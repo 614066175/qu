@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME:hdsp-quantity}
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://db.hdsp.hand.com:3306/hdsp_quantity?useUnicode=true&characterEncoding=utf-8&useSSL=false}
+    username: ${SPRING_DATASOURCE_USERNAME:hdsp_dev}
+    password: ${SPRING_DATASOURCE_PASSWORD:hdsp_dev}
+  resources:
+    # 资源缓存时间，单位秒
+    cache-period: 604800
+    # 开启gzip压缩
+    chain.gzipped: true
+    # 启用缓存
+    chain.cache: true
+#  redis:
+#    host: ${SPRING_REDIS_HOST:redis.hdsp.hand.com}
+#    port: ${SPRING_REDIS_PORT:6379}
+#    database: ${SPRING_REDIS_DATABASE:1}
+#    password: ${SPRING_REDIS_PASSWORD:}
+
+ribbon:
+  ReadTimeout: 30000
+  ConnectTimeout: 6000
+
+logging:
+  level:
+    org.apache.ibatis: ${LOGGING_LEVEL:debug}
+    com.hand.hdsp.factory: ${LOGGING_LEVEL:debug}

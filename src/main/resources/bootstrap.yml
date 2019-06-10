@@ -1,0 +1,48 @@
+server:
+  port: 8580
+management:
+  port: 8581
+  security:
+    enabled: false
+spring:
+  application:
+    name: hdsp-quantity
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:default}
+  cloud:
+    config:
+      enabled: ${SPRING_CLOUD_CONFIG_ENABLED:true}
+      label: ${SPRING_CLOUD_CONFIG_LABEL:}
+      uri: ${SPRING_CLOUD_CONFIG_URI:http://dev.hdsp.hand.com:8610}
+feign:
+  hystrix:
+    enabled: true
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: false
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://dev.hdsp.hand.com:8000/eureka}
+  instance:
+    preferIpAddress: true
+    leaseRenewalIntervalInSeconds: 1
+    leaseExpirationDurationInSeconds: 3
+    metadata-map:
+      VERSION: 0.1.0
+      NODE_GROUP_ID: ${HZERO_NODE_GROUP_ID:0}
+      PRODUCT_CODE: ${HZERO_PRODUCT_CODE:DEFAULT}
+      PRODUCT_VERSION_CODE: ${HZERO_PRODUCT_VERSION_CODE:DEFAULT}
+      PRODUCT_ENV_CODE: ${HZERO_PRODUCT_ENV_CODE:DEFAULT}
+      SERVICE_VERSION_CODE: ${HZERO_SERVICE_VERSION_CODE:DEFAULT}
+mybatis:
+  mapperLocations: classpath*:/mapper/*.xml
+  configuration:
+    mapUnderscoreToCamelCase: true
+
+security:
+  basic:
+    enabled: false
