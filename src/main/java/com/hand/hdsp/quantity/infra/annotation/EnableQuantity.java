@@ -3,6 +3,7 @@ package com.hand.hdsp.quantity.infra.annotation;
 import io.choerodon.resource.annoation.EnableChoerodonResourceServer;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 import java.lang.annotation.*;
 
@@ -14,10 +15,13 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@EnableFeignClients
 @EnableEurekaClient
 @EnableChoerodonResourceServer
 @MapperScan({
-        "com.hand.hdsp.quantity.**.mapper",
+        "io.choerodon.**.mapper",
+        "org.hzero.**.mapper",
+        "com.hand.hdsp.**.mapper"
 })
 public @interface EnableQuantity {
 }

@@ -1,11 +1,22 @@
 # maven ignore
 target/
 *.versionsBackup
+.factorypath
 
 # eclipse ignore
 .settings/
 .project
 .classpath
+*rebel.xml
+
+# STS 
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
 
 # idea ignore
 .idea/
@@ -19,15 +30,23 @@ target/
 *.diff
 *.patch
 *.tmp
-/temp
-/tmp
-app.jar
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
 
 # system ignore
 .DS_Store
 Thumbs.db
 
-gitlabci/.generated
+.vscode
 
-/bin
-src/main/resources/application-default.yml
+# dev properties
+src/main/resources/application-dev.yml
+src/main/resources/application-remote.yml
+
+init-local-database-dev.sh

@@ -12,6 +12,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class QuantityApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(QuantityApplication.class, args);
+        try {
+            SpringApplication.run(QuantityApplication.class, args);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
     }
 }
