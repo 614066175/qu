@@ -10,7 +10,7 @@
         <version>1.2.2-SNAPSHOT</version>
     </parent>
 
-    <artifactId>hdsp-quantity</artifactId>
+    <artifactId>hdsp-quality</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>

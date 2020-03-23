@@ -1,8 +1,8 @@
 spring:
   application:
-    name: ${SPRING_APPLICATION_NAME:hdsp-quantity}
+    name: ${SPRING_APPLICATION_NAME:hdsp-quality}
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://dev.hdsp.hand.com:7233/hdsp_quantity?useUnicode=true&characterEncoding=utf-8&useSSL=false}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://dev.hdsp.hand.com:7233/hdsp_quality?useUnicode=true&characterEncoding=utf-8&useSSL=false}
     username: ${SPRING_DATASOURCE_USERNAME:hdsp_dev}
     password: ${SPRING_DATASOURCE_PASSWORD:hdsp_dev}
     hikari:
