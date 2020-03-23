@@ -92,6 +92,9 @@ mybatis:
 
 
 hzero:
+  lov:
+    value:
+      enabled: true
   service:
     register:
       name: ${HZERO_SERVICE_REGISTER_NAME:hzero-register}
