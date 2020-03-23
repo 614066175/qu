@@ -13,12 +13,16 @@ import springfox.documentation.spring.web.plugins.Docket;
 @Configuration
 public class SwaggerTags {
 
-    public static final String EXAMPLE = "Example";
+    public static final String RULE_GROUP = "RULE GROUP CONTROLLER";
+    public static final String RULE = "RULE CONTROLLER";
+    public static final String RULE_LINE = "RULE LINE CONTROLLER";
 
     @Autowired
     public SwaggerTags(Docket docket) {
         docket.tags(
-                new Tag(EXAMPLE, "EXAMPLE 案例")
+                new Tag(RULE_GROUP, "规则分组表 管理 API"),
+                new Tag(RULE, "规则表 管理 API"),
+                new Tag(RULE_LINE, "规则校验项表 管理 API")
         );
     }
 }
