@@ -21,6 +21,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.List;
+
 /**
  * 规则分组表 管理 API
  *
@@ -34,11 +36,13 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/rule-groups")
 public class RuleGroupController extends BaseController {
 
-    @Autowired
     private RuleGroupService ruleGroupService;
-
-    @Autowired
     private RuleGroupRepository ruleGroupRepository;
+
+    public RuleGroupController(RuleGroupService ruleGroupService, RuleGroupRepository ruleGroupRepository) {
+        this.ruleGroupService = ruleGroupService;
+        this.ruleGroupRepository = ruleGroupRepository;
+    }
 
     @ApiOperation(value = "规则分组表列表")
     @ApiImplicitParams({@ApiImplicitParam(
@@ -55,6 +59,21 @@ public class RuleGroupController extends BaseController {
         ruleGroupDTO.setTenantId(tenantId);
         Page<RuleGroupDTO> list = ruleGroupRepository.pageAndSortDTO(pageRequest, ruleGroupDTO);
         return Results.success(list);
+    }
+
+    @ApiOperation(value = "规则分组表列表（不分页）")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/query")
+    public ResponseEntity<?> query(@PathVariable(name = "organizationId") Long tenantId,
+                                   RuleGroup ruleGroup) {
+        ruleGroup.setTenantId(tenantId);
+        return Results.success(ruleGroupRepository.select(ruleGroup));
     }
 
     @ApiOperation(value = "规则分组表明细")
@@ -88,7 +107,7 @@ public class RuleGroupController extends BaseController {
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody RuleGroupDTO ruleGroupDTO) {
         ruleGroupDTO.setTenantId(tenantId);
         validObject(ruleGroupDTO, Create.class);
-        ruleGroupService.create(ruleGroupDTO);
+        ruleGroupRepository.insertDTOSelective(ruleGroupDTO);
         return Results.success(ruleGroupDTO);
     }
 
@@ -118,7 +137,7 @@ public class RuleGroupController extends BaseController {
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody RuleGroupDTO ruleGroupDTO) {
         ruleGroupDTO.setTenantId(tenantId);
-        ruleGroupRepository.deleteByPrimaryKey(ruleGroupDTO);
+        ruleGroupService.delete(ruleGroupDTO);
         return Results.success();
     }
 }

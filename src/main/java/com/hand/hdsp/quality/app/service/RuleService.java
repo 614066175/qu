@@ -23,4 +23,19 @@ public interface RuleService {
      * @param ruleDTO
      */
     void insert(RuleDTO ruleDTO);
+
+    /**
+     * 更新规则（含规则校验项、告警等级的更新和创建）
+     *
+     * @param ruleDTO 更新规则信息
+     */
+    void update(RuleDTO ruleDTO);
+
+    /**
+     * 删除（含规则校验项、告警等级的删除）
+     *
+     * @param ruleDTO 删除条件
+     * @return 删除结果
+     */
+    int delete(RuleDTO ruleDTO);
 }

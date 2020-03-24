@@ -18,4 +18,9 @@ public interface ErrorCode {
      * 规则分组父级分类ID不能为空
      */
     String PARENT_NULL = "error.parent_null";
+
+    /**
+     * 分组下存在规则或其他分组，无法删除
+     */
+    String CAN_NOT_DELETE ="error.can_not_delete";
 }

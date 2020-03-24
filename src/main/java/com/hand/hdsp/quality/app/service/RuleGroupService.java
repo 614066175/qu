@@ -11,5 +11,11 @@ import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
  */
 public interface RuleGroupService {
 
-    void create(RuleGroupDTO ruleGroupDTO);
+    /**
+     * 删除
+     *
+     * @param ruleGroupDTO 删除条件
+     * @return 删除结果
+     */
+    int delete(RuleGroupDTO ruleGroupDTO);
 }

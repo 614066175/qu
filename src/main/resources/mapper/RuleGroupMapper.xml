@@ -15,4 +15,12 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+
+    <sql id="baseColumn">
+        ${std}.group_id,
+        ${std}.parent_group_id,
+        ${std}.group_code,
+        ${std}.group_name,
+        ${std}.group_desc,
+    </sql>
 </mapper>

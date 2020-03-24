@@ -9,6 +9,7 @@ import com.hand.hdsp.quality.domain.entity.RuleWarningLevel;
 import com.hand.hdsp.quality.domain.repository.RuleLineRepository;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
 import com.hand.hdsp.quality.domain.repository.RuleWarningLevelRepository;
+import com.hand.hdsp.quality.infra.constant.RuleConstant;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
@@ -63,5 +64,56 @@ public class RuleServiceImpl implements RuleService {
                 }
             }
         }
+    }
+
+    @Override
+    public void update(RuleDTO ruleDTO) {
+        Long tenantId = ruleDTO.getTenantId();
+        ruleRepository.updateDTOWhereTenant(ruleDTO, tenantId);
+        if (ruleDTO.getRuleLineDTOList() != null) {
+
+            for (RuleLineDTO ruleLineDTO : ruleDTO.getRuleLineDTOList()) {
+                if (ruleLineRepository.selectOne(RuleLine.builder()
+                        .ruleLineId(ruleLineDTO.getRuleLineId())
+                        .ruleId(ruleLineDTO.getRuleId()).build()) != null) {
+                    ruleLineDTO.setRuleId(ruleDTO.getRuleId());
+                    ruleLineDTO.setTenantId(tenantId);
+                    ruleLineRepository.updateDTOWhereTenant(ruleLineDTO, tenantId);
+                } else {
+                    ruleLineRepository.insertDTOSelective(ruleLineDTO);
+                }
+
+                if (ruleLineDTO.getRuleWarningLevelDTOList() != null) {
+
+                    for (RuleWarningLevelDTO ruleWarningLevelDTO : ruleLineDTO.getRuleWarningLevelDTOList()) {
+                        if (ruleWarningLevelRepository.selectOne(RuleWarningLevel.builder()
+                                .ruleLineId(ruleWarningLevelDTO.getRuleLineId())
+                                .levelId(ruleWarningLevelDTO.getLevelId()).build()) != null) {
+                            ruleWarningLevelDTO.setRuleLineId(ruleLineDTO.getRuleLineId());
+                            ruleWarningLevelDTO.setTenantId(tenantId);
+                            ruleWarningLevelRepository.updateDTOWhereTenant(ruleWarningLevelDTO, tenantId);
+                        } else {
+                            ruleWarningLevelRepository.insertDTOSelective(ruleWarningLevelDTO);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public int delete(RuleDTO ruleDTO) {
+        if (ruleDTO.getRuleLineDTOList() != null) {
+
+            for (RuleLineDTO ruleLineDTO : ruleDTO.getRuleLineDTOList()) {
+                ruleLineRepository.deleteDTO(ruleLineDTO);
+                if (ruleLineDTO.getRuleWarningLevelDTOList() != null) {
+                    for (RuleWarningLevelDTO ruleWarningLevelDTO : ruleLineDTO.getRuleWarningLevelDTOList()) {
+                        ruleWarningLevelRepository.deleteDTO(ruleWarningLevelDTO);
+                    }
+                }
+            }
+        }
+        return ruleRepository.deleteByPrimaryKey(ruleDTO);
     }
 }

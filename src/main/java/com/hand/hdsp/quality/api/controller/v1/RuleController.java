@@ -84,7 +84,7 @@ public class RuleController extends BaseController {
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody RuleDTO ruleDTO) {
         ruleDTO.setTenantId(tenantId);
         this.validObject(ruleDTO);
-        ruleService.insert(ruleDTO);
+//        ruleService.insert(ruleDTO);
         return Results.success(ruleDTO);
     }
 
@@ -98,7 +98,8 @@ public class RuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody RuleDTO ruleDTO) {
-        ruleRepository.updateDTOWhereTenant(ruleDTO, tenantId);
+        ruleDTO.setTenantId(tenantId);
+        ruleService.update(ruleDTO);
         return Results.success(ruleDTO);
     }
 
@@ -114,7 +115,7 @@ public class RuleController extends BaseController {
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody RuleDTO ruleDTO) {
         ruleDTO.setTenantId(tenantId);
-        ruleRepository.deleteByPrimaryKey(ruleDTO);
+        ruleService.delete(ruleDTO);
         return Results.success();
     }
 }

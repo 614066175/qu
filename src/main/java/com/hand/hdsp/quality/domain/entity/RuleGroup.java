@@ -61,6 +61,10 @@ public class RuleGroup extends AuditDomain {
         }
     }
 
+    //
+    // 数据库字段
+    // ------------------------------------------------------------------------------
+
     @Id
     @GeneratedValue
     private Long groupId;
