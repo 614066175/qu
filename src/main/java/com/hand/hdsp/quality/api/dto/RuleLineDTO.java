@@ -10,6 +10,7 @@ import org.hzero.boot.platform.lov.annotation.LovValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 /**
  * 规则校验项表 数据传输对象
@@ -59,4 +60,7 @@ public class RuleLineDTO extends AuditDomain {
     @ApiModelProperty("租户ID")
     @NotNull
     private Long tenantId;
+
+    @ApiModelProperty("规则告警等级List")
+    private List<RuleWarningLevelDTO> ruleWarningLevelDTOList;
 }

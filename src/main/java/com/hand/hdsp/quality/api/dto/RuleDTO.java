@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 /**
  * 规则表 数据传输对象
@@ -76,4 +77,7 @@ public class RuleDTO extends AuditDomain {
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;
+
+    @ApiModelProperty(value = "规则校验项List")
+    private List<RuleLineDTO> ruleLineDTOList;
 }

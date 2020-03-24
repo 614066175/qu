@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.choerodon.mybatis.common.BaseMapper">
+    <sql id="baseColumn">
+        ${std}.tenant_id,
+        ${std}.object_version_number,
+        ${std}.creation_date,
+        ${std}.created_by,
+        ${std}.last_updated_by,
+        ${std}.last_update_date
+    </sql>
+</mapper>

@@ -1,11 +1,10 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
-import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
-import com.hand.hdsp.quality.app.service.RuleGroupService;
+import com.hand.hdsp.quality.api.dto.RuleDTO;
+import com.hand.hdsp.quality.app.service.RuleService;
 import com.hand.hdsp.quality.config.SwaggerTags;
-import com.hand.hdsp.quality.domain.entity.RuleGroup;
-import com.hand.hdsp.quality.domain.repository.RuleGroupRepository;
-import com.hand.hdsp.quality.infra.validator.groups.Create;
+import com.hand.hdsp.quality.domain.entity.Rule;
+import com.hand.hdsp.quality.domain.repository.RuleRepository;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
@@ -13,34 +12,31 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.*;
-import lombok.extern.slf4j.Slf4j;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 /**
- * 规则分组表 管理 API
+ * <p>规则表 管理 API</p>
  *
- * @author wuzhong26857
- * @version 1.0
- * @date 2020/3/23 12:03
+ * @author feng.liu01@hand-china.com 2020-03-24 09:31:46
  */
-@Slf4j
-@Api(tags = SwaggerTags.RULE_GROUP)
-@RestController("RuleGroupController.v1")
-@RequestMapping("/v1/{organizationId}/rule-groups")
-public class RuleGroupController extends BaseController {
+@Api(tags = SwaggerTags.RULE)
+@RestController("ruleController.v1")
+@RequestMapping("/v1/{organizationId}/rules")
+public class RuleController extends BaseController {
 
-    @Autowired
-    private RuleGroupService ruleGroupService;
+    private RuleRepository ruleRepository;
+    private RuleService ruleService;
 
-    @Autowired
-    private RuleGroupRepository ruleGroupRepository;
+    public RuleController(RuleRepository ruleRepository, RuleService ruleService) {
+        this.ruleRepository = ruleRepository;
+        this.ruleService = ruleService;
+    }
 
-    @ApiOperation(value = "规则分组表列表")
+    @ApiOperation(value = "规则表列表")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -50,33 +46,33 @@ public class RuleGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  RuleGroupDTO ruleGroupDTO, @ApiIgnore @SortDefault(value = RuleGroup.FIELD_GROUP_ID,
+                                  RuleDTO ruleDTO, @ApiIgnore @SortDefault(value = Rule.FIELD_RULE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
-        ruleGroupDTO.setTenantId(tenantId);
-        Page<RuleGroupDTO> list = ruleGroupRepository.pageAndSortDTO(pageRequest, ruleGroupDTO);
+        ruleDTO.setTenantId(tenantId);
+        Page<RuleDTO> list = ruleRepository.pageAndSortDTO(pageRequest, ruleDTO);
         return Results.success(list);
     }
 
-    @ApiOperation(value = "规则分组表明细")
+    @ApiOperation(value = "规则表明细")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
             paramType = "path",
             required = true
     ), @ApiImplicitParam(
-            name = "groupId",
-            value = "规则分组表主键",
+            name = "ruleId",
+            value = "规则表主键",
             paramType = "path",
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/{groupId}")
-    public ResponseEntity<?> detail(@PathVariable Long groupId) {
-        RuleGroupDTO ruleGroupDTO = ruleGroupRepository.selectDTOByPrimaryKeyAndTenant(groupId);
-        return Results.success(ruleGroupDTO);
+    @GetMapping("/{ruleId}")
+    public ResponseEntity<?> detail(@PathVariable Long ruleId) {
+        RuleDTO ruleDTO = ruleService.detail(ruleId);
+        return Results.success(ruleDTO);
     }
 
-    @ApiOperation(value = "创建规则分组表")
+    @ApiOperation(value = "创建规则表")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -85,14 +81,14 @@ public class RuleGroupController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody RuleGroupDTO ruleGroupDTO) {
-        ruleGroupDTO.setTenantId(tenantId);
-        validObject(ruleGroupDTO, Create.class);
-        ruleGroupService.create(ruleGroupDTO);
-        return Results.success(ruleGroupDTO);
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody RuleDTO ruleDTO) {
+        ruleDTO.setTenantId(tenantId);
+        this.validObject(ruleDTO);
+        ruleService.insert(ruleDTO);
+        return Results.success(ruleDTO);
     }
 
-    @ApiOperation(value = "修改规则分组表")
+    @ApiOperation(value = "修改规则表")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -101,12 +97,12 @@ public class RuleGroupController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody RuleGroupDTO ruleGroupDTO) {
-        ruleGroupRepository.updateDTOWhereTenant(ruleGroupDTO, tenantId);
-        return Results.success(ruleGroupDTO);
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody RuleDTO ruleDTO) {
+        ruleRepository.updateDTOWhereTenant(ruleDTO, tenantId);
+        return Results.success(ruleDTO);
     }
 
-    @ApiOperation(value = "删除规则分组表")
+    @ApiOperation(value = "删除规则表")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -116,9 +112,9 @@ public class RuleGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestBody RuleGroupDTO ruleGroupDTO) {
-        ruleGroupDTO.setTenantId(tenantId);
-        ruleGroupRepository.deleteByPrimaryKey(ruleGroupDTO);
+                                    @RequestBody RuleDTO ruleDTO) {
+        ruleDTO.setTenantId(tenantId);
+        ruleRepository.deleteByPrimaryKey(ruleDTO);
         return Results.success();
     }
 }
