@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.BatchResultRuleMapper">
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.BatchResultRule">
+        <result column="result_rule_id" property="resultRuleId" jdbcType="DECIMAL"/>
+        <result column="result_base_id" property="resultBaseId" jdbcType="DECIMAL"/>
+        <result column="rule_type" property="ruleType" jdbcType="VARCHAR"/>
+        <result column="table_name" property="tableName" jdbcType="VARCHAR"/>
+        <result column="rule_id" property="ruleId" jdbcType="DECIMAL"/>
+        <result column="rule_code" property="ruleCode" jdbcType="VARCHAR"/>
+        <result column="rule_name" property="ruleName" jdbcType="VARCHAR"/>
+        <result column="check_item" property="checkItem" jdbcType="VARCHAR"/>
+        <result column="expected_value" property="expectedValue" jdbcType="VARCHAR"/>
+        <result column="actual_value" property="actualValue" jdbcType="VARCHAR"/>
+        <result column="wave_rate" property="waveRate" jdbcType="DECIMAL"/>
+        <result column="exception_info" property="exceptionInfo" jdbcType="VARCHAR"/>
+        <result column="warning_level" property="warningLevel" jdbcType="VARCHAR"/>
+        <result column="field_name" property="fieldName" jdbcType="VARCHAR"/>
+        <result column="rel_table_name" property="relTableName" jdbcType="VARCHAR"/>
+        <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
+        <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
+        <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
+        <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+    </resultMap>
+</mapper>
