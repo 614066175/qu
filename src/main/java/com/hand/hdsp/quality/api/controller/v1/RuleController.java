@@ -84,7 +84,7 @@ public class RuleController extends BaseController {
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody RuleDTO ruleDTO) {
         ruleDTO.setTenantId(tenantId);
         this.validObject(ruleDTO);
-//        ruleService.insert(ruleDTO);
+        ruleService.insert(ruleDTO);
         return Results.success(ruleDTO);
     }
 
