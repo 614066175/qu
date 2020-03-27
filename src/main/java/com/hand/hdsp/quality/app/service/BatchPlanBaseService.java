@@ -23,4 +23,19 @@ public interface BatchPlanBaseService {
      * @param batchPlanBaseDTO
      */
     void insert(BatchPlanBaseDTO batchPlanBaseDTO);
+
+    /**
+     * 更新
+     *
+     * @param batchPlanBaseDTO 更新信息
+     */
+    void update(BatchPlanBaseDTO batchPlanBaseDTO);
+
+    /**
+     * 关联查询
+     *
+     * @param planBaseId
+     * @return
+     */
+    BatchPlanBaseDTO detail(Long planBaseId);
 }

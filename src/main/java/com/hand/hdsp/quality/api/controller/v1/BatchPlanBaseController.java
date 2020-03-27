@@ -70,7 +70,7 @@ public class BatchPlanBaseController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{planBaseId}")
     public ResponseEntity<?> detail(@PathVariable Long planBaseId) {
-        BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseRepository.selectDTOByPrimaryKeyAndTenant(planBaseId);
+        BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseService.detail(planBaseId);
         return Results.success(batchPlanBaseDTO);
     }
 
@@ -100,7 +100,8 @@ public class BatchPlanBaseController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanBaseDTO batchPlanBaseDTO) {
-        batchPlanBaseRepository.updateDTOWhereTenant(batchPlanBaseDTO, tenantId);
+        batchPlanBaseDTO.setTenantId(tenantId);
+        batchPlanBaseService.update(batchPlanBaseDTO);
         return Results.success(batchPlanBaseDTO);
     }
 
