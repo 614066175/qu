@@ -1,5 +1,8 @@
 package com.hand.hdsp.quality.infra.mapper;
 
+import java.util.List;
+
+import com.hand.hdsp.quality.api.dto.BatchResultDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import io.choerodon.mybatis.common.BaseMapper;
 
@@ -10,4 +13,19 @@ import io.choerodon.mybatis.common.BaseMapper;
  */
 public interface BatchResultMapper extends BaseMapper<BatchResult> {
 
+    /**
+     * 根据分组查询对应的评估方案
+     *
+     * @param batchResultDTO
+     * @return BatchResultDTO
+     */
+    List<BatchResultDTO> listByGroup(BatchResultDTO batchResultDTO);
+
+    /**
+     * 查看方法评估报告
+     *
+     * @param batchResultDTO
+     * @return
+     */
+    List<BatchResultDTO> showReport(BatchResultDTO batchResultDTO);
 }

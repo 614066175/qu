@@ -50,4 +50,35 @@ public class BatchResultDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
+    // =========================非库字段=========================
+
+    @ApiModelProperty(value = "评估方案分组ID")
+    private Long groupId;
+
+    @ApiModelProperty(value = "方案名称")
+    private String planName;
+
+    private String tableName;
+
+    private Long ruleCount;
+
+    private Long exceptionRuleCount;
+
+    private Long dataCount;
+
+    private String ruleName;
+
+    private String checkItem;
+
+    private String expectedValue;
+
+    private String actualValue;
+
+    private BigDecimal waveRate;
+
+    private String warningLevel;
+
+    private String fieldName;
+
+    private String relTableName;
 }

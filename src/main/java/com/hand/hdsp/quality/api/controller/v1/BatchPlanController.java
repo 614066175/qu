@@ -51,6 +51,21 @@ public class BatchPlanController extends BaseController {
         return Results.success(list);
     }
 
+    @ApiOperation(value = "根据方案名找到对应分组")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/group")
+    public ResponseEntity<?> group(@PathVariable(name = "organizationId") Long tenantId,
+                                   @RequestBody BatchPlanDTO batchPlanDTO){
+        batchPlanDTO.setTenantId(tenantId);
+        return Results.success(batchPlanRepository.listByGroup(batchPlanDTO));
+    }
+
     @ApiOperation(value = "批数据评估方案表明细")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",

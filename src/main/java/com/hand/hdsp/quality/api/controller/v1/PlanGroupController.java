@@ -1,8 +1,11 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import java.util.List;
+
 import com.hand.hdsp.quality.api.dto.PlanGroupDTO;
 import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.domain.repository.PlanGroupRepository;
+import com.hand.hdsp.quality.infra.converter.PlanGroupConverter;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
@@ -32,6 +35,22 @@ public class PlanGroupController extends BaseController {
 
     public PlanGroupController(PlanGroupRepository planGroupRepository) {
         this.planGroupRepository = planGroupRepository;
+    }
+
+    @ApiOperation(value = "评估方案分组所有列表")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/all")
+    public ResponseEntity<?> allList(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestBody PlanGroup planGroup) {
+        planGroup.setTenantId(tenantId);
+        List<PlanGroup> planGroups = planGroupRepository.select(planGroup);
+        return Results.success(planGroups);
     }
 
     @ApiOperation(value = "评估方案分组表列表")

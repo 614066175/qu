@@ -16,4 +16,40 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+
+    <resultMap id="BaseResultMapDTO" type="com.hand.hdsp.quality.api.dto.BatchPlanDTO" extends="BaseResultMap">
+        <result column="parent_group_id" property="planGroup.parentGroupId" jdbcType="DECIMAL"/>
+        <result column="group_name" property="planGroup.groupName" jdbcType="VARCHAR"/>
+        <result column="result_id" property="batchResult.resultId" jdbcType="DECIMAL"/>
+        <result column="plan_status" property="batchResult.planStatus" jdbcType="VARCHAR"/>
+        <result column="mark" property="batchResult.mark" jdbcType="DECIMAL"/>
+        <result column="start_date" property="batchResult.startDate" jdbcType="TIMESTAMP"/>
+        <result column="end_date" property="batchResult.endDate" jdbcType="TIMESTAMP"/>
+        <result column="next_count_date" property="batchResult.nextCountDate" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <select id="getGroupByPlanName" resultMap="BaseResultMapDTO">
+        select
+        <include refid="com.hand.hdsp.quality.infra.mapper.BatchResultMapper.Plan_And_Result">
+            <property name="xbp" value="xbp"/>
+            <property name="xbr" value="xbr"/>
+        </include>,
+        xpg.group_id,
+        xpg.parent_group_id,
+        xpg.group_name
+        from xqua_batch_result xbr
+        LEFT JOIN xqua_batch_plan xbp
+        on xbr.plan_id=xbp.plan_id
+        LEFT JOIN xqua_plan_group xpg
+        on xbp.group_id=xpg.group_id
+        <where>
+            <if test="planName != null">
+                <bind name="planName" value="'%' + planName + '%'"/>
+                xbp.plan_name like #{planName}
+            </if>
+            <if test="tenantId != null">
+                and xbp.tenant_id = #{tenantId}
+            </if>
+        </where>
+    </select>
 </mapper>
