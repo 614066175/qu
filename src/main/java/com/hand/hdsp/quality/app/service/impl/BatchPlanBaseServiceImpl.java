@@ -1,9 +1,6 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO;
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
-import com.hand.hdsp.quality.api.dto.BatchPlanRelTableDTO;
-import com.hand.hdsp.quality.api.dto.BatchPlanTableDTO;
+import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanBaseService;
 import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
@@ -68,5 +65,50 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
         batchPlanFieldRepository.batchDTODeleteByPrimaryKey(batchPlanFieldDTOList);
         batchPlanRelTableRepository.batchDTODeleteByPrimaryKey(batchPlanRelTableDTOList);
         return batchPlanBaseRepository.deleteByPrimaryKey(batchPlanBaseDTO);
+    }
+
+    @Override
+    public void insert(BatchPlanBaseDTO batchPlanBaseDTO) {
+        Long tenantId = batchPlanBaseDTO.getTenantId();
+        batchPlanBaseRepository.insertDTOSelective(batchPlanBaseDTO);
+        if (batchPlanBaseDTO.getBatchPlanTableDTO() != null) {
+            BatchPlanTableDTO batchPlanTableDTO = batchPlanBaseDTO.getBatchPlanTableDTO();
+            batchPlanTableDTO.setPlanBaseId(batchPlanBaseDTO.getPlanBaseId());
+            batchPlanTableDTO.setTenantId(tenantId);
+            batchPlanTableRepository.insertDTOSelective(batchPlanTableDTO);
+            if (batchPlanTableDTO.getBatchPlanTableLineDTOList() != null) {
+                for (BatchPlanTableLineDTO batchPlanTableLineDTO : batchPlanTableDTO.getBatchPlanTableLineDTOList()) {
+                    batchPlanTableLineDTO.setPlanTableId(batchPlanTableDTO.getPlanTableId());
+                    batchPlanTableLineDTO.setTenantId(tenantId);
+                    batchPlanTableLineRepository.insertDTOSelective(batchPlanTableLineDTO);
+                }
+            }
+        }
+        if (batchPlanBaseDTO.getBatchPlanFieldDTO() != null) {
+            BatchPlanFieldDTO batchPlanFieldDTO = batchPlanBaseDTO.getBatchPlanFieldDTO();
+            batchPlanFieldDTO.setPlanBaseId(batchPlanBaseDTO.getPlanBaseId());
+            batchPlanFieldDTO.setTenantId(tenantId);
+            batchPlanFieldRepository.insertDTOSelective(batchPlanFieldDTO);
+            if (batchPlanFieldDTO.getBatchPlanFieldLineDTOList() != null) {
+                for (BatchPlanFieldLineDTO batchPlanFieldLineDTO : batchPlanFieldDTO.getBatchPlanFieldLineDTOList()) {
+                    batchPlanFieldLineDTO.setPlanFieldId(batchPlanFieldDTO.getPlanFieldId());
+                    batchPlanFieldLineDTO.setTenantId(tenantId);
+                    batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
+                }
+            }
+        }
+        if (batchPlanBaseDTO.getBatchPlanRelTableDTO() != null) {
+            BatchPlanRelTableDTO batchPlanRelTableDTO = batchPlanBaseDTO.getBatchPlanRelTableDTO();
+            batchPlanRelTableDTO.setPlanBaseId(batchPlanBaseDTO.getPlanBaseId());
+            batchPlanRelTableDTO.setTenantId(tenantId);
+            batchPlanRelTableRepository.insertDTOSelective(batchPlanRelTableDTO);
+            if (batchPlanRelTableDTO.getBatchPlanRelTableLineDTOList() != null) {
+                for (BatchPlanRelTableLineDTO batchPlanRelTableLineDTO : batchPlanRelTableDTO.getBatchPlanRelTableLineDTOList()) {
+                    batchPlanRelTableLineDTO.setPlanRelTableId(batchPlanRelTableDTO.getPlanRelTableId());
+                    batchPlanRelTableLineDTO.setTenantId(tenantId);
+                    batchPlanRelTableLineRepository.insertDTOSelective(batchPlanRelTableLineDTO);
+                }
+            }
+        }
     }
 }

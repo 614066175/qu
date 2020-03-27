@@ -16,4 +16,11 @@ public interface BatchPlanBaseService {
      * @return 删除结果
      */
     int delete(BatchPlanBaseDTO batchPlanBaseDTO);
+
+    /**
+     * 新建，同时下级规则、规则行
+     *
+     * @param batchPlanBaseDTO
+     */
+    void insert(BatchPlanBaseDTO batchPlanBaseDTO);
 }

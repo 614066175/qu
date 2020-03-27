@@ -9,6 +9,7 @@ import lombok.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 /**
  * <p>批数据方案-表级规则表 数据传输对象</p>
@@ -58,4 +59,6 @@ public class BatchPlanTableDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
+    @ApiModelProperty(value = "表级规则校验项List")
+    private List<BatchPlanTableLineDTO> batchPlanTableLineDTOList;
 }

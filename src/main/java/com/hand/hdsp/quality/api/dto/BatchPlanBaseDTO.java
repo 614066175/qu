@@ -48,4 +48,12 @@ public class BatchPlanBaseDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
+    @ApiModelProperty(value = "表级规则")
+    private BatchPlanTableDTO batchPlanTableDTO;
+
+    @ApiModelProperty(value = "字段规则")
+    private BatchPlanFieldDTO batchPlanFieldDTO;
+
+    @ApiModelProperty(value = "表间规则")
+    private BatchPlanRelTableDTO batchPlanRelTableDTO;
 }

@@ -86,7 +86,7 @@ public class BatchPlanBaseController extends BaseController {
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanBaseDTO batchPlanBaseDTO) {
         batchPlanBaseDTO.setTenantId(tenantId);
         this.validObject(batchPlanBaseDTO);
-        batchPlanBaseRepository.insertDTOSelective(batchPlanBaseDTO);
+        batchPlanBaseService.insert(batchPlanBaseDTO);
         return Results.success(batchPlanBaseDTO);
     }
 
