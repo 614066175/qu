@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.quality.api.dto.StreamingPlanDTO;
+import com.hand.hdsp.quality.app.service.StreamingPlanService;
 import com.hand.hdsp.quality.domain.entity.StreamingPlan;
 import com.hand.hdsp.quality.domain.repository.StreamingPlanRepository;
 import io.choerodon.core.domain.Page;
@@ -29,9 +30,12 @@ import springfox.documentation.annotations.ApiIgnore;
 public class StreamingPlanController extends BaseController {
 
     private StreamingPlanRepository streamingPlanRepository;
+    private StreamingPlanService streamingPlanService;
 
-    public StreamingPlanController(StreamingPlanRepository streamingPlanRepository) {
+    public StreamingPlanController(StreamingPlanRepository streamingPlanRepository,
+                                   StreamingPlanService streamingPlanService) {
         this.streamingPlanRepository = streamingPlanRepository;
+        this.streamingPlanService = streamingPlanService;
     }
 
     @ApiOperation(value = "实时数据评估方案表列表")
@@ -112,7 +116,7 @@ public class StreamingPlanController extends BaseController {
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody StreamingPlanDTO streamingPlanDTO) {
         streamingPlanDTO.setTenantId(tenantId);
-        streamingPlanRepository.deleteByPrimaryKey(streamingPlanDTO);
+        streamingPlanService.delete(streamingPlanDTO);
         return Results.success();
     }
 }

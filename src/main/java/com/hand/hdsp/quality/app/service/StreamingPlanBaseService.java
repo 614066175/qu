@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.app.service;
 
+import com.hand.hdsp.quality.api.dto.StreamingPlanBaseDTO;
+
 /**
  * <p>实时数据方案-基础配置表应用服务</p>
  *
@@ -7,4 +9,11 @@ package com.hand.hdsp.quality.app.service;
  */
 public interface StreamingPlanBaseService {
 
+    /**
+     * 删除（所有相关项）
+     *
+     * @param streamingPlanBaseDTO 删除条件
+     * @return 删除结果
+     */
+    int delete(StreamingPlanBaseDTO streamingPlanBaseDTO);
 }
