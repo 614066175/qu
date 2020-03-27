@@ -134,4 +134,24 @@ public class BatchPlanController extends BaseController {
         batchPlanService.delete(batchPlanDTO);
         return Results.success();
     }
+
+    @ApiOperation(value = "生成数据质量任务")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    ), @ApiImplicitParam(
+            name = "planId",
+            value = "批数据评估方案表主键",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/generate/{planId}")
+    public ResponseEntity<?> generate(@PathVariable("organizationId") Long tenantId,
+                                      @PathVariable Long planId) {
+        batchPlanService.generate(tenantId, planId);
+        return Results.success();
+    }
 }

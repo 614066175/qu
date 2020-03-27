@@ -16,4 +16,20 @@ public interface BatchPlanService {
      * @return 删除结果
      */
     int delete(BatchPlanDTO batchPlanDTO);
+
+    /**
+     * 执行批数据评估方案
+     *
+     * @param tenantId tenantId
+     * @param planId   planId
+     */
+    void exec(Long tenantId, Long planId);
+
+    /**
+     * 生成数据质量任务
+     *
+     * @param tenantId
+     * @param planId
+     */
+    void generate(Long tenantId, Long planId);
 }
