@@ -16,4 +16,26 @@ public interface StreamingPlanBaseService {
      * @return 删除结果
      */
     int delete(StreamingPlanBaseDTO streamingPlanBaseDTO);
+
+    /**
+     * 更新
+     *
+     * @param streamingPlanBaseDTO 更新信息
+     */
+    void update(StreamingPlanBaseDTO streamingPlanBaseDTO);
+
+    /**
+     * 新建
+     *
+     * @param streamingPlanBaseDTO
+     */
+    void insert(StreamingPlanBaseDTO streamingPlanBaseDTO);
+
+    /**
+     * 关联查询规则校验项、告警等级
+     *
+     * @param planBaseId
+     * @return
+     */
+    StreamingPlanBaseDTO detail(Long planBaseId);
 }

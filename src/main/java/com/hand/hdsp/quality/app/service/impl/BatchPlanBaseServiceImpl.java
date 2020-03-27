@@ -40,30 +40,35 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
 
     @Override
     public int delete(BatchPlanBaseDTO batchPlanBaseDTO) {
-        List<BatchPlanTableDTO> batchPlanTableDTOList = batchPlanTableRepository.
-                selectDTO(BatchPlanTable.FIELD_PLAN_BASE_ID, batchPlanBaseDTO.getPlanBaseId());
-        List<BatchPlanFieldDTO> batchPlanFieldDTOList = batchPlanFieldRepository.
-                selectDTO(BatchPlanField.FIELD_PLAN_BASE_ID, batchPlanBaseDTO.getPlanBaseId());
-        List<BatchPlanRelTableDTO> batchPlanRelTableDTOList = batchPlanRelTableRepository.
-                selectDTO(BatchPlanRelTable.FIELD_PLAN_BASE_ID, batchPlanBaseDTO.getPlanBaseId());
-        for (BatchPlanTableDTO batchPlanTableDTO : batchPlanTableDTOList) {
-            batchPlanTableLineRepository.batchDTODelete(
-                    batchPlanTableLineRepository.selectDTO
-                            (BatchPlanTableLine.FIELD_PLAN_TABLE_ID, batchPlanTableDTO.getPlanTableId()));
+        if (batchPlanBaseDTO.getBatchPlanTableDTO() != null) {
+            if (batchPlanBaseDTO.getBatchPlanTableDTO().getBatchPlanTableLineDTOList() != null) {
+                for (BatchPlanTableLineDTO batchPlanTableLineDTO :
+                        batchPlanBaseDTO.getBatchPlanTableDTO().getBatchPlanTableLineDTOList()) {
+                    batchPlanTableLineRepository.deleteDTO(batchPlanTableLineDTO);
+                }
+            }
+            batchPlanTableRepository.deleteDTO(batchPlanBaseDTO.getBatchPlanTableDTO());
         }
-        for (BatchPlanFieldDTO batchPlanFieldDTO : batchPlanFieldDTOList) {
-            batchPlanFieldLineRepository.batchDTODelete(
-                    batchPlanFieldLineRepository.selectDTO
-                            (BatchPlanFieldLine.FIELD_PLAN_FIELD_ID, batchPlanFieldDTO.getPlanFieldId()));
+
+        if (batchPlanBaseDTO.getBatchPlanFieldDTO() != null) {
+            if (batchPlanBaseDTO.getBatchPlanFieldDTO().getBatchPlanFieldLineDTOList() != null) {
+                for (BatchPlanFieldLineDTO batchPlanFieldLineDTO :
+                        batchPlanBaseDTO.getBatchPlanFieldDTO().getBatchPlanFieldLineDTOList()) {
+                    batchPlanFieldLineRepository.deleteDTO(batchPlanFieldLineDTO);
+                }
+            }
+            batchPlanFieldRepository.deleteDTO(batchPlanBaseDTO.getBatchPlanFieldDTO());
         }
-        for (BatchPlanRelTableDTO batchPlanRelTableDTO : batchPlanRelTableDTOList) {
-            batchPlanRelTableLineRepository.batchDTODelete(
-                    batchPlanRelTableLineRepository.selectDTO
-                            (BatchPlanRelTableLine.FIELD_PLAN_REL_TABLE_ID, batchPlanRelTableDTO.getPlanRelTableId()));
+
+        if (batchPlanBaseDTO.getBatchPlanRelTableDTO() != null) {
+            if (batchPlanBaseDTO.getBatchPlanRelTableDTO().getBatchPlanRelTableLineDTOList() != null) {
+                for (BatchPlanRelTableLineDTO batchPlanRelTableLineDTO :
+                        batchPlanBaseDTO.getBatchPlanRelTableDTO().getBatchPlanRelTableLineDTOList()) {
+                    batchPlanRelTableLineRepository.deleteDTO(batchPlanRelTableLineDTO);
+                }
+            }
+            batchPlanRelTableRepository.deleteDTO(batchPlanBaseDTO.getBatchPlanRelTableDTO());
         }
-        batchPlanTableRepository.batchDTODeleteByPrimaryKey(batchPlanTableDTOList);
-        batchPlanFieldRepository.batchDTODeleteByPrimaryKey(batchPlanFieldDTOList);
-        batchPlanRelTableRepository.batchDTODeleteByPrimaryKey(batchPlanRelTableDTOList);
         return batchPlanBaseRepository.deleteByPrimaryKey(batchPlanBaseDTO);
     }
 
