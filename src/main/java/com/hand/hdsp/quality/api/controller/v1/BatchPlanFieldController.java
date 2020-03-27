@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
+import com.hand.hdsp.quality.app.service.BatchPlanFieldService;
 import com.hand.hdsp.quality.domain.entity.BatchPlanField;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldRepository;
 import io.choerodon.core.domain.Page;
@@ -29,9 +30,12 @@ import springfox.documentation.annotations.ApiIgnore;
 public class BatchPlanFieldController extends BaseController {
 
     private BatchPlanFieldRepository batchPlanFieldRepository;
+    private BatchPlanFieldService batchPlanFieldService;
 
-    public BatchPlanFieldController(BatchPlanFieldRepository batchPlanFieldRepository) {
+    public BatchPlanFieldController(BatchPlanFieldRepository batchPlanFieldRepository,
+                                    BatchPlanFieldService batchPlanFieldService) {
         this.batchPlanFieldRepository = batchPlanFieldRepository;
+        this.batchPlanFieldService = batchPlanFieldService;
     }
 
     @ApiOperation(value = "批数据方案-字段规则表列表")
@@ -112,7 +116,7 @@ public class BatchPlanFieldController extends BaseController {
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody BatchPlanFieldDTO batchPlanFieldDTO) {
         batchPlanFieldDTO.setTenantId(tenantId);
-        batchPlanFieldRepository.deleteByPrimaryKey(batchPlanFieldDTO);
+        batchPlanFieldService.delete(batchPlanFieldDTO);
         return Results.success();
     }
 }

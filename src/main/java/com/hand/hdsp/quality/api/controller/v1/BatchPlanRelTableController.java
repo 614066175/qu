@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanRelTableDTO;
+import com.hand.hdsp.quality.app.service.BatchPlanRelTableService;
 import com.hand.hdsp.quality.domain.entity.BatchPlanRelTable;
 import com.hand.hdsp.quality.domain.repository.BatchPlanRelTableRepository;
 import io.choerodon.core.domain.Page;
@@ -29,9 +30,12 @@ import springfox.documentation.annotations.ApiIgnore;
 public class BatchPlanRelTableController extends BaseController {
 
     private BatchPlanRelTableRepository batchPlanRelTableRepository;
+    private BatchPlanRelTableService batchPlanRelTableService;
 
-    public BatchPlanRelTableController(BatchPlanRelTableRepository batchPlanRelTableRepository) {
+    public BatchPlanRelTableController(BatchPlanRelTableRepository batchPlanRelTableRepository,
+                                       BatchPlanRelTableService batchPlanRelTableService) {
         this.batchPlanRelTableRepository = batchPlanRelTableRepository;
+        this.batchPlanRelTableService = batchPlanRelTableService;
     }
 
     @ApiOperation(value = "批数据方案-表间规则表列表")
@@ -112,7 +116,7 @@ public class BatchPlanRelTableController extends BaseController {
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody BatchPlanRelTableDTO batchPlanRelTableDTO) {
         batchPlanRelTableDTO.setTenantId(tenantId);
-        batchPlanRelTableRepository.deleteByPrimaryKey(batchPlanRelTableDTO);
+        batchPlanRelTableService.delete(batchPlanRelTableDTO);
         return Results.success();
     }
 }
