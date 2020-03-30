@@ -54,6 +54,7 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
                 Condition.builder(BatchResult.class)
                         .where(Sqls.custom()
                                 .andEqualTo(BatchResult.FIELD_PLAN_ID, batchResultDTO.getPlanId(), true)
+                                .andEqualTo(BatchResult.FIELD_RESULT_ID,batchResultDTO.getResultId(),true)
                                 .andEqualTo(BatchResult.FIELD_TENANT_ID, batchResultDTO.getTenantId(), true))
                         .build()
         ).get(0);

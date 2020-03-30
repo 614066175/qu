@@ -54,6 +54,7 @@ public class StreamingResultRepositoryImpl extends BaseRepositoryImpl<StreamingR
                 Condition.builder(StreamingResult.class)
                         .where(Sqls.custom()
                                 .andEqualTo(StreamingResult.FIELD_PLAN_ID, streamingResultDTO.getPlanId(), true)
+                                .andEqualTo(StreamingResult.FIELD_RESULT_ID,streamingResultDTO.getResultId(),true)
                                 .andEqualTo(StreamingResult.FIELD_TENANT_ID, streamingResultDTO.getTableId(), true))
                         .build()).get(0);
         streamingResultDTOs.setPlanName(streamingPlanRepository.selectByPrimaryKey(streamingResultDTO.getPlanId()).getPlanName());
