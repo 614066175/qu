@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.quality.api.dto.StreamingPlanBaseDTO;
+import com.hand.hdsp.quality.app.service.StreamingPlanBaseService;
 import com.hand.hdsp.quality.domain.entity.StreamingPlanBase;
 import com.hand.hdsp.quality.domain.repository.StreamingPlanBaseRepository;
 import io.choerodon.core.domain.Page;
@@ -29,9 +30,12 @@ import springfox.documentation.annotations.ApiIgnore;
 public class StreamingPlanBaseController extends BaseController {
 
     private StreamingPlanBaseRepository streamingPlanBaseRepository;
+    private StreamingPlanBaseService streamingPlanBaseService;
 
-    public StreamingPlanBaseController(StreamingPlanBaseRepository streamingPlanBaseRepository) {
+    public StreamingPlanBaseController(StreamingPlanBaseRepository streamingPlanBaseRepository,
+                                       StreamingPlanBaseService streamingPlanBaseService) {
         this.streamingPlanBaseRepository = streamingPlanBaseRepository;
+        this.streamingPlanBaseService = streamingPlanBaseService;
     }
 
     @ApiOperation(value = "实时数据方案-基础配置表列表")
@@ -66,7 +70,7 @@ public class StreamingPlanBaseController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{planBaseId}")
     public ResponseEntity<?> detail(@PathVariable Long planBaseId) {
-        StreamingPlanBaseDTO streamingPlanBaseDTO = streamingPlanBaseRepository.selectDTOByPrimaryKeyAndTenant(planBaseId);
+        StreamingPlanBaseDTO streamingPlanBaseDTO = streamingPlanBaseService.detail(planBaseId);
         return Results.success(streamingPlanBaseDTO);
     }
 
@@ -82,7 +86,7 @@ public class StreamingPlanBaseController extends BaseController {
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody StreamingPlanBaseDTO streamingPlanBaseDTO) {
         streamingPlanBaseDTO.setTenantId(tenantId);
         this.validObject(streamingPlanBaseDTO);
-        streamingPlanBaseRepository.insertDTOSelective(streamingPlanBaseDTO);
+        streamingPlanBaseService.insert(streamingPlanBaseDTO);
         return Results.success(streamingPlanBaseDTO);
     }
 
@@ -96,7 +100,8 @@ public class StreamingPlanBaseController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody StreamingPlanBaseDTO streamingPlanBaseDTO) {
-        streamingPlanBaseRepository.updateDTOWhereTenant(streamingPlanBaseDTO, tenantId);
+        streamingPlanBaseDTO.setTenantId(tenantId);
+        streamingPlanBaseService.update(streamingPlanBaseDTO);
         return Results.success(streamingPlanBaseDTO);
     }
 
@@ -112,7 +117,7 @@ public class StreamingPlanBaseController extends BaseController {
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody StreamingPlanBaseDTO streamingPlanBaseDTO) {
         streamingPlanBaseDTO.setTenantId(tenantId);
-        streamingPlanBaseRepository.deleteByPrimaryKey(streamingPlanBaseDTO);
+        streamingPlanBaseService.delete(streamingPlanBaseDTO);
         return Results.success();
     }
 }

@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.app.service;
 
+import com.hand.hdsp.quality.api.dto.BatchPlanTableDTO;
+
 /**
  * <p>批数据方案-表级规则表应用服务</p>
  *
@@ -7,4 +9,11 @@ package com.hand.hdsp.quality.app.service;
  */
 public interface BatchPlanTableService {
 
+    /**
+     * 删除（所有相关项）
+     *
+     * @param batchPlanTableDTO 删除条件
+     * @return 删除结果
+     */
+    int delete(BatchPlanTableDTO batchPlanTableDTO);
 }

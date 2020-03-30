@@ -36,7 +36,7 @@ public class Rule extends AuditDomain {
 
     private String ruleModel;
 
-    private Long GroupId;
+    private Long groupId;
 
     @Unique
     private String ruleCode;

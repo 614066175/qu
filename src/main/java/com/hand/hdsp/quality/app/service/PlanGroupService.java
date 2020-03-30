@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.app.service;
 
+import com.hand.hdsp.quality.api.dto.PlanGroupDTO;
+
 /**
  * <p>评估方案分组表应用服务</p>
  *
@@ -7,4 +9,11 @@ package com.hand.hdsp.quality.app.service;
  */
 public interface PlanGroupService {
 
+    /**
+     * 删除
+     *
+     * @param planGroupDTO 删除条件
+     * @return 删除结果
+     */
+    int delete(PlanGroupDTO planGroupDTO);
 }

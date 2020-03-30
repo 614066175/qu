@@ -73,11 +73,11 @@ public class RuleServiceImpl implements RuleService {
         if (ruleDTO.getRuleLineDTOList() != null) {
 
             for (RuleLineDTO ruleLineDTO : ruleDTO.getRuleLineDTOList()) {
+                ruleLineDTO.setRuleId(ruleDTO.getRuleId());
+                ruleLineDTO.setTenantId(tenantId);
                 if (ruleLineRepository.selectOne(RuleLine.builder()
                         .ruleLineId(ruleLineDTO.getRuleLineId())
                         .ruleId(ruleLineDTO.getRuleId()).build()) != null) {
-                    ruleLineDTO.setRuleId(ruleDTO.getRuleId());
-                    ruleLineDTO.setTenantId(tenantId);
                     ruleLineRepository.updateDTOWhereTenant(ruleLineDTO, tenantId);
                 } else {
                     ruleLineRepository.insertDTOSelective(ruleLineDTO);
@@ -86,11 +86,11 @@ public class RuleServiceImpl implements RuleService {
                 if (ruleLineDTO.getRuleWarningLevelDTOList() != null) {
 
                     for (RuleWarningLevelDTO ruleWarningLevelDTO : ruleLineDTO.getRuleWarningLevelDTOList()) {
+                        ruleWarningLevelDTO.setRuleLineId(ruleLineDTO.getRuleLineId());
+                        ruleWarningLevelDTO.setTenantId(tenantId);
                         if (ruleWarningLevelRepository.selectOne(RuleWarningLevel.builder()
                                 .ruleLineId(ruleWarningLevelDTO.getRuleLineId())
                                 .levelId(ruleWarningLevelDTO.getLevelId()).build()) != null) {
-                            ruleWarningLevelDTO.setRuleLineId(ruleLineDTO.getRuleLineId());
-                            ruleWarningLevelDTO.setTenantId(tenantId);
                             ruleWarningLevelRepository.updateDTOWhereTenant(ruleWarningLevelDTO, tenantId);
                         } else {
                             ruleWarningLevelRepository.insertDTOSelective(ruleWarningLevelDTO);

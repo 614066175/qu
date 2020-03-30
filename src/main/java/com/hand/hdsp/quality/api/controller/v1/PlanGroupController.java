@@ -1,11 +1,9 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
-import java.util.List;
-
 import com.hand.hdsp.quality.api.dto.PlanGroupDTO;
+import com.hand.hdsp.quality.app.service.PlanGroupService;
 import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.domain.repository.PlanGroupRepository;
-import com.hand.hdsp.quality.infra.converter.PlanGroupConverter;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
@@ -22,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.List;
+
 /**
  * <p>评估方案分组表 管理 API</p>
  *
@@ -32,9 +32,12 @@ import springfox.documentation.annotations.ApiIgnore;
 public class PlanGroupController extends BaseController {
 
     private PlanGroupRepository planGroupRepository;
+    private PlanGroupService planGroupService;
 
-    public PlanGroupController(PlanGroupRepository planGroupRepository) {
+    public PlanGroupController(PlanGroupRepository planGroupRepository,
+                               PlanGroupService planGroupService) {
         this.planGroupRepository = planGroupRepository;
+        this.planGroupService = planGroupService;
     }
 
     @ApiOperation(value = "评估方案分组所有列表")
@@ -47,7 +50,7 @@ public class PlanGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/all")
     public ResponseEntity<?> allList(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestBody PlanGroup planGroup) {
+                                     @RequestBody PlanGroup planGroup) {
         planGroup.setTenantId(tenantId);
         List<PlanGroup> planGroups = planGroupRepository.select(planGroup);
         return Results.success(planGroups);
@@ -131,7 +134,7 @@ public class PlanGroupController extends BaseController {
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody PlanGroupDTO planGroupDTO) {
         planGroupDTO.setTenantId(tenantId);
-        planGroupRepository.deleteByPrimaryKey(planGroupDTO);
+        planGroupService.delete(planGroupDTO);
         return Results.success();
     }
 }

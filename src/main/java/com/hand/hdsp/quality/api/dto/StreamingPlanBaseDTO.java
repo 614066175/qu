@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <p>实时数据方案-基础配置表 数据传输对象</p>
@@ -41,5 +42,8 @@ public class StreamingPlanBaseDTO extends AuditDomain {
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;
+
+    @ApiModelProperty(value = "规则List")
+    private List<StreamingPlanRuleDTO> streamingPlanRuleDTOList;
 
 }

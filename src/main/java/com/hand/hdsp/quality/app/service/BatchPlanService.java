@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.app.service;
 
+import com.hand.hdsp.quality.api.dto.BatchPlanDTO;
+
 /**
  * <p>批数据评估方案表应用服务</p>
  *
@@ -7,4 +9,27 @@ package com.hand.hdsp.quality.app.service;
  */
 public interface BatchPlanService {
 
+    /**
+     * 删除
+     *
+     * @param batchPlanDTO 删除条件
+     * @return 删除结果
+     */
+    int delete(BatchPlanDTO batchPlanDTO);
+
+    /**
+     * 执行批数据评估方案
+     *
+     * @param tenantId tenantId
+     * @param planId   planId
+     */
+    void exec(Long tenantId, Long planId);
+
+    /**
+     * 生成数据质量任务
+     *
+     * @param tenantId
+     * @param planId
+     */
+    void generate(Long tenantId, Long planId);
 }

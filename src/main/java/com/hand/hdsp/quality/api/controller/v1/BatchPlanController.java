@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanDTO;
+import com.hand.hdsp.quality.app.service.BatchPlanService;
 import com.hand.hdsp.quality.domain.entity.BatchPlan;
 import com.hand.hdsp.quality.domain.repository.BatchPlanRepository;
 import io.choerodon.core.domain.Page;
@@ -29,9 +30,12 @@ import springfox.documentation.annotations.ApiIgnore;
 public class BatchPlanController extends BaseController {
 
     private BatchPlanRepository batchPlanRepository;
+    private BatchPlanService batchPlanService;
 
-    public BatchPlanController(BatchPlanRepository batchPlanRepository) {
+    public BatchPlanController(BatchPlanRepository batchPlanRepository,
+                               BatchPlanService batchPlanService) {
         this.batchPlanRepository = batchPlanRepository;
+        this.batchPlanService = batchPlanService;
     }
 
     @ApiOperation(value = "批数据评估方案表列表")
@@ -61,7 +65,7 @@ public class BatchPlanController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/group")
     public ResponseEntity<?> group(@PathVariable(name = "organizationId") Long tenantId,
-                                   BatchPlanDTO batchPlanDTO){
+                                   @RequestBody BatchPlanDTO batchPlanDTO) {
         batchPlanDTO.setTenantId(tenantId);
         return Results.success(batchPlanRepository.listByGroup(batchPlanDTO));
     }
@@ -127,7 +131,28 @@ public class BatchPlanController extends BaseController {
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody BatchPlanDTO batchPlanDTO) {
         batchPlanDTO.setTenantId(tenantId);
-        batchPlanRepository.deleteByPrimaryKey(batchPlanDTO);
+        batchPlanService.delete(batchPlanDTO);
         return Results.success();
     }
+
+    @ApiOperation(value = "生成数据质量任务")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    ), @ApiImplicitParam(
+            name = "planId",
+            value = "批数据评估方案表主键",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/generate/{planId}")
+    public ResponseEntity<?> generate(@PathVariable("organizationId") Long tenantId,
+                                      @PathVariable Long planId) {
+        batchPlanService.generate(tenantId, planId);
+        return Results.success();
+    }
+
 }
