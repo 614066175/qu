@@ -61,8 +61,8 @@ public class BatchResultDTO extends AuditDomain {
     @ApiModelProperty(value = "方案名称")
     private String planName;
 
-    private List<BatchResultBase> batchResultBases;
+    private List<BatchResultBaseDTO> batchResultBaseDTOS;
 
-    private List<BatchResultRule> batchResultRules;
+    private List<BatchResultRuleDTO> batchResultRuleDTOS;
 
 }

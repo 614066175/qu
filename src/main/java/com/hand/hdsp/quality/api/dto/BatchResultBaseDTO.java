@@ -50,4 +50,10 @@ public class BatchResultBaseDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
+    // =========================非库字段=========================
+
+    private Long redWarnCounts;
+
+    private Long orangeWarnCounts;
+
 }

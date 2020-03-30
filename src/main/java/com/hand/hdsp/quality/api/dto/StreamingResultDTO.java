@@ -59,8 +59,8 @@ public class StreamingResultDTO extends AuditDomain {
 
     private String planName;
 
-    private List<StreamingResultBase> streamingResultBases;
+    private List<StreamingResultBaseDTO> streamingResultBaseDTOS;
 
-    private List<StreamingResultRule> streamingResultRules;
+    private List<StreamingResultRuleDTO> streamingResultRuleDTOS;
 
 }

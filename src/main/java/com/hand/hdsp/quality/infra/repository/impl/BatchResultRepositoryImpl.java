@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
+import com.hand.hdsp.quality.api.dto.BatchResultBaseDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
+import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultRule;
@@ -12,6 +14,7 @@ import com.hand.hdsp.quality.domain.repository.BatchPlanRepository;
 import com.hand.hdsp.quality.domain.repository.BatchResultBaseRepository;
 import com.hand.hdsp.quality.domain.repository.BatchResultRepository;
 import com.hand.hdsp.quality.domain.repository.BatchResultRuleRepository;
+import com.hand.hdsp.quality.infra.constant.WarnLevel;
 import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -55,21 +58,27 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
                         .build()
         ).get(0);
         batchResultDTOs.setPlanName(batchPlanRepository.selectByPrimaryKey(batchResultDTO.getPlanId()).getPlanName());
-        List<BatchResultBase> batchResultBases = batchResultBaseRepository.selectByCondition(
+        List<BatchResultBaseDTO> batchResultBases = batchResultBaseRepository.selectDTOByCondition(
                 Condition.builder(BatchResultBase.class)
                         .where(Sqls.custom()
                                 .andEqualTo(BatchResultBase.FIELD_RESULT_ID, batchResultDTOs.getResultId(), true))
                         .build()
         );
-        List<Long> resultBaseIds = batchResultBases.stream().map(BatchResultBase::getResultBaseId).collect(Collectors.toList());
-        List<BatchResultRule> batchResultRules = batchResultRuleRepository.selectByCondition(
+        batchResultBases.stream().forEach( b ->{
+            int red = batchResultRuleRepository.selectCount(BatchResultRule.builder().tableName(b.getTableName()).warningLevel(WarnLevel.RED).build());
+            b.setRedWarnCounts(Long.valueOf(red));
+            int orange = batchResultRuleRepository.selectCount(BatchResultRule.builder().tableName(b.getTableName()).warningLevel(WarnLevel.ORANGE).build());
+            b.setOrangeWarnCounts(Long.valueOf(orange));
+        });
+        List<Long> resultBaseIds = batchResultBases.stream().map(BatchResultBaseDTO::getResultBaseId).collect(Collectors.toList());
+        List<BatchResultRuleDTO> batchResultRules = batchResultRuleRepository.selectDTOByCondition(
                 Condition.builder(BatchResultRule.class)
                         .where(Sqls.custom()
                                 .andIn(BatchResultRule.FIELD_RESULT_BASE_ID, resultBaseIds))
                         .build()
         );
-        batchResultDTOs.setBatchResultBases(batchResultBases);
-        batchResultDTOs.setBatchResultRules(batchResultRules);
+        batchResultDTOs.setBatchResultBaseDTOS(batchResultBases);
+        batchResultDTOs.setBatchResultRuleDTOS(batchResultRules);
         return batchResultDTOs;
     }
 }

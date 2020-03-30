@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
+import com.hand.hdsp.quality.api.dto.StreamingResultBaseDTO;
 import com.hand.hdsp.quality.api.dto.StreamingResultDTO;
+import com.hand.hdsp.quality.api.dto.StreamingResultRuleDTO;
 import com.hand.hdsp.quality.domain.entity.StreamingResult;
 import com.hand.hdsp.quality.domain.entity.StreamingResultBase;
 import com.hand.hdsp.quality.domain.entity.StreamingResultRule;
@@ -12,6 +14,7 @@ import com.hand.hdsp.quality.domain.repository.StreamingPlanRepository;
 import com.hand.hdsp.quality.domain.repository.StreamingResultBaseRepository;
 import com.hand.hdsp.quality.domain.repository.StreamingResultRepository;
 import com.hand.hdsp.quality.domain.repository.StreamingResultRuleRepository;
+import com.hand.hdsp.quality.infra.constant.WarnLevel;
 import com.hand.hdsp.quality.infra.mapper.StreamingResultMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -54,21 +57,28 @@ public class StreamingResultRepositoryImpl extends BaseRepositoryImpl<StreamingR
                                 .andEqualTo(StreamingResult.FIELD_TENANT_ID, streamingResultDTO.getTableId(), true))
                         .build()).get(0);
         streamingResultDTOs.setPlanName(streamingPlanRepository.selectByPrimaryKey(streamingResultDTO.getPlanId()).getPlanName());
-        List<StreamingResultBase> streamingResultBases = streamingResultBaseRepository.selectByCondition(
+        List<StreamingResultBaseDTO> streamingResultBases = streamingResultBaseRepository.selectDTOByCondition(
                 Condition.builder(StreamingResultBase.class)
                         .where(Sqls.custom()
                                 .andEqualTo(StreamingResultBase.FIELD_RESULT_ID, streamingResultDTOs.getResultId(), true))
                         .build()
         );
-        List<Long> resultBaseIds = streamingResultBases.stream().map(StreamingResultBase::getResultBaseId).collect(Collectors.toList());
-        List<StreamingResultRule> streamingResultRules = streamingResultRuleRepository.selectByCondition(
+        streamingResultBases.stream().forEach( s ->{
+            int red = streamingResultRuleRepository.selectCount(StreamingResultRule.builder().topicInfo(s.getTopicInfo()).warningLevel(WarnLevel.RED).build());
+            s.setRedWarnCounts(Long.valueOf(red));
+            int orange = streamingResultRuleRepository.selectCount(StreamingResultRule.builder().topicInfo(s.getTopicInfo()).warningLevel(WarnLevel.ORANGE).build());
+            s.setOrangeWarnCounts(Long.valueOf(orange));
+                }
+        );
+        List<Long> resultBaseIds = streamingResultBases.stream().map(StreamingResultBaseDTO::getResultBaseId).collect(Collectors.toList());
+        List<StreamingResultRuleDTO> streamingResultRules = streamingResultRuleRepository.selectDTOByCondition(
                 Condition.builder(StreamingResultRule.class)
                         .where(Sqls.custom()
                                 .andIn(StreamingResultRule.FIELD_RESULT_BASE_ID, resultBaseIds))
                         .build()
         );
-        streamingResultDTOs.setStreamingResultBases(streamingResultBases);
-        streamingResultDTOs.setStreamingResultRules(streamingResultRules);
+        streamingResultDTOs.setStreamingResultBaseDTOS(streamingResultBases);
+        streamingResultDTOs.setStreamingResultRuleDTOS(streamingResultRules);
         return streamingResultDTOs;
     }
 }
