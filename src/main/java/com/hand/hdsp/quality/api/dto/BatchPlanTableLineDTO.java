@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <p>批数据方案-表级规则校验项表 数据传输对象</p>
@@ -44,5 +45,8 @@ public class BatchPlanTableLineDTO extends AuditDomain {
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;
+
+    @ApiModelProperty(value = "方案告警等级List")
+    private List<PlanWarningLevelDTO> planWarningLevelDTOList;
 
 }

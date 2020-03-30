@@ -1,7 +1,10 @@
 package com.hand.hdsp.quality.infra.mapper;
 
 import com.hand.hdsp.quality.domain.entity.BatchPlanTable;
+import com.hand.hdsp.quality.infra.dataobject.BatchPlanTableDO;
 import io.choerodon.mybatis.common.BaseMapper;
+
+import java.util.List;
 
 /**
  * <p>批数据方案-表级规则表Mapper</p>
@@ -10,4 +13,11 @@ import io.choerodon.mybatis.common.BaseMapper;
  */
 public interface BatchPlanTableMapper extends BaseMapper<BatchPlanTable> {
 
+    /**
+     * 表级规则列表
+     *
+     * @param batchPlanTableDO 查询条件
+     * @return
+     */
+    List<BatchPlanTableDO> list(BatchPlanTableDO batchPlanTableDO);
 }

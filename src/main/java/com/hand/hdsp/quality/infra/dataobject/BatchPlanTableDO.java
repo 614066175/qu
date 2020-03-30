@@ -33,4 +33,5 @@ public class BatchPlanTableDO extends AuditDomain {
 
     private Long tenantId;
 
+    private String checkItem;
 }

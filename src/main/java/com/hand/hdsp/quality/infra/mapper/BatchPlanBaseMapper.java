@@ -1,7 +1,10 @@
 package com.hand.hdsp.quality.infra.mapper;
 
+import com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanBase;
 import io.choerodon.mybatis.common.BaseMapper;
+
+import java.util.List;
 
 /**
  * <p>批数据方案-基础配置表Mapper</p>
@@ -10,4 +13,11 @@ import io.choerodon.mybatis.common.BaseMapper;
  */
 public interface BatchPlanBaseMapper extends BaseMapper<BatchPlanBase> {
 
+    /**
+     * 评估方案列表
+     *
+     * @param batchPlanBaseDTO 查询条件
+     * @return 评估方案列表
+     */
+    List<BatchPlanBaseDTO> list(BatchPlanBaseDTO batchPlanBaseDTO);
 }
