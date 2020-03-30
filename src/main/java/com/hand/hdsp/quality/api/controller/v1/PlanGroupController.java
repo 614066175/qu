@@ -50,7 +50,7 @@ public class PlanGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/all")
     public ResponseEntity<?> allList(@PathVariable(name = "organizationId") Long tenantId,
-                                     @RequestBody PlanGroup planGroup) {
+                                     PlanGroup planGroup) {
         planGroup.setTenantId(tenantId);
         List<PlanGroup> planGroups = planGroupRepository.select(planGroup);
         return Results.success(planGroups);
