@@ -4,6 +4,7 @@ import com.hand.hdsp.quality.api.dto.PlanGroupDTO;
 import com.hand.hdsp.quality.app.service.PlanGroupService;
 import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.domain.repository.PlanGroupRepository;
+import com.hand.hdsp.quality.infra.vo.PlanGroupTreeVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
@@ -71,6 +72,21 @@ public class PlanGroupController extends BaseController {
         planGroupDTO.setTenantId(tenantId);
         Page<PlanGroupDTO> list = planGroupRepository.pageAndSortDTO(pageRequest, planGroupDTO);
         return Results.success(list);
+    }
+
+    @ApiOperation(value = "评估方案分组所有列表（含评估方案")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/tree")
+    public ResponseEntity<?> tree(@PathVariable(name = "organizationId") Long tenantId,
+                                  PlanGroupTreeVO planGroupTreeVO) {
+        planGroupTreeVO.setTenantId(tenantId);
+        return Results.success(planGroupRepository.tree(planGroupTreeVO));
     }
 
     @ApiOperation(value = "评估方案分组表明细")
