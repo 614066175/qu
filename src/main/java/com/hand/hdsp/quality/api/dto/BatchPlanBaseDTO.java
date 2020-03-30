@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <p>批数据方案-基础配置表 数据传输对象</p>
@@ -48,12 +49,18 @@ public class BatchPlanBaseDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
-    @ApiModelProperty(value = "表级规则")
-    private BatchPlanTableDTO batchPlanTableDTO;
+    @ApiModelProperty(value = "表级规则List")
+    private List<BatchPlanTableDTO> batchPlanTableDTOList;
 
-    @ApiModelProperty(value = "字段规则")
-    private BatchPlanFieldDTO batchPlanFieldDTO;
+    @ApiModelProperty(value = "字段规则List")
+    private List<BatchPlanFieldDTO> batchPlanFieldDTOList;
 
-    @ApiModelProperty(value = "表间规则")
-    private BatchPlanRelTableDTO batchPlanRelTableDTO;
+    @ApiModelProperty(value = "表间规则List")
+    private List<BatchPlanRelTableDTO> batchPlanRelTableDTOList;
+
+    private Long tableNum;
+
+    private Long fieldNum;
+
+    private Long relTableNum;
 }

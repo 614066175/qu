@@ -17,4 +17,30 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+
+    <select id="list" resultType="com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO">
+        select
+        xbpb.datasource_schema,
+        xbpb.table_name,
+        xbpb.description,
+        (select count(*)
+        from xqua_batch_plan_table xbpt
+        where
+        xbpt.plan_base_id = xbpb.plan_base_id
+        ) as table_num,
+        (select count(*)
+        from xqua_batch_plan_field xbpf
+        where
+        xbpf.plan_base_id = xbpb.plan_base_id
+        ) as field_num,
+        (select count(*)
+        from xqua_batch_plan_rel_table xbprt
+        where
+        xbprt.plan_base_id = xbpb.plan_base_id
+        ) as rel_table_num
+        from
+        xqua_batch_plan_base xbpb
+        where
+        xbpb.tenant_id = #{tenantId}
+    </select>
 </mapper>

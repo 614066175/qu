@@ -5,7 +5,6 @@ import com.hand.hdsp.quality.app.service.RuleGroupService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.RuleGroup;
 import com.hand.hdsp.quality.domain.repository.RuleGroupRepository;
-import com.hand.hdsp.quality.infra.validator.groups.Create;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
@@ -16,12 +15,9 @@ import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
-
-import java.util.List;
 
 /**
  * 规则分组表 管理 API
@@ -71,7 +67,7 @@ public class RuleGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                   RuleGroup ruleGroup) {
+                                  RuleGroup ruleGroup) {
         ruleGroup.setTenantId(tenantId);
         return Results.success(ruleGroupRepository.select(ruleGroup));
     }
@@ -106,7 +102,7 @@ public class RuleGroupController extends BaseController {
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody RuleGroupDTO ruleGroupDTO) {
         ruleGroupDTO.setTenantId(tenantId);
-        validObject(ruleGroupDTO, Create.class);
+        validObject(ruleGroupDTO);
         ruleGroupRepository.insertDTOSelective(ruleGroupDTO);
         return Results.success(ruleGroupDTO);
     }

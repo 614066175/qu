@@ -51,7 +51,7 @@ public class BatchPlanBaseController extends BaseController {
                                   BatchPlanBaseDTO batchPlanBaseDTO, @ApiIgnore @SortDefault(value = BatchPlanBase.FIELD_PLAN_BASE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchPlanBaseDTO.setTenantId(tenantId);
-        Page<BatchPlanBaseDTO> list = batchPlanBaseRepository.pageAndSortDTO(pageRequest, batchPlanBaseDTO);
+        Page<BatchPlanBaseDTO> list = batchPlanBaseRepository.list(pageRequest, batchPlanBaseDTO);
         return Results.success(list);
     }
 
@@ -70,7 +70,7 @@ public class BatchPlanBaseController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{planBaseId}")
     public ResponseEntity<?> detail(@PathVariable Long planBaseId) {
-        BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseService.detail(planBaseId);
+        BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseRepository.selectDTOByPrimaryKeyAndTenant(planBaseId);
         return Results.success(batchPlanBaseDTO);
     }
 
@@ -86,7 +86,7 @@ public class BatchPlanBaseController extends BaseController {
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanBaseDTO batchPlanBaseDTO) {
         batchPlanBaseDTO.setTenantId(tenantId);
         this.validObject(batchPlanBaseDTO);
-        batchPlanBaseService.insert(batchPlanBaseDTO);
+        batchPlanBaseRepository.insertDTOSelective(batchPlanBaseDTO);
         return Results.success(batchPlanBaseDTO);
     }
 
@@ -100,8 +100,7 @@ public class BatchPlanBaseController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanBaseDTO batchPlanBaseDTO) {
-        batchPlanBaseDTO.setTenantId(tenantId);
-        batchPlanBaseService.update(batchPlanBaseDTO);
+        batchPlanBaseRepository.updateDTOWhereTenant(batchPlanBaseDTO, tenantId);
         return Results.success(batchPlanBaseDTO);
     }
 

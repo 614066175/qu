@@ -1,6 +1,8 @@
 package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * <p>批数据方案-基础配置表应用服务</p>
@@ -16,26 +18,4 @@ public interface BatchPlanBaseService {
      * @return 删除结果
      */
     int delete(BatchPlanBaseDTO batchPlanBaseDTO);
-
-    /**
-     * 新建，包括下级规则、规则行
-     *
-     * @param batchPlanBaseDTO
-     */
-    void insert(BatchPlanBaseDTO batchPlanBaseDTO);
-
-    /**
-     * 更新
-     *
-     * @param batchPlanBaseDTO 更新信息
-     */
-    void update(BatchPlanBaseDTO batchPlanBaseDTO);
-
-    /**
-     * 关联查询
-     *
-     * @param planBaseId
-     * @return
-     */
-    BatchPlanBaseDTO detail(Long planBaseId);
 }

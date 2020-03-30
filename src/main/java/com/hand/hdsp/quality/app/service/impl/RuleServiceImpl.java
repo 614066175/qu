@@ -9,10 +9,8 @@ import com.hand.hdsp.quality.domain.entity.RuleWarningLevel;
 import com.hand.hdsp.quality.domain.repository.RuleLineRepository;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
 import com.hand.hdsp.quality.domain.repository.RuleWarningLevelRepository;
-import com.hand.hdsp.quality.infra.constant.RuleConstant;
 import org.springframework.stereotype.Service;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
