@@ -22,10 +22,10 @@ public interface BatchResultMapper extends BaseMapper<BatchResult> {
     List<BatchResultDTO> listByGroup(BatchResultDTO batchResultDTO);
 
     /**
-     * 查看方案评估报告
+     * 根据分组查询对应的评估方案执行记录
      *
      * @param batchResultDTO
-     * @return
+     * @return BatchResultDTO
      */
-    List<BatchResultDTO> showReport(BatchResultDTO batchResultDTO);
+    List<BatchResultDTO> listHistory(BatchResultDTO batchResultDTO);
 }

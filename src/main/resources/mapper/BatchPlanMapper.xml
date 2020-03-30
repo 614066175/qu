@@ -28,6 +28,11 @@
         <result column="next_count_date" property="batchResult.nextCountDate" jdbcType="TIMESTAMP"/>
     </resultMap>
 
+    <resultMap id="BaseResultMapDTOHis" type="com.hand.hdsp.quality.api.dto.BatchPlanDTO" extends="BaseResultMapDTO">
+        <result column="rule_count" property="batchResultBase.ruleCount" jdbcType="DECIMAL"/>
+        <result column="exception_rule_count" property="batchResultBase.exceptionRuleCount" jdbcType="DECIMAL"/>
+    </resultMap>
+
     <select id="getGroupByPlanName" resultMap="BaseResultMapDTO">
         select
         <include refid="com.hand.hdsp.quality.infra.mapper.BatchResultMapper.Plan_And_Result">
@@ -46,6 +51,36 @@
             <if test="planName != null">
                 <bind name="planName" value="'%' + planName + '%'"/>
                 xbp.plan_name like #{planName}
+            </if>
+            <if test="tenantId != null">
+                and xbp.tenant_id = #{tenantId}
+            </if>
+        </where>
+    </select>
+
+    <select id="getHistoryByPlanName" resultMap="BaseResultMapDTOHis">
+        select
+        <include refid="com.hand.hdsp.quality.infra.mapper.BatchResultMapper.Plan_And_Result">
+            <property name="xbp" value="xbp"/>
+            <property name="xbr" value="xbr"/>
+        </include>,
+        xpg.group_id,
+        xpg.parent_group_id,
+        xpg.group_name,
+        xbrb.rule_count,
+        xbrb.exception_rule_count
+        from xqua_plan_group xpg
+        left join xqua_batch_plan xbp
+        on xpg.group_id=xbp.group_id
+        left join xqua_batch_result xbr
+        on xbp.plan_id=xbr.plan_id
+        left join xqua_batch_result_base xbrb
+        on xbr.result_id=xbrb.result_id
+        <where>
+            xbr.plan_status != 'NOTASSESS'
+            <if test="planName != null">
+                <bind name="planName" value="'%' + planName + '%'"/>
+                and xbp.plan_name like #{planName}
             </if>
             <if test="tenantId != null">
                 and xbp.tenant_id = #{tenantId}

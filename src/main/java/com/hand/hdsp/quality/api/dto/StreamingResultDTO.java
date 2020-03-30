@@ -63,4 +63,8 @@ public class StreamingResultDTO extends AuditDomain {
 
     private List<StreamingResultRuleDTO> streamingResultRuleDTOS;
 
+    private Long ruleCount;
+
+    private Long exceptionRuleCount;
+
 }

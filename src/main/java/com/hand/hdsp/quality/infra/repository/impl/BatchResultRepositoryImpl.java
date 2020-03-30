@@ -82,4 +82,9 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
         batchResultDTOs.setBatchResultRuleDTOS(batchResultRules);
         return batchResultDTOs;
     }
+
+    @Override
+    public Page<BatchResultDTO> listHistory(BatchResultDTO batchResultDTO, PageRequest pageRequest) {
+        return PageHelper.doPageAndSort(pageRequest,()-> batchResultMapper.listHistory(batchResultDTO));
+    }
 }

@@ -53,6 +53,22 @@ public class BatchResultController extends BaseController {
         return Results.success(batchResultRepository.listAll(batchResultDTO,pageRequest));
     }
 
+    @ApiOperation(value = "根据分组查看对应的批数据评估方案执行记录")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/history")
+    public ResponseEntity<?> listHistory(@PathVariable(name = "organizationId") Long tenantId,
+                                         BatchResultDTO batchResultDTO,
+                                         PageRequest pageRequest) {
+        batchResultDTO.setTenantId(tenantId);
+        return Results.success(batchResultRepository.listHistory(batchResultDTO, pageRequest));
+    }
+
     @ApiOperation(value = "查看评估报告")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",

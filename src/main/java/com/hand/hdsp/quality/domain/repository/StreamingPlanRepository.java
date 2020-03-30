@@ -19,7 +19,15 @@ public interface StreamingPlanRepository extends BaseRepository<StreamingPlan, S
      * 根据方案名查到所在分组
      *
      * @param streamingPlanDTO
-     * @return
+     * @return StreamingPlanDTO
      */
     List<StreamingPlanDTO> getGroupByPlanName(StreamingPlanDTO streamingPlanDTO);
+
+    /**
+     * 根据方案名查到所在分组及执行历史
+     *
+     * @param streamingPlanDTO
+     * @return StreamingPlanDTO
+     */
+    List<StreamingPlanDTO> getHistoryByPlanName(StreamingPlanDTO streamingPlanDTO);
 }

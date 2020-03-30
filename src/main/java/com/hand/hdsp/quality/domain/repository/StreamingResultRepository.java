@@ -29,7 +29,16 @@ public interface StreamingResultRepository extends BaseRepository<StreamingResul
      * 查看方案评估报告
      *
      * @param streamingResultDTO
-     * @return
+     * @return StreamingResultDTO
      */
     StreamingResultDTO showReport(StreamingResultDTO streamingResultDTO);
+
+    /**
+     * 根据分组查询对应的评估方案执行记录
+     *
+     * @param streamingResultDTO
+     * @param pageRequest
+     * @return StreamingResultDTO
+     */
+    Page<StreamingResultDTO> listHistory(StreamingResultDTO streamingResultDTO, PageRequest pageRequest);
 }

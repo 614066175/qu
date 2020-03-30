@@ -15,10 +15,18 @@ import com.hand.hdsp.quality.domain.entity.BatchPlan;
 public interface BatchPlanRepository extends BaseRepository<BatchPlan, BatchPlanDTO>, ProxySelf<BatchPlanRepository> {
 
     /**
-     * 根据分组查询对应的评估方案
+     * 根据方案名查到所在分组
      *
      * @param batchPlanDTO
      * @return BatchPlanDTO
      */
     List<BatchPlanDTO> listByGroup(BatchPlanDTO batchPlanDTO);
+
+    /**
+     * 根据方案名查到所在分组及执行记录
+     *
+     * @param batchPlanDTO
+     * @return BatchPlanDTO
+     */
+    List<BatchPlanDTO> listHisByName(BatchPlanDTO batchPlanDTO);
 }

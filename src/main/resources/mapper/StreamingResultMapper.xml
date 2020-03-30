@@ -47,6 +47,46 @@
             <if test="tenantId != null">
                 and xsr.tenant_id = #{tenantId}
             </if>
+            <if test="planName != null">
+                <bind name="planName" value="'%' + planName + '%'"/>
+                and xsp.plan_name like #{planName}
+            </if>
+            <if test="planStatus != null">
+                and xsr.plan_status = #{planStatus}
+            </if>
+        </where>
+    </select>
+
+    <select id="listHistory" resultType="com.hand.hdsp.quality.api.dto.StreamingResultDTO">
+        select
+        <include refid="StreamingPlan_And_Result">
+            <property name="xsp" value="xsp"/>
+            <property name="xsr" value="xsr"/>
+        </include>,
+        xsrb.rule_count,
+        xsrb.exception_rule_count
+        from xqua_plan_group xpg
+        left join xqua_streaming_plan xsp
+        on xpg.group_id=xsp.group_id
+        left join xqua_streaming_result xsr
+        on xsp.plan_id=xsr.plan_id
+        left join xqua_streaming_result_base xsrb
+        on xsr.result_id=xsrb.result_id
+        <where>
+            xsr.plan_status != 'NOTASSESS'
+            <if test="groupId != null">
+                and xpg.group_id = #{groupId}
+            </if>
+            <if test="tenantId != null">
+                and xsr.tenant_id = #{tenantId}
+            </if>
+            <if test="planName != null">
+                <bind name="planName" value="'%' + planName + '%'"/>
+                and xsp.plan_name like #{planName}
+            </if>
+            <if test="planStatus != null">
+                and xsr.plan_status = #{planStatus}
+            </if>
         </where>
     </select>
 

@@ -29,7 +29,16 @@ public interface BatchResultRepository extends BaseRepository<BatchResult, Batch
      * 查看方法评估报告
      *
      * @param batchResultDTO
-     * @return
+     * @return BatchResultDTO
      */
     BatchResultDTO showReport(BatchResultDTO batchResultDTO);
+
+    /**
+     * 根据分组查询对应的评估方案执行记录
+     *
+     * @param batchResultDTO
+     * @param pageRequest
+     * @return BatchResultDTO
+     */
+    Page<BatchResultDTO> listHistory(BatchResultDTO batchResultDTO, PageRequest pageRequest);
 }

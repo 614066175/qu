@@ -17,16 +17,15 @@ public interface StreamingResultMapper extends BaseMapper<StreamingResult> {
      * 根据分组查询对应的评估方案
      *
      * @param streamingResultDTO
-     * @return
+     * @return StreamingResultDTO
      */
     List<StreamingResultDTO> listByGroup(StreamingResultDTO streamingResultDTO);
 
     /**
-     *  查看方案评估报告
+     *  根据分组查询对应的评估方案执行记录
      *
      * @param streamingResultDTO
-     * @return
+     * @return StreamingResultDTO
      */
-    List<StreamingResultDTO> showReport(StreamingResultDTO streamingResultDTO);
-
+    List<StreamingResultDTO> listHistory(StreamingResultDTO streamingResultDTO);
 }

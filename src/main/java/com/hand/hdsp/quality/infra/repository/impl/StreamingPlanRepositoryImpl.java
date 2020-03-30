@@ -28,4 +28,9 @@ public class StreamingPlanRepositoryImpl extends BaseRepositoryImpl<StreamingPla
     public List<StreamingPlanDTO> getGroupByPlanName(StreamingPlanDTO streamingPlanDTO) {
         return streamingPlanMapper.getGroupByPlanName(streamingPlanDTO);
     }
+
+    @Override
+    public List<StreamingPlanDTO> getHistoryByPlanName(StreamingPlanDTO streamingPlanDTO) {
+        return streamingPlanMapper.getHistoryByPlanName(streamingPlanDTO);
+    }
 }

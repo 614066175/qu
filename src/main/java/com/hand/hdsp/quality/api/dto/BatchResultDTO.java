@@ -65,4 +65,9 @@ public class BatchResultDTO extends AuditDomain {
 
     private List<BatchResultRuleDTO> batchResultRuleDTOS;
 
+    private Long ruleCount;
+
+    private Long exceptionRuleCount;
+
+
 }

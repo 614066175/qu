@@ -82,4 +82,9 @@ public class StreamingResultRepositoryImpl extends BaseRepositoryImpl<StreamingR
         streamingResultDTOs.setStreamingResultRuleDTOS(streamingResultRules);
         return streamingResultDTOs;
     }
+
+    @Override
+    public Page<StreamingResultDTO> listHistory(StreamingResultDTO streamingResultDTO, PageRequest pageRequest) {
+        return PageHelper.doPageAndSort(pageRequest,()-> streamingResultMapper.listHistory(streamingResultDTO));
+    }
 }

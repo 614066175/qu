@@ -27,4 +27,9 @@ public class BatchPlanRepositoryImpl extends BaseRepositoryImpl<BatchPlan, Batch
     public List<BatchPlanDTO> listByGroup(BatchPlanDTO batchPlanDTO) {
         return batchPlanMapper.getGroupByPlanName(batchPlanDTO);
     }
+
+    @Override
+    public List<BatchPlanDTO> listHisByName(BatchPlanDTO batchPlanDTO) {
+        return batchPlanMapper.getHistoryByPlanName(batchPlanDTO);
+    }
 }

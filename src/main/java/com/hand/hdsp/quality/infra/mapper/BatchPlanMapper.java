@@ -20,4 +20,12 @@ public interface BatchPlanMapper extends BaseMapper<BatchPlan> {
      * @return BatchPlanDTO
      */
     List<BatchPlanDTO> getGroupByPlanName(BatchPlanDTO batchPlanDTO);
+
+    /**
+     * 根据方案名查到所在分组和执行记录
+     *
+     * @param batchPlanDTO
+     * @return BatchPlanDTO
+     */
+    List<BatchPlanDTO> getHistoryByPlanName(BatchPlanDTO batchPlanDTO);
 }

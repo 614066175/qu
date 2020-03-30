@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
+import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
@@ -59,5 +60,7 @@ public class BatchPlanDTO extends AuditDomain {
     private BatchResult batchResult;
 
     private PlanGroup planGroup;
+
+    private BatchResultBase batchResultBase;
 
 }

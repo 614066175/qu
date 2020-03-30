@@ -17,7 +17,15 @@ public interface StreamingPlanMapper extends BaseMapper<StreamingPlan> {
      * 根据方案名查到所在分组
      *
      * @param streamingPlanDTO
-     * @return
+     * @return StreamingPlanDTO
      */
     List<StreamingPlanDTO> getGroupByPlanName(StreamingPlanDTO streamingPlanDTO);
+
+    /**
+     * 根据方案名查到所在分组及执行记录
+     *
+     * @param streamingPlanDTO
+     * @return StreamingPlanDTO
+     */
+    List<StreamingPlanDTO> getHistoryByPlanName(StreamingPlanDTO streamingPlanDTO);
 }
