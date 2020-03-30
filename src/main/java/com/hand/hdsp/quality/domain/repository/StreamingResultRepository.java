@@ -31,5 +31,5 @@ public interface StreamingResultRepository extends BaseRepository<StreamingResul
      * @param streamingResultDTO
      * @return
      */
-    List<StreamingResultDTO> showReport(StreamingResultDTO streamingResultDTO);
+    StreamingResultDTO showReport(StreamingResultDTO streamingResultDTO);
 }

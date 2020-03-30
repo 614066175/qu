@@ -29,21 +29,6 @@
         ${xbr}.next_count_date
     </sql>
 
-    <sql id="Plan_Result_Report">
-        ${xbrb}.table_name,
-        ${xbrb}.rule_count,
-        ${xbrb}.exception_rule_count,
-        ${xbrb}.data_count,
-        ${xbrr}.rule_name,
-        ${xbrr}.check_item,
-        ${xbrr}.expected_value,
-        ${xbrr}.actual_value,
-        ${xbrr}.wave_rate,
-        ${xbrr}.warning_level,
-        ${xbrr}.field_name,
-        ${xbrr}.rel_table_name
-    </sql>
-    
     <select id="listByGroup" resultType="com.hand.hdsp.quality.api.dto.BatchResultDTO">
         select
         <include refid="Plan_And_Result">
@@ -56,7 +41,7 @@
         LEFT JOIN xqua_plan_group xpg
         on xbp.group_id=xpg.group_id
         <where>
-            <if test="groupId != null and groupId != 1">
+            <if test="groupId != null and groupId != 0">
                 xpg.group_id = #{groupId}
             </if>
             <if test="tenantId != null">
@@ -65,30 +50,4 @@
         </where>
     </select>
 
-    <select id="showReport" resultType="com.hand.hdsp.quality.api.dto.BatchResultDTO">
-        select
-        <include refid="Plan_And_Result">
-            <property name="xbp" value="xbp"/>
-            <property name="xbr" value="xbr"/>
-        </include>,
-        <include refid="Plan_Result_Report">
-            <property name="xbrb" value="xbrb"/>
-            <property name="xbrr" value="xbrr"/>
-        </include>
-        FROM xqua_batch_plan xbp
-        LEFT JOIN xqua_batch_result xbr
-        on xbp.plan_id=xbr.plan_id
-        LEFT JOIN xqua_batch_result_base xbrb
-        on xbr.result_id=xbrb.result_id
-        LEFT JOIN xqua_batch_result_rule xbrr
-        on xbrb.result_base_id=xbrr.result_base_id
-        <where>
-            <if test="planId != null">
-                xbr.plan_id = #{planId}
-            </if>
-            <if test="tenantId != null">
-                and xbr.tenant_id = #{tenantId}
-            </if>
-        </where>
-    </select>
 </mapper>

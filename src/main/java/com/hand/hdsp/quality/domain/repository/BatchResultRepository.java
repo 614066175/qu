@@ -31,5 +31,5 @@ public interface BatchResultRepository extends BaseRepository<BatchResult, Batch
      * @param batchResultDTO
      * @return
      */
-    List<BatchResultDTO> showReport(BatchResultDTO batchResultDTO);
+    BatchResultDTO showReport(BatchResultDTO batchResultDTO);
 }

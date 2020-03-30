@@ -1,6 +1,8 @@
 package com.hand.hdsp.quality.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.hand.hdsp.quality.domain.entity.BatchResultBase;
+import com.hand.hdsp.quality.domain.entity.BatchResultRule;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -9,6 +11,7 @@ import lombok.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * <p>批数据方案结果表 数据传输对象</p>
@@ -58,27 +61,8 @@ public class BatchResultDTO extends AuditDomain {
     @ApiModelProperty(value = "方案名称")
     private String planName;
 
-    private String tableName;
+    private List<BatchResultBase> batchResultBases;
 
-    private Long ruleCount;
+    private List<BatchResultRule> batchResultRules;
 
-    private Long exceptionRuleCount;
-
-    private Long dataCount;
-
-    private String ruleName;
-
-    private String checkItem;
-
-    private String expectedValue;
-
-    private String actualValue;
-
-    private BigDecimal waveRate;
-
-    private String warningLevel;
-
-    private String fieldName;
-
-    private String relTableName;
 }

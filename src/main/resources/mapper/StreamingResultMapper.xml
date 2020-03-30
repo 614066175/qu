@@ -29,18 +29,6 @@
         ${xsr}.next_count_date
     </sql>
 
-    <sql id="StreamingPlan_Result_Report">
-        ${xsrb}.connector_info,
-        ${xsrb}.topic_info,
-        ${xsrb}.rule_count,
-        ${xsrb}.exception_rule_count,
-        ${xsrr}.rule_name,
-        ${xsrr}.rule_type,
-        ${xsrr}.delay_date,
-        ${xsrr}.exception_info,
-        ${xsrr}.warning_level
-    </sql>
-
     <select id="listByGroup" resultType="com.hand.hdsp.quality.api.dto.StreamingResultDTO">
         select
         <include refid="StreamingPlan_And_Result">
@@ -53,7 +41,7 @@
         LEFT JOIN xqua_streaming_result xsr
         on xsp.plan_id=xsr.plan_id
         <where>
-            <if test="groupId != null and groupId != 1">
+            <if test="groupId != null and groupId != 0">
                 xpg.group_id = #{groupId}
             </if>
             <if test="tenantId != null">
@@ -62,30 +50,4 @@
         </where>
     </select>
 
-    <select id="showReport" resultType="com.hand.hdsp.quality.api.dto.StreamingResultDTO">
-        select
-        <include refid="StreamingPlan_And_Result">
-            <property name="xsp" value="xsp"/>
-            <property name="xsr" value="xsr"/>
-        </include>,
-        <include refid="StreamingPlan_Result_Report">
-            <property name="xsrb" value="xsrb"/>
-            <property name="xsrr" value="xsrr"/>
-        </include>
-        from xqua_streaming_plan xsp
-        LEFT JOIN xqua_streaming_result xsr
-        on xsp.plan_id=xsr.plan_id
-        LEFT JOIN xqua_streaming_result_base xsrb
-        on xsr.result_id=xsrb.result_id
-        LEFT JOIN xqua_streaming_result_rule xsrr
-        on xsrb.result_base_id=xsrr.result_base_id
-        <where>
-            <if test="planId != null">
-                xsr.plan_id = #{planId}
-            </if>
-            <if test="tenantId != null">
-                and xsr.tenant_id = #{tenantId}
-            </if>
-        </where>
-    </select>
 </mapper>

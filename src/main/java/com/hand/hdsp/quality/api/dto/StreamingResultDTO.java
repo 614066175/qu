@@ -1,6 +1,8 @@
 package com.hand.hdsp.quality.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.hand.hdsp.quality.domain.entity.StreamingResultBase;
+import com.hand.hdsp.quality.domain.entity.StreamingResultRule;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -9,6 +11,7 @@ import lombok.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * <p>实时数据方案结果表 数据传输对象</p>
@@ -56,21 +59,8 @@ public class StreamingResultDTO extends AuditDomain {
 
     private String planName;
 
-    private String connectorInfo;
+    private List<StreamingResultBase> streamingResultBases;
 
-    private String topicInfo;
+    private List<StreamingResultRule> streamingResultRules;
 
-    private Long ruleCount;
-
-    private Long exceptionRuleCount;
-
-    private String ruleName;
-
-    private String ruleType;
-
-    private Date delayDate;
-
-    private String exceptionInfo;
-
-    private String warningLevel;
 }
