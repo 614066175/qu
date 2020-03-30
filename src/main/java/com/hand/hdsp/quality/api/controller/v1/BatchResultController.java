@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
+import com.hand.hdsp.quality.app.service.BatchResultService;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.domain.repository.BatchResultRepository;
 import io.choerodon.core.domain.Page;
@@ -28,10 +29,12 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/batch-results")
 public class BatchResultController extends BaseController {
 
-    private BatchResultRepository batchResultRepository;
+    private final BatchResultRepository batchResultRepository;
+    private final BatchResultService batchResultService;
 
-    public BatchResultController(BatchResultRepository batchResultRepository) {
+    public BatchResultController(BatchResultRepository batchResultRepository, BatchResultService batchResultService) {
         this.batchResultRepository = batchResultRepository;
+        this.batchResultService = batchResultService;
     }
 
     @ApiOperation(value = "根据分组查看对应的批数据评估方案")
@@ -44,7 +47,7 @@ public class BatchResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> listAll(@PathVariable(name = "organizationId") Long tenantId,
-                                     @RequestBody BatchResultDTO batchResultDTO,
+                                     BatchResultDTO batchResultDTO,
                                      PageRequest pageRequest){
         batchResultDTO.setTenantId(tenantId);
         return Results.success(batchResultRepository.listAll(batchResultDTO,pageRequest));
@@ -60,9 +63,24 @@ public class BatchResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/evaluation-report")
     public ResponseEntity<?> evaluationReport(@PathVariable(name = "organizationId") Long tenantId,
-                                              @RequestBody BatchResultDTO batchResultDTO){
+                                              BatchResultDTO batchResultDTO){
         batchResultDTO.setTenantId(tenantId);
         return Results.success(batchResultRepository.showReport(batchResultDTO));
+    }
+
+    @ApiOperation(value = "查看运行日志")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/log")
+    public ResponseEntity<?> showLog(@PathVariable(name = "organizationId") Long tenantId,
+                                     @RequestParam("execId") int execId,
+                                     @RequestParam("jobId") String jobId){
+        return Results.success(batchResultService.showLog(tenantId, execId, jobId));
     }
 
     @ApiOperation(value = "批数据方案结果表列表")

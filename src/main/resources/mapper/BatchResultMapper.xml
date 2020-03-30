@@ -65,7 +65,7 @@
         </where>
     </select>
 
-    <select id="showReport"resultType="com.hand.hdsp.quality.api.dto.BatchResultDTO">
+    <select id="showReport" resultType="com.hand.hdsp.quality.api.dto.BatchResultDTO">
         select
         <include refid="Plan_And_Result">
             <property name="xbp" value="xbp"/>

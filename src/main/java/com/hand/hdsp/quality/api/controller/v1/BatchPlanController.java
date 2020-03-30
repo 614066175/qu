@@ -61,7 +61,7 @@ public class BatchPlanController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/group")
     public ResponseEntity<?> group(@PathVariable(name = "organizationId") Long tenantId,
-                                   @RequestBody BatchPlanDTO batchPlanDTO){
+                                   BatchPlanDTO batchPlanDTO){
         batchPlanDTO.setTenantId(tenantId);
         return Results.success(batchPlanRepository.listByGroup(batchPlanDTO));
     }

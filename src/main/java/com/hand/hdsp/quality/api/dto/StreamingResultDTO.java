@@ -50,4 +50,27 @@ public class StreamingResultDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
+    // =========================非库字段=========================
+
+    private Long groupId;
+
+    private String planName;
+
+    private String connectorInfo;
+
+    private String topicInfo;
+
+    private Long ruleCount;
+
+    private Long exceptionRuleCount;
+
+    private String ruleName;
+
+    private String ruleType;
+
+    private Date delayDate;
+
+    private String exceptionInfo;
+
+    private String warningLevel;
 }

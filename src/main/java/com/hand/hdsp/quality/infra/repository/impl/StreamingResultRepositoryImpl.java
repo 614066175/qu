@@ -1,9 +1,15 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
+import java.util.List;
+
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.StreamingResultDTO;
 import com.hand.hdsp.quality.domain.entity.StreamingResult;
 import com.hand.hdsp.quality.domain.repository.StreamingResultRepository;
+import com.hand.hdsp.quality.infra.mapper.StreamingResultMapper;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,4 +20,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class StreamingResultRepositoryImpl extends BaseRepositoryImpl<StreamingResult, StreamingResultDTO> implements StreamingResultRepository {
 
+    private final StreamingResultMapper streamingResultMapper;
+
+    public StreamingResultRepositoryImpl(StreamingResultMapper streamingResultMapper) {
+        this.streamingResultMapper = streamingResultMapper;
+    }
+
+    @Override
+    public Page<StreamingResultDTO> listAll(StreamingResultDTO streamingResultDTO, PageRequest pageRequest) {
+        return PageHelper.doPageAndSort(pageRequest,() -> streamingResultMapper.listByGroup(streamingResultDTO));
+    }
+
+    @Override
+    public List<StreamingResultDTO> showReport(StreamingResultDTO streamingResultDTO) {
+        return streamingResultMapper.showReport(streamingResultDTO);
+    }
 }

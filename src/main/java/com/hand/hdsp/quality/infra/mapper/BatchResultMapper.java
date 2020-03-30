@@ -22,7 +22,7 @@ public interface BatchResultMapper extends BaseMapper<BatchResult> {
     List<BatchResultDTO> listByGroup(BatchResultDTO batchResultDTO);
 
     /**
-     * 查看方法评估报告
+     * 查看方案评估报告
      *
      * @param batchResultDTO
      * @return

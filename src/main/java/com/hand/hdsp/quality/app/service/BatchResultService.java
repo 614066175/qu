@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.app.service;
 
+import com.hand.hdsp.quality.api.dto.ResultObjDTO;
+
 /**
  * <p>批数据方案结果表应用服务</p>
  *
@@ -7,4 +9,12 @@ package com.hand.hdsp.quality.app.service;
  */
 public interface BatchResultService {
 
+    /**
+     * 查看运行日志
+     *
+     * @param execId
+     * @param jobId
+     * @return
+     */
+    ResultObjDTO showLog(Long tenantId, int execId, String jobId);
 }

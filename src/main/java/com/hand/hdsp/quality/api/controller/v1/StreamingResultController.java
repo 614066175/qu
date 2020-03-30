@@ -34,6 +34,37 @@ public class StreamingResultController extends BaseController {
         this.streamingResultRepository = streamingResultRepository;
     }
 
+    @ApiOperation(value = "根据分组查看对应的实时数据评估方案")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/list")
+    public ResponseEntity<?> listAll(@PathVariable(name = "organizationId") Long tenantId,
+                                     StreamingResultDTO streamingResultDTO,
+                                     PageRequest pageRequest){
+        streamingResultDTO.setTenantId(tenantId);
+        return Results.success(streamingResultRepository.listAll(streamingResultDTO, pageRequest));
+    }
+
+    @ApiOperation(value = "查看评估报告")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/evaluation-report")
+    public ResponseEntity<?> evaluationReport(@PathVariable(name = "organizationId") Long tenantId,
+                                              StreamingResultDTO streamingResultDTO){
+        streamingResultDTO.setTenantId(tenantId);
+        return Results.success(streamingResultRepository.showReport(streamingResultDTO));
+    }
+
     @ApiOperation(value = "实时数据方案结果表列表")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
