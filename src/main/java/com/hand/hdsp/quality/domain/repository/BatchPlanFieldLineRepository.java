@@ -5,6 +5,8 @@ import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
 
+import java.util.List;
+
 /**
  * <p>批数据方案-字段规则校验项表资源库</p>
  *
@@ -12,4 +14,11 @@ import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
  */
 public interface BatchPlanFieldLineRepository extends BaseRepository<BatchPlanFieldLine, BatchPlanFieldLineDTO>, ProxySelf<BatchPlanFieldLineRepository> {
 
+    /**
+     * 可选字段级规则列表
+     *
+     * @param checkItemList
+     * @return
+     */
+    List<BatchPlanFieldLineDTO> list(List<String> checkItemList);
 }

@@ -4,11 +4,7 @@ import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanFieldService;
 import com.hand.hdsp.quality.domain.entity.BatchPlanField;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldRepository;
-import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -18,7 +14,6 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * <p>批数据方案-字段规则表 管理 API</p>
@@ -48,11 +43,9 @@ public class BatchPlanFieldController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  BatchPlanFieldDTO batchPlanFieldDTO, @ApiIgnore @SortDefault(value = BatchPlanField.FIELD_PLAN_FIELD_ID,
-            direction = Sort.Direction.DESC) PageRequest pageRequest) {
-        batchPlanFieldDTO.setTenantId(tenantId);
-        Page<BatchPlanFieldDTO> list = batchPlanFieldRepository.pageAndSortDTO(pageRequest, batchPlanFieldDTO);
-        return Results.success(list);
+                                  BatchPlanField batchPlanField) {
+        batchPlanField.setTenantId(tenantId);
+        return Results.success(batchPlanFieldRepository.select(batchPlanField));
     }
 
     @ApiOperation(value = "批数据方案-字段规则表明细")

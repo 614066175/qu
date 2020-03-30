@@ -1,8 +1,8 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
+import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanFieldService;
-import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldLineRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldRepository;
 import org.springframework.stereotype.Service;
@@ -25,9 +25,11 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
 
     @Override
     public int delete(BatchPlanFieldDTO batchPlanFieldDTO) {
-        batchPlanFieldLineRepository.batchDTODelete(
-                batchPlanFieldLineRepository.selectDTO
-                        (BatchPlanFieldLine.FIELD_PLAN_FIELD_ID, batchPlanFieldDTO.getPlanFieldId()));
+        if (batchPlanFieldDTO.getBatchPlanFieldLineDTOList() != null) {
+            for (BatchPlanFieldLineDTO batchPlanFieldLineDTO : batchPlanFieldDTO.getBatchPlanFieldLineDTOList()) {
+                batchPlanFieldLineRepository.deleteDTO(batchPlanFieldLineDTO);
+            }
+        }
         return batchPlanFieldRepository.deleteByPrimaryKey(batchPlanFieldDTO);
     }
 }

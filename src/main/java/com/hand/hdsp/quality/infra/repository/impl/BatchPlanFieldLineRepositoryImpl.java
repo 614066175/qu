@@ -4,7 +4,10 @@ import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldLineRepository;
+import com.hand.hdsp.quality.infra.mapper.BatchPlanFieldLineMapper;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * <p>批数据方案-字段规则校验项表资源库实现</p>
@@ -14,4 +17,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class BatchPlanFieldLineRepositoryImpl extends BaseRepositoryImpl<BatchPlanFieldLine, BatchPlanFieldLineDTO> implements BatchPlanFieldLineRepository {
 
+    private BatchPlanFieldLineMapper batchPlanFieldLineMapper;
+
+    public BatchPlanFieldLineRepositoryImpl(BatchPlanFieldLineMapper batchPlanFieldLineMapper) {
+        this.batchPlanFieldLineMapper = batchPlanFieldLineMapper;
+    }
+
+    @Override
+    public List<BatchPlanFieldLineDTO> list(List<String> checkItemList) {
+        return batchPlanFieldLineMapper.list(checkItemList);
+    }
 }

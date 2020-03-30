@@ -17,4 +17,16 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+
+    <select id="list" resultType="com.hand.hdsp.quality.api.dto.RuleLineDTO">
+        select
+        xrl.check_item
+        from xqua_rule_line xrl
+        <where>
+            check_item not in
+            <foreach item="checkItem" collection="checkItem" separator="," open="(" close=")" index="">
+                #{checkItem, jdbcType=VARCHAR}
+            </foreach>
+        </where>
+    </select>
 </mapper>
