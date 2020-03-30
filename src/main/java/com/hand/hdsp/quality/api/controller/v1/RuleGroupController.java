@@ -69,8 +69,8 @@ public class RuleGroupController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/query")
-    public ResponseEntity<?> query(@PathVariable(name = "organizationId") Long tenantId,
+    @GetMapping("/list")
+    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
                                    RuleGroup ruleGroup) {
         ruleGroup.setTenantId(tenantId);
         return Results.success(ruleGroupRepository.select(ruleGroup));
