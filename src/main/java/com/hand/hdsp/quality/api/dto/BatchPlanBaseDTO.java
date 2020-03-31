@@ -43,7 +43,7 @@ public class BatchPlanBaseDTO extends AuditDomain {
     private String tableName;
 
     @ApiModelProperty(value = "描述")
-    private Long description;
+    private String description;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull

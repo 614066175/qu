@@ -27,7 +27,7 @@ public class BatchPlanBaseDO extends AuditDomain {
 
     private String tableName;
 
-    private Long description;
+    private String description;
 
     private Long tenantId;
 
