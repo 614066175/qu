@@ -38,7 +38,7 @@ public class StreamingPlanRepositoryImpl extends BaseRepositoryImpl<StreamingPla
                         .where(Sqls.custom().andLike(StreamingPlan.FIELD_PLAN_NAME, streamingPlanDTO.getPlanName(), true))
                         .build()
         );
-        if (streamingPlans.isEmpty() || streamingPlans.size() == 0){
+        if (streamingPlans.isEmpty()){
             throw new CommonException("plan or group not exists");
         }
         List<Long> groupIds = streamingPlans.stream().map(StreamingPlan::getGroupId).collect(Collectors.toList());

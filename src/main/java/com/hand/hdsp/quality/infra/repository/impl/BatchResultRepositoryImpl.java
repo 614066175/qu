@@ -1,6 +1,8 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
@@ -17,6 +19,7 @@ import com.hand.hdsp.quality.domain.repository.BatchResultRuleRepository;
 import com.hand.hdsp.quality.infra.constant.WarnLevel;
 import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
 import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.mybatis.domian.Condition;
@@ -58,6 +61,9 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
                                 .andEqualTo(BatchResult.FIELD_TENANT_ID, batchResultDTO.getTenantId(), true))
                         .build()
         ).get(0);
+        if (batchResultDTOs == null){
+            throw new CommonException("reslult not exists");
+        }
         batchResultDTOs.setPlanName(batchPlanRepository.selectByPrimaryKey(batchResultDTO.getPlanId()).getPlanName());
         List<BatchResultBaseDTO> batchResultBases = batchResultBaseRepository.selectDTOByCondition(
                 Condition.builder(BatchResultBase.class)
@@ -65,6 +71,9 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
                                 .andEqualTo(BatchResultBase.FIELD_RESULT_ID, batchResultDTOs.getResultId(), true))
                         .build()
         );
+        if (batchResultBases.isEmpty()){
+            throw new CommonException("plan has not reslult base");
+        }
         batchResultBases.stream().forEach( b ->{
             int red = batchResultRuleRepository.selectCount(BatchResultRule.builder().tableName(b.getTableName()).warningLevel(WarnLevel.RED).build());
             b.setRedWarnCounts(Long.valueOf(red));
