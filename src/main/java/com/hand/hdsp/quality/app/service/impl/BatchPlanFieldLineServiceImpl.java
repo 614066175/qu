@@ -39,6 +39,6 @@ public class BatchPlanFieldLineServiceImpl implements BatchPlanFieldLineService 
         for (BatchPlanFieldLine batchPlanFieldLine : batchPlanFieldLineList) {
             checkItemList.add(batchPlanFieldLine.getCheckItem());
         }
-        return batchPlanFieldLineRepository.list(checkItemList);
+        return batchPlanFieldLineRepository.list(checkItemList, batchPlanFieldDTO);
     }
 }

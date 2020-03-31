@@ -4,6 +4,7 @@ import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.PlanGroupDTO;
 import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.domain.repository.PlanGroupRepository;
+import com.hand.hdsp.quality.infra.constant.RuleConstant;
 import com.hand.hdsp.quality.infra.mapper.PlanGroupMapper;
 import com.hand.hdsp.quality.infra.vo.PlanGroupTreeVO;
 import org.springframework.stereotype.Component;
@@ -25,12 +26,11 @@ public class PlanGroupRepositoryImpl extends BaseRepositoryImpl<PlanGroup, PlanG
     }
 
     @Override
-    public List<PlanGroupTreeVO> treeBatch(PlanGroupTreeVO planGroupTreeVO) {
-        return planGroupMapper.treeBatch(planGroupTreeVO);
-    }
-
-    @Override
-    public List<PlanGroupTreeVO> treeStream(PlanGroupTreeVO planGroupTreeVO) {
+    public List<PlanGroupTreeVO> tree(PlanGroupTreeVO planGroupTreeVO) {
+        if (planGroupTreeVO.getGroupType() == null || planGroupTreeVO.getGroupType().equals(RuleConstant.RULE_MODEL_BATCH)){
+            planGroupTreeVO.setGroupType(RuleConstant.RULE_MODEL_BATCH);
+            return planGroupMapper.treeBatch(planGroupTreeVO);
+        }
         return planGroupMapper.treeStream(planGroupTreeVO);
     }
 }

@@ -14,7 +14,7 @@ import java.util.List;
 public interface PlanGroupMapper extends BaseMapper<PlanGroup> {
 
     /**
-     * 含批数据估方案列表
+     * 含批数据评估方案列表
      *
      * @param planGroupTreeVO 查询条件
      * @return
@@ -22,7 +22,7 @@ public interface PlanGroupMapper extends BaseMapper<PlanGroup> {
     List<PlanGroupTreeVO> treeBatch(PlanGroupTreeVO planGroupTreeVO);
 
     /**
-     * 含实时数据估方案列表
+     * 含实时数据评估方案列表
      *
      * @param planGroupTreeVO 查询条件
      * @return

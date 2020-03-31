@@ -23,6 +23,7 @@
     group_id id,
     concat('group',group_id) group_id,
     concat('group',parent_group_id) parent_group_id,
+    parent_group_id parent_id,
     group_code,
     group_name,
     'group' type
@@ -34,10 +35,17 @@
     plan_id id,
     concat('plan', plan_id) group_id,
     concat('group',group_id) parent_group_id,
+    group_id parent_id,
     plan_code group_code,
     plan_name group_name,
     'plan' type
-    from xqua_batch_plan
+    from xqua_batch_plan xbp
+    <where>
+        <if test="planName != null">
+            <bind name="planName" value="'%' + planName + '%'"/>
+            and xbp.plan_name like #{planName}
+        </if>
+    </where>
     </select>
 
     <select id="treeStream" resultType="com.hand.hdsp.quality.infra.vo.PlanGroupTreeVO">
@@ -45,6 +53,7 @@
     group_id id,
     concat('group',group_id) group_id,
     concat('group',parent_group_id) parent_group_id,
+    parent_group_id parent_id,
     group_code,
     group_name,
     'group' type
@@ -56,9 +65,16 @@
     plan_id id,
     concat('plan', plan_id) group_id,
     concat('group',group_id) parent_group_id,
+    group_id parent_id,
     plan_code group_code,
     plan_name group_name,
     'plan' type
     from xqua_streaming_plan
+    <where>
+        <if test="planName != null">
+            <bind name="planName" value="'%' + planName + '%'"/>
+            and xbp.plan_name like #{planName}
+        </if>
+    </where>
     </select>
 </mapper>

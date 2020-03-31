@@ -20,7 +20,7 @@ public interface ErrorCode {
     String PARENT_NULL = "error.parent_null";
 
     /**
-     * 分组下存在规则或其他分组，或方案下存在行信息，无法删除
+     * 分组下存在规则或其他分组，方案下存在行信息，或方案正在运行，无法删除
      */
     String CAN_NOT_DELETE ="error.can_not_delete";
 }

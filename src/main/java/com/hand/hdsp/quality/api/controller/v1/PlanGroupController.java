@@ -74,7 +74,7 @@ public class PlanGroupController extends BaseController {
         return Results.success(list);
     }
 
-    @ApiOperation(value = "评估方案分组所有列表（含批数据评估方案）")
+    @ApiOperation(value = "评估方案分组所有列表（含评估方案）")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -82,26 +82,11 @@ public class PlanGroupController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/tree-batch")
-    public ResponseEntity<?> treeBatch(@PathVariable(name = "organizationId") Long tenantId,
+    @GetMapping("/tree")
+    public ResponseEntity<?> tree(@PathVariable(name = "organizationId") Long tenantId,
                                   PlanGroupTreeVO planGroupTreeVO) {
         planGroupTreeVO.setTenantId(tenantId);
-        return Results.success(planGroupRepository.treeBatch(planGroupTreeVO));
-    }
-
-    @ApiOperation(value = "评估方案分组所有列表（含实时数据评估方案）")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/tree-stream")
-    public ResponseEntity<?> treeStream(@PathVariable(name = "organizationId") Long tenantId,
-                                  PlanGroupTreeVO planGroupTreeVO) {
-        planGroupTreeVO.setTenantId(tenantId);
-        return Results.success(planGroupRepository.treeStream(planGroupTreeVO));
+        return Results.success(planGroupRepository.tree(planGroupTreeVO));
     }
 
     @ApiOperation(value = "评估方案分组表明细")

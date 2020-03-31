@@ -2,7 +2,11 @@ package com.hand.hdsp.quality.app.service.impl;
 
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanBaseService;
+import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.domain.repository.*;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.constant.PlanConstant;
+import io.choerodon.core.exception.CommonException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,12 +25,17 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
     private final BatchPlanRelTableRepository batchPlanRelTableRepository;
     private final BatchPlanRelTableLineRepository batchPlanRelTableLineRepository;
     private final PlanWarningLevelRepository planWarningLevelRepository;
+    private final BatchResultRepository batchResultRepository;
 
     public BatchPlanBaseServiceImpl(BatchPlanBaseRepository batchPlanBaseRepository,
                                     BatchPlanTableRepository batchPlanTableRepository,
                                     BatchPlanTableLineRepository batchPlanTableLineRepository,
-                                    BatchPlanFieldRepository batchPlanFieldRepository, BatchPlanFieldLineRepository batchPlanFieldLineRepository,
-                                    BatchPlanRelTableRepository batchPlanRelTableRepository, BatchPlanRelTableLineRepository batchPlanRelTableLineRepository, PlanWarningLevelRepository planWarningLevelRepository) {
+                                    BatchPlanFieldRepository batchPlanFieldRepository,
+                                    BatchPlanFieldLineRepository batchPlanFieldLineRepository,
+                                    BatchPlanRelTableRepository batchPlanRelTableRepository,
+                                    BatchPlanRelTableLineRepository batchPlanRelTableLineRepository,
+                                    PlanWarningLevelRepository planWarningLevelRepository,
+                                    BatchResultRepository batchResultRepository) {
         this.batchPlanBaseRepository = batchPlanBaseRepository;
         this.batchPlanTableRepository = batchPlanTableRepository;
         this.batchPlanTableLineRepository = batchPlanTableLineRepository;
@@ -35,10 +44,16 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
         this.batchPlanRelTableRepository = batchPlanRelTableRepository;
         this.batchPlanRelTableLineRepository = batchPlanRelTableLineRepository;
         this.planWarningLevelRepository = planWarningLevelRepository;
+        this.batchResultRepository = batchResultRepository;
     }
 
     @Override
     public int delete(BatchPlanBaseDTO batchPlanBaseDTO) {
+        if (batchResultRepository.selectDTO(
+                BatchResult.FIELD_PLAN_ID, batchPlanBaseDTO.getPlanId()).get(0)
+                .getPlanStatus().equals(PlanConstant.PlanStatus.RUNNING)) {
+            throw new CommonException(ErrorCode.CAN_NOT_DELETE);
+        }
         if (batchPlanBaseDTO.getBatchPlanTableDTOList() != null) {
             for (BatchPlanTableDTO batchPlanTableDTO : batchPlanBaseDTO.getBatchPlanTableDTOList()) {
                 if (batchPlanTableDTO.getBatchPlanTableLineDTOList() != null) {
@@ -75,6 +90,12 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
                     for (BatchPlanRelTableLineDTO batchPlanRelTableLineDTO :
                             batchPlanRelTableDTO.getBatchPlanRelTableLineDTOList()) {
                         batchPlanRelTableLineRepository.deleteDTO(batchPlanRelTableLineDTO);
+                    }
+                }
+                if (batchPlanRelTableDTO.getPlanWarningLevelDTOList() != null) {
+                    for (PlanWarningLevelDTO planWarningLevelDTO :
+                            batchPlanRelTableDTO.getPlanWarningLevelDTOList()) {
+                        planWarningLevelRepository.deleteDTO(planWarningLevelDTO);
                     }
                 }
                 batchPlanRelTableRepository.deleteDTO(batchPlanRelTableDTO);

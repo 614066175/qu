@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.infra.mapper;
 
+import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
 import io.choerodon.mybatis.common.BaseMapper;
@@ -17,8 +18,9 @@ public interface BatchPlanFieldLineMapper extends BaseMapper<BatchPlanFieldLine>
     /**
      * 查询字段规则校验
      *
-     * @param checkItemList 查询条件
+     * @param checkItemList
+     * @param batchPlanFieldDTO
      * @return
      */
-    List<BatchPlanFieldLineDTO> list(@Param("checkItem") List<String> checkItemList);
+    List<BatchPlanFieldLineDTO> list(@Param("checkItemList") List<String> checkItemList, @Param("batchPlanFieldDTO") BatchPlanFieldDTO batchPlanFieldDTO);
 }

@@ -22,9 +22,15 @@ public class PlanGroupTreeVO {
 
     private String parentGroupId;
 
+    private Long parentId;
+
     private String groupCode;
 
     private String groupName;
+
+    private String planName;
+
+    private String groupType;
 
     private String type;
 

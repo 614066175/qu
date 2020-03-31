@@ -21,12 +21,16 @@
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.RuleLineDTO">
         select
         xrl.check_item
-        from xqua_rule_line xrl
+        from xqua_rule_line xrl,
+        xqua_batch_plan_field_line xbpfl
         <where>
             check_item not in
-            <foreach item="checkItem" collection="checkItem" separator="," open="(" close=")" index="">
-                #{checkItem, jdbcType=VARCHAR}
+            <foreach item="checkItemList" collection="checkItemList" separator="," open="(" close=")" index="">
+                #{checkItemList, jdbcType=VARCHAR}
             </foreach>
+            <if test="batchPlanFieldDTO.planFieldId != null">
+                and xbpfl.plan_field_id = #{batchPlanFieldDTO.planFieldId}
+            </if>
         </where>
     </select>
 </mapper>

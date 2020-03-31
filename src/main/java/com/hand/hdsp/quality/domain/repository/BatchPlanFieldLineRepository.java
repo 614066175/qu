@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.domain.repository;
 
 import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
+import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
 
@@ -18,7 +19,8 @@ public interface BatchPlanFieldLineRepository extends BaseRepository<BatchPlanFi
      * 可选字段级规则列表
      *
      * @param checkItemList
+     * @param batchPlanFieldDTO
      * @return
      */
-    List<BatchPlanFieldLineDTO> list(List<String> checkItemList);
+    List<BatchPlanFieldLineDTO> list(List<String> checkItemList, BatchPlanFieldDTO batchPlanFieldDTO);
 }
