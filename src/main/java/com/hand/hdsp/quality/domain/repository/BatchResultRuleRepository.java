@@ -5,6 +5,8 @@ import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultRule;
 
+import java.util.List;
+
 /**
  * <p>批数据方案结果表-规则信息资源库</p>
  *
@@ -12,4 +14,11 @@ import com.hand.hdsp.quality.domain.entity.BatchResultRule;
  */
 public interface BatchResultRuleRepository extends BaseRepository<BatchResultRule, BatchResultRuleDTO>, ProxySelf<BatchResultRuleRepository> {
 
+    /**
+     * 根据结果id查询出所有数据
+     *
+     * @param resultId
+     * @return
+     */
+    List<BatchResultRuleDTO> selectByResultId(Long resultId);
 }

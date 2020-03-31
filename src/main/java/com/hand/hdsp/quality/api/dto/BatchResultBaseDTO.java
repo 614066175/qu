@@ -31,6 +31,10 @@ public class BatchResultBaseDTO extends AuditDomain {
     @NotNull
     private Long resultId;
 
+    @ApiModelProperty(value = "批数据方案-基础配置表XQUA_BATCH_PLAN_BASE.PLAN_BASE_ID")
+    @NotNull
+    private Long planBaseId;
+
     @ApiModelProperty(value = "校验表名称")
     @NotBlank
     @Size(max = 50)
@@ -45,6 +49,9 @@ public class BatchResultBaseDTO extends AuditDomain {
 
     @ApiModelProperty(value = "数据量")
     private Long dataCount;
+
+    @ApiModelProperty(value = "表大小")
+    private Long tableSize;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull

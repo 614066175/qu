@@ -4,6 +4,7 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * <p>批数据方案结果表-规则信息数据对象</p>
@@ -49,4 +50,8 @@ public class BatchResultRuleDO extends AuditDomain {
 
     private Long tenantId;
 
+    /**
+     * 计算日期
+     */
+    private Date measureDate;
 }
