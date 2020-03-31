@@ -7,7 +7,6 @@ import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
-import com.hand.hdsp.quality.infra.converter.BatchPlanBaseConverter;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import io.choerodon.core.exception.CommonException;
 import org.hzero.core.util.ResponseUtils;
@@ -32,7 +31,6 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
     private final PlanWarningLevelRepository planWarningLevelRepository;
     private final BatchResultRepository batchResultRepository;
     private final DatasourceFeign datasourceFeign;
-    private final BatchPlanBaseConverter batchPlanBaseConverter;
 
     public BatchPlanBaseServiceImpl(BatchPlanBaseRepository batchPlanBaseRepository,
                                     BatchPlanTableRepository batchPlanTableRepository,
@@ -43,8 +41,7 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
                                     BatchPlanRelTableLineRepository batchPlanRelTableLineRepository,
                                     PlanWarningLevelRepository planWarningLevelRepository,
                                     BatchResultRepository batchResultRepository,
-                                    DatasourceFeign datasourceFeign,
-                                    BatchPlanBaseConverter batchPlanBaseConverter) {
+                                    DatasourceFeign datasourceFeign) {
         this.batchPlanBaseRepository = batchPlanBaseRepository;
         this.batchPlanTableRepository = batchPlanTableRepository;
         this.batchPlanTableLineRepository = batchPlanTableLineRepository;
@@ -55,7 +52,6 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
         this.planWarningLevelRepository = planWarningLevelRepository;
         this.batchResultRepository = batchResultRepository;
         this.datasourceFeign = datasourceFeign;
-        this.batchPlanBaseConverter = batchPlanBaseConverter;
     }
 
     @Override
