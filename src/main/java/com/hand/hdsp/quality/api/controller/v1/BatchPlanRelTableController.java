@@ -55,6 +55,21 @@ public class BatchPlanRelTableController extends BaseController {
         return Results.success(list);
     }
 
+    @ApiOperation(value = "批数据方案-表间规则表列表（不分页）")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/list")
+    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  BatchPlanRelTable batchPlanRelTable) {
+        batchPlanRelTable.setTenantId(tenantId);
+        return Results.success(batchPlanRelTableRepository.select(batchPlanRelTable));
+    }
+
     @ApiOperation(value = "批数据方案-表间规则表明细")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
@@ -70,7 +85,7 @@ public class BatchPlanRelTableController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{planRelTableId}")
     public ResponseEntity<?> detail(@PathVariable Long planRelTableId) {
-        BatchPlanRelTableDTO batchPlanRelTableDTO = batchPlanRelTableRepository.selectDTOByPrimaryKeyAndTenant(planRelTableId);
+        BatchPlanRelTableDTO batchPlanRelTableDTO = batchPlanRelTableService.detail(planRelTableId);
         return Results.success(batchPlanRelTableDTO);
     }
 
@@ -86,7 +101,7 @@ public class BatchPlanRelTableController extends BaseController {
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanRelTableDTO batchPlanRelTableDTO) {
         batchPlanRelTableDTO.setTenantId(tenantId);
         this.validObject(batchPlanRelTableDTO);
-        batchPlanRelTableRepository.insertDTOSelective(batchPlanRelTableDTO);
+        batchPlanRelTableService.insert(batchPlanRelTableDTO);
         return Results.success(batchPlanRelTableDTO);
     }
 
@@ -100,7 +115,8 @@ public class BatchPlanRelTableController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanRelTableDTO batchPlanRelTableDTO) {
-        batchPlanRelTableRepository.updateDTOWhereTenant(batchPlanRelTableDTO, tenantId);
+        batchPlanRelTableDTO.setTenantId(tenantId);
+        batchPlanRelTableService.update(batchPlanRelTableDTO);
         return Results.success(batchPlanRelTableDTO);
     }
 

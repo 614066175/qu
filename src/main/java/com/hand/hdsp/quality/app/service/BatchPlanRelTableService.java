@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanRelTableDTO;
+import com.hand.hdsp.quality.api.dto.BatchPlanTableDTO;
 
 /**
  * <p>批数据方案-表间规则表应用服务</p>
@@ -16,4 +17,26 @@ public interface BatchPlanRelTableService {
      * @return 删除结果
      */
     int delete(BatchPlanRelTableDTO batchPlanRelTableDTO);
+
+    /**
+     * 表间规则明细
+     *
+     * @param planRelTableId
+     * @return
+     */
+    BatchPlanRelTableDTO detail(Long planRelTableId);
+
+    /**
+     * 创建
+     *
+     * @param batchPlanRelTableDTO
+     */
+    void insert(BatchPlanRelTableDTO batchPlanRelTableDTO);
+
+    /**
+     * 更新
+     *
+     * @param batchPlanRelTableDTO 更新规则信息
+     */
+    void update(BatchPlanRelTableDTO batchPlanRelTableDTO);
 }

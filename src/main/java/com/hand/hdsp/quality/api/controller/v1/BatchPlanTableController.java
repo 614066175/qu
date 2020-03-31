@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanTableDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanTableService;
+import com.hand.hdsp.quality.domain.entity.BatchPlanTable;
 import com.hand.hdsp.quality.domain.repository.BatchPlanTableRepository;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanTableDO;
 import io.choerodon.core.iam.ResourceLevel;
@@ -42,6 +43,21 @@ public class BatchPlanTableController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
+    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  BatchPlanTable batchPlanTable) {
+        batchPlanTable.setTenantId(tenantId);
+        return Results.success(batchPlanTableRepository.select(batchPlanTable));
+    }
+
+    @ApiOperation(value = "批数据方案-表级规则表列表（含校验项）")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/list")
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
                                   BatchPlanTableDO batchPlanTableDO) {
         batchPlanTableDO.setTenantId(tenantId);

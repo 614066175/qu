@@ -10,9 +10,11 @@ import com.hand.hdsp.quality.domain.repository.BatchPlanTableLineRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanTableRepository;
 import com.hand.hdsp.quality.domain.repository.PlanWarningLevelRepository;
 import com.hand.hdsp.quality.infra.constant.TableNameConstant;
+import com.hand.hdsp.quality.infra.converter.PlanWarningLevelConverter;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanTableDO;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,13 +28,15 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
     private final BatchPlanTableRepository batchPlanTableRepository;
     private final BatchPlanTableLineRepository batchPlanTableLineRepository;
     private final PlanWarningLevelRepository planWarningLevelRepository;
+    private final PlanWarningLevelConverter planWarningLevelConverter;
 
     public BatchPlanTableServiceImpl(BatchPlanTableRepository batchPlanTableRepository,
                                      BatchPlanTableLineRepository batchPlanTableLineRepository,
-                                     PlanWarningLevelRepository planWarningLevelRepository) {
+                                     PlanWarningLevelRepository planWarningLevelRepository, PlanWarningLevelConverter planWarningLevelConverter) {
         this.batchPlanTableRepository = batchPlanTableRepository;
         this.batchPlanTableLineRepository = batchPlanTableLineRepository;
         this.planWarningLevelRepository = planWarningLevelRepository;
+        this.planWarningLevelConverter = planWarningLevelConverter;
     }
 
     @Override
@@ -119,9 +123,15 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
         List<BatchPlanTableLineDTO> batchPlanTableLineDTOList =
                 batchPlanTableLineRepository.selectDTO(BatchPlanTableLine.FIELD_PLAN_TABLE_ID, planTableId);
         for (BatchPlanTableLineDTO batchPlanTableLineDTO : batchPlanTableLineDTOList) {
-            batchPlanTableLineDTO.setPlanWarningLevelDTOList(
-                    planWarningLevelRepository.selectDTO(
-                            PlanWarningLevel.FIELD_SOURCE_ID, batchPlanTableLineDTO.getPlanTableLineId()));
+            List<PlanWarningLevel> planWarningLevelList = planWarningLevelRepository.select(
+                    PlanWarningLevel.builder()
+                            .sourceId(batchPlanTableLineDTO.getPlanTableLineId())
+                            .sourceType(TableNameConstant.XQUA_BATCH_PLAN_TABLE_LINE).build());
+            List<PlanWarningLevelDTO> planWarningLevelDTOList = new ArrayList<>();
+            for (PlanWarningLevel planWarningLevel : planWarningLevelList) {
+                planWarningLevelDTOList.add(planWarningLevelConverter.entityToDto(planWarningLevel));
+            }
+            batchPlanTableLineDTO.setPlanWarningLevelDTOList(planWarningLevelDTOList);
         }
         batchPlanTableDTO.setBatchPlanTableLineDTOList(batchPlanTableLineDTOList);
         return batchPlanTableDTO;
