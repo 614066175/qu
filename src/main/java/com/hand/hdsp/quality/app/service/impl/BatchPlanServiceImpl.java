@@ -262,7 +262,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         });
         if (!result.isEmpty()) {
             batchResultBase.setDataCount(result.get(0).get("table_rows"));
-            batchResultBase.setDataCount(result.get(0).get("data_length"));
+            batchResultBase.setTableSize(result.get(0).get("data_length"));
         } else {
             throw new CommonException("查询表行数和大小失败，请联系系统管理员！");
         }

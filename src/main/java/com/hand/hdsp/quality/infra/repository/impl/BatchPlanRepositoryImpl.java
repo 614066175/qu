@@ -34,7 +34,7 @@ public class BatchPlanRepositoryImpl extends BaseRepositoryImpl<BatchPlan, Batch
                         .where(Sqls.custom().andLike(BatchPlan.FIELD_PLAN_NAME, batchPlanDTO.getPlanName(), true))
                         .build()
         );
-        if (batchPlans.isEmpty() || batchPlans.size() == 0){
+        if (batchPlans.isEmpty()){
             throw new CommonException("plan or group not exists");
         }
         List<Long> groupIds = batchPlans.stream().map(BatchPlan::getGroupId).collect(Collectors.toList());

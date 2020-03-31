@@ -17,6 +17,7 @@ import com.hand.hdsp.quality.domain.repository.StreamingResultRuleRepository;
 import com.hand.hdsp.quality.infra.constant.WarnLevel;
 import com.hand.hdsp.quality.infra.mapper.StreamingResultMapper;
 import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.mybatis.domian.Condition;
@@ -57,6 +58,9 @@ public class StreamingResultRepositoryImpl extends BaseRepositoryImpl<StreamingR
                                 .andEqualTo(StreamingResult.FIELD_RESULT_ID,streamingResultDTO.getResultId(),true)
                                 .andEqualTo(StreamingResult.FIELD_TENANT_ID, streamingResultDTO.getTableId(), true))
                         .build()).get(0);
+        if (streamingResultDTOs == null){
+            throw new CommonException("reslult not exists");
+        }
         streamingResultDTOs.setPlanName(streamingPlanRepository.selectByPrimaryKey(streamingResultDTO.getPlanId()).getPlanName());
         List<StreamingResultBaseDTO> streamingResultBases = streamingResultBaseRepository.selectDTOByCondition(
                 Condition.builder(StreamingResultBase.class)
@@ -64,6 +68,9 @@ public class StreamingResultRepositoryImpl extends BaseRepositoryImpl<StreamingR
                                 .andEqualTo(StreamingResultBase.FIELD_RESULT_ID, streamingResultDTOs.getResultId(), true))
                         .build()
         );
+        if (streamingResultBases.isEmpty()){
+            throw new CommonException("plan has not reslult base");
+        }
         streamingResultBases.stream().forEach( s ->{
             int red = streamingResultRuleRepository.selectCount(StreamingResultRule.builder().topicInfo(s.getTopicInfo()).warningLevel(WarnLevel.RED).build());
             s.setRedWarnCounts(Long.valueOf(red));
