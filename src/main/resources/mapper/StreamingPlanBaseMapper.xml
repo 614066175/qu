@@ -30,10 +30,28 @@
         from xqua_streaming_plan_rule xspr
         where
         xspr.plan_base_id = xspr.plan_base_id
-        ) as cutoff_num
+        ) as cutoff_num,
+        xspb.plan_base_id,
+        xspb.plan_id,
+        xspb.tenant_id
         from
         xqua_streaming_plan_base xspb
         where
         xspb.tenant_id = #{tenantId}
+        <if test="planId != null">
+            and xspb.plan_id = #{planId}
+        </if>
+        <if test="connectorInfo != null">
+            <bind name="connectorInfo" value="'%' + connectorInfo + '%'"/>
+            and xspb.connector_info like #{connectorInfo}
+        </if>
+        <if test="topicInfo != null">
+            <bind name="topicInfo" value="'%' + topicInfo + '%'"/>
+            and xspb.topic_info like #{topicInfo}
+        </if>
+        <if test="planDesc != null">
+            <bind name="planDesc" value="'%' + planDesc + '%'"/>
+            and xspb.plan_desc like #{planDesc}
+        </if>
     </select>
 </mapper>
