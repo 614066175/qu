@@ -1,8 +1,6 @@
 package com.hand.hdsp.quality.infra.mapper;
 
-import java.util.List;
 
-import com.hand.hdsp.quality.api.dto.BatchPlanDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlan;
 import io.choerodon.mybatis.common.BaseMapper;
 
@@ -13,19 +11,4 @@ import io.choerodon.mybatis.common.BaseMapper;
  */
 public interface BatchPlanMapper extends BaseMapper<BatchPlan> {
 
-    /**
-     * 根据方案名查到所在分组
-     *
-     * @param batchPlanDTO
-     * @return BatchPlanDTO
-     */
-    List<BatchPlanDTO> getGroupByPlanName(BatchPlanDTO batchPlanDTO);
-
-    /**
-     * 根据方案名查到所在分组和执行记录
-     *
-     * @param batchPlanDTO
-     * @return BatchPlanDTO
-     */
-    List<BatchPlanDTO> getHistoryByPlanName(BatchPlanDTO batchPlanDTO);
 }

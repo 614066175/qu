@@ -1,13 +1,18 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.StreamingPlanDTO;
-import com.hand.hdsp.quality.api.dto.StreamingResultDTO;
+import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.domain.entity.StreamingPlan;
+import com.hand.hdsp.quality.domain.repository.PlanGroupRepository;
 import com.hand.hdsp.quality.domain.repository.StreamingPlanRepository;
 import com.hand.hdsp.quality.infra.mapper.StreamingPlanMapper;
+import io.choerodon.core.exception.CommonException;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,18 +24,43 @@ import org.springframework.stereotype.Component;
 public class StreamingPlanRepositoryImpl extends BaseRepositoryImpl<StreamingPlan, StreamingPlanDTO> implements StreamingPlanRepository {
 
     private final StreamingPlanMapper streamingPlanMapper;
+    private final PlanGroupRepository planGroupRepository;
 
-    public StreamingPlanRepositoryImpl(StreamingPlanMapper streamingPlanMapper) {
+    public StreamingPlanRepositoryImpl(StreamingPlanMapper streamingPlanMapper, PlanGroupRepository planGroupRepository) {
         this.streamingPlanMapper = streamingPlanMapper;
+        this.planGroupRepository = planGroupRepository;
     }
 
     @Override
-    public List<StreamingPlanDTO> getGroupByPlanName(StreamingPlanDTO streamingPlanDTO) {
-        return streamingPlanMapper.getGroupByPlanName(streamingPlanDTO);
+    public List<PlanGroup> getGroupByPlanName(StreamingPlanDTO streamingPlanDTO) {
+        List<StreamingPlan> streamingPlans = this.selectByCondition(
+                Condition.builder(StreamingPlan.class)
+                        .where(Sqls.custom().andLike(StreamingPlan.FIELD_PLAN_NAME, streamingPlanDTO.getPlanName(), true))
+                        .build()
+        );
+        if (streamingPlans.isEmpty() || streamingPlans.size() == 0){
+            throw new CommonException("plan or group not exists");
+        }
+        List<Long> groupIds = streamingPlans.stream().map(StreamingPlan::getGroupId).collect(Collectors.toList());
+        List<PlanGroup> planGroups = planGroupRepository.selectByCondition(
+                Condition.builder(PlanGroup.class)
+                        .where(Sqls.custom().andIn(PlanGroup.FIELD_GROUP_ID, groupIds))
+                        .build()
+        );
+        planGroups.stream().forEach(p ->{
+            getGroup(p.getParentGroupId(),planGroups);
+        });
+        planGroups.add(PlanGroup.builder().groupId(0L).groupName("所有分组").build());
+        return planGroups;
     }
 
-    @Override
-    public List<StreamingPlanDTO> getHistoryByPlanName(StreamingPlanDTO streamingPlanDTO) {
-        return streamingPlanMapper.getHistoryByPlanName(streamingPlanDTO);
+    private void getGroup(Long parentId,List<PlanGroup> planGroups){
+        if (parentId == 0){
+            return;
+        }
+        PlanGroup planGroup1 = planGroupRepository.selectByPrimaryKey(parentId);
+        planGroups.add(planGroup1);
+        getGroup(planGroup1.getParentGroupId(),planGroups);
     }
+
 }

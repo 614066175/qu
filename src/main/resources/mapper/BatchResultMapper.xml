@@ -30,11 +30,17 @@
     </sql>
 
     <select id="listByGroup" resultType="com.hand.hdsp.quality.api.dto.BatchResultDTO">
+        select * from
+        (
         select
-        <include refid="Plan_And_Result">
-            <property name="xbp" value="xbp"/>
-            <property name="xbr" value="xbr"/>
-        </include>
+        xbp.plan_id,
+        xbp.plan_name,
+        xbr.result_id,
+        xbr.plan_status,
+        xbr.mark,
+        xbr.start_date,
+        xbr.end_date,
+        xbr.next_count_date
         from xqua_batch_result xbr
         LEFT JOIN xqua_batch_plan xbp
         on xbr.plan_id=xbp.plan_id
@@ -55,6 +61,38 @@
                 and xbr.plan_status = #{planStatus}
             </if>
         </where>
+        ) a
+        where not exists (select 1 from (
+        select
+        xbp.plan_id,
+        xbp.plan_name,
+        xbr.result_id,
+        xbr.plan_status,
+        xbr.mark,
+        xbr.start_date,
+        xbr.end_date,
+        xbr.next_count_date
+        from xqua_batch_result xbr
+        LEFT JOIN xqua_batch_plan xbp
+        on xbr.plan_id=xbp.plan_id
+        LEFT JOIN xqua_plan_group xpg
+        on xbp.group_id=xpg.group_id
+        <where>
+            <if test="groupId != null and groupId != 0">
+                xpg.group_id = #{groupId}
+            </if>
+            <if test="tenantId != null">
+                and xbr.tenant_id = #{tenantId}
+            </if>
+            <if test="planName != null">
+                <bind name="planName" value="'%' + planName + '%'"/>
+                and xbp.plan_name like #{planName}
+            </if>
+            <if test="planStatus != null">
+                and xbr.plan_status = #{planStatus}
+            </if>
+        </where>
+        ) b where a.start_date &lt; b.start_date and a.plan_id=b.plan_id)
     </select>
 
     <select id="listHistory" resultType="com.hand.hdsp.quality.api.dto.BatchResultDTO">

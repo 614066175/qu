@@ -6,6 +6,7 @@ import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.BatchPlanDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlan;
+import com.hand.hdsp.quality.domain.entity.PlanGroup;
 
 /**
  * <p>批数据评估方案表资源库</p>
@@ -20,13 +21,6 @@ public interface BatchPlanRepository extends BaseRepository<BatchPlan, BatchPlan
      * @param batchPlanDTO
      * @return BatchPlanDTO
      */
-    List<BatchPlanDTO> listByGroup(BatchPlanDTO batchPlanDTO);
+    List<PlanGroup> listByGroup(BatchPlanDTO batchPlanDTO);
 
-    /**
-     * 根据方案名查到所在分组及执行记录
-     *
-     * @param batchPlanDTO
-     * @return BatchPlanDTO
-     */
-    List<BatchPlanDTO> listHisByName(BatchPlanDTO batchPlanDTO);
 }

@@ -6,6 +6,7 @@ import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.StreamingPlanDTO;
 import com.hand.hdsp.quality.api.dto.StreamingResultDTO;
+import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.domain.entity.StreamingPlan;
 
 /**
@@ -21,13 +22,6 @@ public interface StreamingPlanRepository extends BaseRepository<StreamingPlan, S
      * @param streamingPlanDTO
      * @return StreamingPlanDTO
      */
-    List<StreamingPlanDTO> getGroupByPlanName(StreamingPlanDTO streamingPlanDTO);
+    List<PlanGroup> getGroupByPlanName(StreamingPlanDTO streamingPlanDTO);
 
-    /**
-     * 根据方案名查到所在分组及执行历史
-     *
-     * @param streamingPlanDTO
-     * @return StreamingPlanDTO
-     */
-    List<StreamingPlanDTO> getHistoryByPlanName(StreamingPlanDTO streamingPlanDTO);
 }

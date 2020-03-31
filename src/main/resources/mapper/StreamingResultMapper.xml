@@ -30,16 +30,22 @@
     </sql>
 
     <select id="listByGroup" resultType="com.hand.hdsp.quality.api.dto.StreamingResultDTO">
+        select * from
+        (
         select
-        <include refid="StreamingPlan_And_Result">
-            <property name="xsp" value="xsp"/>
-            <property name="xsr" value="xsr"/>
-        </include>
-        from xqua_plan_group xpg
+        xsp.plan_id,
+        xsp.plan_name,
+        xsr.result_id,
+        xsr.plan_status,
+        xsr.mark,
+        xsr.start_date,
+        xsr.end_date,
+        xsr.next_count_date
+        from xqua_streaming_result xsr
         LEFT JOIN xqua_streaming_plan xsp
-        on xpg.group_id=xsp.group_id
-        LEFT JOIN xqua_streaming_result xsr
-        on xsp.plan_id=xsr.plan_id
+        on xsr.plan_id=xsp.plan_id
+        LEFT JOIN xqua_plan_group xpg
+        on xsp.group_id=xpg.group_id
         <where>
             <if test="groupId != null and groupId != 0">
                 xpg.group_id = #{groupId}
@@ -55,6 +61,38 @@
                 and xsr.plan_status = #{planStatus}
             </if>
         </where>
+        ) a
+        where not exists (select 1 from (
+        select
+        xsp.plan_id,
+        xsp.plan_name,
+        xsr.result_id,
+        xsr.plan_status,
+        xsr.mark,
+        xsr.start_date,
+        xsr.end_date,
+        xsr.next_count_date
+        from xqua_streaming_result xsr
+        LEFT JOIN xqua_streaming_plan xsp
+        on xsr.plan_id=xsp.plan_id
+        LEFT JOIN xqua_plan_group xpg
+        on xsp.group_id=xpg.group_id
+        <where>
+            <if test="groupId != null and groupId != 0">
+                xpg.group_id = #{groupId}
+            </if>
+            <if test="tenantId != null">
+                and xsr.tenant_id = #{tenantId}
+            </if>
+            <if test="planName != null">
+                <bind name="planName" value="'%' + planName + '%'"/>
+                and xsp.plan_name like #{planName}
+            </if>
+            <if test="planStatus != null">
+                and xsr.plan_status = #{planStatus}
+            </if>
+        </where>
+        ) b where a.start_date &lt; b.start_date and a.plan_id=b.plan_id)
     </select>
 
     <select id="listHistory" resultType="com.hand.hdsp.quality.api.dto.StreamingResultDTO">

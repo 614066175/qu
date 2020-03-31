@@ -85,20 +85,6 @@ public class StreamingPlanController extends BaseController {
         return Results.success(streamingPlanRepository.getGroupByPlanName(streamingPlanDTO));
     }
 
-    @ApiOperation(value = "根据方案名找到对应分组及执行记录")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/history")
-    public ResponseEntity<?> history(@PathVariable(name = "organizationId") Long tenantId,
-                                     StreamingPlanDTO streamingPlanDTO){
-        streamingPlanDTO.setTenantId(tenantId);
-        return Results.success(streamingPlanRepository.getHistoryByPlanName(streamingPlanDTO));
-    }
 
     @ApiOperation(value = "实时数据评估方案表明细")
     @ApiImplicitParams({@ApiImplicitParam(
