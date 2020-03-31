@@ -1,6 +1,6 @@
 package com.hand.hdsp.quality.infra.mapper;
 
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
+import com.hand.hdsp.quality.api.dto.RuleLineDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
@@ -21,5 +21,5 @@ public interface BatchPlanFieldLineMapper extends BaseMapper<BatchPlanFieldLine>
      * @param ruleModel
      * @return
      */
-    List<BatchPlanFieldLineDTO> list(@Param("checkItemList") List<String> checkItemList, @Param("ruleModel") String ruleModel);
+    List<RuleLineDTO> list(@Param("checkItemList") List<String> checkItemList, @Param("ruleModel") String ruleModel);
 }

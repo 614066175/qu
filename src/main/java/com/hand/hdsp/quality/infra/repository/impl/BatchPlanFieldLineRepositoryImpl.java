@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.infra.repository.impl;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
+import com.hand.hdsp.quality.api.dto.RuleLineDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldLineRepository;
 import com.hand.hdsp.quality.infra.mapper.BatchPlanFieldLineMapper;
@@ -24,7 +25,7 @@ public class BatchPlanFieldLineRepositoryImpl extends BaseRepositoryImpl<BatchPl
     }
 
     @Override
-    public List<BatchPlanFieldLineDTO> list(List<String> checkItemList, String ruleModel) {
+    public List<RuleLineDTO> list(List<String> checkItemList, String ruleModel) {
         return batchPlanFieldLineMapper.list(checkItemList, ruleModel);
     }
 }
