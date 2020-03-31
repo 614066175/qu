@@ -1,8 +1,8 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
+import com.hand.hdsp.quality.api.dto.RuleLineDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanFieldLineService;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldLineRepository;
@@ -33,7 +33,7 @@ public class BatchPlanFieldLineServiceImpl implements BatchPlanFieldLineService 
     }
 
     @Override
-    public List<BatchPlanFieldLineDTO> list(BatchPlanFieldDTO batchPlanFieldDTO, RuleDTO ruleDTO) {
+    public List<RuleLineDTO> list(BatchPlanFieldDTO batchPlanFieldDTO, RuleDTO ruleDTO) {
         List<BatchPlanFieldLine> batchPlanFieldLineList =
                 batchPlanFieldLineRepository.select(
                         BatchPlanFieldLine.builder().planFieldId(batchPlanFieldDTO.getPlanFieldId()).build());

@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.domain.repository;
 import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
+import com.hand.hdsp.quality.api.dto.RuleLineDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
 
 import java.util.List;
@@ -21,5 +22,5 @@ public interface BatchPlanFieldLineRepository extends BaseRepository<BatchPlanFi
      * @param ruleModel
      * @return
      */
-    List<BatchPlanFieldLineDTO> list(List<String> checkItemList, String ruleModel);
+    List<RuleLineDTO> list(List<String> checkItemList, String ruleModel);
 }
