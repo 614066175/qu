@@ -16,10 +16,18 @@ import java.util.List;
 public interface PlanGroupRepository extends BaseRepository<PlanGroup, PlanGroupDTO>, ProxySelf<PlanGroupRepository> {
 
     /**
-     * 含评估方案列表
+     * 含批数据估方案列表
      *
      * @param planGroupTreeVO
      * @return
      */
-    List<PlanGroupTreeVO> tree(PlanGroupTreeVO planGroupTreeVO);
+    List<PlanGroupTreeVO> treeBatch(PlanGroupTreeVO planGroupTreeVO);
+
+    /**
+     * 含实时数据估方案列表
+     *
+     * @param planGroupTreeVO
+     * @return
+     */
+    List<PlanGroupTreeVO> treeStream(PlanGroupTreeVO planGroupTreeVO);
 }

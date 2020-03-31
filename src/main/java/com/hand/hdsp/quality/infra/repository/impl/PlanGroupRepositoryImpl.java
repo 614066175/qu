@@ -25,7 +25,12 @@ public class PlanGroupRepositoryImpl extends BaseRepositoryImpl<PlanGroup, PlanG
     }
 
     @Override
-    public List<PlanGroupTreeVO> tree(PlanGroupTreeVO planGroupTreeVO) {
-        return planGroupMapper.tree(planGroupTreeVO);
+    public List<PlanGroupTreeVO> treeBatch(PlanGroupTreeVO planGroupTreeVO) {
+        return planGroupMapper.treeBatch(planGroupTreeVO);
+    }
+
+    @Override
+    public List<PlanGroupTreeVO> treeStream(PlanGroupTreeVO planGroupTreeVO) {
+        return planGroupMapper.treeStream(planGroupTreeVO);
     }
 }

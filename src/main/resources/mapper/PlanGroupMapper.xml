@@ -18,7 +18,7 @@
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
 
-    <select id="tree" resultType="com.hand.hdsp.quality.infra.vo.PlanGroupTreeVO">
+    <select id="treeBatch" resultType="com.hand.hdsp.quality.infra.vo.PlanGroupTreeVO">
     select
     group_id id,
     concat('group',group_id) group_id,
@@ -28,6 +28,7 @@
     'group' type
     from xqua_plan_group
     where group_type = 'BATCH'
+    and group_id != 0
     union
     select
     plan_id id,
@@ -37,5 +38,27 @@
     plan_name group_name,
     'plan' type
     from xqua_batch_plan
+    </select>
+
+    <select id="treeStream" resultType="com.hand.hdsp.quality.infra.vo.PlanGroupTreeVO">
+    select
+    group_id id,
+    concat('group',group_id) group_id,
+    concat('group',parent_group_id) parent_group_id,
+    group_code,
+    group_name,
+    'group' type
+    from xqua_plan_group
+    where group_type = 'STREAMING'
+    and group_id != 0
+    union
+    select
+    plan_id id,
+    concat('plan', plan_id) group_id,
+    concat('group',group_id) parent_group_id,
+    plan_code group_code,
+    plan_name group_name,
+    'plan' type
+    from xqua_streaming_plan
     </select>
 </mapper>
