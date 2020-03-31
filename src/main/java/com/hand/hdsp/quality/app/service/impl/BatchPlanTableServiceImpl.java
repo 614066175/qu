@@ -6,10 +6,10 @@ import com.hand.hdsp.quality.api.dto.PlanWarningLevelDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanTableService;
 import com.hand.hdsp.quality.domain.entity.BatchPlanTableLine;
 import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
-import com.hand.hdsp.quality.domain.repository.BatchPlanBaseRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanTableLineRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanTableRepository;
 import com.hand.hdsp.quality.domain.repository.PlanWarningLevelRepository;
+import com.hand.hdsp.quality.infra.constant.TableNameConstant;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanTableDO;
 import org.springframework.stereotype.Service;
 
@@ -26,13 +26,13 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
     private final BatchPlanTableRepository batchPlanTableRepository;
     private final BatchPlanTableLineRepository batchPlanTableLineRepository;
     private final PlanWarningLevelRepository planWarningLevelRepository;
-    private final BatchPlanBaseRepository batchPlanBaseRepository;
 
-    public BatchPlanTableServiceImpl(BatchPlanTableRepository batchPlanTableRepository, BatchPlanTableLineRepository batchPlanTableLineRepository, PlanWarningLevelRepository planWarningLevelRepository, BatchPlanBaseRepository batchPlanBaseRepository) {
+    public BatchPlanTableServiceImpl(BatchPlanTableRepository batchPlanTableRepository,
+                                     BatchPlanTableLineRepository batchPlanTableLineRepository,
+                                     PlanWarningLevelRepository planWarningLevelRepository) {
         this.batchPlanTableRepository = batchPlanTableRepository;
         this.batchPlanTableLineRepository = batchPlanTableLineRepository;
         this.planWarningLevelRepository = planWarningLevelRepository;
-        this.batchPlanBaseRepository = batchPlanBaseRepository;
     }
 
     @Override
@@ -64,10 +64,7 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
                 if (batchPlanTableLineDTO.getPlanWarningLevelDTOList() != null) {
                     for (PlanWarningLevelDTO planWarningLevelDTO : batchPlanTableLineDTO.getPlanWarningLevelDTOList()) {
                         planWarningLevelDTO.setSourceId(batchPlanTableLineDTO.getPlanTableLineId());
-                        planWarningLevelDTO.setSourceType(
-                                batchPlanBaseRepository.selectByPrimaryKey(
-                                        batchPlanTableRepository.selectByPrimaryKey(
-                                                batchPlanTableDTO.getTenantId()).getPlanBaseId()).getTableName());
+                        planWarningLevelDTO.setSourceType(TableNameConstant.XQUA_BATCH_PLAN_TABLE_LINE);
                         planWarningLevelDTO.setTenantId(tenantId);
                         planWarningLevelRepository.insertDTOSelective(planWarningLevelDTO);
                     }
@@ -96,10 +93,7 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
                 if (batchPlanTableLineDTO.getPlanWarningLevelDTOList() != null) {
                     for (PlanWarningLevelDTO planWarningLevelDTO : batchPlanTableLineDTO.getPlanWarningLevelDTOList()) {
                         planWarningLevelDTO.setSourceId(batchPlanTableLineDTO.getPlanTableLineId());
-                        planWarningLevelDTO.setSourceType(
-                                batchPlanBaseRepository.selectByPrimaryKey(
-                                        batchPlanTableRepository.selectByPrimaryKey(
-                                                batchPlanTableDTO.getTenantId()).getPlanBaseId()).getTableName());
+                        planWarningLevelDTO.setSourceType(TableNameConstant.XQUA_BATCH_PLAN_TABLE_LINE);
                         planWarningLevelDTO.setTenantId(tenantId);
                         if (planWarningLevelRepository.selectOne(PlanWarningLevel.builder()
                                 .sourceId(planWarningLevelDTO.getSourceId())

@@ -27,6 +27,7 @@
     group_name,
     'group' type
     from xqua_plan_group
+    where group_type = 'BATCH'
     union
     select
     plan_id id,
