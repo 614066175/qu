@@ -2,9 +2,11 @@ package com.hand.hdsp.quality.app.service.impl;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
+import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanFieldLineService;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldLineRepository;
+import com.hand.hdsp.quality.infra.constant.RuleConstant;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -31,7 +33,7 @@ public class BatchPlanFieldLineServiceImpl implements BatchPlanFieldLineService 
     }
 
     @Override
-    public List<BatchPlanFieldLineDTO> list(BatchPlanFieldDTO batchPlanFieldDTO) {
+    public List<BatchPlanFieldLineDTO> list(BatchPlanFieldDTO batchPlanFieldDTO, RuleDTO ruleDTO) {
         List<BatchPlanFieldLine> batchPlanFieldLineList =
                 batchPlanFieldLineRepository.select(
                         BatchPlanFieldLine.builder().planFieldId(batchPlanFieldDTO.getPlanFieldId()).build());
@@ -39,6 +41,12 @@ public class BatchPlanFieldLineServiceImpl implements BatchPlanFieldLineService 
         for (BatchPlanFieldLine batchPlanFieldLine : batchPlanFieldLineList) {
             checkItemList.add(batchPlanFieldLine.getCheckItem());
         }
-        return batchPlanFieldLineRepository.list(checkItemList, batchPlanFieldDTO);
+        if (ruleDTO.getRuleModel() == null || ruleDTO.getRuleModel().equals(RuleConstant.RULE_MODEL_STANDARD)) {
+            ruleDTO.setRuleModel(RuleConstant.RULE_MODEL_STANDARD);
+            return batchPlanFieldLineRepository.list(checkItemList, ruleDTO.getRuleModel());
+        } else if (ruleDTO.getRuleModel().equals(RuleConstant.RULE_MODEL_STREAMING)) {
+            return batchPlanFieldLineRepository.list(checkItemList, ruleDTO.getRuleModel());
+        }
+        return null;
     }
 }

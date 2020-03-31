@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
+import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanFieldLineService;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldLineRepository;
@@ -66,9 +67,10 @@ public class BatchPlanFieldLineController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/option")
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  BatchPlanFieldDTO batchPlanFieldDTO) {
+                                  BatchPlanFieldDTO batchPlanFieldDTO,
+                                  RuleDTO ruleDTO) {
         batchPlanFieldDTO.setTenantId(tenantId);
-        return Results.success(batchPlanFieldLineService.list(batchPlanFieldDTO));
+        return Results.success(batchPlanFieldLineService.list(batchPlanFieldDTO, ruleDTO));
     }
 
     @ApiOperation(value = "批数据方案-已选字段规则校验项表列表")

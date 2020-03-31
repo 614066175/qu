@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
+import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
 
 import java.util.List;
@@ -17,9 +18,10 @@ public interface BatchPlanFieldLineService {
      * 可选字段级规则列表
      *
      * @param batchPlanFieldDTO
+     * @param ruleDTO
      * @return
      */
-    List<BatchPlanFieldLineDTO> list(BatchPlanFieldDTO batchPlanFieldDTO);
+    List<BatchPlanFieldLineDTO> list(BatchPlanFieldDTO batchPlanFieldDTO, RuleDTO ruleDTO);
 
     /**
      * 已选字段级规则列表
