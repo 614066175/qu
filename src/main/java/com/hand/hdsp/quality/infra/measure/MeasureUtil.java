@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.infra.measure;
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
+import org.hzero.core.base.BaseConstants;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -83,17 +84,9 @@ public class MeasureUtil {
      * @return 波动率
      */
     public static BigDecimal volatility(BigDecimal sample, BigDecimal base) {
-        return sample.subtract(base).divide(base, 2, RoundingMode.HALF_UP).abs();
+        return sample.subtract(base).divide(base, 2, RoundingMode.HALF_UP).abs().multiply(new BigDecimal(100));
     }
 
-    /**
-     * 波动率比较工具类
-     *
-     * @param compareWay    比较方式
-     * @param actualValue   实际值
-     * @param expectedValue 期望值
-     * @return 结果
-     */
     /**
      * 波动率比较工具类
      *
@@ -111,7 +104,7 @@ public class MeasureUtil {
         switch (compareWay) {
             case PlanConstant.CompareWay.ABSOLUTE_VALUE:
                 BigDecimal actualValue = volatility(sample, base);
-                batchResultRuleDTO.setActualValue(actualValue.toString());
+                batchResultRuleDTO.setActualValue(actualValue.toString() + BaseConstants.Symbol.PERCENTAGE);
                 for (PlanWarningLevel planWarningLevel : warningLevelList) {
                     if (planWarningLevel.getStartValue().compareTo(actualValue) <= 0
                             && planWarningLevel.getEndValue().compareTo(actualValue) >= 0) {
@@ -122,7 +115,7 @@ public class MeasureUtil {
             case PlanConstant.CompareWay.RISE_RATE:
                 if (sample.compareTo(base) > 0) {
                     BigDecimal actualValue1 = volatility(sample, base);
-                    batchResultRuleDTO.setActualValue(actualValue1.toString());
+                    batchResultRuleDTO.setActualValue(actualValue1.toString() + BaseConstants.Symbol.PERCENTAGE);
                     for (PlanWarningLevel planWarningLevel : warningLevelList) {
                         if (planWarningLevel.getStartValue().compareTo(actualValue1) <= 0
                                 && planWarningLevel.getEndValue().compareTo(actualValue1) >= 0) {
@@ -136,7 +129,7 @@ public class MeasureUtil {
             case PlanConstant.CompareWay.DOWN_RATE:
                 if (sample.compareTo(base) < 0) {
                     BigDecimal actualValue1 = volatility(sample, base);
-                    batchResultRuleDTO.setActualValue(actualValue1.toString());
+                    batchResultRuleDTO.setActualValue(actualValue1.toString() + BaseConstants.Symbol.PERCENTAGE);
                     for (PlanWarningLevel planWarningLevel : warningLevelList) {
                         if (planWarningLevel.getStartValue().compareTo(actualValue1) <= 0
                                 && planWarningLevel.getEndValue().compareTo(actualValue1) >= 0) {
