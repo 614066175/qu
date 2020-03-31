@@ -49,10 +49,7 @@ public class LineOneDiffValueMeasure implements Measure {
 
         long actualValue = dataCount - resultList.get(0).getDataCount();
         long expectedValue = Long.parseLong(batchPlanTableLineDTO.getExpectedValue());
-        boolean result = MeasureUtil.fixedCompare(batchPlanTableLineDTO.getCompareWay(), actualValue, expectedValue);
-        if (result) {
-            batchResultRuleDTO.setWarningLevel(warningLevelList.get(0).getWarningLevel());
-        }
+        MeasureUtil.fixedCompare(batchPlanTableLineDTO.getCompareWay(), actualValue, expectedValue, warningLevelList, batchResultRuleDTO);
 
         batchResultRuleDTO.setActualValue(actualValue + "");
         return batchResultRuleDTO;

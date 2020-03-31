@@ -21,12 +21,17 @@ public class MeasureUtil {
     /**
      * 固定值比较工具类
      *
-     * @param compareWay    比较方式
-     * @param actualValue   实际值
-     * @param expectedValue 期望值
-     * @return 结果
+     * @param compareWay         比较方式
+     * @param actualValue        实际值
+     * @param expectedValue      期望值
+     * @param warningLevelList   告警等级
+     * @param batchResultRuleDTO 结果
      */
-    public static boolean fixedCompare(String compareWay, long actualValue, long expectedValue) {
+    public static void fixedCompare(String compareWay,
+                                    long actualValue,
+                                    long expectedValue,
+                                    List<PlanWarningLevel> warningLevelList,
+                                    BatchResultRuleDTO batchResultRuleDTO) {
         boolean result = false;
         switch (compareWay) {
             case PlanConstant.CompareWay.LESS:
@@ -63,7 +68,9 @@ public class MeasureUtil {
                 break;
 
         }
-        return result;
+        if (!result) {
+            batchResultRuleDTO.setWarningLevel(warningLevelList.get(0).getWarningLevel());
+        }
     }
 
 

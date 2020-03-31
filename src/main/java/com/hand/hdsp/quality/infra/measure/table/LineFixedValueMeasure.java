@@ -28,10 +28,7 @@ public class LineFixedValueMeasure implements Measure {
         batchResultRuleDTO.setExpectedValue(batchPlanTableLineDTO.getExpectedValue());
 
         long expectedValue = Long.parseLong(batchPlanTableLineDTO.getExpectedValue());
-        boolean result = MeasureUtil.fixedCompare(batchPlanTableLineDTO.getCompareWay(), actualValue, expectedValue);
-        if (!result) {
-            batchResultRuleDTO.setWarningLevel(warningLevelList.get(0).getWarningLevel());
-        }
+        MeasureUtil.fixedCompare(batchPlanTableLineDTO.getCompareWay(), actualValue, expectedValue, warningLevelList, batchResultRuleDTO);
 
         batchResultRuleDTO.setActualValue(actualValue + "");
         return batchResultRuleDTO;
