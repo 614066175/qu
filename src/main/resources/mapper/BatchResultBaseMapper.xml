@@ -5,10 +5,12 @@
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.BatchResultBase">
         <result column="result_base_id" property="resultBaseId" jdbcType="DECIMAL"/>
         <result column="result_id" property="resultId" jdbcType="DECIMAL"/>
+        <result column="plan_base_id" property="planBaseId" jdbcType="DECIMAL"/>
         <result column="table_name" property="tableName" jdbcType="VARCHAR"/>
         <result column="rule_count" property="ruleCount" jdbcType="DECIMAL"/>
         <result column="exception_rule_count" property="exceptionRuleCount" jdbcType="DECIMAL"/>
         <result column="data_count" property="dataCount" jdbcType="DECIMAL"/>
+        <result column="table_size" property="tableSize" jdbcType="DECIMAL"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
         <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
@@ -16,4 +18,19 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+
+    <select id="queryList" resultType="com.hand.hdsp.quality.infra.dataobject.BatchResultBaseDO">
+        select data_count,
+               table_size
+        from xqua_batch_result_base xbrb
+        where plan_base_id = #{planBaseId}
+          and (data_count is not null or table_size is not null)
+          <if test="measureDate != null">
+              and date_format(creation_date, '%Y%m%d') = date_format(#{measureDate}, '%Y%m%d')
+          </if>
+        <if test="measureDateFrom != null">
+            and date_format(creation_date, '%Y%m%d') >= date_format(#{measureDateFrom}, '%Y%m%d')
+        </if>
+        order by xbrb.creation_date desc
+    </select>
 </mapper>

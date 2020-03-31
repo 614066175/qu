@@ -1,7 +1,11 @@
 package com.hand.hdsp.quality.infra.mapper;
 
+import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultRule;
+import com.hand.hdsp.quality.infra.dataobject.BatchResultRuleDO;
 import io.choerodon.mybatis.common.BaseMapper;
+
+import java.util.List;
 
 /**
  * <p>批数据方案结果表-规则信息Mapper</p>
@@ -10,4 +14,13 @@ import io.choerodon.mybatis.common.BaseMapper;
  */
 public interface BatchResultRuleMapper extends BaseMapper<BatchResultRule> {
 
+    List<BatchResultRuleDO> queryList(BatchResultRuleDO batchResultRule);
+
+    /**
+     * 根据结果id查询出所有数据
+     *
+     * @param resultId
+     * @return
+     */
+    List<BatchResultRuleDTO> selectByResultId(Long resultId);
 }

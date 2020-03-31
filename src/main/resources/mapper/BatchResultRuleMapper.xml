@@ -25,4 +25,23 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+
+    <select id="queryList" resultType="com.hand.hdsp.quality.infra.dataobject.BatchResultRuleDO">
+        select *
+        from xqua_batch_result_rule xbrr
+        where xbrr.rule_id = #{ruleId}
+          and date_format(creation_date, '%Y%m%d') = date_format(#{measureDate}, '%Y%m%d')
+    </select>
+
+    <select id="selectByResultId" resultType="com.hand.hdsp.quality.api.dto.BatchResultRuleDTO">
+        select xbrr.warning_level,
+               COALESCE(xbpt.weight, xbpf.weight) weight
+        from xqua_batch_result_rule xbrr
+                 left join xqua_batch_plan_table xbpt on xbrr.rule_id = xbpt.plan_table_id and xbrr.rule_type = 'TABLE'
+                 left join xqua_batch_plan_field xbpf on xbrr.rule_id = xbpf.plan_field_id and xbrr.rule_type = 'FIELD'
+                 join xqua_batch_result_base xbrb on xbrr.result_base_id = xbrb.result_base_id
+                 join xqua_batch_result xbr on xbrb.result_id = xbr.result_id
+        where warning_level is not null
+          and xbr.result_id = #{resultId}
+    </select>
 </mapper>

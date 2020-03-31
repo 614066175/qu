@@ -47,7 +47,7 @@ public class MaxFixedValueMeasure implements Measure {
 
         long actualValue = Long.parseLong(batchResultRuleDTO.getActualValue());
         long expectedValue = Long.parseLong(batchPlanFieldLineDTO.getExpectedValue());
-        boolean result = MeasureUtil.compary(batchPlanFieldLineDTO.getCompareWay(), actualValue, expectedValue);
+        boolean result = MeasureUtil.fixedCompare(batchPlanFieldLineDTO.getCompareWay(), actualValue, expectedValue);
         if (result) {
             batchResultRuleDTO.setWarningLevel(warningLevelList.get(0).getWarningLevel());
         }

@@ -4,7 +4,11 @@ import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultRule;
 import com.hand.hdsp.quality.domain.repository.BatchResultRuleRepository;
+import com.hand.hdsp.quality.infra.mapper.BatchResultRuleMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * <p>批数据方案结果表-规则信息资源库实现</p>
@@ -14,4 +18,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class BatchResultRuleRepositoryImpl extends BaseRepositoryImpl<BatchResultRule, BatchResultRuleDTO> implements BatchResultRuleRepository {
 
+    private final BatchResultRuleMapper batchResultRuleMapper;
+
+    public BatchResultRuleRepositoryImpl(BatchResultRuleMapper batchResultRuleMapper) {
+        this.batchResultRuleMapper = batchResultRuleMapper;
+    }
+
+    @Override
+    public List<BatchResultRuleDTO> selectByResultId(Long resultId) {
+        return batchResultRuleMapper.selectByResultId(resultId);
+    }
 }

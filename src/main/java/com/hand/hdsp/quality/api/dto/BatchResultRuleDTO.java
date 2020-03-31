@@ -77,4 +77,6 @@ public class BatchResultRuleDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
+    @ApiModelProperty(value = "权重")
+    private Long weight;
 }

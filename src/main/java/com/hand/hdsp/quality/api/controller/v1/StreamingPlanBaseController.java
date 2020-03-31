@@ -55,6 +55,23 @@ public class StreamingPlanBaseController extends BaseController {
         return Results.success(list);
     }
 
+    @ApiOperation(value = "实时数据方案-基础配置表列表（含规则计数）")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/list")
+    public ResponseEntity<?> listBase(@PathVariable(name = "organizationId") Long tenantId,
+                                  StreamingPlanBaseDTO streamingPlanBaseDTO, @ApiIgnore @SortDefault(value = StreamingPlanBase.FIELD_PLAN_BASE_ID,
+            direction = Sort.Direction.DESC) PageRequest pageRequest) {
+        streamingPlanBaseDTO.setTenantId(tenantId);
+        Page<StreamingPlanBaseDTO> list = streamingPlanBaseRepository.list(pageRequest, streamingPlanBaseDTO);
+        return Results.success(list);
+    }
+
     @ApiOperation(value = "实时数据方案-基础配置表明细")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",

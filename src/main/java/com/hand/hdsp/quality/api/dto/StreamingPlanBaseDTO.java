@@ -46,4 +46,7 @@ public class StreamingPlanBaseDTO extends AuditDomain {
     @ApiModelProperty(value = "规则List")
     private List<StreamingPlanRuleDTO> streamingPlanRuleDTOList;
 
+    private Long delayNum;
+
+    private Long cutoffNum;
 }

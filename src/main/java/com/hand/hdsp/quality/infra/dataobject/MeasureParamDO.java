@@ -1,9 +1,7 @@
 package com.hand.hdsp.quality.infra.dataobject;
 
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
-import com.hand.hdsp.quality.api.dto.BatchPlanTableLineDTO;
-import com.hand.hdsp.quality.api.dto.DatasourceDTO;
+import com.hand.hdsp.quality.api.dto.*;
+import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
 import lombok.*;
 
@@ -25,6 +23,8 @@ public class MeasureParamDO {
 
     private DatasourceDTO datasourceDTO;
 
+    private BatchPlanTableDTO batchPlanTableDTO;
+
     private BatchPlanTableLineDTO batchPlanTableLineDTO;
 
     private BatchPlanFieldDTO batchPlanFieldDTO;
@@ -32,4 +32,6 @@ public class MeasureParamDO {
     private BatchPlanFieldLineDTO batchPlanFieldLineDTO;
 
     private List<PlanWarningLevel> warningLevelList;
+
+    private BatchResultBase batchResultBase;
 }

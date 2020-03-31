@@ -4,6 +4,10 @@ import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.StreamingPlanBaseDTO;
 import com.hand.hdsp.quality.domain.entity.StreamingPlanBase;
 import com.hand.hdsp.quality.domain.repository.StreamingPlanBaseRepository;
+import com.hand.hdsp.quality.infra.mapper.StreamingPlanBaseMapper;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,4 +18,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class StreamingPlanBaseRepositoryImpl extends BaseRepositoryImpl<StreamingPlanBase, StreamingPlanBaseDTO> implements StreamingPlanBaseRepository {
 
+    private StreamingPlanBaseMapper streamingPlanBaseMapper;
+
+    public StreamingPlanBaseRepositoryImpl(StreamingPlanBaseMapper streamingPlanBaseMapper) {
+        this.streamingPlanBaseMapper = streamingPlanBaseMapper;
+    }
+
+    @Override
+    public Page<StreamingPlanBaseDTO> list(PageRequest pageRequest, StreamingPlanBaseDTO streamingPlanBaseDTO) {
+        return PageHelper.doPage(pageRequest, () -> streamingPlanBaseMapper.list(streamingPlanBaseDTO));
+    }
 }

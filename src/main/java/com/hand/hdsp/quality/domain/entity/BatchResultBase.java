@@ -40,6 +40,8 @@ public class BatchResultBase extends AuditDomain {
 
     private Long resultId;
 
+    private Long planBaseId;
+
     private String tableName;
 
     private Long ruleCount;
@@ -47,6 +49,8 @@ public class BatchResultBase extends AuditDomain {
     private Long exceptionRuleCount;
 
     private Long dataCount;
+
+    private Long tableSize;
 
     private Long tenantId;
 
