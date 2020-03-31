@@ -26,21 +26,22 @@
         (select count(*)
         from xqua_batch_plan_table xbpt
         where
-        xbpt.plan_base_id = xbpb.plan_base_id
+        xbpt.plan_base_id = #{planBaseId}
         ) as table_num,
         (select count(*)
         from xqua_batch_plan_field xbpf
         where
-        xbpf.plan_base_id = xbpb.plan_base_id
+        xbpf.plan_base_id = #{planBaseId}
         ) as field_num,
         (select count(*)
         from xqua_batch_plan_rel_table xbprt
         where
-        xbprt.plan_base_id = xbpb.plan_base_id
+        xbprt.plan_base_id = #{planBaseId}
         ) as rel_table_num
         from
         xqua_batch_plan_base xbpb
         where
         xbpb.tenant_id = #{tenantId}
+        and xbpb.plan_base_id = #{planBaseId}
     </select>
 </mapper>

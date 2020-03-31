@@ -38,6 +38,23 @@ public class BatchPlanBaseController extends BaseController {
         this.batchPlanBaseService = batchPlanBaseService;
     }
 
+    @ApiOperation(value = "批数据方案-基础配置表列表（含规则计数）")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/list")
+    public ResponseEntity<?> listBase(@PathVariable(name = "organizationId") Long tenantId,
+                                      BatchPlanBaseDTO batchPlanBaseDTO, @ApiIgnore @SortDefault(value = BatchPlanBase.FIELD_PLAN_BASE_ID,
+            direction = Sort.Direction.DESC) PageRequest pageRequest) {
+        batchPlanBaseDTO.setTenantId(tenantId);
+        Page<BatchPlanBaseDTO> list = batchPlanBaseRepository.list(pageRequest, batchPlanBaseDTO);
+        return Results.success(list);
+    }
+
     @ApiOperation(value = "批数据方案-基础配置表列表")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
@@ -51,7 +68,7 @@ public class BatchPlanBaseController extends BaseController {
                                   BatchPlanBaseDTO batchPlanBaseDTO, @ApiIgnore @SortDefault(value = BatchPlanBase.FIELD_PLAN_BASE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchPlanBaseDTO.setTenantId(tenantId);
-        Page<BatchPlanBaseDTO> list = batchPlanBaseRepository.list(pageRequest, batchPlanBaseDTO);
+        Page<BatchPlanBaseDTO> list = batchPlanBaseRepository.pageAndSortDTO(pageRequest, batchPlanBaseDTO);
         return Results.success(list);
     }
 

@@ -15,7 +15,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 public interface BatchPlanBaseRepository extends BaseRepository<BatchPlanBase, BatchPlanBaseDTO>, ProxySelf<BatchPlanBaseRepository> {
 
     /**
-     * 评估方案列表
+     * 行列表
      *
      * @param pageRequest
      * @param batchPlanBaseDTO

@@ -14,10 +14,10 @@ import java.util.List;
 public interface BatchPlanBaseMapper extends BaseMapper<BatchPlanBase> {
 
     /**
-     * 评估方案列表
+     * 行列表
      *
      * @param batchPlanBaseDTO 查询条件
-     * @return 评估方案列表
+     * @return
      */
     List<BatchPlanBaseDTO> list(BatchPlanBaseDTO batchPlanBaseDTO);
 }
