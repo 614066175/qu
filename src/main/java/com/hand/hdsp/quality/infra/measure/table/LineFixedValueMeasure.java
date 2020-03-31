@@ -29,7 +29,7 @@ public class LineFixedValueMeasure implements Measure {
 
         long expectedValue = Long.parseLong(batchPlanTableLineDTO.getExpectedValue());
         boolean result = MeasureUtil.fixedCompare(batchPlanTableLineDTO.getCompareWay(), actualValue, expectedValue);
-        if (result) {
+        if (!result) {
             batchResultRuleDTO.setWarningLevel(warningLevelList.get(0).getWarningLevel());
         }
 

@@ -216,6 +216,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 sum = sum.add(multiply);
             }
             batchResult.setMark(sum.multiply(BigDecimal.valueOf(100)));
+            batchResult.setPlanStatus(PlanConstant.PlanStatus.SUCCESS);
             batchResultRepository.updateByPrimaryKey(batchResult);
         }
     }
