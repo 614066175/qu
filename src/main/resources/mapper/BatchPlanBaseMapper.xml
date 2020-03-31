@@ -37,10 +37,30 @@
         from xqua_batch_plan_rel_table xbprt
         where
         xbprt.plan_base_id = xbpb.plan_base_id
-        ) as rel_table_num
+        ) as rel_table_num,
+        xbpb.plan_base_id,
+        xbpb.plan_id,
+        xbpb.datasource_type,
+        xbpb.datasource_id,
+        xbpb.tenant_id
         from
         xqua_batch_plan_base xbpb
         where
         xbpb.tenant_id = #{tenantId}
+        <if test="planId != null">
+            and xbpb.plan_id = #{planId}
+        </if>
+        <if test="datasourceSchema != null">
+            <bind name="datasourceSchema" value="'%' + datasourceSchema + '%'"/>
+            and xbpb.datasource_schema like #{datasourceSchema}
+        </if>
+        <if test="tableName != null">
+            <bind name="tableName" value="'%' + tableName + '%'"/>
+            and xbpb.table_name like #{tableName}
+        </if>
+        <if test="description != null">
+            <bind name="description" value="'%' + description + '%'"/>
+            and xbpb.description like #{description}
+        </if>
     </select>
 </mapper>
