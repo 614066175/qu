@@ -20,12 +20,13 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
     private final BatchPlanFieldLineRepository batchPlanFieldLineRepository;
     private final BatchPlanRelTableRepository batchPlanRelTableRepository;
     private final BatchPlanRelTableLineRepository batchPlanRelTableLineRepository;
+    private final PlanWarningLevelRepository planWarningLevelRepository;
 
     public BatchPlanBaseServiceImpl(BatchPlanBaseRepository batchPlanBaseRepository,
                                     BatchPlanTableRepository batchPlanTableRepository,
                                     BatchPlanTableLineRepository batchPlanTableLineRepository,
                                     BatchPlanFieldRepository batchPlanFieldRepository, BatchPlanFieldLineRepository batchPlanFieldLineRepository,
-                                    BatchPlanRelTableRepository batchPlanRelTableRepository, BatchPlanRelTableLineRepository batchPlanRelTableLineRepository) {
+                                    BatchPlanRelTableRepository batchPlanRelTableRepository, BatchPlanRelTableLineRepository batchPlanRelTableLineRepository, PlanWarningLevelRepository planWarningLevelRepository) {
         this.batchPlanBaseRepository = batchPlanBaseRepository;
         this.batchPlanTableRepository = batchPlanTableRepository;
         this.batchPlanTableLineRepository = batchPlanTableLineRepository;
@@ -33,6 +34,7 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
         this.batchPlanFieldLineRepository = batchPlanFieldLineRepository;
         this.batchPlanRelTableRepository = batchPlanRelTableRepository;
         this.batchPlanRelTableLineRepository = batchPlanRelTableLineRepository;
+        this.planWarningLevelRepository = planWarningLevelRepository;
     }
 
     @Override
@@ -42,6 +44,12 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
                 if (batchPlanTableDTO.getBatchPlanTableLineDTOList() != null) {
                     for (BatchPlanTableLineDTO batchPlanTableLineDTO :
                             batchPlanTableDTO.getBatchPlanTableLineDTOList()) {
+                        if (batchPlanTableLineDTO.getPlanWarningLevelDTOList() != null) {
+                            for (PlanWarningLevelDTO planWarningLevelDTO :
+                                    batchPlanTableLineDTO.getPlanWarningLevelDTOList()) {
+                                planWarningLevelRepository.deleteDTO(planWarningLevelDTO);
+                            }
+                        }
                         batchPlanTableLineRepository.deleteDTO(batchPlanTableLineDTO);
                     }
                 }

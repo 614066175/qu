@@ -74,7 +74,7 @@ public class PlanGroupController extends BaseController {
         return Results.success(list);
     }
 
-    @ApiOperation(value = "评估方案分组所有列表（含评估方案")
+    @ApiOperation(value = "评估方案分组所有列表（含批数据评估方案）")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
