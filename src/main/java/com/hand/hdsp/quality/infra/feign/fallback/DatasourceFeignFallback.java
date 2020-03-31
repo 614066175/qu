@@ -34,4 +34,9 @@ public class DatasourceFeignFallback implements DatasourceFeign {
     public ResponseEntity<String> execSqlBatch(Long tenantId, DatasourceDTO datasourceDTO) {
         throw new CommonException("error.feign.core.datasource.exec_sql_batch");
     }
+
+    @Override
+    public ResponseEntity<String> detail(Long tenantId, Long datasourceId) {
+        throw new CommonException("error.feign.core.datasource.detail");
+    }
 }

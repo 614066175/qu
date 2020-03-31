@@ -1,12 +1,17 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanBaseService;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
+import com.hand.hdsp.quality.infra.converter.BatchPlanBaseConverter;
+import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import io.choerodon.core.exception.CommonException;
+import org.hzero.core.util.ResponseUtils;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 /**
@@ -26,6 +31,8 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
     private final BatchPlanRelTableLineRepository batchPlanRelTableLineRepository;
     private final PlanWarningLevelRepository planWarningLevelRepository;
     private final BatchResultRepository batchResultRepository;
+    private final DatasourceFeign datasourceFeign;
+    private final BatchPlanBaseConverter batchPlanBaseConverter;
 
     public BatchPlanBaseServiceImpl(BatchPlanBaseRepository batchPlanBaseRepository,
                                     BatchPlanTableRepository batchPlanTableRepository,
@@ -35,7 +42,9 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
                                     BatchPlanRelTableRepository batchPlanRelTableRepository,
                                     BatchPlanRelTableLineRepository batchPlanRelTableLineRepository,
                                     PlanWarningLevelRepository planWarningLevelRepository,
-                                    BatchResultRepository batchResultRepository) {
+                                    BatchResultRepository batchResultRepository,
+                                    DatasourceFeign datasourceFeign,
+                                    BatchPlanBaseConverter batchPlanBaseConverter) {
         this.batchPlanBaseRepository = batchPlanBaseRepository;
         this.batchPlanTableRepository = batchPlanTableRepository;
         this.batchPlanTableLineRepository = batchPlanTableLineRepository;
@@ -45,6 +54,8 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
         this.batchPlanRelTableLineRepository = batchPlanRelTableLineRepository;
         this.planWarningLevelRepository = planWarningLevelRepository;
         this.batchResultRepository = batchResultRepository;
+        this.datasourceFeign = datasourceFeign;
+        this.batchPlanBaseConverter = batchPlanBaseConverter;
     }
 
     @Override
@@ -102,5 +113,21 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
             }
         }
         return batchPlanBaseRepository.deleteByPrimaryKey(batchPlanBaseDTO);
+    }
+
+    @Override
+    public BatchPlanBaseDTO detail(Long planBaseId, Long tenantId) {
+        BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseRepository.selectDTOByPrimaryKey(planBaseId);
+        ResponseEntity<String> result = datasourceFeign.detail(tenantId, batchPlanBaseDTO.getDatasourceId());
+        DatasourceDTO datasourceDTO = ResponseUtils.getResponse(result, new TypeReference<DatasourceDTO>() {
+        }, (httpStatus, response) -> {
+            throw new CommonException(response);
+        }, exceptionResponse -> {
+            throw new CommonException(exceptionResponse.getMessage());
+        });
+        if (datasourceDTO != null) {
+            batchPlanBaseDTO.setDatasourceName(datasourceDTO.getDatasourceName());
+        }
+        return batchPlanBaseDTO;
     }
 }

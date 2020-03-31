@@ -64,4 +64,15 @@ public interface DatasourceFeign {
     @PostMapping("/v2/{organizationId}/datasources/exec-sql-batch")
     ResponseEntity<String> execSqlBatch(@PathVariable(name = "organizationId") Long tenantId,
                                         @RequestBody DatasourceDTO datasourceDTO);
+
+    /**
+     * 查询数据源
+     *
+     * @param tenantId
+     * @param datasourceId
+     * @return
+     */
+    @GetMapping("/v1/{organizationId}/datasources/{datasourceId}")
+    ResponseEntity<String> detail(@PathVariable(name = "organizationId") Long tenantId,
+                                  @PathVariable Long datasourceId);
 }

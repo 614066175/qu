@@ -63,4 +63,6 @@ public class BatchPlanBaseDTO extends AuditDomain {
     private Long fieldNum;
 
     private Long relTableNum;
+
+    private String datasourceName;
 }

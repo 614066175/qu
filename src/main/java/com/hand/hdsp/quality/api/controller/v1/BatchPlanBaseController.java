@@ -86,9 +86,9 @@ public class BatchPlanBaseController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{planBaseId}")
-    public ResponseEntity<?> detail(@PathVariable Long planBaseId) {
-        BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseRepository.selectDTOByPrimaryKeyAndTenant(planBaseId);
-        return Results.success(batchPlanBaseDTO);
+    public ResponseEntity<?> detail(@PathVariable(name = "organizationId") Long tenantId,
+                                    @PathVariable Long planBaseId) {
+        return Results.success(batchPlanBaseService.detail(planBaseId, tenantId));
     }
 
     @ApiOperation(value = "创建批数据方案-基础配置表")
