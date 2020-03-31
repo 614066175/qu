@@ -15,4 +15,25 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+
+    <select id="list" resultType="com.hand.hdsp.quality.api.dto.StreamingPlanBaseDTO">
+        select
+        xspb.connector_info,
+        xspb.topic_info,
+        xspb.plan_desc,
+        (select count(*)
+        from xqua_streaming_plan_rule xspr
+        where
+        xspr.plan_base_id = xspr.plan_base_id
+        ) as delay_num,
+        (select count(*)
+        from xqua_streaming_plan_rule xspr
+        where
+        xspr.plan_base_id = xspr.plan_base_id
+        ) as cutoff_num
+        from
+        xqua_streaming_plan_base xspb
+        where
+        xspb.tenant_id = #{tenantId}
+    </select>
 </mapper>
