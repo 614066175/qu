@@ -39,14 +39,20 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
 
     @Override
     public int delete(BatchPlanRelTableDTO batchPlanRelTableDTO) {
-        if (batchPlanRelTableDTO.getBatchPlanRelTableLineDTOList() != null) {
-            for (BatchPlanRelTableLineDTO batchPlanRelTableLineDTO : batchPlanRelTableDTO.getBatchPlanRelTableLineDTOList()) {
+        List<BatchPlanRelTableLineDTO> batchPlanRelTableLineDTOList = batchPlanRelTableLineRepository.selectDTO(
+                BatchPlanRelTableLine.FIELD_PLAN_REL_TABLE_ID, batchPlanRelTableDTO.getPlanRelTableId());
+        if (batchPlanRelTableLineDTOList != null) {
+            for (BatchPlanRelTableLineDTO batchPlanRelTableLineDTO : batchPlanRelTableLineDTOList) {
                 batchPlanRelTableLineRepository.deleteDTO(batchPlanRelTableLineDTO);
             }
         }
-        if (batchPlanRelTableDTO.getPlanWarningLevelDTOList() != null) {
-            for (PlanWarningLevelDTO planWarningLevelDTO : batchPlanRelTableDTO.getPlanWarningLevelDTOList()) {
-                planWarningLevelRepository.deleteDTO(planWarningLevelDTO);
+        List<PlanWarningLevel> planWarningLevelList = planWarningLevelRepository.select(PlanWarningLevel.builder()
+                .sourceId(batchPlanRelTableDTO.getPlanRelTableId())
+                .sourceType(TableNameConstant.XQUA_BATCH_PLAN_REL_TABLE).build());
+        if (planWarningLevelList != null) {
+            for (PlanWarningLevel planWarningLevel :
+                    planWarningLevelList) {
+                planWarningLevelRepository.delete(planWarningLevel);
             }
         }
         return batchPlanRelTableRepository.deleteByPrimaryKey(batchPlanRelTableDTO);
