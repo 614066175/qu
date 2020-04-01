@@ -3,15 +3,18 @@ package com.hand.hdsp.quality.app.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanBaseService;
-import com.hand.hdsp.quality.domain.entity.BatchResult;
+import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
+import com.hand.hdsp.quality.infra.constant.TableNameConstant;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import io.choerodon.core.exception.CommonException;
 import org.hzero.core.util.ResponseUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * <p>批数据方案-基础配置表应用服务默认实现</p>
@@ -56,20 +59,31 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
 
     @Override
     public int delete(BatchPlanBaseDTO batchPlanBaseDTO) {
-        if (batchResultRepository.selectDTO(
-                BatchResult.FIELD_PLAN_ID, batchPlanBaseDTO.getPlanId()).get(0)
-                .getPlanStatus().equals(PlanConstant.PlanStatus.RUNNING)) {
-            throw new CommonException(ErrorCode.CAN_NOT_DELETE);
+        List<BatchResultDTO> batchResultDTOList = batchResultRepository.selectDTO(
+                BatchResult.FIELD_PLAN_ID, batchPlanBaseDTO.getPlanId());
+        if (batchResultDTOList != null) {
+            if (batchResultDTOList.get(0).getPlanStatus().equals(PlanConstant.PlanStatus.RUNNING)){
+                throw new CommonException(ErrorCode.CAN_NOT_DELETE);
+            }
         }
-        if (batchPlanBaseDTO.getBatchPlanTableDTOList() != null) {
-            for (BatchPlanTableDTO batchPlanTableDTO : batchPlanBaseDTO.getBatchPlanTableDTOList()) {
-                if (batchPlanTableDTO.getBatchPlanTableLineDTOList() != null) {
-                    for (BatchPlanTableLineDTO batchPlanTableLineDTO :
-                            batchPlanTableDTO.getBatchPlanTableLineDTOList()) {
-                        if (batchPlanTableLineDTO.getPlanWarningLevelDTOList() != null) {
-                            for (PlanWarningLevelDTO planWarningLevelDTO :
-                                    batchPlanTableLineDTO.getPlanWarningLevelDTOList()) {
-                                planWarningLevelRepository.deleteDTO(planWarningLevelDTO);
+        List<BatchPlanTableDTO> batchPlanTableDTOList =
+                batchPlanTableRepository.selectDTO(
+                        BatchPlanTable.FIELD_PLAN_BASE_ID, batchPlanBaseDTO.getPlanBaseId());
+        if (batchPlanTableDTOList != null) {
+            for (BatchPlanTableDTO batchPlanTableDTO : batchPlanTableDTOList) {
+                List<BatchPlanTableLineDTO> batchPlanTableLineDTOList =
+                        batchPlanTableLineRepository.selectDTO(
+                                BatchPlanTableLine.FIELD_PLAN_TABLE_ID, batchPlanTableDTO.getPlanTableId());
+                if (batchPlanTableLineDTOList != null) {
+                    for (BatchPlanTableLineDTO batchPlanTableLineDTO : batchPlanTableLineDTOList) {
+                        List<PlanWarningLevel> planWarningLevelList =
+                                planWarningLevelRepository.select(PlanWarningLevel.builder()
+                                        .sourceId(batchPlanTableLineDTO.getPlanTableLineId())
+                                        .sourceType(TableNameConstant.XQUA_BATCH_PLAN_TABLE_LINE).build());
+                        if (planWarningLevelList != null) {
+                            for (PlanWarningLevel planWarningLevel :
+                                    planWarningLevelList) {
+                                planWarningLevelRepository.delete(planWarningLevel);
                             }
                         }
                         batchPlanTableLineRepository.deleteDTO(batchPlanTableLineDTO);
@@ -79,11 +93,16 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
             }
         }
 
-        if (batchPlanBaseDTO.getBatchPlanFieldDTOList() != null) {
-            for (BatchPlanFieldDTO batchPlanFieldDTO : batchPlanBaseDTO.getBatchPlanFieldDTOList()) {
-                if (batchPlanFieldDTO.getBatchPlanFieldLineDTOList() != null) {
+        List<BatchPlanFieldDTO> batchPlanFieldDTOList = batchPlanFieldRepository.selectDTO(
+                BatchPlanField.FIELD_PLAN_BASE_ID, batchPlanBaseDTO.getPlanBaseId());
+        if (batchPlanFieldDTOList != null) {
+            for (BatchPlanFieldDTO batchPlanFieldDTO : batchPlanFieldDTOList) {
+                List<BatchPlanFieldLineDTO> batchPlanFieldLineDTOList =
+                        batchPlanFieldLineRepository.selectDTO(BatchPlanFieldLine.FIELD_PLAN_FIELD_ID,
+                                batchPlanFieldDTO.getPlanFieldId());
+                if (batchPlanFieldLineDTOList != null) {
                     for (BatchPlanFieldLineDTO batchPlanFieldLineDTO :
-                            batchPlanFieldDTO.getBatchPlanFieldLineDTOList()) {
+                            batchPlanFieldLineDTOList) {
                         batchPlanFieldLineRepository.deleteDTO(batchPlanFieldLineDTO);
                     }
                 }
@@ -91,18 +110,24 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
             }
         }
 
-        if (batchPlanBaseDTO.getBatchPlanRelTableDTOList() != null) {
-            for (BatchPlanRelTableDTO batchPlanRelTableDTO : batchPlanBaseDTO.getBatchPlanRelTableDTOList()) {
-                if (batchPlanRelTableDTO.getBatchPlanRelTableLineDTOList() != null) {
-                    for (BatchPlanRelTableLineDTO batchPlanRelTableLineDTO :
-                            batchPlanRelTableDTO.getBatchPlanRelTableLineDTOList()) {
+        List<BatchPlanRelTableDTO> batchPlanRelTableDTOList = batchPlanRelTableRepository.selectDTO(
+                BatchPlanRelTable.FIELD_PLAN_BASE_ID, batchPlanBaseDTO.getPlanBaseId());
+        if (batchPlanRelTableDTOList != null) {
+            for (BatchPlanRelTableDTO batchPlanRelTableDTO : batchPlanRelTableDTOList) {
+                List<BatchPlanRelTableLineDTO> batchPlanRelTableLineDTOList = batchPlanRelTableLineRepository.selectDTO(
+                        BatchPlanRelTableLine.FIELD_PLAN_REL_TABLE_ID, batchPlanRelTableDTO.getPlanRelTableId());
+                if (batchPlanRelTableLineDTOList != null) {
+                    for (BatchPlanRelTableLineDTO batchPlanRelTableLineDTO : batchPlanRelTableLineDTOList) {
                         batchPlanRelTableLineRepository.deleteDTO(batchPlanRelTableLineDTO);
                     }
                 }
-                if (batchPlanRelTableDTO.getPlanWarningLevelDTOList() != null) {
-                    for (PlanWarningLevelDTO planWarningLevelDTO :
-                            batchPlanRelTableDTO.getPlanWarningLevelDTOList()) {
-                        planWarningLevelRepository.deleteDTO(planWarningLevelDTO);
+                List<PlanWarningLevel> planWarningLevelList = planWarningLevelRepository.select(PlanWarningLevel.builder()
+                        .sourceId(batchPlanRelTableDTO.getPlanRelTableId())
+                        .sourceType(TableNameConstant.XQUA_BATCH_PLAN_REL_TABLE).build());
+                if (planWarningLevelList != null) {
+                    for (PlanWarningLevel planWarningLevel :
+                            planWarningLevelList) {
+                        planWarningLevelRepository.delete(planWarningLevel);
                     }
                 }
                 batchPlanRelTableRepository.deleteDTO(batchPlanRelTableDTO);
