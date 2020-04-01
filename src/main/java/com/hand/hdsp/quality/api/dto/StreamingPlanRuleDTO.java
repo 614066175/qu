@@ -9,6 +9,7 @@ import lombok.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 /**
  * <p>实时数据方案-规则表 数据传输对象</p>
@@ -57,4 +58,6 @@ public class StreamingPlanRuleDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
+    @ApiModelProperty(value = "方案告警等级List")
+    private List<PlanWarningLevelDTO> planWarningLevelDTOList;
 }

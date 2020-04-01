@@ -10,7 +10,7 @@ import com.hand.hdsp.quality.api.dto.StreamingPlanDTO;
 public interface StreamingPlanService {
 
     /**
-     * 删除（所有相关项）
+     * 删除
      *
      * @param streamingPlanDTO 删除条件
      * @return 删除结果
