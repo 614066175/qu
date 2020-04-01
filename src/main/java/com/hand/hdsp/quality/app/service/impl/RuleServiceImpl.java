@@ -101,12 +101,14 @@ public class RuleServiceImpl implements RuleService {
 
     @Override
     public int delete(RuleDTO ruleDTO) {
-        if (ruleDTO.getRuleLineDTOList() != null) {
-
-            for (RuleLineDTO ruleLineDTO : ruleDTO.getRuleLineDTOList()) {
+        List<RuleLineDTO> ruleLineDTOList = ruleLineRepository.selectDTO(RuleLine.FIELD_RULE_ID, ruleDTO.getRuleId());
+        if (ruleLineDTOList != null) {
+            for (RuleLineDTO ruleLineDTO : ruleLineDTOList) {
                 ruleLineRepository.deleteDTO(ruleLineDTO);
-                if (ruleLineDTO.getRuleWarningLevelDTOList() != null) {
-                    for (RuleWarningLevelDTO ruleWarningLevelDTO : ruleLineDTO.getRuleWarningLevelDTOList()) {
+                List<RuleWarningLevelDTO> ruleWarningLevelDTOList =
+                        ruleWarningLevelRepository.selectDTO(RuleWarningLevel.FIELD_RULE_LINE_ID, ruleLineDTO.getRuleLineId());
+                if (ruleWarningLevelDTOList != null) {
+                    for (RuleWarningLevelDTO ruleWarningLevelDTO : ruleWarningLevelDTOList) {
                         ruleWarningLevelRepository.deleteDTO(ruleWarningLevelDTO);
                     }
                 }
