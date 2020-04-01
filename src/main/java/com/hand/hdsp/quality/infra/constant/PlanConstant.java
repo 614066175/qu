@@ -28,24 +28,9 @@ public interface PlanConstant {
     Long DEFAULT_LAYER_ID = -7L;
 
     /**
-     * 方案告警等级-对应业务类型-表级
-     */
-    String WARNING_LEVEL_TABLE = "xqua_batch_plan_table_line";
-
-    /**
-     * 方案告警等级-对应业务类型-字段级
-     */
-    String WARNING_LEVEL_FIELD = "xqua_batch_plan_field_line";
-
-    /**
-     * 方案告警等级-对应业务类型-表间
-     */
-    String WARNING_LEVEL_REL_TABLE = "xqua_batch_plan_rel_table_line";
-
-    /**
      * 比较方式
      */
-    public interface CompareWay {
+    interface CompareWay {
         /**
          * 绝对值
          */
@@ -87,7 +72,7 @@ public interface PlanConstant {
     /**
      * 方案状态
      */
-    public interface PlanStatus {
+    interface PlanStatus {
         /**
          * 未评估
          */
@@ -105,5 +90,26 @@ public interface PlanConstant {
          */
         String FAILED = "FAILED";
 
+    }
+
+    /**
+     * 数据质量规则表规则类型
+     */
+    interface RuleType {
+        /**
+         * 表间关系
+         */
+        String TABLE_RELATION = "TABLE_RELATION";
+
+    }
+
+
+    /**
+     * 批数据方案结果表-规则类型
+     */
+    interface ResultRuleType {
+        String TABLE = "TABLE";
+        String FIELD = "FIELD";
+        String REL_TABLE = "REL_TABLE";
     }
 }

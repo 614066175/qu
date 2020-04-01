@@ -7,6 +7,7 @@ import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
+import com.hand.hdsp.quality.infra.constant.TableNameConstant;
 import com.hand.hdsp.quality.infra.converter.BatchPlanFieldLineConverter;
 import com.hand.hdsp.quality.infra.converter.BatchPlanTableLineConverter;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
@@ -58,6 +59,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     private BatchPlanFieldLineRepository batchPlanFieldLineRepository;
     @Autowired
     private BatchPlanRelTableRepository batchPlanRelTableRepository;
+    @Autowired
+    private BatchPlanRelTableLineRepository batchPlanRelTableLineRepository;
     @Autowired
     private PlanWarningLevelRepository planWarningLevelRepository;
     @Autowired
@@ -137,7 +140,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     List<PlanWarningLevel> warningLevelList = planWarningLevelRepository.select(
                             PlanWarningLevel.builder()
                                     .sourceId(batchPlanTableLine.getPlanTableLineId())
-                                    .sourceType(PlanConstant.WARNING_LEVEL_TABLE)
+                                    .sourceType(TableNameConstant.XQUA_BATCH_PLAN_TABLE_LINE)
                                     .build());
 
                     BatchPlanTableLineDTO batchPlanTableLineDTO = batchPlanTableLineConverter.entityToDto(batchPlanTableLine);
@@ -151,7 +154,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                             .batchResultBase(batchResultBase)
                             .build());
                     batchResultRuleDTO.setResultBaseId(batchResultBase.getResultBaseId());
-                    batchResultRuleDTO.setRuleType("TABLE");
+                    batchResultRuleDTO.setRuleType(PlanConstant.ResultRuleType.TABLE);
                     batchResultRuleDTO.setTableName(batchPlanBase.getTableName());
                     batchResultRuleDTO.setRuleId(batchPlanTable.getPlanTableId());
                     batchResultRuleDTO.setRuleCode(batchPlanTable.getRuleCode());
@@ -168,7 +171,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     List<PlanWarningLevel> warningLevelList = planWarningLevelRepository.select(
                             PlanWarningLevel.builder()
                                     .sourceId(batchPlanFieldLine.getPlanFieldLineId())
-                                    .sourceType(PlanConstant.WARNING_LEVEL_FIELD)
+                                    .sourceType(TableNameConstant.XQUA_BATCH_PLAN_FIELD_LINE)
                                     .build());
 
                     BatchPlanFieldLineDTO batchPlanFieldLineDTO = batchPlanFieldLineConverter.entityToDto(batchPlanFieldLine);
@@ -182,7 +185,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                             .batchResultBase(batchResultBase)
                             .build());
                     batchResultRuleDTO.setResultBaseId(batchResultBase.getResultBaseId());
-                    batchResultRuleDTO.setRuleType("TABLE");
+                    batchResultRuleDTO.setRuleType(PlanConstant.ResultRuleType.FIELD);
                     batchResultRuleDTO.setTableName(batchPlanBase.getTableName());
                     batchResultRuleDTO.setRuleId(batchPlanField.getPlanFieldId());
                     batchResultRuleDTO.setRuleCode(batchPlanField.getRuleCode());
@@ -192,6 +195,36 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
 
                 }
+            }
+
+            for (BatchPlanRelTable batchPlanRelTable : relTableList) {
+                List<PlanWarningLevel> warningLevelList = planWarningLevelRepository.select(
+                        PlanWarningLevel.builder()
+                                .sourceId(batchPlanRelTable.getPlanRelTableId())
+                                .sourceType(TableNameConstant.XQUA_BATCH_PLAN_REL_TABLE)
+                                .build());
+
+                List<BatchPlanRelTableLine> lineList = batchPlanRelTableLineRepository.select(BatchPlanRelTableLine.FIELD_PLAN_REL_TABLE_ID, batchPlanRelTable.getPlanRelTableId());
+
+                Measure measure = measureCollector.getMeasure(PlanConstant.RuleType.TABLE_RELATION);
+
+                BatchResultRuleDTO batchResultRuleDTO = measure.check(MeasureParamDO.builder()
+                        .tenantId(tenantId)
+                        .datasourceDTO(datasourceDTO)
+                        .batchPlanRelTable(batchPlanRelTable)
+                        .batchPlanRelTableLineList(lineList)
+                        .warningLevelList(warningLevelList)
+                        .batchResultBase(batchResultBase)
+                        .build());
+
+                batchResultRuleDTO.setResultBaseId(batchResultBase.getResultBaseId());
+                batchResultRuleDTO.setRuleType(PlanConstant.ResultRuleType.REL_TABLE);
+                batchResultRuleDTO.setTableName(batchPlanBase.getTableName());
+                batchResultRuleDTO.setRuleId(batchPlanRelTable.getPlanRelTableId());
+                batchResultRuleDTO.setRuleCode(batchPlanRelTable.getRuleCode());
+                batchResultRuleDTO.setRuleName(batchPlanRelTable.getRuleName());
+                batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
+
             }
 
             //获取所有告警等级

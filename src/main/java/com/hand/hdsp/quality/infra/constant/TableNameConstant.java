@@ -21,4 +21,10 @@ public interface TableNameConstant {
      * 实时数据方案-规则表
      */
     String XQUA_STREAMING_PLAN_RULE = "xqua_streaming_plan_rule";
+
+    /**
+     * 批数据方案-字段规则校验项表
+     */
+    String XQUA_BATCH_PLAN_FIELD_LINE = "xqua_batch_plan_field_line";
+
 }
