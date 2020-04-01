@@ -7,6 +7,7 @@ import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldLineRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int delete(BatchPlanFieldDTO batchPlanFieldDTO) {
         List<BatchPlanFieldLineDTO> batchPlanFieldLineDTOList =
                 batchPlanFieldLineRepository.selectDTO(BatchPlanFieldLine.FIELD_PLAN_FIELD_ID,

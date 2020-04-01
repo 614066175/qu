@@ -10,6 +10,7 @@ import com.hand.hdsp.quality.domain.repository.RuleLineRepository;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
 import com.hand.hdsp.quality.domain.repository.RuleWarningLevelRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -43,6 +44,7 @@ public class RuleServiceImpl implements RuleService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void insert(RuleDTO ruleDTO) {
         Long tenantId = ruleDTO.getTenantId();
         ruleRepository.insertDTOSelective(ruleDTO);
@@ -65,6 +67,7 @@ public class RuleServiceImpl implements RuleService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void update(RuleDTO ruleDTO) {
         Long tenantId = ruleDTO.getTenantId();
         ruleRepository.updateDTOWhereTenant(ruleDTO, tenantId);
@@ -100,6 +103,7 @@ public class RuleServiceImpl implements RuleService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int delete(RuleDTO ruleDTO) {
         List<RuleLineDTO> ruleLineDTOList = ruleLineRepository.selectDTO(RuleLine.FIELD_RULE_ID, ruleDTO.getRuleId());
         if (ruleLineDTOList != null) {

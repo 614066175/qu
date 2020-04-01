@@ -13,6 +13,7 @@ import com.hand.hdsp.quality.infra.constant.TableNameConstant;
 import com.hand.hdsp.quality.infra.converter.PlanWarningLevelConverter;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanTableDO;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,7 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int delete(BatchPlanTableDTO batchPlanTableDTO) {
         List<BatchPlanTableLineDTO> batchPlanTableLineDTOList =
                 batchPlanTableLineRepository.selectDTO(
@@ -63,6 +65,7 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void insert(BatchPlanTableDTO batchPlanTableDTO) {
         Long tenantId = batchPlanTableDTO.getTenantId();
         batchPlanTableRepository.insertDTOSelective(batchPlanTableDTO);
@@ -86,6 +89,7 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void update(BatchPlanTableDTO batchPlanTableDTO) {
         Long tenantId = batchPlanTableDTO.getTenantId();
         batchPlanTableRepository.updateDTOWhereTenant(batchPlanTableDTO, tenantId);

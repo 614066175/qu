@@ -9,6 +9,7 @@ import com.hand.hdsp.quality.domain.repository.StreamingPlanRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -29,6 +30,7 @@ public class StreamingPlanServiceImpl implements StreamingPlanService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int delete(StreamingPlanDTO streamingPlanDTO) {
         List<StreamingPlanBaseDTO> streamingPlanBaseDTOList = streamingPlanBaseRepository.selectDTO(StreamingPlanBase.FIELD_PLAN_ID, streamingPlanDTO.getPlanId());
         if (!streamingPlanBaseDTOList.isEmpty()) {

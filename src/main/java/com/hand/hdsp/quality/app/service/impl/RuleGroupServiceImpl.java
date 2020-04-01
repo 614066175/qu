@@ -22,7 +22,6 @@ import java.util.List;
  * @version 1.0
  * @date 2020/3/23 13:36
  */
-@Transactional(rollbackFor = Exception.class)
 @Service
 @Slf4j
 public class RuleGroupServiceImpl implements RuleGroupService {
@@ -36,6 +35,7 @@ public class RuleGroupServiceImpl implements RuleGroupService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int delete(RuleGroupDTO ruleGroupDTO) {
         List<RuleGroupDTO> ruleGroupList = ruleGroupRepository.selectDTO(RuleGroup.FIELD_PARENT_GROUP_ID, ruleGroupDTO.getGroupId());
         List<RuleDTO> ruleDTOList = ruleRepository.selectDTO(Rule.FIELD_GROUP_ID,ruleGroupDTO.getGroupId());

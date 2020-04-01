@@ -13,6 +13,7 @@ import com.hand.hdsp.quality.domain.repository.PlanWarningLevelRepository;
 import com.hand.hdsp.quality.infra.constant.TableNameConstant;
 import com.hand.hdsp.quality.infra.converter.PlanWarningLevelConverter;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,7 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int delete(BatchPlanRelTableDTO batchPlanRelTableDTO) {
         List<BatchPlanRelTableLineDTO> batchPlanRelTableLineDTOList = batchPlanRelTableLineRepository.selectDTO(
                 BatchPlanRelTableLine.FIELD_PLAN_REL_TABLE_ID, batchPlanRelTableDTO.getPlanRelTableId());
@@ -77,6 +79,7 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void insert(BatchPlanRelTableDTO batchPlanRelTableDTO) {
         Long tenantId = batchPlanRelTableDTO.getTenantId();
         batchPlanRelTableRepository.insertDTOSelective(batchPlanRelTableDTO);
@@ -99,6 +102,7 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void update(BatchPlanRelTableDTO batchPlanRelTableDTO) {
         Long tenantId = batchPlanRelTableDTO.getTenantId();
         batchPlanRelTableRepository.updateDTOWhereTenant(batchPlanRelTableDTO, tenantId);

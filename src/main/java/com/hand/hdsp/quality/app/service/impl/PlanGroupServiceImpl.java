@@ -10,6 +10,7 @@ import com.hand.hdsp.quality.domain.repository.PlanGroupRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -30,6 +31,7 @@ public class PlanGroupServiceImpl implements PlanGroupService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int delete(PlanGroupDTO planGroupDTO) {
         List<PlanGroupDTO> planGroupDTOList = planGroupRepository.selectDTO(PlanGroup.FIELD_PARENT_GROUP_ID, planGroupDTO.getGroupId());
         List<BatchPlanDTO> batchPlanDTOList = batchPlanRepository.selectDTO(BatchPlan.FIELD_GROUP_ID, planGroupDTO.getGroupId());

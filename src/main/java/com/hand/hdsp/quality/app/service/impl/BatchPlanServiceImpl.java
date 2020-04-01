@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -85,6 +86,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     LovAdapter lovAdapter;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int delete(BatchPlanDTO batchPlanDTO) {
         List<BatchPlanBaseDTO> batchPlanBaseDTOList = batchPlanBaseRepository.selectDTO(BatchPlanBase.FIELD_PLAN_ID, batchPlanDTO.getPlanId());
         if (!batchPlanBaseDTOList.isEmpty()) {

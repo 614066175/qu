@@ -13,6 +13,7 @@ import io.choerodon.core.exception.CommonException;
 import org.hzero.core.util.ResponseUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -58,6 +59,7 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int delete(BatchPlanBaseDTO batchPlanBaseDTO) {
         List<BatchResultDTO> batchResultDTOList = batchResultRepository.selectDTO(
                 BatchResult.FIELD_PLAN_ID, batchPlanBaseDTO.getPlanId());

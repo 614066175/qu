@@ -12,6 +12,7 @@ import com.hand.hdsp.quality.domain.repository.StreamingPlanRuleRepository;
 import com.hand.hdsp.quality.infra.constant.TableNameConstant;
 import com.hand.hdsp.quality.infra.converter.PlanWarningLevelConverter;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,7 @@ public class StreamingPlanBaseServiceImpl implements StreamingPlanBaseService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int delete(StreamingPlanBaseDTO streamingPlanBaseDTO) {
         List<StreamingPlanRuleDTO> streamingPlanRuleDTOList = streamingPlanRuleRepository.selectDTO(
                 StreamingPlanRule.FIELD_PLAN_BASE_ID, streamingPlanBaseDTO);
@@ -58,6 +60,7 @@ public class StreamingPlanBaseServiceImpl implements StreamingPlanBaseService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void update(StreamingPlanBaseDTO streamingPlanBaseDTO) {
         Long tenantId = streamingPlanBaseDTO.getTenantId();
         streamingPlanBaseRepository.updateDTOWhereTenant(streamingPlanBaseDTO, tenantId);
@@ -90,6 +93,7 @@ public class StreamingPlanBaseServiceImpl implements StreamingPlanBaseService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void insert(StreamingPlanBaseDTO streamingPlanBaseDTO) {
         Long tenantId = streamingPlanBaseDTO.getTenantId();
         streamingPlanBaseRepository.insertDTOSelective(streamingPlanBaseDTO);
