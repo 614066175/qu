@@ -63,4 +63,7 @@ public class RuleLineDTO extends AuditDomain {
 
     @ApiModelProperty("规则告警等级List")
     private List<RuleWarningLevelDTO> ruleWarningLevelDTOList;
+
+    @ApiModelProperty("规则告警等级删除对象的List")
+    private List<RuleWarningLevelDTO> deleteRuleWarningLevelDTOList;
 }

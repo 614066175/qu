@@ -80,4 +80,7 @@ public class RuleDTO extends AuditDomain {
 
     @ApiModelProperty(value = "规则校验项List")
     private List<RuleLineDTO> ruleLineDTOList;
+
+    @ApiModelProperty(value = "规则校验项删除的对象List")
+    private List<RuleLineDTO> deleteRuleLineDTOList;
 }

@@ -5,13 +5,13 @@ import com.hand.hdsp.quality.api.dto.BatchPlanRelTableLineDTO;
 import com.hand.hdsp.quality.api.dto.PlanWarningLevelDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanRelTableService;
 import com.hand.hdsp.quality.domain.entity.BatchPlanRelTable;
-import com.hand.hdsp.quality.domain.entity.BatchPlanRelTableLine;
 import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
 import com.hand.hdsp.quality.domain.repository.BatchPlanRelTableLineRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanRelTableRepository;
 import com.hand.hdsp.quality.domain.repository.PlanWarningLevelRepository;
 import com.hand.hdsp.quality.infra.constant.TableNameConstant;
 import com.hand.hdsp.quality.infra.converter.PlanWarningLevelConverter;
+import io.choerodon.mybatis.domain.AuditDomain;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,32 +94,35 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
         Long tenantId = batchPlanRelTableDTO.getTenantId();
         batchPlanRelTableRepository.updateDTOWhereTenant(batchPlanRelTableDTO, tenantId);
         if (batchPlanRelTableDTO.getBatchPlanRelTableLineDTOList() != null) {
-
             for (BatchPlanRelTableLineDTO batchPlanRelTableLineDTO : batchPlanRelTableDTO.getBatchPlanRelTableLineDTOList()) {
-                batchPlanRelTableLineDTO.setPlanRelTableId(batchPlanRelTableDTO.getPlanRelTableId());
-                batchPlanRelTableLineDTO.setTenantId(tenantId);
-                if (batchPlanRelTableLineRepository.selectOne(BatchPlanRelTableLine.builder()
-                        .lineId(batchPlanRelTableLineDTO.getLineId())
-                        .planRelTableId(batchPlanRelTableLineDTO.getPlanRelTableId()).build()) != null) {
+                if (AuditDomain.RecordStatus.update.equals(batchPlanRelTableLineDTO.get_status())) {
                     batchPlanRelTableLineRepository.updateDTOWhereTenant(batchPlanRelTableLineDTO, tenantId);
-                } else {
+                } else if (AuditDomain.RecordStatus.create.equals(batchPlanRelTableLineDTO.get_status())) {
+                    batchPlanRelTableLineDTO.setPlanRelTableId(batchPlanRelTableDTO.getPlanRelTableId());
+                    batchPlanRelTableLineDTO.setTenantId(tenantId);
                     batchPlanRelTableLineRepository.insertDTOSelective(batchPlanRelTableLineDTO);
                 }
             }
         }
+        if (batchPlanRelTableDTO.getDeleteBatchPlanRelTableLineDTOList() != null) {
+            batchPlanRelTableLineRepository.batchDTODeleteByPrimaryKey(batchPlanRelTableDTO.getDeleteBatchPlanRelTableLineDTOList());
+            batchPlanRelTableDTO.getDeleteBatchPlanRelTableLineDTOList().clear();
+        }
         if (batchPlanRelTableDTO.getPlanWarningLevelDTOList() != null) {
             for (PlanWarningLevelDTO planWarningLevelDTO : batchPlanRelTableDTO.getPlanWarningLevelDTOList()) {
-                planWarningLevelDTO.setSourceId(batchPlanRelTableDTO.getPlanRelTableId());
-                planWarningLevelDTO.setSourceType(TableNameConstant.XQUA_BATCH_PLAN_REL_TABLE);
-                planWarningLevelDTO.setTenantId(tenantId);
-                if (planWarningLevelRepository.selectOne(PlanWarningLevel.builder()
-                        .sourceId(planWarningLevelDTO.getSourceId())
-                        .sourceType(planWarningLevelDTO.getSourceType()).build()) != null) {
+                if (AuditDomain.RecordStatus.update.equals(planWarningLevelDTO.get_status())) {
                     planWarningLevelRepository.updateDTOWhereTenant(planWarningLevelDTO, tenantId);
-                } else {
+                } else if (AuditDomain.RecordStatus.create.equals(planWarningLevelDTO.get_status())) {
+                    planWarningLevelDTO.setSourceId(batchPlanRelTableDTO.getPlanRelTableId());
+                    planWarningLevelDTO.setSourceType(TableNameConstant.XQUA_BATCH_PLAN_REL_TABLE);
+                    planWarningLevelDTO.setTenantId(tenantId);
                     planWarningLevelRepository.insertDTOSelective(planWarningLevelDTO);
                 }
             }
+        }
+        if (batchPlanRelTableDTO.getDeletePlanWarningLevelDTOList() != null) {
+            planWarningLevelRepository.batchDTODeleteByPrimaryKey(batchPlanRelTableDTO.getDeletePlanWarningLevelDTOList());
+            batchPlanRelTableDTO.getDeletePlanWarningLevelDTOList().clear();
         }
     }
 }
