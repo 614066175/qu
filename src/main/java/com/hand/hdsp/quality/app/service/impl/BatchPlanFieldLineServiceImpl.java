@@ -44,9 +44,7 @@ public class BatchPlanFieldLineServiceImpl implements BatchPlanFieldLineService 
         if (ruleDTO.getRuleModel() == null || ruleDTO.getRuleModel().equals(RuleConstant.RULE_MODEL_STANDARD)) {
             ruleDTO.setRuleModel(RuleConstant.RULE_MODEL_STANDARD);
             return batchPlanFieldLineRepository.list(checkItemList, ruleDTO.getRuleModel());
-        } else if (ruleDTO.getRuleModel().equals(RuleConstant.RULE_MODEL_STREAMING)) {
-            return batchPlanFieldLineRepository.list(checkItemList, ruleDTO.getRuleModel());
         }
-        return null;
+        return batchPlanFieldLineRepository.list(checkItemList, ruleDTO.getRuleModel());
     }
 }
