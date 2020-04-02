@@ -12,4 +12,11 @@ import com.hand.hdsp.quality.domain.entity.StreamingPlanRule;
  */
 public interface StreamingPlanRuleRepository extends BaseRepository<StreamingPlanRule, StreamingPlanRuleDTO>, ProxySelf<StreamingPlanRuleRepository> {
 
+    /**
+     * 删除
+     *
+     * @param planBaseId
+     * @return
+     */
+    int deleteByParentId(Long planBaseId);
 }

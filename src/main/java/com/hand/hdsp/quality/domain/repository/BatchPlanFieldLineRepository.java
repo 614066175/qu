@@ -23,4 +23,12 @@ public interface BatchPlanFieldLineRepository extends BaseRepository<BatchPlanFi
      * @return
      */
     List<RuleLineDTO> list(List<String> checkItemList, String ruleModel);
+
+    /**
+     * 删除
+     *
+     * @param planFieldId
+     * @return
+     */
+    int deleteByParentId(Long planFieldId);
 }

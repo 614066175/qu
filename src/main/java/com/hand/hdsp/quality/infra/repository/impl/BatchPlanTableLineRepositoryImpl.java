@@ -4,6 +4,7 @@ import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.BatchPlanTableLineDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanTableLine;
 import com.hand.hdsp.quality.domain.repository.BatchPlanTableLineRepository;
+import com.hand.hdsp.quality.infra.mapper.BatchPlanTableLineMapper;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,4 +15,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class BatchPlanTableLineRepositoryImpl extends BaseRepositoryImpl<BatchPlanTableLine, BatchPlanTableLineDTO> implements BatchPlanTableLineRepository {
 
+    private final BatchPlanTableLineMapper batchPlanTableLineMapper;
+
+    public BatchPlanTableLineRepositoryImpl(BatchPlanTableLineMapper batchPlanTableLineMapper) {
+        this.batchPlanTableLineMapper = batchPlanTableLineMapper;
+    }
+
+    @Override
+    public int deleteByParentId(Long planTableId) {
+        return batchPlanTableLineMapper.deleteByParentId(planTableId);
+    }
 }

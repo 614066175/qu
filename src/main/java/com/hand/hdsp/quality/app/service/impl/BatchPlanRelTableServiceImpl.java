@@ -41,22 +41,9 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int delete(BatchPlanRelTableDTO batchPlanRelTableDTO) {
-        List<BatchPlanRelTableLineDTO> batchPlanRelTableLineDTOList = batchPlanRelTableLineRepository.selectDTO(
-                BatchPlanRelTableLine.FIELD_PLAN_REL_TABLE_ID, batchPlanRelTableDTO.getPlanRelTableId());
-        if (batchPlanRelTableLineDTOList != null) {
-            for (BatchPlanRelTableLineDTO batchPlanRelTableLineDTO : batchPlanRelTableLineDTOList) {
-                batchPlanRelTableLineRepository.deleteDTO(batchPlanRelTableLineDTO);
-            }
-        }
-        List<PlanWarningLevel> planWarningLevelList = planWarningLevelRepository.select(PlanWarningLevel.builder()
-                .sourceId(batchPlanRelTableDTO.getPlanRelTableId())
-                .sourceType(TableNameConstant.XQUA_BATCH_PLAN_REL_TABLE).build());
-        if (planWarningLevelList != null) {
-            for (PlanWarningLevel planWarningLevel :
-                    planWarningLevelList) {
-                planWarningLevelRepository.delete(planWarningLevel);
-            }
-        }
+        batchPlanRelTableLineRepository.deleteByParentId(batchPlanRelTableDTO.getPlanRelTableId());
+        planWarningLevelRepository.deleteByParentId(batchPlanRelTableDTO.getPlanRelTableId(),
+                TableNameConstant.XQUA_BATCH_PLAN_REL_TABLE);
         return batchPlanRelTableRepository.deleteByPrimaryKey(batchPlanRelTableDTO);
     }
 

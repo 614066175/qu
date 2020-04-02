@@ -22,4 +22,12 @@ public interface BatchPlanTableRepository extends BaseRepository<BatchPlanTable,
      * @return
      */
     List<BatchPlanTableDO> list(BatchPlanTableDO batchPlanTableDO);
+
+    /**
+     * 删除
+     *
+     * @param planBaseId
+     * @return
+     */
+    int deleteByParentId(Long planBaseId);
 }

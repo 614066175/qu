@@ -1,9 +1,9 @@
 package com.hand.hdsp.quality.domain.repository;
 
-import com.hand.hdsp.core.base.repository.BaseRepository;
-import com.hand.hdsp.quality.domain.entity.RuleLine;
-import com.hand.hdsp.quality.api.dto.RuleLineDTO;
 import com.hand.hdsp.core.base.ProxySelf;
+import com.hand.hdsp.core.base.repository.BaseRepository;
+import com.hand.hdsp.quality.api.dto.RuleLineDTO;
+import com.hand.hdsp.quality.domain.entity.RuleLine;
 
 /**
  * <p>规则校验项表资源库</p>
@@ -12,4 +12,11 @@ import com.hand.hdsp.core.base.ProxySelf;
  */
 public interface RuleLineRepository extends BaseRepository<RuleLine, RuleLineDTO>, ProxySelf<RuleLineRepository> {
 
+    /**
+     * 删除
+     *
+     * @param ruleId
+     * @return
+     */
+    int deleteByParentId(Long ruleId);
 }

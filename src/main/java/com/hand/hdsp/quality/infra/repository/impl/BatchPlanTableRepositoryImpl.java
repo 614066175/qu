@@ -20,7 +20,6 @@ public class BatchPlanTableRepositoryImpl extends BaseRepositoryImpl<BatchPlanTa
 
     private BatchPlanTableMapper batchPlanTableMapper;
 
-
     public BatchPlanTableRepositoryImpl(BatchPlanTableMapper batchPlanTableMapper) {
         this.batchPlanTableMapper = batchPlanTableMapper;
     }
@@ -28,5 +27,10 @@ public class BatchPlanTableRepositoryImpl extends BaseRepositoryImpl<BatchPlanTa
     @Override
     public List<BatchPlanTableDO> list(BatchPlanTableDO batchPlanTableDO) {
         return batchPlanTableMapper.list(batchPlanTableDO);
+    }
+
+    @Override
+    public int deleteByParentId(Long planBaseId) {
+        return batchPlanTableMapper.deleteByParentId(planBaseId);
     }
 }

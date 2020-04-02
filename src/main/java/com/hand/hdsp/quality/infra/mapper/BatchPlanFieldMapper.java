@@ -2,6 +2,8 @@ package com.hand.hdsp.quality.infra.mapper;
 
 import com.hand.hdsp.quality.domain.entity.BatchPlanField;
 import io.choerodon.mybatis.common.BaseMapper;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>批数据方案-字段规则表Mapper</p>
@@ -10,4 +12,12 @@ import io.choerodon.mybatis.common.BaseMapper;
  */
 public interface BatchPlanFieldMapper extends BaseMapper<BatchPlanField> {
 
+    /**
+     * 删除
+     *
+     * @param planBaseId
+     * @return
+     */
+    @Delete("delete from xqua_batch_plan_field where plan_base_id = #{planBaseId}")
+    int deleteByParentId(@Param("planBaseId") Long planBaseId);
 }

@@ -2,6 +2,8 @@ package com.hand.hdsp.quality.infra.mapper;
 
 import com.hand.hdsp.quality.domain.entity.RuleWarningLevel;
 import io.choerodon.mybatis.common.BaseMapper;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>规则告警等级表Mapper</p>
@@ -10,4 +12,12 @@ import io.choerodon.mybatis.common.BaseMapper;
  */
 public interface RuleWarningLevelMapper extends BaseMapper<RuleWarningLevel> {
 
+    /**
+     * 删除
+     *
+     * @param ruleLineId
+     * @return
+     */
+    @Delete("delete from xqua_rule_warning_level where rule_line_id = #{ruleLineId}")
+    int deleteByParentId(@Param("ruleLineId") Long ruleLineId);
 }

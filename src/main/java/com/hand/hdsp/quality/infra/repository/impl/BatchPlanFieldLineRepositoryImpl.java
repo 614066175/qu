@@ -28,4 +28,9 @@ public class BatchPlanFieldLineRepositoryImpl extends BaseRepositoryImpl<BatchPl
     public List<RuleLineDTO> list(List<String> checkItemList, String ruleModel) {
         return batchPlanFieldLineMapper.list(checkItemList, ruleModel);
     }
+
+    @Override
+    public int deleteByParentId(Long planFieldId) {
+        return batchPlanFieldLineMapper.deleteByParentId(planFieldId);
+    }
 }

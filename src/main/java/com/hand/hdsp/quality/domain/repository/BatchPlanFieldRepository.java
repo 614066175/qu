@@ -12,4 +12,11 @@ import com.hand.hdsp.quality.domain.entity.BatchPlanField;
  */
 public interface BatchPlanFieldRepository extends BaseRepository<BatchPlanField, BatchPlanFieldDTO>, ProxySelf<BatchPlanFieldRepository> {
 
+    /**
+     * 删除
+     *
+     * @param planBaseId
+     * @return
+     */
+    int deleteByParentId(Long planBaseId);
 }

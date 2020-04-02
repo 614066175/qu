@@ -4,6 +4,7 @@ import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.StreamingPlanRuleDTO;
 import com.hand.hdsp.quality.domain.entity.StreamingPlanRule;
 import com.hand.hdsp.quality.domain.repository.StreamingPlanRuleRepository;
+import com.hand.hdsp.quality.infra.mapper.StreamingPlanRuleMapper;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,4 +15,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class StreamingPlanRuleRepositoryImpl extends BaseRepositoryImpl<StreamingPlanRule, StreamingPlanRuleDTO> implements StreamingPlanRuleRepository {
 
+    private final StreamingPlanRuleMapper streamingPlanRuleMapper;
+
+    public StreamingPlanRuleRepositoryImpl(StreamingPlanRuleMapper streamingPlanRuleMapper) {
+        this.streamingPlanRuleMapper = streamingPlanRuleMapper;
+    }
+
+    @Override
+    public int deleteByParentId(Long planBaseId) {
+        return streamingPlanRuleMapper.deleteByParentId(planBaseId);
+    }
 }

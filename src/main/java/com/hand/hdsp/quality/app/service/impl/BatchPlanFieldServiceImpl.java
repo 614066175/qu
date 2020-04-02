@@ -1,15 +1,11 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanFieldService;
-import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldLineRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * <p>批数据方案-字段规则表应用服务默认实现</p>
@@ -30,15 +26,7 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int delete(BatchPlanFieldDTO batchPlanFieldDTO) {
-        List<BatchPlanFieldLineDTO> batchPlanFieldLineDTOList =
-                batchPlanFieldLineRepository.selectDTO(BatchPlanFieldLine.FIELD_PLAN_FIELD_ID,
-                        batchPlanFieldDTO.getPlanFieldId());
-        if (batchPlanFieldLineDTOList != null) {
-            for (BatchPlanFieldLineDTO batchPlanFieldLineDTO :
-                    batchPlanFieldLineDTOList) {
-                batchPlanFieldLineRepository.deleteDTO(batchPlanFieldLineDTO);
-            }
-        }
+        batchPlanFieldLineRepository.deleteByParentId(batchPlanFieldDTO.getPlanFieldId());
         return batchPlanFieldRepository.deleteByPrimaryKey(batchPlanFieldDTO);
     }
 }

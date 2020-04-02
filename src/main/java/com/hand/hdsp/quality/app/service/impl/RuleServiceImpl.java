@@ -108,15 +108,9 @@ public class RuleServiceImpl implements RuleService {
         List<RuleLineDTO> ruleLineDTOList = ruleLineRepository.selectDTO(RuleLine.FIELD_RULE_ID, ruleDTO.getRuleId());
         if (ruleLineDTOList != null) {
             for (RuleLineDTO ruleLineDTO : ruleLineDTOList) {
-                ruleLineRepository.deleteDTO(ruleLineDTO);
-                List<RuleWarningLevelDTO> ruleWarningLevelDTOList =
-                        ruleWarningLevelRepository.selectDTO(RuleWarningLevel.FIELD_RULE_LINE_ID, ruleLineDTO.getRuleLineId());
-                if (ruleWarningLevelDTOList != null) {
-                    for (RuleWarningLevelDTO ruleWarningLevelDTO : ruleWarningLevelDTOList) {
-                        ruleWarningLevelRepository.deleteDTO(ruleWarningLevelDTO);
-                    }
-                }
+                ruleWarningLevelRepository.deleteByParentId(ruleLineDTO.getRuleLineId());
             }
+            ruleLineRepository.deleteByParentId(ruleDTO.getRuleId());
         }
         return ruleRepository.deleteByPrimaryKey(ruleDTO);
     }

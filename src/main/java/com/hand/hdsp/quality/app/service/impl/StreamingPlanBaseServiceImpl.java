@@ -44,17 +44,10 @@ public class StreamingPlanBaseServiceImpl implements StreamingPlanBaseService {
                 StreamingPlanRule.FIELD_PLAN_BASE_ID, streamingPlanBaseDTO);
         if (streamingPlanRuleDTOList != null) {
             for (StreamingPlanRuleDTO streamingPlanRuleDTO : streamingPlanRuleDTOList) {
-                List<PlanWarningLevel> planWarningLevelList =
-                        planWarningLevelRepository.select(PlanWarningLevel.builder()
-                                .sourceId(streamingPlanRuleDTO.getPlanRuleId())
-                                .sourceType(TableNameConstant.XQUA_STREAMING_PLAN_RULE).build());
-                if (planWarningLevelList != null) {
-                    for (PlanWarningLevel planWarningLevel : planWarningLevelList) {
-                        planWarningLevelRepository.delete(planWarningLevel);
-                    }
-                }
-                streamingPlanRuleRepository.deleteDTO(streamingPlanRuleDTO);
+                planWarningLevelRepository.deleteByParentId(streamingPlanRuleDTO.getPlanRuleId(),
+                        TableNameConstant.XQUA_STREAMING_PLAN_RULE);
             }
+            streamingPlanRuleRepository.deleteByParentId(streamingPlanBaseDTO.getPlanBaseId());
         }
         return streamingPlanBaseRepository.deleteByPrimaryKey(streamingPlanBaseDTO);
     }

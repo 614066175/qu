@@ -12,4 +12,12 @@ import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
  */
 public interface PlanWarningLevelRepository extends BaseRepository<PlanWarningLevel, PlanWarningLevelDTO>, ProxySelf<PlanWarningLevelRepository> {
 
+    /**
+     * 删除
+     *
+     * @param sourceId
+     * @param sourceType
+     * @return
+     */
+    int deleteByParentId(Long sourceId, String sourceType);
 }

@@ -48,18 +48,10 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
                         BatchPlanTableLine.FIELD_PLAN_TABLE_ID, batchPlanTableDTO.getPlanTableId());
         if (batchPlanTableLineDTOList != null) {
             for (BatchPlanTableLineDTO batchPlanTableLineDTO : batchPlanTableLineDTOList) {
-                List<PlanWarningLevel> planWarningLevelList =
-                        planWarningLevelRepository.select(PlanWarningLevel.builder()
-                                .sourceId(batchPlanTableLineDTO.getPlanTableLineId())
-                                .sourceType(TableNameConstant.XQUA_BATCH_PLAN_TABLE_LINE).build());
-                if (planWarningLevelList != null) {
-                    for (PlanWarningLevel planWarningLevel :
-                            planWarningLevelList) {
-                        planWarningLevelRepository.delete(planWarningLevel);
-                    }
-                }
-                batchPlanTableLineRepository.deleteDTO(batchPlanTableLineDTO);
+                planWarningLevelRepository.deleteByParentId(batchPlanTableLineDTO.getPlanTableLineId(),
+                        TableNameConstant.XQUA_BATCH_PLAN_TABLE_LINE);
             }
+            batchPlanTableLineRepository.deleteByParentId(batchPlanTableDTO.getPlanTableId());
         }
         return batchPlanTableRepository.deleteByPrimaryKey(batchPlanTableDTO);
     }

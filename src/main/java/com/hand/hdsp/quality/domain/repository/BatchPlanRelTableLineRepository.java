@@ -12,4 +12,11 @@ import com.hand.hdsp.quality.domain.entity.BatchPlanRelTableLine;
  */
 public interface BatchPlanRelTableLineRepository extends BaseRepository<BatchPlanRelTableLine, BatchPlanRelTableLineDTO>, ProxySelf<BatchPlanRelTableLineRepository> {
 
+    /**
+     * 删除
+     *
+     * @param planRelTableId
+     * @return
+     */
+    int deleteByParentId(Long planRelTableId);
 }
