@@ -1,8 +1,7 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import static java.util.Map.Entry.comparingByValue;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
@@ -18,6 +17,8 @@ import com.hand.hdsp.quality.domain.repository.BatchResultRepository;
 import com.hand.hdsp.quality.domain.repository.BatchResultRuleRepository;
 import com.hand.hdsp.quality.infra.constant.WarnLevel;
 import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
+import com.hand.hdsp.quality.infra.util.TimeToString;
+import com.hand.hdsp.quality.infra.vo.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -52,48 +53,92 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
     }
 
     @Override
-    public BatchResultDTO showReport(BatchResultDTO batchResultDTO) {
-        BatchResultDTO batchResultDTOs = this.selectDTOByCondition(
-                Condition.builder(BatchResult.class)
-                        .where(Sqls.custom()
-                                .andEqualTo(BatchResult.FIELD_PLAN_ID, batchResultDTO.getPlanId(), true)
-                                .andEqualTo(BatchResult.FIELD_RESULT_ID,batchResultDTO.getResultId(),true)
-                                .andEqualTo(BatchResult.FIELD_TENANT_ID, batchResultDTO.getTenantId(), true))
-                        .build()
-        ).get(0);
-        if (batchResultDTOs == null){
-            throw new CommonException("reslult not exists");
-        }
-        batchResultDTOs.setPlanName(batchPlanRepository.selectByPrimaryKey(batchResultDTO.getPlanId()).getPlanName());
-        List<BatchResultBaseDTO> batchResultBases = batchResultBaseRepository.selectDTOByCondition(
-                Condition.builder(BatchResultBase.class)
-                        .where(Sqls.custom()
-                                .andEqualTo(BatchResultBase.FIELD_RESULT_ID, batchResultDTOs.getResultId(), true))
-                        .build()
-        );
-        if (batchResultBases.isEmpty()){
-            throw new CommonException("plan has not reslult base");
-        }
-        batchResultBases.stream().forEach( b ->{
-            int red = batchResultRuleRepository.selectCount(BatchResultRule.builder().tableName(b.getTableName()).warningLevel(WarnLevel.RED).build());
-            b.setRedWarnCounts(Long.valueOf(red));
-            int orange = batchResultRuleRepository.selectCount(BatchResultRule.builder().tableName(b.getTableName()).warningLevel(WarnLevel.ORANGE).build());
-            b.setOrangeWarnCounts(Long.valueOf(orange));
-        });
-        List<Long> resultBaseIds = batchResultBases.stream().map(BatchResultBaseDTO::getResultBaseId).collect(Collectors.toList());
-        List<BatchResultRuleDTO> batchResultRules = batchResultRuleRepository.selectDTOByCondition(
-                Condition.builder(BatchResultRule.class)
-                        .where(Sqls.custom()
-                                .andIn(BatchResultRule.FIELD_RESULT_BASE_ID, resultBaseIds))
-                        .build()
-        );
-        batchResultDTOs.setBatchResultBaseDTOS(batchResultBases);
-        batchResultDTOs.setBatchResultRuleDTOS(batchResultRules);
-        return batchResultDTOs;
+    public BatchResultDTO showResultHead(BatchResultDTO batchResultDTO) {
+        BatchResultDTO batchResult = batchResultMapper.listResultHead(batchResultDTO);
+        return batchResult;
     }
 
     @Override
     public Page<BatchResultDTO> listHistory(BatchResultDTO batchResultDTO, PageRequest pageRequest) {
         return PageHelper.doPageAndSort(pageRequest,()-> batchResultMapper.listHistory(batchResultDTO));
     }
+
+
+    @Override
+    public Map<String, Object> numberView(Long tenantId, String timeRange, Date startDate, Date endDate) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
+        Map<String, Object> resultMap = batchResultMapper.listResultMap(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd());
+        return resultMap;
+    }
+
+    @Override
+    public List<CheckTypePercentageVO> checkTypePercentage(Long tenantId, String timeRange, Date startDate, Date endDate) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
+        List<CheckTypePercentageVO> success = batchResultMapper.listSUCCESSTypeCount(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd());
+        List<CheckTypePercentageVO> all = batchResultMapper.listAllTypeCount(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd());
+        List<CheckTypePercentageVO> checkTypePercentage = new ArrayList<>();
+        if (!success.isEmpty() && !all.isEmpty()){
+            for (CheckTypePercentageVO a : all){
+                for (CheckTypePercentageVO s : success){
+                    if (a.getCheckType().equals(s.getCheckType())){
+                        checkTypePercentage.add(CheckTypePercentageVO
+                                .builder()
+                                .checkType(a.getCheckType())
+                                .percentage((s.getCountSum()*1.0)/(a.getCountSum() == 0 ? 1 : a.getCountSum()))
+                                .build());
+                    }
+                }
+            }
+        } else {
+            return Arrays.asList(new CheckTypePercentageVO());
+        }
+        return checkTypePercentage;
+    }
+
+    @Override
+    public List<Map.Entry<String, Double>> rulePercentage(Long tenantId, String timeRange, Date startDate, Date endDate, String rule) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
+        List<RuleVO> ruleVOS = batchResultMapper.listRule(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd(),rule);
+        List<RuleVO> listErrorRule = batchResultMapper.listErrorRule(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd(), rule);
+        HashMap<String, Double> ruleMap = new HashMap<>();
+        if (!ruleVOS.isEmpty() && !listErrorRule.isEmpty()){
+            for (RuleVO ruleVO : ruleVOS){
+                for (RuleVO errorRuleVO : listErrorRule){
+                    if (ruleVO.getRuleId().equals(errorRuleVO.getRuleId())){
+                        ruleMap.put(errorRuleVO.getRuleName(),errorRuleVO.getCountSum()*1.0/(ruleVO.getCountSum() == 0 ? 1 : ruleVO.getCountSum()));
+                    }
+                }
+            }
+        } else {
+            return Collections.emptyList();
+        }
+        List<Map.Entry<String, Double>> entryList = ruleMap.entrySet()
+                .stream()
+                .sorted(Collections.reverseOrder(comparingByValue()))
+                .collect(Collectors.toList());
+        return entryList;
+    }
+
+    @Override
+    public List<MarkTrendVO> markTrend(Long tenantId, String timeRange, Date startDate, Date endDate) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
+        List<MarkTrendVO> markTrendVOS = batchResultMapper.listMarkTrend(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd());
+        return markTrendVOS;
+    }
+
+    @Override
+    public List<RuleExceptionVO> daysErrorRule(Long tenantId, String timeRange, Date startDate, Date endDate) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
+        List<RuleExceptionVO> ruleExceptionVOS = batchResultMapper.listRuleException(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd());
+        return ruleExceptionVOS;
+    }
+
+    @Override
+    public List<WarningLevelVO> warningTrend(Long tenantId, String timeRange, Date startDate, Date endDate) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
+        List<WarningLevelVO> warningLevelVOS = batchResultMapper.listWarningLevel(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd());
+        return warningLevelVOS;
+    }
+
+
 }

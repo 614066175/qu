@@ -1,6 +1,9 @@
 package com.hand.hdsp.quality.api.dto;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -59,8 +62,6 @@ public class BatchResultBaseDTO extends AuditDomain {
 
     // =========================非库字段=========================
 
-    private Long redWarnCounts;
-
-    private Long orangeWarnCounts;
+    private List<ResultWaringVO> resultWaringVOS;
 
 }

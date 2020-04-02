@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.api.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultRule;
+import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -60,10 +61,6 @@ public class BatchResultDTO extends AuditDomain {
 
     @ApiModelProperty(value = "方案名称")
     private String planName;
-
-    private List<BatchResultBaseDTO> batchResultBaseDTOS;
-
-    private List<BatchResultRuleDTO> batchResultRuleDTOS;
 
     private Long ruleCount;
 

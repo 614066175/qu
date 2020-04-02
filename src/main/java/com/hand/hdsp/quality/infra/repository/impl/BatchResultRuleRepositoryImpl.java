@@ -5,6 +5,8 @@ import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultRule;
 import com.hand.hdsp.quality.domain.repository.BatchResultRuleRepository;
 import com.hand.hdsp.quality.infra.mapper.BatchResultRuleMapper;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,5 +29,17 @@ public class BatchResultRuleRepositoryImpl extends BaseRepositoryImpl<BatchResul
     @Override
     public List<BatchResultRuleDTO> selectByResultId(Long resultId) {
         return batchResultRuleMapper.selectByResultId(resultId);
+    }
+
+    @Override
+    public List<BatchResultRuleDTO> listRuleError(BatchResultRuleDTO batchResultRuleDTO) {
+        List<BatchResultRuleDTO> batchResultRuleDTOS = this.selectDTOByCondition(
+                Condition.builder(BatchResultRule.class)
+                        .where(Sqls.custom()
+                                .andEqualTo(BatchResultRule.FIELD_RESULT_BASE_ID, batchResultRuleDTO.getResultBaseId(), true)
+                                .andEqualTo(BatchResultRule.FIELD_TENANT_ID, batchResultRuleDTO.getTenantId(), true))
+                        .build()
+        );
+        return batchResultRuleDTOS;
     }
 }

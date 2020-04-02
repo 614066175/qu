@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.domain.repository;
 
+import java.util.List;
+
 import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.StreamingResultBaseDTO;
@@ -12,4 +14,11 @@ import com.hand.hdsp.quality.domain.entity.StreamingResultBase;
  */
 public interface StreamingResultBaseRepository extends BaseRepository<StreamingResultBase, StreamingResultBaseDTO>, ProxySelf<StreamingResultBaseRepository> {
 
+    /**
+     * 查看评估报告base结果表
+     *
+     * @param streamingResultBaseDTO
+     * @return StreamingResultBaseDTO
+     */
+    List<StreamingResultBaseDTO> listResultBase(StreamingResultBaseDTO streamingResultBaseDTO);
 }

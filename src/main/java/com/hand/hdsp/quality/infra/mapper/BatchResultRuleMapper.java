@@ -3,7 +3,10 @@ package com.hand.hdsp.quality.infra.mapper;
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultRule;
 import com.hand.hdsp.quality.infra.dataobject.BatchResultRuleDO;
+import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
+import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import io.choerodon.mybatis.common.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -23,4 +26,13 @@ public interface BatchResultRuleMapper extends BaseMapper<BatchResultRule> {
      * @return
      */
     List<BatchResultRuleDTO> selectByResultId(Long resultId);
+
+    /**
+     * 根据表名查询各个告警等级数
+     *
+     * @param tenantId
+     * @param tableName
+     * @return ResultWaringVO
+     */
+    List<ResultWaringVO> selectWaringLevel(@Param("tenantId") Long tenantId,@Param("tableName") String tableName);
 }

@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import java.util.Date;
+
 import com.hand.hdsp.quality.api.dto.StreamingResultDTO;
 import com.hand.hdsp.quality.domain.entity.StreamingResult;
 import com.hand.hdsp.quality.domain.repository.StreamingResultRepository;
@@ -50,6 +52,21 @@ public class StreamingResultController extends BaseController {
         return Results.success(streamingResultRepository.listAll(streamingResultDTO, pageRequest));
     }
 
+    @ApiOperation(value = "查看评估结果头")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/result-head")
+    public ResponseEntity<?> resultHead(@PathVariable(name = "organizationId") Long tenantId,
+                                        StreamingResultDTO streamingResultDTO){
+        streamingResultDTO.setTenantId(tenantId);
+        return Results.success(streamingResultRepository.showResultHead(streamingResultDTO));
+    }
+
     @ApiOperation(value = "根据分组查看对应的实时数据评估方案执行记录")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
@@ -66,7 +83,7 @@ public class StreamingResultController extends BaseController {
         return Results.success(streamingResultRepository.listHistory(streamingResultDTO, pageRequest));
     }
 
-    @ApiOperation(value = "查看评估报告")
+    @ApiOperation(value = "查看质量分数，规则总数，异常规则数")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -74,11 +91,77 @@ public class StreamingResultController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/evaluation-report")
-    public ResponseEntity<?> evaluationReport(@PathVariable(name = "organizationId") Long tenantId,
-                                              StreamingResultDTO streamingResultDTO){
-        streamingResultDTO.setTenantId(tenantId);
-        return Results.success(streamingResultRepository.showReport(streamingResultDTO));
+    @GetMapping("/number-view")
+    public ResponseEntity<?> numberView(@PathVariable(name = "organizationId") Long tenantId,
+                                        String timeRange,
+                                        Date startDate,
+                                        Date endDate){
+        return Results.success(streamingResultRepository.numberView(tenantId, timeRange, startDate, endDate));
+    }
+
+    @ApiOperation(value = "数据质量分数走势")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/mark-trend")
+    public ResponseEntity<?> markTrend(@PathVariable(name = "organizationId") Long tenantId,
+                                       String timeRange,
+                                       Date startDate,
+                                       Date endDate){
+        return Results.success(streamingResultRepository.markTrend(tenantId, timeRange, startDate, endDate));
+    }
+
+    @ApiOperation(value = "每日不同告警等级数")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/warning-trend")
+    public ResponseEntity<?> warningTrend(@PathVariable(name = "organizationId") Long tenantId,
+                                          String timeRange,
+                                          Date startDate,
+                                          Date endDate){
+        return Results.success(streamingResultRepository.warningTrend(tenantId, timeRange, startDate, endDate));
+    }
+
+    @ApiOperation(value = "主要延迟topic")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/delay-topic")
+    public ResponseEntity<?> delayTopic(@PathVariable(name = "organizationId") Long tenantId,
+                                          String timeRange,
+                                          Date startDate,
+                                          Date endDate,
+                                          String topicInfo){
+        return Results.success(streamingResultRepository.delayTopicInfo(tenantId, timeRange, startDate, endDate, topicInfo));
+    }
+
+    @ApiOperation(value = "展示不同类型异常数")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/rule-error-trend")
+    public ResponseEntity<?> delayTopic(@PathVariable(name = "organizationId") Long tenantId,
+                                        String timeRange,
+                                        Date startDate,
+                                        Date endDate){
+        return Results.success(streamingResultRepository.ruleErrorTrend(tenantId, timeRange, startDate, endDate));
     }
 
     @ApiOperation(value = "实时数据方案结果表列表")

@@ -1,9 +1,14 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
+import java.util.List;
+
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.StreamingResultBaseDTO;
 import com.hand.hdsp.quality.domain.entity.StreamingResultBase;
 import com.hand.hdsp.quality.domain.repository.StreamingResultBaseRepository;
+import com.hand.hdsp.quality.infra.mapper.StreamingResultRuleMapper;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,4 +19,26 @@ import org.springframework.stereotype.Component;
 @Component
 public class StreamingResultBaseRepositoryImpl extends BaseRepositoryImpl<StreamingResultBase, StreamingResultBaseDTO> implements StreamingResultBaseRepository {
 
+    private final StreamingResultRuleMapper streamingResultRuleMapper;
+
+    public StreamingResultBaseRepositoryImpl(StreamingResultRuleMapper streamingResultRuleMapper) {
+        this.streamingResultRuleMapper = streamingResultRuleMapper;
+    }
+
+    @Override
+    public List<StreamingResultBaseDTO> listResultBase(StreamingResultBaseDTO streamingResultBaseDTO) {
+        List<StreamingResultBaseDTO> streamingResultBases = this.selectDTOByCondition(
+                Condition.builder(StreamingResultBase.class)
+                        .where(Sqls.custom()
+                                .andEqualTo(StreamingResultBase.FIELD_RESULT_ID, streamingResultBaseDTO.getResultId(), true)
+                                .andEqualTo(StreamingResultBase.FIELD_TENANT_ID, streamingResultBaseDTO.getTenantId(), true))
+                        .build()
+        );
+        if (!streamingResultBases.isEmpty()){
+            streamingResultBases.stream().forEach( s -> {
+                s.setResultWaringVOS(streamingResultRuleMapper.selectWarnByTopic(streamingResultBaseDTO.getTenantId(),s.getTopicInfo()));
+            });
+        }
+        return streamingResultBases;
+    }
 }

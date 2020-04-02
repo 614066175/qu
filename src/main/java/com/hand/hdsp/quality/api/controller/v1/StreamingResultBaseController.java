@@ -51,6 +51,21 @@ public class StreamingResultBaseController extends BaseController {
         return Results.success(list);
     }
 
+    @ApiOperation(value = "评估结果基础信息")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/result-base")
+    public ResponseEntity<?> reseultBase(@PathVariable(name = "organizationId") Long tenantId,
+                                         StreamingResultBaseDTO streamingResultBaseDTO){
+        streamingResultBaseDTO.setTenantId(tenantId);
+        return Results.success(streamingResultBaseRepository.listResultBase(streamingResultBaseDTO));
+    }
+
     @ApiOperation(value = "实时数据方案结果表-基础信息明细")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",

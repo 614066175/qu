@@ -1,11 +1,16 @@
 package com.hand.hdsp.quality.domain.repository;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.StreamingResultDTO;
 import com.hand.hdsp.quality.domain.entity.StreamingResult;
+import com.hand.hdsp.quality.infra.vo.MarkTrendVO;
+import com.hand.hdsp.quality.infra.vo.RuleExceptionVO;
+import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
@@ -26,12 +31,12 @@ public interface StreamingResultRepository extends BaseRepository<StreamingResul
     Page<StreamingResultDTO> listAll(StreamingResultDTO streamingResultDTO, PageRequest pageRequest);
 
     /**
-     * 查看方案评估报告
+     * 查看评估方案的评估结果头
      *
      * @param streamingResultDTO
-     * @return StreamingResultDTO
+     * @return
      */
-    StreamingResultDTO showReport(StreamingResultDTO streamingResultDTO);
+    StreamingResultDTO showResultHead(StreamingResultDTO streamingResultDTO);
 
     /**
      * 根据分组查询对应的评估方案执行记录
@@ -41,4 +46,60 @@ public interface StreamingResultRepository extends BaseRepository<StreamingResul
      * @return StreamingResultDTO
      */
     Page<StreamingResultDTO> listHistory(StreamingResultDTO streamingResultDTO, PageRequest pageRequest);
+
+    /**
+     * 查看质量分数，规则总数，异常规则数
+     *
+     * @param tenantId
+     * @param timeRange
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    Map<String,Object> numberView(Long tenantId, String timeRange, Date startDate, Date endDate);
+
+    /**
+     * 数据质量分数走势
+     *
+     * @param tenantId
+     * @param timeRange
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    List<MarkTrendVO> markTrend(Long tenantId, String timeRange, Date startDate, Date endDate);
+
+    /**
+     * 不同告警等级趋势
+     *
+     * @param tenantId
+     * @param timeRange
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    List<WarningLevelVO> warningTrend(Long tenantId, String timeRange, Date startDate, Date endDate);
+
+    /**
+     * topic延迟
+     *
+     * @param tenantId
+     * @param timeRange
+     * @param startDate
+     * @param endDate
+     * @param topicInfo
+     * @return
+     */
+    List<Map<String,Object>> delayTopicInfo(Long tenantId, String timeRange, Date startDate, Date endDate,String topicInfo);
+
+    /**
+     * 展示不同类型异常数
+     *
+     * @param tenantId
+     * @param timeRange
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    List<RuleExceptionVO> ruleErrorTrend(Long tenantId, String timeRange, Date startDate, Date endDate);
 }

@@ -18,4 +18,20 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+
+    <select id="selectWarnByTopic" resultType="com.hand.hdsp.quality.infra.vo.ResultWaringVO">
+        select
+        xsrr.warning_level warningLevel,
+        count(xsrr.warning_level) countSum
+        from xqua_streaming_result_rule xsrr
+        <where>
+            <if test="tenantId != null">
+                xsrr.tenant_id = #{tenantId}
+            </if>
+            <if test="topicInfo != null">
+                and xsrr.topic_info = #{topicInfo}
+            </if>
+        </where>
+        GROUP BY xsrr.warning_level
+    </select>
 </mapper>

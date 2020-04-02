@@ -44,4 +44,20 @@
         where warning_level is not null
           and xbr.result_id = #{resultId}
     </select>
+
+    <select id="selectWaringLevel" resultType="com.hand.hdsp.quality.infra.vo.ResultWaringVO">
+        select
+        xbrr.warning_level warningLevel,
+        count(xbrr.warning_level) countSum
+        from xqua_batch_result_rule xbrr
+        <where>
+            <if test="tenantId != null ">
+                xbrr.tenant_id = #{tenantId}
+            </if>
+            <if test="tableName">
+                and xbrr.table_name = #{tableName}
+            </if>
+        </where>
+        GROUP BY xbrr.warning_level
+    </select>
 </mapper>

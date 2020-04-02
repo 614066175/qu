@@ -95,6 +95,28 @@
         ) b where a.start_date &lt; b.start_date and a.plan_id=b.plan_id)
     </select>
 
+    <select id="showResultHead" resultType="com.hand.hdsp.quality.api.dto.StreamingResultDTO">
+        select
+        <include refid="StreamingPlan_And_Result">
+            <property name="xsp" value="xsp"/>
+            <property name="xsr" value="xsr"/>
+        </include>
+        from xqua_streaming_plan xsp
+        LEFT JOIN xqua_streaming_result xsr
+        on xsp.plan_id=xsr.plan_id
+        <where>
+            <if test="tenantId != null">
+                xsr.tenant_id = #{tenantId}
+            </if>
+            <if test="planId != null">
+                and xsr.plan_id = #{planId}
+            </if>
+            <if test="resultId != null">
+                and xsr.result_id = #{resultId}
+            </if>
+        </where>
+    </select>
+
     <select id="listHistory" resultType="com.hand.hdsp.quality.api.dto.StreamingResultDTO">
         select
         <include refid="StreamingPlan_And_Result">
@@ -111,7 +133,7 @@
         left join xqua_streaming_result_base xsrb
         on xsr.result_id=xsrb.result_id
         <where>
-            xsr.plan_status != 'NOTASSESS'
+            xsr.plan_status != '${@com.hand.hdsp.quality.infra.constant.PlanStatus@NOTACCESS}'
             <if test="groupId != null">
                 and xpg.group_id = #{groupId}
             </if>
@@ -128,4 +150,115 @@
         </where>
     </select>
 
+    <select id="listResultMap" resultType="java.util.Map">
+        select ROUND(avg(xsr.mark),1) mark,
+        sum(xsrb.rule_count) ruleCount,
+        sum(xsrb.exception_rule_count) exceptionRuleCount
+        from xqua_streaming_result xsr
+        left join xqua_streaming_result_base xsrb
+        on xsr.result_id=xsrb.result_id
+        <where>
+            <if test="tenantId != null">
+                xsr.tenant_id = #{tenantId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                and xsr.end_date &gt;=  #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and xsr.end_date &lt;=  #{endDate}
+            </if>
+        </where>
+    </select>
+
+    <select id="listMarkTrend" resultType="com.hand.hdsp.quality.infra.vo.MarkTrendVO">
+        select date_format(xsr.end_date, '%Y-%m-%d') date,avg(xsr.mark) mark
+        from xqua_streaming_result xsr
+        <where>
+            <if test="tenantId != null">
+                xsr.tenant_id = #{tenantId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                and xsr.end_date &gt;=  #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and xsr.end_date &lt;=  #{endDate}
+            </if>
+        </where>
+        group by date_format(xsr.end_date, '%Y-%m-%d')
+        order by date_format(xsr.end_date, '%Y-%m-%d') asc
+    </select>
+
+    <select id="listWarningLevel" resultType="com.hand.hdsp.quality.infra.vo.WarningLevelVO">
+        select date_format(xsr.end_date, '%Y-%m-%d') date,
+        xsrr.warning_level warningLevel,
+        count(xsrr.warning_level) levelCount
+        from xqua_streaming_result xsr
+        INNER JOIN xqua_streaming_result_base xsrb
+        on xsr.result_id=xsrb.result_id
+        INNER JOIN xqua_streaming_result_rule xsrr
+        on xsrb.result_base_id=xsrr.result_base_id
+        <where>
+            <if test="tenantId != null">
+                xsr.tenant_id = #{tenantId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                and xsr.end_date &gt;=  #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and xsr.end_date &lt;=  #{endDate}
+            </if>
+        </where>
+        group by date_format(xsr.end_date, '%Y-%m-%d'),xsrr.warning_level
+        order by date_format(xsr.end_date, '%Y-%m-%d') asc
+    </select>
+
+    <select id="listDelayTopic" resultType="java.util.Map">
+        select xsrr.topic_info topicInfo,
+        count(xsrr.topic_info) sumCount
+        from xqua_streaming_result xsr
+        LEFT JOIN xqua_streaming_result_base xsrb
+        on xsr.result_id=xsrb.result_id
+        LEFT JOIN xqua_streaming_result_rule xsrr
+        on xsrb.result_base_id=xsrr.result_base_id
+        <where>
+            <if test="tenantId != null">
+                xsr.tenant_id = #{tenantId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                and xsr.end_date &gt;=  #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and xsr.end_date &lt;=  #{endDate}
+            </if>
+            <if test="topicInfo != null">
+                <bind name="topicInfo" value="'%' + topicInfo + '%'"/>
+                xsrr.topic_info like #{topicInfo}
+            </if>
+        </where>
+        GROUP BY xsrr.topic_info
+    </select>
+
+    <select id="listRuleError" resultType="com.hand.hdsp.quality.infra.vo.RuleExceptionVO">
+        select date_format(xsr.end_date, '%Y-%m-%d') date,
+        xsrr.rule_type ruleType,
+        SUM(xsrb.exception_rule_count) exceptionRuleCount
+        from xqua_streaming_result xsr
+        INNER JOIN xqua_streaming_result_base xsrb
+        on xsr.result_id=xsrb.result_id
+        INNER JOIN xqua_streaming_result_rule xsrr
+        on xsrb.result_base_id=xsrr.result_base_id
+        <where>
+            <if test="tenantId != null">
+                xsr.tenant_id = #{tenantId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                and xsr.end_date &gt;=  #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and xsr.end_date &lt;=  #{endDate}
+            </if>
+        </where>
+        group by date_format(xsr.end_date, '%Y-%m-%d'),xsrr.rule_type
+        order by date_format(xsr.end_date, '%Y-%m-%d') asc
+    </select>
 </mapper>

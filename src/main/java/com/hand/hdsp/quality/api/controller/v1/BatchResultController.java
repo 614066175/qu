@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import java.util.Date;
+
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
 import com.hand.hdsp.quality.app.service.BatchResultService;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
@@ -69,7 +71,7 @@ public class BatchResultController extends BaseController {
         return Results.success(batchResultRepository.listHistory(batchResultDTO, pageRequest));
     }
 
-    @ApiOperation(value = "查看评估报告")
+    @ApiOperation(value = "查看评估报告结果头")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -77,11 +79,108 @@ public class BatchResultController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/evaluation-report")
-    public ResponseEntity<?> evaluationReport(@PathVariable(name = "organizationId") Long tenantId,
-                                              BatchResultDTO batchResultDTO){
+    @GetMapping("/result-head")
+    public ResponseEntity<?> resultHead(@PathVariable(name = "organizationId") Long tenantId,
+                                        BatchResultDTO batchResultDTO){
         batchResultDTO.setTenantId(tenantId);
-        return Results.success(batchResultRepository.showReport(batchResultDTO));
+        return Results.success(batchResultRepository.showResultHead(batchResultDTO));
+    }
+
+    @ApiOperation(value = "查看质量分数，规则总数，异常规则数")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/number-view")
+    public ResponseEntity<?> numberView(@PathVariable(name = "organizationId") Long tenantId,
+                                        String timeRange,
+                                        Date startDate,
+                                        Date endDate){
+        return Results.success(batchResultRepository.numberView(tenantId, timeRange, startDate, endDate));
+    }
+
+    @ApiOperation(value = "数据质量评估统计")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/check-type-percentage")
+    public ResponseEntity<?> checkTypePercentage(@PathVariable(name = "organizationId") Long tenantId,
+                                                 String timeRange,
+                                                 Date startDate,
+                                                 Date endDate){
+        return Results.success(batchResultRepository.checkTypePercentage(tenantId, timeRange, startDate, endDate));
+    }
+
+    @ApiOperation(value = "主要可改进指标（规则）")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/rule-percentage")
+    public ResponseEntity<?> rulePercentage(@PathVariable(name = "organizationId") Long tenantId,
+                                            String timeRange,
+                                            Date startDate,
+                                            Date endDate,
+                                            String rule){
+        return Results.success(batchResultRepository.rulePercentage(tenantId, timeRange, startDate, endDate, rule));
+    }
+
+    @ApiOperation(value = "数据质量分数走势")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/mark-trend")
+    public ResponseEntity<?> markTrend(@PathVariable(name = "organizationId") Long tenantId,
+                                       String timeRange,
+                                       Date startDate,
+                                       Date endDate){
+        return Results.success(batchResultRepository.markTrend(tenantId, timeRange, startDate, endDate));
+    }
+
+    @ApiOperation(value = "表级，表间，字段级异常规则数")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/error-rule-trend")
+    public ResponseEntity<?> daysErrorRule(@PathVariable(name = "organizationId") Long tenantId,
+                                           String timeRange,
+                                           Date startDate,
+                                           Date endDate){
+        return Results.success(batchResultRepository.daysErrorRule(tenantId, timeRange, startDate, endDate));
+    }
+
+    @ApiOperation(value = "每日不同告警等级数")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/warning-trend")
+    public ResponseEntity<?> warningTrend(@PathVariable(name = "organizationId") Long tenantId,
+                                          String timeRange,
+                                          Date startDate,
+                                          Date endDate){
+        return Results.success(batchResultRepository.warningTrend(tenantId, timeRange, startDate, endDate));
     }
 
     @ApiOperation(value = "查看运行日志")

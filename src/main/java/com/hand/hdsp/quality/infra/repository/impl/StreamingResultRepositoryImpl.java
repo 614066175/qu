@@ -1,6 +1,8 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
@@ -16,6 +18,11 @@ import com.hand.hdsp.quality.domain.repository.StreamingResultRepository;
 import com.hand.hdsp.quality.domain.repository.StreamingResultRuleRepository;
 import com.hand.hdsp.quality.infra.constant.WarnLevel;
 import com.hand.hdsp.quality.infra.mapper.StreamingResultMapper;
+import com.hand.hdsp.quality.infra.util.TimeToString;
+import com.hand.hdsp.quality.infra.vo.MarkTrendVO;
+import com.hand.hdsp.quality.infra.vo.RuleExceptionVO;
+import com.hand.hdsp.quality.infra.vo.StringTimeVO;
+import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -50,48 +57,48 @@ public class StreamingResultRepositoryImpl extends BaseRepositoryImpl<StreamingR
     }
 
     @Override
-    public StreamingResultDTO showReport(StreamingResultDTO streamingResultDTO) {
-        StreamingResultDTO streamingResultDTOs = this.selectDTOByCondition(
-                Condition.builder(StreamingResult.class)
-                        .where(Sqls.custom()
-                                .andEqualTo(StreamingResult.FIELD_PLAN_ID, streamingResultDTO.getPlanId(), true)
-                                .andEqualTo(StreamingResult.FIELD_RESULT_ID,streamingResultDTO.getResultId(),true)
-                                .andEqualTo(StreamingResult.FIELD_TENANT_ID, streamingResultDTO.getTableId(), true))
-                        .build()).get(0);
-        if (streamingResultDTOs == null){
-            throw new CommonException("reslult not exists");
-        }
-        streamingResultDTOs.setPlanName(streamingPlanRepository.selectByPrimaryKey(streamingResultDTO.getPlanId()).getPlanName());
-        List<StreamingResultBaseDTO> streamingResultBases = streamingResultBaseRepository.selectDTOByCondition(
-                Condition.builder(StreamingResultBase.class)
-                        .where(Sqls.custom()
-                                .andEqualTo(StreamingResultBase.FIELD_RESULT_ID, streamingResultDTOs.getResultId(), true))
-                        .build()
-        );
-        if (streamingResultBases.isEmpty()){
-            throw new CommonException("plan has not reslult base");
-        }
-        streamingResultBases.stream().forEach( s ->{
-            int red = streamingResultRuleRepository.selectCount(StreamingResultRule.builder().topicInfo(s.getTopicInfo()).warningLevel(WarnLevel.RED).build());
-            s.setRedWarnCounts(Long.valueOf(red));
-            int orange = streamingResultRuleRepository.selectCount(StreamingResultRule.builder().topicInfo(s.getTopicInfo()).warningLevel(WarnLevel.ORANGE).build());
-            s.setOrangeWarnCounts(Long.valueOf(orange));
-                }
-        );
-        List<Long> resultBaseIds = streamingResultBases.stream().map(StreamingResultBaseDTO::getResultBaseId).collect(Collectors.toList());
-        List<StreamingResultRuleDTO> streamingResultRules = streamingResultRuleRepository.selectDTOByCondition(
-                Condition.builder(StreamingResultRule.class)
-                        .where(Sqls.custom()
-                                .andIn(StreamingResultRule.FIELD_RESULT_BASE_ID, resultBaseIds))
-                        .build()
-        );
-        streamingResultDTOs.setStreamingResultBaseDTOS(streamingResultBases);
-        streamingResultDTOs.setStreamingResultRuleDTOS(streamingResultRules);
-        return streamingResultDTOs;
+    public StreamingResultDTO showResultHead(StreamingResultDTO streamingResultDTO) {
+        StreamingResultDTO resultDTO = streamingResultMapper.showResultHead(streamingResultDTO);
+        return resultDTO;
     }
 
     @Override
     public Page<StreamingResultDTO> listHistory(StreamingResultDTO streamingResultDTO, PageRequest pageRequest) {
         return PageHelper.doPageAndSort(pageRequest,()-> streamingResultMapper.listHistory(streamingResultDTO));
+    }
+
+    @Override
+    public Map<String, Object> numberView(Long tenantId, String timeRange, Date startDate, Date endDate) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
+        Map<String, Object> resultMap = streamingResultMapper.listResultMap(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd());
+        return resultMap;
+    }
+
+    @Override
+    public List<MarkTrendVO> markTrend(Long tenantId, String timeRange, Date startDate, Date endDate) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
+        List<MarkTrendVO> markTrendVOS = streamingResultMapper.listMarkTrend(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd());
+        return markTrendVOS;
+    }
+
+    @Override
+    public List<WarningLevelVO> warningTrend(Long tenantId, String timeRange, Date startDate, Date endDate) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
+        List<WarningLevelVO> warningLevelVOS = streamingResultMapper.listWarningLevel(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd());
+        return warningLevelVOS;
+    }
+
+    @Override
+    public List<Map<String, Object>> delayTopicInfo(Long tenantId, String timeRange, Date startDate, Date endDate, String topicInfo) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
+        List<Map<String, Object>> listDelayTopic = streamingResultMapper.listDelayTopic(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd(), topicInfo);
+        return listDelayTopic;
+    }
+
+    @Override
+    public List<RuleExceptionVO> ruleErrorTrend(Long tenantId, String timeRange, Date startDate, Date endDate) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
+        List<RuleExceptionVO> ruleExceptionVOS = streamingResultMapper.listRuleError(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd());
+        return ruleExceptionVOS;
     }
 }

@@ -95,6 +95,28 @@
         ) b where a.start_date &lt; b.start_date and a.plan_id=b.plan_id)
     </select>
 
+    <select id="listResultHead" resultType="com.hand.hdsp.quality.api.dto.BatchResultDTO">
+        select
+        <include refid="Plan_And_Result">
+            <property name="xbp" value="xbp"/>
+            <property name="xbr" value="xbr"/>
+        </include>
+        from xqua_batch_plan xbp
+        LEFT JOIN xqua_batch_result xbr
+        on xbp.plan_id=xbr.plan_id
+        <where>
+            <if test="tenantId != null">
+                xbr.tenant_id = #{tenantId}
+            </if>
+            <if test="planId != null">
+                and xbr.plan_id = #{planId}
+            </if>
+            <if test="resultId != null">
+                and xbr.result_id = #{resultId}
+            </if>
+        </where>
+    </select>
+
     <select id="listHistory" resultType="com.hand.hdsp.quality.api.dto.BatchResultDTO">
         select
         <include refid="Plan_And_Result">
@@ -111,7 +133,7 @@
         left join xqua_batch_result_base xbrb
         on xbr.result_id=xbrb.result_id
         <where>
-            xbr.plan_status != 'NOTASSESS'
+            xbr.plan_status != '${@com.hand.hdsp.quality.infra.constant.PlanStatus@NOTACCESS}'
             <if test="groupId != null and groupId != 0">
                 and xpg.group_id = #{groupId}
             </if>
@@ -126,6 +148,315 @@
                 and xbr.plan_status = #{planStatus}
             </if>
         </where>
+    </select>
+
+    <select id="listResultMap" resultType="java.util.Map">
+        select ROUND(avg(xbr.mark),1) mark,
+        sum(xbrb.rule_count) ruleCount,
+        sum(exception_rule_count) exceptionRuleCount
+        from xqua_batch_result xbr
+        left join xqua_batch_result_base xbrb
+        on xbr.result_id=xbrb.result_id
+        <where>
+            <if test="tenantId != null">
+                xbr.tenant_id = #{tenantId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                and xbr.end_date &gt;=  #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and xbr.end_date &lt;=  #{endDate}
+            </if>
+        </where>
+    </select>
+
+    <select id="listSUCCESSTypeCount" resultType="com.hand.hdsp.quality.infra.vo.CheckTypePercentageVO">
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@COMPLETENESS}' checkType,
+        count(1) countSum
+        from xqua_rule xr
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xr.rule_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xbr.plan_status='${@com.hand.hdsp.quality.infra.constant.PlanStatus@SUCCESS}'
+        and xr.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@COMPLETENESS}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        union
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@UNIFORMITY}' checkType,
+        count(1) countSum
+        from xqua_rule xr
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xr.rule_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xbr.plan_status='${@com.hand.hdsp.quality.infra.constant.PlanStatus@SUCCESS}'
+        and xr.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@UNIFORMITY}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        union
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@ACCURACY}' checkType,
+        count(1) countSum
+        from xqua_rule xr
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xr.rule_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xbr.plan_status='${@com.hand.hdsp.quality.infra.constant.PlanStatus@SUCCESS}'
+        and xr.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@ACCURACY}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        union
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@STANDARD}' checkType,
+        count(1) countSum
+        from xqua_rule xr
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xr.rule_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xbr.plan_status='${@com.hand.hdsp.quality.infra.constant.PlanStatus@SUCCESS}'
+        and xr.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@STANDARD}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+    </select>
+
+    <select id="listAllTypeCount" resultType="com.hand.hdsp.quality.infra.vo.CheckTypePercentageVO">
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@COMPLETENESS}' checkType,
+        count(1) countSum
+        from xqua_rule xr
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xr.rule_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xr.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@COMPLETENESS}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        union
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@UNIFORMITY}' checkType,
+        count(1) countSum
+        from xqua_rule xr
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xr.rule_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xr.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@UNIFORMITY}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        union
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@ACCURACY}' checkType,
+        count(1) countSum
+        from xqua_rule xr
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xr.rule_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xr.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@ACCURACY}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        union
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@STANDARD}' checkType,
+        count(1) countSum
+        from xqua_rule xr
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xr.rule_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xr.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@STANDARD}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+    </select>
+
+    <select id="listRule" resultType="com.hand.hdsp.quality.infra.vo.RuleVO">
+        select xr.rule_id ruleId,xr.rule_name ruleName,SUM(xbrb.rule_count) countSum
+        from xqua_batch_result xbr
+        inner join xqua_batch_result_base xbrb
+        on xbr.result_id=xbrb.result_id
+        inner join xqua_batch_result_rule xbrr
+        on xbrb.result_base_id=xbrr.result_base_id
+        inner join xqua_rule xr
+        on xbrr.rule_id=xr.rule_id
+        <where>
+            <if test="tenantId != null">
+                xbr.tenant_id = #{tenantId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                and xbr.end_date &gt;=  #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and xbr.end_date &lt;=  #{endDate}
+            </if>
+            <if test="rule != null">
+                <bind name="rule" value="'%' + rule + '%'"/>
+                and (xr.rule_name like #{rule} or xr.rule_code like #{rule})
+            </if>
+        </where>
+        GROUP BY xr.rule_id,xr.rule_name
+    </select>
+
+    <select id="listErrorRule" resultType="com.hand.hdsp.quality.infra.vo.RuleVO">
+        select xr.rule_id ruleId,xr.rule_name ruleName,SUM(xbrb.exception_rule_count) countSum
+        from xqua_batch_result xbr
+        inner join xqua_batch_result_base xbrb
+        on xbr.result_id=xbrb.result_id
+        inner join xqua_batch_result_rule xbrr
+        on xbrb.result_base_id=xbrr.result_base_id
+        inner join xqua_rule xr
+        on xbrr.rule_id=xr.rule_id
+        <where>
+            <if test="tenantId != null">
+                xbr.tenant_id = #{tenantId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                and xbr.end_date &gt;=  #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and xbr.end_date &lt;=  #{endDate}
+            </if>
+            <if test="rule != null">
+                <bind name="rule" value="'%' + rule + '%'"/>
+                and (xr.rule_name like #{rule} or xr.rule_code like #{rule})
+            </if>
+        </where>
+        GROUP BY xr.rule_id,xr.rule_name
+    </select>
+
+    <select id="listMarkTrend" resultType="com.hand.hdsp.quality.infra.vo.MarkTrendVO">
+        select date_format(xbr.end_date, '%Y-%m-%d') date,avg(xbr.mark) mark
+        from xqua_batch_result xbr
+        <where>
+            <if test="tenantId != null">
+                xbr.tenant_id = #{tenantId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                and xbr.end_date &gt;=  #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and xbr.end_date &lt;=  #{endDate}
+            </if>
+        </where>
+        group by date_format(xbr.end_date, '%Y-%m-%d')
+        order by date_format(xbr.end_date, '%Y-%m-%d') asc
+    </select>
+
+    <select id="listRuleException" resultType="com.hand.hdsp.quality.infra.vo.RuleExceptionVO">
+        select  date_format(xbr.end_date, '%Y-%m-%d') date,
+        xbrr.rule_type ruleType,
+        SUM(xbrb.exception_rule_count) exceptionRuleCount
+        from xqua_batch_result xbr
+        INNER JOIN xqua_batch_result_base xbrb
+        on xbr.result_id=xbrb.result_id
+        INNER JOIN xqua_batch_result_rule xbrr
+        on xbrb.result_base_id=xbrr.result_base_id
+        <where>
+            <if test="tenantId != null">
+                xbr.tenant_id = #{tenantId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                and xbr.end_date &gt;=  #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and xbr.end_date &lt;=  #{endDate}
+            </if>
+        </where>
+        group by date_format(xbr.end_date, '%Y-%m-%d'),xbrr.rule_type
+        order by date_format(xbr.end_date, '%Y-%m-%d') asc
+    </select>
+
+    <select id="listWarningLevel" resultType="com.hand.hdsp.quality.infra.vo.WarningLevelVO">
+        select date_format(xbr.end_date, '%Y-%m-%d') date,
+        xbrr.warning_level warningLevel,
+        count(xbrr.warning_level) levelCount
+        from xqua_batch_result xbr
+        INNER JOIN xqua_batch_result_base xbrb
+        on xbr.result_id=xbrb.result_id
+        INNER JOIN xqua_batch_result_rule xbrr
+        on xbrb.result_base_id=xbrr.result_base_id
+        <where>
+            <if test="tenantId != null">
+                xbr.tenant_id = #{tenantId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                and xbr.end_date &gt;=  #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and xbr.end_date &lt;=  #{endDate}
+            </if>
+        </where>
+        group by date_format(xbr.end_date, '%Y-%m-%d'),xbrr.warning_level
+        order by date_format(xbr.end_date, '%Y-%m-%d') asc
+
     </select>
 
 </mapper>

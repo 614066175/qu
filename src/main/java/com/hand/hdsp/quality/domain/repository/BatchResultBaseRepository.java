@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.domain.repository;
 
+import java.util.List;
+
 import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.BatchResultBaseDTO;
@@ -12,4 +14,11 @@ import com.hand.hdsp.quality.domain.entity.BatchResultBase;
  */
 public interface BatchResultBaseRepository extends BaseRepository<BatchResultBase, BatchResultBaseDTO>, ProxySelf<BatchResultBaseRepository> {
 
+    /**
+     * 查看评估报告结果base表信息
+     *
+     * @param batchResultBaseDTO
+     * @return
+     */
+    List<BatchResultBaseDTO> listResultBase(BatchResultBaseDTO batchResultBaseDTO);
 }

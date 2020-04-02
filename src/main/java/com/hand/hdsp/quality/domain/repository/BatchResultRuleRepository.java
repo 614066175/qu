@@ -21,4 +21,11 @@ public interface BatchResultRuleRepository extends BaseRepository<BatchResultRul
      * @return
      */
     List<BatchResultRuleDTO> selectByResultId(Long resultId);
+
+    /**
+     * 查询出各级规则错误信息
+     *
+     * @return BatchResultRuleDTO
+     */
+    List<BatchResultRuleDTO> listRuleError(BatchResultRuleDTO batchResultRuleDTO);
 }
