@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.api.controller.v1;
 import java.util.Date;
 
 import com.hand.hdsp.quality.api.dto.StreamingResultDTO;
+import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.StreamingResult;
 import com.hand.hdsp.quality.domain.repository.StreamingResultRepository;
 import io.choerodon.core.domain.Page;
@@ -11,10 +12,7 @@ import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +24,7 @@ import springfox.documentation.annotations.ApiIgnore;
  *
  * @author feng.liu01@hand-china.com 2020-03-24 16:19:50
  */
+@Api(tags = SwaggerTags.STREAMING_RESULT)
 @RestController("streamingResultController.v1")
 @RequestMapping("/v1/{organizationId}/streaming-results")
 public class StreamingResultController extends BaseController {

@@ -50,7 +50,7 @@ public class StreamingPlanRepositoryImpl extends BaseRepositoryImpl<StreamingPla
         planGroups.stream().forEach(p ->{
             getGroup(p.getParentGroupId(),planGroups);
         });
-        planGroups.add(PlanGroup.builder().groupId(0L).groupName("所有分组").build());
+        planGroups.add(planGroupRepository.selectByPrimaryKey(0));
         return planGroups;
     }
 
