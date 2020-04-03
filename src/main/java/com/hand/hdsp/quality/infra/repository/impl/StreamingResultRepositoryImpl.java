@@ -9,6 +9,7 @@ import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.StreamingResultBaseDTO;
 import com.hand.hdsp.quality.api.dto.StreamingResultDTO;
 import com.hand.hdsp.quality.api.dto.StreamingResultRuleDTO;
+import com.hand.hdsp.quality.api.dto.TimeRangeDTO;
 import com.hand.hdsp.quality.domain.entity.StreamingResult;
 import com.hand.hdsp.quality.domain.entity.StreamingResultBase;
 import com.hand.hdsp.quality.domain.entity.StreamingResultRule;
@@ -68,37 +69,67 @@ public class StreamingResultRepositoryImpl extends BaseRepositoryImpl<StreamingR
     }
 
     @Override
-    public Map<String, Object> numberView(Long tenantId, String timeRange, Date startDate, Date endDate) {
-        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
-        Map<String, Object> resultMap = streamingResultMapper.listResultMap(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd());
+    public Map<String, Object> numberView(TimeRangeDTO timeRangeDTO) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRangeDTO.getTimeRange(), timeRangeDTO.getStart(), timeRangeDTO.getEnd());
+        Map<String, Object> resultMap = streamingResultMapper.listResultMap(TimeRangeDTO
+                .builder()
+                .tenantId(timeRangeDTO.getTenantId())
+                .startDate(stringTimeVO.getStart())
+                .endDate(stringTimeVO.getEnd())
+                .build()
+        );
         return resultMap;
     }
 
     @Override
-    public List<MarkTrendVO> markTrend(Long tenantId, String timeRange, Date startDate, Date endDate) {
-        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
-        List<MarkTrendVO> markTrendVOS = streamingResultMapper.listMarkTrend(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd());
+    public List<MarkTrendVO> markTrend(TimeRangeDTO timeRangeDTO) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRangeDTO.getTimeRange(), timeRangeDTO.getStart(), timeRangeDTO.getEnd());
+        List<MarkTrendVO> markTrendVOS = streamingResultMapper.listMarkTrend(TimeRangeDTO
+                .builder()
+                .tenantId(timeRangeDTO.getTenantId())
+                .startDate(stringTimeVO.getStart())
+                .endDate(stringTimeVO.getEnd())
+                .build()
+        );
         return markTrendVOS;
     }
 
     @Override
-    public List<WarningLevelVO> warningTrend(Long tenantId, String timeRange, Date startDate, Date endDate) {
-        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
-        List<WarningLevelVO> warningLevelVOS = streamingResultMapper.listWarningLevel(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd());
+    public List<WarningLevelVO> warningTrend(TimeRangeDTO timeRangeDTO) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRangeDTO.getTimeRange(), timeRangeDTO.getStart(), timeRangeDTO.getEnd());
+        List<WarningLevelVO> warningLevelVOS = streamingResultMapper.listWarningLevel(TimeRangeDTO
+                .builder()
+                .tenantId(timeRangeDTO.getTenantId())
+                .startDate(stringTimeVO.getStart())
+                .endDate(stringTimeVO.getEnd())
+                .build()
+        );
         return warningLevelVOS;
     }
 
     @Override
-    public List<Map<String, Object>> delayTopicInfo(Long tenantId, String timeRange, Date startDate, Date endDate, String topicInfo) {
-        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
-        List<Map<String, Object>> listDelayTopic = streamingResultMapper.listDelayTopic(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd(), topicInfo);
+    public List<Map<String, Object>> delayTopicInfo(TimeRangeDTO timeRangeDTO) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRangeDTO.getTimeRange(), timeRangeDTO.getStart(), timeRangeDTO.getEnd());
+        List<Map<String, Object>> listDelayTopic = streamingResultMapper.listDelayTopic(TimeRangeDTO
+                .builder()
+                .tenantId(timeRangeDTO.getTenantId())
+                .startDate(stringTimeVO.getStart())
+                .endDate(stringTimeVO.getEnd())
+                .build()
+        );
         return listDelayTopic;
     }
 
     @Override
-    public List<RuleExceptionVO> ruleErrorTrend(Long tenantId, String timeRange, Date startDate, Date endDate) {
-        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
-        List<RuleExceptionVO> ruleExceptionVOS = streamingResultMapper.listRuleError(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd());
+    public List<RuleExceptionVO> ruleErrorTrend(TimeRangeDTO timeRangeDTO) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRangeDTO.getTimeRange(),timeRangeDTO.getStart(),timeRangeDTO.getEnd());
+        List<RuleExceptionVO> ruleExceptionVOS = streamingResultMapper.listRuleError(TimeRangeDTO
+                .builder()
+                .tenantId(timeRangeDTO.getTenantId())
+                .startDate(stringTimeVO.getStart())
+                .endDate(stringTimeVO.getEnd())
+                .build()
+        );
         return ruleExceptionVOS;
     }
 }

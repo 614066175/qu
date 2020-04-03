@@ -1,12 +1,12 @@
 package com.hand.hdsp.quality.domain.repository;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.StreamingResultDTO;
+import com.hand.hdsp.quality.api.dto.TimeRangeDTO;
 import com.hand.hdsp.quality.domain.entity.StreamingResult;
 import com.hand.hdsp.quality.infra.vo.MarkTrendVO;
 import com.hand.hdsp.quality.infra.vo.RuleExceptionVO;
@@ -50,56 +50,40 @@ public interface StreamingResultRepository extends BaseRepository<StreamingResul
     /**
      * 查看质量分数，规则总数，异常规则数
      *
-     * @param tenantId
-     * @param timeRange
-     * @param startDate
-     * @param endDate
+     * @param timeRangeDTO
      * @return
      */
-    Map<String,Object> numberView(Long tenantId, String timeRange, Date startDate, Date endDate);
+    Map<String,Object> numberView(TimeRangeDTO timeRangeDTO);
 
     /**
      * 数据质量分数走势
      *
-     * @param tenantId
-     * @param timeRange
-     * @param startDate
-     * @param endDate
-     * @return
+     * @param timeRangeDTO
+     * @return MarkTrendVO
      */
-    List<MarkTrendVO> markTrend(Long tenantId, String timeRange, Date startDate, Date endDate);
+    List<MarkTrendVO> markTrend(TimeRangeDTO timeRangeDTO);
 
     /**
      * 不同告警等级趋势
      *
-     * @param tenantId
-     * @param timeRange
-     * @param startDate
-     * @param endDate
-     * @return
+     * @param timeRangeDTO
+     * @return WarningLevelVO
      */
-    List<WarningLevelVO> warningTrend(Long tenantId, String timeRange, Date startDate, Date endDate);
+    List<WarningLevelVO> warningTrend(TimeRangeDTO timeRangeDTO);
 
     /**
      * topic延迟
      *
-     * @param tenantId
-     * @param timeRange
-     * @param startDate
-     * @param endDate
-     * @param topicInfo
+     * @param timeRangeDTO
      * @return
      */
-    List<Map<String,Object>> delayTopicInfo(Long tenantId, String timeRange, Date startDate, Date endDate,String topicInfo);
+    List<Map<String,Object>> delayTopicInfo(TimeRangeDTO timeRangeDTO);
 
     /**
      * 展示不同类型异常数
      *
-     * @param tenantId
-     * @param timeRange
-     * @param startDate
-     * @param endDate
-     * @return
+     * @param timeRangeDTO
+     * @return RuleExceptionVO
      */
-    List<RuleExceptionVO> ruleErrorTrend(Long tenantId, String timeRange, Date startDate, Date endDate);
+    List<RuleExceptionVO> ruleErrorTrend(TimeRangeDTO timeRangeDTO);
 }

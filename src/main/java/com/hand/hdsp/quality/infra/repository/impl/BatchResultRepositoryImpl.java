@@ -8,6 +8,7 @@ import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.BatchResultBaseDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
+import com.hand.hdsp.quality.api.dto.TimeRangeDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultRule;
@@ -65,17 +66,35 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
 
 
     @Override
-    public Map<String, Object> numberView(Long tenantId, String timeRange, Date startDate, Date endDate) {
-        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
-        Map<String, Object> resultMap = batchResultMapper.listResultMap(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd());
+    public Map<String, Object> numberView(TimeRangeDTO timeRangeDTO) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRangeDTO.getTimeRange(), timeRangeDTO.getStart(), timeRangeDTO.getEnd());
+        Map<String, Object> resultMap = batchResultMapper.listResultMap(TimeRangeDTO
+                .builder()
+                .tenantId(timeRangeDTO.getTenantId())
+                .startDate(stringTimeVO.getStart())
+                .endDate(stringTimeVO.getEnd())
+                .build()
+        );
         return resultMap;
     }
 
     @Override
-    public List<CheckTypePercentageVO> checkTypePercentage(Long tenantId, String timeRange, Date startDate, Date endDate) {
-        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
-        List<CheckTypePercentageVO> success = batchResultMapper.listSUCCESSTypeCount(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd());
-        List<CheckTypePercentageVO> all = batchResultMapper.listAllTypeCount(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd());
+    public List<CheckTypePercentageVO> checkTypePercentage(TimeRangeDTO timeRangeDTO) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRangeDTO.getTimeRange(), timeRangeDTO.getStart(), timeRangeDTO.getEnd());
+        List<CheckTypePercentageVO> success = batchResultMapper.listSUCCESSTypeCount(TimeRangeDTO
+                .builder()
+                .tenantId(timeRangeDTO.getTenantId())
+                .startDate(stringTimeVO.getStart())
+                .endDate(stringTimeVO.getEnd())
+                .build()
+        );
+        List<CheckTypePercentageVO> all = batchResultMapper.listAllTypeCount(TimeRangeDTO
+                .builder()
+                .tenantId(timeRangeDTO.getTenantId())
+                .startDate(stringTimeVO.getStart())
+                .endDate(stringTimeVO.getEnd())
+                .build()
+        );
         List<CheckTypePercentageVO> checkTypePercentage = new ArrayList<>();
         if (!success.isEmpty() && !all.isEmpty()){
             for (CheckTypePercentageVO a : all){
@@ -96,10 +115,22 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
     }
 
     @Override
-    public List<Map.Entry<String, Double>> rulePercentage(Long tenantId, String timeRange, Date startDate, Date endDate, String rule) {
-        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
-        List<RuleVO> ruleVOS = batchResultMapper.listRule(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd(),rule);
-        List<RuleVO> listErrorRule = batchResultMapper.listErrorRule(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd(), rule);
+    public List<Map.Entry<String, Double>> rulePercentage(TimeRangeDTO timeRangeDTO) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRangeDTO.getTimeRange(), timeRangeDTO.getStart(), timeRangeDTO.getEnd());
+        List<RuleVO> ruleVOS = batchResultMapper.listRule(TimeRangeDTO
+                .builder()
+                .tenantId(timeRangeDTO.getTenantId())
+                .startDate(stringTimeVO.getStart())
+                .endDate(stringTimeVO.getEnd())
+                .build()
+        );
+        List<RuleVO> listErrorRule = batchResultMapper.listErrorRule(TimeRangeDTO
+                .builder()
+                .tenantId(timeRangeDTO.getTenantId())
+                .startDate(stringTimeVO.getStart())
+                .endDate(stringTimeVO.getEnd())
+                .build()
+        );
         HashMap<String, Double> ruleMap = new HashMap<>();
         if (!ruleVOS.isEmpty() && !listErrorRule.isEmpty()){
             for (RuleVO ruleVO : ruleVOS){
@@ -120,23 +151,41 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
     }
 
     @Override
-    public List<MarkTrendVO> markTrend(Long tenantId, String timeRange, Date startDate, Date endDate) {
-        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
-        List<MarkTrendVO> markTrendVOS = batchResultMapper.listMarkTrend(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd());
+    public List<MarkTrendVO> markTrend(TimeRangeDTO timeRangeDTO) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRangeDTO.getTimeRange(), timeRangeDTO.getStart(), timeRangeDTO.getEnd());
+        List<MarkTrendVO> markTrendVOS = batchResultMapper.listMarkTrend(TimeRangeDTO
+                .builder()
+                .tenantId(timeRangeDTO.getTenantId())
+                .startDate(stringTimeVO.getStart())
+                .endDate(stringTimeVO.getEnd())
+                .build()
+        );
         return markTrendVOS;
     }
 
     @Override
-    public List<RuleExceptionVO> daysErrorRule(Long tenantId, String timeRange, Date startDate, Date endDate) {
-        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
-        List<RuleExceptionVO> ruleExceptionVOS = batchResultMapper.listRuleException(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd());
+    public List<RuleExceptionVO> daysErrorRule(TimeRangeDTO timeRangeDTO) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRangeDTO.getTimeRange(),timeRangeDTO.getStart(),timeRangeDTO.getEnd());
+        List<RuleExceptionVO> ruleExceptionVOS = batchResultMapper.listRuleException(TimeRangeDTO
+                .builder()
+                .tenantId(timeRangeDTO.getTenantId())
+                .startDate(stringTimeVO.getStart())
+                .endDate(stringTimeVO.getEnd())
+                .build()
+        );
         return ruleExceptionVOS;
     }
 
     @Override
-    public List<WarningLevelVO> warningTrend(Long tenantId, String timeRange, Date startDate, Date endDate) {
-        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRange, startDate, endDate);
-        List<WarningLevelVO> warningLevelVOS = batchResultMapper.listWarningLevel(tenantId, stringTimeVO.getStart(), stringTimeVO.getEnd());
+    public List<WarningLevelVO> warningTrend(TimeRangeDTO timeRangeDTO) {
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRangeDTO.getTimeRange(), timeRangeDTO.getStart(), timeRangeDTO.getEnd());
+        List<WarningLevelVO> warningLevelVOS = batchResultMapper.listWarningLevel(TimeRangeDTO
+                .builder()
+                .tenantId(timeRangeDTO.getTenantId())
+                .startDate(stringTimeVO.getStart())
+                .endDate(stringTimeVO.getEnd())
+                .build()
+        );
         return warningLevelVOS;
     }
 

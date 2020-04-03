@@ -1,8 +1,8 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
-import java.util.Date;
 
 import com.hand.hdsp.quality.api.dto.StreamingResultDTO;
+import com.hand.hdsp.quality.api.dto.TimeRangeDTO;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.StreamingResult;
 import com.hand.hdsp.quality.domain.repository.StreamingResultRepository;
@@ -92,10 +92,9 @@ public class StreamingResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/number-view")
     public ResponseEntity<?> numberView(@PathVariable(name = "organizationId") Long tenantId,
-                                        String timeRange,
-                                        Date startDate,
-                                        Date endDate){
-        return Results.success(streamingResultRepository.numberView(tenantId, timeRange, startDate, endDate));
+                                        TimeRangeDTO timeRangeDTO){
+        timeRangeDTO.setTenantId(tenantId);
+        return Results.success(streamingResultRepository.numberView(timeRangeDTO));
     }
 
     @ApiOperation(value = "数据质量分数走势")
@@ -108,10 +107,9 @@ public class StreamingResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/mark-trend")
     public ResponseEntity<?> markTrend(@PathVariable(name = "organizationId") Long tenantId,
-                                       String timeRange,
-                                       Date startDate,
-                                       Date endDate){
-        return Results.success(streamingResultRepository.markTrend(tenantId, timeRange, startDate, endDate));
+                                       TimeRangeDTO timeRangeDTO){
+        timeRangeDTO.setTenantId(tenantId);
+        return Results.success(streamingResultRepository.markTrend(timeRangeDTO));
     }
 
     @ApiOperation(value = "每日不同告警等级数")
@@ -124,10 +122,9 @@ public class StreamingResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/warning-trend")
     public ResponseEntity<?> warningTrend(@PathVariable(name = "organizationId") Long tenantId,
-                                          String timeRange,
-                                          Date startDate,
-                                          Date endDate){
-        return Results.success(streamingResultRepository.warningTrend(tenantId, timeRange, startDate, endDate));
+                                          TimeRangeDTO timeRangeDTO){
+        timeRangeDTO.setTenantId(tenantId);
+        return Results.success(streamingResultRepository.warningTrend(timeRangeDTO));
     }
 
     @ApiOperation(value = "主要延迟topic")
@@ -140,11 +137,9 @@ public class StreamingResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/delay-topic")
     public ResponseEntity<?> delayTopic(@PathVariable(name = "organizationId") Long tenantId,
-                                          String timeRange,
-                                          Date startDate,
-                                          Date endDate,
-                                          String topicInfo){
-        return Results.success(streamingResultRepository.delayTopicInfo(tenantId, timeRange, startDate, endDate, topicInfo));
+                                        TimeRangeDTO timeRangeDTO){
+        timeRangeDTO.setTenantId(tenantId);
+        return Results.success(streamingResultRepository.delayTopicInfo(timeRangeDTO));
     }
 
     @ApiOperation(value = "展示不同类型异常数")
@@ -156,11 +151,10 @@ public class StreamingResultController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/rule-error-trend")
-    public ResponseEntity<?> delayTopic(@PathVariable(name = "organizationId") Long tenantId,
-                                        String timeRange,
-                                        Date startDate,
-                                        Date endDate){
-        return Results.success(streamingResultRepository.ruleErrorTrend(tenantId, timeRange, startDate, endDate));
+    public ResponseEntity<?> ruleErrorTrend(@PathVariable(name = "organizationId") Long tenantId,
+                                            TimeRangeDTO timeRangeDTO){
+        timeRangeDTO.setTenantId(tenantId);
+        return Results.success(streamingResultRepository.ruleErrorTrend(timeRangeDTO));
     }
 
     @ApiOperation(value = "实时数据方案结果表列表")

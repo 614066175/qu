@@ -1,8 +1,8 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
-import java.util.Date;
 
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
+import com.hand.hdsp.quality.api.dto.TimeRangeDTO;
 import com.hand.hdsp.quality.app.service.BatchResultService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
@@ -95,10 +95,9 @@ public class BatchResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/number-view")
     public ResponseEntity<?> numberView(@PathVariable(name = "organizationId") Long tenantId,
-                                        String timeRange,
-                                        Date startDate,
-                                        Date endDate){
-        return Results.success(batchResultRepository.numberView(tenantId, timeRange, startDate, endDate));
+                                        TimeRangeDTO timeRangeDTO){
+        timeRangeDTO.setTenantId(tenantId);
+        return Results.success(batchResultRepository.numberView(timeRangeDTO));
     }
 
     @ApiOperation(value = "数据质量评估统计")
@@ -111,10 +110,9 @@ public class BatchResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/check-type-percentage")
     public ResponseEntity<?> checkTypePercentage(@PathVariable(name = "organizationId") Long tenantId,
-                                                 String timeRange,
-                                                 Date startDate,
-                                                 Date endDate){
-        return Results.success(batchResultRepository.checkTypePercentage(tenantId, timeRange, startDate, endDate));
+                                                 TimeRangeDTO timeRangeDTO){
+        timeRangeDTO.setTenantId(tenantId);
+        return Results.success(batchResultRepository.checkTypePercentage(timeRangeDTO));
     }
 
     @ApiOperation(value = "主要可改进指标（规则）")
@@ -127,11 +125,9 @@ public class BatchResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/rule-percentage")
     public ResponseEntity<?> rulePercentage(@PathVariable(name = "organizationId") Long tenantId,
-                                            String timeRange,
-                                            Date startDate,
-                                            Date endDate,
-                                            String rule){
-        return Results.success(batchResultRepository.rulePercentage(tenantId, timeRange, startDate, endDate, rule));
+                                            TimeRangeDTO timeRangeDTO){
+        timeRangeDTO.setTenantId(tenantId);
+        return Results.success(batchResultRepository.rulePercentage(timeRangeDTO));
     }
 
     @ApiOperation(value = "数据质量分数走势")
@@ -144,10 +140,9 @@ public class BatchResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/mark-trend")
     public ResponseEntity<?> markTrend(@PathVariable(name = "organizationId") Long tenantId,
-                                       String timeRange,
-                                       Date startDate,
-                                       Date endDate){
-        return Results.success(batchResultRepository.markTrend(tenantId, timeRange, startDate, endDate));
+                                       TimeRangeDTO timeRangeDTO){
+        timeRangeDTO.setTenantId(tenantId);
+        return Results.success(batchResultRepository.markTrend(timeRangeDTO));
     }
 
     @ApiOperation(value = "表级，表间，字段级异常规则数")
@@ -160,10 +155,9 @@ public class BatchResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/error-rule-trend")
     public ResponseEntity<?> daysErrorRule(@PathVariable(name = "organizationId") Long tenantId,
-                                           String timeRange,
-                                           Date startDate,
-                                           Date endDate){
-        return Results.success(batchResultRepository.daysErrorRule(tenantId, timeRange, startDate, endDate));
+                                           TimeRangeDTO timeRangeDTO){
+        timeRangeDTO.setTenantId(tenantId);
+        return Results.success(batchResultRepository.daysErrorRule(timeRangeDTO));
     }
 
     @ApiOperation(value = "每日不同告警等级数")
@@ -176,10 +170,9 @@ public class BatchResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/warning-trend")
     public ResponseEntity<?> warningTrend(@PathVariable(name = "organizationId") Long tenantId,
-                                          String timeRange,
-                                          Date startDate,
-                                          Date endDate){
-        return Results.success(batchResultRepository.warningTrend(tenantId, timeRange, startDate, endDate));
+                                          TimeRangeDTO timeRangeDTO){
+        timeRangeDTO.setTenantId(tenantId);
+        return Results.success(batchResultRepository.warningTrend(timeRangeDTO));
     }
 
     @ApiOperation(value = "查看运行日志")

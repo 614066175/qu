@@ -1,14 +1,13 @@
 package com.hand.hdsp.quality.infra.mapper;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
+import com.hand.hdsp.quality.api.dto.TimeRangeDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.infra.vo.*;
 import io.choerodon.mybatis.common.BaseMapper;
-import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>批数据方案结果表Mapper</p>
@@ -44,80 +43,65 @@ public interface BatchResultMapper extends BaseMapper<BatchResult> {
     /**
      * 质量分析汇总:数据质量分数，规则总数，异常规则数
      *
-     * @param tenantId
-     * @param startDate
-     * @param endDate
+     * @param timeRangeDTO
      * @return
      */
-    Map<String,Object> listResultMap(@Param("tenantId") Long tenantId,@Param("startDate") String startDate,@Param("endDate") String endDate);
+    Map<String,Object> listResultMap(TimeRangeDTO timeRangeDTO);
 
 
     /**
      * 查询时间范围内各个校验类型成功总数
      *
-     * @param tenantId
-     * @param startDate
-     * @param endDate
+     * @param timeRangeDTO
      * @return CheckTypePercentageVO
      */
-    List<CheckTypePercentageVO> listSUCCESSTypeCount(@Param("tenantId") Long tenantId,@Param("startDate") String startDate,@Param("endDate") String endDate);
+    List<CheckTypePercentageVO> listSUCCESSTypeCount(TimeRangeDTO timeRangeDTO);
 
     /**
      * 询时间范围内各个校验类型总数
      *
-     * @param tenantId
-     * @param startDate
-     * @param endDate
-     * @return
+     * @param timeRangeDTO
+     * @return CheckTypePercentageVO
      */
-    List<CheckTypePercentageVO> listAllTypeCount(@Param("tenantId") Long tenantId,@Param("startDate") String startDate,@Param("endDate") String endDate);
+    List<CheckTypePercentageVO> listAllTypeCount(TimeRangeDTO timeRangeDTO);
 
     /**
      * 主要可改进指标:规则总数
      *
-     * @param tenantId
-     * @param startDate
-     * @param endDate
-     * @param rule
-     * @return
+     * @param timeRangeDTO
+     * @return RuleVO
      */
-    List<RuleVO> listRule(@Param("tenantId") Long tenantId,@Param("startDate") String startDate,@Param("endDate") String endDate,@Param("rule") String rule);
+    List<RuleVO> listRule(TimeRangeDTO timeRangeDTO);
 
     /**
      * 主要可改进指标:异常规则数
      *
-     * @param tenantId
-     * @param startDate
-     * @param endDate
-     * @param rule
-     * @return
+     * @param timeRangeDTO
+     * @return RuleVO
      */
-    List<RuleVO> listErrorRule(@Param("tenantId") Long tenantId,@Param("startDate") String startDate,@Param("endDate") String endDate,@Param("rule") String rule);
+    List<RuleVO> listErrorRule(TimeRangeDTO timeRangeDTO);
 
     /**
      * 每日分数走势
      *
-     * @param tenantId
-     * @param startDate
-     * @param endDate
-     * @return
+     * @param timeRangeDTO
+     * @return MarkTrendVO
      */
-    List<MarkTrendVO> listMarkTrend(@Param("tenantId") Long tenantId,@Param("startDate") String startDate,@Param("endDate") String endDate);
+    List<MarkTrendVO> listMarkTrend(TimeRangeDTO timeRangeDTO);
 
     /**
      * 展示不同类型异常数
      *
-     * @return
+     * @param timeRangeDTO
+     * @return RuleExceptionVO
      */
-    List<RuleExceptionVO> listRuleException(@Param("tenantId") Long tenantId,@Param("startDate") String startDate,@Param("endDate") String endDate);
+    List<RuleExceptionVO> listRuleException(TimeRangeDTO timeRangeDTO);
 
     /**
      * 展示不同等级每日告警数
      *
-     * @param tenantId
-     * @param startDate
-     * @param endDate
-     * @return
+     * @param timeRangeDTO
+     * @return WarningLevelVO
      */
-    List<WarningLevelVO> listWarningLevel(@Param("tenantId") Long tenantId,@Param("startDate") String startDate,@Param("endDate") String endDate);
+    List<WarningLevelVO> listWarningLevel(TimeRangeDTO timeRangeDTO);
 }
