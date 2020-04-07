@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,27 +37,29 @@ public class BatchPlanRepositoryImpl extends BaseRepositoryImpl<BatchPlan, Batch
                         .build()
         );
         if (batchPlans.isEmpty()){
-            throw new CommonException("plan or group not exists");
+            return Collections.emptyList();
         }
         List<Long> groupIds = batchPlans.stream().map(BatchPlan::getGroupId).collect(Collectors.toList());
         List<PlanGroup> planGroups = planGroupRepository.selectByCondition(
                 Condition.builder(PlanGroup.class)
                         .where(Sqls.custom().andIn(PlanGroup.FIELD_GROUP_ID, groupIds)).build()
         );
+        List<PlanGroup> groups = new ArrayList<>();
         planGroups.stream().forEach(p ->{
-            getGroup(p.getParentGroupId(),planGroups);
+            getGroup(p.getParentGroupId(),groups);
+            groups.add(p);
         });
-        planGroups.add(planGroupRepository.selectByPrimaryKey(0));
-        return planGroups;
+        groups.add(planGroupRepository.selectByPrimaryKey(0L));
+        return groups;
     }
 
-    private void getGroup(Long parentId,List<PlanGroup> planGroups){
+    private void getGroup(Long parentId,List<PlanGroup> groups){
         if (parentId == 0){
             return;
         }
         PlanGroup planGroup1 = planGroupRepository.selectByPrimaryKey(parentId);
-        planGroups.add(planGroup1);
-        getGroup(planGroup1.getParentGroupId(),planGroups);
+        groups.add(planGroup1);
+        getGroup(planGroup1.getParentGroupId(),groups);
     }
 
 }
