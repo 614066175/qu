@@ -49,6 +49,9 @@ public class RuleController extends BaseController {
                                   RuleDTO ruleDTO, @ApiIgnore @SortDefault(value = Rule.FIELD_RULE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         ruleDTO.setTenantId(tenantId);
+        if (ruleDTO.getGroupId() != null && ruleDTO.getGroupId() == 0) {
+            ruleDTO.setGroupId(null);
+        }
         Page<RuleDTO> list = ruleRepository.pageAndSortDTO(pageRequest, ruleDTO);
         return Results.success(list);
     }

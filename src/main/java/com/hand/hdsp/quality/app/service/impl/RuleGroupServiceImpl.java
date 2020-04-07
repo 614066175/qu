@@ -38,10 +38,17 @@ public class RuleGroupServiceImpl implements RuleGroupService {
     @Transactional(rollbackFor = Exception.class)
     public int delete(RuleGroupDTO ruleGroupDTO) {
         List<RuleGroupDTO> ruleGroupList = ruleGroupRepository.selectDTO(RuleGroup.FIELD_PARENT_GROUP_ID, ruleGroupDTO.getGroupId());
-        List<RuleDTO> ruleDTOList = ruleRepository.selectDTO(Rule.FIELD_GROUP_ID,ruleGroupDTO.getGroupId());
+        List<RuleDTO> ruleDTOList = ruleRepository.selectDTO(Rule.FIELD_GROUP_ID, ruleGroupDTO.getGroupId());
         if (!ruleGroupList.isEmpty() || !ruleDTOList.isEmpty()) {
             throw new CommonException(ErrorCode.CAN_NOT_DELETE);
         }
         return ruleGroupRepository.deleteByPrimaryKey(ruleGroupDTO);
+    }
+
+    @Override
+    public List<RuleGroup> selectList(RuleGroup ruleGroup) {
+        List<RuleGroup> list = ruleGroupRepository.select(ruleGroup);
+        list.add(RuleGroup.ROOT_RULE_GROUP);
+        return list;
     }
 }

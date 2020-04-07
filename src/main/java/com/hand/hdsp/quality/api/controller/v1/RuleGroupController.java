@@ -69,7 +69,7 @@ public class RuleGroupController extends BaseController {
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
                                   RuleGroup ruleGroup) {
         ruleGroup.setTenantId(tenantId);
-        return Results.success(ruleGroupRepository.select(ruleGroup));
+        return Results.success(ruleGroupService.selectList(ruleGroup));
     }
 
     @ApiOperation(value = "规则分组表明细")

@@ -32,6 +32,12 @@ import javax.persistence.Table;
 @Table(name = "xqua_rule_group")
 public class RuleGroup extends AuditDomain {
 
+    public static final RuleGroup ROOT_RULE_GROUP = RuleGroup.builder()
+            .groupId(0L)
+            .groupCode("root")
+            .groupName("所有分组")
+            .build();
+
     //
     // 业务方法(按public protected private顺序排列)
     // ------------------------------------------------------------------------------

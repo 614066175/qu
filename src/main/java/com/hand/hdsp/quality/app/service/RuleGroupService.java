@@ -1,6 +1,9 @@
 package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
+import com.hand.hdsp.quality.domain.entity.RuleGroup;
+
+import java.util.List;
 
 /**
  * 规则分组表应用服务
@@ -18,4 +21,12 @@ public interface RuleGroupService {
      * @return 删除结果
      */
     int delete(RuleGroupDTO ruleGroupDTO);
+
+    /**
+     * 查询，处理所有分组逻辑
+     *
+     * @param ruleGroup
+     * @return
+     */
+    List<RuleGroup> selectList(RuleGroup ruleGroup);
 }
