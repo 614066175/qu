@@ -50,6 +50,21 @@ public class PlanWarningLevelController extends BaseController {
         return Results.success(list);
     }
 
+    @ApiOperation(value = "方案告警等级表列表（不分页）")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/list")
+    public ResponseEntity<?> query(@PathVariable(name = "organizationId") Long tenantId,
+                                  PlanWarningLevel planWarningLevel) {
+        planWarningLevel.setTenantId(tenantId);
+        return Results.success(planWarningLevelRepository.select(planWarningLevel));
+    }
+
     @ApiOperation(value = "方案告警等级表明细")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",

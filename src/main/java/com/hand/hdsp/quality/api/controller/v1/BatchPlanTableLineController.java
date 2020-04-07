@@ -50,6 +50,21 @@ public class BatchPlanTableLineController extends BaseController {
         return Results.success(list);
     }
 
+    @ApiOperation(value = "批数据方案-表级规则校验项表列表（不分页）")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/list")
+    public ResponseEntity<?> query(@PathVariable(name = "organizationId") Long tenantId,
+                                   BatchPlanTableLine batchPlanTableLine) {
+        batchPlanTableLine.setTenantId(tenantId);
+        return Results.success(batchPlanTableLineRepository.select(batchPlanTableLine));
+    }
+
     @ApiOperation(value = "批数据方案-表级规则校验项表明细")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
