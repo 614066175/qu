@@ -1,7 +1,9 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.quality.api.dto.BatchPlanRelTableDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanRelTableLineDTO;
+import com.hand.hdsp.quality.api.dto.DatasourceDTO;
 import com.hand.hdsp.quality.api.dto.PlanWarningLevelDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanRelTableService;
 import com.hand.hdsp.quality.domain.entity.BatchPlanRelTable;
@@ -11,7 +13,13 @@ import com.hand.hdsp.quality.domain.repository.BatchPlanRelTableRepository;
 import com.hand.hdsp.quality.domain.repository.PlanWarningLevelRepository;
 import com.hand.hdsp.quality.infra.constant.TableNameConstant;
 import com.hand.hdsp.quality.infra.converter.PlanWarningLevelConverter;
+import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.domain.AuditDomain;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.hzero.core.util.ResponseUtils;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,12 +38,14 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
     private final BatchPlanRelTableLineRepository batchPlanRelTableLineRepository;
     private final PlanWarningLevelRepository planWarningLevelRepository;
     private final PlanWarningLevelConverter planWarningLevelConverter;
+    private final DatasourceFeign datasourceFeign;
 
-    public BatchPlanRelTableServiceImpl(BatchPlanRelTableRepository batchPlanRelTableRepository, BatchPlanRelTableLineRepository batchPlanRelTableLineRepository, PlanWarningLevelRepository planWarningLevelRepository, PlanWarningLevelConverter planWarningLevelConverter) {
+    public BatchPlanRelTableServiceImpl(BatchPlanRelTableRepository batchPlanRelTableRepository, BatchPlanRelTableLineRepository batchPlanRelTableLineRepository, PlanWarningLevelRepository planWarningLevelRepository, PlanWarningLevelConverter planWarningLevelConverter, DatasourceFeign datasourceFeign) {
         this.batchPlanRelTableRepository = batchPlanRelTableRepository;
         this.batchPlanRelTableLineRepository = batchPlanRelTableLineRepository;
         this.planWarningLevelRepository = planWarningLevelRepository;
         this.planWarningLevelConverter = planWarningLevelConverter;
+        this.datasourceFeign = datasourceFeign;
     }
 
     @Override
@@ -120,5 +130,25 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
                 }
             }
         }
+    }
+
+    @Override
+    public Page<BatchPlanRelTableDTO> list(PageRequest pageRequest, BatchPlanRelTableDTO batchPlanRelTableDTO) {
+        Page<BatchPlanRelTableDTO> list = batchPlanRelTableRepository.pageAndSortDTO(pageRequest, batchPlanRelTableDTO);
+        int i = 0;
+        for (BatchPlanRelTableDTO batchPlanRelTableDTO1 : list) {
+            ResponseEntity<String> result = datasourceFeign.detail(batchPlanRelTableDTO.getTenantId(), batchPlanRelTableDTO1.getRelDatasourceId());
+            DatasourceDTO datasourceDTO = ResponseUtils.getResponse(result, new TypeReference<DatasourceDTO>() {
+            }, (httpStatus, response) -> {
+                throw new CommonException(response);
+            }, exceptionResponse -> {
+                throw new CommonException(exceptionResponse.getMessage());
+            });
+            if (datasourceDTO != null) {
+                list.get(i).setDatasourceName(datasourceDTO.getDatasourceName());
+            }
+            i++;
+        }
+        return list;
     }
 }

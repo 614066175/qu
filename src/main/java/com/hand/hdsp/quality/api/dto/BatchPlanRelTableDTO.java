@@ -79,4 +79,6 @@ public class BatchPlanRelTableDTO extends AuditDomain {
 
     @ApiModelProperty(value = "方案告警等级List")
     private List<PlanWarningLevelDTO> planWarningLevelDTOList;
+
+    private String datasourceName;
 }

@@ -2,6 +2,8 @@ package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanRelTableDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanTableDTO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * <p>批数据方案-表间规则表应用服务</p>
@@ -39,4 +41,13 @@ public interface BatchPlanRelTableService {
      * @param batchPlanRelTableDTO 更新规则信息
      */
     void update(BatchPlanRelTableDTO batchPlanRelTableDTO);
+
+    /**
+     * 查询
+     *
+     * @param pageRequest
+     * @param batchPlanRelTableDTO
+     * @return
+     */
+    Page<BatchPlanRelTableDTO> list(PageRequest pageRequest, BatchPlanRelTableDTO batchPlanRelTableDTO);
 }

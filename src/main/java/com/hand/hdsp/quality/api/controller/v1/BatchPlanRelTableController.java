@@ -50,7 +50,7 @@ public class BatchPlanRelTableController extends BaseController {
                                   BatchPlanRelTableDTO batchPlanRelTableDTO, @ApiIgnore @SortDefault(value = BatchPlanRelTable.FIELD_PLAN_REL_TABLE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchPlanRelTableDTO.setTenantId(tenantId);
-        Page<BatchPlanRelTableDTO> list = batchPlanRelTableRepository.pageAndSortDTO(pageRequest, batchPlanRelTableDTO);
+        Page<BatchPlanRelTableDTO> list = batchPlanRelTableService.list(pageRequest, batchPlanRelTableDTO);
         return Results.success(list);
     }
 
