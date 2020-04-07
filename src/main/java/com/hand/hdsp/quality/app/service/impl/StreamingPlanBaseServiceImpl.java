@@ -66,6 +66,8 @@ public class StreamingPlanBaseServiceImpl implements StreamingPlanBaseService {
                     streamingPlanRuleDTO.setPlanBaseId(streamingPlanRuleDTO.getPlanBaseId());
                     streamingPlanRuleDTO.setTenantId(tenantId);
                     streamingPlanRuleRepository.insertDTOSelective(streamingPlanRuleDTO);
+                } else if (AuditDomain.RecordStatus.delete.equals(streamingPlanRuleDTO.get_status())) {
+                    streamingPlanRuleRepository.deleteByPrimaryKey(streamingPlanRuleDTO);
                 }
                 if (streamingPlanRuleDTO.getPlanWarningLevelDTOList() != null) {
                     for (PlanWarningLevelDTO planWarningLevelDTO : streamingPlanRuleDTO.getPlanWarningLevelDTOList()) {
@@ -76,23 +78,12 @@ public class StreamingPlanBaseServiceImpl implements StreamingPlanBaseService {
                             planWarningLevelDTO.setSourceType(TableNameConstant.XQUA_STREAMING_PLAN_RULE);
                             planWarningLevelDTO.setTenantId(tenantId);
                             planWarningLevelRepository.insertDTOSelective(planWarningLevelDTO);
+                        } else if (AuditDomain.RecordStatus.delete.equals(planWarningLevelDTO.get_status())) {
+                            planWarningLevelRepository.deleteByPrimaryKey(planWarningLevelDTO);
                         }
                     }
                 }
-                if (streamingPlanRuleDTO.getDeletePlanWarningLevelDTOList() != null) {
-                    planWarningLevelRepository.batchDTODeleteByPrimaryKey(streamingPlanRuleDTO.getDeletePlanWarningLevelDTOList());
-                }
             }
-        }
-        if (streamingPlanBaseDTO.getDeleteStreamingPlanRuleDTOList() != null) {
-            streamingPlanRuleRepository.batchDTODeleteByPrimaryKey(streamingPlanBaseDTO.getDeleteStreamingPlanRuleDTOList());
-            for (StreamingPlanRuleDTO streamingPlanRuleDTO : streamingPlanBaseDTO.getDeleteStreamingPlanRuleDTOList()) {
-                if (streamingPlanRuleDTO.getDeletePlanWarningLevelDTOList() != null) {
-                    planWarningLevelRepository.batchDTODeleteByPrimaryKey(streamingPlanRuleDTO.getDeletePlanWarningLevelDTOList());
-                    streamingPlanRuleDTO.getDeletePlanWarningLevelDTOList().clear();
-                }
-            }
-            streamingPlanBaseDTO.getDeleteStreamingPlanRuleDTOList().clear();
         }
     }
 

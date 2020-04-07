@@ -80,6 +80,8 @@ public class RuleServiceImpl implements RuleService {
                     ruleLineDTO.setRuleId(ruleDTO.getRuleId());
                     ruleLineDTO.setTenantId(tenantId);
                     ruleLineRepository.insertDTOSelective(ruleLineDTO);
+                } else if (AuditDomain.RecordStatus.delete.equals(ruleLineDTO.get_status())) {
+                    ruleLineRepository.deleteByPrimaryKey(ruleLineDTO);
                 }
                 if (ruleLineDTO.getRuleWarningLevelDTOList() != null) {
                     for (RuleWarningLevelDTO ruleWarningLevelDTO : ruleLineDTO.getRuleWarningLevelDTOList()) {
@@ -89,24 +91,12 @@ public class RuleServiceImpl implements RuleService {
                             ruleWarningLevelDTO.setRuleLineId(ruleLineDTO.getRuleLineId());
                             ruleWarningLevelDTO.setTenantId(tenantId);
                             ruleWarningLevelRepository.insertDTOSelective(ruleWarningLevelDTO);
+                        } else if (AuditDomain.RecordStatus.delete.equals(ruleWarningLevelDTO.get_status())) {
+                            ruleWarningLevelRepository.deleteByPrimaryKey(ruleWarningLevelDTO);
                         }
                     }
                 }
-                if (ruleLineDTO.getDeleteRuleWarningLevelDTOList() != null) {
-                    ruleWarningLevelRepository.batchDTODeleteByPrimaryKey(ruleLineDTO.getDeleteRuleWarningLevelDTOList());
-                    ruleLineDTO.getDeleteRuleWarningLevelDTOList().clear();
-                }
             }
-        }
-        if (ruleDTO.getDeleteRuleLineDTOList() != null) {
-            ruleLineRepository.batchDTODeleteByPrimaryKey(ruleDTO.getDeleteRuleLineDTOList());
-            for (RuleLineDTO ruleLineDTO : ruleDTO.getDeleteRuleLineDTOList()) {
-                if (ruleLineDTO.getDeleteRuleWarningLevelDTOList() != null) {
-                    ruleWarningLevelRepository.batchDTODeleteByPrimaryKey(ruleLineDTO.getDeleteRuleWarningLevelDTOList());
-                    ruleLineDTO.getDeleteRuleWarningLevelDTOList().clear();
-                }
-            }
-            ruleDTO.getDeleteRuleLineDTOList().clear();
         }
     }
 

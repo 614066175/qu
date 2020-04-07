@@ -101,12 +101,10 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
                     batchPlanRelTableLineDTO.setPlanRelTableId(batchPlanRelTableDTO.getPlanRelTableId());
                     batchPlanRelTableLineDTO.setTenantId(tenantId);
                     batchPlanRelTableLineRepository.insertDTOSelective(batchPlanRelTableLineDTO);
+                } else if (AuditDomain.RecordStatus.delete.equals(batchPlanRelTableLineDTO.get_status())) {
+                    batchPlanRelTableLineRepository.deleteByPrimaryKey(batchPlanRelTableLineDTO);
                 }
             }
-        }
-        if (batchPlanRelTableDTO.getDeleteBatchPlanRelTableLineDTOList() != null) {
-            batchPlanRelTableLineRepository.batchDTODeleteByPrimaryKey(batchPlanRelTableDTO.getDeleteBatchPlanRelTableLineDTOList());
-            batchPlanRelTableDTO.getDeleteBatchPlanRelTableLineDTOList().clear();
         }
         if (batchPlanRelTableDTO.getPlanWarningLevelDTOList() != null) {
             for (PlanWarningLevelDTO planWarningLevelDTO : batchPlanRelTableDTO.getPlanWarningLevelDTOList()) {
@@ -117,12 +115,10 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
                     planWarningLevelDTO.setSourceType(TableNameConstant.XQUA_BATCH_PLAN_REL_TABLE);
                     planWarningLevelDTO.setTenantId(tenantId);
                     planWarningLevelRepository.insertDTOSelective(planWarningLevelDTO);
+                } else if (AuditDomain.RecordStatus.delete.equals(planWarningLevelDTO.get_status())) {
+                    planWarningLevelRepository.deleteByPrimaryKey(planWarningLevelDTO);
                 }
             }
-        }
-        if (batchPlanRelTableDTO.getDeletePlanWarningLevelDTOList() != null) {
-            planWarningLevelRepository.batchDTODeleteByPrimaryKey(batchPlanRelTableDTO.getDeletePlanWarningLevelDTOList());
-            batchPlanRelTableDTO.getDeletePlanWarningLevelDTOList().clear();
         }
     }
 }

@@ -79,10 +79,4 @@ public class BatchPlanRelTableDTO extends AuditDomain {
 
     @ApiModelProperty(value = "方案告警等级List")
     private List<PlanWarningLevelDTO> planWarningLevelDTOList;
-
-    @ApiModelProperty(value = "表间规则校验项删除的对象List")
-    private List<BatchPlanRelTableLineDTO> deleteBatchPlanRelTableLineDTOList;
-
-    @ApiModelProperty(value = "方案告警等级删除的对象List")
-    private List<PlanWarningLevelDTO> deletePlanWarningLevelDTOList;
 }
