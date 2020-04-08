@@ -149,7 +149,7 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
 
     @Override
     public Page<BatchPlanFieldDTO> list(PageRequest pageRequest, BatchPlanFieldDTO batchPlanFieldDTO) {
-        Page<BatchPlanFieldDTO> list = batchPlanFieldRepository.pageAndSortDTO(pageRequest, batchPlanFieldDTO);
+        Page<BatchPlanFieldDTO> list = batchPlanFieldRepository.distinctPageAndSortDTO(pageRequest, batchPlanFieldDTO);
         for (BatchPlanFieldDTO batchPlanFieldDTO1 : list) {
             List<BatchPlanFieldDTO> batchPlanFieldDTOList = new ArrayList<>();
             List<BatchPlanField> batchPlanFieldList = batchPlanFieldRepository.select(BatchPlanField.builder()

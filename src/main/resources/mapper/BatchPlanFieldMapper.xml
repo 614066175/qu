@@ -21,4 +21,22 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+    <select id="list" resultType="com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO">
+        select
+        plan_base_id,
+        field_name,
+        field_desc
+        from
+        xqua_batch_plan_field
+        <where>
+            <if test="fieldName != null">
+                <bind name="fieldName" value="'%' + fieldName + '%'"/>
+                field_name like #{fieldName}
+            </if>
+        </where>
+        GROUP BY
+	    plan_base_id,
+	    field_name,
+	    field_desc
+    </select>
 </mapper>
