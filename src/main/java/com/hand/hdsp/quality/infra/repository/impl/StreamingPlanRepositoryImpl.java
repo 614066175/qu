@@ -11,6 +11,7 @@ import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.domain.entity.StreamingPlan;
 import com.hand.hdsp.quality.domain.repository.PlanGroupRepository;
 import com.hand.hdsp.quality.domain.repository.StreamingPlanRepository;
+import com.hand.hdsp.quality.infra.constant.GroupType;
 import com.hand.hdsp.quality.infra.mapper.StreamingPlanMapper;
 import io.choerodon.core.exception.CommonException;
 import org.hzero.mybatis.domian.Condition;
@@ -25,16 +26,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class StreamingPlanRepositoryImpl extends BaseRepositoryImpl<StreamingPlan, StreamingPlanDTO> implements StreamingPlanRepository {
 
-    private final StreamingPlanMapper streamingPlanMapper;
     private final PlanGroupRepository planGroupRepository;
 
-    public StreamingPlanRepositoryImpl(StreamingPlanMapper streamingPlanMapper, PlanGroupRepository planGroupRepository) {
-        this.streamingPlanMapper = streamingPlanMapper;
+    public StreamingPlanRepositoryImpl(PlanGroupRepository planGroupRepository) {
         this.planGroupRepository = planGroupRepository;
     }
 
     @Override
     public List<PlanGroup> getGroupByPlanName(StreamingPlanDTO streamingPlanDTO) {
+        if (streamingPlanDTO.getPlanName() == null || streamingPlanDTO.getPlanName().length() == 0){
+            List<PlanGroup> all = planGroupRepository.select(PlanGroup.builder().groupType(GroupType.STREAMING).build());
+            all.add(planGroupRepository.selectByPrimaryKey(0L));
+            return all;
+        }
         List<StreamingPlan> streamingPlans = this.selectByCondition(
                 Condition.builder(StreamingPlan.class)
                         .where(Sqls.custom().andLike(StreamingPlan.FIELD_PLAN_NAME, streamingPlanDTO.getPlanName(), true))
@@ -46,7 +50,9 @@ public class StreamingPlanRepositoryImpl extends BaseRepositoryImpl<StreamingPla
         List<Long> groupIds = streamingPlans.stream().map(StreamingPlan::getGroupId).collect(Collectors.toList());
         List<PlanGroup> planGroups = planGroupRepository.selectByCondition(
                 Condition.builder(PlanGroup.class)
-                        .where(Sqls.custom().andIn(PlanGroup.FIELD_GROUP_ID, groupIds))
+                        .where(Sqls.custom()
+                                .andIn(PlanGroup.FIELD_GROUP_ID, groupIds)
+                                .andEqualTo(PlanGroup.FIELD_GROUP_TYPE, GroupType.STREAMING))
                         .build()
         );
         List<PlanGroup> groups = new ArrayList<>();

@@ -11,6 +11,7 @@ import com.hand.hdsp.quality.domain.entity.BatchPlan;
 import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.domain.repository.BatchPlanRepository;
 import com.hand.hdsp.quality.domain.repository.PlanGroupRepository;
+import com.hand.hdsp.quality.infra.constant.GroupType;
 import io.choerodon.core.exception.CommonException;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
@@ -31,6 +32,11 @@ public class BatchPlanRepositoryImpl extends BaseRepositoryImpl<BatchPlan, Batch
 
     @Override
     public List<PlanGroup> listByGroup(BatchPlanDTO batchPlanDTO) {
+        if (batchPlanDTO.getPlanName() == null || batchPlanDTO.getPlanName().length() == 0){
+            List<PlanGroup> all = planGroupRepository.select(PlanGroup.builder().groupType(GroupType.BATCH).build());
+            all.add(planGroupRepository.selectByPrimaryKey(0L));
+            return all;
+        }
         List<BatchPlan> batchPlans = this.selectByCondition(
                 Condition.builder(BatchPlan.class)
                         .where(Sqls.custom().andLike(BatchPlan.FIELD_PLAN_NAME, batchPlanDTO.getPlanName(), true))
@@ -42,7 +48,10 @@ public class BatchPlanRepositoryImpl extends BaseRepositoryImpl<BatchPlan, Batch
         List<Long> groupIds = batchPlans.stream().map(BatchPlan::getGroupId).collect(Collectors.toList());
         List<PlanGroup> planGroups = planGroupRepository.selectByCondition(
                 Condition.builder(PlanGroup.class)
-                        .where(Sqls.custom().andIn(PlanGroup.FIELD_GROUP_ID, groupIds)).build()
+                        .where(Sqls.custom()
+                                .andIn(PlanGroup.FIELD_GROUP_ID, groupIds)
+                                .andEqualTo(PlanGroup.FIELD_GROUP_TYPE, GroupType.BATCH))
+                        .build()
         );
         List<PlanGroup> groups = new ArrayList<>();
         planGroups.stream().forEach(p ->{
