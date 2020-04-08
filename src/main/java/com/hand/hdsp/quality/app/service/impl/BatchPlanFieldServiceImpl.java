@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.app.service.impl;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
 import com.hand.hdsp.quality.api.dto.PlanWarningLevelDTO;
+import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanFieldService;
 import com.hand.hdsp.quality.domain.entity.BatchPlanField;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
@@ -10,6 +11,7 @@ import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldLineRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldRepository;
 import com.hand.hdsp.quality.domain.repository.PlanWarningLevelRepository;
+import com.hand.hdsp.quality.domain.repository.RuleRepository;
 import com.hand.hdsp.quality.infra.constant.TableNameConstant;
 import com.hand.hdsp.quality.infra.converter.BatchPlanFieldConverter;
 import com.hand.hdsp.quality.infra.converter.PlanWarningLevelConverter;
@@ -35,17 +37,20 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
     private final PlanWarningLevelRepository planWarningLevelRepository;
     private final PlanWarningLevelConverter planWarningLevelConverter;
     private final BatchPlanFieldConverter batchPlanFieldConverter;
+    private final RuleRepository ruleRepository;
 
     public BatchPlanFieldServiceImpl(BatchPlanFieldRepository batchPlanFieldRepository,
                                      BatchPlanFieldLineRepository batchPlanFieldLineRepository,
                                      PlanWarningLevelRepository planWarningLevelRepository,
                                      PlanWarningLevelConverter planWarningLevelConverter,
-                                     BatchPlanFieldConverter batchPlanFieldConverter) {
+                                     BatchPlanFieldConverter batchPlanFieldConverter,
+                                     RuleRepository ruleRepository) {
         this.batchPlanFieldRepository = batchPlanFieldRepository;
         this.batchPlanFieldLineRepository = batchPlanFieldLineRepository;
         this.planWarningLevelRepository = planWarningLevelRepository;
         this.planWarningLevelConverter = planWarningLevelConverter;
         this.batchPlanFieldConverter = batchPlanFieldConverter;
+        this.ruleRepository = ruleRepository;
     }
 
     @Override
@@ -145,16 +150,39 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
     @Override
     public Page<BatchPlanFieldDTO> list(PageRequest pageRequest, BatchPlanFieldDTO batchPlanFieldDTO) {
         Page<BatchPlanFieldDTO> list = batchPlanFieldRepository.pageAndSortDTO(pageRequest, batchPlanFieldDTO);
-        for (BatchPlanFieldDTO batchPlanFieldDTO1 : list){
+        for (BatchPlanFieldDTO batchPlanFieldDTO1 : list) {
             List<BatchPlanFieldDTO> batchPlanFieldDTOList = new ArrayList<>();
             List<BatchPlanField> batchPlanFieldList = batchPlanFieldRepository.select(BatchPlanField.builder()
                     .planBaseId(batchPlanFieldDTO1.getPlanBaseId())
                     .fieldName(batchPlanFieldDTO1.getFieldName()).build());
-            for (BatchPlanField batchPlanField : batchPlanFieldList){
+            for (BatchPlanField batchPlanField : batchPlanFieldList) {
                 batchPlanFieldDTOList.add(batchPlanFieldConverter.entityToDto(batchPlanField));
             }
             batchPlanFieldDTO1.setBatchPlanFieldDTOList(batchPlanFieldDTOList);
         }
         return list;
+    }
+
+    @Override
+    public List<RuleDTO> select(BatchPlanFieldDTO batchPlanFieldDTO, String ruleModel) {
+        List<BatchPlanField> batchPlanFieldList = batchPlanFieldRepository.select(BatchPlanField.builder()
+                .planBaseId(batchPlanFieldDTO.getPlanBaseId())
+                .fieldName(batchPlanFieldDTO.getFieldName()).build());
+        List<String> ruleCodeList = new ArrayList<>();
+        for (BatchPlanField batchPlanField : batchPlanFieldList) {
+            ruleCodeList.add(batchPlanField.getRuleCode());
+        }
+        List<RuleDTO> ruleDTOList = ruleRepository.list(ruleCodeList, ruleModel);
+        List<RuleDTO> ruleDTOListAll = ruleRepository.listAll(ruleModel);
+        if (ruleDTOList != null) {
+            for (RuleDTO ruleDTO : ruleDTOList) {
+                for (RuleDTO ruleDTO1 : ruleDTOListAll) {
+                    if (ruleDTO1.getRuleId().equals(ruleDTO.getRuleId())) {
+                        ruleDTO1.setSelectedFlag(1);
+                    }
+                }
+            }
+        }
+        return ruleDTOListAll;
     }
 }

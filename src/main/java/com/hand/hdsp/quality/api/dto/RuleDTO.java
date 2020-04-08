@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import javafx.beans.DefaultProperty;
 import lombok.*;
 import org.hzero.boot.platform.lov.annotation.LovValue;
 
@@ -83,4 +84,7 @@ public class RuleDTO extends AuditDomain {
 
     @ApiModelProperty(value = "规则校验项删除的对象List")
     private List<RuleLineDTO> deleteRuleLineDTOList;
+
+    @ApiModelProperty(value = "是否选用标记")
+    private Integer selectedFlag = 0;
 }

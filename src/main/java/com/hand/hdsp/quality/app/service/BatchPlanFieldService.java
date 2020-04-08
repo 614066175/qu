@@ -1,8 +1,11 @@
 package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
+import com.hand.hdsp.quality.api.dto.RuleDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import java.util.List;
 
 /**
  * <p>批数据方案-字段规则表应用服务</p>
@@ -49,4 +52,13 @@ public interface BatchPlanFieldService {
      * @return
      */
     Page<BatchPlanFieldDTO> list(PageRequest pageRequest, BatchPlanFieldDTO batchPlanFieldDTO);
+
+    /**
+     * 字段级规则选择列表
+     *
+     * @param batchPlanFieldDTO
+     * @param ruleModel
+     * @return
+     */
+    List<RuleDTO> select(BatchPlanFieldDTO batchPlanFieldDTO, String ruleModel);
 }

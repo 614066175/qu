@@ -35,5 +35,35 @@
         ${std}.weight,
         ${std}.enabled_flag
     </sql>
+    <select id="list" resultType="com.hand.hdsp.quality.api.dto.RuleDTO">
+        select
+        rule_id
+        from xqua_rule
+        <where>
+            rule_code in
+            <foreach item="ruleCode" collection="ruleCode" separator="," open="(" close=")" index="">
+                #{ruleCode, jdbcType=VARCHAR}
+            </foreach>
+            and rule_model = #{ruleModel}
+        </where>
+    </select>
+    <select id="listAll" resultType="com.hand.hdsp.quality.api.dto.RuleDTO">
+        select
+        rule_id,
+        rule_model,
+        group_id,
+        rule_code,
+        rule_name,
+        rule_desc,
+        check_type,
+        rule_type,
+        exception_block,
+        weight,
+        enabled_flag,
+        tenant_id,
+        object_version_number
+        from xqua_rule
+        where rule_model = #{ruleModel}
+    </select>
 
 </mapper>

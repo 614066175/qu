@@ -5,6 +5,8 @@ import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.domain.entity.Rule;
 
+import java.util.List;
+
 /**
  * <p>规则表资源库</p>
  *
@@ -12,4 +14,20 @@ import com.hand.hdsp.quality.domain.entity.Rule;
  */
 public interface RuleRepository extends BaseRepository<Rule, RuleDTO>, ProxySelf<RuleRepository> {
 
+    /**
+     * 列表
+     *
+     * @param ruleCodeList
+     * @param ruleModel
+     * @return
+     */
+    List<RuleDTO> list(List<String> ruleCodeList, String ruleModel);
+
+    /**
+     * 查询所有
+     *
+     * @param ruleModel
+     * @return
+     */
+    List<RuleDTO> listAll(String ruleModel);
 }
