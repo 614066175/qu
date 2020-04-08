@@ -11,6 +11,7 @@ import com.hand.hdsp.quality.domain.repository.BatchPlanFieldLineRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldRepository;
 import com.hand.hdsp.quality.domain.repository.PlanWarningLevelRepository;
 import com.hand.hdsp.quality.infra.constant.TableNameConstant;
+import com.hand.hdsp.quality.infra.converter.BatchPlanFieldConverter;
 import com.hand.hdsp.quality.infra.converter.PlanWarningLevelConverter;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -33,15 +34,18 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
     private final BatchPlanFieldLineRepository batchPlanFieldLineRepository;
     private final PlanWarningLevelRepository planWarningLevelRepository;
     private final PlanWarningLevelConverter planWarningLevelConverter;
+    private final BatchPlanFieldConverter batchPlanFieldConverter;
 
     public BatchPlanFieldServiceImpl(BatchPlanFieldRepository batchPlanFieldRepository,
                                      BatchPlanFieldLineRepository batchPlanFieldLineRepository,
                                      PlanWarningLevelRepository planWarningLevelRepository,
-                                     PlanWarningLevelConverter planWarningLevelConverter) {
+                                     PlanWarningLevelConverter planWarningLevelConverter,
+                                     BatchPlanFieldConverter batchPlanFieldConverter) {
         this.batchPlanFieldRepository = batchPlanFieldRepository;
         this.batchPlanFieldLineRepository = batchPlanFieldLineRepository;
         this.planWarningLevelRepository = planWarningLevelRepository;
         this.planWarningLevelConverter = planWarningLevelConverter;
+        this.batchPlanFieldConverter = batchPlanFieldConverter;
     }
 
     @Override
@@ -141,9 +145,14 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
     @Override
     public Page<BatchPlanFieldDTO> list(PageRequest pageRequest, BatchPlanFieldDTO batchPlanFieldDTO) {
         Page<BatchPlanFieldDTO> list = batchPlanFieldRepository.pageAndSortDTO(pageRequest, batchPlanFieldDTO);
-        for (BatchPlanFieldDTO batchPlanFieldDTO1 : list) {
-            List<BatchPlanFieldDTO> batchPlanFieldDTOList = batchPlanFieldRepository.selectDTO(
-                    BatchPlanField.FIELD_PLAN_BASE_ID, batchPlanFieldDTO1.getPlanBaseId());
+        for (BatchPlanFieldDTO batchPlanFieldDTO1 : list){
+            List<BatchPlanFieldDTO> batchPlanFieldDTOList = new ArrayList<>();
+            List<BatchPlanField> batchPlanFieldList = batchPlanFieldRepository.select(BatchPlanField.builder()
+                    .planBaseId(batchPlanFieldDTO1.getPlanBaseId())
+                    .fieldName(batchPlanFieldDTO1.getFieldName()).build());
+            for (BatchPlanField batchPlanField : batchPlanFieldList){
+                batchPlanFieldDTOList.add(batchPlanFieldConverter.entityToDto(batchPlanField));
+            }
             batchPlanFieldDTO1.setBatchPlanFieldDTOList(batchPlanFieldDTOList);
         }
         return list;
