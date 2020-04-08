@@ -1,6 +1,8 @@
 package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * <p>批数据方案-字段规则表应用服务</p>
@@ -16,4 +18,35 @@ public interface BatchPlanFieldService {
      * @return 删除结果
      */
     int delete(BatchPlanFieldDTO batchPlanFieldDTO);
+
+    /**
+     * 创建
+     *
+     * @param batchPlanFieldDTO
+     */
+    void insert(BatchPlanFieldDTO batchPlanFieldDTO);
+
+    /**
+     * 更新
+     *
+     * @param batchPlanFieldDTO 更新规则信息
+     */
+    void update(BatchPlanFieldDTO batchPlanFieldDTO);
+
+    /**
+     * 字段级规则明细
+     *
+     * @param planFieldId
+     * @return
+     */
+    BatchPlanFieldDTO detail(Long planFieldId);
+
+    /**
+     * 字段级规则列表
+     *
+     * @param pageRequest
+     * @param batchPlanFieldDTO
+     * @return
+     */
+    Page<BatchPlanFieldDTO> list(PageRequest pageRequest, BatchPlanFieldDTO batchPlanFieldDTO);
 }

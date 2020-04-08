@@ -40,7 +40,11 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
     private final PlanWarningLevelConverter planWarningLevelConverter;
     private final DatasourceFeign datasourceFeign;
 
-    public BatchPlanRelTableServiceImpl(BatchPlanRelTableRepository batchPlanRelTableRepository, BatchPlanRelTableLineRepository batchPlanRelTableLineRepository, PlanWarningLevelRepository planWarningLevelRepository, PlanWarningLevelConverter planWarningLevelConverter, DatasourceFeign datasourceFeign) {
+    public BatchPlanRelTableServiceImpl(BatchPlanRelTableRepository batchPlanRelTableRepository,
+                                        BatchPlanRelTableLineRepository batchPlanRelTableLineRepository,
+                                        PlanWarningLevelRepository planWarningLevelRepository,
+                                        PlanWarningLevelConverter planWarningLevelConverter,
+                                        DatasourceFeign datasourceFeign) {
         this.batchPlanRelTableRepository = batchPlanRelTableRepository;
         this.batchPlanRelTableLineRepository = batchPlanRelTableLineRepository;
         this.planWarningLevelRepository = planWarningLevelRepository;
@@ -135,7 +139,6 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
     @Override
     public Page<BatchPlanRelTableDTO> list(PageRequest pageRequest, BatchPlanRelTableDTO batchPlanRelTableDTO) {
         Page<BatchPlanRelTableDTO> list = batchPlanRelTableRepository.pageAndSortDTO(pageRequest, batchPlanRelTableDTO);
-        int i = 0;
         for (BatchPlanRelTableDTO batchPlanRelTableDTO1 : list) {
             ResponseEntity<String> result = datasourceFeign.detail(batchPlanRelTableDTO.getTenantId(), batchPlanRelTableDTO1.getRelDatasourceId());
             DatasourceDTO datasourceDTO = ResponseUtils.getResponse(result, new TypeReference<DatasourceDTO>() {
@@ -145,9 +148,8 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
                 throw new CommonException(exceptionResponse.getMessage());
             });
             if (datasourceDTO != null) {
-                list.get(i).setDatasourceName(datasourceDTO.getDatasourceName());
+                batchPlanRelTableDTO1.setDatasourceName(datasourceDTO.getDatasourceName());
             }
-            i++;
         }
         return list;
     }

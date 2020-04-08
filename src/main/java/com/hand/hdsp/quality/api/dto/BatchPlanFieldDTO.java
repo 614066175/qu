@@ -72,4 +72,7 @@ public class BatchPlanFieldDTO extends AuditDomain {
 
     @ApiModelProperty(value = "字段规则校验项List")
     private List<BatchPlanFieldLineDTO> batchPlanFieldLineDTOList;
+
+    @ApiModelProperty(value = "已选规则List")
+    private List<BatchPlanFieldDTO> batchPlanFieldDTOList;
 }

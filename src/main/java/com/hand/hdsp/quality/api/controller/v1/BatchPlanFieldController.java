@@ -6,12 +6,16 @@ import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.BatchPlanField;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldRepository;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.*;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * <p>批数据方案-字段规则表 管理 API</p>
@@ -47,6 +51,22 @@ public class BatchPlanFieldController extends BaseController {
         return Results.success(batchPlanFieldRepository.select(batchPlanField));
     }
 
+    @ApiOperation(value = "批数据方案-字段规则表列表（含已选规则）")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/list")
+    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  BatchPlanFieldDTO batchPlanFieldDTO, @ApiIgnore @SortDefault(value = BatchPlanField.FIELD_PLAN_FIELD_ID,
+            direction = Sort.Direction.DESC) PageRequest pageRequest) {
+        batchPlanFieldDTO.setTenantId(tenantId);
+        return Results.success(batchPlanFieldService.list(pageRequest, batchPlanFieldDTO));
+    }
+
     @ApiOperation(value = "批数据方案-字段规则表明细")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
@@ -62,7 +82,7 @@ public class BatchPlanFieldController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{planFieldId}")
     public ResponseEntity<?> detail(@PathVariable Long planFieldId) {
-        BatchPlanFieldDTO batchPlanFieldDTO = batchPlanFieldRepository.selectDTOByPrimaryKeyAndTenant(planFieldId);
+        BatchPlanFieldDTO batchPlanFieldDTO = batchPlanFieldService.detail(planFieldId);
         return Results.success(batchPlanFieldDTO);
     }
 
@@ -78,7 +98,7 @@ public class BatchPlanFieldController extends BaseController {
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanFieldDTO batchPlanFieldDTO) {
         batchPlanFieldDTO.setTenantId(tenantId);
         this.validObject(batchPlanFieldDTO);
-        batchPlanFieldRepository.insertDTOSelective(batchPlanFieldDTO);
+        batchPlanFieldService.insert(batchPlanFieldDTO);
         return Results.success(batchPlanFieldDTO);
     }
 
@@ -92,7 +112,8 @@ public class BatchPlanFieldController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanFieldDTO batchPlanFieldDTO) {
-        batchPlanFieldRepository.updateDTOWhereTenant(batchPlanFieldDTO, tenantId);
+        batchPlanFieldDTO.setTenantId(tenantId);
+        batchPlanFieldService.update(batchPlanFieldDTO);
         return Results.success(batchPlanFieldDTO);
     }
 
