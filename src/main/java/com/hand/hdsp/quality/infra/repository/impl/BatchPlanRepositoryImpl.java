@@ -54,7 +54,7 @@ public class BatchPlanRepositoryImpl extends BaseRepositoryImpl<BatchPlan, Batch
     }
 
     private void getGroup(Long parentId,List<PlanGroup> groups){
-        if (parentId == 0){
+        if (parentId == 0 || parentId == null){
             return;
         }
         PlanGroup planGroup1 = planGroupRepository.selectByPrimaryKey(parentId);
