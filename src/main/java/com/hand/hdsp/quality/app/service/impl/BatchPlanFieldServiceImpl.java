@@ -169,19 +169,23 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
                 .planBaseId(batchPlanFieldDTO.getPlanBaseId())
                 .fieldName(batchPlanFieldDTO.getFieldName()).build());
         List<String> ruleCodeList = new ArrayList<>();
-        for (BatchPlanField batchPlanField : batchPlanFieldList) {
-            ruleCodeList.add(batchPlanField.getRuleCode());
-        }
-        List<RuleDTO> ruleDTOList = ruleRepository.list(ruleCodeList, ruleModel);
         List<RuleDTO> ruleDTOListAll = ruleRepository.listAll(ruleModel);
-        if (ruleDTOList != null) {
-            for (RuleDTO ruleDTO : ruleDTOList) {
-                for (RuleDTO ruleDTO1 : ruleDTOListAll) {
-                    if (ruleDTO1.getRuleId().equals(ruleDTO.getRuleId())) {
-                        ruleDTO1.setSelectedFlag(1);
+        if (!batchPlanFieldList.isEmpty()) {
+            for (BatchPlanField batchPlanField : batchPlanFieldList) {
+                ruleCodeList.add(batchPlanField.getRuleCode());
+            }
+            List<RuleDTO> ruleDTOList = ruleRepository.list(ruleCodeList, ruleModel);
+            if (ruleDTOList != null) {
+                for (RuleDTO ruleDTO : ruleDTOList) {
+                    for (RuleDTO ruleDTO1 : ruleDTOListAll) {
+                        if (ruleDTO1.getRuleId().equals(ruleDTO.getRuleId())) {
+                            ruleDTO1.setSelectedFlag(1);
+                        }
                     }
                 }
             }
+        } else {
+            return ruleDTOListAll;
         }
         return ruleDTOListAll;
     }
