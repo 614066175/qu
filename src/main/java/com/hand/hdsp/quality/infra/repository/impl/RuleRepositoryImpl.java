@@ -29,7 +29,7 @@ public class RuleRepositoryImpl extends BaseRepositoryImpl<Rule, RuleDTO> implem
     }
 
     @Override
-    public List<RuleDTO> listAll(String ruleModel) {
-        return ruleMapper.listAll(ruleModel);
+    public List<RuleDTO> listAll(RuleDTO ruleDTO) {
+        return ruleMapper.listAll(ruleDTO);
     }
 }

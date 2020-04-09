@@ -63,7 +63,13 @@
         tenant_id,
         object_version_number
         from xqua_rule
-        where rule_model = #{ruleModel}
+        <where>
+            rule_model = #{ruleModel}
+            <if test="ruleName != null">
+                <bind name="ruleName" value="'%' + ruleName + '%'"/>
+                and rule_name like #{ruleName}
+            </if>
+        </where>
     </select>
 
 </mapper>

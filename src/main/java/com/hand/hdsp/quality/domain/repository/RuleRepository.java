@@ -26,8 +26,8 @@ public interface RuleRepository extends BaseRepository<Rule, RuleDTO>, ProxySelf
     /**
      * 查询所有
      *
-     * @param ruleModel
+     * @param ruleDTO
      * @return
      */
-    List<RuleDTO> listAll(String ruleModel);
+    List<RuleDTO> listAll(RuleDTO ruleDTO);
 }

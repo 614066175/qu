@@ -43,4 +43,23 @@
 	    field_name,
 	    field_desc
     </select>
+    <select id="list2" resultType="com.hand.hdsp.quality.domain.entity.BatchPlanField">
+        select
+        *
+        from
+        xqua_batch_plan_field
+        <where>
+            1 = 1
+            <if test="fieldName != null">
+                and field_name = #{fieldName}
+            </if>
+            <if test="planBaseId != null">
+                and plan_base_id = #{planBaseId}
+            </if>
+            <if test="ruleName != null">
+                <bind name="ruleName" value="'%' + ruleName + '%'"/>
+                and rule_name like #{ruleName}
+            </if>
+        </where>
+    </select>
 </mapper>

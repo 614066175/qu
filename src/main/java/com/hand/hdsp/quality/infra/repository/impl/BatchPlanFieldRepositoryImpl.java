@@ -10,6 +10,8 @@ import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * <p>批数据方案-字段规则表资源库实现</p>
  *
@@ -32,5 +34,10 @@ public class BatchPlanFieldRepositoryImpl extends BaseRepositoryImpl<BatchPlanFi
     @Override
     public Page<BatchPlanFieldDTO> distinctPageAndSortDTO(PageRequest pageRequest, BatchPlanFieldDTO batchPlanFieldDTO) {
         return PageHelper.doPage(pageRequest, () -> batchPlanFieldMapper.list(batchPlanFieldDTO));
+    }
+
+    @Override
+    public List<BatchPlanField> list(BatchPlanField batchPlanField) {
+        return batchPlanFieldMapper.list2(batchPlanField);
     }
 }

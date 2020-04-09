@@ -25,8 +25,8 @@ public interface RuleMapper extends BaseMapper<Rule> {
     /**
      * 查询所有
      *
-     * @param ruleModel 查询条件
+     * @param ruleDTO
      * @return
      */
-    List<RuleDTO> listAll(@Param("ruleModel") String ruleModel);
+    List<RuleDTO> listAll(RuleDTO ruleDTO);
 }
