@@ -29,9 +29,13 @@
         from
         xqua_batch_plan_field
         <where>
+            1 = 1
             <if test="fieldName != null">
                 <bind name="fieldName" value="'%' + fieldName + '%'"/>
-                field_name like #{fieldName}
+                and field_name like #{fieldName}
+            </if>
+            <if test="planBaseId != null">
+                and plan_base_id = #{planBaseId}
             </if>
         </where>
         GROUP BY
