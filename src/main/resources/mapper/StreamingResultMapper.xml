@@ -171,7 +171,7 @@
     </select>
 
     <select id="listMarkTrend" resultType="com.hand.hdsp.quality.infra.vo.MarkTrendVO">
-        select date_format(xsr.end_date, '%Y-%m-%d') date,avg(xsr.mark) mark
+        select date_format(xsr.end_date, '%Y-%m-%d') date,avg(IFNULL(xsr.mark,0)) mark
         from xqua_streaming_result xsr
         <where>
             <if test="tenantId != null">

@@ -393,7 +393,7 @@
     </select>
 
     <select id="listMarkTrend" resultType="com.hand.hdsp.quality.infra.vo.MarkTrendVO">
-        select date_format(xbr.end_date, '%Y-%m-%d') date,avg(xbr.mark) mark
+        select date_format(xbr.end_date, '%Y-%m-%d') date,avg(IFNULL(xbr.mark,0)) mark
         from xqua_batch_result xbr
         <where>
             <if test="tenantId != null">
