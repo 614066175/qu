@@ -1,9 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
-import com.hand.hdsp.quality.api.dto.RuleDTO;
-import com.hand.hdsp.quality.app.service.BatchPlanFieldLineService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldLineRepository;
@@ -31,12 +28,9 @@ import springfox.documentation.annotations.ApiIgnore;
 public class BatchPlanFieldLineController extends BaseController {
 
     private BatchPlanFieldLineRepository batchPlanFieldLineRepository;
-    private BatchPlanFieldLineService batchPlanFieldLineService;
 
-    public BatchPlanFieldLineController(BatchPlanFieldLineRepository batchPlanFieldLineRepository,
-                                        BatchPlanFieldLineService batchPlanFieldLineService) {
+    public BatchPlanFieldLineController(BatchPlanFieldLineRepository batchPlanFieldLineRepository) {
         this.batchPlanFieldLineRepository = batchPlanFieldLineRepository;
-        this.batchPlanFieldLineService = batchPlanFieldLineService;
     }
 
     @ApiOperation(value = "批数据方案-字段规则校验项表列表")
@@ -54,37 +48,6 @@ public class BatchPlanFieldLineController extends BaseController {
         batchPlanFieldLineDTO.setTenantId(tenantId);
         Page<BatchPlanFieldLineDTO> list = batchPlanFieldLineRepository.pageAndSortDTO(pageRequest, batchPlanFieldLineDTO);
         return Results.success(list);
-    }
-
-    @ApiOperation(value = "批数据方案-可选字段规则校验项表列表")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/option")
-    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  BatchPlanFieldDTO batchPlanFieldDTO,
-                                  RuleDTO ruleDTO) {
-        batchPlanFieldDTO.setTenantId(tenantId);
-        return Results.success(batchPlanFieldLineService.list(batchPlanFieldDTO, ruleDTO));
-    }
-
-    @ApiOperation(value = "批数据方案-已选字段规则校验项表列表")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/selected")
-    public ResponseEntity<?> list2(@PathVariable(name = "organizationId") Long tenantId,
-                                   BatchPlanFieldDTO batchPlanFieldDTO) {
-        batchPlanFieldDTO.setTenantId(tenantId);
-        return Results.success(batchPlanFieldLineService.list2(batchPlanFieldDTO));
     }
 
     @ApiOperation(value = "批数据方案-字段规则校验项表明细")

@@ -17,19 +17,4 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
-
-    <select id="list" resultType="com.hand.hdsp.quality.api.dto.RuleLineDTO">
-        select
-        xrl.check_item
-        from xqua_rule_line xrl
-        left join xqua_rule xr
-        on xr.rule_id = xrl.rule_id
-        <where>
-            xrl.check_item not in
-            <foreach item="checkItemList" collection="checkItemList" separator="," open="(" close=")" index="">
-                #{checkItemList, jdbcType=VARCHAR}
-            </foreach>
-            and xr.rule_model = #{ruleModel}
-        </where>
-    </select>
 </mapper>

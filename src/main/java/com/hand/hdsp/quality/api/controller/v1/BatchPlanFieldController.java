@@ -67,6 +67,22 @@ public class BatchPlanFieldController extends BaseController {
         return Results.success(batchPlanFieldService.list(pageRequest, batchPlanFieldDTO));
     }
 
+    @ApiOperation(value = "批数据方案-字段规则表选择标记")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/selected")
+    public ResponseEntity<?> listSelected(@PathVariable(name = "organizationId") Long tenantId,
+                                          BatchPlanFieldDTO batchPlanFieldDTO,
+                                          String ruleModel) {
+        batchPlanFieldDTO.setTenantId(tenantId);
+        return Results.success(batchPlanFieldService.select(batchPlanFieldDTO, ruleModel));
+    }
+
     @ApiOperation(value = "批数据方案-字段规则表明细")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
