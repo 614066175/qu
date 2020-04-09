@@ -413,7 +413,7 @@
     <select id="listRuleException" resultType="com.hand.hdsp.quality.infra.vo.RuleExceptionVO">
         select  date_format(xbr.end_date, '%Y-%m-%d') date,
         xbrr.rule_type ruleType,
-        SUM(xbrb.exception_rule_count) exceptionRuleCount
+        SUM(IFNULL(xbrb.exception_rule_count,0)) exceptionRuleCount
         from xqua_batch_result xbr
         INNER JOIN xqua_batch_result_base xbrb
         on xbr.result_id=xbrb.result_id

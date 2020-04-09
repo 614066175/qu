@@ -241,7 +241,7 @@
     <select id="listRuleError" resultType="com.hand.hdsp.quality.infra.vo.RuleExceptionVO">
         select date_format(xsr.end_date, '%Y-%m-%d') date,
         xsrr.rule_type ruleType,
-        SUM(xsrb.exception_rule_count) exceptionRuleCount
+        SUM(IFNULL(xsrb.exception_rule_count,0)) exceptionRuleCount
         from xqua_streaming_result xsr
         INNER JOIN xqua_streaming_result_base xsrb
         on xsr.result_id=xsrb.result_id
