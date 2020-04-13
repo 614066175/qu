@@ -26,6 +26,9 @@ public class BatchPlanBaseRepositoryImpl extends BaseRepositoryImpl<BatchPlanBas
 
     @Override
     public Page<BatchPlanBaseDTO> list(PageRequest pageRequest, BatchPlanBaseDTO batchPlanBaseDTO) {
+        if (batchPlanBaseDTO.getPlanId() == null) {
+            return new Page<>();
+        }
         return PageHelper.doPage(pageRequest, () -> batchPlanBaseMapper.list(batchPlanBaseDTO));
     }
 }
