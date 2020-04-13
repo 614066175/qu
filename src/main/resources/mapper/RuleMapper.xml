@@ -45,6 +45,7 @@
                 #{ruleCode, jdbcType=VARCHAR}
             </foreach>
             and rule_model = #{ruleModel}
+            and rule_type in('FIELD_NUMERICAL','FIELD_CHAR','FIELD_DATE')
         </where>
     </select>
     <select id="listAll" resultType="com.hand.hdsp.quality.api.dto.RuleDTO">
@@ -69,6 +70,7 @@
                 <bind name="ruleName" value="'%' + ruleName + '%'"/>
                 and rule_name like #{ruleName}
             </if>
+            and rule_type in('FIELD_NUMERICAL','FIELD_CHAR','FIELD_DATE')
         </where>
     </select>
 
