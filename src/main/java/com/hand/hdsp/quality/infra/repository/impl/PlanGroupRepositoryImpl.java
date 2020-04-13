@@ -27,10 +27,13 @@ public class PlanGroupRepositoryImpl extends BaseRepositoryImpl<PlanGroup, PlanG
 
     @Override
     public List<PlanGroupTreeVO> tree(PlanGroupTreeVO planGroupTreeVO) {
-        if (planGroupTreeVO.getGroupType() == null || planGroupTreeVO.getGroupType().equals(RuleConstant.RULE_MODEL_BATCH)){
-            planGroupTreeVO.setGroupType(RuleConstant.RULE_MODEL_BATCH);
-            return planGroupMapper.treeBatch(planGroupTreeVO);
+        List<PlanGroupTreeVO> planGroupTreeVOList;
+        if (RuleConstant.RULE_MODEL_BATCH.equals(planGroupTreeVO.getGroupType())) {
+            planGroupTreeVOList = planGroupMapper.treeBatch(planGroupTreeVO);
+        } else {
+            planGroupTreeVOList = planGroupMapper.treeStream(planGroupTreeVO);
         }
-        return planGroupMapper.treeStream(planGroupTreeVO);
+        planGroupTreeVOList.add(PlanGroupTreeVO.ROOT_PLAN_GROUP);
+        return planGroupTreeVOList;
     }
 }

@@ -16,6 +16,14 @@ import lombok.*;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class PlanGroupTreeVO {
 
+    public static final PlanGroupTreeVO ROOT_PLAN_GROUP = PlanGroupTreeVO.builder()
+            .id(0L)
+            .groupCode("root")
+            .groupName("所有分组")
+            .type("group")
+            .groupId("group0")
+            .build();
+
     private Long id;
 
     private String groupId;

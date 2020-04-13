@@ -36,7 +36,7 @@ public class StreamingPlanRepositoryImpl extends BaseRepositoryImpl<StreamingPla
     public List<PlanGroup> getGroupByPlanName(StreamingPlanDTO streamingPlanDTO) {
         if (streamingPlanDTO.getPlanName() == null || streamingPlanDTO.getPlanName().length() == 0){
             List<PlanGroup> all = planGroupRepository.select(PlanGroup.builder().groupType(GroupType.STREAMING).build());
-            all.add(planGroupRepository.selectByPrimaryKey(0L));
+            all.add(PlanGroup.ROOT_PLAN_GROUP);
             return all;
         }
         List<StreamingPlan> streamingPlans = this.selectByCondition(
@@ -60,7 +60,7 @@ public class StreamingPlanRepositoryImpl extends BaseRepositoryImpl<StreamingPla
             getGroup(p.getParentGroupId(),groups);
             groups.add(p);
         });
-        planGroups.add(planGroupRepository.selectByPrimaryKey(0L));
+        planGroups.add(PlanGroup.ROOT_PLAN_GROUP);
         return planGroups;
     }
 

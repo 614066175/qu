@@ -26,6 +26,12 @@ import javax.persistence.Table;
 @Table(name = "xqua_plan_group")
 public class PlanGroup extends AuditDomain {
 
+    public static final PlanGroup ROOT_PLAN_GROUP = PlanGroup.builder()
+            .groupId(0L)
+            .groupCode("root")
+            .groupName("所有分组")
+            .build();
+
     //
     // 业务方法(按public protected private顺序排列)
     // ------------------------------------------------------------------------------
