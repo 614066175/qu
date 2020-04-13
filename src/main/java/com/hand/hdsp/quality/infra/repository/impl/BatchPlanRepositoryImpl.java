@@ -34,7 +34,7 @@ public class BatchPlanRepositoryImpl extends BaseRepositoryImpl<BatchPlan, Batch
     public List<PlanGroup> listByGroup(BatchPlanDTO batchPlanDTO) {
         if (batchPlanDTO.getPlanName() == null || batchPlanDTO.getPlanName().length() == 0){
             List<PlanGroup> all = planGroupRepository.select(PlanGroup.builder().groupType(GroupType.BATCH).build());
-            all.add(planGroupRepository.selectByPrimaryKey(0L));
+            all.add(PlanGroup.ROOT_PLAN_GROUP);
             return all;
         }
         List<BatchPlan> batchPlans = this.selectByCondition(
@@ -58,7 +58,7 @@ public class BatchPlanRepositoryImpl extends BaseRepositoryImpl<BatchPlan, Batch
             getGroup(p.getParentGroupId(),groups);
             groups.add(p);
         });
-        groups.add(planGroupRepository.selectByPrimaryKey(0L));
+        groups.add(PlanGroup.ROOT_PLAN_GROUP);
         return groups;
     }
 

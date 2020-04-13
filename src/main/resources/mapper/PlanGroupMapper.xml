@@ -29,7 +29,6 @@
     'group' type
     from xqua_plan_group
     where group_type = 'BATCH'
-    and group_id != 0
     union
     select
     plan_id id,
@@ -59,7 +58,6 @@
     'group' type
     from xqua_plan_group
     where group_type = 'STREAMING'
-    and group_id != 0
     union
     select
     plan_id id,

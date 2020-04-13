@@ -151,9 +151,9 @@
     </select>
 
     <select id="listResultMap" resultType="java.util.Map">
-        select ROUND(avg(xsr.mark),1) mark,
-        sum(xsrb.rule_count) ruleCount,
-        sum(xsrb.exception_rule_count) exceptionRuleCount
+        select ROUND(IFNULL(avg(xsr.mark),0),1) mark,
+        IFNULL(sum(xsrb.rule_count),0) ruleCount,
+        IFNULL(sum(xsrb.exception_rule_count),0) exceptionRuleCount
         from xqua_streaming_result xsr
         left join xqua_streaming_result_base xsrb
         on xsr.result_id=xsrb.result_id
@@ -171,7 +171,7 @@
     </select>
 
     <select id="listMarkTrend" resultType="com.hand.hdsp.quality.infra.vo.MarkTrendVO">
-        select date_format(xsr.end_date, '%Y-%m-%d') date,avg(IFNULL(xsr.mark,0)) mark
+        select date_format(xsr.end_date, '%Y-%m-%d') date,IFNULL(avg(xsr.mark),0) mark
         from xqua_streaming_result xsr
         <where>
             <if test="tenantId != null">
@@ -241,7 +241,7 @@
     <select id="listRuleError" resultType="com.hand.hdsp.quality.infra.vo.RuleExceptionVO">
         select date_format(xsr.end_date, '%Y-%m-%d') date,
         xsrr.rule_type ruleType,
-        SUM(IFNULL(xsrb.exception_rule_count,0)) exceptionRuleCount
+        IFNULL(SUM(xsrb.exception_rule_count),0) exceptionRuleCount
         from xqua_streaming_result xsr
         INNER JOIN xqua_streaming_result_base xsrb
         on xsr.result_id=xsrb.result_id

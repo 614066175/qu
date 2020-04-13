@@ -136,7 +136,7 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
             for (RuleVO ruleVO : ruleVOS){
                 for (RuleVO errorRuleVO : listErrorRule){
                     if (ruleVO.getRuleId().equals(errorRuleVO.getRuleId())){
-                        ruleMap.put(errorRuleVO.getRuleName(),errorRuleVO.getCountSum()*1.0/(ruleVO.getCountSum() == 0 ? 1 : ruleVO.getCountSum()));
+                        ruleMap.put(Optional.ofNullable(errorRuleVO.getRuleName()).orElse(""),errorRuleVO.getCountSum()*1.0/(ruleVO.getCountSum() == 0 ? 1 : ruleVO.getCountSum()));
                     }
                 }
             }
