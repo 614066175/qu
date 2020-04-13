@@ -1,23 +1,13 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
-import com.hand.hdsp.quality.api.dto.StreamingResultBaseDTO;
 import com.hand.hdsp.quality.api.dto.StreamingResultDTO;
-import com.hand.hdsp.quality.api.dto.StreamingResultRuleDTO;
 import com.hand.hdsp.quality.api.dto.TimeRangeDTO;
 import com.hand.hdsp.quality.domain.entity.StreamingResult;
-import com.hand.hdsp.quality.domain.entity.StreamingResultBase;
-import com.hand.hdsp.quality.domain.entity.StreamingResultRule;
-import com.hand.hdsp.quality.domain.repository.StreamingPlanRepository;
-import com.hand.hdsp.quality.domain.repository.StreamingResultBaseRepository;
 import com.hand.hdsp.quality.domain.repository.StreamingResultRepository;
-import com.hand.hdsp.quality.domain.repository.StreamingResultRuleRepository;
-import com.hand.hdsp.quality.infra.constant.WarnLevel;
 import com.hand.hdsp.quality.infra.mapper.StreamingResultMapper;
 import com.hand.hdsp.quality.infra.util.TimeToString;
 import com.hand.hdsp.quality.infra.vo.MarkTrendVO;
@@ -25,11 +15,8 @@ import com.hand.hdsp.quality.infra.vo.RuleExceptionVO;
 import com.hand.hdsp.quality.infra.vo.StringTimeVO;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
 
 /**
@@ -41,15 +28,9 @@ import org.springframework.stereotype.Component;
 public class StreamingResultRepositoryImpl extends BaseRepositoryImpl<StreamingResult, StreamingResultDTO> implements StreamingResultRepository {
 
     private final StreamingResultMapper streamingResultMapper;
-    private final StreamingPlanRepository streamingPlanRepository;
-    private final StreamingResultBaseRepository streamingResultBaseRepository;
-    private final StreamingResultRuleRepository streamingResultRuleRepository;
 
-    public StreamingResultRepositoryImpl(StreamingResultMapper streamingResultMapper, StreamingPlanRepository streamingPlanRepository, StreamingResultBaseRepository streamingResultBaseRepository, StreamingResultRuleRepository streamingResultRuleRepository) {
+    public StreamingResultRepositoryImpl(StreamingResultMapper streamingResultMapper) {
         this.streamingResultMapper = streamingResultMapper;
-        this.streamingPlanRepository = streamingPlanRepository;
-        this.streamingResultBaseRepository = streamingResultBaseRepository;
-        this.streamingResultRuleRepository = streamingResultRuleRepository;
     }
 
     @Override

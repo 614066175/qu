@@ -46,7 +46,8 @@ public class StreamingResultController extends BaseController {
     @GetMapping("/list")
     public ResponseEntity<?> listAll(@PathVariable(name = "organizationId") Long tenantId,
                                      StreamingResultDTO streamingResultDTO,
-                                     PageRequest pageRequest){
+                                     @SortDefault(value = StreamingResult.FIELD_END_DATE,
+                                             direction = Sort.Direction.DESC)PageRequest pageRequest){
         streamingResultDTO.setTenantId(tenantId);
         return Results.success(streamingResultRepository.listAll(streamingResultDTO, pageRequest));
     }
@@ -77,7 +78,8 @@ public class StreamingResultController extends BaseController {
     @GetMapping("/history")
     public ResponseEntity<?> listHistory(@PathVariable(name = "organizationId") Long tenantId,
                                          StreamingResultDTO streamingResultDTO,
-                                         PageRequest pageRequest){
+                                         @SortDefault(value = StreamingResult.FIELD_START_DATE,
+                                                 direction = Sort.Direction.DESC)PageRequest pageRequest){
         streamingResultDTO.setTenantId(tenantId);
         return Results.success(streamingResultRepository.listHistory(streamingResultDTO, pageRequest));
     }

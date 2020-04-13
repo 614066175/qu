@@ -49,7 +49,8 @@ public class BatchResultController extends BaseController {
     @GetMapping("/list")
     public ResponseEntity<?> listAll(@PathVariable(name = "organizationId") Long tenantId,
                                      BatchResultDTO batchResultDTO,
-                                     PageRequest pageRequest){
+                                     @SortDefault(value = BatchResult.FIELD_END_DATE,
+                                             direction = Sort.Direction.DESC)PageRequest pageRequest){
         batchResultDTO.setTenantId(tenantId);
         return Results.success(batchResultRepository.listAll(batchResultDTO,pageRequest));
     }
@@ -65,7 +66,8 @@ public class BatchResultController extends BaseController {
     @GetMapping("/history")
     public ResponseEntity<?> listHistory(@PathVariable(name = "organizationId") Long tenantId,
                                          BatchResultDTO batchResultDTO,
-                                         PageRequest pageRequest) {
+                                         @SortDefault(value = BatchResult.FIELD_START_DATE,
+                                                 direction = Sort.Direction.DESC)PageRequest pageRequest) {
         batchResultDTO.setTenantId(tenantId);
         return Results.success(batchResultRepository.listHistory(batchResultDTO, pageRequest));
     }

@@ -5,27 +5,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
-import com.hand.hdsp.quality.api.dto.BatchResultBaseDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
-import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.api.dto.TimeRangeDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
-import com.hand.hdsp.quality.domain.entity.BatchResultBase;
-import com.hand.hdsp.quality.domain.entity.BatchResultRule;
-import com.hand.hdsp.quality.domain.repository.BatchPlanRepository;
-import com.hand.hdsp.quality.domain.repository.BatchResultBaseRepository;
 import com.hand.hdsp.quality.domain.repository.BatchResultRepository;
-import com.hand.hdsp.quality.domain.repository.BatchResultRuleRepository;
-import com.hand.hdsp.quality.infra.constant.WarnLevel;
 import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
 import com.hand.hdsp.quality.infra.util.TimeToString;
 import com.hand.hdsp.quality.infra.vo.*;
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
 
 /**
@@ -37,15 +26,9 @@ import org.springframework.stereotype.Component;
 public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, BatchResultDTO> implements BatchResultRepository {
 
     private final BatchResultMapper batchResultMapper;
-    private final BatchPlanRepository batchPlanRepository;
-    private final BatchResultBaseRepository batchResultBaseRepository;
-    private final BatchResultRuleRepository batchResultRuleRepository;
 
-    public BatchResultRepositoryImpl(BatchResultMapper batchResultMapper, BatchPlanRepository batchPlanRepository, BatchResultBaseRepository batchResultBaseRepository, BatchResultRuleRepository batchResultRuleRepository) {
+    public BatchResultRepositoryImpl(BatchResultMapper batchResultMapper) {
         this.batchResultMapper = batchResultMapper;
-        this.batchPlanRepository = batchPlanRepository;
-        this.batchResultBaseRepository = batchResultBaseRepository;
-        this.batchResultRuleRepository = batchResultRuleRepository;
     }
 
     @Override

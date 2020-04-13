@@ -61,6 +61,31 @@
                 and xbr.plan_status = #{planStatus}
             </if>
         </where>
+        union
+        select
+        xbp.plan_id,
+        xbp.plan_name,
+        null result_id,
+        '${@com.hand.hdsp.quality.infra.constant.PlanStatus@NOTACCESS}' plan_status,
+        null mark,
+        xbp.creation_date start_date,
+        null end_date,
+        null next_count_date
+        from xqua_batch_plan xbp
+        LEFT JOIN xqua_plan_group xpg
+        on xpg.group_id=xbp.group_id
+        <where>
+            <if test="groupId != null and groupId != 0">
+                xpg.group_id = #{groupId}
+            </if>
+            <if test="tenantId != null">
+                and xpg.tenant_id = #{tenantId}
+            </if>
+            <if test="planName != null">
+                <bind name="planName" value="'%' + planName + '%'"/>
+                and xbp.plan_name like #{planName}
+            </if>
+        </where>
         ) a
         where not exists (select 1 from (
         select
@@ -90,6 +115,31 @@
             </if>
             <if test="planStatus != null">
                 and xbr.plan_status = #{planStatus}
+            </if>
+        </where>
+        union
+        select
+        xbp.plan_id,
+        xbp.plan_name,
+        null result_id,
+        '${@com.hand.hdsp.quality.infra.constant.PlanStatus@NOTACCESS}' plan_status,
+        null mark,
+        xbp.creation_date start_date,
+        null end_date,
+        null next_count_date
+        from xqua_batch_plan xbp
+        LEFT JOIN xqua_plan_group xpg
+        on xpg.group_id=xbp.group_id
+        <where>
+            <if test="groupId != null and groupId != 0">
+                xpg.group_id = #{groupId}
+            </if>
+            <if test="tenantId != null">
+                and xpg.tenant_id = #{tenantId}
+            </if>
+            <if test="planName != null">
+                <bind name="planName" value="'%' + planName + '%'"/>
+                and xbp.plan_name like #{planName}
             </if>
         </where>
         ) b where a.start_date &lt; b.start_date and a.plan_id=b.plan_id)
