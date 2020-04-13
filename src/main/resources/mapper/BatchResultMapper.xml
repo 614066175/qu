@@ -151,9 +151,9 @@
     </select>
 
     <select id="listResultMap" resultType="java.util.Map">
-        select ROUND(avg(xbr.mark),1) mark,
-        sum(xbrb.rule_count) ruleCount,
-        sum(exception_rule_count) exceptionRuleCount
+        select ROUND(IFNULL(avg(xbr.mark),0),1) mark,
+        IFNULL(sum(xbrb.rule_count),0) ruleCount,
+        IFNULL(sum(exception_rule_count),0) exceptionRuleCount
         from xqua_batch_result xbr
         left join xqua_batch_result_base xbrb
         on xbr.result_id=xbrb.result_id
@@ -339,7 +339,7 @@
     </select>
 
     <select id="listRule" resultType="com.hand.hdsp.quality.infra.vo.RuleVO">
-        select xr.rule_id ruleId,xr.rule_name ruleName,SUM(xbrb.rule_count) countSum
+        select xr.rule_id ruleId,xr.rule_name ruleName,IFNULL(SUM(xbrb.rule_count),0) countSum
         from xqua_batch_result xbr
         inner join xqua_batch_result_base xbrb
         on xbr.result_id=xbrb.result_id
@@ -366,7 +366,7 @@
     </select>
 
     <select id="listErrorRule" resultType="com.hand.hdsp.quality.infra.vo.RuleVO">
-        select xr.rule_id ruleId,xr.rule_name ruleName,SUM(xbrb.exception_rule_count) countSum
+        select xr.rule_id ruleId,xr.rule_name ruleName,IFNULL(SUM(xbrb.exception_rule_count),0) countSum
         from xqua_batch_result xbr
         inner join xqua_batch_result_base xbrb
         on xbr.result_id=xbrb.result_id
@@ -393,7 +393,7 @@
     </select>
 
     <select id="listMarkTrend" resultType="com.hand.hdsp.quality.infra.vo.MarkTrendVO">
-        select date_format(xbr.end_date, '%Y-%m-%d') date,avg(IFNULL(xbr.mark,0)) mark
+        select date_format(xbr.end_date, '%Y-%m-%d') date,IFNULL(avg(xbr.mark),0) mark
         from xqua_batch_result xbr
         <where>
             <if test="tenantId != null">
@@ -413,7 +413,7 @@
     <select id="listRuleException" resultType="com.hand.hdsp.quality.infra.vo.RuleExceptionVO">
         select  date_format(xbr.end_date, '%Y-%m-%d') date,
         xbrr.rule_type ruleType,
-        SUM(IFNULL(xbrb.exception_rule_count,0)) exceptionRuleCount
+        IFNULL(SUM(xbrb.exception_rule_count),0) exceptionRuleCount
         from xqua_batch_result xbr
         INNER JOIN xqua_batch_result_base xbrb
         on xbr.result_id=xbrb.result_id
