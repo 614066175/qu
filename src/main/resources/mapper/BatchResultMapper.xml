@@ -221,17 +221,21 @@
     </select>
 
     <select id="listSUCCESSTypeCount" resultType="com.hand.hdsp.quality.infra.vo.CheckTypePercentageVO">
+        select a.checkType,IFNULL(SUM(a.countSum),0) countSum
+        FROM
+        (
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@COMPLETENESS}' checkType,
         count(1) countSum
-        from xqua_rule xr
+        from xqua_batch_plan_table xbpt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xr.rule_id=xbrr.rule_id
+        on xbpt.plan_table_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
         on xbrb.result_id=xbr.result_id
         where xbr.plan_status='${@com.hand.hdsp.quality.infra.constant.PlanStatus@SUCCESS}'
-        and xr.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@COMPLETENESS}'
+        and xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@TABLE}'
+        and xbpt.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@COMPLETENESS}'
         <if test="tenantId != null">
             and xbr.tenant_id = #{tenantId}
         </if>
@@ -241,18 +245,67 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
+        UNION
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@COMPLETENESS}' checkType,
+        count(1) countSum
+        from xqua_batch_plan_field xbpf
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xbpf.plan_field_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xbr.plan_status='${@com.hand.hdsp.quality.infra.constant.PlanStatus@SUCCESS}'
+        and xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@FIELD}'
+        and xbpf.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@COMPLETENESS}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        UNION
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@COMPLETENESS}' checkType,
+        count(1) countSum
+        from xqua_batch_plan_rel_table xbprt
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xbprt.plan_rel_table_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xbr.plan_status='${@com.hand.hdsp.quality.infra.constant.PlanStatus@SUCCESS}'
+        and xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@REL_TABLE}'
+        and xbprt.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@COMPLETENESS}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        ) a GROUP BY a.checkType
         union
+        select b.checkType,IFNULL(SUM(b.countSum),0) countSum
+        FROM
+        (
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@UNIFORMITY}' checkType,
         count(1) countSum
-        from xqua_rule xr
+        from xqua_batch_plan_table xbpt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xr.rule_id=xbrr.rule_id
+        on xbpt.plan_table_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
         on xbrb.result_id=xbr.result_id
         where xbr.plan_status='${@com.hand.hdsp.quality.infra.constant.PlanStatus@SUCCESS}'
-        and xr.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@UNIFORMITY}'
+        and xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@TABLE}'
+        and xbpt.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@UNIFORMITY}'
         <if test="tenantId != null">
             and xbr.tenant_id = #{tenantId}
         </if>
@@ -262,18 +315,67 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
+        UNION
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@UNIFORMITY}' checkType,
+        count(1) countSum
+        from xqua_batch_plan_field xbpf
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xbpf.plan_field_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xbr.plan_status='${@com.hand.hdsp.quality.infra.constant.PlanStatus@SUCCESS}'
+        and xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@FIELD}'
+        and xbpf.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@UNIFORMITY}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        UNION
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@UNIFORMITY}' checkType,
+        count(1) countSum
+        from xqua_batch_plan_rel_table xbprt
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xbprt.plan_rel_table_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xbr.plan_status='${@com.hand.hdsp.quality.infra.constant.PlanStatus@SUCCESS}'
+        and xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@REL_TABLE}'
+        and xbprt.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@UNIFORMITY}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        ) b GROUP BY b.checkType
         union
+        select c.checkType,IFNULL(SUM(c.countSum),0) countSum
+        FROM
+        (
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@ACCURACY}' checkType,
         count(1) countSum
-        from xqua_rule xr
+        from xqua_batch_plan_table xbpt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xr.rule_id=xbrr.rule_id
+        on xbpt.plan_table_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
         on xbrb.result_id=xbr.result_id
         where xbr.plan_status='${@com.hand.hdsp.quality.infra.constant.PlanStatus@SUCCESS}'
-        and xr.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@ACCURACY}'
+        and xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@TABLE}'
+        and xbpt.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@ACCURACY}'
         <if test="tenantId != null">
             and xbr.tenant_id = #{tenantId}
         </if>
@@ -283,18 +385,67 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
+        UNION
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@ACCURACY}' checkType,
+        count(1) countSum
+        from xqua_batch_plan_field xbpf
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xbpf.plan_field_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xbr.plan_status='${@com.hand.hdsp.quality.infra.constant.PlanStatus@SUCCESS}'
+        and xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@FIELD}'
+        and xbpf.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@ACCURACY}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        UNION
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@ACCURACY}' checkType,
+        count(1) countSum
+        from xqua_batch_plan_rel_table xbprt
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xbprt.plan_rel_table_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xbr.plan_status='${@com.hand.hdsp.quality.infra.constant.PlanStatus@SUCCESS}'
+        and xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@REL_TABLE}'
+        and xbprt.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@ACCURACY}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        ) c GROUP BY c.checkType
         union
+        select d.checkType,IFNULL(SUM(d.countSum),0) countSum
+        FROM
+        (
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@STANDARD}' checkType,
         count(1) countSum
-        from xqua_rule xr
+        from xqua_batch_plan_table xbpt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xr.rule_id=xbrr.rule_id
+        on xbpt.plan_table_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
         on xbrb.result_id=xbr.result_id
         where xbr.plan_status='${@com.hand.hdsp.quality.infra.constant.PlanStatus@SUCCESS}'
-        and xr.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@STANDARD}'
+        and xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@TABLE}'
+        and xbpt.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@STANDARD}'
         <if test="tenantId != null">
             and xbr.tenant_id = #{tenantId}
         </if>
@@ -304,19 +455,68 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
+        UNION
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@STANDARD}' checkType,
+        count(1) countSum
+        from xqua_batch_plan_field xbpf
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xbpf.plan_field_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xbr.plan_status='${@com.hand.hdsp.quality.infra.constant.PlanStatus@SUCCESS}'
+        and xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@FIELD}'
+        and xbpf.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@STANDARD}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        UNION
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@STANDARD}' checkType,
+        count(1) countSum
+        from xqua_batch_plan_rel_table xbprt
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xbprt.plan_rel_table_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xbr.plan_status='${@com.hand.hdsp.quality.infra.constant.PlanStatus@SUCCESS}'
+        and xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@REL_TABLE}'
+        and xbprt.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@STANDARD}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        ) d GROUP BY d.checkType
     </select>
 
     <select id="listAllTypeCount" resultType="com.hand.hdsp.quality.infra.vo.CheckTypePercentageVO">
+        select a.checkType,IFNULL(SUM(a.countSum),0) countSum
+        FROM
+        (
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@COMPLETENESS}' checkType,
         count(1) countSum
-        from xqua_rule xr
+        from xqua_batch_plan_table xbpt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xr.rule_id=xbrr.rule_id
+        on xbpt.plan_table_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
         on xbrb.result_id=xbr.result_id
-        where xr.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@COMPLETENESS}'
+        where xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@TABLE}'
+        and xbpt.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@COMPLETENESS}'
         <if test="tenantId != null">
             and xbr.tenant_id = #{tenantId}
         </if>
@@ -326,17 +526,64 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
+        UNION
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@COMPLETENESS}' checkType,
+        count(1) countSum
+        from xqua_batch_plan_field xbpf
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xbpf.plan_field_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@FIELD}'
+        and xbpf.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@COMPLETENESS}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        UNION
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@COMPLETENESS}' checkType,
+        count(1) countSum
+        from xqua_batch_plan_rel_table xbprt
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xbprt.plan_rel_table_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@REL_TABLE}'
+        and xbprt.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@COMPLETENESS}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        ) a GROUP BY a.checkType
         union
+        select b.checkType,IFNULL(SUM(b.countSum),0) countSum
+        FROM
+        (
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@UNIFORMITY}' checkType,
         count(1) countSum
-        from xqua_rule xr
+        from xqua_batch_plan_table xbpt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xr.rule_id=xbrr.rule_id
+        on xbpt.plan_table_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
         on xbrb.result_id=xbr.result_id
-        where xr.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@UNIFORMITY}'
+        where xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@TABLE}'
+        and xbpt.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@UNIFORMITY}'
         <if test="tenantId != null">
             and xbr.tenant_id = #{tenantId}
         </if>
@@ -346,17 +593,64 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
+        UNION
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@UNIFORMITY}' checkType,
+        count(1) countSum
+        from xqua_batch_plan_field xbpf
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xbpf.plan_field_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@FIELD}'
+        and xbpf.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@UNIFORMITY}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        UNION
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@UNIFORMITY}' checkType,
+        count(1) countSum
+        from xqua_batch_plan_rel_table xbprt
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xbprt.plan_rel_table_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@REL_TABLE}'
+        and xbprt.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@UNIFORMITY}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        ) b GROUP BY b.checkType
         union
+        select c.checkType,IFNULL(SUM(c.countSum),0) countSum
+        FROM
+        (
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@ACCURACY}' checkType,
         count(1) countSum
-        from xqua_rule xr
+        from xqua_batch_plan_table xbpt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xr.rule_id=xbrr.rule_id
+        on xbpt.plan_table_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
         on xbrb.result_id=xbr.result_id
-        where xr.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@ACCURACY}'
+        where xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@TABLE}'
+        and xbpt.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@ACCURACY}'
         <if test="tenantId != null">
             and xbr.tenant_id = #{tenantId}
         </if>
@@ -366,17 +660,64 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
+        UNION
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@ACCURACY}' checkType,
+        count(1) countSum
+        from xqua_batch_plan_field xbpf
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xbpf.plan_field_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@FIELD}'
+        and xbpf.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@ACCURACY}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        UNION
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@ACCURACY}' checkType,
+        count(1) countSum
+        from xqua_batch_plan_rel_table xbprt
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xbprt.plan_rel_table_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@REL_TABLE}'
+        and xbprt.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@ACCURACY}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        ) c GROUP BY c.checkType
         union
+        select d.checkType,IFNULL(SUM(d.countSum),0) countSum
+        FROM
+        (
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@STANDARD}' checkType,
         count(1) countSum
-        from xqua_rule xr
+        from xqua_batch_plan_table xbpt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xr.rule_id=xbrr.rule_id
+        on xbpt.plan_table_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
         on xbrb.result_id=xbr.result_id
-        where xr.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@STANDARD}'
+        where xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@TABLE}'
+        and xbpt.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@STANDARD}'
         <if test="tenantId != null">
             and xbr.tenant_id = #{tenantId}
         </if>
@@ -386,6 +727,49 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
+        UNION
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@STANDARD}' checkType,
+        count(1) countSum
+        from xqua_batch_plan_field xbpf
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xbpf.plan_field_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@FIELD}'
+        and xbpf.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@STANDARD}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        UNION
+        select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@STANDARD}' checkType,
+        count(1) countSum
+        from xqua_batch_plan_rel_table xbprt
+        LEFT JOIN xqua_batch_result_rule xbrr
+        on xbprt.plan_rel_table_id=xbrr.rule_id
+        left join xqua_batch_result_base xbrb
+        on xbrr.result_base_id=xbrb.result_base_id
+        LEFT JOIN xqua_batch_result xbr
+        on xbrb.result_id=xbr.result_id
+        where xbrr.rule_type='${@com.hand.hdsp.quality.infra.constant.RuleType@REL_TABLE}'
+        and xbprt.check_type='${@com.hand.hdsp.quality.infra.constant.CheckTypeEN@STANDARD}'
+        <if test="tenantId != null">
+            and xbr.tenant_id = #{tenantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and xbr.end_date &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and xbr.end_date &lt;=  #{endDate}
+        </if>
+        ) d GROUP BY d.checkType
     </select>
 
     <select id="listRule" resultType="com.hand.hdsp.quality.infra.vo.RuleVO">
