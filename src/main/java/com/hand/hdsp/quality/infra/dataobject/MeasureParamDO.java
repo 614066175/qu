@@ -1,10 +1,10 @@
 package com.hand.hdsp.quality.infra.dataobject;
 
-import com.hand.hdsp.quality.api.dto.*;
-import com.hand.hdsp.quality.domain.entity.BatchPlanRelTable;
-import com.hand.hdsp.quality.domain.entity.BatchPlanRelTableLine;
-import com.hand.hdsp.quality.domain.entity.BatchResultBase;
-import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
+import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
+import com.hand.hdsp.quality.api.dto.BatchPlanTableDTO;
+import com.hand.hdsp.quality.api.dto.BatchPlanTableLineDTO;
+import com.hand.hdsp.quality.api.dto.DatasourceDTO;
+import com.hand.hdsp.quality.domain.entity.*;
 import lombok.*;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public class MeasureParamDO {
 
     private BatchPlanTableLineDTO batchPlanTableLineDTO;
 
-    private BatchPlanFieldDTO batchPlanFieldDTO;
+    private BatchPlanField batchPlanField;
 
     private BatchPlanFieldLineDTO batchPlanFieldLineDTO;
 

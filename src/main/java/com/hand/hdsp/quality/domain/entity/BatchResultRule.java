@@ -9,7 +9,6 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.math.BigDecimal;
 
 /**
  * <p>批数据方案结果表-规则信息实体</p>
@@ -47,6 +46,8 @@ public class BatchResultRule extends AuditDomain {
 
     private Long ruleId;
 
+    private Long planFieldLineId;
+
     private String ruleCode;
 
     private String ruleName;
@@ -57,7 +58,9 @@ public class BatchResultRule extends AuditDomain {
 
     private String actualValue;
 
-    private BigDecimal waveRate;
+    private String waveRate;
+
+    private String currentValue;
 
     private String exceptionInfo;
 

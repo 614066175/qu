@@ -3,7 +3,6 @@ package com.hand.hdsp.quality.infra.dataobject;
 import io.choerodon.mybatis.domain.AuditDomain;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -28,6 +27,8 @@ public class BatchResultRuleDO extends AuditDomain {
 
     private Long ruleId;
 
+    private Long planFieldLineId;
+
     private String ruleCode;
 
     private String ruleName;
@@ -38,7 +39,9 @@ public class BatchResultRuleDO extends AuditDomain {
 
     private String actualValue;
 
-    private BigDecimal waveRate;
+    private String waveRate;
+
+    private String currentValue;
 
     private String exceptionInfo;
 

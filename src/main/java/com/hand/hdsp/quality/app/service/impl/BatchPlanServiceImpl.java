@@ -182,6 +182,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     BatchResultRuleDTO batchResultRuleDTO = measure.check(MeasureParamDO.builder()
                             .tenantId(tenantId)
                             .datasourceDTO(datasourceDTO)
+                            .batchPlanField(batchPlanField)
                             .batchPlanFieldLineDTO(batchPlanFieldLineDTO)
                             .warningLevelList(warningLevelList)
                             .batchResultBase(batchResultBase)
@@ -190,6 +191,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     batchResultRuleDTO.setRuleType(PlanConstant.ResultRuleType.FIELD);
                     batchResultRuleDTO.setTableName(batchPlanBase.getTableName());
                     batchResultRuleDTO.setRuleId(batchPlanField.getPlanFieldId());
+                    batchResultRuleDTO.setPlanFieldLineId(batchPlanFieldLine.getPlanFieldLineId());
                     batchResultRuleDTO.setRuleCode(batchPlanField.getRuleCode());
                     batchResultRuleDTO.setRuleName(batchPlanField.getRuleName());
                     batchResultRuleDTO.setFieldName(batchPlanField.getFieldName());
@@ -229,8 +231,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
             }
 
-            //获取所有告警等级
-            List<LovValueDTO> list = lovAdapter.queryLovValue("HDSP.XQUA.WARNING_LEVEL", tenantId);
+            //获取所有告警等级，计算 F 值
+            List<LovValueDTO> list = lovAdapter.queryLovValue(PlanConstant.LOV_WARNING_LEVEL, tenantId);
             Map<String, BigDecimal> map = new HashMap<>();
             BigDecimal n = BigDecimal.valueOf(list.size());
             BigDecimal half = BigDecimal.valueOf(0.5);
@@ -252,6 +254,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             }
             batchResult.setMark(sum.multiply(BigDecimal.valueOf(100)));
             batchResult.setPlanStatus(PlanConstant.PlanStatus.SUCCESS);
+            batchResult.setEndDate(new Date());
             batchResultRepository.updateByPrimaryKey(batchResult);
         }
     }
@@ -275,11 +278,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                         .enabledFlag(1)
                         .tenantId(tenantId)
                         .build());
-        ResponseUtils.getResponse(jobResult, JobDTO.class, (httpStatus, response) -> {
-            throw new CommonException(response);
-        }, exceptionResponse -> {
-            throw new CommonException(exceptionResponse.getMessage());
-        });
+        ResponseUtils.getResponse(jobResult, JobDTO.class);
     }
 
     /**
@@ -291,10 +290,6 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     private void setTableInfo(DatasourceDTO datasourceDTO, BatchResultBase batchResultBase) {
         datasourceDTO.setSql(String.format(TABLE_SQL, datasourceDTO.getSchema(), datasourceDTO.getTableName()));
         List<Map<String, Long>> result = ResponseUtils.getResponse(datasourceFeign.execSql(datasourceDTO.getTenantId(), datasourceDTO), new TypeReference<List<Map<String, Long>>>() {
-        }, (httpStatus, response) -> {
-            throw new CommonException(response);
-        }, exceptionResponse -> {
-            throw new CommonException(exceptionResponse.getMessage());
         });
         if (!result.isEmpty()) {
             batchResultBase.setDataCount(result.get(0).get("table_rows"));

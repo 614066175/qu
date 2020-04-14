@@ -114,10 +114,6 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
         BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseRepository.selectDTOByPrimaryKey(planBaseId);
         ResponseEntity<String> result = datasourceFeign.detail(tenantId, batchPlanBaseDTO.getDatasourceId());
         DatasourceDTO datasourceDTO = ResponseUtils.getResponse(result, new TypeReference<DatasourceDTO>() {
-        }, (httpStatus, response) -> {
-            throw new CommonException(response);
-        }, exceptionResponse -> {
-            throw new CommonException(exceptionResponse.getMessage());
         });
         if (datasourceDTO != null) {
             batchPlanBaseDTO.setDatasourceName(datasourceDTO.getDatasourceName());

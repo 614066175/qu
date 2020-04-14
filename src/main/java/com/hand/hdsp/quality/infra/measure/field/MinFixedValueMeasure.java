@@ -16,17 +16,17 @@ import org.hzero.core.util.ResponseUtils;
 import java.util.List;
 
 /**
- * <p>最大值,固定值</p>
+ * <p>最小值,固定值</p>
  *
  * @author feng.liu01@hand-china.com 2020-03-24 16:19:53
  */
-@CheckItem("FIELD_MAX_FIXED_VALUE")
-public class MaxFixedValueMeasure implements Measure {
+@CheckItem("FIELD_MIN_FIXED_VALUE")
+public class MinFixedValueMeasure implements Measure {
 
-    private static final String SQL = "select max(%s) actualValue from %s";
+    private static final String SQL = "select min(%s) actualValue from %s";
     private final DatasourceFeign datasourceFeign;
 
-    public MaxFixedValueMeasure(DatasourceFeign datasourceFeign) {
+    public MinFixedValueMeasure(DatasourceFeign datasourceFeign) {
         this.datasourceFeign = datasourceFeign;
     }
 

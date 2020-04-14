@@ -15,7 +15,6 @@ import com.hand.hdsp.quality.infra.constant.TableNameConstant;
 import com.hand.hdsp.quality.infra.converter.PlanWarningLevelConverter;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.core.util.ResponseUtils;
@@ -142,10 +141,6 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
         for (BatchPlanRelTableDTO batchPlanRelTableDTO1 : list) {
             ResponseEntity<String> result = datasourceFeign.detail(batchPlanRelTableDTO.getTenantId(), batchPlanRelTableDTO1.getRelDatasourceId());
             DatasourceDTO datasourceDTO = ResponseUtils.getResponse(result, new TypeReference<DatasourceDTO>() {
-            }, (httpStatus, response) -> {
-                throw new CommonException(response);
-            }, exceptionResponse -> {
-                throw new CommonException(exceptionResponse.getMessage());
             });
             if (datasourceDTO != null) {
                 batchPlanRelTableDTO1.setDatasourceName(datasourceDTO.getDatasourceName());

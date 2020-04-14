@@ -4,7 +4,6 @@ import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultRule;
 import com.hand.hdsp.quality.infra.dataobject.BatchResultRuleDO;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
-import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -17,6 +16,12 @@ import java.util.List;
  */
 public interface BatchResultRuleMapper extends BaseMapper<BatchResultRule> {
 
+    /**
+     * 查询历史实际值
+     *
+     * @param batchResultRule
+     * @return
+     */
     List<BatchResultRuleDO> queryList(BatchResultRuleDO batchResultRule);
 
     /**
@@ -34,5 +39,5 @@ public interface BatchResultRuleMapper extends BaseMapper<BatchResultRule> {
      * @param tableName
      * @return ResultWaringVO
      */
-    List<ResultWaringVO> selectWaringLevel(@Param("tenantId") Long tenantId,@Param("tableName") String tableName);
+    List<ResultWaringVO> selectWaringLevel(@Param("tenantId") Long tenantId, @Param("tableName") String tableName);
 }

@@ -6,28 +6,35 @@ import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.api.dto.DatasourceDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanField;
 import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
+import com.hand.hdsp.quality.infra.dataobject.BatchResultRuleDO;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
+import com.hand.hdsp.quality.infra.mapper.BatchResultRuleMapper;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hzero.core.util.ResponseUtils;
 
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 /**
- * <p>最大值,固定值</p>
+ * <p>最大值,1天波动率</p>
  *
  * @author feng.liu01@hand-china.com 2020-03-24 16:19:53
  */
-@CheckItem("FIELD_MAX_FIXED_VALUE")
-public class MaxFixedValueMeasure implements Measure {
+@CheckItem("FIELD_ONE_MAX_VOLATILITY")
+public class OneMaxVolatilityMeasure implements Measure {
 
-    private static final String SQL = "select max(%s) actualValue from %s";
+    private static final String SQL = "select max(%s) currentValue from %s";
     private final DatasourceFeign datasourceFeign;
+    private final BatchResultRuleMapper batchResultRuleMapper;
 
-    public MaxFixedValueMeasure(DatasourceFeign datasourceFeign) {
+    public OneMaxVolatilityMeasure(DatasourceFeign datasourceFeign, BatchResultRuleMapper batchResultRuleMapper) {
         this.datasourceFeign = datasourceFeign;
+        this.batchResultRuleMapper = batchResultRuleMapper;
     }
 
     @Override
@@ -41,12 +48,24 @@ public class MaxFixedValueMeasure implements Measure {
         datasourceDTO.setSql(String.format(SQL, batchPlanField.getFieldName(), datasourceDTO.getTableName()));
         List<BatchResultRuleDTO> batchResultRuleDTOList = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<BatchResultRuleDTO>>() {
         });
-        BatchResultRuleDTO batchResultRuleDTO = batchResultRuleDTOList.get(0);
-        batchResultRuleDTO.setExpectedValue(batchPlanFieldLineDTO.getExpectedValue());
+        String currentValue = batchResultRuleDTOList.get(0).getCurrentValue();
 
-        long actualValue = Long.parseLong(batchResultRuleDTO.getActualValue());
-        long expectedValue = Long.parseLong(batchPlanFieldLineDTO.getExpectedValue());
-        MeasureUtil.fixedCompare(batchPlanFieldLineDTO.getCompareWay(), actualValue, expectedValue, warningLevelList, batchResultRuleDTO);
+        BatchResultRuleDTO batchResultRuleDTO = new BatchResultRuleDTO();
+        batchResultRuleDTO.setCurrentValue(currentValue);
+
+        //查询基础值
+        List<BatchResultRuleDO> baseList = batchResultRuleMapper.queryList(BatchResultRuleDO.builder()
+                .planFieldLineId(batchPlanFieldLineDTO.getPlanFieldLineId())
+                .measureDate(DateUtils.addDays(new Date(), -1))
+                .build());
+        if (baseList.isEmpty()) {
+            return batchResultRuleDTO;
+        }
+
+        MeasureUtil.volatilityCompare(batchPlanFieldLineDTO.getCompareWay(),
+                new BigDecimal(currentValue),
+                new BigDecimal(baseList.get(0).getCurrentValue()),
+                warningLevelList, batchResultRuleDTO);
 
         return batchResultRuleDTO;
     }

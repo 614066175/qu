@@ -8,12 +8,14 @@
         <result column="rule_type" property="ruleType" jdbcType="VARCHAR"/>
         <result column="table_name" property="tableName" jdbcType="VARCHAR"/>
         <result column="rule_id" property="ruleId" jdbcType="DECIMAL"/>
+        <result column="plan_field_line_id" property="planFieldLineId" jdbcType="DECIMAL"/>
         <result column="rule_code" property="ruleCode" jdbcType="VARCHAR"/>
         <result column="rule_name" property="ruleName" jdbcType="VARCHAR"/>
         <result column="check_item" property="checkItem" jdbcType="VARCHAR"/>
         <result column="expected_value" property="expectedValue" jdbcType="VARCHAR"/>
         <result column="actual_value" property="actualValue" jdbcType="VARCHAR"/>
-        <result column="wave_rate" property="waveRate" jdbcType="DECIMAL"/>
+        <result column="wave_rate" property="waveRate" jdbcType="VARCHAR"/>
+        <result column="current_value" property="currentValue" jdbcType="VARCHAR"/>
         <result column="exception_info" property="exceptionInfo" jdbcType="VARCHAR"/>
         <result column="warning_level" property="warningLevel" jdbcType="VARCHAR"/>
         <result column="field_name" property="fieldName" jdbcType="VARCHAR"/>
@@ -27,10 +29,12 @@
     </resultMap>
 
     <select id="queryList" resultType="com.hand.hdsp.quality.infra.dataobject.BatchResultRuleDO">
-        select *
+        select current_value
         from xqua_batch_result_rule xbrr
-        where xbrr.rule_id = #{ruleId}
+        where xbrr.plan_field_line_id = #{planFieldLineId}
+          and rule_type = '${@com.hand.hdsp.quality.infra.constant.PlanConstant$ResultRuleType@FIELD}'
           and date_format(creation_date, '%Y%m%d') = date_format(#{measureDate}, '%Y%m%d')
+        order by xbrr.creation_date desc
     </select>
 
     <select id="selectByResultId" resultType="com.hand.hdsp.quality.api.dto.BatchResultRuleDTO">

@@ -16,38 +16,40 @@ import org.hzero.core.util.ResponseUtils;
 import java.util.List;
 
 /**
- * <p>最大值,固定值</p>
+ * <p>重复值个数,固定值</p>
  *
  * @author feng.liu01@hand-china.com 2020-03-24 16:19:53
  */
-@CheckItem("FIELD_MAX_FIXED_VALUE")
-public class MaxFixedValueMeasure implements Measure {
+@CheckItem("FIELD_DUPLICATE_FIXED_VALUE")
+public class DuplicateFixedValueMeasure implements Measure {
 
-    private static final String SQL = "select max(%s) actualValue from %s";
+    private static final String SQL = "SELECT COUNT(*) actualValue FROM (SELECT %s FROM %s GROUP BY %s HAVING COUNT(*) != 1) a";
     private final DatasourceFeign datasourceFeign;
 
-    public MaxFixedValueMeasure(DatasourceFeign datasourceFeign) {
+    public DuplicateFixedValueMeasure(DatasourceFeign datasourceFeign) {
         this.datasourceFeign = datasourceFeign;
     }
 
     @Override
     public BatchResultRuleDTO check(MeasureParamDO param) {
         Long tenantId = param.getTenantId();
-        DatasourceDTO datasourceDTO = param.getDatasourceDTO();
         BatchPlanField batchPlanField = param.getBatchPlanField();
         BatchPlanFieldLineDTO batchPlanFieldLineDTO = param.getBatchPlanFieldLineDTO();
+        DatasourceDTO datasourceDTO = param.getDatasourceDTO();
         List<PlanWarningLevel> warningLevelList = param.getWarningLevelList();
 
-        datasourceDTO.setSql(String.format(SQL, batchPlanField.getFieldName(), datasourceDTO.getTableName()));
-        List<BatchResultRuleDTO> batchResultRuleDTOList = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<BatchResultRuleDTO>>() {
+        datasourceDTO.setSql(String.format(SQL, batchPlanField.getFieldName(), datasourceDTO.getTableName(), batchPlanField.getFieldName()));
+        List<BatchResultRuleDTO> resultList = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<BatchResultRuleDTO>>() {
         });
-        BatchResultRuleDTO batchResultRuleDTO = batchResultRuleDTOList.get(0);
+        long actualValue = Long.parseLong(resultList.get(0).getActualValue());
+
+        BatchResultRuleDTO batchResultRuleDTO = new BatchResultRuleDTO();
         batchResultRuleDTO.setExpectedValue(batchPlanFieldLineDTO.getExpectedValue());
 
-        long actualValue = Long.parseLong(batchResultRuleDTO.getActualValue());
         long expectedValue = Long.parseLong(batchPlanFieldLineDTO.getExpectedValue());
         MeasureUtil.fixedCompare(batchPlanFieldLineDTO.getCompareWay(), actualValue, expectedValue, warningLevelList, batchResultRuleDTO);
 
+        batchResultRuleDTO.setActualValue(resultList.get(0).getActualValue());
         return batchResultRuleDTO;
     }
 }

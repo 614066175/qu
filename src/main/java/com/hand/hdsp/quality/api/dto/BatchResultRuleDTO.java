@@ -9,7 +9,6 @@ import lombok.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.math.BigDecimal;
 
 /**
  * <p>批数据方案结果表-规则信息 数据传输对象</p>
@@ -40,8 +39,11 @@ public class BatchResultRuleDTO extends AuditDomain {
     @ApiModelProperty(value = "校验表名称")
     private String tableName;
 
-    @ApiModelProperty(value = "规则ID")
+    @ApiModelProperty(value = "方案规则ID(XQUA_BATCH_PLAN_REL_TABLE.PLAN_REL_TABLE_ID/XQUA_BATCH_PLAN_FIELD.PLAN_FIELD_ID/XQUA_BATCH_PLAN_TABLE.PLAN_TABLE_ID)结合规则类型判断具体是哪个")
     private Long ruleId;
+
+    @ApiModelProperty(value = "XQUA_BATCH_PLAN_FIELD_LINE.PLAN_FIELD_LINE_ID")
+    private Long planFieldLineId;
 
     @ApiModelProperty(value = "规则编码")
     private String ruleCode;
@@ -59,7 +61,10 @@ public class BatchResultRuleDTO extends AuditDomain {
     private String actualValue;
 
     @ApiModelProperty(value = "波动率")
-    private BigDecimal waveRate;
+    private String waveRate;
+
+    @ApiModelProperty(value = "当前值（用于字段规则计算波动率）")
+    private String currentValue;
 
     @ApiModelProperty(value = "错误信息")
     private String exceptionInfo;

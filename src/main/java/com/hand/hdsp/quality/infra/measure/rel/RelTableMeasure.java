@@ -12,10 +12,9 @@ import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
-import io.choerodon.core.exception.CommonException;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.core.util.ResponseUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -30,8 +29,11 @@ import java.util.Map;
 @CheckItem(PlanConstant.RuleType.TABLE_RELATION)
 public class RelTableMeasure implements Measure {
 
-    @Autowired
-    private DatasourceFeign datasourceFeign;
+    private final DatasourceFeign datasourceFeign;
+
+    public RelTableMeasure(DatasourceFeign datasourceFeign) {
+        this.datasourceFeign = datasourceFeign;
+    }
 
     @Override
     public BatchResultRuleDTO check(MeasureParamDO param) {
@@ -44,13 +46,16 @@ public class RelTableMeasure implements Measure {
         StringBuilder sql = new StringBuilder();
         sql.append("select count(*) count from ")
                 .append(batchResultBase.getTableName())
-                .append(" source, ")
-                .append("( select * from ")
-                .append(batchPlanRelTable.getRelTableName())
-                .append(" where ")
-                .append(batchPlanRelTable.getWhereCondition())
-                .append(" ) rel ");
-
+                .append(" source, ");
+        if (StringUtils.isBlank(batchPlanRelTable.getWhereCondition())) {
+            sql.append(batchPlanRelTable.getRelTableName()).append(" rel ");
+        } else {
+            sql.append("( select * from ")
+                    .append(batchPlanRelTable.getRelTableName())
+                    .append(" where ")
+                    .append(batchPlanRelTable.getWhereCondition())
+                    .append(" ) rel ");
+        }
         if (!lineList.isEmpty()) {
             sql.append(" where 1 = 1 ");
             for (BatchPlanRelTableLine batchPlanRelTableLine : lineList) {
@@ -62,10 +67,6 @@ public class RelTableMeasure implements Measure {
 
         datasourceDTO.setSql(sql.toString());
         List<Map<String, Long>> result = ResponseUtils.getResponse(datasourceFeign.execSql(datasourceDTO.getTenantId(), datasourceDTO), new TypeReference<List<Map<String, Long>>>() {
-        }, (httpStatus, response) -> {
-            throw new CommonException(response);
-        }, exceptionResponse -> {
-            throw new CommonException(exceptionResponse.getMessage());
         });
 
         //计算准确率
@@ -75,11 +76,13 @@ public class RelTableMeasure implements Measure {
 
         BatchResultRuleDTO batchResultRuleDTO = new BatchResultRuleDTO();
         batchResultRuleDTO.setActualValue(rate.toString() + BaseConstants.Symbol.PERCENTAGE);
+        batchResultRuleDTO.setRelTableName(batchPlanRelTable.getRelTableName());
 
         for (PlanWarningLevel planWarningLevel : warningLevelList) {
             if (planWarningLevel.getStartValue().compareTo(rate) <= 0
                     && planWarningLevel.getEndValue().compareTo(rate) >= 0) {
                 batchResultRuleDTO.setWarningLevel(planWarningLevel.getWarningLevel());
+                batchResultRuleDTO.setExceptionInfo("准确率（校验表与目标表匹配条数/校验表总条数）超出阈值范围");
             }
         }
 

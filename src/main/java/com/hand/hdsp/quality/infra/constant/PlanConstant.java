@@ -28,6 +28,11 @@ public interface PlanConstant {
     Long DEFAULT_LAYER_ID = -7L;
 
     /**
+     * 告警等级LOV
+     */
+    String LOV_WARNING_LEVEL = "HDSP.XQUA.WARNING_LEVEL";
+
+    /**
      * 比较方式
      */
     interface CompareWay {
