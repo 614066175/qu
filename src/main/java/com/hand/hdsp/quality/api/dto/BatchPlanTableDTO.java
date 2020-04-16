@@ -61,7 +61,4 @@ public class BatchPlanTableDTO extends AuditDomain {
 
     @ApiModelProperty(value = "表级规则校验项List")
     private List<BatchPlanTableLineDTO> batchPlanTableLineDTOList;
-
-    @ApiModelProperty(value = "表级规则校验项删除的对象List")
-    private List<BatchPlanTableLineDTO> deleteBatchPlanTableLineDTOList;
 }

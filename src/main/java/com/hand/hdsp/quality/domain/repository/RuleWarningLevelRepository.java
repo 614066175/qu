@@ -5,6 +5,8 @@ import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.RuleWarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.RuleWarningLevel;
 
+import java.util.List;
+
 /**
  * <p>规则告警等级表资源库</p>
  *
@@ -19,4 +21,13 @@ public interface RuleWarningLevelRepository extends BaseRepository<RuleWarningLe
      * @return
      */
     int deleteByParentId(Long ruleLineId);
+
+    /**
+     * 列表
+     *
+     * @param ruleLineId
+     * @param tenantId
+     * @return
+     */
+    List<RuleWarningLevelDTO> list(Long ruleLineId, Long tenantId);
 }

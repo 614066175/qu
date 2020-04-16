@@ -17,10 +17,12 @@ public interface RuleMapper extends BaseMapper<Rule> {
     /**
      * 列表
      *
-     * @param ruleCodeList 查询条件
+     * @param ruleCodeList
+     * @param ruleModel
+     * @param tenantId
      * @return
      */
-    List<RuleDTO> list(@Param("ruleCode") List<String> ruleCodeList, @Param("ruleModel") String ruleModel);
+    List<RuleDTO> list(@Param("ruleCode") List<String> ruleCodeList, @Param("ruleModel") String ruleModel, @Param("tenantId") Long tenantId);
 
     /**
      * 查询所有
@@ -29,4 +31,12 @@ public interface RuleMapper extends BaseMapper<Rule> {
      * @return
      */
     List<RuleDTO> listAll(RuleDTO ruleDTO);
+
+    /**
+     * 列表（租户级）
+     *
+     * @param ruleDTO 查询条件
+     * @return
+     */
+    List<RuleDTO> list2(RuleDTO ruleDTO);
 }

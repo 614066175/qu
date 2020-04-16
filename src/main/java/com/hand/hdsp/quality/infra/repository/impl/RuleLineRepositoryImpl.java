@@ -7,6 +7,8 @@ import com.hand.hdsp.quality.domain.repository.RuleLineRepository;
 import com.hand.hdsp.quality.infra.mapper.RuleLineMapper;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * <p>规则校验项表资源库实现</p>
  *
@@ -24,5 +26,10 @@ public class RuleLineRepositoryImpl extends BaseRepositoryImpl<RuleLine, RuleLin
     @Override
     public int deleteByParentId(Long ruleId) {
         return ruleLineMapper.deleteByParentId(ruleId);
+    }
+
+    @Override
+    public List<RuleLineDTO> list(Long ruleId, Long tenantId) {
+        return ruleLineMapper.list(ruleId, tenantId);
     }
 }

@@ -4,6 +4,8 @@ import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.domain.entity.Rule;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 
@@ -19,9 +21,10 @@ public interface RuleRepository extends BaseRepository<Rule, RuleDTO>, ProxySelf
      *
      * @param ruleCodeList
      * @param ruleModel
+     * @param tenantId
      * @return
      */
-    List<RuleDTO> list(List<String> ruleCodeList, String ruleModel);
+    List<RuleDTO> list(List<String> ruleCodeList, String ruleModel, Long tenantId);
 
     /**
      * 查询所有
@@ -30,4 +33,13 @@ public interface RuleRepository extends BaseRepository<Rule, RuleDTO>, ProxySelf
      * @return
      */
     List<RuleDTO> listAll(RuleDTO ruleDTO);
+
+    /**
+     * 列表(租户级）
+     *
+     * @param pageRequest
+     * @param ruleDTO
+     * @return
+     */
+    Page<RuleDTO> list2(PageRequest pageRequest, RuleDTO ruleDTO);
 }

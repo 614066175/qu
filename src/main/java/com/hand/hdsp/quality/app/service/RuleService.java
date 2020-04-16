@@ -18,6 +18,14 @@ public interface RuleService {
     RuleDTO detail(Long ruleId);
 
     /**
+     * 关联查询规则校验项、告警等级（标准规则租户级）
+     *
+     * @param ruleId
+     * @return
+     */
+    RuleDTO detail2(Long ruleId, Long tenantId);
+
+    /**
      * 同时保存规则校验项、告警等级
      *
      * @param ruleDTO
@@ -30,6 +38,13 @@ public interface RuleService {
      * @param ruleDTO 更新规则信息
      */
     void update(RuleDTO ruleDTO);
+
+    /**
+     * 更新规则平台级（含规则校验项、告警等级的更新和创建）
+     *
+     * @param ruleDTO 更新规则信息
+     */
+    void update2(RuleDTO ruleDTO);
 
     /**
      * 删除（含规则校验项、告警等级的删除）

@@ -46,9 +46,6 @@ public class StreamingPlanBaseDTO extends AuditDomain {
     @ApiModelProperty(value = "规则List")
     private List<StreamingPlanRuleDTO> streamingPlanRuleDTOList;
 
-    @ApiModelProperty(value = "规则删除的对象List")
-    private List<StreamingPlanRuleDTO> deleteStreamingPlanRuleDTOList;
-
     private Long delayNum;
 
     private Long cutoffNum;

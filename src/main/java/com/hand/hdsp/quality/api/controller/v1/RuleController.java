@@ -56,6 +56,26 @@ public class RuleController extends BaseController {
         return Results.success(list);
     }
 
+    @ApiOperation(value = "规则表列表（标准规则租户级）")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/list")
+    public ResponseEntity<?> list2(@PathVariable(name = "organizationId") Long tenantId,
+                                   RuleDTO ruleDTO, @ApiIgnore @SortDefault(value = Rule.FIELD_RULE_ID,
+            direction = Sort.Direction.DESC) PageRequest pageRequest) {
+        ruleDTO.setTenantId(tenantId);
+        if (ruleDTO.getGroupId() != null && ruleDTO.getGroupId() == 0) {
+            ruleDTO.setGroupId(null);
+        }
+        Page<RuleDTO> list = ruleRepository.list2(pageRequest, ruleDTO);
+        return Results.success(list);
+    }
+
     @ApiOperation(value = "规则表明细")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
@@ -72,6 +92,25 @@ public class RuleController extends BaseController {
     @GetMapping("/{ruleId}")
     public ResponseEntity<?> detail(@PathVariable Long ruleId) {
         RuleDTO ruleDTO = ruleService.detail(ruleId);
+        return Results.success(ruleDTO);
+    }
+
+    @ApiOperation(value = "规则表明细（标准规则租户级）")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    ), @ApiImplicitParam(
+            name = "ruleId",
+            value = "规则表主键",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/detail/{ruleId}")
+    public ResponseEntity<?> detail2(@PathVariable("organizationId") Long tenantId, @PathVariable Long ruleId) {
+        RuleDTO ruleDTO = ruleService.detail2(ruleId, tenantId);
         return Results.success(ruleDTO);
     }
 

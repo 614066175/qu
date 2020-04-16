@@ -7,6 +7,8 @@ import com.hand.hdsp.quality.domain.repository.RuleWarningLevelRepository;
 import com.hand.hdsp.quality.infra.mapper.RuleWarningLevelMapper;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * <p>规则告警等级表资源库实现</p>
  *
@@ -24,5 +26,10 @@ public class RuleWarningLevelRepositoryImpl extends BaseRepositoryImpl<RuleWarni
     @Override
     public int deleteByParentId(Long ruleLineId) {
         return ruleWarningLevelMapper.deleteByParentId(ruleLineId);
+    }
+
+    @Override
+    public List<RuleWarningLevelDTO> list(Long ruleLineId, Long tenantId) {
+        return ruleWarningLevelMapper.list(ruleLineId, tenantId);
     }
 }

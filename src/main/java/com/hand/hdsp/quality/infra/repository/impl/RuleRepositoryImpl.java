@@ -5,6 +5,9 @@ import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.domain.entity.Rule;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
 import com.hand.hdsp.quality.infra.mapper.RuleMapper;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,12 +27,17 @@ public class RuleRepositoryImpl extends BaseRepositoryImpl<Rule, RuleDTO> implem
     }
 
     @Override
-    public List<RuleDTO> list(List<String> ruleCodeList, String ruleModel) {
-        return ruleMapper.list(ruleCodeList, ruleModel);
+    public List<RuleDTO> list(List<String> ruleCodeList, String ruleModel, Long tenantId) {
+        return ruleMapper.list(ruleCodeList, ruleModel, tenantId);
     }
 
     @Override
     public List<RuleDTO> listAll(RuleDTO ruleDTO) {
         return ruleMapper.listAll(ruleDTO);
+    }
+
+    @Override
+    public Page<RuleDTO> list2(PageRequest pageRequest, RuleDTO ruleDTO) {
+        return PageHelper.doPage(pageRequest, () -> ruleMapper.list2(ruleDTO));
     }
 }

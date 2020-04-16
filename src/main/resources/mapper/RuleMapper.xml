@@ -46,6 +46,7 @@
             </foreach>
             and rule_model = #{ruleModel}
             and rule_type in('FIELD_NUMERICAL','FIELD_CHAR','FIELD_DATE')
+            and tenant_id in(0,#{tenantId})
         </where>
     </select>
     <select id="listAll" resultType="com.hand.hdsp.quality.api.dto.RuleDTO">
@@ -71,6 +72,60 @@
                 and rule_name like #{ruleName}
             </if>
             and rule_type in('FIELD_NUMERICAL','FIELD_CHAR','FIELD_DATE')
+            and tenant_id in(0,#{tenantId})
+        </where>
+    </select>
+    <select id="list2" resultType="com.hand.hdsp.quality.api.dto.RuleDTO">
+        select
+        rule_id,
+        rule_model,
+        group_id,
+        rule_code,
+        rule_name,
+        rule_desc,
+        check_type,
+        rule_type,
+        exception_block,
+        weight,
+        enabled_flag,
+        tenant_id,
+        object_version_number
+        from xqua_rule
+        <where>
+            <if test="ruleId != null">
+                and rule_id = #{ruleId}
+            </if>
+            <if test="ruleModel != null">
+                and rule_model = #{ruleModel}
+            </if>
+            <if test="groupId != null">
+                and group_id = #{groupId}
+            </if>
+            <if test="ruleCode != null">
+                and rule_code = #{ruleCode}
+            </if>
+            <if test="ruleName != null">
+                and rule_name = #{ruleName}
+            </if>
+            <if test="ruleDesc != null">
+                and rule_desc = #{ruleDesc}
+            </if>
+            <if test="checkType != null">
+                and check_type = #{checkType}
+            </if>
+            <if test="ruleType != null">
+                and rule_type = #{ruleType}
+            </if>
+            <if test="exceptionBlock != null">
+                and exception_block = #{exceptionBlock}
+            </if>
+            <if test="weight != null">
+                and weight = #{weight}
+            </if>
+            <if test="enabledFlag != null">
+                and enabled_flag = #{enabledFlag}
+            </if>
+            and tenant_id in(0,#{tenantId})
         </where>
     </select>
 
