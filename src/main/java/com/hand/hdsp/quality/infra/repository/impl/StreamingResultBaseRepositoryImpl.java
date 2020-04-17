@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.StreamingResultBaseDTO;
+import com.hand.hdsp.quality.api.dto.StreamingResultRuleDTO;
 import com.hand.hdsp.quality.domain.entity.StreamingResultBase;
 import com.hand.hdsp.quality.domain.repository.StreamingResultBaseRepository;
 import com.hand.hdsp.quality.infra.mapper.StreamingResultRuleMapper;
@@ -36,7 +37,7 @@ public class StreamingResultBaseRepositoryImpl extends BaseRepositoryImpl<Stream
         );
         if (!streamingResultBases.isEmpty()){
             streamingResultBases.stream().forEach( s -> {
-                s.setResultWaringVOS(streamingResultRuleMapper.selectWarnByTopic(streamingResultBaseDTO.getTenantId(),s.getTopicInfo()));
+                s.setResultWaringVOS(streamingResultRuleMapper.selectWarnByTopic(StreamingResultRuleDTO.builder().tenantId(streamingResultBaseDTO.getTenantId()).topicInfo(s.getTopicInfo()).resultBaseId(s.getResultBaseId()).build()));
             });
         }
         return streamingResultBases;
