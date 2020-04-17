@@ -48,7 +48,7 @@ public class DuplicateRateFixedValueMeasure implements Measure {
         BatchResultRuleDTO batchResultRuleDTO = new BatchResultRuleDTO();
         batchResultRuleDTO.setExpectedValue(batchPlanFieldLineDTO.getExpectedValue());
 
-        double expectedValue = Long.parseLong(batchPlanFieldLineDTO.getExpectedValue());
+        double expectedValue = Double.parseDouble(batchPlanFieldLineDTO.getExpectedValue());
         MeasureUtil.fixedCompare(batchPlanFieldLineDTO.getCompareWay(), actualValue, expectedValue, warningLevelList, batchResultRuleDTO);
 
         batchResultRuleDTO.setActualValue(resultList.get(0).getActualValue());
