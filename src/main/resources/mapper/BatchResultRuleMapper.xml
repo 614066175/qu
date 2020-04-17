@@ -38,15 +38,26 @@
     </select>
 
     <select id="selectByResultId" resultType="com.hand.hdsp.quality.api.dto.BatchResultRuleDTO">
-        select xbrr.warning_level,
-               COALESCE(xbpt.weight, xbpf.weight) weight
+        select CASE
+                   WHEN xbrr.warning_level IS NOT NULL THEN xbrr.warning_level
+                   ELSE '${@com.hand.hdsp.quality.infra.constant.PlanConstant@WARNING_LEVEL_NORMAL}'
+                   END warning_level,
+               CASE
+                   WHEN xbpt.weight IS NOT NULL THEN xbpt.weight
+                   WHEN xbpf.weight IS NOT NULL THEN xbpf.weight
+                   ELSE xbprt.weight
+                   END weight
         from xqua_batch_result_rule xbrr
-                 left join xqua_batch_plan_table xbpt on xbrr.rule_id = xbpt.plan_table_id and xbrr.rule_type = 'TABLE'
-                 left join xqua_batch_plan_field xbpf on xbrr.rule_id = xbpf.plan_field_id and xbrr.rule_type = 'FIELD'
+                 left join xqua_batch_plan_table xbpt on xbrr.rule_id = xbpt.plan_table_id
+                    and xbrr.rule_type = '${@com.hand.hdsp.quality.infra.constant.PlanConstant$ResultRuleType@TABLE}'
+                 left join xqua_batch_plan_field xbpf on xbrr.rule_id = xbpf.plan_field_id
+                    and xbrr.rule_type = '${@com.hand.hdsp.quality.infra.constant.PlanConstant$ResultRuleType@FIELD}'
+                 left join xqua_batch_plan_rel_table xbprt
+                           on xbrr.rule_id = xbprt.plan_rel_table_id
+                                  and xbrr.rule_type = '${@com.hand.hdsp.quality.infra.constant.PlanConstant$ResultRuleType@REL_TABLE}'
                  join xqua_batch_result_base xbrb on xbrr.result_base_id = xbrb.result_base_id
                  join xqua_batch_result xbr on xbrb.result_id = xbr.result_id
-        where warning_level is not null
-          and xbr.result_id = #{resultId}
+        where xbr.result_id = #{resultId}
     </select>
 
     <select id="selectWaringLevel" resultType="com.hand.hdsp.quality.infra.vo.ResultWaringVO">

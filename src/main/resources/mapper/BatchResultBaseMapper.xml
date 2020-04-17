@@ -9,6 +9,8 @@
         <result column="table_name" property="tableName" jdbcType="VARCHAR"/>
         <result column="rule_count" property="ruleCount" jdbcType="DECIMAL"/>
         <result column="exception_rule_count" property="exceptionRuleCount" jdbcType="DECIMAL"/>
+        <result column="check_item_count" property="checkItemCount" jdbcType="DECIMAL"/>
+        <result column="exception_check_item_count" property="exceptionCheckItemCount" jdbcType="DECIMAL"/>
         <result column="data_count" property="dataCount" jdbcType="DECIMAL"/>
         <result column="table_size" property="tableSize" jdbcType="DECIMAL"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>

@@ -16,6 +16,8 @@ import com.hand.hdsp.quality.infra.feign.DispatchJobFeign;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureCollector;
 import io.choerodon.core.exception.CommonException;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.boot.platform.lov.dto.LovValueDTO;
 import org.hzero.core.util.ResponseUtils;
@@ -38,6 +40,7 @@ import java.util.Map;
  *
  * @author feng.liu01@hand-china.com 2020-03-24 16:19:52
  */
+@Slf4j
 @Service
 public class BatchPlanServiceImpl implements BatchPlanService {
 
@@ -108,154 +111,17 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 .build();
         batchResultRepository.insertSelective(batchResult);
 
-        List<BatchPlanBase> baseList = batchPlanBaseRepository.select(BatchPlanBase.FIELD_PLAN_ID, planId);
-        for (BatchPlanBase batchPlanBase : baseList) {
+        try {
+            //规则计算
+            ruleJudge(tenantId, planId, batchResult);
 
-            // 构建DatasourceDTO
-            DatasourceDTO datasourceDTO = DatasourceDTO.builder()
-                    .datasourceId(batchPlanBase.getDatasourceId())
-                    .schema(batchPlanBase.getDatasourceSchema())
-                    .tableName(batchPlanBase.getTableName())
-                    .tenantId(tenantId)
-                    .build();
-
-            List<BatchPlanTable> tableList = batchPlanTableRepository.select(BatchPlanTable.FIELD_PLAN_BASE_ID, batchPlanBase.getPlanBaseId());
-            List<BatchPlanField> fieldList = batchPlanFieldRepository.select(BatchPlanTable.FIELD_PLAN_BASE_ID, batchPlanBase.getPlanBaseId());
-            List<BatchPlanRelTable> relTableList = batchPlanRelTableRepository.select(BatchPlanTable.FIELD_PLAN_BASE_ID, batchPlanBase.getPlanBaseId());
-
-
-            //插入批数据方案结果表-表信息
-            BatchResultBase batchResultBase = BatchResultBase.builder()
-                    .resultId(batchResult.getResultId())
-                    .planBaseId(batchPlanBase.getPlanBaseId())
-                    .tableName(batchPlanBase.getTableName())
-                    .ruleCount((long) tableList.size() + fieldList.size() + relTableList.size())
-                    .tenantId(tenantId)
-                    .build();
-            // 查询并设置表行数和表大小
-            setTableInfo(datasourceDTO, batchResultBase);
-            batchResultBaseRepository.insertSelective(batchResultBase);
-
-            for (BatchPlanTable batchPlanTable : tableList) {
-                List<BatchPlanTableLine> lineList = batchPlanTableLineRepository.select(BatchPlanTableLine.FIELD_PLAN_TABLE_ID, batchPlanTable.getPlanTableId());
-                for (BatchPlanTableLine batchPlanTableLine : lineList) {
-                    List<PlanWarningLevel> warningLevelList = planWarningLevelRepository.select(
-                            PlanWarningLevel.builder()
-                                    .sourceId(batchPlanTableLine.getPlanTableLineId())
-                                    .sourceType(TableNameConstant.XQUA_BATCH_PLAN_TABLE_LINE)
-                                    .build());
-
-                    BatchPlanTableLineDTO batchPlanTableLineDTO = batchPlanTableLineConverter.entityToDto(batchPlanTableLine);
-                    Measure measure = measureCollector.getMeasure(batchPlanTableLine.getCheckItem().toUpperCase());
-
-                    BatchResultRuleDTO batchResultRuleDTO = measure.check(MeasureParamDO.builder()
-                            .tenantId(tenantId)
-                            .datasourceDTO(datasourceDTO)
-                            .batchPlanTableLineDTO(batchPlanTableLineDTO)
-                            .warningLevelList(warningLevelList)
-                            .batchResultBase(batchResultBase)
-                            .build());
-                    batchResultRuleDTO.setResultBaseId(batchResultBase.getResultBaseId());
-                    batchResultRuleDTO.setRuleType(PlanConstant.ResultRuleType.TABLE);
-                    batchResultRuleDTO.setTableName(batchPlanBase.getTableName());
-                    batchResultRuleDTO.setRuleId(batchPlanTable.getPlanTableId());
-                    batchResultRuleDTO.setRuleCode(batchPlanTable.getRuleCode());
-                    batchResultRuleDTO.setRuleName(batchPlanTable.getRuleName());
-                    batchResultRuleDTO.setCheckItem(batchPlanTableLine.getCheckItem());
-                    batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
-
-                }
-            }
-
-            for (BatchPlanField batchPlanField : fieldList) {
-                List<BatchPlanFieldLine> lineList = batchPlanFieldLineRepository.select(BatchPlanFieldLine.FIELD_PLAN_FIELD_ID, batchPlanField.getPlanFieldId());
-                for (BatchPlanFieldLine batchPlanFieldLine : lineList) {
-                    List<PlanWarningLevel> warningLevelList = planWarningLevelRepository.select(
-                            PlanWarningLevel.builder()
-                                    .sourceId(batchPlanFieldLine.getPlanFieldLineId())
-                                    .sourceType(TableNameConstant.XQUA_BATCH_PLAN_FIELD_LINE)
-                                    .build());
-
-                    BatchPlanFieldLineDTO batchPlanFieldLineDTO = batchPlanFieldLineConverter.entityToDto(batchPlanFieldLine);
-                    Measure measure = measureCollector.getMeasure(batchPlanFieldLine.getCheckItem().toUpperCase());
-
-                    BatchResultRuleDTO batchResultRuleDTO = measure.check(MeasureParamDO.builder()
-                            .tenantId(tenantId)
-                            .datasourceDTO(datasourceDTO)
-                            .batchPlanField(batchPlanField)
-                            .batchPlanFieldLineDTO(batchPlanFieldLineDTO)
-                            .warningLevelList(warningLevelList)
-                            .batchResultBase(batchResultBase)
-                            .build());
-                    batchResultRuleDTO.setResultBaseId(batchResultBase.getResultBaseId());
-                    batchResultRuleDTO.setRuleType(PlanConstant.ResultRuleType.FIELD);
-                    batchResultRuleDTO.setTableName(batchPlanBase.getTableName());
-                    batchResultRuleDTO.setRuleId(batchPlanField.getPlanFieldId());
-                    batchResultRuleDTO.setPlanFieldLineId(batchPlanFieldLine.getPlanFieldLineId());
-                    batchResultRuleDTO.setRuleCode(batchPlanField.getRuleCode());
-                    batchResultRuleDTO.setRuleName(batchPlanField.getRuleName());
-                    batchResultRuleDTO.setFieldName(batchPlanField.getFieldName());
-                    batchResultRuleDTO.setCheckItem(batchPlanFieldLine.getCheckItem());
-                    batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
-
-                }
-            }
-
-            for (BatchPlanRelTable batchPlanRelTable : relTableList) {
-                List<PlanWarningLevel> warningLevelList = planWarningLevelRepository.select(
-                        PlanWarningLevel.builder()
-                                .sourceId(batchPlanRelTable.getPlanRelTableId())
-                                .sourceType(TableNameConstant.XQUA_BATCH_PLAN_REL_TABLE)
-                                .build());
-
-                List<BatchPlanRelTableLine> lineList = batchPlanRelTableLineRepository.select(BatchPlanRelTableLine.FIELD_PLAN_REL_TABLE_ID, batchPlanRelTable.getPlanRelTableId());
-
-                Measure measure = measureCollector.getMeasure(PlanConstant.RuleType.TABLE_RELATION);
-
-                BatchResultRuleDTO batchResultRuleDTO = measure.check(MeasureParamDO.builder()
-                        .tenantId(tenantId)
-                        .datasourceDTO(datasourceDTO)
-                        .batchPlanRelTable(batchPlanRelTable)
-                        .batchPlanRelTableLineList(lineList)
-                        .warningLevelList(warningLevelList)
-                        .batchResultBase(batchResultBase)
-                        .build());
-
-                batchResultRuleDTO.setResultBaseId(batchResultBase.getResultBaseId());
-                batchResultRuleDTO.setRuleType(PlanConstant.ResultRuleType.REL_TABLE);
-                batchResultRuleDTO.setTableName(batchPlanBase.getTableName());
-                batchResultRuleDTO.setRuleId(batchPlanRelTable.getPlanRelTableId());
-                batchResultRuleDTO.setRuleCode(batchPlanRelTable.getRuleCode());
-                batchResultRuleDTO.setRuleName(batchPlanRelTable.getRuleName());
-                batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
-
-            }
-
-            //获取所有告警等级，计算 F 值
-            List<LovValueDTO> list = lovAdapter.queryLovValue(PlanConstant.LOV_WARNING_LEVEL, tenantId);
-            Map<String, BigDecimal> map = new HashMap<>();
-            BigDecimal n = BigDecimal.valueOf(list.size());
-            BigDecimal half = BigDecimal.valueOf(0.5);
-            BigDecimal f = BigDecimal.ONE.divide(n, 2, RoundingMode.HALF_UP).multiply(half);
-            for (LovValueDTO lovValueDTO : list) {
-                map.put(lovValueDTO.getValue(), f);
-                f = f.add(BigDecimal.ONE.divide(n, 2, RoundingMode.HALF_UP));
-            }
-
-            // 查询规则
-            List<BatchResultRuleDTO> resultRuleDTOList = batchResultRuleRepository.selectByResultId(batchResult.getResultId());
-            BigDecimal w = BigDecimal.valueOf(resultRuleDTOList.stream().mapToLong(BatchResultRuleDTO::getWeight).sum());
-            BigDecimal sum = BigDecimal.ZERO;
-            for (BatchResultRuleDTO batchResultRuleDTO : resultRuleDTOList) {
-                BigDecimal multiply = BigDecimal.valueOf(batchResultRuleDTO.getWeight())
-                        .divide(w, 2, RoundingMode.HALF_UP)
-                        .multiply(map.get(batchResultRuleDTO.getWarningLevel()));
-                sum = sum.add(multiply);
-            }
-            batchResult.setMark(sum.multiply(BigDecimal.valueOf(100)));
-            batchResult.setPlanStatus(PlanConstant.PlanStatus.SUCCESS);
-            batchResult.setEndDate(new Date());
-            batchResultRepository.updateByPrimaryKey(batchResult);
+            //分数计算
+            countScore(tenantId, batchResult);
+        } catch (Exception e) {
+            log.error("count_error", e);
+            batchResult.setPlanStatus(PlanConstant.PlanStatus.FAILED);
+            batchResult.setExceptionInfo(e.getMessage());
+            batchResultRepository.updateByPrimaryKeySelective(batchResult);
         }
     }
 
@@ -284,8 +150,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     /**
      * 获取并设置表信息
      *
-     * @param datasourceDTO
-     * @param batchResultBase
+     * @param datasourceDTO   datasourceDTO
+     * @param batchResultBase batchResultBase
      */
     private void setTableInfo(DatasourceDTO datasourceDTO, BatchResultBase batchResultBase) {
         datasourceDTO.setSql(String.format(TABLE_SQL, datasourceDTO.getSchema(), datasourceDTO.getTableName()));
@@ -298,4 +164,248 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             throw new CommonException("查询表行数和大小失败，请联系系统管理员！");
         }
     }
+
+    /**
+     * 对每个规则进行计算
+     *
+     * @param tenantId    tenantId
+     * @param planId      planId
+     * @param batchResult batchResult
+     */
+    private void ruleJudge(Long tenantId, Long planId, BatchResult batchResult) {
+
+        List<BatchPlanBase> baseList = batchPlanBaseRepository.select(BatchPlanBase.FIELD_PLAN_ID, planId);
+        for (BatchPlanBase batchPlanBase : baseList) {
+
+            // 构建DatasourceDTO
+            DatasourceDTO datasourceDTO = DatasourceDTO.builder()
+                    .datasourceId(batchPlanBase.getDatasourceId())
+                    .schema(batchPlanBase.getDatasourceSchema())
+                    .tableName(batchPlanBase.getTableName())
+                    .tenantId(tenantId)
+                    .build();
+
+            //插入批数据方案结果表-表信息
+            BatchResultBase batchResultBase = BatchResultBase.builder()
+                    .resultId(batchResult.getResultId())
+                    .planBaseId(batchPlanBase.getPlanBaseId())
+                    .tableName(batchPlanBase.getTableName())
+                    .ruleCount(0L)
+                    .exceptionRuleCount(0L)
+                    .checkItemCount(0L)
+                    .exceptionCheckItemCount(0L)
+                    .tenantId(tenantId)
+                    .build();
+            // 查询并设置表行数和表大小
+            setTableInfo(datasourceDTO, batchResultBase);
+            batchResultBaseRepository.insertSelective(batchResultBase);
+
+            handleTableRule(tenantId, batchResultBase, datasourceDTO);
+            handleFieldRule(tenantId, batchResultBase, datasourceDTO);
+            handleRelTableRule(tenantId, batchResultBase, datasourceDTO);
+
+            batchResultBaseRepository.updateByPrimaryKeySelective(batchResultBase);
+        }
+    }
+
+    /**
+     * 处理表级规则
+     *
+     * @param tenantId        tenantId
+     * @param batchResultBase batchResultBase
+     * @param datasourceDTO   datasourceDTO
+     */
+    private void handleTableRule(Long tenantId, BatchResultBase batchResultBase, DatasourceDTO datasourceDTO) {
+        List<BatchPlanTable> tableList = batchPlanTableRepository.select(BatchPlanTable.FIELD_PLAN_BASE_ID, batchResultBase.getPlanBaseId());
+        batchResultBase.setRuleCount(batchResultBase.getRuleCount() + tableList.size());
+
+        for (BatchPlanTable batchPlanTable : tableList) {
+            List<BatchPlanTableLine> lineList = batchPlanTableLineRepository.select(BatchPlanTableLine.FIELD_PLAN_TABLE_ID, batchPlanTable.getPlanTableId());
+            batchResultBase.setCheckItemCount(batchResultBase.getCheckItemCount() + lineList.size());
+
+            //异常标记
+            boolean exceptionFlag = false;
+
+            for (BatchPlanTableLine batchPlanTableLine : lineList) {
+                List<PlanWarningLevel> warningLevelList = planWarningLevelRepository.select(
+                        PlanWarningLevel.builder()
+                                .sourceId(batchPlanTableLine.getPlanTableLineId())
+                                .sourceType(TableNameConstant.XQUA_BATCH_PLAN_TABLE_LINE)
+                                .build());
+
+                BatchPlanTableLineDTO batchPlanTableLineDTO = batchPlanTableLineConverter.entityToDto(batchPlanTableLine);
+                Measure measure = measureCollector.getMeasure(batchPlanTableLine.getCheckItem().toUpperCase());
+
+                BatchResultRuleDTO batchResultRuleDTO = measure.check(MeasureParamDO.builder()
+                        .tenantId(tenantId)
+                        .datasourceDTO(datasourceDTO)
+                        .batchPlanTableLineDTO(batchPlanTableLineDTO)
+                        .warningLevelList(warningLevelList)
+                        .batchResultBase(batchResultBase)
+                        .build());
+                batchResultRuleDTO.setResultBaseId(batchResultBase.getResultBaseId());
+                batchResultRuleDTO.setRuleType(PlanConstant.ResultRuleType.TABLE);
+                batchResultRuleDTO.setTableName(batchResultBase.getTableName());
+                batchResultRuleDTO.setRuleId(batchPlanTable.getPlanTableId());
+                batchResultRuleDTO.setRuleCode(batchPlanTable.getRuleCode());
+                batchResultRuleDTO.setRuleName(batchPlanTable.getRuleName());
+                batchResultRuleDTO.setCheckItem(batchPlanTableLine.getCheckItem());
+                batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
+
+                if (StringUtils.isNotBlank(batchResultRuleDTO.getWarningLevel())) {
+                    batchResultBase.setExceptionCheckItemCount(batchResultBase.getExceptionCheckItemCount() + 1);
+                    exceptionFlag = true;
+                }
+            }
+
+            if (exceptionFlag) {
+                batchResultBase.setExceptionRuleCount(batchResultBase.getExceptionRuleCount() + 1);
+            }
+        }
+    }
+
+    /**
+     * 处理字段规则
+     *
+     * @param tenantId        tenantId
+     * @param batchResultBase batchResultBase
+     * @param datasourceDTO   datasourceDTO
+     */
+    private void handleFieldRule(Long tenantId, BatchResultBase batchResultBase, DatasourceDTO datasourceDTO) {
+        List<BatchPlanField> fieldList = batchPlanFieldRepository.select(BatchPlanTable.FIELD_PLAN_BASE_ID, batchResultBase.getPlanBaseId());
+        batchResultBase.setRuleCount(batchResultBase.getRuleCount() + fieldList.size());
+
+        for (BatchPlanField batchPlanField : fieldList) {
+            List<BatchPlanFieldLine> lineList = batchPlanFieldLineRepository.select(BatchPlanFieldLine.FIELD_PLAN_FIELD_ID, batchPlanField.getPlanFieldId());
+            batchResultBase.setCheckItemCount(batchResultBase.getCheckItemCount() + lineList.size());
+
+            //异常标记
+            boolean exceptionFlag = false;
+
+            for (BatchPlanFieldLine batchPlanFieldLine : lineList) {
+                List<PlanWarningLevel> warningLevelList = planWarningLevelRepository.select(
+                        PlanWarningLevel.builder()
+                                .sourceId(batchPlanFieldLine.getPlanFieldLineId())
+                                .sourceType(TableNameConstant.XQUA_BATCH_PLAN_FIELD_LINE)
+                                .build());
+
+                BatchPlanFieldLineDTO batchPlanFieldLineDTO = batchPlanFieldLineConverter.entityToDto(batchPlanFieldLine);
+                Measure measure = measureCollector.getMeasure(batchPlanFieldLine.getCheckItem().toUpperCase());
+
+                BatchResultRuleDTO batchResultRuleDTO = measure.check(MeasureParamDO.builder()
+                        .tenantId(tenantId)
+                        .datasourceDTO(datasourceDTO)
+                        .batchPlanField(batchPlanField)
+                        .batchPlanFieldLineDTO(batchPlanFieldLineDTO)
+                        .warningLevelList(warningLevelList)
+                        .batchResultBase(batchResultBase)
+                        .build());
+                batchResultRuleDTO.setResultBaseId(batchResultBase.getResultBaseId());
+                batchResultRuleDTO.setRuleType(PlanConstant.ResultRuleType.FIELD);
+                batchResultRuleDTO.setTableName(batchResultBase.getTableName());
+                batchResultRuleDTO.setRuleId(batchPlanField.getPlanFieldId());
+                batchResultRuleDTO.setPlanFieldLineId(batchPlanFieldLine.getPlanFieldLineId());
+                batchResultRuleDTO.setRuleCode(batchPlanField.getRuleCode());
+                batchResultRuleDTO.setRuleName(batchPlanField.getRuleName());
+                batchResultRuleDTO.setFieldName(batchPlanField.getFieldName());
+                batchResultRuleDTO.setCheckItem(batchPlanFieldLine.getCheckItem());
+                batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
+
+                if (StringUtils.isNotBlank(batchResultRuleDTO.getWarningLevel())) {
+                    batchResultBase.setExceptionCheckItemCount(batchResultBase.getExceptionCheckItemCount() + 1);
+                    exceptionFlag = true;
+                }
+            }
+
+            if (exceptionFlag) {
+                batchResultBase.setExceptionRuleCount(batchResultBase.getExceptionRuleCount() + 1);
+            }
+        }
+    }
+
+    /**
+     * 处理表间规则
+     *
+     * @param tenantId        tenantId
+     * @param batchResultBase batchResultBase
+     * @param datasourceDTO   datasourceDTO
+     */
+    private void handleRelTableRule(Long tenantId, BatchResultBase batchResultBase, DatasourceDTO datasourceDTO) {
+
+        List<BatchPlanRelTable> relTableList = batchPlanRelTableRepository.select(BatchPlanTable.FIELD_PLAN_BASE_ID, batchResultBase.getPlanBaseId());
+        batchResultBase.setRuleCount(batchResultBase.getRuleCount() + relTableList.size());
+        batchResultBase.setCheckItemCount(batchResultBase.getCheckItemCount() + relTableList.size());
+
+        for (BatchPlanRelTable batchPlanRelTable : relTableList) {
+            List<PlanWarningLevel> warningLevelList = planWarningLevelRepository.select(
+                    PlanWarningLevel.builder()
+                            .sourceId(batchPlanRelTable.getPlanRelTableId())
+                            .sourceType(TableNameConstant.XQUA_BATCH_PLAN_REL_TABLE)
+                            .build());
+
+            List<BatchPlanRelTableLine> lineList = batchPlanRelTableLineRepository.select(BatchPlanRelTableLine.FIELD_PLAN_REL_TABLE_ID, batchPlanRelTable.getPlanRelTableId());
+
+            Measure measure = measureCollector.getMeasure(PlanConstant.RuleType.TABLE_RELATION);
+
+            BatchResultRuleDTO batchResultRuleDTO = measure.check(MeasureParamDO.builder()
+                    .tenantId(tenantId)
+                    .datasourceDTO(datasourceDTO)
+                    .batchPlanRelTable(batchPlanRelTable)
+                    .batchPlanRelTableLineList(lineList)
+                    .warningLevelList(warningLevelList)
+                    .batchResultBase(batchResultBase)
+                    .build());
+
+            batchResultRuleDTO.setResultBaseId(batchResultBase.getResultBaseId());
+            batchResultRuleDTO.setRuleType(PlanConstant.ResultRuleType.REL_TABLE);
+            batchResultRuleDTO.setTableName(batchResultBase.getTableName());
+            batchResultRuleDTO.setRuleId(batchPlanRelTable.getPlanRelTableId());
+            batchResultRuleDTO.setRuleCode(batchPlanRelTable.getRuleCode());
+            batchResultRuleDTO.setRuleName(batchPlanRelTable.getRuleName());
+            batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
+
+            if (StringUtils.isNotBlank(batchResultRuleDTO.getWarningLevel())) {
+                batchResultBase.setExceptionRuleCount(batchResultBase.getExceptionRuleCount() + 1);
+                batchResultBase.setExceptionCheckItemCount(batchResultBase.getExceptionCheckItemCount() + 1);
+            }
+        }
+    }
+
+    /**
+     * 分数计算
+     *
+     * @param tenantId    tenantId
+     * @param batchResult 结果表对象
+     */
+    private void countScore(Long tenantId, BatchResult batchResult) {
+
+        //获取所有告警等级，计算 F 值
+        List<LovValueDTO> list = lovAdapter.queryLovValue(PlanConstant.LOV_WARNING_LEVEL, tenantId);
+        Map<String, BigDecimal> map = new HashMap<>();
+        BigDecimal n = BigDecimal.valueOf(list.size());
+        BigDecimal half = BigDecimal.valueOf(0.5);
+        BigDecimal f = BigDecimal.ONE.divide(n, 10, RoundingMode.HALF_UP).multiply(half);
+        for (LovValueDTO lovValueDTO : list) {
+            map.put(lovValueDTO.getValue(), f);
+            f = f.add(BigDecimal.ONE.divide(n, 10, RoundingMode.HALF_UP));
+        }
+        //正常规则F 为1
+        map.put(PlanConstant.WARNING_LEVEL_NORMAL, BigDecimal.ONE);
+
+        // 查询规则
+        List<BatchResultRuleDTO> resultRuleDTOList = batchResultRuleRepository.selectByResultId(batchResult.getResultId());
+        BigDecimal w = BigDecimal.valueOf(resultRuleDTOList.stream().mapToLong(BatchResultRuleDTO::getWeight).sum());
+        BigDecimal sum = BigDecimal.ZERO;
+        for (BatchResultRuleDTO batchResultRuleDTO : resultRuleDTOList) {
+            BigDecimal multiply = BigDecimal.valueOf(batchResultRuleDTO.getWeight())
+                    .divide(w, 10, RoundingMode.HALF_UP)
+                    .multiply(map.get(batchResultRuleDTO.getWarningLevel()));
+            sum = sum.add(multiply);
+        }
+        batchResult.setMark(sum.multiply(BigDecimal.valueOf(100)));
+        batchResult.setPlanStatus(PlanConstant.PlanStatus.SUCCESS);
+        batchResult.setEndDate(new Date());
+        batchResultRepository.updateByPrimaryKey(batchResult);
+    }
+
 }

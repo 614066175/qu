@@ -24,7 +24,7 @@ public class MeasureUtil {
      *
      * @param compareWay         比较方式
      * @param actualValue        实际值
-     * @param expectedValue      期望值
+     * @param expectedValue      阈值
      * @param warningLevelList   告警等级
      * @param batchResultRuleDTO 结果
      */
@@ -69,9 +69,9 @@ public class MeasureUtil {
                 break;
 
         }
-        if (!result) {
+        if (result) {
             batchResultRuleDTO.setWarningLevel(warningLevelList.get(0).getWarningLevel());
-            batchResultRuleDTO.setExceptionInfo("不满足期望值");
+            batchResultRuleDTO.setExceptionInfo("达到阈值");
         }
     }
 

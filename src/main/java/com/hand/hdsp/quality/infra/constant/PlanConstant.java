@@ -33,6 +33,11 @@ public interface PlanConstant {
     String LOV_WARNING_LEVEL = "HDSP.XQUA.WARNING_LEVEL";
 
     /**
+     * 告警等级-正常
+     */
+    String WARNING_LEVEL_NORMAL = "NORMAL";
+
+    /**
      * 比较方式
      */
     interface CompareWay {

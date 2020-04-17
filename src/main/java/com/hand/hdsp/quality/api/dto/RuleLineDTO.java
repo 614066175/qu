@@ -51,7 +51,7 @@ public class RuleLineDTO extends AuditDomain {
     @Size(max = 30)
     private String compareWay;
 
-    @ApiModelProperty("期望值")
+    @ApiModelProperty("阈值")
     private String expectedValue;
 
     @ApiModelProperty("正则表达式")

@@ -1,9 +1,6 @@
 package com.hand.hdsp.quality.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.hand.hdsp.quality.domain.entity.BatchResultBase;
-import com.hand.hdsp.quality.domain.entity.BatchResultRule;
-import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -12,7 +9,6 @@ import lombok.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 
 /**
  * <p>批数据方案结果表 数据传输对象</p>
@@ -49,6 +45,9 @@ public class BatchResultDTO extends AuditDomain {
 
     @ApiModelProperty(value = "下次评估时间")
     private Date nextCountDate;
+
+    @ApiModelProperty(value = "异常信息")
+    private String exceptionInfo;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull
