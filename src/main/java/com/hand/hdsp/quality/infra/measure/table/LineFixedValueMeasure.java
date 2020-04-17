@@ -22,12 +22,12 @@ public class LineFixedValueMeasure implements Measure {
     public BatchResultRuleDTO check(MeasureParamDO param) {
         BatchPlanTableLineDTO batchPlanTableLineDTO = param.getBatchPlanTableLineDTO();
         List<PlanWarningLevel> warningLevelList = param.getWarningLevelList();
-        long actualValue = param.getBatchResultBase().getDataCount();
+        double actualValue = param.getBatchResultBase().getDataCount();
 
         BatchResultRuleDTO batchResultRuleDTO = new BatchResultRuleDTO();
         batchResultRuleDTO.setExpectedValue(batchPlanTableLineDTO.getExpectedValue());
 
-        long expectedValue = Long.parseLong(batchPlanTableLineDTO.getExpectedValue());
+        double expectedValue = Double.parseDouble(batchPlanTableLineDTO.getExpectedValue());
         MeasureUtil.fixedCompare(batchPlanTableLineDTO.getCompareWay(), actualValue, expectedValue, warningLevelList, batchResultRuleDTO);
 
         batchResultRuleDTO.setActualValue(actualValue + "");

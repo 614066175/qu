@@ -1,7 +1,5 @@
 package com.hand.hdsp.quality.api.dto;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -12,6 +10,7 @@ import lombok.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 /**
  * <p>批数据方案结果表-表信息 数据传输对象</p>
@@ -49,6 +48,12 @@ public class BatchResultBaseDTO extends AuditDomain {
 
     @ApiModelProperty(value = "异常规则数")
     private Long exceptionRuleCount;
+
+    @ApiModelProperty(value = "校验项总数")
+    private Long checkItemCount;
+
+    @ApiModelProperty(value = "异常校验项数")
+    private Long exceptionCheckItemCount;
 
     @ApiModelProperty(value = "数据量")
     private Long dataCount;

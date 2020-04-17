@@ -48,6 +48,10 @@ public class BatchResultBase extends AuditDomain {
 
     private Long exceptionRuleCount;
 
+    private Long checkItemCount;
+
+    private Long exceptionCheckItemCount;
+
     private Long dataCount;
 
     private Long tableSize;

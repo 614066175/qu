@@ -24,13 +24,13 @@ public class MeasureUtil {
      *
      * @param compareWay         比较方式
      * @param actualValue        实际值
-     * @param expectedValue      期望值
+     * @param expectedValue      阈值
      * @param warningLevelList   告警等级
      * @param batchResultRuleDTO 结果
      */
     public static void fixedCompare(String compareWay,
-                                    long actualValue,
-                                    long expectedValue,
+                                    double actualValue,
+                                    double expectedValue,
                                     List<PlanWarningLevel> warningLevelList,
                                     BatchResultRuleDTO batchResultRuleDTO) {
         boolean result = false;
@@ -46,12 +46,12 @@ public class MeasureUtil {
                 }
                 break;
             case PlanConstant.CompareWay.EQUAL:
-                if (actualValue == expectedValue) {
+                if (BigDecimal.valueOf(actualValue).compareTo(BigDecimal.valueOf(expectedValue)) == 0) {
                     result = true;
                 }
                 break;
             case PlanConstant.CompareWay.NOT_EQUAL:
-                if (actualValue != expectedValue) {
+                if (BigDecimal.valueOf(actualValue).compareTo(BigDecimal.valueOf(expectedValue)) != 0) {
                     result = true;
                 }
                 break;
@@ -69,9 +69,9 @@ public class MeasureUtil {
                 break;
 
         }
-        if (!result) {
+        if (result) {
             batchResultRuleDTO.setWarningLevel(warningLevelList.get(0).getWarningLevel());
-            batchResultRuleDTO.setExceptionInfo("不满足期望值");
+            batchResultRuleDTO.setExceptionInfo("达到阈值");
         }
     }
 

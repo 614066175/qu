@@ -33,11 +33,9 @@ public interface BatchResultRuleMapper extends BaseMapper<BatchResultRule> {
     List<BatchResultRuleDTO> selectByResultId(Long resultId);
 
     /**
-     * 根据表名查询各个告警等级数
-     *
-     * @param tenantId
-     * @param tableName
-     * @return ResultWaringVO
+     *  查出各个告警等级数
+     * @param batchResultRule
+     * @return
      */
-    List<ResultWaringVO> selectWaringLevel(@Param("tenantId") Long tenantId, @Param("tableName") String tableName);
+    List<ResultWaringVO> selectWaringLevel(BatchResultRuleDO batchResultRule);
 }

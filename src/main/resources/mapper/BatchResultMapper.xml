@@ -10,6 +10,7 @@
         <result column="end_date" property="endDate" jdbcType="TIMESTAMP"/>
         <result column="plan_status" property="planStatus" jdbcType="VARCHAR"/>
         <result column="next_count_date" property="nextCountDate" jdbcType="TIMESTAMP"/>
+        <result column="exception_info" property="exceptionInfo" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
         <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
@@ -48,10 +49,11 @@
         on xbp.group_id=xpg.group_id
         <where>
             <if test="groupId != null and groupId != 0">
-                xpg.group_id = #{groupId}
+                and xpg.group_id = #{groupId}
             </if>
             <if test="tenantId != null">
                 and xbr.tenant_id = #{tenantId}
+                and xbp.tenant_id = #{tenantId}
             </if>
             <if test="planName != null">
                 <bind name="planName" value="'%' + planName + '%'"/>
@@ -79,7 +81,7 @@
                 xpg.group_id = #{groupId}
             </if>
             <if test="tenantId != null">
-                and xpg.tenant_id = #{tenantId}
+                and xbp.tenant_id = #{tenantId}
             </if>
             <if test="planName != null">
                 <bind name="planName" value="'%' + planName + '%'"/>
@@ -108,6 +110,7 @@
             </if>
             <if test="tenantId != null">
                 and xbr.tenant_id = #{tenantId}
+                and xbp.tenant_id = #{tenantId}
             </if>
             <if test="planName != null">
                 <bind name="planName" value="'%' + planName + '%'"/>
@@ -135,7 +138,7 @@
                 xpg.group_id = #{groupId}
             </if>
             <if test="tenantId != null">
-                and xpg.tenant_id = #{tenantId}
+                and xbp.tenant_id = #{tenantId}
             </if>
             <if test="planName != null">
                 <bind name="planName" value="'%' + planName + '%'"/>

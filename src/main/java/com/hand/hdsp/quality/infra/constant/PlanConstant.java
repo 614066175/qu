@@ -33,6 +33,11 @@ public interface PlanConstant {
     String LOV_WARNING_LEVEL = "HDSP.XQUA.WARNING_LEVEL";
 
     /**
+     * 告警等级-正常
+     */
+    String WARNING_LEVEL_NORMAL = "NORMAL";
+
+    /**
      * 比较方式
      */
     interface CompareWay {
@@ -116,5 +121,20 @@ public interface PlanConstant {
         String TABLE = "TABLE";
         String FIELD = "FIELD";
         String REL_TABLE = "REL_TABLE";
+    }
+
+
+    /**
+     * 规则校验方式 HDSP.XQUA.CHECK_WAY
+     */
+    interface CheckWay {
+        /**
+         * 常规校验
+         */
+        String COMMON = "COMMON";
+        /**
+         * 正则表达式
+         */
+        String REGULAR = "REGULAR";
     }
 }

@@ -39,7 +39,7 @@ public class BatchPlanFieldLineDTO extends AuditDomain {
     @ApiModelProperty(value = "比较方式 HDSP.XQUA.COMPARE_WAY")
     private String compareWay;
 
-    @ApiModelProperty(value = "期望值")
+    @ApiModelProperty(value = "阈值")
     private String expectedValue;
 
     @ApiModelProperty(value = "正则表达式")

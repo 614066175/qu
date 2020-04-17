@@ -25,11 +25,15 @@
         count(xsrr.warning_level) countSum
         from xqua_streaming_result_rule xsrr
         <where>
+            xsrr.warning_level is not null
             <if test="tenantId != null">
-                xsrr.tenant_id = #{tenantId}
+                and xsrr.tenant_id = #{tenantId}
             </if>
             <if test="topicInfo != null">
                 and xsrr.topic_info = #{topicInfo}
+            </if>
+            <if test="resultBaseId != null ">
+                and xsrr.result_base_id = #{resultBaseId}
             </if>
         </where>
         GROUP BY xsrr.warning_level
