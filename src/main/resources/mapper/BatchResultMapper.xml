@@ -49,10 +49,11 @@
         on xbp.group_id=xpg.group_id
         <where>
             <if test="groupId != null and groupId != 0">
-                xpg.group_id = #{groupId}
+                and xpg.group_id = #{groupId}
             </if>
             <if test="tenantId != null">
                 and xbr.tenant_id = #{tenantId}
+                and xbp.tenant_id = #{tenantId}
             </if>
             <if test="planName != null">
                 <bind name="planName" value="'%' + planName + '%'"/>
@@ -80,7 +81,7 @@
                 xpg.group_id = #{groupId}
             </if>
             <if test="tenantId != null">
-                and xpg.tenant_id = #{tenantId}
+                and xbp.tenant_id = #{tenantId}
             </if>
             <if test="planName != null">
                 <bind name="planName" value="'%' + planName + '%'"/>
@@ -109,6 +110,7 @@
             </if>
             <if test="tenantId != null">
                 and xbr.tenant_id = #{tenantId}
+                and xbp.tenant_id = #{tenantId}
             </if>
             <if test="planName != null">
                 <bind name="planName" value="'%' + planName + '%'"/>
@@ -136,7 +138,7 @@
                 xpg.group_id = #{groupId}
             </if>
             <if test="tenantId != null">
-                and xpg.tenant_id = #{tenantId}
+                and xbp.tenant_id = #{tenantId}
             </if>
             <if test="planName != null">
                 <bind name="planName" value="'%' + planName + '%'"/>
