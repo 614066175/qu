@@ -66,8 +66,9 @@
         count(xbrr.warning_level) countSum
         from xqua_batch_result_rule xbrr
         <where>
+            xbrr.warning_level is not null
             <if test="tenantId != null ">
-                xbrr.tenant_id = #{tenantId}
+                and xbrr.tenant_id = #{tenantId}
             </if>
             <if test="tableName">
                 and xbrr.table_name = #{tableName}

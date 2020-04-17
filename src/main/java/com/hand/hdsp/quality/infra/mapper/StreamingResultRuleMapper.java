@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.infra.mapper;
 
 import java.util.List;
 
+import com.hand.hdsp.quality.api.dto.StreamingResultRuleDTO;
 import com.hand.hdsp.quality.domain.entity.StreamingResultRule;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import io.choerodon.mybatis.common.BaseMapper;
@@ -17,9 +18,8 @@ public interface StreamingResultRuleMapper extends BaseMapper<StreamingResultRul
     /**
      * 根据topicInfo查询各种告警等级数
      *
-     * @param tenantId
-     * @param topicInfo
-     * @return ResultWaringVO
+     * @param streamingResultRuleDTO
+     * @return
      */
-    List<ResultWaringVO> selectWarnByTopic(@Param("tenantId") Long tenantId,@Param("topicInfo") String topicInfo);
+    List<ResultWaringVO> selectWarnByTopic(StreamingResultRuleDTO streamingResultRuleDTO);
 }

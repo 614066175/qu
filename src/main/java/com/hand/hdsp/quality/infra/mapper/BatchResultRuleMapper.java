@@ -33,7 +33,7 @@ public interface BatchResultRuleMapper extends BaseMapper<BatchResultRule> {
     List<BatchResultRuleDTO> selectByResultId(Long resultId);
 
     /**
-     *
+     *  查出各个告警等级数
      * @param batchResultRule
      * @return
      */
