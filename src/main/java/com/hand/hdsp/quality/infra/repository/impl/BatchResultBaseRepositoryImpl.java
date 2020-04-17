@@ -6,6 +6,7 @@ import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.BatchResultBaseDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.repository.BatchResultBaseRepository;
+import com.hand.hdsp.quality.infra.dataobject.BatchResultRuleDO;
 import com.hand.hdsp.quality.infra.mapper.BatchResultRuleMapper;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
@@ -36,7 +37,7 @@ public class BatchResultBaseRepositoryImpl extends BaseRepositoryImpl<BatchResul
         );
         if (!batchResultBaseDTOS.isEmpty()){
             batchResultBaseDTOS.stream().forEach( s ->{
-                s.setResultWaringVOS(batchResultRuleMapper.selectWaringLevel(batchResultBaseDTO.getTenantId(),s.getTableName()));
+                s.setResultWaringVOS(batchResultRuleMapper.selectWaringLevel(BatchResultRuleDO.builder().tenantId(batchResultBaseDTO.getTenantId()).tableName(s.getTableName()).resultBaseId(s.getResultBaseId()).build()));
             });
         }
         return batchResultBaseDTOS;
