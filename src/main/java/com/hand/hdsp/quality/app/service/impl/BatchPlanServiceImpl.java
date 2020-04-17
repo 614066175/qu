@@ -250,6 +250,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 batchResultRuleDTO.setRuleCode(batchPlanTable.getRuleCode());
                 batchResultRuleDTO.setRuleName(batchPlanTable.getRuleName());
                 batchResultRuleDTO.setCheckItem(batchPlanTableLine.getCheckItem());
+                batchResultRuleDTO.setTenantId(tenantId);
                 batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
 
                 if (StringUtils.isNotBlank(batchResultRuleDTO.getWarningLevel())) {
@@ -309,6 +310,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 batchResultRuleDTO.setRuleName(batchPlanField.getRuleName());
                 batchResultRuleDTO.setFieldName(batchPlanField.getFieldName());
                 batchResultRuleDTO.setCheckItem(batchPlanFieldLine.getCheckItem());
+                batchResultRuleDTO.setTenantId(tenantId);
                 batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
 
                 if (StringUtils.isNotBlank(batchResultRuleDTO.getWarningLevel())) {
@@ -362,6 +364,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             batchResultRuleDTO.setRuleId(batchPlanRelTable.getPlanRelTableId());
             batchResultRuleDTO.setRuleCode(batchPlanRelTable.getRuleCode());
             batchResultRuleDTO.setRuleName(batchPlanRelTable.getRuleName());
+            batchResultRuleDTO.setTenantId(tenantId);
             batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
 
             if (StringUtils.isNotBlank(batchResultRuleDTO.getWarningLevel())) {
@@ -405,7 +408,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         batchResult.setMark(sum.multiply(BigDecimal.valueOf(100)));
         batchResult.setPlanStatus(PlanConstant.PlanStatus.SUCCESS);
         batchResult.setEndDate(new Date());
-        batchResultRepository.updateByPrimaryKey(batchResult);
+        batchResultRepository.updateByPrimaryKeySelective(batchResult);
     }
 
 }
