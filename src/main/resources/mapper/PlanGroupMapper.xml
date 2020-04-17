@@ -29,6 +29,7 @@
     'group' type
     from xqua_plan_group
     where group_type = 'BATCH'
+        and tenant_id = #{tenantId}
     union
     select
     plan_id id,
@@ -40,6 +41,7 @@
     'plan' type
     from xqua_batch_plan xbp
     <where>
+    and tenant_id = #{tenantId}
         <if test="planName != null">
             <bind name="planName" value="'%' + planName + '%'"/>
             and xbp.plan_name like #{planName}
@@ -58,6 +60,7 @@
     'group' type
     from xqua_plan_group
     where group_type = 'STREAMING'
+        and tenant_id = #{tenantId}
     union
     select
     plan_id id,
@@ -69,6 +72,7 @@
     'plan' type
     from xqua_streaming_plan
     <where>
+        and tenant_id = #{tenantId}
         <if test="planName != null">
             <bind name="planName" value="'%' + planName + '%'"/>
             and xbp.plan_name like #{planName}
