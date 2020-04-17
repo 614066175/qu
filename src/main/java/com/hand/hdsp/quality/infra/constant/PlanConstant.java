@@ -122,4 +122,19 @@ public interface PlanConstant {
         String FIELD = "FIELD";
         String REL_TABLE = "REL_TABLE";
     }
+
+
+    /**
+     * 规则校验方式 HDSP.XQUA.CHECK_WAY
+     */
+    interface CheckWay {
+        /**
+         * 常规校验
+         */
+        String COMMON = "COMMON";
+        /**
+         * 正则表达式
+         */
+        String REGULAR = "REGULAR";
+    }
 }

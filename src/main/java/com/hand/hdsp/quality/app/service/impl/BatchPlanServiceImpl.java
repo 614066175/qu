@@ -291,7 +291,13 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                                 .build());
 
                 BatchPlanFieldLineDTO batchPlanFieldLineDTO = batchPlanFieldLineConverter.entityToDto(batchPlanFieldLine);
-                Measure measure = measureCollector.getMeasure(batchPlanFieldLine.getCheckItem().toUpperCase());
+
+                Measure measure;
+                if (PlanConstant.CheckWay.COMMON.equals(batchPlanFieldLine.getCheckWay())) {
+                    measure = measureCollector.getMeasure(batchPlanFieldLine.getCheckItem().toUpperCase());
+                } else {
+                    measure = measureCollector.getMeasure(PlanConstant.CheckWay.REGULAR);
+                }
 
                 BatchResultRuleDTO batchResultRuleDTO = measure.check(MeasureParamDO.builder()
                         .tenantId(tenantId)

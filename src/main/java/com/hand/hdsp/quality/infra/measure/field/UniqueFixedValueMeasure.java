@@ -41,12 +41,12 @@ public class UniqueFixedValueMeasure implements Measure {
         datasourceDTO.setSql(String.format(SQL, batchPlanField.getFieldName(), datasourceDTO.getTableName(), batchPlanField.getFieldName()));
         List<BatchResultRuleDTO> resultList = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<BatchResultRuleDTO>>() {
         });
-        long actualValue = Long.parseLong(resultList.get(0).getActualValue());
+        double actualValue = Long.parseLong(resultList.get(0).getActualValue());
 
         BatchResultRuleDTO batchResultRuleDTO = new BatchResultRuleDTO();
         batchResultRuleDTO.setExpectedValue(batchPlanFieldLineDTO.getExpectedValue());
 
-        long expectedValue = Long.parseLong(batchPlanFieldLineDTO.getExpectedValue());
+        double expectedValue = Long.parseLong(batchPlanFieldLineDTO.getExpectedValue());
         MeasureUtil.fixedCompare(batchPlanFieldLineDTO.getCompareWay(), actualValue, expectedValue, warningLevelList, batchResultRuleDTO);
 
         batchResultRuleDTO.setActualValue(resultList.get(0).getActualValue());

@@ -43,12 +43,12 @@ public class EmptyRateFixedValueMeasure implements Measure {
         List<BatchResultRuleDTO> resultList = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<BatchResultRuleDTO>>() {
         });
         long baseValue = Long.parseLong(resultList.get(0).getActualValue());
-        long actualValue = MeasureUtil.divide(baseValue, dataCount);
+        double actualValue = MeasureUtil.divide(baseValue, dataCount);
 
         BatchResultRuleDTO batchResultRuleDTO = new BatchResultRuleDTO();
         batchResultRuleDTO.setExpectedValue(batchPlanFieldLineDTO.getExpectedValue());
 
-        long expectedValue = Long.parseLong(batchPlanFieldLineDTO.getExpectedValue());
+        double expectedValue = Long.parseLong(batchPlanFieldLineDTO.getExpectedValue());
         MeasureUtil.fixedCompare(batchPlanFieldLineDTO.getCompareWay(), actualValue, expectedValue, warningLevelList, batchResultRuleDTO);
 
         batchResultRuleDTO.setActualValue(resultList.get(0).getActualValue());

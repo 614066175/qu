@@ -22,12 +22,12 @@ public class SizeFixedValueMeasure implements Measure {
     public BatchResultRuleDTO check(MeasureParamDO param) {
         BatchPlanTableLineDTO batchPlanTableLineDTO = param.getBatchPlanTableLineDTO();
         List<PlanWarningLevel> warningLevelList = param.getWarningLevelList();
-        long actualValue = param.getBatchResultBase().getTableSize();
+        double actualValue = param.getBatchResultBase().getTableSize();
 
         BatchResultRuleDTO batchResultRuleDTO = new BatchResultRuleDTO();
         batchResultRuleDTO.setExpectedValue(batchPlanTableLineDTO.getExpectedValue());
 
-        long expectedValue = Long.parseLong(batchPlanTableLineDTO.getExpectedValue());
+        double expectedValue = Long.parseLong(batchPlanTableLineDTO.getExpectedValue());
         MeasureUtil.fixedCompare(batchPlanTableLineDTO.getCompareWay(), actualValue, expectedValue, warningLevelList, batchResultRuleDTO);
 
         batchResultRuleDTO.setActualValue(actualValue + "");

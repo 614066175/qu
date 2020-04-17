@@ -29,8 +29,8 @@ public class MeasureUtil {
      * @param batchResultRuleDTO 结果
      */
     public static void fixedCompare(String compareWay,
-                                    long actualValue,
-                                    long expectedValue,
+                                    double actualValue,
+                                    double expectedValue,
                                     List<PlanWarningLevel> warningLevelList,
                                     BatchResultRuleDTO batchResultRuleDTO) {
         boolean result = false;
@@ -46,12 +46,12 @@ public class MeasureUtil {
                 }
                 break;
             case PlanConstant.CompareWay.EQUAL:
-                if (actualValue == expectedValue) {
+                if (BigDecimal.valueOf(actualValue).compareTo(BigDecimal.valueOf(expectedValue)) == 0) {
                     result = true;
                 }
                 break;
             case PlanConstant.CompareWay.NOT_EQUAL:
-                if (actualValue != expectedValue) {
+                if (BigDecimal.valueOf(actualValue).compareTo(BigDecimal.valueOf(expectedValue)) != 0) {
                     result = true;
                 }
                 break;
