@@ -10,6 +10,7 @@
         <result column="end_date" property="endDate" jdbcType="TIMESTAMP"/>
         <result column="plan_status" property="planStatus" jdbcType="VARCHAR"/>
         <result column="next_count_date" property="nextCountDate" jdbcType="TIMESTAMP"/>
+        <result column="exception_info" property="exceptionInfo" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
         <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>

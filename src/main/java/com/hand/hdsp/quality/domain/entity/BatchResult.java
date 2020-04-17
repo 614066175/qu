@@ -52,6 +52,8 @@ public class BatchResult extends AuditDomain {
 
     private Date nextCountDate;
 
+    private String exceptionInfo;
+
     private Long tenantId;
 
 
