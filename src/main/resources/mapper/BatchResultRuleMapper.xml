@@ -72,6 +72,9 @@
             <if test="tableName">
                 and xbrr.table_name = #{tableName}
             </if>
+            <if test="resultBaseId != null ">
+                and xbrr.result_base_id = #{resultBaseId}
+            </if>
         </where>
         GROUP BY xbrr.warning_level
     </select>
