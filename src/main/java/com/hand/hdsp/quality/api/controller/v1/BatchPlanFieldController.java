@@ -78,9 +78,10 @@ public class BatchPlanFieldController extends BaseController {
     @GetMapping("/selected")
     public ResponseEntity<?> listSelected(@PathVariable(name = "organizationId") Long tenantId,
                                           BatchPlanFieldDTO batchPlanFieldDTO,
-                                          String ruleModel) {
+                                          String ruleModel, @ApiIgnore @SortDefault(value = BatchPlanField.FIELD_PLAN_FIELD_ID,
+            direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchPlanFieldDTO.setTenantId(tenantId);
-        return Results.success(batchPlanFieldService.select(batchPlanFieldDTO, ruleModel));
+        return Results.success(batchPlanFieldService.select(batchPlanFieldDTO, ruleModel, pageRequest));
     }
 
     @ApiOperation(value = "批数据方案-字段规则表明细")

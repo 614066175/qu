@@ -17,6 +17,7 @@ import com.hand.hdsp.quality.infra.converter.BatchPlanFieldConverter;
 import com.hand.hdsp.quality.infra.converter.PlanWarningLevelConverter;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.domain.AuditDomain;
+import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -164,7 +165,7 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
     }
 
     @Override
-    public List<RuleDTO> select(BatchPlanFieldDTO batchPlanFieldDTO, String ruleModel) {
+    public Page<RuleDTO> select(BatchPlanFieldDTO batchPlanFieldDTO, String ruleModel, PageRequest pageRequest) {
         Long tenantId = batchPlanFieldDTO.getTenantId();
         List<BatchPlanField> batchPlanFieldList = batchPlanFieldRepository.list(BatchPlanField.builder()
                 .planBaseId(batchPlanFieldDTO.getPlanBaseId())
@@ -192,8 +193,8 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
                 }
             }
         } else {
-            return ruleDTOListAll;
+            return PageHelper.doPage(pageRequest, () -> ruleDTOListAll);
         }
-        return ruleDTOListAll;
+        return PageHelper.doPage(pageRequest, () -> ruleDTOListAll);
     }
 }

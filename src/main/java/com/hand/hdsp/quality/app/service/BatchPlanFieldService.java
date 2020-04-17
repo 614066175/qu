@@ -58,7 +58,8 @@ public interface BatchPlanFieldService {
      *
      * @param batchPlanFieldDTO
      * @param ruleModel
+     * @param pageRequest
      * @return
      */
-    List<RuleDTO> select(BatchPlanFieldDTO batchPlanFieldDTO, String ruleModel);
+    Page<RuleDTO> select(BatchPlanFieldDTO batchPlanFieldDTO, String ruleModel, PageRequest pageRequest);
 }
