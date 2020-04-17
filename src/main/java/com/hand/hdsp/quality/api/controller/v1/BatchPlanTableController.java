@@ -57,7 +57,7 @@ public class BatchPlanTableController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
-    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<?> list2(@PathVariable(name = "organizationId") Long tenantId,
                                   BatchPlanTableDO batchPlanTableDO) {
         batchPlanTableDO.setTenantId(tenantId);
         return Results.success(batchPlanTableService.list(batchPlanTableDO));
