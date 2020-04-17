@@ -50,6 +50,23 @@ public class RuleWarningLevelController extends BaseController {
         return Results.success(list);
     }
 
+    @ApiOperation(value = "规则告警等级表列表（标准规则租户级）")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/list")
+    public ResponseEntity<?> list2(@PathVariable(name = "organizationId") Long tenantId,
+                                   RuleWarningLevelDTO ruleWarningLevelDTO, @ApiIgnore @SortDefault(value = RuleWarningLevel.FIELD_LEVEL_ID,
+            direction = Sort.Direction.DESC) PageRequest pageRequest) {
+        ruleWarningLevelDTO.setTenantId(tenantId);
+        Page<RuleWarningLevelDTO> list = ruleWarningLevelRepository.list2(pageRequest, ruleWarningLevelDTO);
+        return Results.success(list);
+    }
+
     @ApiOperation(value = "规则告警等级表明细")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",

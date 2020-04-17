@@ -34,4 +34,13 @@ public interface RuleWarningLevelMapper extends BaseMapper<RuleWarningLevel> {
      */
     @Select("select * from xqua_rule_warning_level where rule_line_id = #{ruleLineId} and tenant_id in(0,#{tenantId})")
     List<RuleWarningLevelDTO> list(@Param("ruleLineId") Long ruleLineId, @Param("tenantId") Long tenantId);
+
+    /**
+     * 列表（分页）
+     *
+     * @param ruleWarningLevelDTO
+     * @return
+     */
+    @Select("select * from xqua_rule_warning_level where rule_line_id = #{ruleLineId} and tenant_id in(0,#{tenantId})")
+    List<RuleWarningLevelDTO> list2(RuleWarningLevelDTO ruleWarningLevelDTO);
 }

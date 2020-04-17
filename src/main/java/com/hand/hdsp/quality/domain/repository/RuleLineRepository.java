@@ -4,6 +4,8 @@ import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.RuleLineDTO;
 import com.hand.hdsp.quality.domain.entity.RuleLine;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 
@@ -30,4 +32,13 @@ public interface RuleLineRepository extends BaseRepository<RuleLine, RuleLineDTO
      * @return
      */
     List<RuleLineDTO> list(Long ruleId, Long tenantId);
+
+    /**
+     * 列表（分页）
+     *
+     * @param pageRequest
+     * @param ruleLineDTO
+     * @return
+     */
+    Page<RuleLineDTO> list2(PageRequest pageRequest, RuleLineDTO ruleLineDTO);
 }

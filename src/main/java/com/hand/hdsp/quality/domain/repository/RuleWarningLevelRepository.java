@@ -4,6 +4,8 @@ import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.RuleWarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.RuleWarningLevel;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 
@@ -30,4 +32,13 @@ public interface RuleWarningLevelRepository extends BaseRepository<RuleWarningLe
      * @return
      */
     List<RuleWarningLevelDTO> list(Long ruleLineId, Long tenantId);
+
+    /**
+     * 列表（分页）
+     *
+     * @param pageRequest
+     * @param ruleWarningLevelDTO
+     * @return
+     */
+    Page<RuleWarningLevelDTO> list2(PageRequest pageRequest, RuleWarningLevelDTO ruleWarningLevelDTO);
 }

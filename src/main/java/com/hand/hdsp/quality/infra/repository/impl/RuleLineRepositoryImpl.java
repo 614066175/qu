@@ -5,6 +5,9 @@ import com.hand.hdsp.quality.api.dto.RuleLineDTO;
 import com.hand.hdsp.quality.domain.entity.RuleLine;
 import com.hand.hdsp.quality.domain.repository.RuleLineRepository;
 import com.hand.hdsp.quality.infra.mapper.RuleLineMapper;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -31,5 +34,10 @@ public class RuleLineRepositoryImpl extends BaseRepositoryImpl<RuleLine, RuleLin
     @Override
     public List<RuleLineDTO> list(Long ruleId, Long tenantId) {
         return ruleLineMapper.list(ruleId, tenantId);
+    }
+
+    @Override
+    public Page<RuleLineDTO> list2(PageRequest pageRequest, RuleLineDTO ruleLineDTO) {
+        return PageHelper.doPage(pageRequest, () -> ruleLineMapper.list2(ruleLineDTO));
     }
 }

@@ -5,6 +5,9 @@ import com.hand.hdsp.quality.api.dto.RuleWarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.RuleWarningLevel;
 import com.hand.hdsp.quality.domain.repository.RuleWarningLevelRepository;
 import com.hand.hdsp.quality.infra.mapper.RuleWarningLevelMapper;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -31,5 +34,10 @@ public class RuleWarningLevelRepositoryImpl extends BaseRepositoryImpl<RuleWarni
     @Override
     public List<RuleWarningLevelDTO> list(Long ruleLineId, Long tenantId) {
         return ruleWarningLevelMapper.list(ruleLineId, tenantId);
+    }
+
+    @Override
+    public Page<RuleWarningLevelDTO> list2(PageRequest pageRequest, RuleWarningLevelDTO ruleWarningLevelDTO) {
+        return PageHelper.doPage(pageRequest, () -> ruleWarningLevelMapper.list2(ruleWarningLevelDTO));
     }
 }

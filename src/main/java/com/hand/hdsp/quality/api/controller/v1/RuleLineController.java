@@ -50,6 +50,23 @@ public class RuleLineController extends BaseController {
         return Results.success(list);
     }
 
+    @ApiOperation(value = "规则校验项表列表（标准规则租户级）")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/list")
+    public ResponseEntity<?> list2(@PathVariable(name = "organizationId") Long tenantId,
+                                  RuleLineDTO ruleLineDTO, @ApiIgnore @SortDefault(value = RuleLine.FIELD_RULE_LINE_ID,
+            direction = Sort.Direction.DESC) PageRequest pageRequest) {
+        ruleLineDTO.setTenantId(tenantId);
+        Page<RuleLineDTO> list = ruleLineRepository.list2(pageRequest, ruleLineDTO);
+        return Results.success(list);
+    }
+
     @ApiOperation(value = "规则校验项表明细")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
