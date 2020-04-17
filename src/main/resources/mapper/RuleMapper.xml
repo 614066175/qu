@@ -47,6 +47,7 @@
             and rule_model = #{ruleModel}
             and rule_type in('FIELD_NUMERICAL','FIELD_CHAR','FIELD_DATE')
             and tenant_id in(0,#{tenantId})
+            and enabled_flag = 1
         </where>
     </select>
     <select id="listAll" resultType="com.hand.hdsp.quality.api.dto.RuleDTO">
@@ -73,6 +74,7 @@
             </if>
             and rule_type in('FIELD_NUMERICAL','FIELD_CHAR','FIELD_DATE')
             and tenant_id in(0,#{tenantId})
+            and enabled_flag = 1
         </where>
     </select>
     <select id="list2" resultType="com.hand.hdsp.quality.api.dto.RuleDTO">
