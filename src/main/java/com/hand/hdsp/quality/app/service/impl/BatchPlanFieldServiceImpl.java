@@ -177,7 +177,7 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
         ruleDTO2.setRuleName(batchPlanFieldDTO.getRuleName());
         ruleDTO2.setRuleModel(ruleModel);
         ruleDTO2.setTenantId(tenantId);
-        List<RuleDTO> ruleDTOListAll = ruleRepository.listAll(ruleDTO2);
+        Page<RuleDTO> ruleDTOListAll = PageHelper.doPage(pageRequest, () -> ruleRepository.listAll(ruleDTO2));
         if (!batchPlanFieldList.isEmpty()) {
             for (BatchPlanField batchPlanField : batchPlanFieldList) {
                 ruleCodeList.add(batchPlanField.getRuleCode());
@@ -193,8 +193,8 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
                 }
             }
         } else {
-            return PageHelper.doPage(pageRequest, () -> ruleDTOListAll);
+            return ruleDTOListAll;
         }
-        return PageHelper.doPage(pageRequest, () -> ruleDTOListAll);
+        return ruleDTOListAll;
     }
 }
