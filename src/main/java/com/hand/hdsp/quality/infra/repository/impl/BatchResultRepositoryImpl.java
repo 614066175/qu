@@ -1,6 +1,8 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
 import static java.util.Map.Entry.comparingByValue;
+
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -86,7 +88,7 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
                         checkTypePercentage.add(CheckTypePercentageVO
                                 .builder()
                                 .checkType(a.getCheckType())
-                                .percentage((s.getCountSum()*1.0)/(a.getCountSum() == 0 ? 1 : a.getCountSum()))
+                                .percentage(Double.valueOf(new DecimalFormat("#.00").format((s.getCountSum()*1.0)/(a.getCountSum() == 0 ? 1 : a.getCountSum()))))
                                 .build());
                     }
                 }
