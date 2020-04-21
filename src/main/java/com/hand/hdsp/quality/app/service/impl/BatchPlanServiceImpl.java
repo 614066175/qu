@@ -13,13 +13,20 @@ import com.hand.hdsp.quality.infra.converter.BatchPlanTableLineConverter;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import com.hand.hdsp.quality.infra.feign.DispatchJobFeign;
+import com.hand.hdsp.quality.infra.feign.DqRuleLineFeign;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureCollector;
 import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.hzero.boot.message.MessageClient;
+import org.hzero.boot.message.constant.MessageType;
+import org.hzero.boot.message.entity.MessageSender;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.boot.platform.lov.dto.LovValueDTO;
+import org.hzero.core.base.BaseConstants;
 import org.hzero.core.util.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,10 +37,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>批数据评估方案表应用服务默认实现</p>
@@ -86,7 +91,11 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     @Autowired
     private DatasourceFeign datasourceFeign;
     @Autowired
-    LovAdapter lovAdapter;
+    private LovAdapter lovAdapter;
+    @Autowired
+    private DqRuleLineFeign dqRuleLineFeign;
+    @Autowired
+    private MessageClient messageClient;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -117,6 +126,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
             //分数计算
             countScore(tenantId, batchResult);
+
+            //告警
+            sendWarning(tenantId, batchResult.getResultId());
         } catch (Exception e) {
             log.error("count_error", e);
             batchResult.setPlanStatus(PlanConstant.PlanStatus.FAILED);
@@ -417,4 +429,96 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         batchResultRepository.updateByPrimaryKeySelective(batchResult);
     }
 
+
+    /**
+     * 告警
+     *
+     * @param tenantId
+     * @param resultId
+     */
+    private void sendWarning(Long tenantId, Long resultId) {
+        BatchResultDTO batchResultDTO = batchResultRepository.showResultHead(BatchResultDTO.builder().resultId(resultId).tenantId(tenantId).build());
+        //当没有告警发送代码时直接返回
+        if (StringUtils.isBlank(batchResultDTO.getWarningCode())) {
+            return;
+        }
+        ResponseEntity<String> result = dqRuleLineFeign.listAll(tenantId, DqRuleLineDTO.builder().configCode(batchResultDTO.getWarningCode()).build());
+        List<DqRuleLineDTO> dqRuleLineDTOList = ResponseUtils.getResponse(result, new TypeReference<List<DqRuleLineDTO>>() {
+        });
+
+        //当未配置告警规则时直接返回
+        if (CollectionUtils.isEmpty(dqRuleLineDTOList)) {
+            return;
+        }
+
+        List<String> waringLevelStrings = batchResultRuleRepository.selectWaringLevelByResultId(resultId);
+
+        //当告警等级数组为空时直接返回（正常记录）
+        if (CollectionUtils.isEmpty(waringLevelStrings)) {
+            return;
+        }
+
+        DqRuleLineDTO dqRuleLineDTO = null;
+        //当配置告警规则只有一条时直接取
+        if (dqRuleLineDTOList.size() == 1) {
+            dqRuleLineDTO = dqRuleLineDTOList.get(0);
+        } else {
+            //获取所有告警等级
+            List<LovValueDTO> list = lovAdapter.queryLovValue(PlanConstant.LOV_WARNING_LEVEL, tenantId)
+                    .stream()
+                    .sorted(Comparator.comparing(LovValueDTO::getOrderSeq).reversed())
+                    .collect(Collectors.toList());
+
+            //获取本次结果最高级别的告警等级
+            String waringLevel = "";
+            for (LovValueDTO lovValueDTO : list) {
+                if (waringLevelStrings.contains(lovValueDTO.getValue())) {
+                    waringLevel = lovValueDTO.getValue();
+                    break;
+                }
+            }
+
+            Map<String, List<DqRuleLineDTO>> alertLevelMap = dqRuleLineDTOList.stream()
+                    .filter(dto -> dto.getAlertLevel() != null)
+                    .collect(Collectors.groupingBy(DqRuleLineDTO::getAlertLevel));
+            Map<String, List<DqRuleLineDTO>> alarmWayMap = dqRuleLineDTOList.stream().collect(Collectors.groupingBy(DqRuleLineDTO::getAlarmWay));
+            if (CollectionUtils.isNotEmpty(alertLevelMap.get(waringLevel))) {
+                //当存在最高等级的告警规则时取此条记录
+                dqRuleLineDTO = alertLevelMap.get(waringLevel).get(0);
+            } else if (CollectionUtils.isNotEmpty(alarmWayMap.get(MessageType.EMAIL))) {
+                //不存在最高等级的告警规则时则取告警方式为邮件
+                dqRuleLineDTO = alarmWayMap.get(MessageType.EMAIL).get(0);
+            } else {
+                //都不存在则随便取
+                dqRuleLineDTO = dqRuleLineDTOList.get(0);
+            }
+
+        }
+
+        //查询表结果
+//      List<BatchResultBaseDTO> resultBaseList = batchResultBaseRepository.listResultBase(BatchResultBaseDTO.builder().resultId(resultId).tenantId(tenantId).build());
+
+        //查询规则结果
+
+        //参数
+        Map<String, String> args = new HashMap<>();
+        args.put("planName", batchResultDTO.getPlanName());
+        args.put("mark", batchResultDTO.getMark() != null ? batchResultDTO.getMark().toString() : "");
+        args.put("startDate", DateFormatUtils.format(batchResultDTO.getStartDate(), BaseConstants.Pattern.DATETIME));
+        args.put("status", lovAdapter.queryLovMeaning(PlanConstant.LOV_PLAN_STATUS, tenantId, batchResultDTO.getPlanStatus()));
+        args.put("exceptionInfo", batchResultDTO.getExceptionInfo() != null ? batchResultDTO.getExceptionInfo() : "");
+
+        //发送消息
+        MessageSender messageSender = MessageSender.builder()
+                .messageCode(dqRuleLineDTO.getMessageTemplateCode())
+                .receiverTypeCode(dqRuleLineDTO.getReceiveGroupCode())
+                .receiverAddressList(messageClient.receiver(dqRuleLineDTO.getReceiveGroupCode(), null))
+                .typeCodeList(Collections.singletonList(dqRuleLineDTO.getAlarmWay()))
+                .args(args)
+                .tenantId(tenantId)
+                .build();
+        messageClient.async().sendMessage(messageSender);
+
+
+    }
 }

@@ -7,7 +7,6 @@ import com.hand.hdsp.quality.domain.repository.BatchResultRuleRepository;
 import com.hand.hdsp.quality.infra.mapper.BatchResultRuleMapper;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -41,5 +40,10 @@ public class BatchResultRuleRepositoryImpl extends BaseRepositoryImpl<BatchResul
                         .build()
         );
         return batchResultRuleDTOS;
+    }
+
+    @Override
+    public List<String> selectWaringLevelByResultId(Long resultId) {
+        return batchResultRuleMapper.selectWaringLevelByResultId(resultId);
     }
 }

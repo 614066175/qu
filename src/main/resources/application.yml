@@ -143,6 +143,10 @@ hdsp:
       excludeUrlSuffix: ${HDSP_ACCESS_SIGN_EXCLUDE_URL_SUFFIX:/v2/.*}
       initTokenNum: ${HDSP_ACCESS_SIGN_INIT_TOKEN_NUM:10}
       enabled: ${HDSP_ACCESS_SIGN_ENABLED:false}
+  service:
+    core: ${HDSP_CORE_SERVICE:hdsp-core}
+    dispatch: ${HDSP_DISPATCH_SERVICE:hdsp-dispatch}
+    ops: ${HDSP_OPS_SERVICE:hdsp-ops}
 
 jasypt:
   encryptor:
