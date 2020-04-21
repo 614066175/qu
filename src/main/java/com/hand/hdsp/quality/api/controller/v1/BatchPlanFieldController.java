@@ -60,7 +60,7 @@ public class BatchPlanFieldController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
-    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<?> list2(@PathVariable(name = "organizationId") Long tenantId,
                                   BatchPlanFieldDTO batchPlanFieldDTO, @ApiIgnore @SortDefault(value = BatchPlanField.FIELD_PLAN_FIELD_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchPlanFieldDTO.setTenantId(tenantId);
