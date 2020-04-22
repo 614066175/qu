@@ -501,7 +501,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         //查询规则结果
 
         //参数
-        Map<String, String> args = new HashMap<>();
+        Map<String, String> args = new HashMap<>(5);
         args.put("planName", batchResultDTO.getPlanName());
         args.put("mark", batchResultDTO.getMark() != null ? batchResultDTO.getMark().toString() : "");
         args.put("startDate", DateFormatUtils.format(batchResultDTO.getStartDate(), BaseConstants.Pattern.DATETIME));
@@ -518,7 +518,5 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 .tenantId(tenantId)
                 .build();
         messageClient.async().sendMessage(messageSender);
-
-
     }
 }

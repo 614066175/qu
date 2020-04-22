@@ -73,7 +73,12 @@
                 and rule_name like #{ruleName}
             </if>
             and rule_type in('FIELD_NUMERICAL','FIELD_CHAR','FIELD_DATE')
-            and tenant_id in(0,#{tenantId})
+            <if test='ruleModel == "STANDARD"'>
+                and tenant_id in(0,#{tenantId})
+            </if>
+            <if test='ruleModel != "STANDARD"'>
+                and tenant_id = #{tenantId}
+            </if>
             and enabled_flag = 1
         </where>
     </select>
