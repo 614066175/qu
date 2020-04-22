@@ -41,7 +41,7 @@ public class RuleSiteController extends BaseController {
 
     @ApiOperation(value = "规则表列表（平台级）")
     @Permission(level = ResourceLevel.SITE)
-    @GetMapping
+    @GetMapping("/list")
     public ResponseEntity<?> list(RuleDTO ruleDTO, @ApiIgnore @SortDefault(value = Rule.FIELD_RULE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         if (ruleDTO.getGroupId() != null && ruleDTO.getGroupId() == 0) {
