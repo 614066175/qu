@@ -28,4 +28,12 @@ public interface BatchResultRuleRepository extends BaseRepository<BatchResultRul
      * @return BatchResultRuleDTO
      */
     List<BatchResultRuleDTO> listRuleError(BatchResultRuleDTO batchResultRuleDTO);
+
+    /**
+     * 根据结果id查询出告警等级并去重
+     *
+     * @param resultId
+     * @return
+     */
+    List<String> selectWaringLevelByResultId(Long resultId);
 }

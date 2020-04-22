@@ -22,12 +22,14 @@
     <sql id="Plan_And_Result">
         ${xbp}.plan_id,
         ${xbp}.plan_name,
+        ${xbp}.warning_code,
         ${xbr}.result_id,
         ${xbr}.plan_status,
         ${xbr}.mark,
         ${xbr}.start_date,
         ${xbr}.end_date,
-        ${xbr}.next_count_date
+        ${xbr}.next_count_date,
+        ${xbr}.exception_info
     </sql>
 
     <select id="listByGroup" resultType="com.hand.hdsp.quality.api.dto.BatchResultDTO">

@@ -65,5 +65,6 @@ public class BatchResultDTO extends AuditDomain {
 
     private Long exceptionRuleCount;
 
+    private String warningCode;
 
 }
