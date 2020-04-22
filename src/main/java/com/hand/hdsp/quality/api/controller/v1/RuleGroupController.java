@@ -67,9 +67,24 @@ public class RuleGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> list2(@PathVariable(name = "organizationId") Long tenantId,
-                                  RuleGroup ruleGroup) {
+                                   RuleGroup ruleGroup) {
         ruleGroup.setTenantId(tenantId);
         return Results.success(ruleGroupService.selectList(ruleGroup));
+    }
+
+    @ApiOperation(value = "规则分组表列表标准规则租户级（不分页）")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/all")
+    public ResponseEntity<?> list3(@PathVariable(name = "organizationId") Long tenantId,
+                                   RuleGroup ruleGroup) {
+        ruleGroup.setTenantId(tenantId);
+        return Results.success(ruleGroupService.selectList2(ruleGroup));
     }
 
     @ApiOperation(value = "规则分组表明细")

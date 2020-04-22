@@ -4,7 +4,10 @@ import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
 import com.hand.hdsp.quality.domain.entity.RuleGroup;
 import com.hand.hdsp.quality.domain.repository.RuleGroupRepository;
+import com.hand.hdsp.quality.infra.mapper.RuleGroupMapper;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * 规则分组表资源库实现
@@ -15,4 +18,15 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class RuleGroupRepositoryImpl extends BaseRepositoryImpl<RuleGroup, RuleGroupDTO> implements RuleGroupRepository {
+
+    private final RuleGroupMapper ruleGroupMapper;
+
+    public RuleGroupRepositoryImpl(RuleGroupMapper ruleGroupMapper) {
+        this.ruleGroupMapper = ruleGroupMapper;
+    }
+
+    @Override
+    public List<RuleGroup> list(RuleGroup ruleGroup) {
+        return ruleGroupMapper.list(ruleGroup);
+    }
 }

@@ -29,4 +29,12 @@ public interface RuleGroupService {
      * @return
      */
     List<RuleGroup> selectList(RuleGroup ruleGroup);
+
+    /**
+     * 查询，处理所有分组逻辑（标准规则租户级）
+     *
+     * @param ruleGroup
+     * @return
+     */
+    List<RuleGroup> selectList2(RuleGroup ruleGroup);
 }

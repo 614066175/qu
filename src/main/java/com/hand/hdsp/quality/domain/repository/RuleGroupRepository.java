@@ -5,6 +5,8 @@ import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
 import com.hand.hdsp.quality.domain.entity.RuleGroup;
 
+import java.util.List;
+
 /**
  * 规则分组表资源库
  *
@@ -13,4 +15,12 @@ import com.hand.hdsp.quality.domain.entity.RuleGroup;
  * @date 2020/3/23 13:29
  */
 public interface RuleGroupRepository extends BaseRepository<RuleGroup, RuleGroupDTO>, ProxySelf<RuleGroupRepository> {
+
+    /**
+     * 根据方案名查到所在分组
+     *
+     * @param ruleGroup
+     * @return List<RuleGroup>
+     */
+    List<RuleGroup> list(RuleGroup ruleGroup);
 }

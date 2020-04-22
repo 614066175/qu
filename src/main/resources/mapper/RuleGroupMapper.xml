@@ -23,4 +23,27 @@
         ${std}.group_name,
         ${std}.group_desc,
     </sql>
+    <select id="list" resultType="com.hand.hdsp.quality.domain.entity.RuleGroup">
+        select * from xqua_rule_group xrg
+        where
+        tenant_id in(0,#{tenantId})
+        <if test="groupCode != null">
+            <bind name="groupCode" value="'%' + groupCode + '%'"/>
+            and xrg.group_code like #{groupCode}
+        </if>
+        <if test="groupName != null">
+            <bind name="groupName" value="'%' + groupName + '%'"/>
+            and xrg.group_name like #{groupName}
+        </if>
+        <if test="groupDesc != null">
+            <bind name="groupDesc" value="'%' + groupDesc + '%'"/>
+            and xrg.group_desc like #{groupDesc}
+        </if>
+        <if test="groupId != null">
+            and xrg.group_id = #{groupId}
+        </if>
+        <if test="parentGroupId != null">
+            and xrg.parent_group_id = #{parentGroupId}
+        </if>
+    </select>
 </mapper>
