@@ -38,7 +38,7 @@ public class RuleWarningLevelSiteController extends BaseController {
 
     @ApiOperation(value = "规则告警等级表列表（平台级）")
     @Permission(level = ResourceLevel.SITE)
-    @GetMapping
+    @GetMapping("/list")
     public ResponseEntity<?> list(RuleWarningLevelDTO ruleWarningLevelDTO, @ApiIgnore @SortDefault(value = RuleWarningLevel.FIELD_LEVEL_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         Page<RuleWarningLevelDTO> list = ruleWarningLevelRepository.pageAndSortDTO(pageRequest, ruleWarningLevelDTO);

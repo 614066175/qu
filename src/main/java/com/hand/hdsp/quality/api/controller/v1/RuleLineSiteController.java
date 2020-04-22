@@ -38,7 +38,7 @@ public class RuleLineSiteController extends BaseController {
 
     @ApiOperation(value = "规则校验项表列表（平台级）")
     @Permission(level = ResourceLevel.SITE)
-    @GetMapping
+    @GetMapping("/list")
     public ResponseEntity<?> list(RuleLineDTO ruleLineDTO, @ApiIgnore @SortDefault(value = RuleLine.FIELD_RULE_LINE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         Page<RuleLineDTO> list = ruleLineRepository.pageAndSortDTO(pageRequest, ruleLineDTO);
