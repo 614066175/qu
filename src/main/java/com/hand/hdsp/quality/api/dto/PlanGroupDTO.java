@@ -48,7 +48,6 @@ public class PlanGroupDTO extends AuditDomain {
     private String groupType;
 
     @ApiModelProperty(value = "是否启用 1-启用 0-不启用")
-    @NotNull
     private Integer enabledFlag;
 
     @ApiModelProperty(value = "租户ID")

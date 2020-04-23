@@ -495,6 +495,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
         }
 
+        // TODO 目前只支持string类型参数，后续会增加object参数
         //查询表结果
 //      List<BatchResultBaseDTO> resultBaseList = batchResultBaseRepository.listResultBase(BatchResultBaseDTO.builder().resultId(resultId).tenantId(tenantId).build());
 
