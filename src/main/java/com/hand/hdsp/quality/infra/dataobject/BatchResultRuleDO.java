@@ -35,6 +35,8 @@ public class BatchResultRuleDO extends AuditDomain {
 
     private String checkItem;
 
+    private String compareWay;
+
     private String expectedValue;
 
     private String actualValue;

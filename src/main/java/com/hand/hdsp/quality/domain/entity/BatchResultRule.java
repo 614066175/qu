@@ -54,6 +54,8 @@ public class BatchResultRule extends AuditDomain {
 
     private String checkItem;
 
+    private String compareWay;
+
     private String expectedValue;
 
     private String actualValue;

@@ -27,7 +27,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/batch-result-rules")
 public class BatchResultRuleController extends BaseController {
 
-    private BatchResultRuleRepository batchResultRuleRepository;
+    private final BatchResultRuleRepository batchResultRuleRepository;
 
     public BatchResultRuleController(BatchResultRuleRepository batchResultRuleRepository) {
         this.batchResultRuleRepository = batchResultRuleRepository;
@@ -58,9 +58,9 @@ public class BatchResultRuleController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("result-rule")
+    @GetMapping("/result-rule")
     public ResponseEntity<?> resultRule(@PathVariable(name = "organizationId") Long tenantId,
-                                        BatchResultRuleDTO batchResultRuleDTO){
+                                        BatchResultRuleDTO batchResultRuleDTO) {
         batchResultRuleDTO.setTenantId(tenantId);
         return Results.success(batchResultRuleRepository.listRuleError(batchResultRuleDTO));
     }

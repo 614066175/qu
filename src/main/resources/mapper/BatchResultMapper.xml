@@ -43,7 +43,8 @@
         xbr.mark,
         xbr.start_date,
         xbr.end_date,
-        xbr.next_count_date
+        xbr.next_count_date,
+        xbr.exception_info
         from xqua_batch_result xbr
         LEFT JOIN xqua_batch_plan xbp
         on xbr.plan_id=xbp.plan_id
@@ -72,9 +73,10 @@
         null result_id,
         '${@com.hand.hdsp.quality.infra.constant.PlanStatus@NOTACCESS}' plan_status,
         null mark,
-        xbp.creation_date start_date,
+        null start_date,
         null end_date,
-        null next_count_date
+        null next_count_date,
+        null exception_info
         from xqua_batch_plan xbp
         LEFT JOIN xqua_plan_group xpg
         on xpg.group_id=xbp.group_id
@@ -100,7 +102,8 @@
         xbr.mark,
         xbr.start_date,
         xbr.end_date,
-        xbr.next_count_date
+        xbr.next_count_date,
+        xbr.exception_info
         from xqua_batch_result xbr
         LEFT JOIN xqua_batch_plan xbp
         on xbr.plan_id=xbp.plan_id
@@ -129,9 +132,10 @@
         null result_id,
         '${@com.hand.hdsp.quality.infra.constant.PlanStatus@NOTACCESS}' plan_status,
         null mark,
-        xbp.creation_date start_date,
+        null start_date,
         null end_date,
-        null next_count_date
+        null next_count_date,
+        null exception_info
         from xqua_batch_plan xbp
         LEFT JOIN xqua_plan_group xpg
         on xpg.group_id=xbp.group_id

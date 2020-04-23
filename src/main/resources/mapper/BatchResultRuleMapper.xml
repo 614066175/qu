@@ -12,6 +12,7 @@
         <result column="rule_code" property="ruleCode" jdbcType="VARCHAR"/>
         <result column="rule_name" property="ruleName" jdbcType="VARCHAR"/>
         <result column="check_item" property="checkItem" jdbcType="VARCHAR"/>
+        <result column="compare_way" property="compareWay" jdbcType="VARCHAR"/>
         <result column="expected_value" property="expectedValue" jdbcType="VARCHAR"/>
         <result column="actual_value" property="actualValue" jdbcType="VARCHAR"/>
         <result column="wave_rate" property="waveRate" jdbcType="VARCHAR"/>

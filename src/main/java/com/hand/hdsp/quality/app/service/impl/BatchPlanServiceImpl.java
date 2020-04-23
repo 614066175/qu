@@ -20,6 +20,7 @@ import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.hzero.boot.message.MessageClient;
 import org.hzero.boot.message.constant.MessageType;
@@ -27,6 +28,7 @@ import org.hzero.boot.message.entity.MessageSender;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.boot.platform.lov.dto.LovValueDTO;
 import org.hzero.core.base.BaseConstants;
+import org.hzero.core.exception.MessageException;
 import org.hzero.core.util.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -129,11 +131,16 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
             //告警
             sendWarning(tenantId, batchResult.getResultId());
-        } catch (Exception e) {
+        } catch (MessageException e) {
             log.error("count_error", e);
             batchResult.setPlanStatus(PlanConstant.PlanStatus.FAILED);
             batchResult.setExceptionInfo(e.getMessage());
             batchResultRepository.updateByPrimaryKeySelective(batchResult);
+        } catch (Exception e) {
+            batchResult.setPlanStatus(PlanConstant.PlanStatus.FAILED);
+            batchResult.setExceptionInfo(ExceptionUtils.getMessage(e));
+            batchResultRepository.updateByPrimaryKeySelective(batchResult);
+            throw e;
         }
     }
 
@@ -262,6 +269,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 batchResultRuleDTO.setRuleCode(batchPlanTable.getRuleCode());
                 batchResultRuleDTO.setRuleName(batchPlanTable.getRuleName());
                 batchResultRuleDTO.setCheckItem(batchPlanTableLine.getCheckItem());
+                batchResultRuleDTO.setCompareWay(batchPlanTableLine.getCompareWay());
                 batchResultRuleDTO.setTenantId(tenantId);
                 batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
 
@@ -328,6 +336,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 batchResultRuleDTO.setRuleName(batchPlanField.getRuleName());
                 batchResultRuleDTO.setFieldName(batchPlanField.getFieldName());
                 batchResultRuleDTO.setCheckItem(batchPlanFieldLine.getCheckItem());
+                batchResultRuleDTO.setCompareWay(batchPlanFieldLine.getCompareWay());
                 batchResultRuleDTO.setTenantId(tenantId);
                 batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
 
@@ -458,7 +467,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             return;
         }
 
-        DqRuleLineDTO dqRuleLineDTO = null;
+        DqRuleLineDTO dqRuleLineDTO;
         //当配置告警规则只有一条时直接取
         if (dqRuleLineDTOList.size() == 1) {
             dqRuleLineDTO = dqRuleLineDTOList.get(0);

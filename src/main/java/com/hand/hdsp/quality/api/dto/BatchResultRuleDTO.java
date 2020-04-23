@@ -54,6 +54,9 @@ public class BatchResultRuleDTO extends AuditDomain {
     @ApiModelProperty(value = "校验项 HDSP.XQUA.CHECK_ITEM")
     private String checkItem;
 
+    @ApiModelProperty(value = "比较方式 HDSP.XQUA.COMPARE_WAY")
+    private String compareWay;
+
     @ApiModelProperty(value = "阈值")
     private String expectedValue;
 
