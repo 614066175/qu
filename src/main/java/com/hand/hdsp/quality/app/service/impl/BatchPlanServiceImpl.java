@@ -19,11 +19,11 @@ import com.hand.hdsp.quality.infra.measure.MeasureCollector;
 import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.hzero.boot.message.MessageClient;
-import org.hzero.boot.message.constant.MessageType;
 import org.hzero.boot.message.entity.MessageSender;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.boot.platform.lov.dto.LovValueDTO;
@@ -467,41 +467,12 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             return;
         }
 
-        DqRuleLineDTO dqRuleLineDTO;
-        //当配置告警规则只有一条时直接取
-        if (dqRuleLineDTOList.size() == 1) {
-            dqRuleLineDTO = dqRuleLineDTOList.get(0);
-        } else {
-            //获取所有告警等级
-            List<LovValueDTO> list = lovAdapter.queryLovValue(PlanConstant.LOV_WARNING_LEVEL, tenantId)
-                    .stream()
-                    .sorted(Comparator.comparing(LovValueDTO::getOrderSeq).reversed())
-                    .collect(Collectors.toList());
+        Map<String, List<DqRuleLineDTO>> alertLevelMap = dqRuleLineDTOList.stream()
+                .filter(dto -> dto.getAlertLevel() != null)
+                .collect(Collectors.groupingBy(DqRuleLineDTO::getAlertLevel));
 
-            //获取本次结果最高级别的告警等级
-            String waringLevel = "";
-            for (LovValueDTO lovValueDTO : list) {
-                if (waringLevelStrings.contains(lovValueDTO.getValue())) {
-                    waringLevel = lovValueDTO.getValue();
-                    break;
-                }
-            }
-
-            Map<String, List<DqRuleLineDTO>> alertLevelMap = dqRuleLineDTOList.stream()
-                    .filter(dto -> dto.getAlertLevel() != null)
-                    .collect(Collectors.groupingBy(DqRuleLineDTO::getAlertLevel));
-            Map<String, List<DqRuleLineDTO>> alarmWayMap = dqRuleLineDTOList.stream().collect(Collectors.groupingBy(DqRuleLineDTO::getAlarmWay));
-            if (CollectionUtils.isNotEmpty(alertLevelMap.get(waringLevel))) {
-                //当存在最高等级的告警规则时取此条记录
-                dqRuleLineDTO = alertLevelMap.get(waringLevel).get(0);
-            } else if (CollectionUtils.isNotEmpty(alarmWayMap.get(MessageType.EMAIL))) {
-                //不存在最高等级的告警规则时则取告警方式为邮件
-                dqRuleLineDTO = alarmWayMap.get(MessageType.EMAIL).get(0);
-            } else {
-                //都不存在则随便取
-                dqRuleLineDTO = dqRuleLineDTOList.get(0);
-            }
-
+        if (MapUtils.isEmpty(alertLevelMap)) {
+            return;
         }
 
         // TODO 目前只支持string类型参数，后续会增加object参数
@@ -518,15 +489,20 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         args.put("status", lovAdapter.queryLovMeaning(PlanConstant.LOV_PLAN_STATUS, tenantId, batchResultDTO.getPlanStatus()));
         args.put("exceptionInfo", batchResultDTO.getExceptionInfo() != null ? batchResultDTO.getExceptionInfo() : "");
 
-        //发送消息
-        MessageSender messageSender = MessageSender.builder()
-                .messageCode(dqRuleLineDTO.getMessageTemplateCode())
-                .receiverTypeCode(dqRuleLineDTO.getReceiveGroupCode())
-                .receiverAddressList(messageClient.receiver(dqRuleLineDTO.getReceiveGroupCode(), null))
-                .typeCodeList(Collections.singletonList(dqRuleLineDTO.getAlarmWay()))
-                .args(args)
-                .tenantId(tenantId)
-                .build();
-        messageClient.async().sendMessage(messageSender);
+        for (String waringLevel : waringLevelStrings) {
+            List<DqRuleLineDTO> list = alertLevelMap.get(waringLevel);
+            for (DqRuleLineDTO dqRuleLineDTO : list) {
+                //发送消息
+                MessageSender messageSender = MessageSender.builder()
+                        .messageCode(dqRuleLineDTO.getMessageTemplateCode())
+                        .receiverTypeCode(dqRuleLineDTO.getReceiveGroupCode())
+                        .receiverAddressList(messageClient.receiver(dqRuleLineDTO.getReceiveGroupCode(), null))
+                        .typeCodeList(Collections.singletonList(dqRuleLineDTO.getAlarmWay()))
+                        .args(args)
+                        .tenantId(tenantId)
+                        .build();
+                messageClient.async().sendMessage(messageSender);
+            }
+        }
     }
 }
