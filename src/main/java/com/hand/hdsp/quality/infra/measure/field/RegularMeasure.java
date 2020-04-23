@@ -24,7 +24,7 @@ import java.util.List;
 @CheckItem(PlanConstant.CheckWay.REGULAR)
 public class RegularMeasure implements Measure {
 
-    private static final String SQL = "SELECT COUNT(*) FROM %s WHERE %s REGEXP '%s'";
+    private static final String SQL = "SELECT COUNT(*) actualValue FROM %s WHERE %s REGEXP '%s'";
     private final DatasourceFeign datasourceFeign;
 
     public RegularMeasure(DatasourceFeign datasourceFeign) {
