@@ -48,5 +48,5 @@ public interface RuleWarningLevelRepository extends BaseRepository<RuleWarningLe
      * @param ruleWarningLevelDTO ruleWarningLevelDTO
      * @return 为 null 则重叠
      */
-    int judgeOverlap(RuleWarningLevelDTO ruleWarningLevelDTO);
+    Integer judgeOverlap(RuleWarningLevelDTO ruleWarningLevelDTO);
 }

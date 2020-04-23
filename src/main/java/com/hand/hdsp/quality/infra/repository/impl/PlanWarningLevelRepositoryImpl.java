@@ -25,4 +25,9 @@ public class PlanWarningLevelRepositoryImpl extends BaseRepositoryImpl<PlanWarni
     public int deleteByParentId(Long sourceId, String sourceType) {
         return planWarningLevelMapper.deleteByParentId(sourceId, sourceType);
     }
+
+    @Override
+    public Integer judgeOverlap(PlanWarningLevelDTO planWarningLevelDTO) {
+        return planWarningLevelMapper.judgeOverlap(planWarningLevelDTO);
+    }
 }

@@ -28,8 +28,8 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/batch-plan-rel-tables")
 public class BatchPlanRelTableController extends BaseController {
 
-    private BatchPlanRelTableRepository batchPlanRelTableRepository;
-    private BatchPlanRelTableService batchPlanRelTableService;
+    private final BatchPlanRelTableRepository batchPlanRelTableRepository;
+    private final BatchPlanRelTableService batchPlanRelTableService;
 
     public BatchPlanRelTableController(BatchPlanRelTableRepository batchPlanRelTableRepository,
                                        BatchPlanRelTableService batchPlanRelTableService) {

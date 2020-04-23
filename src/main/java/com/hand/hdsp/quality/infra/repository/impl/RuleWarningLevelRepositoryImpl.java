@@ -42,7 +42,7 @@ public class RuleWarningLevelRepositoryImpl extends BaseRepositoryImpl<RuleWarni
     }
 
     @Override
-    public int judgeOverlap(RuleWarningLevelDTO ruleWarningLevelDTO) {
+    public Integer judgeOverlap(RuleWarningLevelDTO ruleWarningLevelDTO) {
         return ruleWarningLevelMapper.judgeOverlap(ruleWarningLevelDTO);
     }
 }

@@ -4,9 +4,9 @@ import com.hand.hdsp.quality.api.dto.RuleWarningLevelDTO;
 import com.hand.hdsp.quality.app.service.RuleWarningLevelService;
 import com.hand.hdsp.quality.domain.repository.RuleWarningLevelRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
-import io.choerodon.core.exception.CommonException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 /**
  * <p>规则告警等级表应用服务默认实现</p>
@@ -25,17 +25,13 @@ public class RuleWarningLevelServiceImpl implements RuleWarningLevelService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int insertAndValid(RuleWarningLevelDTO ruleWarningLevelDTO) {
-        if (ruleWarningLevelRepository.judgeOverlap(ruleWarningLevelDTO) == 0) {
-            throw new CommonException(ErrorCode.WARNING_LEVEL_OVERLAP);
-        }
+        Assert.notNull(ruleWarningLevelRepository.judgeOverlap(ruleWarningLevelDTO), ErrorCode.WARNING_LEVEL_OVERLAP);
         return ruleWarningLevelRepository.insertDTOSelective(ruleWarningLevelDTO);
     }
 
     @Override
     public int updateAndValid(RuleWarningLevelDTO ruleWarningLevelDTO, Long tenantId) {
-        if (ruleWarningLevelRepository.judgeOverlap(ruleWarningLevelDTO) == 0) {
-            throw new CommonException(ErrorCode.WARNING_LEVEL_OVERLAP);
-        }
+        Assert.notNull(ruleWarningLevelRepository.judgeOverlap(ruleWarningLevelDTO), ErrorCode.WARNING_LEVEL_OVERLAP);
         return ruleWarningLevelRepository.updateDTOWhereTenant(ruleWarningLevelDTO, tenantId);
     }
 }

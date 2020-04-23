@@ -24,8 +24,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1/{organizationId}/batch-plan-tables")
 public class BatchPlanTableController extends BaseController {
 
-    private BatchPlanTableRepository batchPlanTableRepository;
-    private BatchPlanTableService batchPlanTableService;
+    private final BatchPlanTableRepository batchPlanTableRepository;
+    private final BatchPlanTableService batchPlanTableService;
 
     public BatchPlanTableController(BatchPlanTableRepository batchPlanTableRepository,
                                     BatchPlanTableService batchPlanTableService) {

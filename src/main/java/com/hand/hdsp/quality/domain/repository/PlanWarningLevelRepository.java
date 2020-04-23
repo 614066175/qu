@@ -20,4 +20,12 @@ public interface PlanWarningLevelRepository extends BaseRepository<PlanWarningLe
      * @return
      */
     int deleteByParentId(Long sourceId, String sourceType);
+
+    /**
+     * 判断告警范围是否重叠
+     *
+     * @param planWarningLevelDTO planWarningLevelDTO
+     * @return 为 null 则重叠
+     */
+    Integer judgeOverlap(PlanWarningLevelDTO planWarningLevelDTO);
 }

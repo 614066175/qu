@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.infra.mapper;
 
+import com.hand.hdsp.quality.api.dto.PlanWarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Delete;
@@ -21,4 +22,12 @@ public interface PlanWarningLevelMapper extends BaseMapper<PlanWarningLevel> {
      */
     @Delete("delete from xqua_plan_warning_level where source_id = #{sourceId} and source_type = #{sourceType}")
     int deleteByParentId(@Param("sourceId") Long sourceId, @Param("sourceType") String sourceType);
+
+    /**
+     * 判断告警范围是否重叠
+     *
+     * @param planWarningLevelDTO planWarningLevelDTO
+     * @return 为 null 则重叠
+     */
+    Integer judgeOverlap(PlanWarningLevelDTO planWarningLevelDTO);
 }

@@ -11,6 +11,7 @@ import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
 import com.hand.hdsp.quality.domain.repository.BatchPlanRelTableLineRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanRelTableRepository;
 import com.hand.hdsp.quality.domain.repository.PlanWarningLevelRepository;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.TableNameConstant;
 import com.hand.hdsp.quality.infra.converter.PlanWarningLevelConverter;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
@@ -21,6 +22,7 @@ import org.hzero.core.util.ResponseUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,6 +98,7 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
                 planWarningLevelDTO.setSourceId(batchPlanRelTableDTO.getPlanRelTableId());
                 planWarningLevelDTO.setSourceType(TableNameConstant.XQUA_BATCH_PLAN_REL_TABLE);
                 planWarningLevelDTO.setTenantId(tenantId);
+                Assert.notNull(planWarningLevelRepository.judgeOverlap(planWarningLevelDTO), ErrorCode.WARNING_LEVEL_OVERLAP);
                 planWarningLevelRepository.insertDTOSelective(planWarningLevelDTO);
             }
         }
@@ -122,11 +125,13 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
         if (batchPlanRelTableDTO.getPlanWarningLevelDTOList() != null) {
             for (PlanWarningLevelDTO planWarningLevelDTO : batchPlanRelTableDTO.getPlanWarningLevelDTOList()) {
                 if (AuditDomain.RecordStatus.update.equals(planWarningLevelDTO.get_status())) {
+                    Assert.notNull(planWarningLevelRepository.judgeOverlap(planWarningLevelDTO), ErrorCode.WARNING_LEVEL_OVERLAP);
                     planWarningLevelRepository.updateDTOWhereTenant(planWarningLevelDTO, tenantId);
                 } else if (AuditDomain.RecordStatus.create.equals(planWarningLevelDTO.get_status())) {
                     planWarningLevelDTO.setSourceId(batchPlanRelTableDTO.getPlanRelTableId());
                     planWarningLevelDTO.setSourceType(TableNameConstant.XQUA_BATCH_PLAN_REL_TABLE);
                     planWarningLevelDTO.setTenantId(tenantId);
+                    Assert.notNull(planWarningLevelRepository.judgeOverlap(planWarningLevelDTO), ErrorCode.WARNING_LEVEL_OVERLAP);
                     planWarningLevelRepository.insertDTOSelective(planWarningLevelDTO);
                 } else if (AuditDomain.RecordStatus.delete.equals(planWarningLevelDTO.get_status())) {
                     planWarningLevelRepository.deleteByPrimaryKey(planWarningLevelDTO);

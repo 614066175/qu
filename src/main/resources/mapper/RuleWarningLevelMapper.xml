@@ -27,7 +27,9 @@
     </sql>
 
     <select id="judgeOverlap" resultType="integer">
-        SELECT
+        SELECT 1
+        FROM DUAL
+        WHERE
         (
             SELECT COUNT(*)
             FROM xqua_rule_warning_level
@@ -47,6 +49,5 @@
                 and level_id != #{levelId}
             </if>
         )
-        FROM DUAL
     </select>
 </mapper>
