@@ -40,4 +40,9 @@ public class RuleWarningLevelRepositoryImpl extends BaseRepositoryImpl<RuleWarni
     public Page<RuleWarningLevelDTO> list2(PageRequest pageRequest, RuleWarningLevelDTO ruleWarningLevelDTO) {
         return PageHelper.doPage(pageRequest, () -> ruleWarningLevelMapper.list2(ruleWarningLevelDTO));
     }
+
+    @Override
+    public int judgeOverlap(RuleWarningLevelDTO ruleWarningLevelDTO) {
+        return ruleWarningLevelMapper.judgeOverlap(ruleWarningLevelDTO);
+    }
 }

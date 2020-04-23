@@ -41,4 +41,12 @@ public interface RuleWarningLevelRepository extends BaseRepository<RuleWarningLe
      * @return
      */
     Page<RuleWarningLevelDTO> list2(PageRequest pageRequest, RuleWarningLevelDTO ruleWarningLevelDTO);
+
+    /**
+     * 判断告警范围是否重叠
+     *
+     * @param ruleWarningLevelDTO ruleWarningLevelDTO
+     * @return 为 null 则重叠
+     */
+    int judgeOverlap(RuleWarningLevelDTO ruleWarningLevelDTO);
 }

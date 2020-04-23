@@ -22,5 +22,10 @@ public interface ErrorCode {
     /**
      * 分组下存在规则或其他分组，方案下存在行信息，或方案正在运行，无法删除
      */
-    String CAN_NOT_DELETE ="error.can_not_delete";
+    String CAN_NOT_DELETE = "error.can_not_delete";
+
+    /**
+     * 告警等级阈值范围重叠
+     */
+    String WARNING_LEVEL_OVERLAP = "error.warning_level_overlap";
 }

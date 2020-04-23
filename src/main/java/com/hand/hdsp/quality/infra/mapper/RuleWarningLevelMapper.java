@@ -43,4 +43,13 @@ public interface RuleWarningLevelMapper extends BaseMapper<RuleWarningLevel> {
      */
     @Select("select * from xqua_rule_warning_level where rule_line_id = #{ruleLineId} and tenant_id in(0,#{tenantId})")
     List<RuleWarningLevelDTO> list2(RuleWarningLevelDTO ruleWarningLevelDTO);
+
+
+    /**
+     * 判断告警范围是否重叠
+     *
+     * @param ruleWarningLevelDTO ruleWarningLevelDTO
+     * @return 为 null 则重叠
+     */
+    int judgeOverlap(RuleWarningLevelDTO ruleWarningLevelDTO);
 }

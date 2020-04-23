@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.quality.api.dto.RuleWarningLevelDTO;
+import com.hand.hdsp.quality.app.service.RuleWarningLevelService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.RuleWarningLevel;
 import com.hand.hdsp.quality.domain.repository.RuleWarningLevelRepository;
@@ -27,10 +28,12 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/rule-warning-levels")
 public class RuleWarningLevelController extends BaseController {
 
-    private RuleWarningLevelRepository ruleWarningLevelRepository;
+    private final RuleWarningLevelRepository ruleWarningLevelRepository;
+    private final RuleWarningLevelService ruleWarningLevelService;
 
-    public RuleWarningLevelController(RuleWarningLevelRepository ruleWarningLevelRepository) {
+    public RuleWarningLevelController(RuleWarningLevelRepository ruleWarningLevelRepository, RuleWarningLevelService ruleWarningLevelService) {
         this.ruleWarningLevelRepository = ruleWarningLevelRepository;
+        this.ruleWarningLevelService = ruleWarningLevelService;
     }
 
     @ApiOperation(value = "规则告警等级表列表")
@@ -98,7 +101,7 @@ public class RuleWarningLevelController extends BaseController {
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody RuleWarningLevelDTO ruleWarningLevelDTO) {
         ruleWarningLevelDTO.setTenantId(tenantId);
         this.validObject(ruleWarningLevelDTO);
-        ruleWarningLevelRepository.insertDTOSelective(ruleWarningLevelDTO);
+        ruleWarningLevelService.insertAndValid(ruleWarningLevelDTO);
         return Results.success(ruleWarningLevelDTO);
     }
 
@@ -112,7 +115,7 @@ public class RuleWarningLevelController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody RuleWarningLevelDTO ruleWarningLevelDTO) {
-        ruleWarningLevelRepository.updateDTOWhereTenant(ruleWarningLevelDTO, tenantId);
+        ruleWarningLevelService.updateAndValid(ruleWarningLevelDTO, tenantId);
         return Results.success(ruleWarningLevelDTO);
     }
 
