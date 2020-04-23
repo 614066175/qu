@@ -17,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.List;
+
 /**
  * <p>批数据方案-表间规则关联关系表 管理 API</p>
  *
@@ -47,6 +49,22 @@ public class BatchPlanRelTableLineController extends BaseController {
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchPlanRelTableLineDTO.setTenantId(tenantId);
         Page<BatchPlanRelTableLineDTO> list = batchPlanRelTableLineRepository.pageAndSortDTO(pageRequest, batchPlanRelTableLineDTO);
+        return Results.success(list);
+    }
+
+    @ApiOperation(value = "批数据方案-表间规则关联关系表列表（不分页）")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/list")
+    public ResponseEntity<?> listAll(@PathVariable(name = "organizationId") Long tenantId,
+                                     BatchPlanRelTableLine batchPlanRelTableLine) {
+        batchPlanRelTableLine.setTenantId(tenantId);
+        List<BatchPlanRelTableLine> list = batchPlanRelTableLineRepository.select(batchPlanRelTableLine);
         return Results.success(list);
     }
 

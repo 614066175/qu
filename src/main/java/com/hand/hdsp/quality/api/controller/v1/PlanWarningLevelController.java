@@ -60,9 +60,9 @@ public class PlanWarningLevelController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> query(@PathVariable(name = "organizationId") Long tenantId,
-                                  PlanWarningLevel planWarningLevel) {
-        planWarningLevel.setTenantId(tenantId);
-        return Results.success(planWarningLevelRepository.select(planWarningLevel));
+                                   PlanWarningLevelDTO planWarningLevelDTO) {
+        planWarningLevelDTO.setTenantId(tenantId);
+        return Results.success(planWarningLevelRepository.selectList(planWarningLevelDTO));
     }
 
     @ApiOperation(value = "方案告警等级表明细")

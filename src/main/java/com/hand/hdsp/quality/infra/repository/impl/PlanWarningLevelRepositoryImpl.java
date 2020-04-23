@@ -5,7 +5,11 @@ import com.hand.hdsp.quality.api.dto.PlanWarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
 import com.hand.hdsp.quality.domain.repository.PlanWarningLevelRepository;
 import com.hand.hdsp.quality.infra.mapper.PlanWarningLevelMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * <p>方案告警等级表资源库实现</p>
@@ -29,5 +33,14 @@ public class PlanWarningLevelRepositoryImpl extends BaseRepositoryImpl<PlanWarni
     @Override
     public Integer judgeOverlap(PlanWarningLevelDTO planWarningLevelDTO) {
         return planWarningLevelMapper.judgeOverlap(planWarningLevelDTO);
+    }
+
+    @Override
+    public List<PlanWarningLevelDTO> selectList(PlanWarningLevelDTO planWarningLevelDTO) {
+        if (StringUtils.isNotBlank(planWarningLevelDTO.getSourceIds())) {
+            String[] strings = planWarningLevelDTO.getSourceIds().split(",");
+            planWarningLevelDTO.setSourceIdList(Arrays.asList(strings));
+        }
+        return planWarningLevelMapper.selectList(planWarningLevelDTO);
     }
 }

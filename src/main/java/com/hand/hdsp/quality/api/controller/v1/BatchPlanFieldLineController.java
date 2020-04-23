@@ -17,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.List;
+
 /**
  * <p>批数据方案-字段规则校验项表 管理 API</p>
  *
@@ -47,6 +49,22 @@ public class BatchPlanFieldLineController extends BaseController {
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchPlanFieldLineDTO.setTenantId(tenantId);
         Page<BatchPlanFieldLineDTO> list = batchPlanFieldLineRepository.pageAndSortDTO(pageRequest, batchPlanFieldLineDTO);
+        return Results.success(list);
+    }
+
+    @ApiOperation(value = "批数据方案-字段规则校验项表列表（不分页）")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/list")
+    public ResponseEntity<?> listAll(@PathVariable(name = "organizationId") Long tenantId,
+                                     BatchPlanFieldLine batchPlanFieldLine) {
+        batchPlanFieldLine.setTenantId(tenantId);
+        List<BatchPlanFieldLine> list = batchPlanFieldLineRepository.select(batchPlanFieldLine);
         return Results.success(list);
     }
 

@@ -6,6 +6,8 @@ import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * <p>方案告警等级表Mapper</p>
  *
@@ -30,4 +32,12 @@ public interface PlanWarningLevelMapper extends BaseMapper<PlanWarningLevel> {
      * @return 为 null 则重叠
      */
     Integer judgeOverlap(PlanWarningLevelDTO planWarningLevelDTO);
+
+    /**
+     * 查询
+     *
+     * @param planWarningLevelDTO
+     * @return
+     */
+    List<PlanWarningLevelDTO> selectList(PlanWarningLevelDTO planWarningLevelDTO);
 }

@@ -5,6 +5,8 @@ import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.PlanWarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
 
+import java.util.List;
+
 /**
  * <p>方案告警等级表资源库</p>
  *
@@ -28,4 +30,12 @@ public interface PlanWarningLevelRepository extends BaseRepository<PlanWarningLe
      * @return 为 null 则重叠
      */
     Integer judgeOverlap(PlanWarningLevelDTO planWarningLevelDTO);
+
+    /**
+     * 查询
+     *
+     * @param planWarningLevelDTO
+     * @return
+     */
+    List<PlanWarningLevelDTO> selectList(PlanWarningLevelDTO planWarningLevelDTO);
 }

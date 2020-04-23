@@ -45,4 +45,26 @@
             </if>
         )
     </select>
+
+    <select id="selectList" resultType="com.hand.hdsp.quality.api.dto.PlanWarningLevelDTO">
+        select *
+        from xqua_plan_warning_level
+        <where>
+            <if test="tenantId != null ">
+                and tenant_id = #{tenantId}
+            </if>
+            <if test="sourceId != null ">
+                and source_id = #{sourceId}
+            </if>
+            <if test="sourceType != null ">
+                and source_type = #{sourceType}
+            </if>
+            <if test="sourceIdList != null ">
+                and source_id in
+                <foreach item="sourceId" collection="sourceIdList" separator="," open="(" close=")" index="">
+                    #{sourceId}
+                </foreach>
+            </if>
+        </where>
+    </select>
 </mapper>

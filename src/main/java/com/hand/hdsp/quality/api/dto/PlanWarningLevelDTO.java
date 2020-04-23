@@ -10,6 +10,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <p>方案告警等级表 数据传输对象</p>
@@ -55,4 +56,8 @@ public class PlanWarningLevelDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
+    @ApiModelProperty(value = "业务主键（多个）")
+    private String sourceIds;
+
+    private List<String> sourceIdList;
 }
