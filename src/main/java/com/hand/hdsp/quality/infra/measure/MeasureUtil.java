@@ -85,6 +85,9 @@ public class MeasureUtil {
      * @return 波动率
      */
     public static BigDecimal volatility(BigDecimal sample, BigDecimal base) {
+        if (BigDecimal.ZERO.compareTo(base) == 0) {
+            return null;
+        }
         return sample.subtract(base).divide(base, 2, RoundingMode.HALF_UP).abs().multiply(new BigDecimal(100));
     }
 
@@ -105,18 +108,23 @@ public class MeasureUtil {
         switch (compareWay) {
             case PlanConstant.CompareWay.ABSOLUTE_VALUE:
                 BigDecimal actualValue = volatility(sample, base);
-                batchResultRuleDTO.setWaveRate(actualValue.toString() + BaseConstants.Symbol.PERCENTAGE);
-                for (PlanWarningLevel planWarningLevel : warningLevelList) {
-                    if (planWarningLevel.getStartValue().compareTo(actualValue) <= 0
-                            && planWarningLevel.getEndValue().compareTo(actualValue) >= 0) {
-                        batchResultRuleDTO.setWarningLevel(planWarningLevel.getWarningLevel());
-                        batchResultRuleDTO.setExceptionInfo("波动率超过阈值范围");
+                if (actualValue != null) {
+
+                    batchResultRuleDTO.setWaveRate(actualValue.toString() + BaseConstants.Symbol.PERCENTAGE);
+                    for (PlanWarningLevel planWarningLevel : warningLevelList) {
+                        if (planWarningLevel.getStartValue().compareTo(actualValue) <= 0
+                                && planWarningLevel.getEndValue().compareTo(actualValue) >= 0) {
+                            batchResultRuleDTO.setWarningLevel(planWarningLevel.getWarningLevel());
+                            batchResultRuleDTO.setExceptionInfo("波动率超过阈值范围");
+                        }
                     }
+                } else {
+                    batchResultRuleDTO.setWaveRate("0%");
                 }
                 break;
             case PlanConstant.CompareWay.RISE_RATE:
-                if (sample.compareTo(base) > 0) {
-                    BigDecimal actualValue1 = volatility(sample, base);
+                BigDecimal actualValue1 = volatility(sample, base);
+                if (sample.compareTo(base) > 0 && actualValue1 != null) {
                     batchResultRuleDTO.setWaveRate(actualValue1.toString() + BaseConstants.Symbol.PERCENTAGE);
                     for (PlanWarningLevel planWarningLevel : warningLevelList) {
                         if (planWarningLevel.getStartValue().compareTo(actualValue1) <= 0
@@ -130,12 +138,12 @@ public class MeasureUtil {
                 }
                 break;
             case PlanConstant.CompareWay.DOWN_RATE:
-                if (sample.compareTo(base) < 0) {
-                    BigDecimal actualValue1 = volatility(sample, base);
-                    batchResultRuleDTO.setWaveRate(actualValue1.toString() + BaseConstants.Symbol.PERCENTAGE);
+                BigDecimal actualValue2 = volatility(sample, base);
+                if (sample.compareTo(base) < 0 && actualValue2 != null) {
+                    batchResultRuleDTO.setWaveRate(actualValue2.toString() + BaseConstants.Symbol.PERCENTAGE);
                     for (PlanWarningLevel planWarningLevel : warningLevelList) {
-                        if (planWarningLevel.getStartValue().compareTo(actualValue1) <= 0
-                                && planWarningLevel.getEndValue().compareTo(actualValue1) >= 0) {
+                        if (planWarningLevel.getStartValue().compareTo(actualValue2) <= 0
+                                && planWarningLevel.getEndValue().compareTo(actualValue2) >= 0) {
                             batchResultRuleDTO.setWarningLevel(planWarningLevel.getWarningLevel());
                             batchResultRuleDTO.setExceptionInfo("波动率超过阈值范围");
                         }

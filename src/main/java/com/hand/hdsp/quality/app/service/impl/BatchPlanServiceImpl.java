@@ -336,6 +336,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 batchResultRuleDTO.setRuleName(batchPlanField.getRuleName());
                 batchResultRuleDTO.setFieldName(batchPlanField.getFieldName());
                 batchResultRuleDTO.setCheckItem(batchPlanFieldLine.getCheckItem());
+                if (PlanConstant.CheckWay.REGULAR.equals(batchPlanFieldLine.getCheckWay())) {
+                    batchResultRuleDTO.setCheckItem(PlanConstant.CheckWay.REGULAR);
+                }
                 batchResultRuleDTO.setCompareWay(batchPlanFieldLine.getCompareWay());
                 batchResultRuleDTO.setTenantId(tenantId);
                 batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);

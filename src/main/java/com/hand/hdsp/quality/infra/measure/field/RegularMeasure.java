@@ -11,7 +11,6 @@ import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
-import com.hand.hdsp.quality.infra.measure.MeasureUtil;
 import org.hzero.core.util.ResponseUtils;
 
 import java.util.List;
@@ -25,6 +24,7 @@ import java.util.List;
 public class RegularMeasure implements Measure {
 
     private static final String SQL = "SELECT COUNT(*) actualValue FROM %s WHERE %s REGEXP '%s'";
+    private static final String SQL_ALL = "SELECT COUNT(*) actualValue FROM %s";
     private final DatasourceFeign datasourceFeign;
 
     public RegularMeasure(DatasourceFeign datasourceFeign) {
@@ -40,14 +40,22 @@ public class RegularMeasure implements Measure {
         List<PlanWarningLevel> warningLevelList = param.getWarningLevelList();
 
         datasourceDTO.setSql(String.format(SQL, datasourceDTO.getTableName(), batchPlanField.getFieldName(), batchPlanFieldLineDTO.getRegularExpression()));
-        List<BatchResultRuleDTO> batchResultRuleDTOList = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<BatchResultRuleDTO>>() {
+        List<BatchResultRuleDTO> regResultList = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<BatchResultRuleDTO>>() {
         });
-        BatchResultRuleDTO batchResultRuleDTO = batchResultRuleDTOList.get(0);
-        batchResultRuleDTO.setExpectedValue(batchPlanFieldLineDTO.getExpectedValue());
 
-        double actualValue = Double.parseDouble(batchResultRuleDTO.getActualValue());
-        double expectedValue = Double.parseDouble(batchPlanFieldLineDTO.getExpectedValue());
-        MeasureUtil.fixedCompare(batchPlanFieldLineDTO.getCompareWay(), actualValue, expectedValue, warningLevelList, batchResultRuleDTO);
+        datasourceDTO.setSql(String.format(SQL_ALL, datasourceDTO.getTableName()));
+        List<BatchResultRuleDTO> allList = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<BatchResultRuleDTO>>() {
+        });
+
+        BatchResultRuleDTO batchResultRuleDTO = new BatchResultRuleDTO();
+
+        double actualValue = Double.parseDouble(regResultList.get(0).getActualValue());
+        double expectedValue = Double.parseDouble(allList.get(0).getActualValue());
+
+        if (actualValue != expectedValue) {
+            batchResultRuleDTO.setWarningLevel(warningLevelList.get(0).getWarningLevel());
+            batchResultRuleDTO.setExceptionInfo("不满足正则表达式");
+        }
 
         return batchResultRuleDTO;
     }
