@@ -154,7 +154,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 JobDTO.builder()
                         .themeId(PlanConstant.DEFAULT_THEME_ID)
                         .layerId(PlanConstant.DEFAULT_LAYER_ID)
-                        .jobName("quality_" + batchPlanDTO.getPlanCode())
+                        .jobName("QUA_" + tenantId + "_" + batchPlanDTO.getPlanCode())
                         .jobDescription(batchPlanDTO.getPlanName())
                         .jobClass(PlanConstant.JOB_TYPE)
                         .jobType(PlanConstant.JOB_TYPE)
