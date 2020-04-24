@@ -36,6 +36,7 @@ import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -52,7 +53,7 @@ import java.util.stream.Collectors;
 public class BatchPlanServiceImpl implements BatchPlanService {
 
     private static final String JOB_COMMAND = "curl -X GET --header 'Accept: */*' 'http://%s:%s/v2/%d/batch-plans/exec/%d'";
-    private static final String TABLE_SQL = "SELECT table_rows,data_length FROM information_schema.TABLES WHERE table_schema='%s' AND table_name='%s'";
+    private static final String TABLE_SIZE_SQL = "SELECT COUNT(*) table_rows FROM %s";
     @Value("${server.port}")
     private String port;
 
@@ -173,15 +174,13 @@ public class BatchPlanServiceImpl implements BatchPlanService {
      * @param batchResultBase batchResultBase
      */
     private void setTableInfo(DatasourceDTO datasourceDTO, BatchResultBase batchResultBase) {
-        datasourceDTO.setSql(String.format(TABLE_SQL, datasourceDTO.getSchema(), datasourceDTO.getTableName()));
+        datasourceDTO.setSql(String.format(TABLE_SIZE_SQL, datasourceDTO.getTableName()));
         List<Map<String, Long>> result = ResponseUtils.getResponse(datasourceFeign.execSql(datasourceDTO.getTenantId(), datasourceDTO), new TypeReference<List<Map<String, Long>>>() {
         });
-        if (!result.isEmpty()) {
-            batchResultBase.setDataCount(result.get(0).get("table_rows"));
-            batchResultBase.setTableSize(result.get(0).get("data_length"));
-        } else {
-            throw new CommonException("查询表行数和大小失败，请联系系统管理员！");
-        }
+        Assert.notEmpty(result, "查询表行数失败，请联系系统管理员！");
+        Long tableRows = result.get(0).get("table_rows");
+        Assert.notNull(tableRows, "查询表行数失败，请联系系统管理员！");
+        batchResultBase.setDataCount(tableRows);
     }
 
     /**

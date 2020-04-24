@@ -81,6 +81,7 @@
             </if>
             and enabled_flag = 1
         </where>
+        order by rule_name
     </select>
     <select id="list2" resultType="com.hand.hdsp.quality.api.dto.RuleDTO">
         select
