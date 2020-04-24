@@ -32,14 +32,15 @@ public class BatchResultRuleRepositoryImpl extends BaseRepositoryImpl<BatchResul
 
     @Override
     public List<BatchResultRuleDTO> listRuleError(BatchResultRuleDTO batchResultRuleDTO) {
-        List<BatchResultRuleDTO> batchResultRuleDTOS = this.selectDTOByCondition(
+        return this.selectDTOByCondition(
                 Condition.builder(BatchResultRule.class)
                         .where(Sqls.custom()
                                 .andEqualTo(BatchResultRule.FIELD_RESULT_BASE_ID, batchResultRuleDTO.getResultBaseId(), true)
-                                .andEqualTo(BatchResultRule.FIELD_TENANT_ID, batchResultRuleDTO.getTenantId(), true))
+                                .andEqualTo(BatchResultRule.FIELD_TENANT_ID, batchResultRuleDTO.getTenantId(), true)
+                                .andLike(BatchResultRule.FIELD_RULE_NAME, batchResultRuleDTO.getRuleName(), true)
+                                .andEqualTo(BatchResultRule.FIELD_RULE_TYPE, batchResultRuleDTO.getRuleType(), true))
                         .build()
         );
-        return batchResultRuleDTOS;
     }
 
     @Override
