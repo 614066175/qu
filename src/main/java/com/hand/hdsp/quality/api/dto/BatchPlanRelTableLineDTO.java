@@ -38,7 +38,6 @@ public class BatchPlanRelTableLineDTO extends AuditDomain {
 
     @ApiModelProperty(value = "关联关系 HDSP.XQUA.REL_CODE")
     @NotBlank
-    @Size(max = 50)
     private String relCode;
 
     @ApiModelProperty(value = "关联表字段名")

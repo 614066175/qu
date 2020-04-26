@@ -8,7 +8,6 @@ import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.util.Date;
 
 /**
@@ -34,7 +33,6 @@ public class DqRuleLineDTO extends AuditDomain {
 
     @ApiModelProperty(value = "告警等级")
     @NotBlank
-    @Size(max = 30)
     private String alertLevel;
 
     @ApiModelProperty(value = "告警规则说明")

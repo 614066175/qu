@@ -9,7 +9,6 @@ import org.hzero.boot.platform.lov.annotation.LovValue;
 
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.util.List;
 
 /**
@@ -38,17 +37,14 @@ public class RuleLineDTO extends AuditDomain {
 
     @ApiModelProperty("校验方式")
     @LovValue(lovCode = "HDSP.XQUA.CHECK_WAY", meaningField = "checkWayMeaning")
-    @Size(max = 30)
     private String checkWay;
 
     @ApiModelProperty("校验项")
     @LovValue(lovCode = "HDSP.XQUA.CHECK_ITEM", meaningField = "checkItemMeaning")
-    @Size(max = 30)
     private String checkItem;
 
     @ApiModelProperty("比较方式")
     @LovValue(lovCode = "HDSP.XQUA.COMPARE_WAY", meaningField = "compareWayMeaning")
-    @Size(max = 30)
     private String compareWay;
 
     @ApiModelProperty("阈值")

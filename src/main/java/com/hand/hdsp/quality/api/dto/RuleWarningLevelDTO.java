@@ -34,7 +34,6 @@ public class RuleWarningLevelDTO extends AuditDomain {
 
     @ApiModelProperty(value = "告警等级 HDSP.XQUA.WARNING_LEVEL")
     @NotBlank
-    @Size(max = 30)
     private String warningLevel;
 
     @ApiModelProperty(value = "阈值范围开始")

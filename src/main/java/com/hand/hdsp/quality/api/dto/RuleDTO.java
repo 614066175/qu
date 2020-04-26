@@ -55,12 +55,10 @@ public class RuleDTO extends AuditDomain {
 
     @ApiModelProperty("校验类别")
     @LovValue(lovCode = "HDSP.XQUA.CHECK_TYPE", meaningField = "checkTypeMeaning")
-    @Size(max = 30)
     private String checkType;
 
     @ApiModelProperty("规则类型")
     @LovValue(lovCode = "HDSP.XQUA.RULE_TYPE", meaningField = "ruleTypeMeaning")
-    @Size(max = 30)
     private String ruleType;
 
     @ApiModelProperty("是否异常阻断")
