@@ -33,82 +33,25 @@
     </sql>
 
     <select id="listByGroup" resultType="com.hand.hdsp.quality.api.dto.BatchResultDTO">
-        select * from
-        (
-        select
-        xbp.plan_id,
-        xbp.plan_name,
-        xbr.result_id,
-        xbr.plan_status,
-        xbr.mark,
-        xbr.start_date,
-        xbr.end_date,
-        xbr.next_count_date,
-        xbr.exception_info
-        from xqua_batch_result xbr
-        LEFT JOIN xqua_batch_plan xbp
-        on xbr.plan_id=xbp.plan_id
-        LEFT JOIN xqua_plan_group xpg
-        on xbp.group_id=xpg.group_id
-        <where>
-            <if test="groupId != null and groupId != 0">
-                and xpg.group_id = #{groupId}
-            </if>
-            <if test="tenantId != null">
-                and xbr.tenant_id = #{tenantId}
-                and xbp.tenant_id = #{tenantId}
-            </if>
-            <if test="planName != null">
-                <bind name="planName" value="'%' + planName + '%'"/>
-                and xbp.plan_name like #{planName}
-            </if>
-            <if test="planStatus != null">
-                and xbr.plan_status = #{planStatus}
-            </if>
-        </where>
-        union
-        select
-        xbp.plan_id,
-        xbp.plan_name,
-        null result_id,
-        '${@com.hand.hdsp.quality.infra.constant.PlanStatus@NOTACCESS}' plan_status,
-        null mark,
-        null start_date,
-        null end_date,
-        null next_count_date,
-        null exception_info
-        from xqua_batch_plan xbp
-        LEFT JOIN xqua_plan_group xpg
-        on xpg.group_id=xbp.group_id
-        <where>
-            <if test="groupId != null and groupId != 0">
-                xpg.group_id = #{groupId}
-            </if>
-            <if test="tenantId != null">
-                and xbp.tenant_id = #{tenantId}
-            </if>
-            <if test="planName != null">
-                <bind name="planName" value="'%' + planName + '%'"/>
-                and xbp.plan_name like #{planName}
-            </if>
-        </where>
-        ) a
-        where not exists (select 1 from (
-        select
-        xbp.plan_id,
-        xbp.plan_name,
-        xbr.result_id,
-        xbr.plan_status,
-        xbr.mark,
-        xbr.start_date,
-        xbr.end_date,
-        xbr.next_count_date,
-        xbr.exception_info
-        from xqua_batch_result xbr
-        LEFT JOIN xqua_batch_plan xbp
-        on xbr.plan_id=xbp.plan_id
-        LEFT JOIN xqua_plan_group xpg
-        on xbp.group_id=xpg.group_id
+        SELECT xbp.plan_id,
+               xbp.plan_name,
+               xbr.result_id,
+               CASE
+                   WHEN xbr.plan_status IS NULL THEN
+                       '${@com.hand.hdsp.quality.infra.constant.PlanStatus@NOTACCESS}'
+                   ELSE xbr.plan_status
+                   END plan_status,
+               xbr.mark,
+               xbr.start_date,
+               xbr.end_date,
+               xbr.exception_info
+        FROM xqua_batch_plan xbp
+                 LEFT JOIN (
+                    SELECT *
+                    FROM xqua_batch_result
+                    WHERE result_id IN (SELECT MAX(result_id) FROM xqua_batch_result GROUP BY plan_id)) xbr
+                           ON xbr.plan_id = xbp.plan_id
+                 LEFT JOIN xqua_plan_group xpg ON xbp.group_id = xpg.group_id
         <where>
             <if test="groupId != null and groupId != 0">
                 xpg.group_id = #{groupId}
@@ -121,37 +64,7 @@
                 <bind name="planName" value="'%' + planName + '%'"/>
                 and xbp.plan_name like #{planName}
             </if>
-            <if test="planStatus != null">
-                and xbr.plan_status = #{planStatus}
-            </if>
         </where>
-        union
-        select
-        xbp.plan_id,
-        xbp.plan_name,
-        null result_id,
-        '${@com.hand.hdsp.quality.infra.constant.PlanStatus@NOTACCESS}' plan_status,
-        null mark,
-        null start_date,
-        null end_date,
-        null next_count_date,
-        null exception_info
-        from xqua_batch_plan xbp
-        LEFT JOIN xqua_plan_group xpg
-        on xpg.group_id=xbp.group_id
-        <where>
-            <if test="groupId != null and groupId != 0">
-                xpg.group_id = #{groupId}
-            </if>
-            <if test="tenantId != null">
-                and xbp.tenant_id = #{tenantId}
-            </if>
-            <if test="planName != null">
-                <bind name="planName" value="'%' + planName + '%'"/>
-                and xbp.plan_name like #{planName}
-            </if>
-        </where>
-        ) b where a.start_date &lt; b.start_date and a.plan_id=b.plan_id)
     </select>
 
     <select id="listResultHead" resultType="com.hand.hdsp.quality.api.dto.BatchResultDTO">
