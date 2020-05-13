@@ -10,6 +10,7 @@ import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.constant.TableNameConstant;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import io.choerodon.core.exception.CommonException;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.core.util.ResponseUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -63,10 +64,9 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
     public int delete(BatchPlanBaseDTO batchPlanBaseDTO) {
         List<BatchResultDTO> batchResultDTOList = batchResultRepository.selectDTO(
                 BatchResult.FIELD_PLAN_ID, batchPlanBaseDTO.getPlanId());
-        if (batchResultDTOList != null) {
-            if (batchResultDTOList.get(0).getPlanStatus().equals(PlanConstant.PlanStatus.RUNNING)) {
-                throw new CommonException(ErrorCode.CAN_NOT_DELETE);
-            }
+        if (CollectionUtils.isNotEmpty(batchResultDTOList)
+                && PlanConstant.PlanStatus.RUNNING.equals(batchResultDTOList.get(0).getPlanStatus())) {
+            throw new CommonException(ErrorCode.CAN_NOT_DELETE);
         }
         List<BatchPlanTableDTO> batchPlanTableDTOList =
                 batchPlanTableRepository.selectDTO(
