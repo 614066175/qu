@@ -5,6 +5,7 @@ import com.hand.hdsp.quality.api.dto.BatchPlanTableLineDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.api.dto.DatasourceDTO;
 import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.BatchResultRuleDO;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
@@ -14,11 +15,14 @@ import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hzero.core.exception.MessageException;
+import org.hzero.core.message.MessageAccessor;
 import org.hzero.core.util.ResponseUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -45,9 +49,13 @@ public class CustomSevenVolatilityMeasure implements Measure {
         List<PlanWarningLevel> warningLevelList = param.getWarningLevelList();
 
         datasourceDTO.setSql(batchPlanTableLineDTO.getCustomSql());
-        List<BatchResultRuleDTO> batchResultRuleDTOList = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<BatchResultRuleDTO>>() {
+        List<HashMap<String, String>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, String>>>() {
         });
-        String currentValue = batchResultRuleDTOList.get(0).getCurrentValue();
+        if (response.size() != 1 || response.get(0).size() != 1) {
+            throw new MessageException(MessageAccessor.getMessage(ErrorCode.CUSTOM_SQL_ONE_VALUE).getDesc());
+        }
+
+        String currentValue = (String) response.get(0).values().toArray()[0];
 
         BatchResultRuleDTO batchResultRuleDTO = new BatchResultRuleDTO();
         batchResultRuleDTO.setCurrentValue(currentValue);

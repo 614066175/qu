@@ -28,4 +28,9 @@ public interface ErrorCode {
      * 告警等级阈值范围重叠
      */
     String WARNING_LEVEL_OVERLAP = "error.warning_level_overlap";
+
+    /**
+     * 自定义SQL仅支持返回一个值
+     */
+    String CUSTOM_SQL_ONE_VALUE = "error.custom_sql_one_value";
 }

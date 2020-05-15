@@ -42,4 +42,13 @@ public interface RuleRepository extends BaseRepository<Rule, RuleDTO>, ProxySelf
      * @return
      */
     Page<RuleDTO> list2(PageRequest pageRequest, RuleDTO ruleDTO);
+
+    /**
+     * 查询表级规则、自定义SQL规则列表
+     *
+     * @param ruleDTO
+     * @param pageRequest
+     * @return
+     */
+    Page<Rule> listTableRule(RuleDTO ruleDTO, PageRequest pageRequest);
 }

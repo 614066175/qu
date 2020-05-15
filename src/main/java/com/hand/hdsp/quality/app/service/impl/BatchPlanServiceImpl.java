@@ -137,6 +137,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             batchResult.setPlanStatus(PlanConstant.PlanStatus.FAILED);
             batchResult.setExceptionInfo(e.getMessage());
             batchResultRepository.updateByPrimaryKeySelective(batchResult);
+            throw e;
         } catch (Exception e) {
             batchResult.setPlanStatus(PlanConstant.PlanStatus.FAILED);
             batchResult.setExceptionInfo(ExceptionUtils.getMessage(e));

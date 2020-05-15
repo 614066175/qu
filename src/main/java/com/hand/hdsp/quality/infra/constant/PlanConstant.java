@@ -121,6 +121,16 @@ public interface PlanConstant {
          */
         String TABLE_RELATION = "TABLE_RELATION";
 
+        /**
+         * 表级
+         */
+        String TABLE_TYPE = "TABLE_TYPE";
+
+        /**
+         * 自定义SQL
+         */
+        String SQL_CUSTOM = "SQL_CUSTOM";
+
     }
 
 
