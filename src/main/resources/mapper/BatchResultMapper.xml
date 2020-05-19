@@ -57,7 +57,6 @@
                 xpg.group_id = #{groupId}
             </if>
             <if test="tenantId != null">
-                and xbr.tenant_id = #{tenantId}
                 and xbp.tenant_id = #{tenantId}
             </if>
             <if test="planName != null">
