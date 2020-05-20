@@ -48,9 +48,14 @@ public class RelTableMeasure implements Measure {
                 .append(batchResultBase.getTableName())
                 .append(" source, ");
         if (StringUtils.isBlank(batchPlanRelTable.getWhereCondition())) {
-            sql.append(batchPlanRelTable.getRelTableName()).append(" rel ");
+            sql.append(batchPlanRelTable.getRelSchema())
+                    .append(".")
+                    .append(batchPlanRelTable.getRelTableName())
+                    .append(" rel ");
         } else {
             sql.append("( select * from ")
+                    .append(batchPlanRelTable.getRelSchema())
+                    .append(".")
                     .append(batchPlanRelTable.getRelTableName())
                     .append(" where ")
                     .append(batchPlanRelTable.getWhereCondition())
