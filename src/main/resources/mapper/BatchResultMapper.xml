@@ -166,7 +166,7 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
-        UNION
+        UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@COMPLETENESS}' checkType,
         count(1) countSum
         from xqua_batch_plan_field xbpf
@@ -188,7 +188,7 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
-        UNION
+        UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@COMPLETENESS}' checkType,
         count(1) countSum
         from xqua_batch_plan_rel_table xbprt
@@ -211,7 +211,7 @@
             and xbr.end_date &lt;=  #{endDate}
         </if>
         ) a GROUP BY a.checkType
-        union
+        union all
         select b.checkType,IFNULL(SUM(b.countSum),0) countSum
         FROM
         (
@@ -236,7 +236,7 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
-        UNION
+        UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@UNIFORMITY}' checkType,
         count(1) countSum
         from xqua_batch_plan_field xbpf
@@ -258,7 +258,7 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
-        UNION
+        UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@UNIFORMITY}' checkType,
         count(1) countSum
         from xqua_batch_plan_rel_table xbprt
@@ -281,7 +281,7 @@
             and xbr.end_date &lt;=  #{endDate}
         </if>
         ) b GROUP BY b.checkType
-        union
+        union all
         select c.checkType,IFNULL(SUM(c.countSum),0) countSum
         FROM
         (
@@ -306,7 +306,7 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
-        UNION
+        UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@ACCURACY}' checkType,
         count(1) countSum
         from xqua_batch_plan_field xbpf
@@ -328,7 +328,7 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
-        UNION
+        UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@ACCURACY}' checkType,
         count(1) countSum
         from xqua_batch_plan_rel_table xbprt
@@ -351,7 +351,7 @@
             and xbr.end_date &lt;=  #{endDate}
         </if>
         ) c GROUP BY c.checkType
-        union
+        union all
         select d.checkType,IFNULL(SUM(d.countSum),0) countSum
         FROM
         (
@@ -376,7 +376,7 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
-        UNION
+        UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@STANDARD}' checkType,
         count(1) countSum
         from xqua_batch_plan_field xbpf
@@ -398,7 +398,7 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
-        UNION
+        UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@STANDARD}' checkType,
         count(1) countSum
         from xqua_batch_plan_rel_table xbprt
@@ -447,7 +447,7 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
-        UNION
+        UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@COMPLETENESS}' checkType,
         count(1) countSum
         from xqua_batch_plan_field xbpf
@@ -468,7 +468,7 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
-        UNION
+        UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@COMPLETENESS}' checkType,
         count(1) countSum
         from xqua_batch_plan_rel_table xbprt
@@ -490,7 +490,7 @@
             and xbr.end_date &lt;=  #{endDate}
         </if>
         ) a GROUP BY a.checkType
-        union
+        union all
         select b.checkType,IFNULL(SUM(b.countSum),0) countSum
         FROM
         (
@@ -514,7 +514,7 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
-        UNION
+        UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@UNIFORMITY}' checkType,
         count(1) countSum
         from xqua_batch_plan_field xbpf
@@ -535,7 +535,7 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
-        UNION
+        UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@UNIFORMITY}' checkType,
         count(1) countSum
         from xqua_batch_plan_rel_table xbprt
@@ -557,7 +557,7 @@
             and xbr.end_date &lt;=  #{endDate}
         </if>
         ) b GROUP BY b.checkType
-        union
+        union all
         select c.checkType,IFNULL(SUM(c.countSum),0) countSum
         FROM
         (
@@ -581,7 +581,7 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
-        UNION
+        UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@ACCURACY}' checkType,
         count(1) countSum
         from xqua_batch_plan_field xbpf
@@ -602,7 +602,7 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
-        UNION
+        UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@ACCURACY}' checkType,
         count(1) countSum
         from xqua_batch_plan_rel_table xbprt
@@ -624,7 +624,7 @@
             and xbr.end_date &lt;=  #{endDate}
         </if>
         ) c GROUP BY c.checkType
-        union
+        union all
         select d.checkType,IFNULL(SUM(d.countSum),0) countSum
         FROM
         (
@@ -648,7 +648,7 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
-        UNION
+        UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@STANDARD}' checkType,
         count(1) countSum
         from xqua_batch_plan_field xbpf
@@ -669,7 +669,7 @@
         <if test="endDate != null and endDate != ''">
             and xbr.end_date &lt;=  #{endDate}
         </if>
-        UNION
+        UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@STANDARD}' checkType,
         count(1) countSum
         from xqua_batch_plan_rel_table xbprt
