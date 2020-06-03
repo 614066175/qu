@@ -34,8 +34,6 @@ public class Rule extends AuditDomain {
     @GeneratedValue
     private Long ruleId;
 
-    private String ruleModel;
-
     private Long groupId;
 
     @Unique

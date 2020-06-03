@@ -42,8 +42,11 @@ public class RuleWarningLevelDTO extends AuditDomain {
     @ApiModelProperty(value = "阈值范围结束")
     private BigDecimal endValue;
 
-    @ApiModelProperty(value = "单位")
-    private String unit;
+    @ApiModelProperty(value = "比较符号 HDSP.XQUA.COMPARE_SYMBOL")
+    private String compareSymbol;
+
+    @ApiModelProperty(value = "阈值")
+    private String expectedValue;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull

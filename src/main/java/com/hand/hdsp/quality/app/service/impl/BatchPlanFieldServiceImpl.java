@@ -180,7 +180,6 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
         List<String> ruleCodeList = new ArrayList<>();
         RuleDTO ruleDTO2 = new RuleDTO();
         ruleDTO2.setRuleName(batchPlanFieldDTO.getRuleName());
-        ruleDTO2.setRuleModel(ruleModel);
         ruleDTO2.setTenantId(tenantId);
         Page<RuleDTO> ruleDTOListAll = PageHelper.doPage(pageRequest, () -> ruleRepository.listAll(ruleDTO2));
         if (!batchPlanFieldList.isEmpty()) {

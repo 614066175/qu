@@ -31,7 +31,9 @@ public class RuleWarningLevelDO extends AuditDomain {
 
     private BigDecimal endValue;
 
-    private String unit;
+    private String compareSymbol;
+
+    private String expectedValue;
 
     private Long tenantId;
 

@@ -8,7 +8,8 @@
         <result column="warning_level" property="warningLevel" jdbcType="VARCHAR"/>
         <result column="start_value" property="startValue" jdbcType="DECIMAL"/>
         <result column="end_value" property="endValue" jdbcType="DECIMAL"/>
-        <result column="unit" property="unit" jdbcType="VARCHAR"/>
+        <result column="compare_symbol" property="compareSymbol" jdbcType="VARCHAR"/>
+        <result column="expected_value" property="expectedValue" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
         <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
@@ -23,7 +24,8 @@
         ${std}.warning_level,
         ${std}.start_value,
         ${std}.end_value,
-        ${std}.unit
+        ${std}.compare_symbol,
+        ${std}.expected_value
     </sql>
 
     <select id="judgeOverlap" resultType="integer">

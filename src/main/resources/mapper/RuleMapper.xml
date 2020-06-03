@@ -4,7 +4,6 @@
     <!-- 可根据自己的需求，是否要使用 -->
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.Rule">
         <result column="rule_id" property="ruleId" jdbcType="DECIMAL"/>
-        <result column="rule_model" property="ruleModel" jdbcType="VARCHAR"/>
         <result column="group_id" property="groupId" jdbcType="DECIMAL"/>
         <result column="rule_code" property="ruleCode" jdbcType="VARCHAR"/>
         <result column="rule_name" property="ruleName" jdbcType="VARCHAR"/>
@@ -24,7 +23,6 @@
 
     <sql id="baseColumn">
         ${std}.rule_id,
-        ${std}.rule_model,
         ${std}.group_id,
         ${std}.rule_code,
         ${std}.rule_name,
@@ -44,7 +42,6 @@
             <foreach item="ruleCode" collection="ruleCode" separator="," open="(" close=")" index="">
                 #{ruleCode, jdbcType=VARCHAR}
             </foreach>
-            and rule_model = #{ruleModel}
             and rule_type in('FIELD_NUMERICAL','FIELD_CHAR','FIELD_DATE')
             and tenant_id in(0,#{tenantId})
             and enabled_flag = 1
@@ -53,7 +50,6 @@
     <select id="listAll" resultType="com.hand.hdsp.quality.api.dto.RuleDTO">
         select
         rule_id,
-        rule_model,
         group_id,
         rule_code,
         rule_name,
@@ -67,7 +63,6 @@
         object_version_number
         from xqua_rule
         <where>
-            rule_model = #{ruleModel}
             <if test="ruleName != null">
                 <bind name="ruleName" value="'%' + ruleName + '%'"/>
                 and rule_name like #{ruleName}
@@ -86,7 +81,6 @@
     <select id="list2" resultType="com.hand.hdsp.quality.api.dto.RuleDTO">
         select
         rule_id,
-        rule_model,
         group_id,
         rule_code,
         rule_name,
@@ -103,9 +97,7 @@
             <if test="ruleId != null">
                 and rule_id = #{ruleId}
             </if>
-            <if test="ruleModel != null">
-                and rule_model = #{ruleModel}
-            </if>
+
             <if test="groupId != null">
                 and group_id = #{groupId}
             </if>

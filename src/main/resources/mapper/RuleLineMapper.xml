@@ -7,8 +7,8 @@
         <result column="rule_id" property="ruleId" jdbcType="DECIMAL"/>
         <result column="check_way" property="checkWay" jdbcType="VARCHAR"/>
         <result column="check_item" property="checkItem" jdbcType="VARCHAR"/>
+        <result column="count_type" property="countType" jdbcType="VARCHAR"/>
         <result column="compare_way" property="compareWay" jdbcType="VARCHAR"/>
-        <result column="expected_value" property="expectedValue" jdbcType="VARCHAR"/>
         <result column="regular_expression" property="regularExpression" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
@@ -22,9 +22,9 @@
         ${std}.rule_line_id,
         ${std}.rule_id,
         ${std}.check_way,
+        ${std}.count_type,
         ${std}.check_item,
         ${std}.compare_way,
-        ${std}.expected_value,
         ${std}.regular_expression
     </sql>
 

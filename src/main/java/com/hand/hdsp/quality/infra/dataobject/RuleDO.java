@@ -22,8 +22,6 @@ public class RuleDO extends AuditDomain {
 
     private Long ruleId;
 
-    private String ruleModel;
-
     private Long groupId;
 
     private String ruleCode;

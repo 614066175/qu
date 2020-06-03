@@ -43,12 +43,13 @@ public class RuleLineDTO extends AuditDomain {
     @LovValue(lovCode = "HDSP.XQUA.CHECK_ITEM", meaningField = "checkItemMeaning")
     private String checkItem;
 
+    @ApiModelProperty("校验类型 HDSP.XQUA.COUNT_TYPE")
+    @LovValue(lovCode = "HDSP.XQUA.COUNT_TYPE", meaningField = "countTypeMeaning")
+    private String countType;
+
     @ApiModelProperty("比较方式")
     @LovValue(lovCode = "HDSP.XQUA.COMPARE_WAY", meaningField = "compareWayMeaning")
     private String compareWay;
-
-    @ApiModelProperty("阈值")
-    private String expectedValue;
 
     @ApiModelProperty("正则表达式")
     private String regularExpression;

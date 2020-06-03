@@ -49,7 +49,8 @@ public class PlanWarningLevel extends AuditDomain {
 
     private BigDecimal endValue;
 
-    private String unit;
+    private String COMPARE_SYMBOL;
+    private String EXPECTED_VALUE;
 
     private Long tenantId;
 

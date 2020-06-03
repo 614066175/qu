@@ -41,10 +41,11 @@ public class RuleLine extends AuditDomain {
     @LovValue(lovCode = "HDSP.XQUA.CHECK_ITEM", meaningField = "checkItemMeaning")
     private String checkItem;
 
+    @LovValue(lovCode = "HDSP.XQUA.COUNT_TYPE", meaningField = "countTypeMeaning")
+    private String countType;
+
     @LovValue(lovCode = "HDSP.XQUA.COMPARE_WAY", meaningField = "compareWayMeaning")
     private String compareWay;
-
-    private String expectedValue;
 
     private String regularExpression;
 

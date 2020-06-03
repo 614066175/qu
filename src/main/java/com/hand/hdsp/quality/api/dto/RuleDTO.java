@@ -33,11 +33,6 @@ public class RuleDTO extends AuditDomain {
     @Id
     private Long ruleId;
 
-    @ApiModelProperty("规则模型STANDARD(标准规则)/BATCH(批数据基础规则)/STREAMING(实时数据基础规则)")
-    @NotBlank
-    @Size(max = 50)
-    private String ruleModel;
-
     @ApiModelProperty("规则分组表XQUA_RULE_GROUP.GROUP_ID")
     private Long groupId;
 

@@ -19,8 +19,8 @@ public class SwaggerTags {
     public static final String RULE_SITE = "RULE SITE CONTROLLER";
     public static final String RULE_LINE = "RULE LINE CONTROLLER";
     public static final String RULE_LINE_SITE = "RULE LINE SITE CONTROLLER";
-    public static final String RULE_WARNING_LEVEL = "RULE WARNING LEVEL SITE CONTROLLER";
-    public static final String RULE_WARNING_LEVEL_SITE = "RULE WARNING LEVEL CONTROLLER";
+    public static final String RULE_WARNING_LEVEL = "RULE WARNING LEVEL CONTROLLER";
+    public static final String RULE_WARNING_LEVEL_SITE = "RULE WARNING LEVEL SITE CONTROLLER";
     public static final String BATCH_PLAN = "BATCH PLAN CONTROLLER";
     public static final String BATCH_PLAN_BASE = "BATCH PLAN BASE CONTROLLER";
     public static final String BATCH_PLAN_TABLE = "BATCH PLAN TABLE CONTROLLER";

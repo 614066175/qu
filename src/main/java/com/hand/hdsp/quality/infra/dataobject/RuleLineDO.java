@@ -1,11 +1,6 @@
 package com.hand.hdsp.quality.infra.dataobject;
 
 import io.choerodon.mybatis.domain.AuditDomain;
-import java.util.Date;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import lombok.*;
 
 /**
@@ -28,9 +23,9 @@ public class RuleLineDO extends AuditDomain {
 
     private String checkItem;
 
-    private String compareWay;
+    private String countType;
 
-    private String expectedValue;
+    private String compareWay;
 
     private String regularExpression;
 
