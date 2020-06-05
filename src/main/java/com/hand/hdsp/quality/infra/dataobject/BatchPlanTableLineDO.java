@@ -15,15 +15,13 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = false)
 public class BatchPlanTableLineDO extends AuditDomain {
 
-    private Long planTableLineId;
+    private Long planLineId;
 
-    private Long planTableId;
+    private Long planRuleId;
 
     private String checkItem;
 
-    private String compareWay;
-
-    private String expectedValue;
+    private String countType;
 
     private String customSql;
 

@@ -26,19 +26,11 @@ import java.util.List;
 public class BatchPlanFieldDTO extends AuditDomain {
 
     @ApiModelProperty("表ID，主键，供其他表做外键")
-    private Long planFieldId;
+    private Long planRuleId;
 
     @ApiModelProperty(value = "方案-基础配置表XQUA_BATCH_PLAN_BASE.PLAN_BASE_ID")
     @NotNull
     private Long planBaseId;
-
-    @ApiModelProperty(value = "列名")
-    @NotBlank
-    @Size(max = 50)
-    private String fieldName;
-
-    @ApiModelProperty(value = "列描述")
-    private String fieldDesc;
 
     @ApiModelProperty(value = "规则编码")
     @NotBlank
@@ -56,9 +48,6 @@ public class BatchPlanFieldDTO extends AuditDomain {
     @ApiModelProperty(value = "校验类别 HDSP.XQUA.CHECK_TYPE")
     private String checkType;
 
-    @ApiModelProperty(value = "规则类型 HDSP.XQUA.RULE_TYPE")
-    private String ruleType;
-
     @ApiModelProperty(value = "是否异常阻断")
     @NotNull
     private Integer exceptionBlock;
@@ -73,6 +62,6 @@ public class BatchPlanFieldDTO extends AuditDomain {
     @ApiModelProperty(value = "字段规则校验项List")
     private List<BatchPlanFieldLineDTO> batchPlanFieldLineDTOList;
 
-    @ApiModelProperty(value = "已选规则List")
-    private List<BatchPlanFieldDTO> batchPlanFieldDTOList;
+    @ApiModelProperty(value = "规则字段，多个列逗号拼接")
+    private String fieldName;
 }

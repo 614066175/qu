@@ -2,13 +2,11 @@ package com.hand.hdsp.quality.infra.measure.table;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanTableLineDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
-import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
 import com.hand.hdsp.quality.infra.dataobject.BatchResultBaseDO;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.mapper.BatchResultBaseMapper;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
-import com.hand.hdsp.quality.infra.measure.MeasureUtil;
 import org.apache.commons.lang3.time.DateUtils;
 
 import java.util.Date;
@@ -31,12 +29,12 @@ public class LineOneDiffValueMeasure implements Measure {
     @Override
     public BatchResultRuleDTO check(MeasureParamDO param) {
         BatchPlanTableLineDTO batchPlanTableLineDTO = param.getBatchPlanTableLineDTO();
-        List<PlanWarningLevel> warningLevelList = param.getWarningLevelList();
+
         Long dataCount = param.getBatchResultBase().getDataCount();
 
 
         BatchResultRuleDTO batchResultRuleDTO = new BatchResultRuleDTO();
-        batchResultRuleDTO.setExpectedValue(batchPlanTableLineDTO.getExpectedValue());
+//        batchResultRuleDTO.setExpectedValue(batchPlanTableLineDTO.getExpectedValue());
 
         //查询上一次执行的结果
         List<BatchResultBaseDO> resultList = batchResultBaseMapper.queryList(BatchResultBaseDO.builder()
@@ -48,8 +46,8 @@ public class LineOneDiffValueMeasure implements Measure {
         }
 
         double actualValue = dataCount - resultList.get(0).getDataCount();
-        double expectedValue = Double.parseDouble(batchPlanTableLineDTO.getExpectedValue());
-        MeasureUtil.fixedCompare(batchPlanTableLineDTO.getCompareWay(), actualValue, expectedValue, warningLevelList, batchResultRuleDTO);
+//        double expectedValue = Double.parseDouble(batchPlanTableLineDTO.getExpectedValue());
+//        MeasureUtil.fixedCompare(batchPlanTableLineDTO.getCompareWay(), actualValue, expectedValue, warningLevelList, batchResultRuleDTO);
 
         batchResultRuleDTO.setActualValue(actualValue + "");
         return batchResultRuleDTO;

@@ -1,7 +1,7 @@
 package com.hand.hdsp.quality.infra.measure;
 
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
-import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
+import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import org.hzero.core.base.BaseConstants;
 
@@ -31,7 +31,7 @@ public class MeasureUtil {
     public static void fixedCompare(String compareWay,
                                     double actualValue,
                                     double expectedValue,
-                                    List<PlanWarningLevel> warningLevelList,
+                                    List<WarningLevelDTO> warningLevelList,
                                     BatchResultRuleDTO batchResultRuleDTO) {
         boolean result = false;
         switch (compareWay) {
@@ -103,7 +103,7 @@ public class MeasureUtil {
     public static void volatilityCompare(String compareWay,
                                          BigDecimal sample,
                                          BigDecimal base,
-                                         List<PlanWarningLevel> warningLevelList,
+                                         List<WarningLevelDTO> warningLevelList,
                                          BatchResultRuleDTO batchResultRuleDTO) {
         switch (compareWay) {
             case PlanConstant.CompareWay.ABSOLUTE_VALUE:
@@ -111,7 +111,7 @@ public class MeasureUtil {
                 if (actualValue != null) {
 
                     batchResultRuleDTO.setWaveRate(actualValue.toString() + BaseConstants.Symbol.PERCENTAGE);
-                    for (PlanWarningLevel planWarningLevel : warningLevelList) {
+                    for (WarningLevelDTO planWarningLevel : warningLevelList) {
                         if (planWarningLevel.getStartValue().compareTo(actualValue) <= 0
                                 && planWarningLevel.getEndValue().compareTo(actualValue) >= 0) {
                             batchResultRuleDTO.setWarningLevel(planWarningLevel.getWarningLevel());
@@ -126,7 +126,7 @@ public class MeasureUtil {
                 BigDecimal actualValue1 = volatility(sample, base);
                 if (sample.compareTo(base) > 0 && actualValue1 != null) {
                     batchResultRuleDTO.setWaveRate(actualValue1.toString() + BaseConstants.Symbol.PERCENTAGE);
-                    for (PlanWarningLevel planWarningLevel : warningLevelList) {
+                    for (WarningLevelDTO planWarningLevel : warningLevelList) {
                         if (planWarningLevel.getStartValue().compareTo(actualValue1) <= 0
                                 && planWarningLevel.getEndValue().compareTo(actualValue1) >= 0) {
                             batchResultRuleDTO.setWarningLevel(planWarningLevel.getWarningLevel());
@@ -141,7 +141,7 @@ public class MeasureUtil {
                 BigDecimal actualValue2 = volatility(sample, base);
                 if (sample.compareTo(base) < 0 && actualValue2 != null) {
                     batchResultRuleDTO.setWaveRate(actualValue2.toString() + BaseConstants.Symbol.PERCENTAGE);
-                    for (PlanWarningLevel planWarningLevel : warningLevelList) {
+                    for (WarningLevelDTO planWarningLevel : warningLevelList) {
                         if (planWarningLevel.getStartValue().compareTo(actualValue2) <= 0
                                 && planWarningLevel.getEndValue().compareTo(actualValue2) >= 0) {
                             batchResultRuleDTO.setWarningLevel(planWarningLevel.getWarningLevel());

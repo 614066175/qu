@@ -9,7 +9,6 @@ import lombok.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.List;
 
 /**
  * <p>批数据方案-表间规则表 数据传输对象</p>
@@ -26,7 +25,7 @@ import java.util.List;
 public class BatchPlanRelTableDTO extends AuditDomain {
 
     @ApiModelProperty("表ID，主键，供其他表做外键")
-    private Long planRelTableId;
+    private Long planRuleId;
 
     @ApiModelProperty(value = "方案-基础配置表XQUA_BATCH_PLAN_BASE.PLAN_BASE_ID")
     @NotNull
@@ -70,15 +69,15 @@ public class BatchPlanRelTableDTO extends AuditDomain {
     @ApiModelProperty(value = "关联表条件where")
     private String whereCondition;
 
+    @ApiModelProperty(value = "关联关系json")
+    private String relationship;
+
+    @ApiModelProperty(value = "告警等级json")
+    private String warningLevel;
+
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;
-
-    @ApiModelProperty(value = "表间规则校验项List")
-    private List<BatchPlanRelTableLineDTO> batchPlanRelTableLineDTOList;
-
-    @ApiModelProperty(value = "方案告警等级List")
-    private List<PlanWarningLevelDTO> planWarningLevelDTOList;
 
     private String datasourceName;
 }

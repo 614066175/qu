@@ -52,6 +52,8 @@ public class BatchPlanTable extends AuditDomain {
 
     private Long weight;
 
+    private String ruleType;
+
     private Long tenantId;
 
 

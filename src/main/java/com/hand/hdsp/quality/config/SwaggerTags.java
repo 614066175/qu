@@ -25,15 +25,15 @@ public class SwaggerTags {
     public static final String BATCH_PLAN_BASE = "BATCH PLAN BASE CONTROLLER";
     public static final String BATCH_PLAN_TABLE = "BATCH PLAN TABLE CONTROLLER";
     public static final String BATCH_PLAN_TABLE_LINE = "BATCH PLAN TABLE LINE CONTROLLER";
+    public static final String BATCH_PLAN_TABLE_CON = "BATCH PLAN TABLE CON CONTROLLER";
     public static final String BATCH_PLAN_FIELD = "BATCH PLAN FIELD CONTROLLER";
     public static final String BATCH_PLAN_FIELD_LINE = "BATCH PLAN FIELD LINE CONTROLLER";
+    public static final String BATCH_PLAN_FIELD_CON = "BATCH PLAN FIELD CON CONTROLLER";
     public static final String BATCH_PLAN_REL_TABLE = "BATCH PLAN REL TABLE CONTROLLER";
-    public static final String BATCH_PLAN_REL_TABLE_LINE = "BATCH PLAN REL TABLE LINE CONTROLLER";
     public static final String BATCH_RESULT = "BATCH RESULT";
     public static final String BATCH_RESULT_BASE = "BATCH RESULT BASE";
     public static final String BATCH_RESULT_RULE = "BATCH RESULT RULE";
     public static final String PLAN_GROUP = "PLAN GROUP CONTROLLER";
-    public static final String PLAN_WARNING_LEVEL = "PLAN WARNING LEVEL CONTROLLER";
     public static final String STREAMING_PLAN = "STREAMING PLAN CONTROLLER";
     public static final String STREAMING_PLAN_BASE = "STREAMING PLAN BASE CONTROLLER";
     public static final String STREAMING_PLAN_RULE = "STREAMING PLAN RULE CONTROLLER";
@@ -56,15 +56,15 @@ public class SwaggerTags {
                 new Tag(BATCH_PLAN_BASE, "批数据方案-基础配置表 管理 API"),
                 new Tag(BATCH_PLAN_TABLE, "批数据方案-表级规则表 管理 API"),
                 new Tag(BATCH_PLAN_TABLE_LINE, "批数据方案-表级规则校验项表 管理 API"),
+                new Tag(BATCH_PLAN_TABLE_CON, "批数据方案-表级规则条件表 管理 API"),
                 new Tag(BATCH_PLAN_FIELD, "批数据方案-字段规则表 管理 API"),
                 new Tag(BATCH_PLAN_FIELD_LINE, "批数据方案-字段规则校验项表 管理 API"),
+                new Tag(BATCH_PLAN_FIELD_CON, "批数据方案-字段规则条件表 管理 API"),
                 new Tag(BATCH_PLAN_REL_TABLE, "批数据方案-表间规则表 管理 API"),
-                new Tag(BATCH_PLAN_REL_TABLE_LINE, "批数据方案-表间规则关联关系表 管理 API"),
                 new Tag(BATCH_RESULT, "批数据方案结果表 管理 API"),
                 new Tag(BATCH_RESULT_BASE, "批数据方案结果表-表信息 管理 API"),
                 new Tag(BATCH_RESULT_RULE, "批数据方案结果表-规则信息 管理 API"),
                 new Tag(PLAN_GROUP, "评估方案分组表 管理 API"),
-                new Tag(PLAN_WARNING_LEVEL, "方案告警等级表 管理 API"),
                 new Tag(STREAMING_PLAN, "实时数据评估方案表 管理 API"),
                 new Tag(STREAMING_PLAN_BASE, "实时数据方案-基础配置表 管理 API"),
                 new Tag(STREAMING_PLAN_RULE, "实时数据方案-规则表 管理 API"),

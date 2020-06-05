@@ -7,7 +7,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 /**
@@ -20,16 +19,9 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@ApiModel("批数据方案-表间规则关联关系表")
+@ApiModel("表间规则关联关系")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class BatchPlanRelTableLineDTO extends AuditDomain {
-
-    @ApiModelProperty("表ID，主键，供其他表做外键")
-    private Long lineId;
-
-    @ApiModelProperty(value = "XQUA_BATCH_PLAN_REL_TABLE.PLAN_REL_TABLE_ID")
-    @NotNull
-    private Long planRelTableId;
+public class RelationshipDTO extends AuditDomain {
 
     @ApiModelProperty(value = "源表字段名")
     @NotBlank
@@ -44,9 +36,4 @@ public class BatchPlanRelTableLineDTO extends AuditDomain {
     @NotBlank
     @Size(max = 50)
     private String relFieldName;
-
-    @ApiModelProperty(value = "租户ID")
-    @NotNull
-    private Long tenantId;
-
 }

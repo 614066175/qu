@@ -59,5 +59,5 @@ public class StreamingPlanRuleDTO extends AuditDomain {
     private Long tenantId;
 
     @ApiModelProperty(value = "方案告警等级List")
-    private List<PlanWarningLevelDTO> planWarningLevelDTOList;
+    private List<WarningLevelDTO> warningLevelDTOList;
 }

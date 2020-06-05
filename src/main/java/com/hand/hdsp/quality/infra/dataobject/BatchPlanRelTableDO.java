@@ -15,7 +15,7 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = false)
 public class BatchPlanRelTableDO extends AuditDomain {
 
-    private Long planRelTableId;
+    private Long planRuleId;
 
     private Long planBaseId;
 
@@ -40,6 +40,10 @@ public class BatchPlanRelTableDO extends AuditDomain {
     private String relTableName;
 
     private String whereCondition;
+
+    private String relationship;
+
+    private String warningLevel;
 
     private Long tenantId;
 

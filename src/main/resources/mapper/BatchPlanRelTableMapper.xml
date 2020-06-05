@@ -3,7 +3,7 @@
 <mapper namespace="com.hand.hdsp.quality.infra.mapper.BatchPlanRelTableMapper">
     <!-- 可根据自己的需求，是否要使用 -->
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.BatchPlanRelTable">
-        <result column="plan_rel_table_id" property="planRelTableId" jdbcType="DECIMAL"/>
+        <result column="plan_rule_id" property="planRuleId" jdbcType="DECIMAL"/>
         <result column="plan_base_id" property="planBaseId" jdbcType="DECIMAL"/>
         <result column="rule_code" property="ruleCode" jdbcType="VARCHAR"/>
         <result column="rule_name" property="ruleName" jdbcType="VARCHAR"/>
@@ -16,6 +16,8 @@
         <result column="rel_schema" property="relSchema" jdbcType="VARCHAR"/>
         <result column="rel_table_name" property="relTableName" jdbcType="VARCHAR"/>
         <result column="where_condition" property="whereCondition" jdbcType="VARCHAR"/>
+        <result column="relationship" property="relationship" jdbcType="VARCHAR"/>
+        <result column="warning_level" property="warningLevel" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
         <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>

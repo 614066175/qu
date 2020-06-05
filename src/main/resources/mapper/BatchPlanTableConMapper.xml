@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.BatchPlanRelTableLineMapper">
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.BatchPlanTableConMapper">
     <!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.BatchPlanRelTableLine">
-        <result column="line_id" property="lineId" jdbcType="DECIMAL"/>
-        <result column="plan_rel_table_id" property="planRelTableId" jdbcType="DECIMAL"/>
-        <result column="source_field_name" property="sourceFieldName" jdbcType="VARCHAR"/>
-        <result column="rel_code" property="relCode" jdbcType="VARCHAR"/>
-        <result column="rel_field_name" property="relFieldName" jdbcType="VARCHAR"/>
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.BatchPlanTableCon">
+        <result column="condition_id" property="conditionId" jdbcType="DECIMAL"/>
+        <result column="plan_line_id" property="planLineId" jdbcType="DECIMAL"/>
+        <result column="where_condition" property="whereCondition" jdbcType="VARCHAR"/>
+        <result column="compare_way" property="compareWay" jdbcType="VARCHAR"/>
+        <result column="warning_level" property="warningLevel" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
         <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>

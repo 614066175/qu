@@ -7,7 +7,6 @@ import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
-import com.hand.hdsp.quality.infra.constant.TableNameConstant;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
@@ -32,8 +31,6 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
     private final BatchPlanFieldRepository batchPlanFieldRepository;
     private final BatchPlanFieldLineRepository batchPlanFieldLineRepository;
     private final BatchPlanRelTableRepository batchPlanRelTableRepository;
-    private final BatchPlanRelTableLineRepository batchPlanRelTableLineRepository;
-    private final PlanWarningLevelRepository planWarningLevelRepository;
     private final BatchResultRepository batchResultRepository;
     private final DatasourceFeign datasourceFeign;
 
@@ -43,8 +40,6 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
                                     BatchPlanFieldRepository batchPlanFieldRepository,
                                     BatchPlanFieldLineRepository batchPlanFieldLineRepository,
                                     BatchPlanRelTableRepository batchPlanRelTableRepository,
-                                    BatchPlanRelTableLineRepository batchPlanRelTableLineRepository,
-                                    PlanWarningLevelRepository planWarningLevelRepository,
                                     BatchResultRepository batchResultRepository,
                                     DatasourceFeign datasourceFeign) {
         this.batchPlanBaseRepository = batchPlanBaseRepository;
@@ -53,8 +48,6 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
         this.batchPlanFieldRepository = batchPlanFieldRepository;
         this.batchPlanFieldLineRepository = batchPlanFieldLineRepository;
         this.batchPlanRelTableRepository = batchPlanRelTableRepository;
-        this.batchPlanRelTableLineRepository = batchPlanRelTableLineRepository;
-        this.planWarningLevelRepository = planWarningLevelRepository;
         this.batchResultRepository = batchResultRepository;
         this.datasourceFeign = datasourceFeign;
     }
@@ -75,13 +68,10 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
             for (BatchPlanTableDTO batchPlanTableDTO : batchPlanTableDTOList) {
                 List<BatchPlanTableLineDTO> batchPlanTableLineDTOList =
                         batchPlanTableLineRepository.selectDTO(
-                                BatchPlanTableLine.FIELD_PLAN_TABLE_ID, batchPlanTableDTO.getPlanTableId());
+                                BatchPlanTableLine.FIELD_PLAN_RULE_ID, batchPlanTableDTO.getPlanRuleId());
                 if (batchPlanTableLineDTOList != null) {
-                    for (BatchPlanTableLineDTO batchPlanTableLineDTO : batchPlanTableLineDTOList) {
-                        planWarningLevelRepository.deleteByParentId(batchPlanTableLineDTO.getPlanTableLineId(),
-                                TableNameConstant.XQUA_BATCH_PLAN_TABLE_LINE);
-                    }
-                    batchPlanTableLineRepository.deleteByParentId(batchPlanTableDTO.getPlanTableId());
+
+                    batchPlanTableLineRepository.deleteByParentId(batchPlanTableDTO.getPlanRuleId());
                 }
             }
             batchPlanTableRepository.deleteByParentId(batchPlanBaseDTO.getPlanBaseId());
@@ -91,7 +81,7 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
                 BatchPlanField.FIELD_PLAN_BASE_ID, batchPlanBaseDTO.getPlanBaseId());
         if (batchPlanFieldDTOList != null) {
             for (BatchPlanFieldDTO batchPlanFieldDTO : batchPlanFieldDTOList) {
-                batchPlanFieldLineRepository.deleteByParentId(batchPlanFieldDTO.getPlanFieldId());
+                batchPlanFieldLineRepository.deleteByParentId(batchPlanFieldDTO.getPlanRuleId());
             }
             batchPlanFieldRepository.deleteByParentId(batchPlanBaseDTO.getPlanBaseId());
         }
@@ -99,11 +89,6 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
         List<BatchPlanRelTableDTO> batchPlanRelTableDTOList = batchPlanRelTableRepository.selectDTO(
                 BatchPlanRelTable.FIELD_PLAN_BASE_ID, batchPlanBaseDTO.getPlanBaseId());
         if (batchPlanRelTableDTOList != null) {
-            for (BatchPlanRelTableDTO batchPlanRelTableDTO : batchPlanRelTableDTOList) {
-                batchPlanRelTableLineRepository.deleteByParentId(batchPlanRelTableDTO.getPlanRelTableId());
-                planWarningLevelRepository.deleteByParentId(batchPlanRelTableDTO.getPlanRelTableId(),
-                        TableNameConstant.XQUA_BATCH_PLAN_REL_TABLE);
-            }
             batchPlanRelTableRepository.deleteByParentId(batchPlanBaseDTO.getPlanBaseId());
         }
         return batchPlanBaseRepository.deleteByPrimaryKey(batchPlanBaseDTO);

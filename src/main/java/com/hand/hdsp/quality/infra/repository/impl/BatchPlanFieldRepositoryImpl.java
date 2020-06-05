@@ -5,9 +5,6 @@ import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanField;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldRepository;
 import com.hand.hdsp.quality.infra.mapper.BatchPlanFieldMapper;
-import io.choerodon.core.domain.Page;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -32,8 +29,8 @@ public class BatchPlanFieldRepositoryImpl extends BaseRepositoryImpl<BatchPlanFi
     }
 
     @Override
-    public Page<BatchPlanFieldDTO> distinctPageAndSortDTO(PageRequest pageRequest, BatchPlanFieldDTO batchPlanFieldDTO) {
-        return PageHelper.doPage(pageRequest, () -> batchPlanFieldMapper.list(batchPlanFieldDTO));
+    public List<BatchPlanFieldDTO> selectList(BatchPlanFieldDTO batchPlanFieldDTO) {
+        return batchPlanFieldMapper.selectList(batchPlanFieldDTO);
     }
 
     @Override

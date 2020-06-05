@@ -1,21 +1,15 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import com.hand.hdsp.quality.api.dto.PlanWarningLevelDTO;
 import com.hand.hdsp.quality.api.dto.StreamingPlanBaseDTO;
 import com.hand.hdsp.quality.api.dto.StreamingPlanRuleDTO;
 import com.hand.hdsp.quality.app.service.StreamingPlanBaseService;
-import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
 import com.hand.hdsp.quality.domain.entity.StreamingPlanRule;
-import com.hand.hdsp.quality.domain.repository.PlanWarningLevelRepository;
 import com.hand.hdsp.quality.domain.repository.StreamingPlanBaseRepository;
 import com.hand.hdsp.quality.domain.repository.StreamingPlanRuleRepository;
-import com.hand.hdsp.quality.infra.constant.TableNameConstant;
-import com.hand.hdsp.quality.infra.converter.PlanWarningLevelConverter;
 import io.choerodon.mybatis.domain.AuditDomain;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,14 +22,10 @@ public class StreamingPlanBaseServiceImpl implements StreamingPlanBaseService {
 
     private final StreamingPlanBaseRepository streamingPlanBaseRepository;
     private final StreamingPlanRuleRepository streamingPlanRuleRepository;
-    private final PlanWarningLevelRepository planWarningLevelRepository;
-    private final PlanWarningLevelConverter planWarningLevelConverter;
 
-    public StreamingPlanBaseServiceImpl(StreamingPlanBaseRepository streamingPlanBaseRepository, StreamingPlanRuleRepository streamingPlanRuleRepository, PlanWarningLevelRepository planWarningLevelRepository, PlanWarningLevelConverter planWarningLevelConverter) {
+    public StreamingPlanBaseServiceImpl(StreamingPlanBaseRepository streamingPlanBaseRepository, StreamingPlanRuleRepository streamingPlanRuleRepository) {
         this.streamingPlanBaseRepository = streamingPlanBaseRepository;
         this.streamingPlanRuleRepository = streamingPlanRuleRepository;
-        this.planWarningLevelRepository = planWarningLevelRepository;
-        this.planWarningLevelConverter = planWarningLevelConverter;
     }
 
     @Override
@@ -44,10 +34,6 @@ public class StreamingPlanBaseServiceImpl implements StreamingPlanBaseService {
         List<StreamingPlanRuleDTO> streamingPlanRuleDTOList = streamingPlanRuleRepository.selectDTO(
                 StreamingPlanRule.FIELD_PLAN_BASE_ID, streamingPlanBaseDTO);
         if (streamingPlanRuleDTOList != null) {
-            for (StreamingPlanRuleDTO streamingPlanRuleDTO : streamingPlanRuleDTOList) {
-                planWarningLevelRepository.deleteByParentId(streamingPlanRuleDTO.getPlanRuleId(),
-                        TableNameConstant.XQUA_STREAMING_PLAN_RULE);
-            }
             streamingPlanRuleRepository.deleteByParentId(streamingPlanBaseDTO.getPlanBaseId());
         }
         return streamingPlanBaseRepository.deleteByPrimaryKey(streamingPlanBaseDTO);
@@ -69,20 +55,7 @@ public class StreamingPlanBaseServiceImpl implements StreamingPlanBaseService {
                 } else if (AuditDomain.RecordStatus.delete.equals(streamingPlanRuleDTO.get_status())) {
                     streamingPlanRuleRepository.deleteByPrimaryKey(streamingPlanRuleDTO);
                 }
-                if (streamingPlanRuleDTO.getPlanWarningLevelDTOList() != null) {
-                    for (PlanWarningLevelDTO planWarningLevelDTO : streamingPlanRuleDTO.getPlanWarningLevelDTOList()) {
-                        if (AuditDomain.RecordStatus.update.equals(planWarningLevelDTO.get_status())) {
-                            planWarningLevelRepository.updateDTOWhereTenant(planWarningLevelDTO, tenantId);
-                        } else if (AuditDomain.RecordStatus.create.equals(planWarningLevelDTO.get_status())) {
-                            planWarningLevelDTO.setSourceId(streamingPlanRuleDTO.getPlanRuleId());
-                            planWarningLevelDTO.setSourceType(TableNameConstant.XQUA_STREAMING_PLAN_RULE);
-                            planWarningLevelDTO.setTenantId(tenantId);
-                            planWarningLevelRepository.insertDTOSelective(planWarningLevelDTO);
-                        } else if (AuditDomain.RecordStatus.delete.equals(planWarningLevelDTO.get_status())) {
-                            planWarningLevelRepository.deleteByPrimaryKey(planWarningLevelDTO);
-                        }
-                    }
-                }
+
             }
         }
     }
@@ -97,14 +70,7 @@ public class StreamingPlanBaseServiceImpl implements StreamingPlanBaseService {
                 streamingPlanRuleDTO.setPlanBaseId(streamingPlanBaseDTO.getPlanBaseId());
                 streamingPlanRuleDTO.setTenantId(tenantId);
                 streamingPlanRuleRepository.insertDTOSelective(streamingPlanRuleDTO);
-                if (streamingPlanRuleDTO.getPlanWarningLevelDTOList() != null) {
-                    for (PlanWarningLevelDTO planWarningLevelDTO : streamingPlanRuleDTO.getPlanWarningLevelDTOList()) {
-                        planWarningLevelDTO.setSourceId(streamingPlanRuleDTO.getPlanRuleId());
-                        planWarningLevelDTO.setSourceType(TableNameConstant.XQUA_STREAMING_PLAN_RULE);
-                        planWarningLevelDTO.setTenantId(tenantId);
-                        planWarningLevelRepository.insertDTOSelective(planWarningLevelDTO);
-                    }
-                }
+
             }
         }
     }
@@ -113,17 +79,7 @@ public class StreamingPlanBaseServiceImpl implements StreamingPlanBaseService {
     public StreamingPlanBaseDTO detail(Long planBaseId) {
         StreamingPlanBaseDTO streamingPlanBaseDTO = streamingPlanBaseRepository.selectDTOByPrimaryKey(planBaseId);
         List<StreamingPlanRuleDTO> streamingPlanRuleDTOList = streamingPlanRuleRepository.selectDTO(StreamingPlanRule.FIELD_PLAN_BASE_ID, planBaseId);
-        for (StreamingPlanRuleDTO streamingPlanRuleDTO : streamingPlanRuleDTOList) {
-            List<PlanWarningLevel> planWarningLevelList = planWarningLevelRepository.select(
-                    PlanWarningLevel.builder()
-                            .sourceId(streamingPlanRuleDTO.getPlanRuleId())
-                            .sourceType(TableNameConstant.XQUA_STREAMING_PLAN_RULE).build());
-            List<PlanWarningLevelDTO> planWarningLevelDTOList = new ArrayList<>();
-            for (PlanWarningLevel planWarningLevel : planWarningLevelList) {
-                planWarningLevelDTOList.add(planWarningLevelConverter.entityToDto(planWarningLevel));
-            }
-            streamingPlanRuleDTO.setPlanWarningLevelDTOList(planWarningLevelDTOList);
-        }
+
         streamingPlanBaseDTO.setStreamingPlanRuleDTOList(streamingPlanRuleDTOList);
         return streamingPlanBaseDTO;
     }

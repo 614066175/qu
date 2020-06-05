@@ -15,8 +15,8 @@ public interface BatchPlanFieldLineRepository extends BaseRepository<BatchPlanFi
     /**
      * 删除
      *
-     * @param planFieldId
+     * @param planRuleId
      * @return
      */
-    int deleteByParentId(Long planFieldId);
+    int deleteByParentId(Long planRuleId);
 }

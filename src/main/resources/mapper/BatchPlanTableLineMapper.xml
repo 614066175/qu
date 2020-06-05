@@ -3,11 +3,10 @@
 <mapper namespace="com.hand.hdsp.quality.infra.mapper.BatchPlanTableLineMapper">
     <!-- 可根据自己的需求，是否要使用 -->
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.BatchPlanTableLine">
-        <result column="plan_table_line_id" property="planTableLineId" jdbcType="DECIMAL"/>
-        <result column="plan_table_id" property="planTableId" jdbcType="DECIMAL"/>
+        <result column="plan_line_id" property="planLineId" jdbcType="DECIMAL"/>
+        <result column="plan_rule_id" property="planRuleId" jdbcType="DECIMAL"/>
         <result column="check_item" property="checkItem" jdbcType="VARCHAR"/>
-        <result column="compare_way" property="compareWay" jdbcType="VARCHAR"/>
-        <result column="expected_value" property="expectedValue" jdbcType="VARCHAR"/>
+        <result column="count_type" property="countType" jdbcType="VARCHAR"/>
         <result column="custom_sql" property="customSql" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>

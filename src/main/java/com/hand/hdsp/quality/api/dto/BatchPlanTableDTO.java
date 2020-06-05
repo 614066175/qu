@@ -26,7 +26,7 @@ import java.util.List;
 public class BatchPlanTableDTO extends AuditDomain {
 
     @ApiModelProperty("表ID，主键，供其他表做外键")
-    private Long planTableId;
+    private Long planRuleId;
 
     @ApiModelProperty(value = "方案-基础配置表XQUA_BATCH_PLAN_BASE.PLAN_BASE_ID")
     @NotNull
@@ -54,6 +54,9 @@ public class BatchPlanTableDTO extends AuditDomain {
 
     @ApiModelProperty(value = "权重")
     private Long weight;
+
+    @ApiModelProperty(value = "规则类型 HDSP.XQUA.RULE_TYPE")
+    private String ruleType;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull

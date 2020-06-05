@@ -30,7 +30,7 @@ public interface BatchPlanFieldMapper extends BaseMapper<BatchPlanField> {
      * @param batchPlanFieldDTO 查询条件
      * @return
      */
-    List<BatchPlanFieldDTO> list(BatchPlanFieldDTO batchPlanFieldDTO);
+    List<BatchPlanFieldDTO> selectList(BatchPlanFieldDTO batchPlanFieldDTO);
 
     /**
      * 列表

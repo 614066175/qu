@@ -7,7 +7,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
  * <p>批数据方案-基础配置表 数据传输对象</p>
@@ -39,24 +38,27 @@ public class BatchPlanBaseDTO extends AuditDomain {
     @ApiModelProperty(value = "数据库")
     private String datasourceSchema;
 
-    @ApiModelProperty(value = "表名")
-    private String tableName;
+    @ApiModelProperty(value = "类型 HDSP.XQUA.SQL_TYPE (TABLE/VIEW/SQL)")
+    private String sqlType;
+
+    @ApiModelProperty(value = "表名/视图名/自定义SQL")
+    private String objectName;
 
     @ApiModelProperty(value = "描述")
     private String description;
 
+    @ApiModelProperty(value = "增量校验策略")
+    private String incrementStrategy;
+
+    @ApiModelProperty(value = "增量字段")
+    private String incrementColumn;
+
+    @ApiModelProperty(value = "条件where")
+    private String whereCondition;
+
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;
-
-    @ApiModelProperty(value = "表级规则List")
-    private List<BatchPlanTableDTO> batchPlanTableDTOList;
-
-    @ApiModelProperty(value = "字段规则List")
-    private List<BatchPlanFieldDTO> batchPlanFieldDTOList;
-
-    @ApiModelProperty(value = "表间规则List")
-    private List<BatchPlanRelTableDTO> batchPlanRelTableDTOList;
 
     private Long tableNum;
 

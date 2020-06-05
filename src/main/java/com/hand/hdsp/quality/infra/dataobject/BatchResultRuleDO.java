@@ -27,7 +27,7 @@ public class BatchResultRuleDO extends AuditDomain {
 
     private Long ruleId;
 
-    private Long planFieldLineId;
+    private Long planLineId;
 
     private String ruleCode;
 

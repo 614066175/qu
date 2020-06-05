@@ -1,11 +1,9 @@
 package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
-import com.hand.hdsp.quality.api.dto.RuleDTO;
-import io.choerodon.core.domain.Page;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>批数据方案-字段规则表应用服务</p>
@@ -39,27 +37,24 @@ public interface BatchPlanFieldService {
     /**
      * 字段级规则明细
      *
-     * @param planFieldId
+     * @param planRuleId
      * @return
      */
-    BatchPlanFieldDTO detail(Long planFieldId);
+    BatchPlanFieldDTO detail(Long planRuleId);
 
     /**
-     * 字段级规则列表
+     * 已选字段规则列表
      *
-     * @param pageRequest
      * @param batchPlanFieldDTO
      * @return
      */
-    Page<BatchPlanFieldDTO> list(PageRequest pageRequest, BatchPlanFieldDTO batchPlanFieldDTO);
+    Map<String, List<BatchPlanFieldDTO>> listSelected(BatchPlanFieldDTO batchPlanFieldDTO);
 
     /**
-     * 字段级规则选择列表
+     * 可选标准规则详情（将标准规则转成字段规则的结构）
      *
-     * @param batchPlanFieldDTO
-     * @param ruleModel
-     * @param pageRequest
+     * @param ruleId
      * @return
      */
-    Page<RuleDTO> select(BatchPlanFieldDTO batchPlanFieldDTO, String ruleModel, PageRequest pageRequest);
+    BatchPlanFieldDTO selectDetail(Long ruleId);
 }

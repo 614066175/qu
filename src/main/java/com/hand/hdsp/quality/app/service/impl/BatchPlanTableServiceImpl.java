@@ -1,24 +1,21 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import com.hand.hdsp.quality.api.dto.BatchPlanTableConDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanTableDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanTableLineDTO;
-import com.hand.hdsp.quality.api.dto.PlanWarningLevelDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanTableService;
+import com.hand.hdsp.quality.domain.entity.BatchPlanTableCon;
 import com.hand.hdsp.quality.domain.entity.BatchPlanTableLine;
-import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
+import com.hand.hdsp.quality.domain.repository.BatchPlanTableConRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanTableLineRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanTableRepository;
-import com.hand.hdsp.quality.domain.repository.PlanWarningLevelRepository;
-import com.hand.hdsp.quality.infra.constant.ErrorCode;
-import com.hand.hdsp.quality.infra.constant.TableNameConstant;
-import com.hand.hdsp.quality.infra.converter.PlanWarningLevelConverter;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanTableDO;
+import com.hand.hdsp.quality.infra.util.JsonUtils;
 import io.choerodon.mybatis.domain.AuditDomain;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,16 +28,14 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
 
     private final BatchPlanTableRepository batchPlanTableRepository;
     private final BatchPlanTableLineRepository batchPlanTableLineRepository;
-    private final PlanWarningLevelRepository planWarningLevelRepository;
-    private final PlanWarningLevelConverter planWarningLevelConverter;
+    private final BatchPlanTableConRepository batchPlanTableConRepository;
 
     public BatchPlanTableServiceImpl(BatchPlanTableRepository batchPlanTableRepository,
                                      BatchPlanTableLineRepository batchPlanTableLineRepository,
-                                     PlanWarningLevelRepository planWarningLevelRepository, PlanWarningLevelConverter planWarningLevelConverter) {
+                                     BatchPlanTableConRepository batchPlanTableConRepository) {
         this.batchPlanTableRepository = batchPlanTableRepository;
         this.batchPlanTableLineRepository = batchPlanTableLineRepository;
-        this.planWarningLevelRepository = planWarningLevelRepository;
-        this.planWarningLevelConverter = planWarningLevelConverter;
+        this.batchPlanTableConRepository = batchPlanTableConRepository;
     }
 
     @Override
@@ -48,13 +43,9 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
     public int delete(BatchPlanTableDTO batchPlanTableDTO) {
         List<BatchPlanTableLineDTO> batchPlanTableLineDTOList =
                 batchPlanTableLineRepository.selectDTO(
-                        BatchPlanTableLine.FIELD_PLAN_TABLE_ID, batchPlanTableDTO.getPlanTableId());
+                        BatchPlanTableLine.FIELD_PLAN_RULE_ID, batchPlanTableDTO.getPlanRuleId());
         if (batchPlanTableLineDTOList != null) {
-            for (BatchPlanTableLineDTO batchPlanTableLineDTO : batchPlanTableLineDTOList) {
-                planWarningLevelRepository.deleteByParentId(batchPlanTableLineDTO.getPlanTableLineId(),
-                        TableNameConstant.XQUA_BATCH_PLAN_TABLE_LINE);
-            }
-            batchPlanTableLineRepository.deleteByParentId(batchPlanTableDTO.getPlanTableId());
+            batchPlanTableLineRepository.deleteByParentId(batchPlanTableDTO.getPlanRuleId());
         }
         return batchPlanTableRepository.deleteByPrimaryKey(batchPlanTableDTO);
     }
@@ -67,17 +58,17 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
         if (batchPlanTableDTO.getBatchPlanTableLineDTOList() != null) {
 
             for (BatchPlanTableLineDTO batchPlanTableLineDTO : batchPlanTableDTO.getBatchPlanTableLineDTOList()) {
-                batchPlanTableLineDTO.setPlanTableId(batchPlanTableDTO.getPlanTableId());
+                batchPlanTableLineDTO.setPlanRuleId(batchPlanTableDTO.getPlanRuleId());
                 batchPlanTableLineDTO.setTenantId(tenantId);
                 batchPlanTableLineRepository.insertDTOSelective(batchPlanTableLineDTO);
 
-                if (batchPlanTableLineDTO.getPlanWarningLevelDTOList() != null) {
-                    for (PlanWarningLevelDTO planWarningLevelDTO : batchPlanTableLineDTO.getPlanWarningLevelDTOList()) {
-                        planWarningLevelDTO.setSourceId(batchPlanTableLineDTO.getPlanTableLineId());
-                        planWarningLevelDTO.setSourceType(TableNameConstant.XQUA_BATCH_PLAN_TABLE_LINE);
-                        planWarningLevelDTO.setTenantId(tenantId);
-                        Assert.notNull(planWarningLevelRepository.judgeOverlap(planWarningLevelDTO), ErrorCode.WARNING_LEVEL_OVERLAP);
-                        planWarningLevelRepository.insertDTOSelective(planWarningLevelDTO);
+                if (CollectionUtils.isNotEmpty(batchPlanTableLineDTO.getBatchPlanTableConDTOList())) {
+                    for (BatchPlanTableConDTO batchPlanTableConDTO : batchPlanTableLineDTO.getBatchPlanTableConDTOList()) {
+                        batchPlanTableConDTO.setPlanLineId(batchPlanTableLineDTO.getPlanLineId());
+                        batchPlanTableConDTO.setTenantId(tenantId);
+                        //todo 范围重叠判断
+                        batchPlanTableConDTO.setWarningLevel(JsonUtils.object2Json(batchPlanTableConDTO.getWarningLevelDTOList()));
+                        batchPlanTableConRepository.insertDTOSelective(batchPlanTableConDTO);
                     }
                 }
             }
@@ -94,25 +85,27 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
                 if (AuditDomain.RecordStatus.update.equals(batchPlanTableLineDTO.get_status())) {
                     batchPlanTableLineRepository.updateDTOWhereTenant(batchPlanTableLineDTO, tenantId);
                 } else if (AuditDomain.RecordStatus.create.equals(batchPlanTableLineDTO.get_status())) {
-                    batchPlanTableLineDTO.setPlanTableId(batchPlanTableDTO.getPlanTableId());
+                    batchPlanTableLineDTO.setPlanRuleId(batchPlanTableDTO.getPlanRuleId());
                     batchPlanTableLineDTO.setTenantId(tenantId);
                     batchPlanTableLineRepository.insertDTOSelective(batchPlanTableLineDTO);
                 } else if (AuditDomain.RecordStatus.delete.equals(batchPlanTableLineDTO.get_status())) {
                     batchPlanTableLineRepository.deleteByPrimaryKey(batchPlanTableLineDTO);
                 }
-                if (batchPlanTableLineDTO.getPlanWarningLevelDTOList() != null) {
-                    for (PlanWarningLevelDTO planWarningLevelDTO : batchPlanTableLineDTO.getPlanWarningLevelDTOList()) {
-                        if (AuditDomain.RecordStatus.update.equals(planWarningLevelDTO.get_status())) {
-                            Assert.notNull(planWarningLevelRepository.judgeOverlap(planWarningLevelDTO), ErrorCode.WARNING_LEVEL_OVERLAP);
-                            planWarningLevelRepository.updateDTOWhereTenant(planWarningLevelDTO, tenantId);
-                        } else if (AuditDomain.RecordStatus.create.equals(planWarningLevelDTO.get_status())) {
-                            planWarningLevelDTO.setSourceId(batchPlanTableLineDTO.getPlanTableLineId());
-                            planWarningLevelDTO.setSourceType(TableNameConstant.XQUA_BATCH_PLAN_TABLE_LINE);
-                            planWarningLevelDTO.setTenantId(tenantId);
-                            Assert.notNull(planWarningLevelRepository.judgeOverlap(planWarningLevelDTO), ErrorCode.WARNING_LEVEL_OVERLAP);
-                            planWarningLevelRepository.insertDTOSelective(planWarningLevelDTO);
-                        } else if (AuditDomain.RecordStatus.delete.equals(planWarningLevelDTO.get_status())) {
-                            planWarningLevelRepository.deleteByPrimaryKey(planWarningLevelDTO);
+
+                if (CollectionUtils.isNotEmpty(batchPlanTableLineDTO.getBatchPlanTableConDTOList())) {
+                    for (BatchPlanTableConDTO batchPlanTableConDTO : batchPlanTableLineDTO.getBatchPlanTableConDTOList()) {
+                        if (AuditDomain.RecordStatus.update.equals(batchPlanTableConDTO.get_status())) {
+                            //todo 范围重叠判断
+                            batchPlanTableConDTO.setWarningLevel(JsonUtils.object2Json(batchPlanTableConDTO.getWarningLevelDTOList()));
+                            batchPlanTableConRepository.updateDTOWhereTenant(batchPlanTableConDTO, tenantId);
+                        } else if (AuditDomain.RecordStatus.create.equals(batchPlanTableConDTO.get_status())) {
+                            batchPlanTableConDTO.setPlanLineId(batchPlanTableLineDTO.getPlanLineId());
+                            batchPlanTableConDTO.setTenantId(tenantId);
+                            //todo 范围重叠判断
+                            batchPlanTableConDTO.setWarningLevel(JsonUtils.object2Json(batchPlanTableConDTO.getWarningLevelDTOList()));
+                            batchPlanTableConRepository.insertDTOSelective(batchPlanTableConDTO);
+                        } else if (AuditDomain.RecordStatus.delete.equals(batchPlanTableConDTO.get_status())) {
+                            batchPlanTableConRepository.deleteByPrimaryKey(batchPlanTableConDTO);
                         }
                     }
                 }
@@ -126,20 +119,13 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
     }
 
     @Override
-    public BatchPlanTableDTO detail(Long planTableId) {
-        BatchPlanTableDTO batchPlanTableDTO = batchPlanTableRepository.selectDTOByPrimaryKey(planTableId);
-        List<BatchPlanTableLineDTO> batchPlanTableLineDTOList =
-                batchPlanTableLineRepository.selectDTO(BatchPlanTableLine.FIELD_PLAN_TABLE_ID, planTableId);
+    public BatchPlanTableDTO detail(Long planRuleId) {
+        BatchPlanTableDTO batchPlanTableDTO = batchPlanTableRepository.selectDTOByPrimaryKey(planRuleId);
+        List<BatchPlanTableLineDTO> batchPlanTableLineDTOList = batchPlanTableLineRepository.selectDTO(BatchPlanTableLine.FIELD_PLAN_RULE_ID, planRuleId);
         for (BatchPlanTableLineDTO batchPlanTableLineDTO : batchPlanTableLineDTOList) {
-            List<PlanWarningLevel> planWarningLevelList = planWarningLevelRepository.select(
-                    PlanWarningLevel.builder()
-                            .sourceId(batchPlanTableLineDTO.getPlanTableLineId())
-                            .sourceType(TableNameConstant.XQUA_BATCH_PLAN_TABLE_LINE).build());
-            List<PlanWarningLevelDTO> planWarningLevelDTOList = new ArrayList<>();
-            for (PlanWarningLevel planWarningLevel : planWarningLevelList) {
-                planWarningLevelDTOList.add(planWarningLevelConverter.entityToDto(planWarningLevel));
-            }
-            batchPlanTableLineDTO.setPlanWarningLevelDTOList(planWarningLevelDTOList);
+            List<BatchPlanTableConDTO> conDTOList = batchPlanTableConRepository.selectDTO(BatchPlanTableCon.FIELD_PLAN_LINE_ID, batchPlanTableLineDTO.getPlanLineId());
+            conDTOList.forEach(dto -> dto.setWarningLevelDTOList(JsonUtils.json2WarningLevel(dto.getWarningLevel())));
+            batchPlanTableLineDTO.setBatchPlanTableConDTOList(conDTOList);
         }
         batchPlanTableDTO.setBatchPlanTableLineDTOList(batchPlanTableLineDTOList);
         return batchPlanTableDTO;

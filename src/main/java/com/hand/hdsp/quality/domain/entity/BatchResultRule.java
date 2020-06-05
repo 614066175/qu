@@ -46,7 +46,7 @@ public class BatchResultRule extends AuditDomain {
 
     private Long ruleId;
 
-    private Long planFieldLineId;
+    private Long planLineId;
 
     private String ruleCode;
 

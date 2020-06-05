@@ -4,10 +4,10 @@ import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanTableDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanTableLineDTO;
 import com.hand.hdsp.quality.api.dto.DatasourceDTO;
-import com.hand.hdsp.quality.domain.entity.*;
+import com.hand.hdsp.quality.domain.entity.BatchPlanField;
+import com.hand.hdsp.quality.domain.entity.BatchPlanRelTable;
+import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import lombok.*;
-
-import java.util.List;
 
 /**
  * <p>方案评估参数封装对象</p>
@@ -34,10 +34,6 @@ public class MeasureParamDO {
     private BatchPlanFieldLineDTO batchPlanFieldLineDTO;
 
     private BatchPlanRelTable batchPlanRelTable;
-
-    private List<BatchPlanRelTableLine> batchPlanRelTableLineList;
-
-    private List<PlanWarningLevel> warningLevelList;
 
     private BatchResultBase batchResultBase;
 }

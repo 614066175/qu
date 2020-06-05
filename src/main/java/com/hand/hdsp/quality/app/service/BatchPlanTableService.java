@@ -45,8 +45,8 @@ public interface BatchPlanTableService {
     /**
      * 表级规则明细
      *
-     * @param planTableId
+     * @param planRuleId
      * @return
      */
-    BatchPlanTableDTO detail(Long planTableId);
+    BatchPlanTableDTO detail(Long planRuleId);
 }

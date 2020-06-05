@@ -22,7 +22,7 @@ public class BatchPlanFieldLineRepositoryImpl extends BaseRepositoryImpl<BatchPl
     }
 
     @Override
-    public int deleteByParentId(Long planFieldId) {
-        return batchPlanFieldLineMapper.deleteByParentId(planFieldId);
+    public int deleteByParentId(Long planRuleId) {
+        return batchPlanFieldLineMapper.deleteByParentId(planRuleId);
     }
 }

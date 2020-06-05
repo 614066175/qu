@@ -36,7 +36,7 @@ public class BatchPlanRelTable extends AuditDomain {
 
     @Id
     @GeneratedValue
-    private Long planRelTableId;
+    private Long planRuleId;
 
     private Long planBaseId;
 
@@ -61,6 +61,10 @@ public class BatchPlanRelTable extends AuditDomain {
     private String relTableName;
 
     private String whereCondition;
+
+    private String relationship;
+
+    private String warningLevel;
 
     private Long tenantId;
 

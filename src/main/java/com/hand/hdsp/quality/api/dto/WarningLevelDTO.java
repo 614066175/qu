@@ -7,10 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * <p>方案告警等级表 数据传输对象</p>
@@ -22,21 +19,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@ApiModel("方案告警等级表")
+@ApiModel("告警等级")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PlanWarningLevelDTO extends AuditDomain {
-
-    @ApiModelProperty("表ID，主键，供其他表做外键")
-    private Long levelId;
-
-    @ApiModelProperty(value = "业务主键")
-    @NotNull
-    private Long sourceId;
-
-    @ApiModelProperty(value = "对应业务类型")
-    @NotBlank
-    @Size(max = 50)
-    private String sourceType;
+public class WarningLevelDTO extends AuditDomain {
 
     @ApiModelProperty(value = "告警等级 HDSP.XQUA.WARNING_LEVEL")
     @NotBlank
@@ -48,15 +33,9 @@ public class PlanWarningLevelDTO extends AuditDomain {
     @ApiModelProperty(value = "阈值范围结束")
     private BigDecimal endValue;
 
-    @ApiModelProperty(value = "单位")
-    private String unit;
+    @ApiModelProperty(value = "比较符号 HDSP.XQUA.COMPARE_SYMBOL")
+    private String compareSymbol;
 
-    @ApiModelProperty(value = "租户ID")
-    @NotNull
-    private Long tenantId;
-
-    @ApiModelProperty(value = "业务主键（多个）")
-    private String sourceIds;
-
-    private List<String> sourceIdList;
+    @ApiModelProperty(value = "阈值")
+    private String expectedValue;
 }

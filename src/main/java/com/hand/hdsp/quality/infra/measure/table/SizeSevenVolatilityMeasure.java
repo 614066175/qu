@@ -5,19 +5,16 @@ import com.hand.hdsp.quality.api.dto.BatchPlanTableLineDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.api.dto.DatasourceDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
-import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
 import com.hand.hdsp.quality.infra.dataobject.BatchResultBaseDO;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import com.hand.hdsp.quality.infra.mapper.BatchResultBaseMapper;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
-import com.hand.hdsp.quality.infra.measure.MeasureUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hzero.core.util.ResponseUtils;
 import org.springframework.util.Assert;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +38,7 @@ public class SizeSevenVolatilityMeasure implements Measure {
     @Override
     public BatchResultRuleDTO check(MeasureParamDO param) {
         BatchPlanTableLineDTO batchPlanTableLineDTO = param.getBatchPlanTableLineDTO();
-        List<PlanWarningLevel> warningLevelList = param.getWarningLevelList();
+
         DatasourceDTO datasourceDTO = param.getDatasourceDTO();
 
         BatchResultBase batchResultBase = param.getBatchResultBase();
@@ -56,7 +53,7 @@ public class SizeSevenVolatilityMeasure implements Measure {
         }
 
         BatchResultRuleDTO batchResultRuleDTO = new BatchResultRuleDTO();
-        batchResultRuleDTO.setExpectedValue(batchPlanTableLineDTO.getExpectedValue());
+//        batchResultRuleDTO.setExpectedValue(batchPlanTableLineDTO.getExpectedValue());
         // 查询一天前的表行数
         List<BatchResultBaseDO> resultList = batchResultBaseMapper.queryList(BatchResultBaseDO.builder()
                 .planBaseId(param.getBatchResultBase().getPlanBaseId())
@@ -67,8 +64,8 @@ public class SizeSevenVolatilityMeasure implements Measure {
         }
 
         long base = resultList.get(0).getTableSize();
-        MeasureUtil.volatilityCompare(batchPlanTableLineDTO.getCompareWay(), BigDecimal.valueOf(sample), BigDecimal.valueOf(base),
-                warningLevelList, batchResultRuleDTO);
+//        MeasureUtil.volatilityCompare(batchPlanTableLineDTO.getCompareWay(), BigDecimal.valueOf(sample), BigDecimal.valueOf(base),
+//                warningLevelList, batchResultRuleDTO);
         return batchResultRuleDTO;
     }
 }

@@ -43,7 +43,7 @@ public class BatchPlanTableLineController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  BatchPlanTableLineDTO batchPlanTableLineDTO, @ApiIgnore @SortDefault(value = BatchPlanTableLine.FIELD_PLAN_TABLE_LINE_ID,
+                                  BatchPlanTableLineDTO batchPlanTableLineDTO, @ApiIgnore @SortDefault(value = BatchPlanTableLine.FIELD_PLAN_LINE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchPlanTableLineDTO.setTenantId(tenantId);
         Page<BatchPlanTableLineDTO> list = batchPlanTableLineRepository.pageAndSortDTO(pageRequest, batchPlanTableLineDTO);
@@ -72,15 +72,15 @@ public class BatchPlanTableLineController extends BaseController {
             paramType = "path",
             required = true
     ), @ApiImplicitParam(
-            name = "planTableLineId",
+            name = "planLineId",
             value = "批数据方案-表级规则校验项表主键",
             paramType = "path",
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/{planTableLineId}")
-    public ResponseEntity<?> detail(@PathVariable Long planTableLineId) {
-        BatchPlanTableLineDTO batchPlanTableLineDTO = batchPlanTableLineRepository.selectDTOByPrimaryKeyAndTenant(planTableLineId);
+    @GetMapping("/{planLineId}")
+    public ResponseEntity<?> detail(@PathVariable Long planLineId) {
+        BatchPlanTableLineDTO batchPlanTableLineDTO = batchPlanTableLineRepository.selectDTOByPrimaryKeyAndTenant(planLineId);
         return Results.success(batchPlanTableLineDTO);
     }
 

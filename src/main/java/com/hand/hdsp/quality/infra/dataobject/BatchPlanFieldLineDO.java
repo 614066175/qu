@@ -15,19 +15,19 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = false)
 public class BatchPlanFieldLineDO extends AuditDomain {
 
-    private Long planFieldLineId;
+    private Long planLineId;
 
-    private Long planFieldId;
-
-    private String checkItem;
+    private Long planRuleId;
 
     private String checkWay;
 
-    private String compareWay;
+    private String checkItem;
 
-    private String expectedValue;
+    private String countType;
 
-    private String regularExpression;
+    private String fieldName;
+
+    private String checkFieldName;
 
     private Long tenantId;
 

@@ -46,9 +46,17 @@ public class BatchPlanBase extends AuditDomain {
 
     private String datasourceSchema;
 
-    private String tableName;
+    private String sqlType;
+
+    private String objectName;
 
     private String description;
+
+    private String incrementStrategy;
+
+    private String incrementColumn;
+
+    private String whereCondition;
 
     private Long tenantId;
 

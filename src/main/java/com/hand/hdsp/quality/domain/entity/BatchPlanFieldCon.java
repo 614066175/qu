@@ -11,9 +11,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * <p>批数据方案-表间规则关联关系表实体</p>
+ * <p>批数据方案-字段规则条件表实体</p>
  *
- * @author feng.liu01@hand-china.com 2020-03-24 16:19:53
+ * @author feng.liu01@hand-china.com 2020-06-03 20:03:41
  */
 @Data
 @Builder
@@ -23,8 +23,8 @@ import javax.persistence.Table;
 @FieldNameConstants(prefix = "FIELD_")
 @VersionAudit
 @ModifyAudit
-@Table(name = "xqua_batch_plan_rel_table_line")
-public class BatchPlanRelTableLine extends AuditDomain {
+@Table(name = "xqua_batch_plan_field_con")
+public class BatchPlanFieldCon extends AuditDomain {
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -36,15 +36,19 @@ public class BatchPlanRelTableLine extends AuditDomain {
 
     @Id
     @GeneratedValue
-    private Long lineId;
+    private Long conditionId;
 
-    private Long planRelTableId;
+    private Long planLineId;
 
-    private String sourceFieldName;
+    private String whereCondition;
 
-    private String relCode;
+    private String compareWay;
 
-    private String relFieldName;
+    private String regularExpression;
+
+    private String lovCode;
+
+    private String warningLevel;
 
     private Long tenantId;
 

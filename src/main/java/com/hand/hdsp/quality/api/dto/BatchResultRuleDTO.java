@@ -39,11 +39,11 @@ public class BatchResultRuleDTO extends AuditDomain {
     @ApiModelProperty(value = "校验表名称")
     private String tableName;
 
-    @ApiModelProperty(value = "方案规则ID(XQUA_BATCH_PLAN_REL_TABLE.PLAN_REL_TABLE_ID/XQUA_BATCH_PLAN_FIELD.PLAN_FIELD_ID/XQUA_BATCH_PLAN_TABLE.PLAN_TABLE_ID)结合规则类型判断具体是哪个")
+    @ApiModelProperty(value = "方案规则ID(XQUA_BATCH_PLAN_REL_TABLE.PLAN_RULE_ID/XQUA_BATCH_PLAN_FIELD.PLAN_RULE_ID/XQUA_BATCH_PLAN_TABLE.PLAN_RULE_ID)结合规则类型判断具体是哪个")
     private Long ruleId;
 
-    @ApiModelProperty(value = "XQUA_BATCH_PLAN_FIELD_LINE.PLAN_FIELD_LINE_ID")
-    private Long planFieldLineId;
+    @ApiModelProperty(value = "XQUA_BATCH_PLAN_FIELD_LINE.PLAN_LINE_ID")
+    private Long planLineId;
 
     @ApiModelProperty(value = "规则编码")
     private String ruleCode;

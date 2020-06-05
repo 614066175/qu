@@ -4,13 +4,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.quality.api.dto.BatchPlanTableLineDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.api.dto.DatasourceDTO;
-import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
-import com.hand.hdsp.quality.infra.measure.MeasureUtil;
 import org.hzero.core.exception.MessageException;
 import org.hzero.core.message.MessageAccessor;
 import org.hzero.core.util.ResponseUtils;
@@ -37,7 +35,7 @@ public class CustomFixedMeasure implements Measure {
         Long tenantId = param.getTenantId();
         DatasourceDTO datasourceDTO = param.getDatasourceDTO();
         BatchPlanTableLineDTO batchPlanTableLineDTO = param.getBatchPlanTableLineDTO();
-        List<PlanWarningLevel> warningLevelList = param.getWarningLevelList();
+
 
         datasourceDTO.setSql(batchPlanTableLineDTO.getCustomSql());
 
@@ -48,12 +46,12 @@ public class CustomFixedMeasure implements Measure {
         }
 
         BatchResultRuleDTO batchResultRuleDTO = new BatchResultRuleDTO();
-        batchResultRuleDTO.setExpectedValue(batchPlanTableLineDTO.getExpectedValue());
-        batchResultRuleDTO.setActualValue((String) response.get(0).values().toArray()[0]);
-
-        double actualValue = Double.parseDouble(batchResultRuleDTO.getActualValue());
-        double expectedValue = Double.parseDouble(batchPlanTableLineDTO.getExpectedValue());
-        MeasureUtil.fixedCompare(batchPlanTableLineDTO.getCompareWay(), actualValue, expectedValue, warningLevelList, batchResultRuleDTO);
+//        batchResultRuleDTO.setExpectedValue(batchPlanTableLineDTO.getExpectedValue());
+//        batchResultRuleDTO.setActualValue((String) response.get(0).values().toArray()[0]);
+//
+//        double actualValue = Double.parseDouble(batchResultRuleDTO.getActualValue());
+//        double expectedValue = Double.parseDouble(batchPlanTableLineDTO.getExpectedValue());
+//        MeasureUtil.fixedCompare(batchPlanTableLineDTO.getCompareWay(), actualValue, expectedValue, warningLevelList, batchResultRuleDTO);
 
         return batchResultRuleDTO;
     }

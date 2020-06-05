@@ -9,12 +9,11 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.math.BigDecimal;
 
 /**
- * <p>方案告警等级表实体</p>
+ * <p>批数据方案-表级规则条件表实体</p>
  *
- * @author feng.liu01@hand-china.com 2020-03-24 16:19:51
+ * @author feng.liu01@hand-china.com 2020-06-03 20:03:41
  */
 @Data
 @Builder
@@ -24,8 +23,8 @@ import java.math.BigDecimal;
 @FieldNameConstants(prefix = "FIELD_")
 @VersionAudit
 @ModifyAudit
-@Table(name = "xqua_plan_warning_level")
-public class PlanWarningLevel extends AuditDomain {
+@Table(name = "xqua_batch_plan_table_con")
+public class BatchPlanTableCon extends AuditDomain {
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -37,20 +36,15 @@ public class PlanWarningLevel extends AuditDomain {
 
     @Id
     @GeneratedValue
-    private Long levelId;
+    private Long conditionId;
 
-    private Long sourceId;
+    private Long planLineId;
 
-    private String sourceType;
+    private String whereCondition;
+
+    private String compareWay;
 
     private String warningLevel;
-
-    private BigDecimal startValue;
-
-    private BigDecimal endValue;
-
-    private String COMPARE_SYMBOL;
-    private String EXPECTED_VALUE;
 
     private Long tenantId;
 

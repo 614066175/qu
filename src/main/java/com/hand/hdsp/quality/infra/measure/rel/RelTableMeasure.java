@@ -4,9 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.api.dto.DatasourceDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanRelTable;
-import com.hand.hdsp.quality.domain.entity.BatchPlanRelTableLine;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
-import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
@@ -39,9 +37,8 @@ public class RelTableMeasure implements Measure {
     public BatchResultRuleDTO check(MeasureParamDO param) {
         BatchResultBase batchResultBase = param.getBatchResultBase();
         BatchPlanRelTable batchPlanRelTable = param.getBatchPlanRelTable();
-        List<BatchPlanRelTableLine> lineList = param.getBatchPlanRelTableLineList();
         DatasourceDTO datasourceDTO = param.getDatasourceDTO();
-        List<PlanWarningLevel> warningLevelList = param.getWarningLevelList();
+
 
         StringBuilder sql = new StringBuilder();
         sql.append("select count(*) count from ")
@@ -61,14 +58,15 @@ public class RelTableMeasure implements Measure {
                     .append(batchPlanRelTable.getWhereCondition())
                     .append(" ) rel ");
         }
-        if (!lineList.isEmpty()) {
-            sql.append(" where 1 = 1 ");
-            for (BatchPlanRelTableLine batchPlanRelTableLine : lineList) {
-                sql.append(" and source.").append(batchPlanRelTableLine.getSourceFieldName())
-                        .append(batchPlanRelTableLine.getRelCode())
-                        .append(" rel.").append(batchPlanRelTableLine.getRelFieldName());
-            }
-        }
+        //todo
+//        if (!lineList.isEmpty()) {
+//            sql.append(" where 1 = 1 ");
+//            for (BatchPlanRelTableLine batchPlanRelTableLine : lineList) {
+//                sql.append(" and source.").append(batchPlanRelTableLine.getSourceFieldName())
+//                        .append(batchPlanRelTableLine.getRelCode())
+//                        .append(" rel.").append(batchPlanRelTableLine.getRelFieldName());
+//            }
+//        }
 
         datasourceDTO.setSql(sql.toString());
         List<Map<String, Long>> result = ResponseUtils.getResponse(datasourceFeign.execSql(datasourceDTO.getTenantId(), datasourceDTO), new TypeReference<List<Map<String, Long>>>() {
@@ -83,13 +81,13 @@ public class RelTableMeasure implements Measure {
         batchResultRuleDTO.setActualValue(rate.toString() + BaseConstants.Symbol.PERCENTAGE);
         batchResultRuleDTO.setRelTableName(batchPlanRelTable.getRelTableName());
 
-        for (PlanWarningLevel planWarningLevel : warningLevelList) {
-            if (planWarningLevel.getStartValue().compareTo(rate) <= 0
-                    && planWarningLevel.getEndValue().compareTo(rate) >= 0) {
-                batchResultRuleDTO.setWarningLevel(planWarningLevel.getWarningLevel());
-                batchResultRuleDTO.setExceptionInfo("准确率（校验表与目标表匹配条数/校验表总条数）超出阈值范围");
-            }
-        }
+//        for (PlanWarningLevel planWarningLevel : warningLevelList) {
+//            if (planWarningLevel.getStartValue().compareTo(rate) <= 0
+//                    && planWarningLevel.getEndValue().compareTo(rate) >= 0) {
+//                batchResultRuleDTO.setWarningLevel(planWarningLevel.getWarningLevel());
+//                batchResultRuleDTO.setExceptionInfo("准确率（校验表与目标表匹配条数/校验表总条数）超出阈值范围");
+//            }
+//        }
 
         return batchResultRuleDTO;
     }

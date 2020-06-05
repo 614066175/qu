@@ -47,7 +47,7 @@ public class BatchPlanRelTableController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  BatchPlanRelTableDTO batchPlanRelTableDTO, @ApiIgnore @SortDefault(value = BatchPlanRelTable.FIELD_PLAN_REL_TABLE_ID,
+                                  BatchPlanRelTableDTO batchPlanRelTableDTO, @ApiIgnore @SortDefault(value = BatchPlanRelTable.FIELD_PLAN_RULE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchPlanRelTableDTO.setTenantId(tenantId);
         Page<BatchPlanRelTableDTO> list = batchPlanRelTableService.list(pageRequest, batchPlanRelTableDTO);
@@ -64,7 +64,7 @@ public class BatchPlanRelTableController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> list2(@PathVariable(name = "organizationId") Long tenantId,
-                                  BatchPlanRelTable batchPlanRelTable) {
+                                   BatchPlanRelTable batchPlanRelTable) {
         batchPlanRelTable.setTenantId(tenantId);
         return Results.success(batchPlanRelTableRepository.select(batchPlanRelTable));
     }
@@ -76,15 +76,15 @@ public class BatchPlanRelTableController extends BaseController {
             paramType = "path",
             required = true
     ), @ApiImplicitParam(
-            name = "planRelTableId",
+            name = "planRuleId",
             value = "批数据方案-表间规则表主键",
             paramType = "path",
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/{planRelTableId}")
-    public ResponseEntity<?> detail(@PathVariable Long planRelTableId) {
-        BatchPlanRelTableDTO batchPlanRelTableDTO = batchPlanRelTableService.detail(planRelTableId);
+    @GetMapping("/{planRuleId}")
+    public ResponseEntity<?> detail(@PathVariable Long planRuleId) {
+        BatchPlanRelTableDTO batchPlanRelTableDTO = batchPlanRelTableService.detail(planRuleId);
         return Results.success(batchPlanRelTableDTO);
     }
 
@@ -131,7 +131,7 @@ public class BatchPlanRelTableController extends BaseController {
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody BatchPlanRelTableDTO batchPlanRelTableDTO) {
         batchPlanRelTableDTO.setTenantId(tenantId);
-        batchPlanRelTableService.delete(batchPlanRelTableDTO);
+        batchPlanRelTableRepository.deleteByPrimaryKey(batchPlanRelTableDTO);
         return Results.success();
     }
 }

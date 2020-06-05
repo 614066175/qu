@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.quality.api.dto.BatchPlanTableLineDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.api.dto.DatasourceDTO;
-import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.BatchResultRuleDO;
@@ -13,13 +12,11 @@ import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import com.hand.hdsp.quality.infra.mapper.BatchResultRuleMapper;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
-import com.hand.hdsp.quality.infra.measure.MeasureUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hzero.core.exception.MessageException;
 import org.hzero.core.message.MessageAccessor;
 import org.hzero.core.util.ResponseUtils;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +42,7 @@ public class CustomOneVolatilityMeasure implements Measure {
         Long tenantId = param.getTenantId();
         DatasourceDTO datasourceDTO = param.getDatasourceDTO();
         BatchPlanTableLineDTO batchPlanTableLineDTO = param.getBatchPlanTableLineDTO();
-        List<PlanWarningLevel> warningLevelList = param.getWarningLevelList();
+
 
         datasourceDTO.setSql(batchPlanTableLineDTO.getCustomSql());
         List<HashMap<String, String>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, String>>>() {
@@ -62,17 +59,17 @@ public class CustomOneVolatilityMeasure implements Measure {
         //查询基础值
         List<BatchResultRuleDO> baseList = batchResultRuleMapper.queryList(BatchResultRuleDO.builder()
                 .ruleType(PlanConstant.ResultRuleType.TABLE)
-                .ruleId(batchPlanTableLineDTO.getPlanTableLineId())
+                .ruleId(batchPlanTableLineDTO.getPlanLineId())
                 .measureDate(DateUtils.addDays(new Date(), -1))
                 .build());
         if (baseList.isEmpty()) {
             return batchResultRuleDTO;
         }
 
-        MeasureUtil.volatilityCompare(batchPlanTableLineDTO.getCompareWay(),
-                new BigDecimal(currentValue),
-                new BigDecimal(baseList.get(0).getCurrentValue()),
-                warningLevelList, batchResultRuleDTO);
+//        MeasureUtil.volatilityCompare(batchPlanTableLineDTO.getCompareWay(),
+//                new BigDecimal(currentValue),
+//                new BigDecimal(baseList.get(0).getCurrentValue()),
+//                warningLevelList, batchResultRuleDTO);
         return batchResultRuleDTO;
     }
 }

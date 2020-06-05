@@ -3,15 +3,12 @@
 <mapper namespace="com.hand.hdsp.quality.infra.mapper.BatchPlanFieldMapper">
     <!-- 可根据自己的需求，是否要使用 -->
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.BatchPlanField">
-        <result column="plan_field_id" property="planFieldId" jdbcType="DECIMAL"/>
+        <result column="plan_rule_id" property="planRuleId" jdbcType="DECIMAL"/>
         <result column="plan_base_id" property="planBaseId" jdbcType="DECIMAL"/>
-        <result column="field_name" property="fieldName" jdbcType="VARCHAR"/>
-        <result column="field_desc" property="fieldDesc" jdbcType="VARCHAR"/>
         <result column="rule_code" property="ruleCode" jdbcType="VARCHAR"/>
         <result column="rule_name" property="ruleName" jdbcType="VARCHAR"/>
         <result column="rule_desc" property="ruleDesc" jdbcType="VARCHAR"/>
         <result column="check_type" property="checkType" jdbcType="VARCHAR"/>
-        <result column="rule_type" property="ruleType" jdbcType="VARCHAR"/>
         <result column="exception_block" property="exceptionBlock" jdbcType="DECIMAL"/>
         <result column="weight" property="weight" jdbcType="DECIMAL"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
@@ -21,15 +18,29 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
-    <select id="list" resultType="com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO">
+
+    <sql id="baseColumn">
+        ${std}.plan_rule_id,
+        ${std}.plan_base_id,
+        ${std}.rule_code,
+        ${std}.rule_name,
+        ${std}.rule_desc,
+        ${std}.check_type,
+        ${std}.exception_block,
+        ${std}.weight
+    </sql>
+
+    <select id="selectList" resultType="com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO">
         select
-        plan_base_id,
-        field_name,
-        field_desc
+        <include refid="baseColumn">
+            <property name="std" value="xbpf"/>
+        </include>,
+        xbpfl.field_name
         from
-        xqua_batch_plan_field
+        xqua_batch_plan_field xbpf
+        join xqua_batch_plan_field_line xbpfl on xbpf.plan_rule_id = xbpfl.plan_rule_id
         <where>
-            1 = 1
+            xbpfl.field_name is not null
             <if test="fieldName != null">
                 <bind name="fieldName" value="'%' + fieldName + '%'"/>
                 and field_name like #{fieldName}
@@ -38,10 +49,7 @@
                 and plan_base_id = #{planBaseId}
             </if>
         </where>
-        GROUP BY
-	    plan_base_id,
-	    field_name,
-	    field_desc
+
     </select>
     <select id="list2" resultType="com.hand.hdsp.quality.domain.entity.BatchPlanField">
         select

@@ -21,37 +21,55 @@
 
     <sql id="Plan_And_Result">
         ${xbp}.plan_id,
-        ${xbp}.plan_name,
-        ${xbp}.warning_code,
-        ${xbr}.result_id,
-        ${xbr}.plan_status,
-        ${xbr}.mark,
-        ${xbr}.start_date,
-        ${xbr}.end_date,
-        ${xbr}.next_count_date,
-        ${xbr}.exception_info
+        ${xbp}
+        .
+        plan_name,
+        ${xbp}
+        .
+        warning_code,
+        ${xbr}
+        .
+        result_id,
+        ${xbr}
+        .
+        plan_status,
+        ${xbr}
+        .
+        mark,
+        ${xbr}
+        .
+        start_date,
+        ${xbr}
+        .
+        end_date,
+        ${xbr}
+        .
+        next_count_date,
+        ${xbr}
+        .
+        exception_info
     </sql>
 
     <select id="listByGroup" resultType="com.hand.hdsp.quality.api.dto.BatchResultDTO">
         SELECT xbp.plan_id,
-               xbp.plan_name,
-               xbr.result_id,
-               CASE
-                   WHEN xbr.plan_status IS NULL THEN
-                       '${@com.hand.hdsp.quality.infra.constant.PlanStatus@NOTACCESS}'
-                   ELSE xbr.plan_status
-                   END plan_status,
-               xbr.mark,
-               xbr.start_date,
-               xbr.end_date,
-               xbr.exception_info
+        xbp.plan_name,
+        xbr.result_id,
+        CASE
+        WHEN xbr.plan_status IS NULL THEN
+        '${@com.hand.hdsp.quality.infra.constant.PlanStatus@NOTACCESS}'
+        ELSE xbr.plan_status
+        END plan_status,
+        xbr.mark,
+        xbr.start_date,
+        xbr.end_date,
+        xbr.exception_info
         FROM xqua_batch_plan xbp
-                 LEFT JOIN (
-                    SELECT *
-                    FROM xqua_batch_result
-                    WHERE result_id IN (SELECT MAX(result_id) FROM xqua_batch_result GROUP BY plan_id)) xbr
-                           ON xbr.plan_id = xbp.plan_id
-                 LEFT JOIN xqua_plan_group xpg ON xbp.group_id = xpg.group_id
+        LEFT JOIN (
+        SELECT *
+        FROM xqua_batch_result
+        WHERE result_id IN (SELECT MAX(result_id) FROM xqua_batch_result GROUP BY plan_id)) xbr
+        ON xbr.plan_id = xbp.plan_id
+        LEFT JOIN xqua_plan_group xpg ON xbp.group_id = xpg.group_id
         <where>
             <if test="groupId != null and groupId != 0">
                 xpg.group_id = #{groupId}
@@ -93,7 +111,8 @@
         <include refid="Plan_And_Result">
             <property name="xbp" value="xbp"/>
             <property name="xbr" value="xbr"/>
-        </include>,
+        </include>
+        ,
         xbrb.rule_count,
         xbrb.exception_rule_count
         from xqua_plan_group xpg
@@ -133,10 +152,10 @@
                 xbr.tenant_id = #{tenantId}
             </if>
             <if test="startDate != null and startDate != ''">
-                and xbr.end_date &gt;=  #{startDate}
+                and xbr.end_date &gt;= #{startDate}
             </if>
             <if test="endDate != null and endDate != ''">
-                and xbr.end_date &lt;=  #{endDate}
+                and xbr.end_date &lt;= #{endDate}
             </if>
         </where>
     </select>
@@ -149,7 +168,7 @@
         count(1) countSum
         from xqua_batch_plan_table xbpt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbpt.plan_table_id=xbrr.rule_id
+        on xbpt.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -161,17 +180,17 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@COMPLETENESS}' checkType,
         count(1) countSum
         from xqua_batch_plan_field xbpf
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbpf.plan_field_id=xbrr.rule_id
+        on xbpf.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -183,17 +202,17 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@COMPLETENESS}' checkType,
         count(1) countSum
         from xqua_batch_plan_rel_table xbprt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbprt.plan_rel_table_id=xbrr.rule_id
+        on xbprt.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -205,10 +224,10 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         ) a GROUP BY a.checkType
         union all
@@ -219,7 +238,7 @@
         count(1) countSum
         from xqua_batch_plan_table xbpt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbpt.plan_table_id=xbrr.rule_id
+        on xbpt.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -231,17 +250,17 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@UNIFORMITY}' checkType,
         count(1) countSum
         from xqua_batch_plan_field xbpf
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbpf.plan_field_id=xbrr.rule_id
+        on xbpf.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -253,17 +272,17 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@UNIFORMITY}' checkType,
         count(1) countSum
         from xqua_batch_plan_rel_table xbprt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbprt.plan_rel_table_id=xbrr.rule_id
+        on xbprt.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -275,10 +294,10 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         ) b GROUP BY b.checkType
         union all
@@ -289,7 +308,7 @@
         count(1) countSum
         from xqua_batch_plan_table xbpt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbpt.plan_table_id=xbrr.rule_id
+        on xbpt.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -301,17 +320,17 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@ACCURACY}' checkType,
         count(1) countSum
         from xqua_batch_plan_field xbpf
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbpf.plan_field_id=xbrr.rule_id
+        on xbpf.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -323,17 +342,17 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@ACCURACY}' checkType,
         count(1) countSum
         from xqua_batch_plan_rel_table xbprt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbprt.plan_rel_table_id=xbrr.rule_id
+        on xbprt.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -345,10 +364,10 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         ) c GROUP BY c.checkType
         union all
@@ -359,7 +378,7 @@
         count(1) countSum
         from xqua_batch_plan_table xbpt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbpt.plan_table_id=xbrr.rule_id
+        on xbpt.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -371,17 +390,17 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@STANDARD}' checkType,
         count(1) countSum
         from xqua_batch_plan_field xbpf
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbpf.plan_field_id=xbrr.rule_id
+        on xbpf.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -393,17 +412,17 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@STANDARD}' checkType,
         count(1) countSum
         from xqua_batch_plan_rel_table xbprt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbprt.plan_rel_table_id=xbrr.rule_id
+        on xbprt.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -415,10 +434,10 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         ) d GROUP BY d.checkType
     </select>
@@ -431,7 +450,7 @@
         count(1) countSum
         from xqua_batch_plan_table xbpt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbpt.plan_table_id=xbrr.rule_id
+        on xbpt.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -442,17 +461,17 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@COMPLETENESS}' checkType,
         count(1) countSum
         from xqua_batch_plan_field xbpf
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbpf.plan_field_id=xbrr.rule_id
+        on xbpf.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -463,17 +482,17 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@COMPLETENESS}' checkType,
         count(1) countSum
         from xqua_batch_plan_rel_table xbprt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbprt.plan_rel_table_id=xbrr.rule_id
+        on xbprt.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -484,10 +503,10 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         ) a GROUP BY a.checkType
         union all
@@ -498,7 +517,7 @@
         count(1) countSum
         from xqua_batch_plan_table xbpt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbpt.plan_table_id=xbrr.rule_id
+        on xbpt.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -509,17 +528,17 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@UNIFORMITY}' checkType,
         count(1) countSum
         from xqua_batch_plan_field xbpf
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbpf.plan_field_id=xbrr.rule_id
+        on xbpf.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -530,17 +549,17 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@UNIFORMITY}' checkType,
         count(1) countSum
         from xqua_batch_plan_rel_table xbprt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbprt.plan_rel_table_id=xbrr.rule_id
+        on xbprt.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -551,10 +570,10 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         ) b GROUP BY b.checkType
         union all
@@ -565,7 +584,7 @@
         count(1) countSum
         from xqua_batch_plan_table xbpt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbpt.plan_table_id=xbrr.rule_id
+        on xbpt.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -576,17 +595,17 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@ACCURACY}' checkType,
         count(1) countSum
         from xqua_batch_plan_field xbpf
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbpf.plan_field_id=xbrr.rule_id
+        on xbpf.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -597,17 +616,17 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@ACCURACY}' checkType,
         count(1) countSum
         from xqua_batch_plan_rel_table xbprt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbprt.plan_rel_table_id=xbrr.rule_id
+        on xbprt.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -618,10 +637,10 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         ) c GROUP BY c.checkType
         union all
@@ -632,7 +651,7 @@
         count(1) countSum
         from xqua_batch_plan_table xbpt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbpt.plan_table_id=xbrr.rule_id
+        on xbpt.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -643,17 +662,17 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@STANDARD}' checkType,
         count(1) countSum
         from xqua_batch_plan_field xbpf
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbpf.plan_field_id=xbrr.rule_id
+        on xbpf.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -664,17 +683,17 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         UNION ALL
         select '${@com.hand.hdsp.quality.infra.constant.CheckTypeZH@STANDARD}' checkType,
         count(1) countSum
         from xqua_batch_plan_rel_table xbprt
         LEFT JOIN xqua_batch_result_rule xbrr
-        on xbprt.plan_rel_table_id=xbrr.rule_id
+        on xbprt.plan_rule_id=xbrr.rule_id
         left join xqua_batch_result_base xbrb
         on xbrr.result_base_id=xbrb.result_base_id
         LEFT JOIN xqua_batch_result xbr
@@ -685,10 +704,10 @@
             and xbr.tenant_id = #{tenantId}
         </if>
         <if test="startDate != null and startDate != ''">
-            and xbr.end_date &gt;=  #{startDate}
+            and xbr.end_date &gt;= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            and xbr.end_date &lt;=  #{endDate}
+            and xbr.end_date &lt;= #{endDate}
         </if>
         ) d GROUP BY d.checkType
     </select>
@@ -707,10 +726,10 @@
                 xbr.tenant_id = #{tenantId}
             </if>
             <if test="startDate != null and startDate != ''">
-                and xbr.end_date &gt;=  #{startDate}
+                and xbr.end_date &gt;= #{startDate}
             </if>
             <if test="endDate != null and endDate != ''">
-                and xbr.end_date &lt;=  #{endDate}
+                and xbr.end_date &lt;= #{endDate}
             </if>
             <if test="rule != null">
                 <bind name="rule" value="'%' + rule + '%'"/>
@@ -734,10 +753,10 @@
                 xbr.tenant_id = #{tenantId}
             </if>
             <if test="startDate != null and startDate != ''">
-                and xbr.end_date &gt;=  #{startDate}
+                and xbr.end_date &gt;= #{startDate}
             </if>
             <if test="endDate != null and endDate != ''">
-                and xbr.end_date &lt;=  #{endDate}
+                and xbr.end_date &lt;= #{endDate}
             </if>
             <if test="rule != null">
                 <bind name="rule" value="'%' + rule + '%'"/>
@@ -755,10 +774,10 @@
                 xbr.tenant_id = #{tenantId}
             </if>
             <if test="startDate != null and startDate != ''">
-                and xbr.end_date &gt;=  #{startDate}
+                and xbr.end_date &gt;= #{startDate}
             </if>
             <if test="endDate != null and endDate != ''">
-                and xbr.end_date &lt;=  #{endDate}
+                and xbr.end_date &lt;= #{endDate}
             </if>
         </where>
         group by date_format(xbr.end_date, '%Y-%m-%d')
@@ -766,7 +785,7 @@
     </select>
 
     <select id="listRuleException" resultType="com.hand.hdsp.quality.infra.vo.RuleExceptionVO">
-        select  date_format(xbr.end_date, '%Y-%m-%d') date,
+        select date_format(xbr.end_date, '%Y-%m-%d') date,
         xbrr.rule_type ruleType,
         IFNULL(SUM(xbrb.exception_rule_count),0) exceptionRuleCount
         from xqua_batch_result xbr
@@ -779,10 +798,10 @@
                 xbr.tenant_id = #{tenantId}
             </if>
             <if test="startDate != null and startDate != ''">
-                and xbr.end_date &gt;=  #{startDate}
+                and xbr.end_date &gt;= #{startDate}
             </if>
             <if test="endDate != null and endDate != ''">
-                and xbr.end_date &lt;=  #{endDate}
+                and xbr.end_date &lt;= #{endDate}
             </if>
         </where>
         group by date_format(xbr.end_date, '%Y-%m-%d'),xbrr.rule_type
@@ -803,10 +822,10 @@
                 xbr.tenant_id = #{tenantId}
             </if>
             <if test="startDate != null and startDate != ''">
-                and xbr.end_date &gt;=  #{startDate}
+                and xbr.end_date &gt;= #{startDate}
             </if>
             <if test="endDate != null and endDate != ''">
-                and xbr.end_date &lt;=  #{endDate}
+                and xbr.end_date &lt;= #{endDate}
             </if>
         </where>
         group by date_format(xbr.end_date, '%Y-%m-%d'),xbrr.warning_level

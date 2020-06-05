@@ -24,20 +24,17 @@ import java.util.List;
 public class BatchPlanTableLineDTO extends AuditDomain {
 
     @ApiModelProperty("表ID，主键，供其他表做外键")
-    private Long planTableLineId;
+    private Long planLineId;
 
-    @ApiModelProperty(value = "方案-表级规则表XQUA_BATCH_PLAN_TABLE.PLAN_TABLE_ID")
+    @ApiModelProperty(value = "方案-表级规则表XQUA_BATCH_PLAN_TABLE.PLAN_RULE_ID")
     @NotNull
-    private Long planTableId;
+    private Long planRuleId;
 
     @ApiModelProperty(value = "校验项 HDSP.XQUA.CHECK_ITEM")
     private String checkItem;
 
-    @ApiModelProperty(value = "比较方式 HDSP.XQUA.COMPARE_WAY")
-    private String compareWay;
-
-    @ApiModelProperty(value = "阈值")
-    private String expectedValue;
+    @ApiModelProperty(value = "校验类型 HDSP.XQUA.COUNT_TYPE")
+    private String countType;
 
     @ApiModelProperty(value = "自定义SQL")
     private String customSql;
@@ -46,6 +43,6 @@ public class BatchPlanTableLineDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
-    @ApiModelProperty(value = "方案告警等级List")
-    private List<PlanWarningLevelDTO> planWarningLevelDTOList;
+    @ApiModelProperty(value = "表级规则条件List")
+    private List<BatchPlanTableConDTO> batchPlanTableConDTOList;
 }

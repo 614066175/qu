@@ -28,8 +28,8 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/rules")
 public class RuleController extends BaseController {
 
-    private RuleRepository ruleRepository;
-    private RuleService ruleService;
+    private final RuleRepository ruleRepository;
+    private final RuleService ruleService;
 
     public RuleController(RuleRepository ruleRepository, RuleService ruleService) {
         this.ruleRepository = ruleRepository;

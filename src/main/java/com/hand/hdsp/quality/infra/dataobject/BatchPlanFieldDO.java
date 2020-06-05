@@ -15,13 +15,9 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = false)
 public class BatchPlanFieldDO extends AuditDomain {
 
-    private Long planFieldId;
+    private Long planRuleId;
 
     private Long planBaseId;
-
-    private String fieldName;
-
-    private String fieldDesc;
 
     private String ruleCode;
 
@@ -30,8 +26,6 @@ public class BatchPlanFieldDO extends AuditDomain {
     private String ruleDesc;
 
     private String checkType;
-
-    private String ruleType;
 
     private Integer exceptionBlock;
 

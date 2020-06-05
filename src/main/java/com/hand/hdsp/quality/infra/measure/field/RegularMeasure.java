@@ -5,7 +5,6 @@ import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.api.dto.DatasourceDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanField;
-import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
@@ -37,9 +36,9 @@ public class RegularMeasure implements Measure {
         DatasourceDTO datasourceDTO = param.getDatasourceDTO();
         BatchPlanField batchPlanField = param.getBatchPlanField();
         BatchPlanFieldLineDTO batchPlanFieldLineDTO = param.getBatchPlanFieldLineDTO();
-        List<PlanWarningLevel> warningLevelList = param.getWarningLevelList();
 
-        datasourceDTO.setSql(String.format(SQL, datasourceDTO.getTableName(), batchPlanField.getFieldName(), batchPlanFieldLineDTO.getRegularExpression()));
+
+//        datasourceDTO.setSql(String.format(SQL, datasourceDTO.getTableName(), batchPlanFieldLineDTO.getFieldName(), batchPlanFieldLineDTO.getRegularExpression()));
         List<BatchResultRuleDTO> regResultList = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<BatchResultRuleDTO>>() {
         });
 
@@ -53,7 +52,7 @@ public class RegularMeasure implements Measure {
         double expectedValue = Double.parseDouble(allList.get(0).getActualValue());
 
         if (actualValue != expectedValue) {
-            batchResultRuleDTO.setWarningLevel(warningLevelList.get(0).getWarningLevel());
+//            batchResultRuleDTO.setWarningLevel(warningLevelList.get(0).getWarningLevel());
             batchResultRuleDTO.setExceptionInfo("不满足正则表达式");
         }
 

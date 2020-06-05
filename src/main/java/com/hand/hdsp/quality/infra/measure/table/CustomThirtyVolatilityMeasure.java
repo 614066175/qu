@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.quality.api.dto.BatchPlanTableLineDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.api.dto.DatasourceDTO;
-import com.hand.hdsp.quality.domain.entity.PlanWarningLevel;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.BatchResultRuleDO;
@@ -13,7 +12,6 @@ import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import com.hand.hdsp.quality.infra.mapper.BatchResultRuleMapper;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
-import com.hand.hdsp.quality.infra.measure.MeasureUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hzero.core.exception.MessageException;
 import org.hzero.core.message.MessageAccessor;
@@ -46,7 +44,7 @@ public class CustomThirtyVolatilityMeasure implements Measure {
         Long tenantId = param.getTenantId();
         DatasourceDTO datasourceDTO = param.getDatasourceDTO();
         BatchPlanTableLineDTO batchPlanTableLineDTO = param.getBatchPlanTableLineDTO();
-        List<PlanWarningLevel> warningLevelList = param.getWarningLevelList();
+
 
         datasourceDTO.setSql(batchPlanTableLineDTO.getCustomSql());
         List<HashMap<String, String>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, String>>>() {
@@ -63,7 +61,7 @@ public class CustomThirtyVolatilityMeasure implements Measure {
         // 查询七天前的表行数
         List<BatchResultRuleDO> resultList = batchResultRuleMapper.queryList(BatchResultRuleDO.builder()
                 .ruleType(PlanConstant.ResultRuleType.TABLE)
-                .ruleId(batchPlanTableLineDTO.getPlanTableLineId())
+                .ruleId(batchPlanTableLineDTO.getPlanLineId())
                 .measureDate(DateUtils.addDays(new Date(), -30))
                 .build());
 
@@ -83,10 +81,10 @@ public class CustomThirtyVolatilityMeasure implements Measure {
 
         BigDecimal base = BigDecimal.valueOf(sum).divide(BigDecimal.valueOf(count), 5, RoundingMode.HALF_UP);
 
-        MeasureUtil.volatilityCompare(batchPlanTableLineDTO.getCompareWay(),
-                new BigDecimal(currentValue),
-                base,
-                warningLevelList, batchResultRuleDTO);
+//        MeasureUtil.volatilityCompare(batchPlanTableLineDTO.getCompareWay(),
+//                new BigDecimal(currentValue),
+//                base,
+//                warningLevelList, batchResultRuleDTO);
         return batchResultRuleDTO;
     }
 }

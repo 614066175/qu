@@ -4,8 +4,6 @@ import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanField;
-import io.choerodon.core.domain.Page;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 
@@ -25,13 +23,12 @@ public interface BatchPlanFieldRepository extends BaseRepository<BatchPlanField,
     int deleteByParentId(Long planBaseId);
 
     /**
-     * 去重列表
+     * 关联查询
      *
-     * @param pageRequest
      * @param batchPlanFieldDTO
      * @return
      */
-    Page<BatchPlanFieldDTO> distinctPageAndSortDTO(PageRequest pageRequest, BatchPlanFieldDTO batchPlanFieldDTO);
+    List<BatchPlanFieldDTO> selectList(BatchPlanFieldDTO batchPlanFieldDTO);
 
     /**
      * 列表

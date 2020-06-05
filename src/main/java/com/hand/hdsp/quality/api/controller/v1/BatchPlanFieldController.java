@@ -6,16 +6,12 @@ import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.BatchPlanField;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldRepository;
 import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.*;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * <p>批数据方案-字段规则表 管理 API</p>
@@ -27,8 +23,8 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/batch-plan-fields")
 public class BatchPlanFieldController extends BaseController {
 
-    private BatchPlanFieldRepository batchPlanFieldRepository;
-    private BatchPlanFieldService batchPlanFieldService;
+    private final BatchPlanFieldRepository batchPlanFieldRepository;
+    private final BatchPlanFieldService batchPlanFieldService;
 
     public BatchPlanFieldController(BatchPlanFieldRepository batchPlanFieldRepository,
                                     BatchPlanFieldService batchPlanFieldService) {
@@ -51,7 +47,7 @@ public class BatchPlanFieldController extends BaseController {
         return Results.success(batchPlanFieldRepository.select(batchPlanField));
     }
 
-    @ApiOperation(value = "批数据方案-字段规则表列表（含已选规则）")
+    @ApiOperation(value = "批数据方案-已选字段规则列表")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -59,29 +55,29 @@ public class BatchPlanFieldController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/list")
-    public ResponseEntity<?> list2(@PathVariable(name = "organizationId") Long tenantId,
-                                  BatchPlanFieldDTO batchPlanFieldDTO, @ApiIgnore @SortDefault(value = BatchPlanField.FIELD_PLAN_FIELD_ID,
-            direction = Sort.Direction.DESC) PageRequest pageRequest) {
+    @GetMapping("/list-selected")
+    public ResponseEntity<?> listSelected(@PathVariable(name = "organizationId") Long tenantId,
+                                          BatchPlanFieldDTO batchPlanFieldDTO) {
         batchPlanFieldDTO.setTenantId(tenantId);
-        return Results.success(batchPlanFieldService.list(pageRequest, batchPlanFieldDTO));
+        return Results.success(batchPlanFieldService.listSelected(batchPlanFieldDTO));
     }
 
-    @ApiOperation(value = "批数据方案-字段规则表选择标记")
+    @ApiOperation(value = "批数据方案-可选标准规则详情（将标准规则转成字段规则的结构）")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
             paramType = "path",
             required = true
+    ), @ApiImplicitParam(
+            name = "ruleId",
+            value = "规则表主键",
+            paramType = "path",
+            required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/selected")
-    public ResponseEntity<?> listSelected(@PathVariable(name = "organizationId") Long tenantId,
-                                          BatchPlanFieldDTO batchPlanFieldDTO,
-                                          String ruleModel, @ApiIgnore @SortDefault(value = BatchPlanField.FIELD_PLAN_FIELD_ID,
-            direction = Sort.Direction.DESC) PageRequest pageRequest) {
-        batchPlanFieldDTO.setTenantId(tenantId);
-        return Results.success(batchPlanFieldService.select(batchPlanFieldDTO, ruleModel, pageRequest));
+    @GetMapping("/select-detail/{ruleId}")
+    public ResponseEntity<?> selectDetail(@PathVariable Long ruleId) {
+        return Results.success(batchPlanFieldService.selectDetail(ruleId));
     }
 
     @ApiOperation(value = "批数据方案-字段规则表明细")
@@ -91,15 +87,15 @@ public class BatchPlanFieldController extends BaseController {
             paramType = "path",
             required = true
     ), @ApiImplicitParam(
-            name = "planFieldId",
+            name = "planRuleId",
             value = "批数据方案-字段规则表主键",
             paramType = "path",
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/{planFieldId}")
-    public ResponseEntity<?> detail(@PathVariable Long planFieldId) {
-        BatchPlanFieldDTO batchPlanFieldDTO = batchPlanFieldService.detail(planFieldId);
+    @GetMapping("/{planRuleId}")
+    public ResponseEntity<?> detail(@PathVariable Long planRuleId) {
+        BatchPlanFieldDTO batchPlanFieldDTO = batchPlanFieldService.detail(planRuleId);
         return Results.success(batchPlanFieldDTO);
     }
 

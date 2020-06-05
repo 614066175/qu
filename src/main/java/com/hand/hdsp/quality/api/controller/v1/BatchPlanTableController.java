@@ -58,7 +58,7 @@ public class BatchPlanTableController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> list2(@PathVariable(name = "organizationId") Long tenantId,
-                                  BatchPlanTableDO batchPlanTableDO) {
+                                   BatchPlanTableDO batchPlanTableDO) {
         batchPlanTableDO.setTenantId(tenantId);
         return Results.success(batchPlanTableService.list(batchPlanTableDO));
     }
@@ -76,9 +76,9 @@ public class BatchPlanTableController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/{planTableId}")
-    public ResponseEntity<?> detail(@PathVariable Long planTableId) {
-        BatchPlanTableDTO batchPlanTableDTO = batchPlanTableService.detail(planTableId);
+    @GetMapping("/{planRuleId}")
+    public ResponseEntity<?> detail(@PathVariable Long planRuleId) {
+        BatchPlanTableDTO batchPlanTableDTO = batchPlanTableService.detail(planRuleId);
         return Results.success(batchPlanTableDTO);
     }
 

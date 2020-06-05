@@ -31,6 +31,8 @@ public class BatchPlanTableDO extends AuditDomain {
 
     private Long weight;
 
+    private String ruleType;
+
     private Long tenantId;
 
     private String checkItem;

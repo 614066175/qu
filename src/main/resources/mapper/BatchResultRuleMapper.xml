@@ -8,7 +8,7 @@
         <result column="rule_type" property="ruleType" jdbcType="VARCHAR"/>
         <result column="table_name" property="tableName" jdbcType="VARCHAR"/>
         <result column="rule_id" property="ruleId" jdbcType="DECIMAL"/>
-        <result column="plan_field_line_id" property="planFieldLineId" jdbcType="DECIMAL"/>
+        <result column="plan_line_id" property="planLineId" jdbcType="DECIMAL"/>
         <result column="rule_code" property="ruleCode" jdbcType="VARCHAR"/>
         <result column="rule_name" property="ruleName" jdbcType="VARCHAR"/>
         <result column="check_item" property="checkItem" jdbcType="VARCHAR"/>
@@ -32,7 +32,7 @@
     <select id="queryList" resultType="com.hand.hdsp.quality.infra.dataobject.BatchResultRuleDO">
         select current_value
         from xqua_batch_result_rule xbrr
-        where xbrr.plan_field_line_id = #{planFieldLineId}
+        where xbrr.plan_line_id = #{planLineId}
           and rule_type = '${@com.hand.hdsp.quality.infra.constant.PlanConstant$ResultRuleType@FIELD}'
           and date_format(creation_date, '%Y%m%d') = date_format(#{measureDate}, '%Y%m%d')
         order by xbrr.creation_date desc
@@ -49,13 +49,14 @@
                    ELSE xbprt.weight
                    END weight
         from xqua_batch_result_rule xbrr
-                 left join xqua_batch_plan_table xbpt on xbrr.rule_id = xbpt.plan_table_id
-                    and xbrr.rule_type = '${@com.hand.hdsp.quality.infra.constant.PlanConstant$ResultRuleType@TABLE}'
-                 left join xqua_batch_plan_field xbpf on xbrr.rule_id = xbpf.plan_field_id
-                    and xbrr.rule_type = '${@com.hand.hdsp.quality.infra.constant.PlanConstant$ResultRuleType@FIELD}'
+                 left join xqua_batch_plan_table xbpt on xbrr.rule_id = xbpt.plan_rule_id
+            and xbrr.rule_type = '${@com.hand.hdsp.quality.infra.constant.PlanConstant$ResultRuleType@TABLE}'
+                 left join xqua_batch_plan_field xbpf on xbrr.rule_id = xbpf.plan_rule_id
+            and xbrr.rule_type = '${@com.hand.hdsp.quality.infra.constant.PlanConstant$ResultRuleType@FIELD}'
                  left join xqua_batch_plan_rel_table xbprt
-                           on xbrr.rule_id = xbprt.plan_rel_table_id
-                                  and xbrr.rule_type = '${@com.hand.hdsp.quality.infra.constant.PlanConstant$ResultRuleType@REL_TABLE}'
+                           on xbrr.rule_id = xbprt.plan_rule_id
+                               and xbrr.rule_type =
+                                   '${@com.hand.hdsp.quality.infra.constant.PlanConstant$ResultRuleType@REL_TABLE}'
                  join xqua_batch_result_base xbrb on xbrr.result_base_id = xbrb.result_base_id
                  join xqua_batch_result xbr on xbrb.result_id = xbr.result_id
         where xbr.result_id = #{resultId}
