@@ -234,7 +234,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         batchResultBase.setRuleCount(batchResultBase.getRuleCount() + tableList.size());
 
         for (BatchPlanTable batchPlanTable : tableList) {
-            List<BatchPlanTableLine> lineList = batchPlanTableLineRepository.select(BatchPlanTableLine.FIELD_PLAN_RULE_ID, batchPlanTable.getPlanTableId());
+            List<BatchPlanTableLine> lineList = batchPlanTableLineRepository.select(BatchPlanTableLine.FIELD_PLAN_RULE_ID, batchPlanTable.getPlanRuleId());
             batchResultBase.setCheckItemCount(batchResultBase.getCheckItemCount() + lineList.size());
 
             //异常标记
@@ -254,7 +254,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 batchResultRuleDTO.setResultBaseId(batchResultBase.getResultBaseId());
                 batchResultRuleDTO.setRuleType(PlanConstant.ResultRuleType.TABLE);
                 batchResultRuleDTO.setTableName(batchResultBase.getTableName());
-                batchResultRuleDTO.setRuleId(batchPlanTable.getPlanTableId());
+                batchResultRuleDTO.setRuleId(batchPlanTable.getPlanRuleId());
                 batchResultRuleDTO.setRuleCode(batchPlanTable.getRuleCode());
                 batchResultRuleDTO.setRuleName(batchPlanTable.getRuleName());
                 batchResultRuleDTO.setCheckItem(batchPlanTableLine.getCheckItem());

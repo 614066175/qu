@@ -3,7 +3,7 @@
 <mapper namespace="com.hand.hdsp.quality.infra.mapper.BatchPlanTableMapper">
     <!-- 可根据自己的需求，是否要使用 -->
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.BatchPlanTable">
-        <result column="plan_rule_id" property="planTableId" jdbcType="DECIMAL"/>
+        <result column="plan_rule_id" property="planRuleId" jdbcType="DECIMAL"/>
         <result column="plan_base_id" property="planBaseId" jdbcType="DECIMAL"/>
         <result column="rule_code" property="ruleCode" jdbcType="VARCHAR"/>
         <result column="rule_name" property="ruleName" jdbcType="VARCHAR"/>

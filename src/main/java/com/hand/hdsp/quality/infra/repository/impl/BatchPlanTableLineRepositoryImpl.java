@@ -22,7 +22,7 @@ public class BatchPlanTableLineRepositoryImpl extends BaseRepositoryImpl<BatchPl
     }
 
     @Override
-    public int deleteByParentId(Long planTableId) {
-        return batchPlanTableLineMapper.deleteByParentId(planTableId);
+    public int deleteByParentId(Long planRuleId) {
+        return batchPlanTableLineMapper.deleteByParentId(planRuleId);
     }
 }

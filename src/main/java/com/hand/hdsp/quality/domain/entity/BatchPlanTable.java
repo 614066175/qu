@@ -36,7 +36,7 @@ public class BatchPlanTable extends AuditDomain {
 
     @Id
     @GeneratedValue
-    private Long planTableId;
+    private Long planRuleId;
 
     private Long planBaseId;
 

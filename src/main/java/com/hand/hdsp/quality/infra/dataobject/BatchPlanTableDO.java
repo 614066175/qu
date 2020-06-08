@@ -15,7 +15,7 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = false)
 public class BatchPlanTableDO extends AuditDomain {
 
-    private Long planTableId;
+    private Long planRuleId;
 
     private Long planBaseId;
 

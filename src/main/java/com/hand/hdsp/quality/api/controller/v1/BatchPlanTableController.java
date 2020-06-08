@@ -70,7 +70,7 @@ public class BatchPlanTableController extends BaseController {
             paramType = "path",
             required = true
     ), @ApiImplicitParam(
-            name = "planTableId",
+            name = "planRuleId",
             value = "批数据方案-表级规则表主键",
             paramType = "path",
             required = true
