@@ -9,6 +9,7 @@ import lombok.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 /**
  * <p>批数据方案-表间规则表 数据传输对象</p>
@@ -74,6 +75,12 @@ public class BatchPlanRelTableDTO extends AuditDomain {
 
     @ApiModelProperty(value = "告警等级json")
     private String warningLevel;
+
+    @ApiModelProperty(value = "关联关系list")
+    private List<RelationshipDTO> relationshipList;
+
+    @ApiModelProperty(value = "告警等级list")
+    private List<WarningLevelDTO> warningLevelList;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull

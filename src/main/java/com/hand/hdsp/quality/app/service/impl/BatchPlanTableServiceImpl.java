@@ -67,7 +67,7 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
                         batchPlanTableConDTO.setPlanLineId(batchPlanTableLineDTO.getPlanLineId());
                         batchPlanTableConDTO.setTenantId(tenantId);
                         //todo 范围重叠判断
-                        batchPlanTableConDTO.setWarningLevel(JsonUtils.object2Json(batchPlanTableConDTO.getWarningLevelDTOList()));
+                        batchPlanTableConDTO.setWarningLevel(JsonUtils.object2Json(batchPlanTableConDTO.getWarningLevelList()));
                         batchPlanTableConRepository.insertDTOSelective(batchPlanTableConDTO);
                     }
                 }
@@ -96,13 +96,13 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
                     for (BatchPlanTableConDTO batchPlanTableConDTO : batchPlanTableLineDTO.getBatchPlanTableConDTOList()) {
                         if (AuditDomain.RecordStatus.update.equals(batchPlanTableConDTO.get_status())) {
                             //todo 范围重叠判断
-                            batchPlanTableConDTO.setWarningLevel(JsonUtils.object2Json(batchPlanTableConDTO.getWarningLevelDTOList()));
+                            batchPlanTableConDTO.setWarningLevel(JsonUtils.object2Json(batchPlanTableConDTO.getWarningLevelList()));
                             batchPlanTableConRepository.updateDTOWhereTenant(batchPlanTableConDTO, tenantId);
                         } else if (AuditDomain.RecordStatus.create.equals(batchPlanTableConDTO.get_status())) {
                             batchPlanTableConDTO.setPlanLineId(batchPlanTableLineDTO.getPlanLineId());
                             batchPlanTableConDTO.setTenantId(tenantId);
                             //todo 范围重叠判断
-                            batchPlanTableConDTO.setWarningLevel(JsonUtils.object2Json(batchPlanTableConDTO.getWarningLevelDTOList()));
+                            batchPlanTableConDTO.setWarningLevel(JsonUtils.object2Json(batchPlanTableConDTO.getWarningLevelList()));
                             batchPlanTableConRepository.insertDTOSelective(batchPlanTableConDTO);
                         } else if (AuditDomain.RecordStatus.delete.equals(batchPlanTableConDTO.get_status())) {
                             batchPlanTableConRepository.deleteByPrimaryKey(batchPlanTableConDTO);
@@ -124,7 +124,7 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
         List<BatchPlanTableLineDTO> batchPlanTableLineDTOList = batchPlanTableLineRepository.selectDTO(BatchPlanTableLine.FIELD_PLAN_RULE_ID, planRuleId);
         for (BatchPlanTableLineDTO batchPlanTableLineDTO : batchPlanTableLineDTOList) {
             List<BatchPlanTableConDTO> conDTOList = batchPlanTableConRepository.selectDTO(BatchPlanTableCon.FIELD_PLAN_LINE_ID, batchPlanTableLineDTO.getPlanLineId());
-            conDTOList.forEach(dto -> dto.setWarningLevelDTOList(JsonUtils.json2WarningLevel(dto.getWarningLevel())));
+            conDTOList.forEach(dto -> dto.setWarningLevelList(JsonUtils.json2WarningLevel(dto.getWarningLevel())));
             batchPlanTableLineDTO.setBatchPlanTableConDTOList(conDTOList);
         }
         batchPlanTableDTO.setBatchPlanTableLineDTOList(batchPlanTableLineDTOList);

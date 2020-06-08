@@ -2,11 +2,14 @@ package com.hand.hdsp.quality.infra.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.hand.hdsp.quality.api.dto.RelationshipDTO;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import io.choerodon.core.exception.CommonException;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.util.ResponseUtils;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -43,11 +46,29 @@ public class JsonUtils {
      * @return
      */
     public static List<WarningLevelDTO> json2WarningLevel(String content) {
-        if (Objects.isNull(content)) {
-            return null;
+        if (StringUtils.isBlank(content)) {
+            return Collections.emptyList();
         }
         try {
             return ResponseUtils.getObjectMapper().readValue(content, new TypeReference<List<WarningLevelDTO>>() {
+            });
+        } catch (IOException e) {
+            throw new CommonException("Json Process Error");
+        }
+    }
+
+    /**
+     * json 转关联关系list
+     *
+     * @param content
+     * @return
+     */
+    public static List<RelationshipDTO> json2Relationship(String content) {
+        if (StringUtils.isBlank(content)) {
+            return Collections.emptyList();
+        }
+        try {
+            return ResponseUtils.getObjectMapper().readValue(content, new TypeReference<List<RelationshipDTO>>() {
             });
         } catch (IOException e) {
             throw new CommonException("Json Process Error");

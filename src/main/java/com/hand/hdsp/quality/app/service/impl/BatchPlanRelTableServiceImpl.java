@@ -3,8 +3,10 @@ package com.hand.hdsp.quality.app.service.impl;
 import com.hand.hdsp.quality.api.dto.BatchPlanRelTableDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanRelTableService;
 import com.hand.hdsp.quality.domain.repository.BatchPlanRelTableRepository;
+import com.hand.hdsp.quality.infra.util.JsonUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,12 +26,21 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
 
     @Override
     public BatchPlanRelTableDTO detail(Long planRuleId) {
-        return batchPlanRelTableRepository.selectDTOByPrimaryKey(planRuleId);
+        BatchPlanRelTableDTO dto = batchPlanRelTableRepository.selectDTOByPrimaryKey(planRuleId);
+        dto.setWarningLevelList(JsonUtils.json2WarningLevel(dto.getWarningLevel()));
+        dto.setRelationshipList(JsonUtils.json2Relationship(dto.getRelationship()));
+        return dto;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void insert(BatchPlanRelTableDTO batchPlanRelTableDTO) {
+        if (CollectionUtils.isNotEmpty(batchPlanRelTableDTO.getWarningLevelList())) {
+            batchPlanRelTableDTO.setWarningLevel(JsonUtils.object2Json(batchPlanRelTableDTO.getWarningLevelList()));
+        }
+        if (CollectionUtils.isNotEmpty(batchPlanRelTableDTO.getRelationshipList())) {
+            batchPlanRelTableDTO.setRelationship(JsonUtils.object2Json(batchPlanRelTableDTO.getRelationshipList()));
+        }
         batchPlanRelTableRepository.insertDTOSelective(batchPlanRelTableDTO);
     }
 
@@ -37,6 +48,12 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
     @Transactional(rollbackFor = Exception.class)
     public void update(BatchPlanRelTableDTO batchPlanRelTableDTO) {
         Long tenantId = batchPlanRelTableDTO.getTenantId();
+        if (CollectionUtils.isNotEmpty(batchPlanRelTableDTO.getWarningLevelList())) {
+            batchPlanRelTableDTO.setWarningLevel(JsonUtils.object2Json(batchPlanRelTableDTO.getWarningLevelList()));
+        }
+        if (CollectionUtils.isNotEmpty(batchPlanRelTableDTO.getRelationshipList())) {
+            batchPlanRelTableDTO.setRelationship(JsonUtils.object2Json(batchPlanRelTableDTO.getRelationshipList()));
+        }
         batchPlanRelTableRepository.updateDTOWhereTenant(batchPlanRelTableDTO, tenantId);
 
     }

@@ -72,7 +72,7 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
                     for (BatchPlanFieldConDTO batchPlanFieldConDTO : batchPlanFieldLineDTO.getBatchPlanFieldConDTOList()) {
                         batchPlanFieldConDTO.setPlanLineId(batchPlanFieldLineDTO.getPlanLineId());
                         batchPlanFieldConDTO.setTenantId(tenantId);
-                        batchPlanFieldConDTO.setWarningLevel(JsonUtils.object2Json(batchPlanFieldConDTO.getWarningLevelDTOList()));
+                        batchPlanFieldConDTO.setWarningLevel(JsonUtils.object2Json(batchPlanFieldConDTO.getWarningLevelList()));
                         batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
                     }
                 }
@@ -99,10 +99,10 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
                 if (CollectionUtils.isNotEmpty(batchPlanFieldLineDTO.getBatchPlanFieldConDTOList())) {
                     for (BatchPlanFieldConDTO con : batchPlanFieldLineDTO.getBatchPlanFieldConDTOList()) {
                         if (AuditDomain.RecordStatus.update.equals(con.get_status())) {
-                            con.setWarningLevel(JsonUtils.object2Json(con.getWarningLevelDTOList()));
+                            con.setWarningLevel(JsonUtils.object2Json(con.getWarningLevelList()));
                             batchPlanFieldConRepository.updateDTOWhereTenant(con, tenantId);
                         } else if (AuditDomain.RecordStatus.create.equals(con.get_status())) {
-                            con.setWarningLevel(JsonUtils.object2Json(con.getWarningLevelDTOList()));
+                            con.setWarningLevel(JsonUtils.object2Json(con.getWarningLevelList()));
                             con.setPlanLineId(batchPlanFieldLineDTO.getPlanLineId());
                             con.setTenantId(tenantId);
                             batchPlanFieldConRepository.insertDTOSelective(con);
@@ -122,7 +122,7 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
                 batchPlanFieldLineRepository.selectDTO(BatchPlanFieldLine.FIELD_PLAN_RULE_ID, planRuleId);
         for (BatchPlanFieldLineDTO batchPlanFieldLineDTO : batchPlanFieldLineDTOList) {
             List<BatchPlanFieldConDTO> conDTOList = batchPlanFieldConRepository.selectDTO(BatchPlanFieldCon.FIELD_PLAN_LINE_ID, batchPlanFieldLineDTO.getPlanLineId());
-            conDTOList.forEach(dto -> dto.setWarningLevelDTOList(JsonUtils.json2WarningLevel(dto.getWarningLevel())));
+            conDTOList.forEach(dto -> dto.setWarningLevelList(JsonUtils.json2WarningLevel(dto.getWarningLevel())));
             batchPlanFieldLineDTO.setBatchPlanFieldConDTOList(conDTOList);
         }
         batchPlanFieldDTO.setBatchPlanFieldLineDTOList(batchPlanFieldLineDTOList);
