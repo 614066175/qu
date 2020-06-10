@@ -58,9 +58,9 @@
             <bind name="datasourceSchema" value="'%' + datasourceSchema + '%'"/>
             and xbpb.datasource_schema like #{datasourceSchema}
         </if>
-        <if test="tableName != null">
-            <bind name="tableName" value="'%' + tableName + '%'"/>
-            and xbpb.table_name like #{tableName}
+        <if test="objectName != null">
+            <bind name="objectName" value="'%' + objectName + '%'"/>
+            and xbpb.object_name like #{objectName}
         </if>
         <if test="description != null">
             <bind name="description" value="'%' + description + '%'"/>
