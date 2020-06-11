@@ -42,7 +42,13 @@ public class BatchResultBase extends AuditDomain {
 
     private Long planBaseId;
 
-    private String tableName;
+    private String objectName;
+
+    private String incrementStrategy;
+
+    private String incrementColumn;
+
+    private String whereCondition;
 
     private Long ruleCount;
 

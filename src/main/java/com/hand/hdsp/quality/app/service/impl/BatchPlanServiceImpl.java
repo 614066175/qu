@@ -9,12 +9,14 @@ import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.converter.BatchPlanFieldLineConverter;
 import com.hand.hdsp.quality.infra.converter.BatchPlanTableLineConverter;
+import com.hand.hdsp.quality.infra.dataobject.BatchPlanFieldConDO;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import com.hand.hdsp.quality.infra.feign.DispatchJobFeign;
 import com.hand.hdsp.quality.infra.feign.DqRuleLineFeign;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureCollector;
+import com.hand.hdsp.quality.infra.util.JsonUtils;
 import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -69,6 +71,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     @Autowired
     private BatchPlanFieldLineRepository batchPlanFieldLineRepository;
     @Autowired
+    private BatchPlanFieldConRepository batchPlanFieldConRepository;
+    @Autowired
     private BatchPlanRelTableRepository batchPlanRelTableRepository;
     @Autowired
     private BatchResultRepository batchResultRepository;
@@ -77,11 +81,11 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     @Autowired
     private BatchResultRuleRepository batchResultRuleRepository;
     @Autowired
+    private BatchResultItemRepository batchResultItemRepository;
+    @Autowired
     private MeasureCollector measureCollector;
     @Autowired
     private BatchPlanTableLineConverter batchPlanTableLineConverter;
-    @Autowired
-    private BatchPlanFieldLineConverter batchPlanFieldLineConverter;
     @Autowired
     private DispatchJobFeign dispatchJobFeign;
     @Autowired
@@ -203,7 +207,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             BatchResultBase batchResultBase = BatchResultBase.builder()
                     .resultId(batchResult.getResultId())
                     .planBaseId(batchPlanBase.getPlanBaseId())
-                    .tableName(batchPlanBase.getObjectName())
+                    .objectName(batchPlanBase.getObjectName())
                     .ruleCount(0L)
                     .exceptionRuleCount(0L)
                     .checkItemCount(0L)
@@ -253,18 +257,18 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                         .build());
                 batchResultRuleDTO.setResultBaseId(batchResultBase.getResultBaseId());
                 batchResultRuleDTO.setRuleType(PlanConstant.ResultRuleType.TABLE);
-                batchResultRuleDTO.setTableName(batchResultBase.getTableName());
-                batchResultRuleDTO.setRuleId(batchPlanTable.getPlanRuleId());
-                batchResultRuleDTO.setRuleCode(batchPlanTable.getRuleCode());
-                batchResultRuleDTO.setRuleName(batchPlanTable.getRuleName());
-                batchResultRuleDTO.setCheckItem(batchPlanTableLine.getCheckItem());
-                batchResultRuleDTO.setTenantId(tenantId);
-                batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
-
-                if (StringUtils.isNotBlank(batchResultRuleDTO.getWarningLevel())) {
-                    batchResultBase.setExceptionCheckItemCount(batchResultBase.getExceptionCheckItemCount() + 1);
-                    exceptionFlag = true;
-                }
+//                batchResultRuleDTO.setTableName(batchResultBase.getTableName());
+//                batchResultRuleDTO.setRuleId(batchPlanTable.getPlanRuleId());
+//                batchResultRuleDTO.setRuleCode(batchPlanTable.getRuleCode());
+//                batchResultRuleDTO.setRuleName(batchPlanTable.getRuleName());
+//                batchResultRuleDTO.setCheckItem(batchPlanTableLine.getCheckItem());
+//                batchResultRuleDTO.setTenantId(tenantId);
+//                batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
+//
+//                if (StringUtils.isNotBlank(batchResultRuleDTO.getWarningLevel())) {
+//                    batchResultBase.setExceptionCheckItemCount(batchResultBase.getExceptionCheckItemCount() + 1);
+//                    exceptionFlag = true;
+//                }
             }
 
             if (exceptionFlag) {
@@ -285,46 +289,60 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         batchResultBase.setRuleCount(batchResultBase.getRuleCount() + fieldList.size());
 
         for (BatchPlanField batchPlanField : fieldList) {
-            List<BatchPlanFieldLine> lineList = batchPlanFieldLineRepository.select(BatchPlanFieldLine.FIELD_PLAN_RULE_ID, batchPlanField.getPlanRuleId());
-            batchResultBase.setCheckItemCount(batchResultBase.getCheckItemCount() + lineList.size());
+            List<BatchPlanFieldConDO> conList = batchPlanFieldConRepository.selectJoinItem(BatchPlanFieldConDO.builder().planRuleId(batchPlanField.getPlanRuleId()).build());
+            batchResultBase.setCheckItemCount(batchResultBase.getCheckItemCount() + conList.size());
 
             //异常标记
             boolean exceptionFlag = false;
+            BatchResultRuleDTO batchResultRuleDTO = BatchResultRuleDTO.builder()
+                    .resultBaseId(batchResultBase.getResultBaseId())
+                    .ruleType(PlanConstant.ResultRuleType.FIELD)
+                    .planRuleId(batchPlanField.getPlanRuleId())
+                    .ruleCode(batchPlanField.getRuleCode())
+                    .ruleName(batchPlanField.getRuleName())
+                    .ruleDesc(batchPlanField.getRuleDesc())
+                    .weight(batchPlanField.getWeight())
+                    .tenantId(tenantId)
+                    .build();
+            batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
 
-            for (BatchPlanFieldLine batchPlanFieldLine : lineList) {
-
-                BatchPlanFieldLineDTO batchPlanFieldLineDTO = batchPlanFieldLineConverter.entityToDto(batchPlanFieldLine);
+            for (BatchPlanFieldConDO batchPlanFieldConDO : conList) {
 
                 Measure measure;
-                if (PlanConstant.CheckWay.COMMON.equals(batchPlanFieldLine.getCheckWay())) {
-                    measure = measureCollector.getMeasure(batchPlanFieldLine.getCheckItem().toUpperCase());
+                if (PlanConstant.CheckWay.COMMON.equals(batchPlanFieldConDO.getCheckWay())) {
+                    measure = measureCollector.getMeasure(batchPlanFieldConDO.getCheckItem().toUpperCase());
                 } else {
                     measure = measureCollector.getMeasure(PlanConstant.CheckWay.REGULAR);
                 }
 
-                BatchResultRuleDTO batchResultRuleDTO = measure.check(MeasureParamDO.builder()
+                MeasureParamDO param = MeasureParamDO.builder()
                         .tenantId(tenantId)
+                        .checkItem(batchPlanFieldConDO.getCheckItem())
+                        .countType(batchPlanFieldConDO.getCountType())
+                        .compareWay(batchPlanFieldConDO.getCompareWay())
+                        .warningLevelList(JsonUtils.json2WarningLevel(batchPlanFieldConDO.getWarningLevel()))
                         .datasourceDTO(datasourceDTO)
-                        .batchPlanField(batchPlanField)
-                        .batchPlanFieldLineDTO(batchPlanFieldLineDTO)
                         .batchResultBase(batchResultBase)
-                        .build());
-                batchResultRuleDTO.setResultBaseId(batchResultBase.getResultBaseId());
-                batchResultRuleDTO.setRuleType(PlanConstant.ResultRuleType.FIELD);
-                batchResultRuleDTO.setTableName(batchResultBase.getTableName());
-                batchResultRuleDTO.setRuleId(batchPlanField.getPlanRuleId());
-                batchResultRuleDTO.setPlanLineId(batchPlanFieldLine.getPlanLineId());
-                batchResultRuleDTO.setRuleCode(batchPlanField.getRuleCode());
-                batchResultRuleDTO.setRuleName(batchPlanField.getRuleName());
-                batchResultRuleDTO.setFieldName(batchPlanFieldLineDTO.getFieldName());
-                batchResultRuleDTO.setCheckItem(batchPlanFieldLine.getCheckItem());
-                if (PlanConstant.CheckWay.REGULAR.equals(batchPlanFieldLine.getCheckWay())) {
-                    batchResultRuleDTO.setCheckItem(PlanConstant.CheckWay.REGULAR);
-                }
-                batchResultRuleDTO.setTenantId(tenantId);
-                batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
+                        .batchPlanFieldConDO(batchPlanFieldConDO)
+                        .batchResultItem(BatchResultItem.builder().build())
+                        .build();
+                measure.check(param);
 
-                if (StringUtils.isNotBlank(batchResultRuleDTO.getWarningLevel())) {
+                BatchResultItem batchResultItem = param.getBatchResultItem();
+                batchResultItem.setResultRuleId(batchResultRuleDTO.getResultRuleId());
+                batchResultItem.setConditionId(batchPlanFieldConDO.getConditionId());
+                batchResultItem.setCheckWay(batchPlanFieldConDO.getCheckWay());
+                if (PlanConstant.CheckWay.REGULAR.equals(batchPlanFieldConDO.getCheckWay())) {
+                    batchResultItem.setCheckItem(PlanConstant.CheckWay.REGULAR);
+                }
+                batchResultItem.setCheckItem(batchPlanFieldConDO.getCheckItem());
+                batchResultItem.setFieldName(batchPlanFieldConDO.getFieldName());
+                batchResultItem.setCheckFieldName(batchPlanFieldConDO.getCheckFieldName());
+
+                batchResultItem.setTenantId(tenantId);
+                batchResultItemRepository.insertSelective(batchResultItem);
+
+                if (StringUtils.isNotBlank(batchResultItem.getWarningLevel())) {
                     batchResultBase.setExceptionCheckItemCount(batchResultBase.getExceptionCheckItemCount() + 1);
                     exceptionFlag = true;
                 }
@@ -332,7 +350,10 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
             if (exceptionFlag) {
                 batchResultBase.setExceptionRuleCount(batchResultBase.getExceptionRuleCount() + 1);
+                batchResultRuleDTO.setResultFlag(1);
             }
+            batchResultRuleRepository.updateByDTOPrimaryKeySelective(batchResultRuleDTO);
+
         }
     }
 
@@ -361,17 +382,17 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
             batchResultRuleDTO.setResultBaseId(batchResultBase.getResultBaseId());
             batchResultRuleDTO.setRuleType(PlanConstant.ResultRuleType.REL_TABLE);
-            batchResultRuleDTO.setTableName(batchResultBase.getTableName());
-            batchResultRuleDTO.setRuleId(batchPlanRelTable.getPlanRuleId());
-            batchResultRuleDTO.setRuleCode(batchPlanRelTable.getRuleCode());
-            batchResultRuleDTO.setRuleName(batchPlanRelTable.getRuleName());
-            batchResultRuleDTO.setTenantId(tenantId);
-            batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
-
-            if (StringUtils.isNotBlank(batchResultRuleDTO.getWarningLevel())) {
-                batchResultBase.setExceptionRuleCount(batchResultBase.getExceptionRuleCount() + 1);
-                batchResultBase.setExceptionCheckItemCount(batchResultBase.getExceptionCheckItemCount() + 1);
-            }
+//            batchResultRuleDTO.setTableName(batchResultBase.getTableName());
+//            batchResultRuleDTO.setRuleId(batchPlanRelTable.getPlanRuleId());
+//            batchResultRuleDTO.setRuleCode(batchPlanRelTable.getRuleCode());
+//            batchResultRuleDTO.setRuleName(batchPlanRelTable.getRuleName());
+//            batchResultRuleDTO.setTenantId(tenantId);
+//            batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
+//
+//            if (StringUtils.isNotBlank(batchResultRuleDTO.getWarningLevel())) {
+//                batchResultBase.setExceptionRuleCount(batchResultBase.getExceptionRuleCount() + 1);
+//                batchResultBase.setExceptionCheckItemCount(batchResultBase.getExceptionCheckItemCount() + 1);
+//            }
         }
     }
 
@@ -400,12 +421,12 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         List<BatchResultRuleDTO> resultRuleDTOList = batchResultRuleRepository.selectByResultId(batchResult.getResultId());
         BigDecimal w = BigDecimal.valueOf(resultRuleDTOList.stream().mapToLong(BatchResultRuleDTO::getWeight).sum());
         BigDecimal sum = BigDecimal.ZERO;
-        for (BatchResultRuleDTO batchResultRuleDTO : resultRuleDTOList) {
-            BigDecimal multiply = BigDecimal.valueOf(batchResultRuleDTO.getWeight())
-                    .divide(w, 10, RoundingMode.HALF_UP)
-                    .multiply(map.get(batchResultRuleDTO.getWarningLevel()));
-            sum = sum.add(multiply);
-        }
+//        for (BatchResultRuleDTO batchResultRuleDTO : resultRuleDTOList) {
+//            BigDecimal multiply = BigDecimal.valueOf(batchResultRuleDTO.getWeight())
+//                    .divide(w, 10, RoundingMode.HALF_UP)
+//                    .multiply(map.get(batchResultRuleDTO.getWarningLevel()));
+//            sum = sum.add(multiply);
+//        }
         batchResult.setMark(sum.multiply(BigDecimal.valueOf(100)));
         batchResult.setPlanStatus(PlanConstant.PlanStatus.SUCCESS);
         batchResult.setEndDate(new Date());

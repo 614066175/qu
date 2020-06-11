@@ -35,11 +35,11 @@ public class BatchResultBaseRepositoryImpl extends BaseRepositoryImpl<BatchResul
                                 .andEqualTo(BatchResultBase.FIELD_TENANT_ID, batchResultBaseDTO.getTenantId(), true))
                         .build()
         );
-        if (!batchResultBaseDTOS.isEmpty()){
-            batchResultBaseDTOS.stream().forEach( s ->{
-                s.setResultWaringVOS(batchResultRuleMapper.selectWaringLevel(BatchResultRuleDO.builder().tenantId(batchResultBaseDTO.getTenantId()).tableName(s.getTableName()).resultBaseId(s.getResultBaseId()).build()));
-            });
-        }
+//        if (!batchResultBaseDTOS.isEmpty()){
+//            batchResultBaseDTOS.stream().forEach( s ->{
+//                s.setResultWaringVOS(batchResultRuleMapper.selectWaringLevel(BatchResultRuleDO.builder().tenantId(batchResultBaseDTO.getTenantId()).tableName(s.getTableName()).resultBaseId(s.getResultBaseId()).build()));
+//            });
+//        }
         return batchResultBaseDTOS;
     }
 }

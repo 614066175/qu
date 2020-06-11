@@ -49,6 +49,10 @@ public class BatchResultDTO extends AuditDomain {
     @ApiModelProperty(value = "异常信息")
     private String exceptionInfo;
 
+    @ApiModelProperty(value = "最新一次结果标记 1-最新的 0-旧的")
+    @NotNull
+    private Integer lastFlag;
+
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;

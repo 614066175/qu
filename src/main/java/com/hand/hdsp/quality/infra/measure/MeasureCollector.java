@@ -1,15 +1,20 @@
 package com.hand.hdsp.quality.infra.measure;
 
+import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
+import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.core.exception.MessageException;
 import org.hzero.core.message.MessageAccessor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,6 +26,8 @@ import java.util.Map;
 @Slf4j
 public class MeasureCollector {
     private final LovAdapter lovAdapter;
+    @Autowired
+    private ItemTemplateSqlRepository itemTemplateSqlRepository;
 
     private static final Map<String, Measure> MEASURE_MAP = new HashMap<>();
 
@@ -37,6 +44,12 @@ public class MeasureCollector {
     }
 
     public Measure getMeasure(String checkItem) {
+
+        List<ItemTemplateSql> list = itemTemplateSqlRepository.select(ItemTemplateSql.builder().checkItem(checkItem).build());
+        if (CollectionUtils.isNotEmpty(list)) {
+            return MEASURE_MAP.get("COMMON_SQL");
+        }
+
         Measure measure = MEASURE_MAP.get(checkItem.toUpperCase());
         if (measure == null) {
             String meaning = lovAdapter.queryLovMeaning(PlanConstant.LOV_CHECK_ITEM, BaseConstants.DEFAULT_TENANT_ID, checkItem);

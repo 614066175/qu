@@ -16,14 +16,6 @@ import java.util.List;
 public interface BatchResultRuleMapper extends BaseMapper<BatchResultRule> {
 
     /**
-     * 查询历史实际值
-     *
-     * @param batchResultRule
-     * @return
-     */
-    List<BatchResultRuleDO> queryList(BatchResultRuleDO batchResultRule);
-
-    /**
      * 根据结果id查询出所有数据
      *
      * @param resultId

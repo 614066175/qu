@@ -43,6 +43,11 @@ public interface PlanConstant {
     String LOV_CHECK_ITEM = "HDSP.XQUA.CHECK_ITEM";
 
     /**
+     * 校验类型 LOV
+     */
+    String LOV_COUNT_TYPE = "HDSP.XQUA.COUNT_TYPE";
+
+    /**
      * 告警等级-正常
      */
     String WARNING_LEVEL_NORMAL = "NORMAL";
@@ -87,6 +92,14 @@ public interface PlanConstant {
          * 小于等于
          */
         String LESS_EQUAL = "LESS_EQUAL";
+        /**
+         * 范围比较
+         */
+        String RANGE = "RANGE";
+        /**
+         * 值比较
+         */
+        String VALUE = "VALUE";
     }
 
     /**
@@ -157,4 +170,19 @@ public interface PlanConstant {
          */
         String REGULAR = "REGULAR";
     }
+
+    /**
+     * 比较符号
+     */
+    interface CompareSymbol {
+        /**
+         * 等于
+         */
+        String EQUAL = "EQUAL";
+        /**
+         * 不等于
+         */
+        String NOT_EQUAL = "NOT_EQUAL";
+    }
+
 }

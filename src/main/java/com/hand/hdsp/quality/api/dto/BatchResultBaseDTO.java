@@ -7,9 +7,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.util.List;
 
 /**
@@ -37,13 +35,19 @@ public class BatchResultBaseDTO extends AuditDomain {
     @NotNull
     private Long planBaseId;
 
-    @ApiModelProperty(value = "校验表名称")
-    @NotBlank
-    @Size(max = 50)
-    private String tableName;
+    @ApiModelProperty(value = "表名/视图名/自定义SQL")
+    private String objectName;
+
+    @ApiModelProperty(value = "增量校验策略")
+    private String incrementStrategy;
+
+    @ApiModelProperty(value = "增量字段")
+    private String incrementColumn;
+
+    @ApiModelProperty(value = "条件where")
+    private String whereCondition;
 
     @ApiModelProperty(value = "规则总数")
-    @NotNull
     private Long ruleCount;
 
     @ApiModelProperty(value = "异常规则数")
@@ -55,7 +59,7 @@ public class BatchResultBaseDTO extends AuditDomain {
     @ApiModelProperty(value = "异常校验项数")
     private Long exceptionCheckItemCount;
 
-    @ApiModelProperty(value = "数据量")
+    @ApiModelProperty(value = "数据量（表行数）")
     private Long dataCount;
 
     @ApiModelProperty(value = "表大小")

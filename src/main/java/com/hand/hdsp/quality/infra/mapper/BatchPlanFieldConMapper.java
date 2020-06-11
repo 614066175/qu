@@ -1,7 +1,10 @@
 package com.hand.hdsp.quality.infra.mapper;
 
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldCon;
+import com.hand.hdsp.quality.infra.dataobject.BatchPlanFieldConDO;
 import io.choerodon.mybatis.common.BaseMapper;
+
+import java.util.List;
 
 /**
  * <p>批数据方案-字段规则条件表Mapper</p>
@@ -10,4 +13,11 @@ import io.choerodon.mybatis.common.BaseMapper;
  */
 public interface BatchPlanFieldConMapper extends BaseMapper<BatchPlanFieldCon> {
 
+    /**
+     * 关联查询校验项
+     *
+     * @param batchPlanFieldConDO
+     * @return
+     */
+    List<BatchPlanFieldConDO> selectJoinItem(BatchPlanFieldConDO batchPlanFieldConDO);
 }

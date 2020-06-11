@@ -36,14 +36,8 @@ public class BatchResultRuleDTO extends AuditDomain {
     @Size(max = 50)
     private String ruleType;
 
-    @ApiModelProperty(value = "校验表名称")
-    private String tableName;
-
-    @ApiModelProperty(value = "方案规则ID(XQUA_BATCH_PLAN_REL_TABLE.PLAN_RULE_ID/XQUA_BATCH_PLAN_FIELD.PLAN_RULE_ID/XQUA_BATCH_PLAN_TABLE.PLAN_RULE_ID)结合规则类型判断具体是哪个")
-    private Long ruleId;
-
-    @ApiModelProperty(value = "XQUA_BATCH_PLAN_FIELD_LINE.PLAN_LINE_ID")
-    private Long planLineId;
+    @ApiModelProperty(value = "方案规则ID(XQUA_BATCH_PLAN_REL_TABLE/XQUA_BATCH_PLAN_FIELD/XQUA_BATCH_PLAN_TABLE表的PLAN_RULE_ID)")
+    private Long planRuleId;
 
     @ApiModelProperty(value = "规则编码")
     private String ruleCode;
@@ -51,40 +45,21 @@ public class BatchResultRuleDTO extends AuditDomain {
     @ApiModelProperty(value = "规则名称")
     private String ruleName;
 
-    @ApiModelProperty(value = "校验项 HDSP.XQUA.CHECK_ITEM")
-    private String checkItem;
+    @ApiModelProperty(value = "规则描述")
+    private String ruleDesc;
 
-    @ApiModelProperty(value = "比较方式 HDSP.XQUA.COMPARE_WAY")
-    private String compareWay;
+    @ApiModelProperty(value = "校验类别 HDSP.XQUA.CHECK_TYPE")
+    private String checkType;
 
-    @ApiModelProperty(value = "阈值")
-    private String expectedValue;
+    @ApiModelProperty(value = "权重")
+    private Long weight;
 
-    @ApiModelProperty(value = "实际值")
-    private String actualValue;
-
-    @ApiModelProperty(value = "波动率")
-    private String waveRate;
-
-    @ApiModelProperty(value = "当前值（用于字段规则计算波动率）")
-    private String currentValue;
-
-    @ApiModelProperty(value = "错误信息")
-    private String exceptionInfo;
-
-    @ApiModelProperty(value = "告警等级 HDSP.XQUA.WARNING_LEVEL")
-    private String warningLevel;
-
-    @ApiModelProperty(value = "列名")
-    private String fieldName;
-
-    @ApiModelProperty(value = "对比表名")
-    private String relTableName;
+    @ApiModelProperty(value = "规则结果 1-正常 0-异常")
+    @NotNull
+    private Integer resultFlag;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;
 
-    @ApiModelProperty(value = "权重")
-    private Long weight;
 }

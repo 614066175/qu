@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.BatchResultItemMapper">
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.BatchResultItem">
+        <result column="result_item_id" property="resultItemId" jdbcType="DECIMAL"/>
+        <result column="result_rule_id" property="resultRuleId" jdbcType="DECIMAL"/>
+        <result column="condition_id" property="conditionId" jdbcType="DECIMAL"/>
+        <result column="check_way" property="checkWay" jdbcType="VARCHAR"/>
+        <result column="check_item" property="checkItem" jdbcType="VARCHAR"/>
+        <result column="count_type" property="countType" jdbcType="VARCHAR"/>
+        <result column="field_name" property="fieldName" jdbcType="VARCHAR"/>
+        <result column="check_field_name" property="checkFieldName" jdbcType="VARCHAR"/>
+        <result column="where_condition" property="whereCondition" jdbcType="VARCHAR"/>
+        <result column="compare_way" property="compareWay" jdbcType="VARCHAR"/>
+        <result column="regular_expression" property="regularExpression" jdbcType="VARCHAR"/>
+        <result column="lov_code" property="lovCode" jdbcType="VARCHAR"/>
+        <result column="custom_sql" property="customSql" jdbcType="VARCHAR"/>
+        <result column="rel_datasource_type" property="relDatasourceType" jdbcType="VARCHAR"/>
+        <result column="rel_datasource_id" property="relDatasourceId" jdbcType="DECIMAL"/>
+        <result column="rel_schema" property="relSchema" jdbcType="VARCHAR"/>
+        <result column="rel_table_name" property="relTableName" jdbcType="VARCHAR"/>
+        <result column="relationship" property="relationship" jdbcType="VARCHAR"/>
+        <result column="warning_level_json" property="warningLevelJson" jdbcType="VARCHAR"/>
+        <result column="actual_value" property="actualValue" jdbcType="VARCHAR"/>
+        <result column="wave_rate" property="waveRate" jdbcType="VARCHAR"/>
+        <result column="current_value" property="currentValue" jdbcType="VARCHAR"/>
+        <result column="exception_info" property="exceptionInfo" jdbcType="VARCHAR"/>
+        <result column="warning_level" property="warningLevel" jdbcType="VARCHAR"/>
+        <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
+        <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
+        <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
+        <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+
+    <select id="queryList" resultType="com.hand.hdsp.quality.infra.dataobject.BatchResultItemDO">
+        select xbri.current_value
+        from xqua_batch_result_item xbri
+        join xqua_batch_result_rule xbrr on xbri.result_rule_id = xbrr.result_rule_id
+        where xbri.condition_id = #{conditionId}
+          and xbrr.rule_type = '${@com.hand.hdsp.quality.infra.constant.PlanConstant$ResultRuleType@FIELD}'
+          and date_format(xbri.creation_date, '%Y%m%d') = date_format(#{measureDate}, '%Y%m%d')
+        order by xbri.creation_date desc
+    </select>
+</mapper>

@@ -74,6 +74,4 @@ public class RuleDTO extends AuditDomain {
     @ApiModelProperty(value = "规则校验项List")
     private List<RuleLineDTO> ruleLineDTOList;
 
-    @ApiModelProperty(value = "是否选用标记")
-    private Integer selectedFlag = 0;
 }

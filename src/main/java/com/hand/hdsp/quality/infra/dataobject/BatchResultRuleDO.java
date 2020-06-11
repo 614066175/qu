@@ -3,8 +3,6 @@ package com.hand.hdsp.quality.infra.dataobject;
 import io.choerodon.mybatis.domain.AuditDomain;
 import lombok.*;
 
-import java.util.Date;
-
 /**
  * <p>批数据方案结果表-规则信息数据对象</p>
  *
@@ -23,40 +21,19 @@ public class BatchResultRuleDO extends AuditDomain {
 
     private String ruleType;
 
-    private String tableName;
-
-    private Long ruleId;
-
-    private Long planLineId;
+    private Long planRuleId;
 
     private String ruleCode;
 
     private String ruleName;
 
-    private String checkItem;
+    private String ruleDesc;
 
-    private String compareWay;
+    private String checkType;
 
-    private String expectedValue;
+    private Long weight;
 
-    private String actualValue;
-
-    private String waveRate;
-
-    private String currentValue;
-
-    private String exceptionInfo;
-
-    private String warningLevel;
-
-    private String fieldName;
-
-    private String relTableName;
+    private Integer resultFlag;
 
     private Long tenantId;
-
-    /**
-     * 计算日期
-     */
-    private Date measureDate;
 }

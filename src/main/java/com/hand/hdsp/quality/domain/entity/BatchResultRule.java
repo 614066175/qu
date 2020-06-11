@@ -42,35 +42,19 @@ public class BatchResultRule extends AuditDomain {
 
     private String ruleType;
 
-    private String tableName;
-
-    private Long ruleId;
-
-    private Long planLineId;
+    private Long planRuleId;
 
     private String ruleCode;
 
     private String ruleName;
 
-    private String checkItem;
+    private String ruleDesc;
 
-    private String compareWay;
+    private String checkType;
 
-    private String expectedValue;
+    private Long weight;
 
-    private String actualValue;
-
-    private String waveRate;
-
-    private String currentValue;
-
-    private String exceptionInfo;
-
-    private String warningLevel;
-
-    private String fieldName;
-
-    private String relTableName;
+    private Integer resultFlag;
 
     private Long tenantId;
 
