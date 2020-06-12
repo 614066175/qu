@@ -66,5 +66,7 @@
             <bind name="description" value="'%' + description + '%'"/>
             and xbpb.description like #{description}
         </if>
+        order by
+        xbpb.plan_base_id desc
     </select>
 </mapper>
