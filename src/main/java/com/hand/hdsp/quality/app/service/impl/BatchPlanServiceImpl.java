@@ -7,13 +7,13 @@ import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
-import com.hand.hdsp.quality.infra.converter.BatchPlanFieldLineConverter;
-import com.hand.hdsp.quality.infra.converter.BatchPlanTableLineConverter;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanFieldConDO;
+import com.hand.hdsp.quality.infra.dataobject.BatchPlanTableConDO;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import com.hand.hdsp.quality.infra.feign.DispatchJobFeign;
 import com.hand.hdsp.quality.infra.feign.DqRuleLineFeign;
+import com.hand.hdsp.quality.infra.feign.RestJobFeign;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureCollector;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
@@ -33,7 +33,6 @@ import org.hzero.core.exception.MessageException;
 import org.hzero.core.util.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,10 +52,12 @@ import java.util.stream.Collectors;
 @Service
 public class BatchPlanServiceImpl implements BatchPlanService {
 
-    private static final String JOB_COMMAND = "curl -X GET --header 'Accept: */*' 'http://%s:%s/v2/%d/batch-plans/exec/%d'";
+    private static final String JOB_URL = "/v2/%d/batch-plans/exec/%d";
     private static final String TABLE_SIZE_SQL = "SELECT COUNT(*) table_rows FROM %s";
-    @Value("${server.port}")
-    private String port;
+    @Value("${hdsp.route-data.service-short}")
+    private String serviceShort;
+    @Value("${hdsp.route-data.service-id}")
+    private String serviceId;
 
     @Autowired
     private BatchPlanBaseRepository batchPlanBaseRepository;
@@ -65,11 +66,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     @Autowired
     private BatchPlanTableRepository batchPlanTableRepository;
     @Autowired
-    private BatchPlanTableLineRepository batchPlanTableLineRepository;
+    private BatchPlanTableConRepository batchPlanTableConRepository;
     @Autowired
     private BatchPlanFieldRepository batchPlanFieldRepository;
-    @Autowired
-    private BatchPlanFieldLineRepository batchPlanFieldLineRepository;
     @Autowired
     private BatchPlanFieldConRepository batchPlanFieldConRepository;
     @Autowired
@@ -85,11 +84,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     @Autowired
     private MeasureCollector measureCollector;
     @Autowired
-    private BatchPlanTableLineConverter batchPlanTableLineConverter;
-    @Autowired
     private DispatchJobFeign dispatchJobFeign;
     @Autowired
-    private InetUtils inetUtils;
+    private RestJobFeign restJobFeign;
     @Autowired
     private DatasourceFeign datasourceFeign;
     @Autowired
@@ -148,23 +145,41 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     @Override
     public void generate(Long tenantId, Long planId) {
         BatchPlanDTO batchPlanDTO = batchPlanRepository.selectDTOByPrimaryKey(planId);
-        // 生成azkaban job的内容
-        String ipAddress = inetUtils.findFirstNonLoopbackHostInfo().getIpAddress();
         // 创建或更新job
+        String jobName = "QUA_" + tenantId + "_" + batchPlanDTO.getPlanCode();
         ResponseEntity<String> jobResult = dispatchJobFeign.createOrUpdate(tenantId,
                 JobDTO.builder()
                         .themeId(PlanConstant.DEFAULT_THEME_ID)
                         .layerId(PlanConstant.DEFAULT_LAYER_ID)
-                        .jobName("QUA_" + tenantId + "_" + batchPlanDTO.getPlanCode())
+                        .jobName(jobName)
                         .jobDescription(batchPlanDTO.getPlanName())
-                        .jobClass(PlanConstant.JOB_TYPE)
+                        .jobClass(PlanConstant.JOB_CLASS)
                         .jobType(PlanConstant.JOB_TYPE)
-                        .jobCommand(String.format(JOB_COMMAND, ipAddress, port, tenantId, planId))
                         .jobLevel(PlanConstant.JOB_LEVEL)
                         .enabledFlag(1)
                         .tenantId(tenantId)
                         .build());
         ResponseUtils.getResponse(jobResult, JobDTO.class);
+
+        //查询是否存在restJob
+        ResponseEntity<String> findResult = restJobFeign.findName(tenantId, jobName);
+        RestJobDTO restJobDTO = ResponseUtils.getResponse(findResult, RestJobDTO.class);
+
+        restJobDTO.setExternal(0);
+        restJobDTO.setMethod(PlanConstant.JOB_METHOD);
+        restJobDTO.setServiceCode(serviceId);
+        restJobDTO.setServiceName(serviceShort);
+        restJobDTO.setUseGateway(1);
+        restJobDTO.setUrl(String.format(JOB_URL, tenantId, planId));
+        restJobDTO.setJobName(jobName);
+        restJobDTO.setBody("{}");
+        restJobDTO.setHeader("{\"content-type\": \"application/json\"}");
+        restJobDTO.setSettingInfo("{\"authSettingInfo\":{\"auth\":\"OAUTH2\",\"grantType\":\"PASSWORD\"},\"apiSettingInfo\":{\"retryEnabled\":false},\"callbackApiSettingInfo\":{\"enabled\":false}}");
+
+        //插入或更新
+        ResponseEntity<String> restJobResult = restJobFeign.create(tenantId, restJobDTO);
+        ResponseUtils.getResponse(restJobResult, RestJobDTO.class);
+
     }
 
     /**
@@ -238,42 +253,59 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         batchResultBase.setRuleCount(batchResultBase.getRuleCount() + tableList.size());
 
         for (BatchPlanTable batchPlanTable : tableList) {
-            List<BatchPlanTableLine> lineList = batchPlanTableLineRepository.select(BatchPlanTableLine.FIELD_PLAN_RULE_ID, batchPlanTable.getPlanRuleId());
-            batchResultBase.setCheckItemCount(batchResultBase.getCheckItemCount() + lineList.size());
+            List<BatchPlanTableConDO> conList = batchPlanTableConRepository.selectJoinItem(BatchPlanTableConDO.builder().planRuleId(batchPlanTable.getPlanRuleId()).build());
+            batchResultBase.setCheckItemCount(batchResultBase.getCheckItemCount() + conList.size());
 
             //异常标记
             boolean exceptionFlag = false;
 
-            for (BatchPlanTableLine batchPlanTableLine : lineList) {
+            BatchResultRuleDTO batchResultRuleDTO = BatchResultRuleDTO.builder()
+                    .resultBaseId(batchResultBase.getResultBaseId())
+                    .ruleType(PlanConstant.ResultRuleType.TABLE)
+                    .planRuleId(batchPlanTable.getPlanRuleId())
+                    .ruleCode(batchPlanTable.getRuleCode())
+                    .ruleName(batchPlanTable.getRuleName())
+                    .ruleDesc(batchPlanTable.getRuleDesc())
+                    .weight(batchPlanTable.getWeight())
+                    .ruleType(batchPlanTable.getRuleType())
+                    .tenantId(tenantId)
+                    .build();
+            batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
 
-                BatchPlanTableLineDTO batchPlanTableLineDTO = batchPlanTableLineConverter.entityToDto(batchPlanTableLine);
-                Measure measure = measureCollector.getMeasure(batchPlanTableLine.getCheckItem().toUpperCase());
+            for (BatchPlanTableConDO batchPlanTableConDO : conList) {
 
-                BatchResultRuleDTO batchResultRuleDTO = measure.check(MeasureParamDO.builder()
+                Measure measure = measureCollector.getMeasure(batchPlanTableConDO.getCheckItem().toUpperCase());
+
+                MeasureParamDO param = MeasureParamDO.builder()
                         .tenantId(tenantId)
+                        .checkItem(batchPlanTableConDO.getCheckItem())
+                        .countType(batchPlanTableConDO.getCountType())
+                        .compareWay(batchPlanTableConDO.getCompareWay())
+                        .warningLevelList(JsonUtils.json2WarningLevel(batchPlanTableConDO.getWarningLevel()))
                         .datasourceDTO(datasourceDTO)
-                        .batchPlanTableLineDTO(batchPlanTableLineDTO)
                         .batchResultBase(batchResultBase)
-                        .build());
-                batchResultRuleDTO.setResultBaseId(batchResultBase.getResultBaseId());
-                batchResultRuleDTO.setRuleType(PlanConstant.ResultRuleType.TABLE);
-//                batchResultRuleDTO.setTableName(batchResultBase.getTableName());
-//                batchResultRuleDTO.setRuleId(batchPlanTable.getPlanRuleId());
-//                batchResultRuleDTO.setRuleCode(batchPlanTable.getRuleCode());
-//                batchResultRuleDTO.setRuleName(batchPlanTable.getRuleName());
-//                batchResultRuleDTO.setCheckItem(batchPlanTableLine.getCheckItem());
-//                batchResultRuleDTO.setTenantId(tenantId);
-//                batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
-//
-//                if (StringUtils.isNotBlank(batchResultRuleDTO.getWarningLevel())) {
-//                    batchResultBase.setExceptionCheckItemCount(batchResultBase.getExceptionCheckItemCount() + 1);
-//                    exceptionFlag = true;
-//                }
+                        .batchResultItem(BatchResultItem.builder().build())
+                        .build();
+                measure.check(param);
+
+                BatchResultItem batchResultItem = param.getBatchResultItem();
+                batchResultItem.setResultRuleId(batchResultRuleDTO.getResultRuleId());
+                batchResultItem.setConditionId(batchPlanTableConDO.getConditionId());
+                batchResultItem.setCheckItem(batchPlanTableConDO.getCheckItem());
+                batchResultItem.setTenantId(tenantId);
+                batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
+
+                if (StringUtils.isNotBlank(batchResultItem.getWarningLevel())) {
+                    batchResultBase.setExceptionCheckItemCount(batchResultBase.getExceptionCheckItemCount() + 1);
+                    exceptionFlag = true;
+                }
             }
 
             if (exceptionFlag) {
                 batchResultBase.setExceptionRuleCount(batchResultBase.getExceptionRuleCount() + 1);
+                batchResultRuleDTO.setResultFlag(1);
             }
+            batchResultRuleRepository.updateByDTOPrimaryKeySelective(batchResultRuleDTO);
         }
     }
 

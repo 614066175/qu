@@ -10,7 +10,18 @@ public interface PlanConstant {
     /**
      * 数据质量任务类型
      */
-    String JOB_TYPE = "QUALITY";
+    String JOB_TYPE = "REST";
+
+    /**
+     * 数据质量任务分类
+     */
+    String JOB_CLASS = "QUALITY";
+
+
+    /**
+     * 数据质量任务方法
+     */
+    String JOB_METHOD = "GET";
 
     /**
      * 数据质量任务级别

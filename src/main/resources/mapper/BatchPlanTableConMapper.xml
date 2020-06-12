@@ -15,4 +15,19 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+
+    <select id="selectJoinItem" resultType="com.hand.hdsp.quality.infra.dataobject.BatchPlanTableConDO"
+            parameterType="com.hand.hdsp.quality.infra.dataobject.BatchPlanTableConDO">
+        SELECT xbptc.condition_id,
+               xbptc.plan_line_id,
+               xbptc.where_condition,
+               xbptc.compare_way,
+               xbptc.warning_level,
+               xbptl.plan_rule_id,
+               xbptl.check_item,
+               xbptl.count_type,
+               xbptl.custom_sql
+        FROM xqua_batch_plan_table_con xbptc
+                 join xqua_batch_plan_table_line xbptl on xbptc.plan_line_id = xbptl.plan_line_id
+    </select>
 </mapper>

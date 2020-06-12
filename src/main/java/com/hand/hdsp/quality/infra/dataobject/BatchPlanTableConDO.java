@@ -27,4 +27,12 @@ public class BatchPlanTableConDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long planRuleId;
+
+    private String checkItem;
+
+    private String countType;
+
+    private String customSql;
+
 }
