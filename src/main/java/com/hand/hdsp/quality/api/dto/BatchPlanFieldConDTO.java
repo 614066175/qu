@@ -39,9 +39,6 @@ public class BatchPlanFieldConDTO extends AuditDomain {
     @ApiModelProperty(value = "正则表达式")
     private String regularExpression;
 
-    @ApiModelProperty(value = "值阈范围")
-    private String lovCode;
-
     @ApiModelProperty(value = "告警等级json")
     private String warningLevel;
 

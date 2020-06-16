@@ -62,9 +62,6 @@ public class BatchResultItemDTO extends AuditDomain {
     @ApiModelProperty(value = "正则表达式")
     private String regularExpression;
 
-    @ApiModelProperty(value = "值阈范围")
-    private String lovCode;
-
     @ApiModelProperty(value = "自定义SQL")
     private String customSql;
 

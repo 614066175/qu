@@ -8,7 +8,6 @@
         <result column="where_condition" property="whereCondition" jdbcType="VARCHAR"/>
         <result column="compare_way" property="compareWay" jdbcType="VARCHAR"/>
         <result column="regular_expression" property="regularExpression" jdbcType="VARCHAR"/>
-        <result column="lov_code" property="lovCode" jdbcType="VARCHAR"/>
         <result column="warning_level" property="warningLevel" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>

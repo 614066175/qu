@@ -14,7 +14,6 @@
         <result column="where_condition" property="whereCondition" jdbcType="VARCHAR"/>
         <result column="compare_way" property="compareWay" jdbcType="VARCHAR"/>
         <result column="regular_expression" property="regularExpression" jdbcType="VARCHAR"/>
-        <result column="lov_code" property="lovCode" jdbcType="VARCHAR"/>
         <result column="custom_sql" property="customSql" jdbcType="VARCHAR"/>
         <result column="rel_datasource_type" property="relDatasourceType" jdbcType="VARCHAR"/>
         <result column="rel_datasource_id" property="relDatasourceId" jdbcType="DECIMAL"/>

@@ -58,8 +58,6 @@ public class BatchResultItem extends AuditDomain {
 
     private String regularExpression;
 
-    private String lovCode;
-
     private String customSql;
 
     private String relDatasourceType;

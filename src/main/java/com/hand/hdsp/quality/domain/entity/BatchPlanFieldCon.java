@@ -46,8 +46,6 @@ public class BatchPlanFieldCon extends AuditDomain {
 
     private String regularExpression;
 
-    private String lovCode;
-
     private String warningLevel;
 
     private Long tenantId;
