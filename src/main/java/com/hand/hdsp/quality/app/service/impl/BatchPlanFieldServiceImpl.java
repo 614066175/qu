@@ -6,10 +6,9 @@ import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanFieldService;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldCon;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
-import com.hand.hdsp.quality.domain.repository.BatchPlanFieldConRepository;
-import com.hand.hdsp.quality.domain.repository.BatchPlanFieldLineRepository;
-import com.hand.hdsp.quality.domain.repository.BatchPlanFieldRepository;
-import com.hand.hdsp.quality.domain.repository.RuleRepository;
+import com.hand.hdsp.quality.domain.entity.Rule;
+import com.hand.hdsp.quality.domain.entity.RuleLine;
+import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import io.choerodon.mybatis.domain.AuditDomain;
 import org.apache.commons.collections4.CollectionUtils;
@@ -33,15 +32,17 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
     private final BatchPlanFieldLineRepository batchPlanFieldLineRepository;
     private final BatchPlanFieldConRepository batchPlanFieldConRepository;
     private final RuleRepository ruleRepository;
+    private final RuleLineRepository ruleLineRepository;
 
     public BatchPlanFieldServiceImpl(BatchPlanFieldRepository batchPlanFieldRepository,
                                      BatchPlanFieldLineRepository batchPlanFieldLineRepository,
                                      RuleRepository ruleRepository,
-                                     BatchPlanFieldConRepository batchPlanFieldConRepository) {
+                                     BatchPlanFieldConRepository batchPlanFieldConRepository, RuleLineRepository ruleLineRepository) {
         this.batchPlanFieldRepository = batchPlanFieldRepository;
         this.batchPlanFieldLineRepository = batchPlanFieldLineRepository;
         this.ruleRepository = ruleRepository;
         this.batchPlanFieldConRepository = batchPlanFieldConRepository;
+        this.ruleLineRepository = ruleLineRepository;
     }
 
     @Override
@@ -152,7 +153,38 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
 
     @Override
     public BatchPlanFieldDTO selectDetail(Long ruleId) {
-        // todo
-        return null;
+        // 查询标准规则
+        Rule rule = ruleRepository.selectByPrimaryKey(ruleId);
+        // 查询规则校验项
+        List<RuleLine> ruleLineList = ruleLineRepository.select(RuleLine.FIELD_RULE_ID, ruleId);
+
+        //转换
+        BatchPlanFieldDTO batchPlanFieldDTO = BatchPlanFieldDTO.builder()
+                .ruleCode(rule.getRuleCode())
+                .ruleName(rule.getRuleName())
+                .ruleDesc(rule.getRuleDesc())
+                .checkType(rule.getCheckType())
+                .exceptionBlock(rule.getExceptionBlock())
+                .weight(rule.getWeight())
+                .build();
+
+
+        List<BatchPlanFieldLineDTO> batchPlanFieldLineDTOList = ruleLineList.stream().map(ruleLine -> BatchPlanFieldLineDTO.builder()
+                .checkWay(ruleLine.getCheckWay())
+                .checkItem(ruleLine.getCheckItem())
+                .countType(ruleLine.getCountType())
+                .batchPlanFieldConDTOList(
+                        Collections.singletonList(
+                                BatchPlanFieldConDTO.builder()
+                                        .compareWay(ruleLine.getCompareWay())
+                                        .regularExpression(ruleLine.getRegularExpression())
+                                        .warningLevel(ruleLine.getWarningLevel())
+                                        .warningLevelList(JsonUtils.json2WarningLevel(ruleLine.getWarningLevel()))
+                                        .build()))
+                .build()).collect(Collectors.toList());
+
+        batchPlanFieldDTO.setBatchPlanFieldLineDTOList(batchPlanFieldLineDTOList);
+
+        return batchPlanFieldDTO;
     }
 }
