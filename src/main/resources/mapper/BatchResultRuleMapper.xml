@@ -21,45 +21,4 @@
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
 
-    <select id="selectByResultId" resultType="com.hand.hdsp.quality.api.dto.BatchResultRuleDTO">
-        select CASE
-                   WHEN xbri.warning_level IS NOT NULL THEN xbri.warning_level
-                   ELSE '${@com.hand.hdsp.quality.infra.constant.PlanConstant@WARNING_LEVEL_NORMAL}'
-                   END warning_level,
-               xbrr.weight
-        from xqua_batch_result_item xbri
-                 join xqua_batch_result_rule xbrr on xbri.result_rule_id = xbrr.result_rule_id
-                 join xqua_batch_result_base xbrb on xbrr.result_base_id = xbrb.result_base_id
-                 join xqua_batch_result xbr on xbrb.result_id = xbr.result_id
-        where xbr.result_id = #{resultId}
-    </select>
-
-    <select id="selectWaringLevel" resultType="com.hand.hdsp.quality.infra.vo.ResultWaringVO">
-        select
-        xbrr.warning_level warningLevel,
-        count(xbrr.warning_level) countSum
-        from xqua_batch_result_rule xbrr
-        <where>
-            xbrr.warning_level is not null
-            <if test="tenantId != null ">
-                and xbrr.tenant_id = #{tenantId}
-            </if>
-            <if test="tableName">
-                and xbrr.table_name = #{tableName}
-            </if>
-            <if test="resultBaseId != null ">
-                and xbrr.result_base_id = #{resultBaseId}
-            </if>
-        </where>
-        GROUP BY xbrr.warning_level
-    </select>
-
-    <select id="selectWaringLevelByResultId" resultType="string">
-        select distinct xbrr.warning_level
-        from xqua_batch_result_rule xbrr
-                 join xqua_batch_result_base xbrb on xbrr.result_base_id = xbrb.result_base_id
-                 join xqua_batch_result xbr on xbrb.result_id = xbr.result_id
-        where xbrr.warning_level is not null
-          and xbr.result_id = #{resultId}
-    </select>
 </mapper>

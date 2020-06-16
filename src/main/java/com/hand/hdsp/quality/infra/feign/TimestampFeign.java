@@ -4,10 +4,7 @@ import com.hand.hdsp.quality.api.dto.TimestampControlDTO;
 import com.hand.hdsp.quality.infra.feign.fallback.TimestampFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 时间戳feign
@@ -37,12 +34,12 @@ public interface TimestampFeign {
      * 获取增量控制参数
      *
      * @param tenantId
-     * @param timestampControlDTO
+     * @param timestampType
      * @return
      */
     @GetMapping("/v2/{organizationId}/timestamp-controls/get-increment-param")
     ResponseEntity<String> getIncrementParam(@PathVariable(name = "organizationId") Long tenantId,
-                                             TimestampControlDTO timestampControlDTO);
+                                             @RequestParam("timestampType") String timestampType);
 
     /**
      * 更新增量参数

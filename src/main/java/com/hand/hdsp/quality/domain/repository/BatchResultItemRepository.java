@@ -5,6 +5,8 @@ import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.BatchResultItemDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 
+import java.util.List;
+
 /**
  * <p>批数据方案结果表-校验项信息资源库</p>
  *
@@ -12,4 +14,21 @@ import com.hand.hdsp.quality.domain.entity.BatchResultItem;
  */
 public interface BatchResultItemRepository extends BaseRepository<BatchResultItem, BatchResultItemDTO>, ProxySelf<BatchResultItemRepository> {
 
+
+    /**
+     * 根据结果id查询出所有数据
+     *
+     * @param resultId
+     * @return
+     */
+    List<BatchResultItemDTO> selectByResultId(Long resultId);
+
+
+    /**
+     * 根据结果id查询出告警等级并去重
+     *
+     * @param resultId
+     * @return
+     */
+    List<String> selectWaringLevelByResultId(Long resultId);
 }

@@ -26,11 +26,6 @@ public class BatchResultRuleRepositoryImpl extends BaseRepositoryImpl<BatchResul
     }
 
     @Override
-    public List<BatchResultRuleDTO> selectByResultId(Long resultId) {
-        return batchResultRuleMapper.selectByResultId(resultId);
-    }
-
-    @Override
     public List<BatchResultRuleDTO> listRuleError(BatchResultRuleDTO batchResultRuleDTO) {
         return this.selectDTOByCondition(
                 Condition.builder(BatchResultRule.class)
@@ -43,8 +38,4 @@ public class BatchResultRuleRepositoryImpl extends BaseRepositoryImpl<BatchResul
         );
     }
 
-    @Override
-    public List<String> selectWaringLevelByResultId(Long resultId) {
-        return batchResultRuleMapper.selectWaringLevelByResultId(resultId);
-    }
 }

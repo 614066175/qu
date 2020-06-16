@@ -9,6 +9,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * <p>批数据方案结果表-表信息实体</p>
@@ -64,5 +65,7 @@ public class BatchResultBase extends AuditDomain {
 
     private Long tenantId;
 
+    @Transient
+    private String datasourceType;
 
 }

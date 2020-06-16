@@ -47,7 +47,7 @@ public class TimestampControlDTO extends AuditDomain {
     private String timestampDesc;
 
     @ApiModelProperty(value = "当前时间戳日期", required = true)
-    private Date currentDateTime;
+    private String currentDateTime;
     @ApiModelProperty(value = "同步类型，DATAX/SQOOP/等", required = true)
     private String syncType;
     @ApiModelProperty(value = "增量同步策略，ID/DATE,主键策略/日期策略", required = true)
@@ -63,13 +63,16 @@ public class TimestampControlDTO extends AuditDomain {
     @ApiModelProperty(value = "增量字段名")
     private String whereCondition;
     @ApiModelProperty(value = "上次增量主键ID最大值")
-    private Long lastMaxId;
+    private String lastMaxId;
     @ApiModelProperty(value = "当前增量主键ID最大值")
-    private Long currentMaxId;
+    private String currentMaxId;
 
 
     private String enabledFlag;
 
     @Transient
     private Boolean success;
+
+    @Transient
+    private String lastDateTime;
 }

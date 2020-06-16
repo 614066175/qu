@@ -1,7 +1,10 @@
 package com.hand.hdsp.quality.infra.mapper;
 
+import com.hand.hdsp.quality.api.dto.BatchResultItemDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.infra.dataobject.BatchResultItemDO;
+import com.hand.hdsp.quality.infra.dataobject.BatchResultRuleDO;
+import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import io.choerodon.mybatis.common.BaseMapper;
 
 import java.util.List;
@@ -21,4 +24,28 @@ public interface BatchResultItemMapper extends BaseMapper<BatchResultItem> {
      * @return
      */
     List<BatchResultItemDO> queryList(BatchResultItemDO batchResultItem);
+
+    /**
+     * 根据结果id查询出所有数据
+     *
+     * @param resultId
+     * @return
+     */
+    List<BatchResultItemDTO> selectByResultId(Long resultId);
+
+    /**
+     * 查出各个告警等级数
+     *
+     * @param batchResultRule
+     * @return
+     */
+    List<ResultWaringVO> selectWaringLevel(BatchResultRuleDO batchResultRule);
+
+    /**
+     * 根据结果id查询出告警等级并去重
+     *
+     * @param resultId
+     * @return
+     */
+    List<String> selectWaringLevelByResultId(Long resultId);
 }

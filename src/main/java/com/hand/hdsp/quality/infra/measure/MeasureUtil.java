@@ -5,6 +5,7 @@ import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.hzero.core.base.BaseConstants;
 
@@ -178,6 +179,9 @@ public class MeasureUtil {
      */
     public static String replaceVariable(String template, Map<String, String> variables, String filter) {
         String sqlAction = template;
+        if (StringUtils.isBlank(filter)) {
+            filter = "1 = 1";
+        }
         sqlAction = sqlAction.replace(FILTER_PLACEHOLDER, filter);
         log.info("Succeed to replace {} into {}", FILTER_PLACEHOLDER, filter);
         for (Map.Entry<String, String> entry : variables.entrySet()) {

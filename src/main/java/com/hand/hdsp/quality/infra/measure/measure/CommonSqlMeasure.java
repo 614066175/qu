@@ -1,12 +1,13 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.api.dto.DatasourceDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
+import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
 import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanFieldConDO;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
@@ -40,18 +41,21 @@ public class CommonSqlMeasure implements Measure {
     }
 
     @Override
-    public BatchResultRuleDTO check(MeasureParamDO param) {
+    public BatchResultItem check(MeasureParamDO param) {
         Long tenantId = param.getTenantId();
         DatasourceDTO datasourceDTO = param.getDatasourceDTO();
         BatchResultBase batchResultBase = param.getBatchResultBase();
         BatchPlanFieldConDO batchPlanFieldConDO = param.getBatchPlanFieldConDO();
-        List<ItemTemplateSql> list = templateSqlRepository.select(ItemTemplateSql.builder().build());
+        List<ItemTemplateSql> list = templateSqlRepository.select(ItemTemplateSql.builder()
+                .checkItem(PlanConstant.CheckItem.TABLE_LINE)
+                .datasourceType(param.getDatasourceType())
+                .build());
 
         Map<String, String> variables = new HashMap<>();
         variables.put("table", batchResultBase.getObjectName());
         variables.put("field", batchPlanFieldConDO.getFieldName());
 
-        datasourceDTO.setSql(MeasureUtil.replaceVariable(list.get(0).getSqlContent(), variables, "1=1"));
+        datasourceDTO.setSql(MeasureUtil.replaceVariable(list.get(0).getSqlContent(), variables, batchResultBase.getWhereCondition()));
 
         List<HashMap<String, String>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, String>>>() {
         });
@@ -64,6 +68,6 @@ public class CommonSqlMeasure implements Measure {
         Count count = countCollector.getCount(param.getCountType());
         count.count(param);
 
-        return null;
+        return param.getBatchResultItem();
     }
 }

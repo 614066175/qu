@@ -64,6 +64,17 @@ public interface PlanConstant {
     String WARNING_LEVEL_NORMAL = "NORMAL";
 
     /**
+     * 数据质量任务名称
+     */
+    String JOB_NAME = "QUA_%d_%s";
+
+
+    /**
+     * 数据质量时间戳类型
+     */
+    String TIMESTAMP_TYPE = "QUA_%d_%s_%d";
+
+    /**
      * 比较方式
      */
     interface CompareWay {
@@ -214,4 +225,15 @@ public interface PlanConstant {
         String ID = "ID";
     }
 
+
+    /**
+     * 校验项
+     */
+    interface CheckItem {
+        /**
+         * 表行数
+         */
+        String TABLE_LINE = "TABLE_LINE";
+
+    }
 }

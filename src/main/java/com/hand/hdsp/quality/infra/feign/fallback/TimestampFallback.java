@@ -25,7 +25,7 @@ public class TimestampFallback implements TimestampFeign {
     }
 
     @Override
-    public ResponseEntity<String> getIncrementParam(Long tenantId, TimestampControlDTO timestampControlDTO) {
+    public ResponseEntity<String> getIncrementParam(Long tenantId, String timestampType) {
         throw new CommonException("error.feign.timestamp.get_increment_param");
     }
 

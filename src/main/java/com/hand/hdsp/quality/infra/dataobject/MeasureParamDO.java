@@ -24,6 +24,11 @@ public class MeasureParamDO {
     private Long tenantId;
 
     /**
+     * 数据源类型
+     */
+    private String datasourceType;
+
+    /**
      * 校验项 HDSP.XQUA.CHECK_ITEM
      */
     private String checkItem;

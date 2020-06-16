@@ -5,6 +5,7 @@ import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.api.dto.DatasourceDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanField;
+import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
@@ -31,7 +32,7 @@ public class RegularMeasure implements Measure {
     }
 
     @Override
-    public BatchResultRuleDTO check(MeasureParamDO param) {
+    public BatchResultItem check(MeasureParamDO param) {
         Long tenantId = param.getTenantId();
         DatasourceDTO datasourceDTO = param.getDatasourceDTO();
         BatchPlanField batchPlanField = param.getBatchPlanField();
@@ -56,6 +57,6 @@ public class RegularMeasure implements Measure {
 //            batchResultRuleDTO.setExceptionInfo("不满足正则表达式");
 //        }
 
-        return batchResultRuleDTO;
+        return param.getBatchResultItem();
     }
 }

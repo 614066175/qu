@@ -1,6 +1,6 @@
 package com.hand.hdsp.quality.infra.measure;
 
-import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
+import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 
 /**
@@ -16,5 +16,5 @@ public interface Measure {
      * @param param 参数封装对象
      * @return
      */
-    BatchResultRuleDTO check(MeasureParamDO param);
+    BatchResultItem check(MeasureParamDO param);
 }
