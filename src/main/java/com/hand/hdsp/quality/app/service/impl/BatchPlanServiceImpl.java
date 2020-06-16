@@ -10,10 +10,7 @@ import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanFieldConDO;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanTableConDO;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
-import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
-import com.hand.hdsp.quality.infra.feign.DispatchJobFeign;
-import com.hand.hdsp.quality.infra.feign.DqRuleLineFeign;
-import com.hand.hdsp.quality.infra.feign.RestJobFeign;
+import com.hand.hdsp.quality.infra.feign.*;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureCollector;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
@@ -95,6 +92,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     private DqRuleLineFeign dqRuleLineFeign;
     @Autowired
     private MessageClient messageClient;
+    @Autowired
+    private TimestampFeign timestampFeign;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -143,6 +142,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void generate(Long tenantId, Long planId) {
         BatchPlanDTO batchPlanDTO = batchPlanRepository.selectDTOByPrimaryKey(planId);
         // 创建或更新job
@@ -179,6 +179,28 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         //插入或更新
         ResponseEntity<String> restJobResult = restJobFeign.create(tenantId, restJobDTO);
         ResponseUtils.getResponse(restJobResult, RestJobDTO.class);
+
+        // 创建更新时间戳表
+        List<BatchPlanBase> list = batchPlanBaseRepository.select(BatchPlanBase.builder().planId(planId).build());
+        for (BatchPlanBase base : list) {
+            if (!PlanConstant.IncrementStrategy.NONE.equals(base.getIncrementStrategy())) {
+
+                ResponseEntity<String> timestampResult = timestampFeign.createOrUpdateTimestamp(tenantId,
+                        TimestampControlDTO.builder()
+                                .tenantId(tenantId)
+                                .timestampType(jobName + "_" + base.getPlanBaseId())
+                                .datasourceId(base.getDatasourceId())
+                                .sourceTableName(base.getObjectName())
+                                .sourceSchema(base.getDatasourceSchema())
+                                .incrementStrategy(base.getIncrementStrategy())
+                                .incrementColumn(base.getIncrementColumn())
+                                .whereCondition(base.getWhereCondition())
+                                .syncType(PlanConstant.JOB_CLASS)
+                                .build());
+                ResponseUtils.getResponse(timestampResult, TimestampControlDTO.class);
+            }
+
+        }
 
     }
 

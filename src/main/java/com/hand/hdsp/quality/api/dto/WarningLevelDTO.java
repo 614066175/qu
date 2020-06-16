@@ -38,4 +38,7 @@ public class WarningLevelDTO extends AuditDomain {
 
     @ApiModelProperty(value = "阈值")
     private String expectedValue;
+
+    @ApiModelProperty(value = "值集编码")
+    private String lovCode;
 }

@@ -196,4 +196,22 @@ public interface PlanConstant {
         String NOT_EQUAL = "NOT_EQUAL";
     }
 
+    /**
+     * 比较符号
+     */
+    interface IncrementStrategy {
+        /**
+         * 无,全量同步
+         */
+        String NONE = "NONE";
+        /**
+         * 按时间增量
+         */
+        String DATE = "DATE";
+        /**
+         * 按ID增量
+         */
+        String ID = "ID";
+    }
+
 }
