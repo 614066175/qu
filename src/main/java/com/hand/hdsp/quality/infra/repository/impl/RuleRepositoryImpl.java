@@ -4,17 +4,12 @@ import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.domain.entity.Rule;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
-import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.mapper.RuleMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import org.hzero.core.base.BaseConstants;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -42,19 +37,8 @@ public class RuleRepositoryImpl extends BaseRepositoryImpl<Rule, RuleDTO> implem
     }
 
     @Override
-    public Page<RuleDTO> list2(PageRequest pageRequest, RuleDTO ruleDTO) {
-        return PageHelper.doPage(pageRequest, () -> ruleMapper.list2(ruleDTO));
+    public Page<RuleDTO> listTenant(PageRequest pageRequest, RuleDTO ruleDTO) {
+        return PageHelper.doPage(pageRequest, () -> ruleMapper.listTenant(ruleDTO));
     }
 
-    @Override
-    public Page<Rule> listTableRule(RuleDTO ruleDTO, PageRequest pageRequest) {
-        return PageHelper.doPage(pageRequest, () ->
-                ruleMapper.selectByCondition(Condition.builder(Rule.class)
-                        .where(Sqls.custom()
-                                .andIn(Rule.FIELD_RULE_TYPE, Arrays.asList(PlanConstant.RuleType.TABLE_TYPE, PlanConstant.RuleType.SQL_CUSTOM))
-                                .andEqualTo(Rule.FIELD_ENABLED_FLAG, BaseConstants.Flag.YES)
-                                .andLike(Rule.FIELD_RULE_NAME, ruleDTO.getRuleName(), true))
-                        .build())
-        );
-    }
 }

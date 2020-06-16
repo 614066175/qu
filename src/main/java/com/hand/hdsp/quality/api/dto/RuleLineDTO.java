@@ -54,10 +54,13 @@ public class RuleLineDTO extends AuditDomain {
     @ApiModelProperty("正则表达式")
     private String regularExpression;
 
+    @ApiModelProperty(value = "告警等级json")
+    private String warningLevel;
+
     @ApiModelProperty("租户ID")
     @NotNull
     private Long tenantId;
 
-    @ApiModelProperty("规则告警等级List")
-    private List<RuleWarningLevelDTO> ruleWarningLevelDTOList;
+    @ApiModelProperty(value = "方案告警等级List")
+    private List<WarningLevelDTO> warningLevelList;
 }

@@ -23,15 +23,33 @@
 
     <sql id="baseColumn">
         ${std}.rule_id,
-        ${std}.group_id,
-        ${std}.rule_code,
-        ${std}.rule_name,
-        ${std}.rule_desc,
-        ${std}.check_type,
-        ${std}.rule_type,
-        ${std}.exception_block,
-        ${std}.weight,
-        ${std}.enabled_flag
+        ${std}
+        .
+        group_id,
+        ${std}
+        .
+        rule_code,
+        ${std}
+        .
+        rule_name,
+        ${std}
+        .
+        rule_desc,
+        ${std}
+        .
+        check_type,
+        ${std}
+        .
+        rule_type,
+        ${std}
+        .
+        exception_block,
+        ${std}
+        .
+        weight,
+        ${std}
+        .
+        enabled_flag
     </sql>
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.RuleDTO">
         select
@@ -78,7 +96,7 @@
         </where>
         order by rule_name
     </select>
-    <select id="list2" resultType="com.hand.hdsp.quality.api.dto.RuleDTO">
+    <select id="listTenant" resultType="com.hand.hdsp.quality.api.dto.RuleDTO">
         select
         rule_id,
         group_id,

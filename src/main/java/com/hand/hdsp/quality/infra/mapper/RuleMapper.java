@@ -38,5 +38,5 @@ public interface RuleMapper extends BaseMapper<Rule> {
      * @param ruleDTO 查询条件
      * @return
      */
-    List<RuleDTO> list2(RuleDTO ruleDTO);
+    List<RuleDTO> listTenant(RuleDTO ruleDTO);
 }

@@ -29,6 +29,8 @@ public class RuleLineDO extends AuditDomain {
 
     private String regularExpression;
 
+    private String warningLevel;
+
     private Long tenantId;
 
 }

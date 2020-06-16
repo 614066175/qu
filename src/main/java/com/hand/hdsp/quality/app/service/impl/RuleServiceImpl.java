@@ -2,13 +2,11 @@ package com.hand.hdsp.quality.app.service.impl;
 
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.api.dto.RuleLineDTO;
-import com.hand.hdsp.quality.api.dto.RuleWarningLevelDTO;
 import com.hand.hdsp.quality.app.service.RuleService;
 import com.hand.hdsp.quality.domain.entity.RuleLine;
-import com.hand.hdsp.quality.domain.entity.RuleWarningLevel;
 import com.hand.hdsp.quality.domain.repository.RuleLineRepository;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
-import com.hand.hdsp.quality.domain.repository.RuleWarningLevelRepository;
+import com.hand.hdsp.quality.infra.util.JsonUtils;
 import io.choerodon.mybatis.domain.AuditDomain;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,31 +23,19 @@ public class RuleServiceImpl implements RuleService {
 
     private final RuleRepository ruleRepository;
     private final RuleLineRepository ruleLineRepository;
-    private final RuleWarningLevelRepository ruleWarningLevelRepository;
 
-    public RuleServiceImpl(RuleRepository ruleRepository, RuleLineRepository ruleLineRepository, RuleWarningLevelRepository ruleWarningLevelRepository) {
+    public RuleServiceImpl(RuleRepository ruleRepository, RuleLineRepository ruleLineRepository) {
         this.ruleRepository = ruleRepository;
         this.ruleLineRepository = ruleLineRepository;
-        this.ruleWarningLevelRepository = ruleWarningLevelRepository;
     }
 
-    @Override
-    public RuleDTO detail(Long ruleId) {
-        RuleDTO ruleDTO = ruleRepository.selectDTOByPrimaryKey(ruleId);
-        List<RuleLineDTO> ruleLineDTOList = ruleLineRepository.selectDTO(RuleLine.FIELD_RULE_ID, ruleId);
-        for (RuleLineDTO ruleLineDTO : ruleLineDTOList) {
-            ruleLineDTO.setRuleWarningLevelDTOList(ruleWarningLevelRepository.selectDTO(RuleWarningLevel.FIELD_RULE_LINE_ID, ruleLineDTO.getRuleLineId()));
-        }
-        ruleDTO.setRuleLineDTOList(ruleLineDTOList);
-        return ruleDTO;
-    }
 
     @Override
-    public RuleDTO detail2(Long ruleId, Long tenant) {
+    public RuleDTO detail(Long ruleId, Long tenantId) {
         RuleDTO ruleDTO = ruleRepository.selectDTOByPrimaryKey(ruleId);
-        List<RuleLineDTO> ruleLineDTOList = ruleLineRepository.list(ruleId, tenant);
+        List<RuleLineDTO> ruleLineDTOList = ruleLineRepository.list(ruleId, tenantId);
         for (RuleLineDTO ruleLineDTO : ruleLineDTOList) {
-            ruleLineDTO.setRuleWarningLevelDTOList(ruleWarningLevelRepository.list(ruleLineDTO.getRuleLineId(), tenant));
+            ruleLineDTO.setWarningLevelList(JsonUtils.json2WarningLevel(ruleLineDTO.getWarningLevel()));
         }
         ruleDTO.setRuleLineDTOList(ruleLineDTOList);
         return ruleDTO;
@@ -65,15 +51,9 @@ public class RuleServiceImpl implements RuleService {
             for (RuleLineDTO ruleLineDTO : ruleDTO.getRuleLineDTOList()) {
                 ruleLineDTO.setRuleId(ruleDTO.getRuleId());
                 ruleLineDTO.setTenantId(tenantId);
+                //todo 范围重叠判断
+                ruleLineDTO.setWarningLevel(JsonUtils.object2Json(ruleLineDTO.getWarningLevelList()));
                 ruleLineRepository.insertDTOSelective(ruleLineDTO);
-
-                if (ruleLineDTO.getRuleWarningLevelDTOList() != null) {
-                    for (RuleWarningLevelDTO ruleWarningLevelDTO : ruleLineDTO.getRuleWarningLevelDTOList()) {
-                        ruleWarningLevelDTO.setRuleLineId(ruleLineDTO.getRuleLineId());
-                        ruleWarningLevelDTO.setTenantId(tenantId);
-                        ruleWarningLevelRepository.insertDTOSelective(ruleWarningLevelDTO);
-                    }
-                }
             }
         }
     }
@@ -86,58 +66,41 @@ public class RuleServiceImpl implements RuleService {
         if (ruleDTO.getRuleLineDTOList() != null) {
             for (RuleLineDTO ruleLineDTO : ruleDTO.getRuleLineDTOList()) {
                 if (AuditDomain.RecordStatus.update.equals(ruleLineDTO.get_status())) {
+                    //todo 范围重叠判断
+                    ruleLineDTO.setWarningLevel(JsonUtils.object2Json(ruleLineDTO.getWarningLevelList()));
                     ruleLineRepository.updateDTOWhereTenant(ruleLineDTO, tenantId);
                 } else if (AuditDomain.RecordStatus.create.equals(ruleLineDTO.get_status())) {
                     ruleLineDTO.setRuleId(ruleDTO.getRuleId());
                     ruleLineDTO.setTenantId(tenantId);
+                    //todo 范围重叠判断
+                    ruleLineDTO.setWarningLevel(JsonUtils.object2Json(ruleLineDTO.getWarningLevelList()));
                     ruleLineRepository.insertDTOSelective(ruleLineDTO);
                 } else if (AuditDomain.RecordStatus.delete.equals(ruleLineDTO.get_status())) {
                     ruleLineRepository.deleteByPrimaryKey(ruleLineDTO);
                 }
-                if (ruleLineDTO.getRuleWarningLevelDTOList() != null) {
-                    for (RuleWarningLevelDTO ruleWarningLevelDTO : ruleLineDTO.getRuleWarningLevelDTOList()) {
-                        if (AuditDomain.RecordStatus.update.equals(ruleWarningLevelDTO.get_status())) {
-                            ruleWarningLevelRepository.updateDTOWhereTenant(ruleWarningLevelDTO, tenantId);
-                        } else if (AuditDomain.RecordStatus.create.equals(ruleWarningLevelDTO.get_status())) {
-                            ruleWarningLevelDTO.setRuleLineId(ruleLineDTO.getRuleLineId());
-                            ruleWarningLevelDTO.setTenantId(tenantId);
-                            ruleWarningLevelRepository.insertDTOSelective(ruleWarningLevelDTO);
-                        } else if (AuditDomain.RecordStatus.delete.equals(ruleWarningLevelDTO.get_status())) {
-                            ruleWarningLevelRepository.deleteByPrimaryKey(ruleWarningLevelDTO);
-                        }
-                    }
-                }
+
             }
         }
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void update2(RuleDTO ruleDTO) {
+    public void updateSite(RuleDTO ruleDTO) {
         ruleRepository.updateByDTOPrimaryKeySelective(ruleDTO);
         if (ruleDTO.getRuleLineDTOList() != null) {
             for (RuleLineDTO ruleLineDTO : ruleDTO.getRuleLineDTOList()) {
                 if (AuditDomain.RecordStatus.update.equals(ruleLineDTO.get_status())) {
+                    //todo 范围重叠判断
+                    ruleLineDTO.setWarningLevel(JsonUtils.object2Json(ruleLineDTO.getWarningLevelList()));
                     ruleLineRepository.updateByDTOPrimaryKeySelective(ruleLineDTO);
                 } else if (AuditDomain.RecordStatus.create.equals(ruleLineDTO.get_status())) {
                     ruleLineDTO.setRuleId(ruleDTO.getRuleId());
                     ruleLineDTO.setTenantId(0L);
+                    //todo 范围重叠判断
+                    ruleLineDTO.setWarningLevel(JsonUtils.object2Json(ruleLineDTO.getWarningLevelList()));
                     ruleLineRepository.insertDTOSelective(ruleLineDTO);
                 } else if (AuditDomain.RecordStatus.delete.equals(ruleLineDTO.get_status())) {
                     ruleLineRepository.deleteByPrimaryKey(ruleLineDTO);
-                }
-                if (ruleLineDTO.getRuleWarningLevelDTOList() != null) {
-                    for (RuleWarningLevelDTO ruleWarningLevelDTO : ruleLineDTO.getRuleWarningLevelDTOList()) {
-                        if (AuditDomain.RecordStatus.update.equals(ruleWarningLevelDTO.get_status())) {
-                            ruleWarningLevelRepository.updateByDTOPrimaryKeySelective(ruleWarningLevelDTO);
-                        } else if (AuditDomain.RecordStatus.create.equals(ruleWarningLevelDTO.get_status())) {
-                            ruleWarningLevelDTO.setRuleLineId(ruleLineDTO.getRuleLineId());
-                            ruleWarningLevelDTO.setTenantId(0L);
-                            ruleWarningLevelRepository.insertDTOSelective(ruleWarningLevelDTO);
-                        } else if (AuditDomain.RecordStatus.delete.equals(ruleWarningLevelDTO.get_status())) {
-                            ruleWarningLevelRepository.deleteByPrimaryKey(ruleWarningLevelDTO);
-                        }
-                    }
                 }
             }
         }
@@ -148,9 +111,6 @@ public class RuleServiceImpl implements RuleService {
     public int delete(RuleDTO ruleDTO) {
         List<RuleLineDTO> ruleLineDTOList = ruleLineRepository.selectDTO(RuleLine.FIELD_RULE_ID, ruleDTO.getRuleId());
         if (ruleLineDTOList != null) {
-            for (RuleLineDTO ruleLineDTO : ruleLineDTOList) {
-                ruleWarningLevelRepository.deleteByParentId(ruleLineDTO.getRuleLineId());
-            }
             ruleLineRepository.deleteByParentId(ruleDTO.getRuleId());
         }
         return ruleRepository.deleteByPrimaryKey(ruleDTO);

@@ -15,6 +15,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.hzero.core.base.BaseConstants;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
@@ -61,7 +62,7 @@ public class RuleSiteController extends BaseController {
     @Permission(level = ResourceLevel.SITE)
     @GetMapping("/{ruleId}")
     public ResponseEntity<?> detail(@PathVariable Long ruleId) {
-        RuleDTO ruleDTO = ruleService.detail(ruleId);
+        RuleDTO ruleDTO = ruleService.detail(ruleId, BaseConstants.DEFAULT_TENANT_ID);
         return Results.success(ruleDTO);
     }
 
@@ -69,7 +70,7 @@ public class RuleSiteController extends BaseController {
     @Permission(level = ResourceLevel.SITE)
     @PostMapping
     public ResponseEntity<?> create(@RequestBody RuleDTO ruleDTO) {
-        ruleDTO.setTenantId(0L);
+        ruleDTO.setTenantId(BaseConstants.DEFAULT_TENANT_ID);
         this.validObject(ruleDTO);
         ruleService.insert(ruleDTO);
         return Results.success(ruleDTO);
@@ -79,7 +80,8 @@ public class RuleSiteController extends BaseController {
     @Permission(level = ResourceLevel.SITE)
     @PutMapping
     public ResponseEntity<?> update(@RequestBody RuleDTO ruleDTO) {
-        ruleService.update2(ruleDTO);
+        ruleDTO.setTenantId(BaseConstants.DEFAULT_TENANT_ID);
+        ruleService.updateSite(ruleDTO);
         return Results.success(ruleDTO);
     }
 

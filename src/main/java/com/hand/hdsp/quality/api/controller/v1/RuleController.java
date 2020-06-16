@@ -56,22 +56,6 @@ public class RuleController extends BaseController {
         return Results.success(list);
     }
 
-    @ApiOperation(value = "表级规则、自定义SQL规则列表")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/listTableRule")
-    public ResponseEntity<?> listTableRule(@PathVariable(name = "organizationId") Long tenantId,
-                                           RuleDTO ruleDTO, @ApiIgnore @SortDefault(value = Rule.FIELD_RULE_ID,
-            direction = Sort.Direction.DESC) PageRequest pageRequest) {
-        ruleDTO.setTenantId(tenantId);
-        return Results.success(ruleRepository.listTableRule(ruleDTO, pageRequest));
-    }
-
     @ApiOperation(value = "规则表列表（标准规则租户级）")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
@@ -81,34 +65,15 @@ public class RuleController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
-    public ResponseEntity<?> list2(@PathVariable(name = "organizationId") Long tenantId,
-                                   RuleDTO ruleDTO, @ApiIgnore @SortDefault(value = Rule.FIELD_RULE_ID,
+    public ResponseEntity<?> listTenant(@PathVariable(name = "organizationId") Long tenantId,
+                                        RuleDTO ruleDTO, @ApiIgnore @SortDefault(value = Rule.FIELD_RULE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         ruleDTO.setTenantId(tenantId);
         if (ruleDTO.getGroupId() != null && ruleDTO.getGroupId() == 0) {
             ruleDTO.setGroupId(null);
         }
-        Page<RuleDTO> list = ruleRepository.list2(pageRequest, ruleDTO);
+        Page<RuleDTO> list = ruleRepository.listTenant(pageRequest, ruleDTO);
         return Results.success(list);
-    }
-
-    @ApiOperation(value = "规则表明细")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    ), @ApiImplicitParam(
-            name = "ruleId",
-            value = "规则表主键",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/{ruleId}")
-    public ResponseEntity<?> detail(@PathVariable Long ruleId) {
-        RuleDTO ruleDTO = ruleService.detail(ruleId);
-        return Results.success(ruleDTO);
     }
 
     @ApiOperation(value = "规则表明细（标准规则租户级）")
@@ -125,8 +90,8 @@ public class RuleController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/detail/{ruleId}")
-    public ResponseEntity<?> detail2(@PathVariable("organizationId") Long tenantId, @PathVariable Long ruleId) {
-        RuleDTO ruleDTO = ruleService.detail2(ruleId, tenantId);
+    public ResponseEntity<?> detail(@PathVariable("organizationId") Long tenantId, @PathVariable Long ruleId) {
+        RuleDTO ruleDTO = ruleService.detail(ruleId, tenantId);
         return Results.success(ruleDTO);
     }
 
