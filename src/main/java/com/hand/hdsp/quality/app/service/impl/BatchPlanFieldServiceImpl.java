@@ -173,11 +173,11 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
                 .checkWay(ruleLine.getCheckWay())
                 .checkItem(ruleLine.getCheckItem())
                 .countType(ruleLine.getCountType())
+                .regularExpression(ruleLine.getRegularExpression())
                 .batchPlanFieldConDTOList(
                         Collections.singletonList(
                                 BatchPlanFieldConDTO.builder()
                                         .compareWay(ruleLine.getCompareWay())
-                                        .regularExpression(ruleLine.getRegularExpression())
                                         .warningLevel(ruleLine.getWarningLevel())
                                         .warningLevelList(JsonUtils.json2WarningLevel(ruleLine.getWarningLevel()))
                                         .build()))
