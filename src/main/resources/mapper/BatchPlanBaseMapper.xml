@@ -46,7 +46,8 @@
         xbpb.plan_id,
         xbpb.datasource_type,
         xbpb.datasource_id,
-        xbpb.tenant_id
+        xbpb.tenant_id,
+        xbpb.sql_type
         from
         xqua_batch_plan_base xbpb
         where

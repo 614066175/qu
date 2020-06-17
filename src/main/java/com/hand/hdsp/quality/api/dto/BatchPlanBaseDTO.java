@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -67,4 +68,7 @@ public class BatchPlanBaseDTO extends AuditDomain {
     private Long relTableNum;
 
     private String datasourceName;
+
+    @Transient
+    private String planName;
 }
