@@ -26,8 +26,6 @@ public class BatchPlanFieldConDO extends AuditDomain {
 
     private String compareWay;
 
-    private String regularExpression;
-
     private String warningLevel;
 
     private List<WarningLevelDTO> warningLevelList;

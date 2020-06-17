@@ -29,6 +29,8 @@ public class BatchPlanFieldLineDO extends AuditDomain {
 
     private String checkFieldName;
 
+    private String regularExpression;
+
     private Long tenantId;
 
 }

@@ -50,6 +50,8 @@ public class BatchPlanFieldLine extends AuditDomain {
 
     private String checkFieldName;
 
+    private String regularExpression;
+
     private Long tenantId;
 
 

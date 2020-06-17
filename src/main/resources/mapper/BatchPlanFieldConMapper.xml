@@ -7,7 +7,6 @@
         <result column="plan_line_id" property="planLineId" jdbcType="DECIMAL"/>
         <result column="where_condition" property="whereCondition" jdbcType="VARCHAR"/>
         <result column="compare_way" property="compareWay" jdbcType="VARCHAR"/>
-        <result column="regular_expression" property="regularExpression" jdbcType="VARCHAR"/>
         <result column="warning_level" property="warningLevel" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
@@ -23,8 +22,6 @@
                xbpfc.plan_line_id,
                xbpfc.where_condition,
                xbpfc.compare_way,
-               xbpfc.regular_expression,
-               xbpfc.lov_code,
                xbpfc.warning_level,
                xbpfl.plan_rule_id,
                xbpfl.check_way,

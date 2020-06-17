@@ -10,6 +10,7 @@
         <result column="count_type" property="countType" jdbcType="VARCHAR"/>
         <result column="field_name" property="fieldName" jdbcType="VARCHAR"/>
         <result column="check_field_name" property="checkFieldName" jdbcType="VARCHAR"/>
+        <result column="regular_expression" property="regularExpression" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
         <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>

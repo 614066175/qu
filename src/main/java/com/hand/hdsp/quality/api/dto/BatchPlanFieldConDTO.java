@@ -36,9 +36,6 @@ public class BatchPlanFieldConDTO extends AuditDomain {
     @ApiModelProperty(value = "比较方式 HDSP.XQUA.COMPARE_WAY")
     private String compareWay;
 
-    @ApiModelProperty(value = "正则表达式")
-    private String regularExpression;
-
     @ApiModelProperty(value = "告警等级json")
     private String warningLevel;
 

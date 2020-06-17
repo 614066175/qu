@@ -50,6 +50,9 @@ public class BatchPlanFieldLineDTO extends AuditDomain {
     @Size(max = 1000)
     private String checkFieldName;
 
+    @ApiModelProperty(value = "正则表达式")
+    private String regularExpression;
+
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;
