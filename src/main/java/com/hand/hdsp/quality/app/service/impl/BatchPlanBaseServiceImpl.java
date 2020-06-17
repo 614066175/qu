@@ -26,6 +26,7 @@ import java.util.List;
 public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
 
     private final BatchPlanBaseRepository batchPlanBaseRepository;
+    private final BatchPlanRepository batchPlanRepository;
     private final BatchPlanTableRepository batchPlanTableRepository;
     private final BatchPlanTableLineRepository batchPlanTableLineRepository;
     private final BatchPlanFieldRepository batchPlanFieldRepository;
@@ -35,6 +36,7 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
     private final DatasourceFeign datasourceFeign;
 
     public BatchPlanBaseServiceImpl(BatchPlanBaseRepository batchPlanBaseRepository,
+                                    BatchPlanRepository batchPlanRepository,
                                     BatchPlanTableRepository batchPlanTableRepository,
                                     BatchPlanTableLineRepository batchPlanTableLineRepository,
                                     BatchPlanFieldRepository batchPlanFieldRepository,
@@ -43,6 +45,7 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
                                     BatchResultRepository batchResultRepository,
                                     DatasourceFeign datasourceFeign) {
         this.batchPlanBaseRepository = batchPlanBaseRepository;
+        this.batchPlanRepository = batchPlanRepository;
         this.batchPlanTableRepository = batchPlanTableRepository;
         this.batchPlanTableLineRepository = batchPlanTableLineRepository;
         this.batchPlanFieldRepository = batchPlanFieldRepository;
@@ -97,6 +100,7 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
     @Override
     public BatchPlanBaseDTO detail(Long planBaseId, Long tenantId) {
         BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseRepository.selectDTOByPrimaryKey(planBaseId);
+        batchPlanBaseDTO.setPlanName(batchPlanRepository.selectByPrimaryKey(batchPlanBaseDTO.getPlanId()).getPlanName());
         ResponseEntity<String> result = datasourceFeign.detail(tenantId, batchPlanBaseDTO.getDatasourceId());
         DatasourceDTO datasourceDTO = ResponseUtils.getResponse(result, new TypeReference<DatasourceDTO>() {
         });
