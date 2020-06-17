@@ -17,9 +17,17 @@ public interface BatchPlanBaseRepository extends BaseRepository<BatchPlanBase, B
     /**
      * 行列表
      *
-     * @param pageRequest
-     * @param batchPlanBaseDTO
-     * @return
+     * @param pageRequest      分页条件
+     * @param batchPlanBaseDTO 查询条件
+     * @return Page<BatchPlanBaseDTO> 实体类page
      */
     Page<BatchPlanBaseDTO> list(PageRequest pageRequest, BatchPlanBaseDTO batchPlanBaseDTO);
+
+    /**
+     * 查询明细
+     *
+     * @param planBaseId 主键
+     * @return BatchPlanBaseDTO 实体类
+     */
+    BatchPlanBaseDTO detail(Long planBaseId);
 }

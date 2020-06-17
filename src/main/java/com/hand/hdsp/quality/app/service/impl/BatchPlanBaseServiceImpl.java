@@ -99,8 +99,7 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
 
     @Override
     public BatchPlanBaseDTO detail(Long planBaseId, Long tenantId) {
-        BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseRepository.selectDTOByPrimaryKey(planBaseId);
-        batchPlanBaseDTO.setPlanName(batchPlanRepository.selectByPrimaryKey(batchPlanBaseDTO.getPlanId()).getPlanName());
+        BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseRepository.detail(planBaseId);
         ResponseEntity<String> result = datasourceFeign.detail(tenantId, batchPlanBaseDTO.getDatasourceId());
         DatasourceDTO datasourceDTO = ResponseUtils.getResponse(result, new TypeReference<DatasourceDTO>() {
         });

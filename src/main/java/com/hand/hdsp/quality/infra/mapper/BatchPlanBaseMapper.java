@@ -17,7 +17,15 @@ public interface BatchPlanBaseMapper extends BaseMapper<BatchPlanBase> {
      * 行列表
      *
      * @param batchPlanBaseDTO 查询条件
-     * @return
+     * @return List<BatchPlanBaseDTO> 实体类list
      */
     List<BatchPlanBaseDTO> list(BatchPlanBaseDTO batchPlanBaseDTO);
+
+    /**
+     * 查询明细
+     *
+     * @param planBaseId 查询条件
+     * @return BatchPlanBaseDTO 实体类
+     */
+    BatchPlanBaseDTO detail(Long planBaseId);
 }
