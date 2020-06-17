@@ -73,12 +73,9 @@ public class BatchPlanFieldDTO extends AuditDomain {
     private String countType;
 
     @ApiModelProperty(value = "规则字段，多个列逗号拼接")
-    @NotBlank
-    @Size(max = 1000)
     private String fieldName;
 
     @ApiModelProperty(value = "校验字段，多个列逗号拼接")
-    @Size(max = 1000)
     private String checkFieldName;
 
     @ApiModelProperty(value = "正则表达式")
