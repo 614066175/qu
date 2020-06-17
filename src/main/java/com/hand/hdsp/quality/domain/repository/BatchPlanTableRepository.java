@@ -30,4 +30,12 @@ public interface BatchPlanTableRepository extends BaseRepository<BatchPlanTable,
      * @return
      */
     int deleteByParentId(Long planBaseId);
+
+    /**
+     * 表级规则-规则详情查询方法
+     *
+     * @param batchPlanTableDTO
+     * @return
+     */
+    List<BatchPlanTableDTO> selectDetailList(BatchPlanTableDTO batchPlanTableDTO);
 }

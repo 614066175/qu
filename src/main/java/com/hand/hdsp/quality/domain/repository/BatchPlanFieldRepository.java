@@ -37,4 +37,12 @@ public interface BatchPlanFieldRepository extends BaseRepository<BatchPlanField,
      * @return
      */
     List<BatchPlanField> list(BatchPlanField batchPlanField);
+
+    /**
+     * 字段规则-规则详情查询方法
+     *
+     * @param batchPlanFieldDTO
+     * @return
+     */
+    List<BatchPlanFieldDTO> selectDetailList(BatchPlanFieldDTO batchPlanFieldDTO);
 }

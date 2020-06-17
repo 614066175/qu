@@ -73,4 +73,29 @@
             </if>
         </where>
     </select>
+
+    <select id="selectDetailList" resultType="com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO">
+        select xbpf.plan_rule_id,
+               xbpf.rule_code,
+               xbpf.rule_name,
+               xbpf.rule_desc,
+               xbpf.check_type,
+               xbpf.exception_block,
+               xbpf.weight,
+               xbptl.check_way,
+               xbptl.check_item,
+               xbptl.count_type,
+               xbptl.field_name,
+               xbptl.check_field_name,
+               xbpfc.condition_id,
+               xbpfc.where_condition,
+               xbpfc.compare_way,
+               xbpfc.regular_expression,
+               xbpfc.lov_code,
+               xbpfc.warning_level
+        from xqua_batch_plan_field_con xbpfc
+                 left join xqua_batch_plan_field_line xbptl on xbpfc.plan_line_id = xbptl.plan_line_id
+                 left join xqua_batch_plan_field xbpf on xbptl.plan_rule_id = xbpf.plan_rule_id
+        where xbpf.plan_base_id = #{planBaseId}
+    </select>
 </mapper>

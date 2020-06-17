@@ -11,7 +11,10 @@ import com.hand.hdsp.quality.domain.repository.BatchPlanTableLineRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanTableRepository;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanTableDO;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
+import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.domain.AuditDomain;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -129,5 +132,14 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
         }
         batchPlanTableDTO.setBatchPlanTableLineDTOList(batchPlanTableLineDTOList);
         return batchPlanTableDTO;
+    }
+
+    @Override
+    public Page<BatchPlanTableDTO> selectDetailList(PageRequest pageRequest, BatchPlanTableDTO batchPlanTableDTO) {
+        Page<BatchPlanTableDTO> pages = PageHelper.doPage(pageRequest, () -> batchPlanTableRepository.selectDetailList(batchPlanTableDTO));
+        for (BatchPlanTableDTO dto : pages.getContent()) {
+            dto.setWarningLevelList(JsonUtils.json2WarningLevel(dto.getWarningLevel()));
+        }
+        return pages;
     }
 }

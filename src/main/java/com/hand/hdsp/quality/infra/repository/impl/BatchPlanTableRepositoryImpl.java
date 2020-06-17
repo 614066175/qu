@@ -18,7 +18,7 @@ import java.util.List;
 @Component
 public class BatchPlanTableRepositoryImpl extends BaseRepositoryImpl<BatchPlanTable, BatchPlanTableDTO> implements BatchPlanTableRepository {
 
-    private BatchPlanTableMapper batchPlanTableMapper;
+    private final BatchPlanTableMapper batchPlanTableMapper;
 
     public BatchPlanTableRepositoryImpl(BatchPlanTableMapper batchPlanTableMapper) {
         this.batchPlanTableMapper = batchPlanTableMapper;
@@ -32,5 +32,10 @@ public class BatchPlanTableRepositoryImpl extends BaseRepositoryImpl<BatchPlanTa
     @Override
     public int deleteByParentId(Long planBaseId) {
         return batchPlanTableMapper.deleteByParentId(planBaseId);
+    }
+
+    @Override
+    public List<BatchPlanTableDTO> selectDetailList(BatchPlanTableDTO batchPlanTableDTO) {
+        return batchPlanTableMapper.selectDetailList(batchPlanTableDTO);
     }
 }

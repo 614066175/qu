@@ -41,4 +41,13 @@ public interface BatchPlanRelTableService {
      * @return
      */
     Page<BatchPlanRelTableDTO> list(PageRequest pageRequest, BatchPlanRelTableDTO batchPlanRelTableDTO);
+
+    /**
+     * 表间规则-规则详情查询方法
+     *
+     * @param pageRequest
+     * @param batchPlanRelTableDTO
+     * @return
+     */
+    Page<BatchPlanRelTableDTO> selectDetailList(PageRequest pageRequest, BatchPlanRelTableDTO batchPlanRelTableDTO);
 }

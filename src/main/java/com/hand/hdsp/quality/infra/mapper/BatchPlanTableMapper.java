@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.infra.mapper;
 
+import com.hand.hdsp.quality.api.dto.BatchPlanTableDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanTable;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanTableDO;
 import io.choerodon.mybatis.common.BaseMapper;
@@ -31,4 +32,12 @@ public interface BatchPlanTableMapper extends BaseMapper<BatchPlanTable> {
      */
     @Delete("delete from xqua_batch_plan_table where plan_base_id = #{planBaseId}")
     int deleteByParentId(@Param("planBaseId") Long planBaseId);
+
+    /**
+     * 表级规则-规则详情查询方法
+     *
+     * @param batchPlanTableDTO
+     * @return
+     */
+    List<BatchPlanTableDTO> selectDetailList(BatchPlanTableDTO batchPlanTableDTO);
 }

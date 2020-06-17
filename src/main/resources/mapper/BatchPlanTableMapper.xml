@@ -32,4 +32,26 @@
             and xbpt.rule_name like #{ruleName}
         </if>
     </select>
+
+    <select id="selectDetailList" resultType="com.hand.hdsp.quality.api.dto.BatchPlanTableDTO">
+        select xbpt.plan_rule_id,
+               xbpt.rule_code,
+               xbpt.rule_name,
+               xbpt.rule_desc,
+               xbpt.rule_type,
+               xbpt.check_type,
+               xbpt.exception_block,
+               xbpt.weight,
+               xbptl.check_item,
+               xbptl.count_type,
+               xbptl.custom_sql,
+               xbptc.condition_id,
+               xbptc.where_condition,
+               xbptc.compare_way,
+               xbptc.warning_level
+        from xqua_batch_plan_table_con xbptc
+                 left join xqua_batch_plan_table_line xbptl on xbptc.plan_line_id = xbptl.plan_line_id
+                 left join xqua_batch_plan_table xbpt on xbptl.plan_rule_id = xbpt.plan_rule_id
+        where xbpt.plan_base_id = #{planBaseId}
+    </select>
 </mapper>

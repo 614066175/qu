@@ -2,6 +2,8 @@ package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanTableDTO;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanTableDO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 
@@ -49,4 +51,13 @@ public interface BatchPlanTableService {
      * @return
      */
     BatchPlanTableDTO detail(Long planRuleId);
+
+    /**
+     * 表级规则-规则详情查询方法
+     *
+     * @param pageRequest
+     * @param batchPlanTableDTO
+     * @return
+     */
+    Page<BatchPlanTableDTO> selectDetailList(PageRequest pageRequest, BatchPlanTableDTO batchPlanTableDTO);
 }

@@ -3,16 +3,21 @@ package com.hand.hdsp.quality.api.controller.v1;
 import com.hand.hdsp.quality.api.dto.BatchPlanTableDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanTableService;
 import com.hand.hdsp.quality.config.SwaggerTags;
+import com.hand.hdsp.quality.domain.entity.BatchPlanBase;
 import com.hand.hdsp.quality.domain.entity.BatchPlanTable;
 import com.hand.hdsp.quality.domain.repository.BatchPlanTableRepository;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanTableDO;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.*;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * <p>批数据方案-表级规则表 管理 API</p>
@@ -127,5 +132,21 @@ public class BatchPlanTableController extends BaseController {
         batchPlanTableDTO.setTenantId(tenantId);
         batchPlanTableService.delete(batchPlanTableDTO);
         return Results.success();
+    }
+
+    @ApiOperation(value = "规则详情页面-表级规则api")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/detail-list")
+    public ResponseEntity<?> detailList(@PathVariable(name = "organizationId") Long tenantId,
+                                        BatchPlanTableDTO batchPlanTableDTO, @ApiIgnore @SortDefault(value = BatchPlanBase.FIELD_PLAN_BASE_ID,
+            direction = Sort.Direction.DESC) PageRequest pageRequest) {
+        batchPlanTableDTO.setTenantId(tenantId);
+        return Results.success(batchPlanTableService.selectDetailList(pageRequest, batchPlanTableDTO));
     }
 }

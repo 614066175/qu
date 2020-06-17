@@ -39,4 +39,12 @@ public interface BatchPlanFieldMapper extends BaseMapper<BatchPlanField> {
      * @return
      */
     List<BatchPlanField> list2(BatchPlanField batchPlanField);
+
+    /**
+     * 字段规则-规则详情查询方法
+     *
+     * @param batchPlanFieldDTO
+     * @return
+     */
+    List<BatchPlanFieldDTO> selectDetailList(BatchPlanFieldDTO batchPlanFieldDTO);
 }

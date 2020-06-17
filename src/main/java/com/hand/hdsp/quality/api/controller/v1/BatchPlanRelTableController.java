@@ -134,4 +134,21 @@ public class BatchPlanRelTableController extends BaseController {
         batchPlanRelTableRepository.deleteByPrimaryKey(batchPlanRelTableDTO);
         return Results.success();
     }
+
+    @ApiOperation(value = "规则详情页面-表间规则api")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/detail-list")
+    public ResponseEntity<?> detailList(@PathVariable(name = "organizationId") Long tenantId,
+                                  BatchPlanRelTableDTO batchPlanRelTableDTO, @ApiIgnore @SortDefault(value = BatchPlanRelTable.FIELD_PLAN_RULE_ID,
+            direction = Sort.Direction.DESC) PageRequest pageRequest) {
+        batchPlanRelTableDTO.setTenantId(tenantId);
+        Page<BatchPlanRelTableDTO> list = batchPlanRelTableService.selectDetailList(pageRequest, batchPlanRelTableDTO);
+        return Results.success(list);
+    }
 }

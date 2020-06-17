@@ -62,4 +62,14 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
     public Page<BatchPlanRelTableDTO> list(PageRequest pageRequest, BatchPlanRelTableDTO batchPlanRelTableDTO) {
         return batchPlanRelTableRepository.pageAndSortDTO(pageRequest, batchPlanRelTableDTO);
     }
+
+    @Override
+    public Page<BatchPlanRelTableDTO> selectDetailList(PageRequest pageRequest, BatchPlanRelTableDTO batchPlanRelTableDTO) {
+        Page<BatchPlanRelTableDTO> pages = batchPlanRelTableRepository.pageAndSortDTO(pageRequest, batchPlanRelTableDTO);
+        for (BatchPlanRelTableDTO dto : pages.getContent()) {
+            dto.setWarningLevelList(JsonUtils.json2WarningLevel(dto.getWarningLevel()));
+            dto.setRelationshipList(JsonUtils.json2Relationship(dto.getRelationship()));
+        }
+        return pages;
+    }
 }

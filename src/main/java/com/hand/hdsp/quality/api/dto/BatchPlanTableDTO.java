@@ -64,4 +64,25 @@ public class BatchPlanTableDTO extends AuditDomain {
 
     @ApiModelProperty(value = "表级规则校验项List")
     private List<BatchPlanTableLineDTO> batchPlanTableLineDTOList;
+
+    @ApiModelProperty(value = "校验项 HDSP.XQUA.CHECK_ITEM")
+    private String checkItem;
+
+    @ApiModelProperty(value = "校验类型 HDSP.XQUA.COUNT_TYPE")
+    private String countType;
+
+    @ApiModelProperty(value = "自定义SQL")
+    private String customSql;
+
+    @ApiModelProperty(value = "条件where")
+    private String whereCondition;
+
+    @ApiModelProperty(value = "比较方式 HDSP.XQUA.COMPARE_WAY")
+    private String compareWay;
+
+    @ApiModelProperty(value = "告警等级json")
+    private String warningLevel;
+
+    @ApiModelProperty(value = "方案告警等级List")
+    private List<WarningLevelDTO> warningLevelList;
 }

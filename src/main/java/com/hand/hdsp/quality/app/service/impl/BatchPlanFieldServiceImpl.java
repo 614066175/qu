@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.app.service.impl;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldConDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
+import com.hand.hdsp.quality.api.dto.BatchPlanTableDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanFieldService;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldCon;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
@@ -10,7 +11,10 @@ import com.hand.hdsp.quality.domain.entity.Rule;
 import com.hand.hdsp.quality.domain.entity.RuleLine;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
+import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.domain.AuditDomain;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.core.base.BaseConstants;
 import org.springframework.beans.BeanUtils;
@@ -186,5 +190,14 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
         batchPlanFieldDTO.setBatchPlanFieldLineDTOList(batchPlanFieldLineDTOList);
 
         return batchPlanFieldDTO;
+    }
+
+    @Override
+    public Page<BatchPlanFieldDTO> selectDetailList(PageRequest pageRequest, BatchPlanFieldDTO batchPlanFieldDTO) {
+        Page<BatchPlanFieldDTO> pages = PageHelper.doPage(pageRequest, () -> batchPlanFieldRepository.selectDetailList(batchPlanFieldDTO));
+        for (BatchPlanFieldDTO dto : pages.getContent()) {
+            dto.setWarningLevelList(JsonUtils.json2WarningLevel(dto.getWarningLevel()));
+        }
+        return pages;
     }
 }
