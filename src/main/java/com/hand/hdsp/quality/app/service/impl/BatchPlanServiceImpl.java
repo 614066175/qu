@@ -31,7 +31,7 @@ import org.hzero.boot.message.entity.MessageSender;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.boot.platform.lov.dto.LovValueDTO;
 import org.hzero.core.base.BaseConstants;
-import org.hzero.core.exception.MessageException;
+import org.hzero.core.message.MessageAccessor;
 import org.hzero.core.util.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -108,41 +108,6 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
 
     @Override
-    public void exec(Long tenantId, Long planId) {
-
-        //插入批数据方案结果表
-        BatchResult batchResult = BatchResult.builder()
-                .planId(planId)
-                .startDate(new Date())
-                .planStatus(PlanConstant.PlanStatus.RUNNING)
-                .tenantId(tenantId)
-                .build();
-        batchResultRepository.insertSelective(batchResult);
-
-        try {
-            //规则计算
-            ruleJudge(tenantId, planId, batchResult);
-
-            //分数计算
-            countScore(tenantId, batchResult);
-
-            //告警
-            sendWarning(tenantId, batchResult.getResultId());
-        } catch (MessageException e) {
-            log.error("count_error", e);
-            batchResult.setPlanStatus(PlanConstant.PlanStatus.FAILED);
-            batchResult.setExceptionInfo(e.getMessage());
-            batchResultRepository.updateByPrimaryKeySelective(batchResult);
-            throw e;
-        } catch (Exception e) {
-            batchResult.setPlanStatus(PlanConstant.PlanStatus.FAILED);
-            batchResult.setExceptionInfo(ExceptionUtils.getMessage(e));
-            batchResultRepository.updateByPrimaryKeySelective(batchResult);
-            throw e;
-        }
-    }
-
-    @Override
     @Transactional(rollbackFor = Exception.class)
     public void generate(Long tenantId, Long planId) {
         BatchPlanDTO batchPlanDTO = batchPlanRepository.selectDTOByPrimaryKey(planId);
@@ -205,6 +170,77 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
     }
 
+    @Override
+    public void exec(Long tenantId, Long planId) {
+
+        //插入批数据方案结果表
+        BatchResult batchResult = BatchResult.builder()
+                .planId(planId)
+                .startDate(new Date())
+                .planStatus(PlanConstant.PlanStatus.RUNNING)
+                .tenantId(tenantId)
+                .build();
+        batchResultRepository.insertSelective(batchResult);
+
+        //时间戳对象list
+        List<TimestampControlDTO> timestampList = new ArrayList<>();
+
+        try {
+            //规则计算
+            ruleJudge(tenantId, planId, batchResult, timestampList);
+
+            //分数计算
+            countScore(tenantId, batchResult);
+
+            //告警
+            sendWarning(tenantId, batchResult.getResultId());
+
+            //更新增量参数
+            updateTimestamp(tenantId, timestampList, true);
+        } catch (CommonException e) {
+            //更新增量参数
+            updateTimestamp(tenantId, timestampList, false);
+            batchResult.setPlanStatus(PlanConstant.PlanStatus.FAILED);
+            batchResult.setExceptionInfo(MessageAccessor.getMessage(e.getMessage(), e.getParameters()).getDesc());
+            batchResultRepository.updateByPrimaryKeySelective(batchResult);
+            throw e;
+        } catch (Exception e) {
+            //更新增量参数
+            updateTimestamp(tenantId, timestampList, false);
+            batchResult.setPlanStatus(PlanConstant.PlanStatus.FAILED);
+            batchResult.setExceptionInfo(ExceptionUtils.getMessage(e));
+            batchResultRepository.updateByPrimaryKeySelective(batchResult);
+            throw e;
+        }
+    }
+
+    /**
+     * 更新增量参数
+     *
+     * @param tenantId
+     * @param timestampList
+     * @param success
+     */
+    private void updateTimestamp(Long tenantId, List<TimestampControlDTO> timestampList, boolean success) {
+        if (success) {
+            for (TimestampControlDTO timestampControlDTO : timestampList) {
+                ResponseEntity<String> response = timestampFeign.updateIncrement(tenantId,
+                        timestampControlDTO);
+                ResponseUtils.getResponse(response, TimestampControlDTO.class);
+            }
+        } else {
+            for (TimestampControlDTO timestampControlDTO : timestampList) {
+                ResponseEntity<String> response = timestampFeign.updateIncrement(tenantId,
+                        TimestampControlDTO.builder()
+                                .timestampType(timestampControlDTO.getTimestampType())
+                                .success(false)
+                                .build());
+                ResponseUtils.getResponse(response, TimestampControlDTO.class);
+            }
+        }
+
+    }
+
     /**
      * 对每个规则进行计算
      *
@@ -212,7 +248,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
      * @param planId      planId
      * @param batchResult batchResult
      */
-    private void ruleJudge(Long tenantId, Long planId, BatchResult batchResult) {
+    private void ruleJudge(Long tenantId, Long planId, BatchResult batchResult, List<TimestampControlDTO> timestampList) {
 
         List<BatchPlanBase> baseList = batchPlanBaseRepository.select(BatchPlanBase.FIELD_PLAN_ID, planId);
         for (BatchPlanBase batchPlanBase : baseList) {
@@ -238,17 +274,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     .tenantId(tenantId)
                     .build();
 
-            // 获取增量参数
-            String timestampType = null;
-            SpecifiedParamsResponseDO specifiedParamsResponseDO = new SpecifiedParamsResponseDO();
-            if (!PlanConstant.IncrementStrategy.NONE.equals(batchPlanBase.getIncrementStrategy())) {
-                // 查询方案
-                BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(planId);
-                timestampType = String.format(PlanConstant.TIMESTAMP_TYPE, tenantId, batchPlan.getPlanCode(), batchPlanBase.getPlanBaseId());
-                ResponseEntity<String> incrementParam = timestampFeign.getIncrementParam(tenantId, timestampType);
-                specifiedParamsResponseDO = ResponseUtils.getResponse(incrementParam, SpecifiedParamsResponseDO.class);
-                batchResultBase.setWhereCondition(ParamsUtil.handlePredefinedParams(batchPlanBase.getWhereCondition(), specifiedParamsResponseDO));
-            }
+            //获取增量参数，并更新 where 条件
+            updateWhereCondition(tenantId, planId, batchPlanBase, batchResultBase, timestampList);
 
             batchResultBaseRepository.insertSelective(batchResultBase);
 
@@ -257,20 +284,37 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             handleRelTableRule(tenantId, batchResultBase, datasourceDTO);
 
             batchResultBaseRepository.updateByPrimaryKeySelective(batchResultBase);
+        }
+    }
 
-            //处理完毕 更新增量参数
-            if (!PlanConstant.IncrementStrategy.NONE.equals(batchPlanBase.getIncrementStrategy())) {
-                ResponseEntity<String> response = timestampFeign.updateIncrement(tenantId,
-                        TimestampControlDTO.builder()
-                                .timestampType(timestampType)
-                                .currentDateTime(specifiedParamsResponseDO.getCurrentDataTime())
-                                .lastDateTime(specifiedParamsResponseDO.getLastDateTime())
-                                .currentMaxId(specifiedParamsResponseDO.getCurrentMaxId())
-                                .lastMaxId(specifiedParamsResponseDO.getLastMaxId())
-                                .success(true)
-                                .build());
-                ResponseUtils.getResponse(response, TimestampControlDTO.class);
-            }
+    /**
+     * 获取增量参数，并更新 where 条件
+     *
+     * @param tenantId
+     * @param planId
+     * @param batchPlanBase
+     * @param batchResultBase
+     * @param timestampList
+     */
+    private void updateWhereCondition(Long tenantId, Long planId, BatchPlanBase batchPlanBase, BatchResultBase batchResultBase, List<TimestampControlDTO> timestampList) {
+        // 获取增量参数
+        if (!PlanConstant.IncrementStrategy.NONE.equals(batchPlanBase.getIncrementStrategy())) {
+            // 查询方案
+            BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(planId);
+            String timestampType = String.format(PlanConstant.TIMESTAMP_TYPE, tenantId, batchPlan.getPlanCode(), batchPlanBase.getPlanBaseId());
+            ResponseEntity<String> incrementParam = timestampFeign.getIncrementParam(tenantId, timestampType);
+            SpecifiedParamsResponseDO specifiedParamsResponseDO = ResponseUtils.getResponse(incrementParam, SpecifiedParamsResponseDO.class);
+            batchResultBase.setWhereCondition(ParamsUtil.handlePredefinedParams(batchPlanBase.getWhereCondition(), specifiedParamsResponseDO));
+
+            //将增量参数添加到list中  全部处理完一起更新
+            timestampList.add(TimestampControlDTO.builder()
+                    .timestampType(timestampType)
+                    .currentDateTime(specifiedParamsResponseDO.getCurrentDataTime())
+                    .lastDateTime(specifiedParamsResponseDO.getLastDateTime())
+                    .currentMaxId(specifiedParamsResponseDO.getCurrentMaxId())
+                    .lastMaxId(specifiedParamsResponseDO.getLastMaxId())
+                    .success(true)
+                    .build());
         }
     }
 
@@ -331,6 +375,11 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 if (StringUtils.isNotBlank(batchResultItem.getWarningLevel())) {
                     batchResultBase.setExceptionCheckItemCount(batchResultBase.getExceptionCheckItemCount() + 1);
                     exceptionFlag = true;
+
+                    //异常阻断
+                    if (batchPlanTable.getExceptionBlock() == 1) {
+                        throw new CommonException(ErrorCode.EXCEPTION_BLOCK);
+                    }
                 }
             }
 
@@ -410,6 +459,11 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 if (StringUtils.isNotBlank(batchResultItem.getWarningLevel())) {
                     batchResultBase.setExceptionCheckItemCount(batchResultBase.getExceptionCheckItemCount() + 1);
                     exceptionFlag = true;
+
+                    //异常阻断
+                    if (batchPlanField.getExceptionBlock() == 1) {
+                        throw new CommonException(ErrorCode.EXCEPTION_BLOCK);
+                    }
                 }
             }
 
@@ -467,6 +521,11 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             if (StringUtils.isNotBlank(batchResultItem.getWarningLevel())) {
                 batchResultBase.setExceptionRuleCount(batchResultBase.getExceptionRuleCount() + 1);
                 batchResultBase.setExceptionCheckItemCount(batchResultBase.getExceptionCheckItemCount() + 1);
+
+                //异常阻断
+                if (batchPlanRelTable.getExceptionBlock() == 1) {
+                    throw new CommonException(ErrorCode.EXCEPTION_BLOCK);
+                }
             }
         }
     }

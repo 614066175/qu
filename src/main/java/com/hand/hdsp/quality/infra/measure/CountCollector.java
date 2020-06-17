@@ -5,8 +5,6 @@ import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.core.base.BaseConstants;
-import org.hzero.core.exception.MessageException;
-import org.hzero.core.message.MessageAccessor;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -40,8 +38,7 @@ public class CountCollector {
         Count count = COUNT_MAP.get(countType.toUpperCase());
         if (count == null) {
             String meaning = lovAdapter.queryLovMeaning(PlanConstant.LOV_COUNT_TYPE, BaseConstants.DEFAULT_TENANT_ID, countType);
-            Object[] args = {meaning};
-            throw new MessageException(MessageAccessor.getMessage("error.count.count_type.not_exist", args).getDesc());
+            throw new CommonException("error.count.count_type.not_exist", meaning);
         }
         return count;
     }

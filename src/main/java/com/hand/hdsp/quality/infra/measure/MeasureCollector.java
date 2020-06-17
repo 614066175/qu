@@ -8,8 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.core.base.BaseConstants;
-import org.hzero.core.exception.MessageException;
-import org.hzero.core.message.MessageAccessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -53,8 +51,7 @@ public class MeasureCollector {
         Measure measure = MEASURE_MAP.get(checkItem.toUpperCase());
         if (measure == null) {
             String meaning = lovAdapter.queryLovMeaning(PlanConstant.LOV_CHECK_ITEM, BaseConstants.DEFAULT_TENANT_ID, checkItem);
-            Object[] args = {meaning};
-            throw new MessageException(MessageAccessor.getMessage("error.measure.check_item.not_exist", args).getDesc());
+            throw new CommonException("error.measure.check_item.not_exist", meaning);
         }
         return measure;
     }

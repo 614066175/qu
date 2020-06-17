@@ -17,10 +17,9 @@ import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
+import io.choerodon.core.exception.CommonException;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
-import org.hzero.core.exception.MessageException;
-import org.hzero.core.message.MessageAccessor;
 import org.hzero.core.util.ResponseUtils;
 
 import java.math.BigDecimal;
@@ -102,7 +101,7 @@ public class RelTableMeasure implements Measure {
             List<HashMap<String, String>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, String>>>() {
             });
             if (response.size() != 1 || response.get(0).size() != 1) {
-                throw new MessageException(MessageAccessor.getMessage(ErrorCode.CUSTOM_SQL_ONE_VALUE).getDesc());
+                throw new CommonException(ErrorCode.CUSTOM_SQL_ONE_VALUE);
             }
 
             dataCount = (Long) response.get(0).values().toArray()[0];

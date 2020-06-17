@@ -33,4 +33,10 @@ public interface ErrorCode {
      * 自定义SQL仅支持返回一个值
      */
     String CUSTOM_SQL_ONE_VALUE = "error.custom_sql_one_value";
+
+
+    /**
+     * 异常阻断
+     */
+    String EXCEPTION_BLOCK = "error.exception_block";
 }

@@ -11,8 +11,7 @@ import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Count;
 import com.hand.hdsp.quality.infra.measure.CountCollector;
 import com.hand.hdsp.quality.infra.measure.Measure;
-import org.hzero.core.exception.MessageException;
-import org.hzero.core.message.MessageAccessor;
+import io.choerodon.core.exception.CommonException;
 import org.hzero.core.util.ResponseUtils;
 
 import java.util.HashMap;
@@ -46,7 +45,7 @@ public class CustomFixedMeasure implements Measure {
         List<HashMap<String, String>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, String>>>() {
         });
         if (response.size() != 1 || response.get(0).size() != 1) {
-            throw new MessageException(MessageAccessor.getMessage(ErrorCode.CUSTOM_SQL_ONE_VALUE).getDesc());
+            throw new CommonException(ErrorCode.CUSTOM_SQL_ONE_VALUE);
         }
 
         String value = (String) response.get(0).values().toArray()[0];
