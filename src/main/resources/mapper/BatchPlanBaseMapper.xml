@@ -70,4 +70,16 @@
         order by
         xbpb.plan_base_id desc
     </select>
+    <select id="detail" resultType="com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO">
+        select
+        xbpb.*,
+        xbp.plan_name
+        from
+        xqua_batch_plan_base xbpb
+        left join
+        xqua_batch_plan xbp
+        on xbpb.plan_id = xbp.plan_id
+        where
+        xbpb.plan_base_id = #{planBaseId}
+    </select>
 </mapper>
