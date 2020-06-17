@@ -48,9 +48,10 @@ public class BatchPlanTableController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  BatchPlanTable batchPlanTable) {
+                                  BatchPlanTable batchPlanTable, @ApiIgnore @SortDefault(value = BatchPlanTable.FIELD_PLAN_RULE_ID,
+            direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchPlanTable.setTenantId(tenantId);
-        return Results.success(batchPlanTableRepository.select(batchPlanTable));
+        return Results.success(batchPlanTableRepository.pageAndSort(pageRequest, batchPlanTable));
     }
 
     @ApiOperation(value = "批数据方案-表级规则表列表（含校验项）")
