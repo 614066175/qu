@@ -87,11 +87,10 @@
                xbptl.count_type,
                xbptl.field_name,
                xbptl.check_field_name,
+               xbptl.regular_expression,
                xbpfc.condition_id,
                xbpfc.where_condition,
                xbpfc.compare_way,
-               xbpfc.regular_expression,
-               xbpfc.lov_code,
                xbpfc.warning_level
         from xqua_batch_plan_field_con xbpfc
                  left join xqua_batch_plan_field_line xbptl on xbpfc.plan_line_id = xbptl.plan_line_id
