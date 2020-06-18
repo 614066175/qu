@@ -12,8 +12,6 @@ import com.hand.hdsp.quality.domain.entity.StreamingPlan;
 import com.hand.hdsp.quality.domain.repository.PlanGroupRepository;
 import com.hand.hdsp.quality.domain.repository.StreamingPlanRepository;
 import com.hand.hdsp.quality.infra.constant.GroupType;
-import com.hand.hdsp.quality.infra.mapper.StreamingPlanMapper;
-import io.choerodon.core.exception.CommonException;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;

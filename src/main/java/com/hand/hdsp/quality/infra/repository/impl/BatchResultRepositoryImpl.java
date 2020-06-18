@@ -94,7 +94,7 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
                 }
             }
         } else {
-            return Arrays.asList(new CheckTypePercentageVO());
+            return Collections.singletonList(new CheckTypePercentageVO());
         }
         return checkTypePercentage;
     }
