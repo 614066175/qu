@@ -43,6 +43,7 @@ public class CommonSqlMeasure implements Measure {
         Long tenantId = param.getTenantId();
         DatasourceDTO datasourceDTO = param.getDatasourceDTO();
         BatchResultBase batchResultBase = param.getBatchResultBase();
+        BatchResultItem batchResultItem = param.getBatchResultItem();
         List<ItemTemplateSql> list = templateSqlRepository.select(ItemTemplateSql.builder()
                 .checkItem(PlanConstant.CheckItem.TABLE_LINE)
                 .datasourceType(param.getDatasourceType())
@@ -62,9 +63,11 @@ public class CommonSqlMeasure implements Measure {
 
         String value = (String) response.get(0).values().toArray()[0];
         param.setCountValue(value);
+        batchResultItem.setActualValue(value);
+        batchResultItem.setCurrentValue(value);
         Count count = countCollector.getCount(param.getCountType());
         count.count(param);
 
-        return param.getBatchResultItem();
+        return batchResultItem;
     }
 }

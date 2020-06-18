@@ -385,4 +385,52 @@
 
     </select>
 
+    <select id="errorTablePercentage" resultType="com.hand.hdsp.quality.infra.vo.ErrorTablePercentageVO">
+        SELECT
+            xbrb.object_name,
+            COUNT(*) count_sum
+        FROM
+            xqua_batch_result_rule xbrr
+                JOIN xqua_batch_result_base xbrb ON xbrr.result_base_id = xbrb.result_base_id
+                JOIN xqua_batch_plan_base xbpb ON xbrb.plan_base_id = xbpb.plan_base_id
+        WHERE
+            xbrr.result_flag = 0
+            <include refid="custom_where">
+                <property name="mt" value="xbrr"/>
+            </include>
+        GROUP BY
+            xbrb.object_name
+    </select>
+
+    <select id="errorTableItemPercentage" resultType="com.hand.hdsp.quality.infra.vo.ErrorTablePercentageVO">
+        SELECT
+        a.check_item,
+        a.count_type,
+        COUNT(*) count_sum
+        FROM
+        (
+        SELECT
+        DISTINCT
+        xbri.plan_line_id,
+        xbri.check_item,
+        xbri.count_type,
+        xbrr.result_rule_id
+        FROM
+        xqua_batch_result_item xbri
+        JOIN xqua_batch_result_rule xbrr ON xbri.result_rule_id = xbrr.result_rule_id
+        JOIN xqua_batch_result_base xbrb ON xbrr.result_base_id = xbrb.result_base_id
+        JOIN xqua_batch_plan_base xbpb ON xbrb.plan_base_id = xbpb.plan_base_id
+        WHERE
+        xbri.warning_level IS NOT NULL
+        AND condition_id IS NOT NULL
+        <include refid="custom_where">
+            <property name="mt" value="xbrr"/>
+        </include>
+        ) a
+        GROUP BY
+        a.check_item,
+        a.count_type
+
+    </select>
+
 </mapper>

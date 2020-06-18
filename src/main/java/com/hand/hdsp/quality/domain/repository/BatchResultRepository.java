@@ -1,8 +1,5 @@
 package com.hand.hdsp.quality.domain.repository;
 
-import java.util.List;
-import java.util.Map;
-
 import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
@@ -11,6 +8,9 @@ import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.infra.vo.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>批数据方案结果表资源库</p>
@@ -51,7 +51,7 @@ public interface BatchResultRepository extends BaseRepository<BatchResult, Batch
      * @param timeRangeDTO
      * @return
      */
-    Map<String,Object> numberView(TimeRangeDTO timeRangeDTO);
+    Map<String, Object> numberView(TimeRangeDTO timeRangeDTO);
 
 
     /**
@@ -61,6 +61,22 @@ public interface BatchResultRepository extends BaseRepository<BatchResult, Batch
      * @return CheckTypePercentageVO
      */
     List<CheckTypePercentageVO> checkTypePercentage(TimeRangeDTO timeRangeDTO);
+
+    /**
+     * 灾区表占比情况
+     *
+     * @param timeRangeDTO
+     * @return
+     */
+    List<ErrorTablePercentageVO> errorTablePercentage(TimeRangeDTO timeRangeDTO);
+
+    /**
+     * 灾区表-校验项占比情况
+     *
+     * @param timeRangeDTO
+     * @return
+     */
+    List<ErrorTablePercentageVO> errorTableItemPercentage(TimeRangeDTO timeRangeDTO);
 
     /**
      * 主要可改进指标 规则百分比

@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -40,11 +41,11 @@ public class RuleLineDTO extends AuditDomain {
     private String checkWay;
 
     @ApiModelProperty("校验项")
-    @LovValue(lovCode = "HDSP.XQUA.CHECK_ITEM", meaningField = "checkItemMeaning")
+    @LovValue(lovCode = PlanConstant.LOV_CHECK_ITEM, meaningField = "checkItemMeaning")
     private String checkItem;
 
     @ApiModelProperty("校验类型 HDSP.XQUA.COUNT_TYPE")
-    @LovValue(lovCode = "HDSP.XQUA.COUNT_TYPE", meaningField = "countTypeMeaning")
+    @LovValue(lovCode = PlanConstant.LOV_COUNT_TYPE, meaningField = "countTypeMeaning")
     private String countType;
 
     @ApiModelProperty("比较方式")

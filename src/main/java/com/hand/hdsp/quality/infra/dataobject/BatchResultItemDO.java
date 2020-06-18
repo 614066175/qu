@@ -21,6 +21,8 @@ public class BatchResultItemDO extends AuditDomain {
 
     private Long resultRuleId;
 
+    private Long planLineId;
+
     private Long conditionId;
 
     private String checkWay;

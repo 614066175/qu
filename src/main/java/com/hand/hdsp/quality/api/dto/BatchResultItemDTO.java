@@ -31,6 +31,9 @@ public class BatchResultItemDTO extends AuditDomain {
     @NotNull
     private Long resultRuleId;
 
+    @ApiModelProperty(value = "XQUA_BATCH_PLAN_TABLE_LINE.PLAN_LINE_ID/XQUA_BATCH_PLAN_FIELD_LINE.PLAN_LINE_ID")
+    private Long planLineId;
+
     @ApiModelProperty(value = "XQUA_BATCH_PLAN_TABLE_CON.CONDITION_ID/XQUA_BATCH_PLAN_FIELD_CON.CONDITION_ID")
     private Long conditionId;
 

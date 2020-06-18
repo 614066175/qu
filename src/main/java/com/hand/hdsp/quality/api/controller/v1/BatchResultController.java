@@ -14,6 +14,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.*;
+import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
@@ -50,9 +51,9 @@ public class BatchResultController extends BaseController {
     public ResponseEntity<?> listAll(@PathVariable(name = "organizationId") Long tenantId,
                                      BatchResultDTO batchResultDTO,
                                      @SortDefault(value = BatchResult.FIELD_START_DATE,
-                                             direction = Sort.Direction.DESC)PageRequest pageRequest){
+                                             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchResultDTO.setTenantId(tenantId);
-        return Results.success(batchResultRepository.listAll(batchResultDTO,pageRequest));
+        return Results.success(batchResultRepository.listAll(batchResultDTO, pageRequest));
     }
 
     @ApiOperation(value = "根据分组查看对应的批数据评估方案执行记录")
@@ -67,7 +68,7 @@ public class BatchResultController extends BaseController {
     public ResponseEntity<?> listHistory(@PathVariable(name = "organizationId") Long tenantId,
                                          BatchResultDTO batchResultDTO,
                                          @SortDefault(value = BatchResult.FIELD_START_DATE,
-                                                 direction = Sort.Direction.DESC)PageRequest pageRequest) {
+                                                 direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchResultDTO.setTenantId(tenantId);
         return Results.success(batchResultRepository.listHistory(batchResultDTO, pageRequest));
     }
@@ -82,7 +83,7 @@ public class BatchResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/result-head")
     public ResponseEntity<?> resultHead(@PathVariable(name = "organizationId") Long tenantId,
-                                        BatchResultDTO batchResultDTO){
+                                        BatchResultDTO batchResultDTO) {
         batchResultDTO.setTenantId(tenantId);
         return Results.success(batchResultRepository.showResultHead(batchResultDTO));
     }
@@ -97,7 +98,7 @@ public class BatchResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/number-view")
     public ResponseEntity<?> numberView(@PathVariable(name = "organizationId") Long tenantId,
-                                        TimeRangeDTO timeRangeDTO){
+                                        TimeRangeDTO timeRangeDTO) {
         timeRangeDTO.setTenantId(tenantId);
         return Results.success(batchResultRepository.numberView(timeRangeDTO));
     }
@@ -112,9 +113,40 @@ public class BatchResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/check-type-percentage")
     public ResponseEntity<?> checkTypePercentage(@PathVariable(name = "organizationId") Long tenantId,
-                                                 TimeRangeDTO timeRangeDTO){
+                                                 TimeRangeDTO timeRangeDTO) {
         timeRangeDTO.setTenantId(tenantId);
         return Results.success(batchResultRepository.checkTypePercentage(timeRangeDTO));
+    }
+
+    @ApiOperation(value = "灾区表占比情况")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/error-table-percentage")
+    public ResponseEntity<?> errorTablePercentage(@PathVariable(name = "organizationId") Long tenantId,
+                                                  TimeRangeDTO timeRangeDTO) {
+        timeRangeDTO.setTenantId(tenantId);
+        return Results.success(batchResultRepository.errorTablePercentage(timeRangeDTO));
+    }
+
+    @ApiOperation(value = "灾区表-校验项占比情况")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/error-table-item-percentage")
+    @ProcessLovValue(targetField = {"body"})
+    public ResponseEntity<?> errorTableItemPercentage(@PathVariable(name = "organizationId") Long tenantId,
+                                                      TimeRangeDTO timeRangeDTO) {
+        timeRangeDTO.setTenantId(tenantId);
+        return Results.success(batchResultRepository.errorTableItemPercentage(timeRangeDTO));
     }
 
     @ApiOperation(value = "主要可改进指标（规则）")
@@ -127,7 +159,7 @@ public class BatchResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/rule-percentage")
     public ResponseEntity<?> rulePercentage(@PathVariable(name = "organizationId") Long tenantId,
-                                            TimeRangeDTO timeRangeDTO){
+                                            TimeRangeDTO timeRangeDTO) {
         timeRangeDTO.setTenantId(tenantId);
         return Results.success(batchResultRepository.rulePercentage(timeRangeDTO));
     }
@@ -142,7 +174,7 @@ public class BatchResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/mark-trend")
     public ResponseEntity<?> markTrend(@PathVariable(name = "organizationId") Long tenantId,
-                                       TimeRangeDTO timeRangeDTO){
+                                       TimeRangeDTO timeRangeDTO) {
         timeRangeDTO.setTenantId(tenantId);
         return Results.success(batchResultRepository.markTrend(timeRangeDTO));
     }
@@ -157,7 +189,7 @@ public class BatchResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/error-rule-trend")
     public ResponseEntity<?> daysErrorRule(@PathVariable(name = "organizationId") Long tenantId,
-                                           TimeRangeDTO timeRangeDTO){
+                                           TimeRangeDTO timeRangeDTO) {
         timeRangeDTO.setTenantId(tenantId);
         return Results.success(batchResultRepository.daysErrorRule(timeRangeDTO));
     }
@@ -172,7 +204,7 @@ public class BatchResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/warning-trend")
     public ResponseEntity<?> warningTrend(@PathVariable(name = "organizationId") Long tenantId,
-                                          TimeRangeDTO timeRangeDTO){
+                                          TimeRangeDTO timeRangeDTO) {
         timeRangeDTO.setTenantId(tenantId);
         return Results.success(batchResultRepository.warningTrend(timeRangeDTO));
     }
@@ -188,7 +220,7 @@ public class BatchResultController extends BaseController {
     @GetMapping("/log")
     public ResponseEntity<?> showLog(@PathVariable(name = "organizationId") Long tenantId,
                                      @RequestParam("execId") int execId,
-                                     @RequestParam("jobId") String jobId){
+                                     @RequestParam("jobId") String jobId) {
         return Results.success(batchResultService.showLog(tenantId, execId, jobId));
     }
 

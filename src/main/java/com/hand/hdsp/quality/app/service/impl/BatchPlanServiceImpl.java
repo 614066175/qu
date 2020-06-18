@@ -369,6 +369,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
                 BatchResultItem batchResultItem = param.getBatchResultItem();
                 batchResultItem.setResultRuleId(batchResultRuleDTO.getResultRuleId());
+                batchResultItem.setPlanLineId(batchPlanTableConDO.getPlanLineId());
                 batchResultItem.setConditionId(batchPlanTableConDO.getConditionId());
                 batchResultItem.setWhereCondition(batchPlanTableConDO.getWhereCondition());
                 batchResultItem.setCheckWay(batchPlanTableConDO.getCompareWay());
@@ -454,6 +455,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
                 BatchResultItem batchResultItem = param.getBatchResultItem();
                 batchResultItem.setResultRuleId(batchResultRuleDTO.getResultRuleId());
+                batchResultItem.setPlanLineId(batchPlanFieldConDO.getPlanLineId());
                 batchResultItem.setConditionId(batchPlanFieldConDO.getConditionId());
                 batchResultItem.setWhereCondition(batchPlanFieldConDO.getWhereCondition());
                 batchResultItem.setCheckWay(batchPlanFieldConDO.getCheckWay());
