@@ -8,7 +8,6 @@ import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
 import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
-import com.hand.hdsp.quality.infra.dataobject.BatchPlanFieldConDO;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import com.hand.hdsp.quality.infra.measure.*;
@@ -44,17 +43,14 @@ public class CommonSqlMeasure implements Measure {
         Long tenantId = param.getTenantId();
         DatasourceDTO datasourceDTO = param.getDatasourceDTO();
         BatchResultBase batchResultBase = param.getBatchResultBase();
-        BatchPlanFieldConDO batchPlanFieldConDO = param.getBatchPlanFieldConDO();
         List<ItemTemplateSql> list = templateSqlRepository.select(ItemTemplateSql.builder()
                 .checkItem(PlanConstant.CheckItem.TABLE_LINE)
                 .datasourceType(param.getDatasourceType())
                 .build());
 
-        Map<String, String> variables = new HashMap<>();
+        Map<String, String> variables = new HashMap<>(8);
         variables.put("table", batchResultBase.getObjectName());
-        if (batchPlanFieldConDO != null) {
-            variables.put("field", batchPlanFieldConDO.getFieldName());
-        }
+        variables.put("field", param.getFieldName());
 
         datasourceDTO.setSql(MeasureUtil.replaceVariable(list.get(0).getSqlContent(), variables, batchResultBase.getWhereCondition()));
 

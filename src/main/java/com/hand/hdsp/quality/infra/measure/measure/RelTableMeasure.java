@@ -94,7 +94,7 @@ public class RelTableMeasure implements Measure {
                     .datasourceType(param.getDatasourceType())
                     .build());
 
-            Map<String, String> variables = new HashMap<>();
+            Map<String, String> variables = new HashMap<>(5);
             variables.put("table", batchResultBase.getObjectName());
 
             datasourceDTO.setSql(MeasureUtil.replaceVariable(list.get(0).getSqlContent(), variables, batchResultBase.getWhereCondition()));
@@ -104,7 +104,7 @@ public class RelTableMeasure implements Measure {
                 throw new CommonException(ErrorCode.CUSTOM_SQL_ONE_VALUE);
             }
 
-            dataCount = (Long) response.get(0).values().toArray()[0];
+            dataCount = Long.parseLong((String) response.get(0).values().toArray()[0]);
             batchResultBase.setDataCount(dataCount);
         }
 

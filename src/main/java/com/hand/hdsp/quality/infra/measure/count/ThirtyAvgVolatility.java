@@ -32,7 +32,7 @@ public class ThirtyAvgVolatility implements Count {
 
         //查询基础值
         List<BatchResultItemDO> resultList = batchResultItemMapper.queryList(BatchResultItemDO.builder()
-                .conditionId(param.getBatchPlanFieldConDO().getConditionId())
+                .conditionId(param.getConditionId())
                 .measureDate(DateUtils.addDays(new Date(), -30))
                 .build());
 

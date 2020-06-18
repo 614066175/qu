@@ -1,13 +1,12 @@
 package com.hand.hdsp.quality.infra.mapper;
 
-import java.util.List;
-import java.util.Map;
-
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
 import com.hand.hdsp.quality.api.dto.TimeRangeDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.infra.vo.*;
 import io.choerodon.mybatis.common.BaseMapper;
+
+import java.util.List;
 
 /**
  * <p>批数据方案结果表Mapper</p>
@@ -41,12 +40,28 @@ public interface BatchResultMapper extends BaseMapper<BatchResult> {
     List<BatchResultDTO> listHistory(BatchResultDTO batchResultDTO);
 
     /**
-     * 质量分析汇总:数据质量分数，规则总数，异常规则数
+     * 质量分析汇总:数据质量分数
      *
      * @param timeRangeDTO
      * @return
      */
-    Map<String,Object> listResultMap(TimeRangeDTO timeRangeDTO);
+    long selectScore(TimeRangeDTO timeRangeDTO);
+
+    /**
+     * 质量分析汇总:，规则总数
+     *
+     * @param timeRangeDTO
+     * @return
+     */
+    long selectRuleCount(TimeRangeDTO timeRangeDTO);
+
+    /**
+     * 质量分析汇总:告警次数
+     *
+     * @param timeRangeDTO
+     * @return
+     */
+    long selectWarningCount(TimeRangeDTO timeRangeDTO);
 
 
     /**

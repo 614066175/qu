@@ -23,6 +23,10 @@ public class MeasureParamDO {
 
     private Long tenantId;
 
+    private Long conditionId;
+
+    private String fieldName;
+
     /**
      * 数据源类型
      */
@@ -53,8 +57,6 @@ public class MeasureParamDO {
     private List<WarningLevelDTO> warningLevelList;
 
     private DatasourceDTO datasourceDTO;
-
-    private BatchPlanFieldConDO batchPlanFieldConDO;
 
     private BatchResultItem batchResultItem;
 

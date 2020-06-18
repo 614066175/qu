@@ -1,10 +1,11 @@
 package com.hand.hdsp.quality.api.dto;
 
-import java.util.Date;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+
+import java.util.Date;
 
 /**
  * description
@@ -49,5 +50,14 @@ public class TimeRangeDTO extends AuditDomain {
     private String rule;
 
     private String topicInfo;
+
+    @ApiModelProperty(value = "数据源ID")
+    private Long datasourceId;
+
+    @ApiModelProperty(value = "数据库")
+    private String datasourceSchema;
+
+    @ApiModelProperty(value = "表名/视图名/自定义SQL")
+    private String objectName;
 
 }

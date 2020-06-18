@@ -29,5 +29,6 @@
                xbptl.custom_sql
         FROM xqua_batch_plan_table_con xbptc
                  join xqua_batch_plan_table_line xbptl on xbptc.plan_line_id = xbptl.plan_line_id
+        where xbptl.plan_rule_id = #{planRuleId}
     </select>
 </mapper>

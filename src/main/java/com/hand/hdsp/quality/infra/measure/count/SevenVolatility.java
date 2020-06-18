@@ -31,7 +31,7 @@ public class SevenVolatility implements Count {
 
         //查询基础值
         List<BatchResultItemDO> baseList = batchResultItemMapper.queryList(BatchResultItemDO.builder()
-                .conditionId(param.getBatchPlanFieldConDO().getConditionId())
+                .conditionId(param.getConditionId())
                 .measureDate(DateUtils.addDays(new Date(), -7))
                 .build());
         if (baseList.isEmpty()) {

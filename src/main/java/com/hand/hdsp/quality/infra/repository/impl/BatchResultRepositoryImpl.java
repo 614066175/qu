@@ -1,11 +1,5 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
-import static java.util.Map.Entry.comparingByValue;
-
-import java.text.DecimalFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
 import com.hand.hdsp.quality.api.dto.TimeRangeDTO;
@@ -18,6 +12,12 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.stereotype.Component;
+
+import java.text.DecimalFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.Map.Entry.comparingByValue;
 
 /**
  * <p>批数据方案结果表资源库实现</p>
@@ -46,21 +46,20 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
 
     @Override
     public Page<BatchResultDTO> listHistory(BatchResultDTO batchResultDTO, PageRequest pageRequest) {
-        return PageHelper.doPageAndSort(pageRequest,()-> batchResultMapper.listHistory(batchResultDTO));
+        return PageHelper.doPageAndSort(pageRequest, () -> batchResultMapper.listHistory(batchResultDTO));
     }
 
 
     @Override
     public Map<String, Object> numberView(TimeRangeDTO timeRangeDTO) {
         StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRangeDTO.getTimeRange(), timeRangeDTO.getStart(), timeRangeDTO.getEnd());
-        Map<String, Object> resultMap = batchResultMapper.listResultMap(TimeRangeDTO
-                .builder()
-                .tenantId(timeRangeDTO.getTenantId())
-                .startDate(stringTimeVO.getStart())
-                .endDate(stringTimeVO.getEnd())
-                .build()
-        );
-        return resultMap;
+        timeRangeDTO.setStartDate(stringTimeVO.getStart());
+        timeRangeDTO.setEndDate(stringTimeVO.getEnd());
+        Map<String, Object> map = new HashMap<>(8);
+        map.put("mark", batchResultMapper.selectScore(timeRangeDTO));
+        map.put("ruleCount", batchResultMapper.selectRuleCount(timeRangeDTO));
+        map.put("exceptionRuleCount", batchResultMapper.selectWarningCount(timeRangeDTO));
+        return map;
     }
 
     @Override
@@ -81,20 +80,20 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
                 .build()
         );
         List<CheckTypePercentageVO> checkTypePercentage = new ArrayList<>();
-        if (!success.isEmpty() && !all.isEmpty()){
-            for (CheckTypePercentageVO a : all){
-                for (CheckTypePercentageVO s : success){
-                    if (a.getCheckType().equals(s.getCheckType())){
+        if (!success.isEmpty() && !all.isEmpty()) {
+            for (CheckTypePercentageVO a : all) {
+                for (CheckTypePercentageVO s : success) {
+                    if (a.getCheckType().equals(s.getCheckType())) {
                         checkTypePercentage.add(CheckTypePercentageVO
                                 .builder()
                                 .checkType(a.getCheckType())
-                                .percentage(Double.valueOf(new DecimalFormat("#.00").format((s.getCountSum()*1.0)/(a.getCountSum() == 0 ? 1 : a.getCountSum()))))
+                                .percentage(Double.valueOf(new DecimalFormat("#.00").format((s.getCountSum() * 1.0) / (a.getCountSum() == 0 ? 1 : a.getCountSum()))))
                                 .build());
                     }
                 }
             }
         } else {
-            return Arrays.asList(new CheckTypePercentageVO());
+            return Collections.singletonList(new CheckTypePercentageVO());
         }
         return checkTypePercentage;
     }
@@ -116,12 +115,12 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
                 .endDate(stringTimeVO.getEnd())
                 .build()
         );
-        HashMap<String, Double> ruleMap = new HashMap<>();
-        if (!ruleVOS.isEmpty() && !listErrorRule.isEmpty()){
-            for (RuleVO ruleVO : ruleVOS){
-                for (RuleVO errorRuleVO : listErrorRule){
-                    if (ruleVO.getRuleId().equals(errorRuleVO.getRuleId())){
-                        ruleMap.put(Optional.ofNullable(errorRuleVO.getRuleName()).orElse(""),errorRuleVO.getCountSum()*1.0/(ruleVO.getCountSum() == 0 ? 1 : ruleVO.getCountSum()));
+        HashMap<String, Double> ruleMap = new HashMap<>(10);
+        if (!ruleVOS.isEmpty() && !listErrorRule.isEmpty()) {
+            for (RuleVO ruleVO : ruleVOS) {
+                for (RuleVO errorRuleVO : listErrorRule) {
+                    if (ruleVO.getRuleId().equals(errorRuleVO.getRuleId())) {
+                        ruleMap.put(Optional.ofNullable(errorRuleVO.getRuleName()).orElse(""), errorRuleVO.getCountSum() * 1.0 / (ruleVO.getCountSum() == 0 ? 1 : ruleVO.getCountSum()));
                     }
                 }
             }
@@ -150,7 +149,7 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
 
     @Override
     public List<RuleExceptionVO> daysErrorRule(TimeRangeDTO timeRangeDTO) {
-        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRangeDTO.getTimeRange(),timeRangeDTO.getStart(),timeRangeDTO.getEnd());
+        StringTimeVO stringTimeVO = TimeToString.timeToSring(timeRangeDTO.getTimeRange(), timeRangeDTO.getStart(), timeRangeDTO.getEnd());
         List<RuleExceptionVO> ruleExceptionVOS = batchResultMapper.listRuleException(TimeRangeDTO
                 .builder()
                 .tenantId(timeRangeDTO.getTenantId())

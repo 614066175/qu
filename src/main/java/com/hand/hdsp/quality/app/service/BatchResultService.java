@@ -12,6 +12,7 @@ public interface BatchResultService {
     /**
      * 查看运行日志
      *
+     * @param tenantId
      * @param execId
      * @param jobId
      * @return

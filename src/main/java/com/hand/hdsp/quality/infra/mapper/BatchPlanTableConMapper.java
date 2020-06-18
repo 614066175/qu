@@ -13,5 +13,11 @@ import java.util.List;
  */
 public interface BatchPlanTableConMapper extends BaseMapper<BatchPlanTableCon> {
 
+    /**
+     * 关联查询校验项
+     *
+     * @param batchPlanFieldConDO
+     * @return
+     */
     List<BatchPlanTableConDO> selectJoinItem(BatchPlanTableConDO batchPlanFieldConDO);
 }

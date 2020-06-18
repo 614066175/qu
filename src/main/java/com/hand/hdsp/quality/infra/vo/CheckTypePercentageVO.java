@@ -1,7 +1,5 @@
 package com.hand.hdsp.quality.infra.vo;
 
-import java.math.BigDecimal;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
