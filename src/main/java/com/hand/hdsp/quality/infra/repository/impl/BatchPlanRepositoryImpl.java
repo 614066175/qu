@@ -7,6 +7,7 @@ import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.domain.repository.BatchPlanRepository;
 import com.hand.hdsp.quality.domain.repository.PlanGroupRepository;
 import com.hand.hdsp.quality.infra.constant.GroupType;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
@@ -34,7 +35,7 @@ public class BatchPlanRepositoryImpl extends BaseRepositoryImpl<BatchPlan, Batch
     @Override
     public List<PlanGroup> listByGroup(BatchPlanDTO batchPlanDTO) {
         @NotNull Long tenantId = batchPlanDTO.getTenantId();
-        if (batchPlanDTO.getPlanName() == null || batchPlanDTO.getPlanName().length() == 0) {
+        if (StringUtils.isEmpty(batchPlanDTO.getPlanName())) {
             List<PlanGroup> all = planGroupRepository.select(PlanGroup.builder().groupType(GroupType.BATCH).tenantId(tenantId).build());
             all.add(PlanGroup.ROOT_PLAN_GROUP);
             return all;
@@ -58,7 +59,7 @@ public class BatchPlanRepositoryImpl extends BaseRepositoryImpl<BatchPlan, Batch
                         .build()
         );
         List<PlanGroup> groups = new ArrayList<>();
-        planGroups.stream().forEach(p -> {
+        planGroups.forEach(p -> {
             getGroup(p.getParentGroupId(), groups);
             groups.add(p);
         });

@@ -6,8 +6,6 @@ import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.BatchResultBaseDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.repository.BatchResultBaseRepository;
-import com.hand.hdsp.quality.infra.dataobject.BatchResultRuleDO;
-import com.hand.hdsp.quality.infra.mapper.BatchResultRuleMapper;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
@@ -19,12 +17,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class BatchResultBaseRepositoryImpl extends BaseRepositoryImpl<BatchResultBase, BatchResultBaseDTO> implements BatchResultBaseRepository {
-
-    private final BatchResultRuleMapper batchResultRuleMapper;
-
-    public BatchResultBaseRepositoryImpl(BatchResultRuleMapper batchResultRuleMapper) {
-        this.batchResultRuleMapper = batchResultRuleMapper;
-    }
 
     @Override
     public List<BatchResultBaseDTO> listResultBase(BatchResultBaseDTO batchResultBaseDTO) {
