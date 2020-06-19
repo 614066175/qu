@@ -264,76 +264,19 @@
         group by a.check_type
     </select>
 
-    <select id="listRule" resultType="com.hand.hdsp.quality.infra.vo.RuleVO">
-        select xr.rule_id ruleId,xr.rule_name ruleName,IFNULL(SUM(xbrb.rule_count),0) countSum
-        from xqua_batch_result xbr
-        inner join xqua_batch_result_base xbrb
-        on xbr.result_id=xbrb.result_id
-        inner join xqua_batch_result_rule xbrr
-        on xbrb.result_base_id=xbrr.result_base_id
-        inner join xqua_rule xr
-        on xbrr.rule_id=xr.rule_id
-        <where>
-            <if test="tenantId != null">
-                xbr.tenant_id = #{tenantId}
-            </if>
-            <if test="startDate != null and startDate != ''">
-                and xbr.end_date &gt;= #{startDate}
-            </if>
-            <if test="endDate != null and endDate != ''">
-                and xbr.end_date &lt;= #{endDate}
-            </if>
-            <if test="rule != null">
-                <bind name="rule" value="'%' + rule + '%'"/>
-                and (xr.rule_name like #{rule} or xr.rule_code like #{rule})
-            </if>
-        </where>
-        GROUP BY xr.rule_id,xr.rule_name
-    </select>
-
-    <select id="listErrorRule" resultType="com.hand.hdsp.quality.infra.vo.RuleVO">
-        select xr.rule_id ruleId,xr.rule_name ruleName,IFNULL(SUM(xbrb.exception_rule_count),0) countSum
-        from xqua_batch_result xbr
-        inner join xqua_batch_result_base xbrb
-        on xbr.result_id=xbrb.result_id
-        inner join xqua_batch_result_rule xbrr
-        on xbrb.result_base_id=xbrr.result_base_id
-        inner join xqua_rule xr
-        on xbrr.rule_id=xr.rule_id
-        <where>
-            <if test="tenantId != null">
-                xbr.tenant_id = #{tenantId}
-            </if>
-            <if test="startDate != null and startDate != ''">
-                and xbr.end_date &gt;= #{startDate}
-            </if>
-            <if test="endDate != null and endDate != ''">
-                and xbr.end_date &lt;= #{endDate}
-            </if>
-            <if test="rule != null">
-                <bind name="rule" value="'%' + rule + '%'"/>
-                and (xr.rule_name like #{rule} or xr.rule_code like #{rule})
-            </if>
-        </where>
-        GROUP BY xr.rule_id,xr.rule_name
-    </select>
-
     <select id="listMarkTrend" resultType="com.hand.hdsp.quality.infra.vo.MarkTrendVO">
         select date_format(xbr.end_date, '%Y-%m-%d') date,IFNULL(avg(xbr.mark),0) mark
         from xqua_batch_result xbr
+        join xqua_batch_result_base xbrb on xbr.result_id=xbrb.result_id
+        join xqua_batch_plan_base xbpb on xbrb.plan_base_id = xbpb.plan_base_id
         <where>
-            <if test="tenantId != null">
-                xbr.tenant_id = #{tenantId}
-            </if>
-            <if test="startDate != null and startDate != ''">
-                and xbr.end_date &gt;= #{startDate}
-            </if>
-            <if test="endDate != null and endDate != ''">
-                and xbr.end_date &lt;= #{endDate}
-            </if>
+            and xbr.end_date is not null
+            <include refid="custom_where">
+                <property name="mt" value="xbr"/>
+            </include>
         </where>
         group by date_format(xbr.end_date, '%Y-%m-%d')
-        order by date_format(xbr.end_date, '%Y-%m-%d') asc
+        order by date_format(xbr.end_date, '%Y-%m-%d')
     </select>
 
     <select id="listRuleException" resultType="com.hand.hdsp.quality.infra.vo.RuleExceptionVO">
@@ -345,43 +288,35 @@
         on xbr.result_id=xbrb.result_id
         INNER JOIN xqua_batch_result_rule xbrr
         on xbrb.result_base_id=xbrr.result_base_id
+        join xqua_batch_plan_base xbpb on xbrb.plan_base_id = xbpb.plan_base_id
         <where>
-            <if test="tenantId != null">
-                xbr.tenant_id = #{tenantId}
-            </if>
-            <if test="startDate != null and startDate != ''">
-                and xbr.end_date &gt;= #{startDate}
-            </if>
-            <if test="endDate != null and endDate != ''">
-                and xbr.end_date &lt;= #{endDate}
-            </if>
+            <include refid="custom_where">
+                <property name="mt" value="xbr"/>
+            </include>
         </where>
         group by date_format(xbr.end_date, '%Y-%m-%d'),xbrr.rule_type
-        order by date_format(xbr.end_date, '%Y-%m-%d') asc
+        order by date_format(xbr.end_date, '%Y-%m-%d')
     </select>
 
     <select id="listWarningLevel" resultType="com.hand.hdsp.quality.infra.vo.WarningLevelVO">
         select date_format(xbr.end_date, '%Y-%m-%d') date,
-        xbrr.warning_level warningLevel,
-        count(xbrr.warning_level) levelCount
+        xbri.warning_level warningLevel,
+        count(xbri.warning_level) levelCount
         from xqua_batch_result xbr
         INNER JOIN xqua_batch_result_base xbrb
         on xbr.result_id=xbrb.result_id
+        join xqua_batch_plan_base xbpb on xbrb.plan_base_id = xbpb.plan_base_id
         INNER JOIN xqua_batch_result_rule xbrr
         on xbrb.result_base_id=xbrr.result_base_id
+        join xqua_batch_result_item xbri on xbrr.result_rule_id = xbri.result_rule_id
         <where>
-            <if test="tenantId != null">
-                xbr.tenant_id = #{tenantId}
-            </if>
-            <if test="startDate != null and startDate != ''">
-                and xbr.end_date &gt;= #{startDate}
-            </if>
-            <if test="endDate != null and endDate != ''">
-                and xbr.end_date &lt;= #{endDate}
-            </if>
+            and xbri.warning_level is not null
+            <include refid="custom_where">
+                <property name="mt" value="xbr"/>
+            </include>
         </where>
-        group by date_format(xbr.end_date, '%Y-%m-%d'),xbrr.warning_level
-        order by date_format(xbr.end_date, '%Y-%m-%d') asc
+        group by date_format(xbr.end_date, '%Y-%m-%d'),xbri.warning_level
+        order by date_format(xbr.end_date, '%Y-%m-%d')
 
     </select>
 

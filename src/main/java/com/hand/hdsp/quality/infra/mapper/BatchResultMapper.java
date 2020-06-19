@@ -81,22 +81,6 @@ public interface BatchResultMapper extends BaseMapper<BatchResult> {
     List<CheckTypePercentageVO> listAllTypeCount(TimeRangeDTO timeRangeDTO);
 
     /**
-     * 主要可改进指标:规则总数
-     *
-     * @param timeRangeDTO
-     * @return RuleVO
-     */
-    List<RuleVO> listRule(TimeRangeDTO timeRangeDTO);
-
-    /**
-     * 主要可改进指标:异常规则数
-     *
-     * @param timeRangeDTO
-     * @return RuleVO
-     */
-    List<RuleVO> listErrorRule(TimeRangeDTO timeRangeDTO);
-
-    /**
      * 每日分数走势
      *
      * @param timeRangeDTO

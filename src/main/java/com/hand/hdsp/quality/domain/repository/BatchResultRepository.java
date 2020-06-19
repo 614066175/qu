@@ -79,14 +79,6 @@ public interface BatchResultRepository extends BaseRepository<BatchResult, Batch
     List<ErrorTablePercentageVO> errorTableItemPercentage(TimeRangeDTO timeRangeDTO);
 
     /**
-     * 主要可改进指标 规则百分比
-     *
-     * @param timeRangeDTO
-     * @return
-     */
-    List<Map.Entry<String, Double>> rulePercentage(TimeRangeDTO timeRangeDTO);
-
-    /**
      * 数据质量分数走势
      *
      * @param timeRangeDTO

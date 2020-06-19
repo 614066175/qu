@@ -149,21 +149,6 @@ public class BatchResultController extends BaseController {
         return Results.success(batchResultRepository.errorTableItemPercentage(timeRangeDTO));
     }
 
-    @ApiOperation(value = "主要可改进指标（规则）")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/rule-percentage")
-    public ResponseEntity<?> rulePercentage(@PathVariable(name = "organizationId") Long tenantId,
-                                            TimeRangeDTO timeRangeDTO) {
-        timeRangeDTO.setTenantId(tenantId);
-        return Results.success(batchResultRepository.rulePercentage(timeRangeDTO));
-    }
-
     @ApiOperation(value = "数据质量分数走势")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",

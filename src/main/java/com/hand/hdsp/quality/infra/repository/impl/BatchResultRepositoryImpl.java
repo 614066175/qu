@@ -17,9 +17,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.*;
-import java.util.stream.Collectors;
-
-import static java.util.Map.Entry.comparingByValue;
 
 /**
  * <p>批数据方案结果表资源库实现</p>
@@ -42,8 +39,7 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
 
     @Override
     public BatchResultDTO showResultHead(BatchResultDTO batchResultDTO) {
-        BatchResultDTO batchResult = batchResultMapper.listResultHead(batchResultDTO);
-        return batchResult;
+        return batchResultMapper.listResultHead(batchResultDTO);
     }
 
     @Override
@@ -105,48 +101,21 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
     }
 
     @Override
-    public List<Map.Entry<String, Double>> rulePercentage(TimeRangeDTO timeRangeDTO) {
-        TimeToString.timeToString(timeRangeDTO);
-        List<RuleVO> ruleVOS = batchResultMapper.listRule(timeRangeDTO);
-        List<RuleVO> listErrorRule = batchResultMapper.listErrorRule(timeRangeDTO);
-        HashMap<String, Double> ruleMap = new HashMap<>(10);
-        if (!ruleVOS.isEmpty() && !listErrorRule.isEmpty()) {
-            for (RuleVO ruleVO : ruleVOS) {
-                for (RuleVO errorRuleVO : listErrorRule) {
-                    if (ruleVO.getRuleId().equals(errorRuleVO.getRuleId())) {
-                        ruleMap.put(Optional.ofNullable(errorRuleVO.getRuleName()).orElse(""), errorRuleVO.getCountSum() * 1.0 / (ruleVO.getCountSum() == 0 ? 1 : ruleVO.getCountSum()));
-                    }
-                }
-            }
-        } else {
-            return Collections.emptyList();
-        }
-        List<Map.Entry<String, Double>> entryList = ruleMap.entrySet()
-                .stream()
-                .sorted(Collections.reverseOrder(comparingByValue()))
-                .collect(Collectors.toList());
-        return entryList;
-    }
-
-    @Override
     public List<MarkTrendVO> markTrend(TimeRangeDTO timeRangeDTO) {
         TimeToString.timeToString(timeRangeDTO);
-        List<MarkTrendVO> markTrendVOS = batchResultMapper.listMarkTrend(timeRangeDTO);
-        return markTrendVOS;
+        return batchResultMapper.listMarkTrend(timeRangeDTO);
     }
 
     @Override
     public List<RuleExceptionVO> daysErrorRule(TimeRangeDTO timeRangeDTO) {
         TimeToString.timeToString(timeRangeDTO);
-        List<RuleExceptionVO> ruleExceptionVOS = batchResultMapper.listRuleException(timeRangeDTO);
-        return ruleExceptionVOS;
+        return batchResultMapper.listRuleException(timeRangeDTO);
     }
 
     @Override
     public List<WarningLevelVO> warningTrend(TimeRangeDTO timeRangeDTO) {
         TimeToString.timeToString(timeRangeDTO);
-        List<WarningLevelVO> warningLevelVOS = batchResultMapper.listWarningLevel(timeRangeDTO);
-        return warningLevelVOS;
+        return batchResultMapper.listWarningLevel(timeRangeDTO);
     }
 
 }
