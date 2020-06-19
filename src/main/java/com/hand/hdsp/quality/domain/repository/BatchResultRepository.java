@@ -101,4 +101,22 @@ public interface BatchResultRepository extends BaseRepository<BatchResult, Batch
      * @return WarningLevelVO
      */
     List<WarningLevelVO> warningTrend(TimeRangeDTO timeRangeDTO);
+
+    /**
+     * 灾区表列表
+     *
+     * @param pageRequest
+     * @param timeRangeDTO
+     * @return
+     */
+    Page<ErrorTableListVO> errorTableList(PageRequest pageRequest, TimeRangeDTO timeRangeDTO);
+
+    /**
+     * 灾区表-校验项列表
+     *
+     * @param pageRequest
+     * @param timeRangeDTO
+     * @return
+     */
+    Page<ErrorTableItemListVO> errorTableItemList(PageRequest pageRequest, TimeRangeDTO timeRangeDTO);
 }

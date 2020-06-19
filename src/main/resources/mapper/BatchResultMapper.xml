@@ -21,15 +21,33 @@
 
     <sql id="Plan_And_Result">
         ${xbp}.plan_id,
-        ${xbp}.plan_name,
-        ${xbp}.warning_code,
-        ${xbr}.result_id,
-        ${xbr}.plan_status,
-        ${xbr}.mark,
-        ${xbr}.start_date,
-        ${xbr}.end_date,
-        ${xbr}.next_count_date,
-        ${xbr}.exception_info
+        ${xbp}
+        .
+        plan_name,
+        ${xbp}
+        .
+        warning_code,
+        ${xbr}
+        .
+        result_id,
+        ${xbr}
+        .
+        plan_status,
+        ${xbr}
+        .
+        mark,
+        ${xbr}
+        .
+        start_date,
+        ${xbr}
+        .
+        end_date,
+        ${xbr}
+        .
+        next_count_date,
+        ${xbr}
+        .
+        exception_info
     </sql>
 
     <sql id="custom_where">
@@ -204,35 +222,35 @@
 
     <select id="listSUCCESSTypeCount" resultType="com.hand.hdsp.quality.infra.vo.CheckTypePercentageVO">
         SELECT
-            xbrr.check_type,
-            COUNT(*) count_sum
+        xbrr.check_type,
+        COUNT(*) count_sum
         FROM
-            xqua_batch_result_rule xbrr
-                JOIN xqua_batch_result_base xbrb ON xbrr.result_base_id = xbrb.result_base_id
-                JOIN xqua_batch_plan_base xbpb ON xbrb.plan_base_id = xbpb.plan_base_id
+        xqua_batch_result_rule xbrr
+        JOIN xqua_batch_result_base xbrb ON xbrr.result_base_id = xbrb.result_base_id
+        JOIN xqua_batch_plan_base xbpb ON xbrb.plan_base_id = xbpb.plan_base_id
         WHERE
-            result_flag = 1
-          AND NOT EXISTS (
-                SELECT
-                    1
-                FROM
-                    xqua_batch_result_rule a
-                WHERE
-                    a.rule_type = xbrr.rule_type
-                  AND a.plan_rule_id = xbrr.plan_rule_id
-                  AND a.creation_date > xbrr.creation_date
-            )
+        result_flag = 1
+        AND NOT EXISTS (
+        SELECT
+        1
+        FROM
+        xqua_batch_result_rule a
+        WHERE
+        a.rule_type = xbrr.rule_type
+        AND a.plan_rule_id = xbrr.plan_rule_id
+        AND a.creation_date > xbrr.creation_date
+        )
         <include refid="custom_where">
             <property name="mt" value="xbrr"/>
         </include>
         GROUP BY
-            xbrr.check_type
+        xbrr.check_type
     </select>
 
     <select id="listAllTypeCount" resultType="com.hand.hdsp.quality.infra.vo.CheckTypePercentageVO">
         select
-            a.check_type,
-            COUNT(*) count_sum
+        a.check_type,
+        COUNT(*) count_sum
         from (
         select xbpt.check_type
         from xqua_batch_plan_table xbpt
@@ -322,19 +340,19 @@
 
     <select id="errorTablePercentage" resultType="com.hand.hdsp.quality.infra.vo.ErrorTablePercentageVO">
         SELECT
-            xbrb.object_name,
-            COUNT(*) count_sum
+        xbrb.object_name,
+        COUNT(*) count_sum
         FROM
-            xqua_batch_result_rule xbrr
-                JOIN xqua_batch_result_base xbrb ON xbrr.result_base_id = xbrb.result_base_id
-                JOIN xqua_batch_plan_base xbpb ON xbrb.plan_base_id = xbpb.plan_base_id
+        xqua_batch_result_rule xbrr
+        JOIN xqua_batch_result_base xbrb ON xbrr.result_base_id = xbrb.result_base_id
+        JOIN xqua_batch_plan_base xbpb ON xbrb.plan_base_id = xbpb.plan_base_id
         WHERE
-            xbrr.result_flag = 0
-            <include refid="custom_where">
-                <property name="mt" value="xbrr"/>
-            </include>
+        xbrr.result_flag = 0
+        <include refid="custom_where">
+            <property name="mt" value="xbrr"/>
+        </include>
         GROUP BY
-            xbrb.object_name
+        xbrb.object_name
     </select>
 
     <select id="errorTableItemPercentage" resultType="com.hand.hdsp.quality.infra.vo.ErrorTablePercentageVO">
@@ -358,6 +376,7 @@
         WHERE
         xbri.warning_level IS NOT NULL
         AND condition_id IS NOT NULL
+        AND xbpb.object_name = #{objectName}
         <include refid="custom_where">
             <property name="mt" value="xbrr"/>
         </include>
@@ -368,4 +387,58 @@
 
     </select>
 
+    <select id="errorTableList" resultType="com.hand.hdsp.quality.infra.vo.ErrorTableListVO">
+        SELECT
+        xbrb.object_name,
+        xbpb.datasource_id,
+        xbpb.datasource_schema,
+        COUNT(distinct xbrr.result_rule_id) exception_rule_count,
+        COUNT(distinct xbri.plan_line_id) exception_item_count,
+        COUNT(*) exception_warn_count
+        FROM
+        xqua_batch_result_item xbri
+        JOIN xqua_batch_result_rule xbrr ON xbri.result_rule_id = xbrr.result_rule_id
+        JOIN xqua_batch_result_base xbrb ON xbrr.result_base_id = xbrb.result_base_id
+        JOIN xqua_batch_plan_base xbpb ON xbrb.plan_base_id = xbpb.plan_base_id
+        WHERE
+        xbrr.result_flag = 0
+        <include refid="custom_where">
+            <property name="mt" value="xbri"/>
+        </include>
+        GROUP BY
+        xbrb.object_name,
+        xbpb.datasource_id,
+        xbpb.datasource_schema
+    </select>
+
+    <select id="errorTableItemList" resultType="com.hand.hdsp.quality.infra.vo.ErrorTableItemListVO">
+        SELECT
+        DISTINCT
+        xbri.plan_line_id,
+        xbri.check_item,
+        xbri.count_type,
+        xbri.where_condition,
+        xbri.exception_info,
+        xbri.warning_level,
+        xbri.actual_value,
+        xbrr.result_rule_id,
+        xbrr.rule_name,
+        xbr.start_date,
+        xbp.plan_name
+        FROM
+        xqua_batch_result_item xbri
+        JOIN xqua_batch_result_rule xbrr ON xbri.result_rule_id = xbrr.result_rule_id
+        JOIN xqua_batch_result_base xbrb ON xbrr.result_base_id = xbrb.result_base_id
+        JOIN xqua_batch_plan_base xbpb ON xbrb.plan_base_id = xbpb.plan_base_id
+        join xqua_batch_result xbr on xbrb.result_id = xbr.result_id
+        join xqua_batch_plan xbp on xbpb.plan_id = xbp.plan_id
+        WHERE
+        xbri.warning_level IS NOT NULL
+        AND xbri.condition_id IS NOT NULL
+        AND xbpb.object_name = #{objectName}
+        <include refid="custom_where">
+            <property name="mt" value="xbri"/>
+        </include>
+
+    </select>
 </mapper>

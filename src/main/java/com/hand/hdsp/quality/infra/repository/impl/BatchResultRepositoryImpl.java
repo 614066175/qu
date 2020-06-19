@@ -118,4 +118,16 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
         return batchResultMapper.listWarningLevel(timeRangeDTO);
     }
 
+    @Override
+    public Page<ErrorTableListVO> errorTableList(PageRequest pageRequest, TimeRangeDTO timeRangeDTO) {
+        TimeToString.timeToString(timeRangeDTO);
+        return PageHelper.doPage(pageRequest, () -> batchResultMapper.errorTableList(timeRangeDTO));
+    }
+
+    @Override
+    public Page<ErrorTableItemListVO> errorTableItemList(PageRequest pageRequest, TimeRangeDTO timeRangeDTO) {
+        TimeToString.timeToString(timeRangeDTO);
+        return PageHelper.doPage(pageRequest, () -> batchResultMapper.errorTableItemList(timeRangeDTO));
+    }
+
 }

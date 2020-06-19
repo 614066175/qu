@@ -149,6 +149,40 @@ public class BatchResultController extends BaseController {
         return Results.success(batchResultRepository.errorTableItemPercentage(timeRangeDTO));
     }
 
+
+    @ApiOperation(value = "灾区表列表")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/error-table-list")
+    public ResponseEntity<?> errorTableList(@PathVariable(name = "organizationId") Long tenantId,
+                                            TimeRangeDTO timeRangeDTO,
+                                            PageRequest pageRequest) {
+        timeRangeDTO.setTenantId(tenantId);
+        return Results.success(batchResultRepository.errorTableList(pageRequest, timeRangeDTO));
+    }
+
+    @ApiOperation(value = "灾区表-校验项列表")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/error-table-item-list")
+    @ProcessLovValue(targetField = {"body"})
+    public ResponseEntity<?> errorTableItemList(@PathVariable(name = "organizationId") Long tenantId,
+                                                TimeRangeDTO timeRangeDTO,
+                                                PageRequest pageRequest) {
+        timeRangeDTO.setTenantId(tenantId);
+        return Results.success(batchResultRepository.errorTableItemList(pageRequest, timeRangeDTO));
+    }
+
     @ApiOperation(value = "数据质量分数走势")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",

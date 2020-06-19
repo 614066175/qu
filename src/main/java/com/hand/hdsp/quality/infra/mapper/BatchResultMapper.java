@@ -119,4 +119,20 @@ public interface BatchResultMapper extends BaseMapper<BatchResult> {
      * @return
      */
     List<ErrorTablePercentageVO> errorTableItemPercentage(TimeRangeDTO timeRangeDTO);
+
+    /**
+     * 灾区表列表
+     *
+     * @param timeRangeDTO
+     * @return
+     */
+    List<ErrorTableListVO> errorTableList(TimeRangeDTO timeRangeDTO);
+
+    /**
+     * 灾区表-校验项列表
+     *
+     * @param timeRangeDTO
+     * @return
+     */
+    List<ErrorTableItemListVO> errorTableItemList(TimeRangeDTO timeRangeDTO);
 }
