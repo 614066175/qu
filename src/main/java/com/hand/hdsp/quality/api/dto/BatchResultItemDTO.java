@@ -107,4 +107,19 @@ public class BatchResultItemDTO extends AuditDomain {
 
     @ApiModelProperty(value = "权重")
     private Long weight;
+
+    @ApiModelProperty(value = "规则类型TABLE/FIELD/REL_TABLE")
+    private String ruleType;
+
+    @ApiModelProperty(value = "规则编码")
+    private String ruleCode;
+
+    @ApiModelProperty(value = "规则名称")
+    private String ruleName;
+
+    @ApiModelProperty(value = "规则描述")
+    private String ruleDesc;
+
+    @ApiModelProperty(value = "校验类别 HDSP.XQUA.CHECK_TYPE")
+    private String checkType;
 }

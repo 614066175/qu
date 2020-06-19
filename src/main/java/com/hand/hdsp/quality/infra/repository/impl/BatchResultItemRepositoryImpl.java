@@ -6,6 +6,8 @@ import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.domain.repository.BatchResultItemRepository;
 import com.hand.hdsp.quality.infra.mapper.BatchResultItemMapper;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,5 +33,10 @@ public class BatchResultItemRepositoryImpl extends BaseRepositoryImpl<BatchResul
     @Override
     public List<String> selectWaringLevelByResultId(Long resultId) {
         return batchResultItemMapper.selectWaringLevelByResultId(resultId);
+    }
+
+    @Override
+    public List<BatchResultItemDTO> listRuleError(PageRequest pageRequest, BatchResultItemDTO batchResultItemDTO) {
+        return PageHelper.doPage(pageRequest,() -> batchResultItemMapper.listRuleError(batchResultItemDTO));
     }
 }

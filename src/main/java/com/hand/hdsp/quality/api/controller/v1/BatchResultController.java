@@ -103,6 +103,55 @@ public class BatchResultController extends BaseController {
         return Results.success(batchResultRepository.numberView(timeRangeDTO));
     }
 
+
+    @ApiOperation(value = "规则列表")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/rule-list")
+    public ResponseEntity<?> ruleList(@PathVariable(name = "organizationId") Long tenantId,
+                                      TimeRangeDTO timeRangeDTO,
+                                      PageRequest pageRequest) {
+        timeRangeDTO.setTenantId(tenantId);
+        return Results.success(batchResultRepository.ruleList(pageRequest, timeRangeDTO));
+    }
+
+    @ApiOperation(value = "校验项列表")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/item-list")
+    public ResponseEntity<?> itemList(@PathVariable(name = "organizationId") Long tenantId,
+                                      TimeRangeDTO timeRangeDTO,
+                                      PageRequest pageRequest) {
+        timeRangeDTO.setTenantId(tenantId);
+        return Results.success(batchResultRepository.itemList(pageRequest, timeRangeDTO));
+    }
+
+    @ApiOperation(value = "告警列表")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/error-rule-list")
+    public ResponseEntity<?> errorRuleList(@PathVariable(name = "organizationId") Long tenantId,
+                                           TimeRangeDTO timeRangeDTO,
+                                           PageRequest pageRequest) {
+        timeRangeDTO.setTenantId(tenantId);
+        return Results.success(batchResultRepository.errorRuleList(pageRequest, timeRangeDTO));
+    }
+
     @ApiOperation(value = "数据质量评估统计")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",

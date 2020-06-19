@@ -4,11 +4,7 @@ import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultRule;
 import com.hand.hdsp.quality.domain.repository.BatchResultRuleRepository;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * <p>批数据方案结果表-规则信息资源库实现</p>
@@ -17,18 +13,4 @@ import java.util.List;
  */
 @Component
 public class BatchResultRuleRepositoryImpl extends BaseRepositoryImpl<BatchResultRule, BatchResultRuleDTO> implements BatchResultRuleRepository {
-
-    @Override
-    public List<BatchResultRuleDTO> listRuleError(BatchResultRuleDTO batchResultRuleDTO) {
-        return this.selectDTOByCondition(
-                Condition.builder(BatchResultRule.class)
-                        .where(Sqls.custom()
-                                .andEqualTo(BatchResultRule.FIELD_RESULT_BASE_ID, batchResultRuleDTO.getResultBaseId(), true)
-                                .andEqualTo(BatchResultRule.FIELD_TENANT_ID, batchResultRuleDTO.getTenantId(), true)
-                                .andLike(BatchResultRule.FIELD_RULE_NAME, batchResultRuleDTO.getRuleName(), true)
-                                .andEqualTo(BatchResultRule.FIELD_RULE_TYPE, batchResultRuleDTO.getRuleType(), true))
-                        .build()
-        );
-    }
-
 }

@@ -51,6 +51,22 @@ public class BatchResultItemController extends BaseController {
         return Results.success(list);
     }
 
+    @ApiOperation(value = "评估结果各级规则错误信息")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/result-rule")
+    public ResponseEntity<?> resultRule(@PathVariable(name = "organizationId") Long tenantId,
+                                        BatchResultItemDTO batchResultItemDTO, @ApiIgnore @SortDefault(value = BatchResultItem.FIELD_RESULT_ITEM_ID,
+            direction = Sort.Direction.DESC) PageRequest pageRequest) {
+        batchResultItemDTO.setTenantId(tenantId);
+        return Results.success(batchResultItemRepository.listRuleError(pageRequest, batchResultItemDTO));
+    }
+
     @ApiOperation(value = "批数据方案结果表-校验项信息明细")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",

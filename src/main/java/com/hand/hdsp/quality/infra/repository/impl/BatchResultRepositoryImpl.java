@@ -1,7 +1,9 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
+import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
+import com.hand.hdsp.quality.api.dto.BatchResultItemDTO;
 import com.hand.hdsp.quality.api.dto.TimeRangeDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.domain.repository.BatchResultRepository;
@@ -128,6 +130,24 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
     public Page<ErrorTableItemListVO> errorTableItemList(PageRequest pageRequest, TimeRangeDTO timeRangeDTO) {
         TimeToString.timeToString(timeRangeDTO);
         return PageHelper.doPage(pageRequest, () -> batchResultMapper.errorTableItemList(timeRangeDTO));
+    }
+
+    @Override
+    public List<BatchPlanFieldDTO> ruleList(PageRequest pageRequest, TimeRangeDTO timeRangeDTO) {
+        TimeToString.timeToString(timeRangeDTO);
+        return PageHelper.doPage(pageRequest, () -> batchResultMapper.ruleList(timeRangeDTO));
+    }
+
+    @Override
+    public List<BatchPlanFieldDTO> itemList(PageRequest pageRequest, TimeRangeDTO timeRangeDTO) {
+        TimeToString.timeToString(timeRangeDTO);
+        return PageHelper.doPage(pageRequest, () -> batchResultMapper.itemList(timeRangeDTO));
+    }
+
+    @Override
+    public List<BatchResultItemDTO> errorRuleList(PageRequest pageRequest, TimeRangeDTO timeRangeDTO) {
+        TimeToString.timeToString(timeRangeDTO);
+        return PageHelper.doPage(pageRequest, () -> batchResultMapper.errorRuleList(timeRangeDTO));
     }
 
 }

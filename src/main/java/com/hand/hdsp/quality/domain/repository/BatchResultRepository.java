@@ -2,7 +2,9 @@ package com.hand.hdsp.quality.domain.repository;
 
 import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
+import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
+import com.hand.hdsp.quality.api.dto.BatchResultItemDTO;
 import com.hand.hdsp.quality.api.dto.TimeRangeDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.infra.vo.*;
@@ -119,4 +121,31 @@ public interface BatchResultRepository extends BaseRepository<BatchResult, Batch
      * @return
      */
     Page<ErrorTableItemListVO> errorTableItemList(PageRequest pageRequest, TimeRangeDTO timeRangeDTO);
+
+    /**
+     * 规则列表
+     *
+     * @param pageRequest
+     * @param timeRangeDTO
+     * @return
+     */
+    List<BatchPlanFieldDTO> ruleList(PageRequest pageRequest, TimeRangeDTO timeRangeDTO);
+
+    /**
+     * 校验项列表
+     *
+     * @param pageRequest
+     * @param timeRangeDTO
+     * @return
+     */
+    List<BatchPlanFieldDTO> itemList(PageRequest pageRequest, TimeRangeDTO timeRangeDTO);
+
+    /**
+     * 告警列表
+     *
+     * @param pageRequest
+     * @param timeRangeDTO
+     * @return
+     */
+    List<BatchResultItemDTO> errorRuleList(PageRequest pageRequest, TimeRangeDTO timeRangeDTO);
 }

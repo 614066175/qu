@@ -1,6 +1,8 @@
 package com.hand.hdsp.quality.infra.mapper;
 
+import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
+import com.hand.hdsp.quality.api.dto.BatchResultItemDTO;
 import com.hand.hdsp.quality.api.dto.TimeRangeDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.infra.vo.*;
@@ -135,4 +137,28 @@ public interface BatchResultMapper extends BaseMapper<BatchResult> {
      * @return
      */
     List<ErrorTableItemListVO> errorTableItemList(TimeRangeDTO timeRangeDTO);
+
+    /**
+     * 规则列表
+     *
+     * @param timeRangeDTO
+     * @return
+     */
+    List<BatchPlanFieldDTO> ruleList(TimeRangeDTO timeRangeDTO);
+
+    /**
+     * 校验项列表
+     *
+     * @param timeRangeDTO
+     * @return
+     */
+    List<BatchPlanFieldDTO> itemList(TimeRangeDTO timeRangeDTO);
+
+    /**
+     * 告警列表
+     *
+     * @param timeRangeDTO
+     * @return
+     */
+    List<BatchResultItemDTO> errorRuleList(TimeRangeDTO timeRangeDTO);
 }

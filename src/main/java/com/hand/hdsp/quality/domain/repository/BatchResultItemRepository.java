@@ -4,6 +4,7 @@ import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.BatchResultItemDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 
@@ -31,4 +32,13 @@ public interface BatchResultItemRepository extends BaseRepository<BatchResultIte
      * @return
      */
     List<String> selectWaringLevelByResultId(Long resultId);
+
+    /**
+     * 评估结果各级规则错误信息
+     *
+     * @param pageRequest
+     * @param batchResultItemDTO
+     * @return
+     */
+    List<BatchResultItemDTO> listRuleError(PageRequest pageRequest, BatchResultItemDTO batchResultItemDTO);
 }
