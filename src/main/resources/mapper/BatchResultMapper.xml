@@ -21,33 +21,15 @@
 
     <sql id="Plan_And_Result">
         ${xbp}.plan_id,
-        ${xbp}
-        .
-        plan_name,
-        ${xbp}
-        .
-        warning_code,
-        ${xbr}
-        .
-        result_id,
-        ${xbr}
-        .
-        plan_status,
-        ${xbr}
-        .
-        mark,
-        ${xbr}
-        .
-        start_date,
-        ${xbr}
-        .
-        end_date,
-        ${xbr}
-        .
-        next_count_date,
-        ${xbr}
-        .
-        exception_info
+        ${xbp}.plan_name,
+        ${xbp}.warning_code,
+        ${xbr}.result_id,
+        ${xbr}.plan_status,
+        ${xbr}.mark,
+        ${xbr}.start_date,
+        ${xbr}.end_date,
+        ${xbr}.next_count_date,
+        ${xbr}.exception_info
     </sql>
 
     <sql id="custom_where">
@@ -67,8 +49,8 @@
             and xbpb.datasource_schema = #{datasourceSchema}
         </if>
         <if test="objectName != null and objectName != ''">
-            <bind name="objectName" value="'%' + objectName + '%'"/>
-            and xbpb.object_name like #{objectName}
+            <bind name="objectNameExt" value="'%' + objectName + '%'"/>
+            and xbpb.object_name like #{objectNameExt}
         </if>
     </sql>
 
