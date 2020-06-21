@@ -122,4 +122,10 @@ public class BatchResultItemDTO extends AuditDomain {
 
     @ApiModelProperty(value = "校验类别 HDSP.XQUA.CHECK_TYPE")
     private String checkType;
+
+    @ApiModelProperty(value = "批数据方案结果表XQUA_BATCH_RESULT.RESULT_ID")
+    private Long resultId;
+
+    @ApiModelProperty(value = "XQUA_BATCH_RESULT_BASE.RESULT_BASE_ID")
+    private Long resultBaseId;
 }
