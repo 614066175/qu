@@ -27,6 +27,8 @@ public class MeasureParamDO {
 
     private String fieldName;
 
+    private String checkFieldName;
+
     /**
      * 数据源类型
      */

@@ -449,6 +449,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                         .datasourceDTO(datasourceDTO)
                         .batchResultBase(batchResultBase)
                         .fieldName(batchPlanFieldConDO.getFieldName())
+                        .checkFieldName(batchPlanFieldConDO.getCheckFieldName())
                         .batchResultItem(BatchResultItem.builder().build())
                         .build();
                 measure.check(param);
@@ -467,6 +468,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 }
                 batchResultItem.setCountType(batchPlanFieldConDO.getCountType());
                 batchResultItem.setFieldName(batchPlanFieldConDO.getFieldName());
+                batchResultItem.setCheckFieldName(batchPlanFieldConDO.getCheckFieldName());
                 batchResultItem.setCheckFieldName(batchPlanFieldConDO.getCheckFieldName());
 
                 batchResultItem.setTenantId(tenantId);

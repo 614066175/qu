@@ -11,6 +11,7 @@ import org.hzero.core.base.BaseConstants;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -197,6 +198,24 @@ public class MeasureUtil {
         }
 
         return sqlAction;
+    }
+
+    /**
+     * 处理字段：去掉类型
+     *
+     * @param fieldName
+     * @return
+     */
+    public static String handleFieldName(String fieldName) {
+        if (StringUtils.isBlank(fieldName)) {
+            return null;
+        }
+        String[] strings = fieldName.split(BaseConstants.Symbol.COMMA);
+        List<String> list = new ArrayList<>();
+        for (String string : strings) {
+            list.add(string.substring(0, string.indexOf('(')));
+        }
+        return StringUtils.join(list, BaseConstants.Symbol.COMMA);
     }
 
 }
