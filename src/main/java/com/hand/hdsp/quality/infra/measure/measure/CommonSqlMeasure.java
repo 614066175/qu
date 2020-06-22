@@ -7,6 +7,7 @@ import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
 import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import com.hand.hdsp.quality.infra.measure.*;
@@ -22,7 +23,7 @@ import java.util.Map;
  *
  * @author feng.liu01@hand-china.com 2020-06-09 10:06:43
  */
-@CheckItem("COMMON_SQL")
+@CheckItem(PlanConstant.COMMON_SQL)
 public class CommonSqlMeasure implements Measure {
 
     private final DatasourceFeign datasourceFeign;
@@ -43,6 +44,8 @@ public class CommonSqlMeasure implements Measure {
         DatasourceDTO datasourceDTO = param.getDatasourceDTO();
         BatchResultBase batchResultBase = param.getBatchResultBase();
         BatchResultItem batchResultItem = param.getBatchResultItem();
+
+        // 查询要执行的SQL
         List<ItemTemplateSql> list = templateSqlRepository.select(ItemTemplateSql.builder()
                 .checkItem(param.getCheckItem())
                 .datasourceType(param.getDatasourceType())
@@ -53,7 +56,7 @@ public class CommonSqlMeasure implements Measure {
         variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
         variables.put("checkField", MeasureUtil.handleFieldName(param.getCheckFieldName()));
 
-        datasourceDTO.setSql(MeasureUtil.replaceVariable(list.get(0).getSqlContent(), variables, batchResultBase.getWhereCondition()));
+        datasourceDTO.setSql(MeasureUtil.replaceVariable(list.get(0).getSqlContent(), variables, param.getWhereCondition()));
 
         List<HashMap<String, String>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, String>>>() {
         });

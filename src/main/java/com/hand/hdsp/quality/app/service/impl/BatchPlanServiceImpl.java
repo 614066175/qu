@@ -360,6 +360,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                         .checkItem(batchPlanTableConDO.getCheckItem())
                         .countType(batchPlanTableConDO.getCountType())
                         .compareWay(batchPlanTableConDO.getCompareWay())
+                        .whereCondition(joinWhereCondition(batchPlanTableConDO.getWhereCondition(), batchResultBase.getWhereCondition()))
                         .warningLevelList(JsonUtils.json2WarningLevel(batchPlanTableConDO.getWarningLevel()))
                         .datasourceDTO(datasourceDTO)
                         .batchResultBase(batchResultBase)
@@ -445,6 +446,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                         .checkItem(batchPlanFieldConDO.getCheckItem())
                         .countType(batchPlanFieldConDO.getCountType())
                         .compareWay(batchPlanFieldConDO.getCompareWay())
+                        .whereCondition(joinWhereCondition(batchPlanFieldConDO.getWhereCondition(), batchResultBase.getWhereCondition()))
                         .warningLevelList(JsonUtils.json2WarningLevel(batchPlanFieldConDO.getWarningLevel()))
                         .datasourceDTO(datasourceDTO)
                         .batchResultBase(batchResultBase)
@@ -660,5 +662,25 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 messageClient.async().sendMessage(messageSender);
             }
         }
+    }
+
+    /**
+     * 拼接where条件
+     *
+     * @param where1
+     * @param where2
+     * @return
+     */
+    private String joinWhereCondition(String where1, String where2) {
+        if (StringUtils.isBlank(where1) && StringUtils.isBlank(where2)) {
+            return null;
+        }
+        if (StringUtils.isNotBlank(where1) && StringUtils.isBlank(where2)) {
+            return where1;
+        }
+        if (StringUtils.isBlank(where1) && StringUtils.isNotBlank(where2)) {
+            return where2;
+        }
+        return where1 + " and " + where2;
     }
 }

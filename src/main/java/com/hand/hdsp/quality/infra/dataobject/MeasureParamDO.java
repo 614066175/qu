@@ -1,6 +1,9 @@
 package com.hand.hdsp.quality.infra.dataobject;
 
-import com.hand.hdsp.quality.api.dto.*;
+import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
+import com.hand.hdsp.quality.api.dto.BatchPlanTableLineDTO;
+import com.hand.hdsp.quality.api.dto.DatasourceDTO;
+import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanField;
 import com.hand.hdsp.quality.domain.entity.BatchPlanRelTable;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
@@ -49,6 +52,8 @@ public class MeasureParamDO {
      */
     private String compareWay;
 
+    private String whereCondition;
+
     /**
      * 计算出来的值
      */
@@ -61,8 +66,6 @@ public class MeasureParamDO {
     private DatasourceDTO datasourceDTO;
 
     private BatchResultItem batchResultItem;
-
-    private BatchPlanTableDTO batchPlanTableDTO;
 
     private BatchPlanTableLineDTO batchPlanTableLineDTO;
 

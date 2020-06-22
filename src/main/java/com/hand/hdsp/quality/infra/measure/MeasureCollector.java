@@ -43,12 +43,14 @@ public class MeasureCollector {
 
     public Measure getMeasure(String checkItem) {
 
-        List<ItemTemplateSql> list = itemTemplateSqlRepository.select(ItemTemplateSql.builder().checkItem(checkItem).build());
-        if (CollectionUtils.isNotEmpty(list)) {
-            return MEASURE_MAP.get("COMMON_SQL");
-        }
-
         Measure measure = MEASURE_MAP.get(checkItem.toUpperCase());
+
+        if (measure == null) {
+            List<ItemTemplateSql> list = itemTemplateSqlRepository.select(ItemTemplateSql.builder().checkItem(checkItem).build());
+            if (CollectionUtils.isNotEmpty(list)) {
+                measure = MEASURE_MAP.get(PlanConstant.COMMON_SQL);
+            }
+        }
         if (measure == null) {
             String meaning = lovAdapter.queryLovMeaning(PlanConstant.LOV_CHECK_ITEM, BaseConstants.DEFAULT_TENANT_ID, checkItem);
             throw new CommonException("error.measure.check_item.not_exist", meaning);

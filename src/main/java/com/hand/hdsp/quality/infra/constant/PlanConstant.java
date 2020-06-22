@@ -75,6 +75,11 @@ public interface PlanConstant {
     String TIMESTAMP_TYPE = "QUA_%d_%s_%d";
 
     /**
+     * 通用SQL
+     */
+    String COMMON_SQL = "COMMON_SQL";
+
+    /**
      * 比较方式
      */
     interface CompareWay {
@@ -90,30 +95,6 @@ public interface PlanConstant {
          * 下降
          */
         String DOWN_RATE = "DOWN_RATE";
-        /**
-         * 小于
-         */
-        String LESS = "LESS";
-        /**
-         * 大于
-         */
-        String GREATER = "GREATER";
-        /**
-         * 等于
-         */
-        String EQUAL = "EQUAL";
-        /**
-         * 不等于
-         */
-        String NOT_EQUAL = "NOT_EQUAL";
-        /**
-         * 大于等于
-         */
-        String GREATER_EQUAL = "GREATER_EQUAL";
-        /**
-         * 小于等于
-         */
-        String LESS_EQUAL = "LESS_EQUAL";
         /**
          * 范围比较
          */
@@ -234,6 +215,17 @@ public interface PlanConstant {
          * 表行数
          */
         String TABLE_LINE = "TABLE_LINE";
+
+    }
+
+    /**
+     * 校验类型
+     */
+    interface CountType {
+        /**
+         * 值集
+         */
+        String LOV_VALUE = "LOV_VALUE";
 
     }
 }

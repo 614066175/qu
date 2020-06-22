@@ -280,7 +280,7 @@
     </select>
 
     <select id="listRuleException" resultType="com.hand.hdsp.quality.infra.vo.RuleExceptionVO">
-        select date_format(xbr.end_date, '%Y-%m-%d') date,
+        select date_format(xbr.start_date, '%Y-%m-%d') date,
         xbrr.rule_type ruleType,
         IFNULL(SUM(xbrb.exception_rule_count),0) exceptionRuleCount
         from xqua_batch_result xbr
@@ -294,8 +294,8 @@
                 <property name="mt" value="xbr"/>
             </include>
         </where>
-        group by date_format(xbr.end_date, '%Y-%m-%d'),xbrr.rule_type
-        order by date_format(xbr.end_date, '%Y-%m-%d')
+        group by date_format(xbr.start_date, '%Y-%m-%d'),xbrr.rule_type
+        order by date_format(xbr.start_date, '%Y-%m-%d')
     </select>
 
     <select id="listWarningLevel" resultType="com.hand.hdsp.quality.infra.vo.WarningLevelVO">
