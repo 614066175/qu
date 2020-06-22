@@ -63,8 +63,8 @@ public class BatchPlanRelTableController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
-    public ResponseEntity<?> list2(@PathVariable(name = "organizationId") Long tenantId,
-                                   BatchPlanRelTable batchPlanRelTable) {
+    public ResponseEntity<?> listNoPage(@PathVariable(name = "organizationId") Long tenantId,
+                                        BatchPlanRelTable batchPlanRelTable) {
         batchPlanRelTable.setTenantId(tenantId);
         return Results.success(batchPlanRelTableRepository.select(batchPlanRelTable));
     }
@@ -145,7 +145,7 @@ public class BatchPlanRelTableController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/detail-list")
     public ResponseEntity<?> detailList(@PathVariable(name = "organizationId") Long tenantId,
-                                  BatchPlanRelTableDTO batchPlanRelTableDTO, @ApiIgnore @SortDefault(value = BatchPlanRelTable.FIELD_PLAN_RULE_ID,
+                                        BatchPlanRelTableDTO batchPlanRelTableDTO, @ApiIgnore @SortDefault(value = BatchPlanRelTable.FIELD_PLAN_RULE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchPlanRelTableDTO.setTenantId(tenantId);
         Page<BatchPlanRelTableDTO> list = batchPlanRelTableService.selectDetailList(pageRequest, batchPlanRelTableDTO);

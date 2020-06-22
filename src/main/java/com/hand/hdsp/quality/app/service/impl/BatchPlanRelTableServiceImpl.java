@@ -1,12 +1,15 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanRelTableDTO;
+import com.hand.hdsp.quality.api.dto.DatasourceDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanRelTableService;
 import com.hand.hdsp.quality.domain.repository.BatchPlanRelTableRepository;
+import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
+import org.hzero.core.util.ResponseUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,14 +22,22 @@ import org.springframework.transaction.annotation.Transactional;
 public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
 
     private final BatchPlanRelTableRepository batchPlanRelTableRepository;
+    private final DatasourceFeign datasourceFeign;
 
-    public BatchPlanRelTableServiceImpl(BatchPlanRelTableRepository batchPlanRelTableRepository) {
+    public BatchPlanRelTableServiceImpl(BatchPlanRelTableRepository batchPlanRelTableRepository,
+                                        DatasourceFeign datasourceFeign) {
         this.batchPlanRelTableRepository = batchPlanRelTableRepository;
+        this.datasourceFeign = datasourceFeign;
     }
 
     @Override
     public BatchPlanRelTableDTO detail(Long planRuleId) {
         BatchPlanRelTableDTO dto = batchPlanRelTableRepository.selectDTOByPrimaryKey(planRuleId);
+        datasourceFeign.detail(dto.getTenantId(), dto.getRelDatasourceId());
+        DatasourceDTO datasourceDTO = ResponseUtils.getResponse(datasourceFeign.detail(dto.getTenantId(), dto.getRelDatasourceId()), DatasourceDTO.class);
+        if (datasourceDTO != null) {
+            dto.setDatasourceName(datasourceDTO.getDatasourceName());
+        }
         dto.setWarningLevelList(JsonUtils.json2WarningLevel(dto.getWarningLevel()));
         dto.setRelationshipList(JsonUtils.json2Relationship(dto.getRelationship()));
         return dto;
