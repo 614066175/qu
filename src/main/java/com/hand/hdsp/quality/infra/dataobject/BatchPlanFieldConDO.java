@@ -44,4 +44,6 @@ public class BatchPlanFieldConDO extends AuditDomain {
 
     private String checkFieldName;
 
+    private String regularExpression;
+
 }

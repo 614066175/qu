@@ -10,7 +10,10 @@ import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
-import com.hand.hdsp.quality.infra.measure.*;
+import com.hand.hdsp.quality.infra.measure.CheckItem;
+import com.hand.hdsp.quality.infra.measure.Measure;
+import com.hand.hdsp.quality.infra.measure.MeasureCollector;
+import com.hand.hdsp.quality.infra.measure.MeasureUtil;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
@@ -37,17 +40,14 @@ public class FieldValueMeasure implements Measure {
 
     private final DatasourceFeign datasourceFeign;
     private final ItemTemplateSqlRepository templateSqlRepository;
-    private final CountCollector countCollector;
     private final MeasureCollector measureCollector;
     private final LovAdapter lovAdapter;
 
     public FieldValueMeasure(DatasourceFeign datasourceFeign,
                              ItemTemplateSqlRepository templateSqlRepository,
-                             CountCollector countCollector,
                              MeasureCollector measureCollector, LovAdapter lovAdapter) {
         this.datasourceFeign = datasourceFeign;
         this.templateSqlRepository = templateSqlRepository;
-        this.countCollector = countCollector;
         this.measureCollector = measureCollector;
         this.lovAdapter = lovAdapter;
     }
@@ -72,9 +72,9 @@ public class FieldValueMeasure implements Measure {
         }
 
         // 查询要执行的SQL
-        List<ItemTemplateSql> list = templateSqlRepository.select(ItemTemplateSql.builder()
+        ItemTemplateSql itemTemplateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
                 .checkItem(countType + "_" + warningLevelDTO.getCompareSymbol())
-                .datasourceType(param.getDatasourceType())
+                .datasourceType(batchResultBase.getDatasourceType())
                 .build());
 
         Map<String, String> variables = new HashMap<>(8);
@@ -85,7 +85,7 @@ public class FieldValueMeasure implements Measure {
                 .collect(Collectors.joining(BaseConstants.Symbol.COMMA))
         );
 
-        datasourceDTO.setSql(MeasureUtil.replaceVariable(list.get(0).getSqlContent(), variables, param.getWhereCondition()));
+        datasourceDTO.setSql(MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
 
         List<HashMap<String, Long>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, Long>>>() {
         });

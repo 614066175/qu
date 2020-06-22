@@ -22,21 +22,26 @@ public interface ErrorCode {
     /**
      * 分组下存在规则或其他分组，方案下存在行信息，或方案正在运行，无法删除
      */
-    String CAN_NOT_DELETE = "error.can_not_delete";
+    String CAN_NOT_DELETE = "hdsp.xqua.error.can_not_delete";
 
     /**
      * 告警等级阈值范围重叠
      */
-    String WARNING_LEVEL_OVERLAP = "error.warning_level_overlap";
+    String WARNING_LEVEL_OVERLAP = "hdsp.xqua.error.warning_level_overlap";
 
     /**
-     * 自定义SQL仅支持返回一个值
+     * 该校验项仅支持返回一个值
      */
-    String CUSTOM_SQL_ONE_VALUE = "error.custom_sql_one_value";
+    String CHECK_ITEM_ONE_VALUE = "hdsp.xqua.error.check_item_one_value";
 
 
     /**
      * 异常阻断
      */
-    String EXCEPTION_BLOCK = "error.exception_block";
+    String EXCEPTION_BLOCK = "hdsp.xqua.error.exception_block";
+
+    /**
+     * 校验项[{0}]未找到执行程序
+     */
+    String CHECK_ITEM_NOT_EXIST = "hdsp.xqua.error.measure.check_item.not_exist";
 }

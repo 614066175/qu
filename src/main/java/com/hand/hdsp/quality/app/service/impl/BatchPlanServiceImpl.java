@@ -452,6 +452,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                         .batchResultBase(batchResultBase)
                         .fieldName(batchPlanFieldConDO.getFieldName())
                         .checkFieldName(batchPlanFieldConDO.getCheckFieldName())
+                        .regularExpression(batchPlanFieldConDO.getRegularExpression())
                         .batchResultItem(BatchResultItem.builder().build())
                         .build();
                 measure.check(param);
@@ -465,13 +466,15 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 batchResultItem.setWarningLevelJson(batchPlanFieldConDO.getWarningLevel());
                 batchResultItem.setCheckWay(batchPlanFieldConDO.getCheckWay());
                 batchResultItem.setCheckItem(batchPlanFieldConDO.getCheckItem());
+                batchResultItem.setCountType(batchPlanFieldConDO.getCountType());
                 if (PlanConstant.CheckWay.REGULAR.equals(batchPlanFieldConDO.getCheckWay())) {
                     batchResultItem.setCheckItem(PlanConstant.CheckWay.REGULAR);
+                    batchResultItem.setCountType(null);
                 }
-                batchResultItem.setCountType(batchPlanFieldConDO.getCountType());
                 batchResultItem.setFieldName(batchPlanFieldConDO.getFieldName());
                 batchResultItem.setCheckFieldName(batchPlanFieldConDO.getCheckFieldName());
                 batchResultItem.setCheckFieldName(batchPlanFieldConDO.getCheckFieldName());
+                batchResultItem.setRegularExpression(batchPlanFieldConDO.getRegularExpression());
 
                 batchResultItem.setTenantId(tenantId);
                 batchResultItemRepository.insertSelective(batchResultItem);

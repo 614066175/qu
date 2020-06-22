@@ -28,7 +28,8 @@
                xbpfl.check_item,
                xbpfl.count_type,
                xbpfl.field_name,
-               xbpfl.check_field_name
+               xbpfl.check_field_name,
+               xbpfl.regular_expression
         FROM xqua_batch_plan_field_con xbpfc
                  join xqua_batch_plan_field_line xbpfl on xbpfc.plan_line_id = xbpfl.plan_line_id
         where xbpfl.plan_rule_id = #{planRuleId}

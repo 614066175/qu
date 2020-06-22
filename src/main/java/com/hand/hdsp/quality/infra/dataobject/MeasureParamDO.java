@@ -1,10 +1,8 @@
 package com.hand.hdsp.quality.infra.dataobject;
 
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanTableLineDTO;
 import com.hand.hdsp.quality.api.dto.DatasourceDTO;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
-import com.hand.hdsp.quality.domain.entity.BatchPlanField;
 import com.hand.hdsp.quality.domain.entity.BatchPlanRelTable;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
@@ -33,11 +31,6 @@ public class MeasureParamDO {
     private String checkFieldName;
 
     /**
-     * 数据源类型
-     */
-    private String datasourceType;
-
-    /**
      * 校验项 HDSP.XQUA.CHECK_ITEM
      */
     private String checkItem;
@@ -63,17 +56,16 @@ public class MeasureParamDO {
 
     private List<WarningLevelDTO> warningLevelList;
 
+    private String regularExpression;
+
     private DatasourceDTO datasourceDTO;
+
+    private BatchResultBase batchResultBase;
 
     private BatchResultItem batchResultItem;
 
     private BatchPlanTableLineDTO batchPlanTableLineDTO;
 
-    private BatchPlanField batchPlanField;
-
-    private BatchPlanFieldLineDTO batchPlanFieldLineDTO;
-
     private BatchPlanRelTable batchPlanRelTable;
 
-    private BatchResultBase batchResultBase;
 }

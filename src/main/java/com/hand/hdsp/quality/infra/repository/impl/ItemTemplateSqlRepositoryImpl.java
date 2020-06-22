@@ -1,9 +1,10 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
-import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
 import com.hand.hdsp.quality.api.dto.ItemTemplateSqlDTO;
+import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
 import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
+import com.hand.hdsp.quality.infra.mapper.ItemTemplateSqlMapper;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,4 +15,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class ItemTemplateSqlRepositoryImpl extends BaseRepositoryImpl<ItemTemplateSql, ItemTemplateSqlDTO> implements ItemTemplateSqlRepository {
 
+    private final ItemTemplateSqlMapper itemTemplateSqlMapper;
+
+    public ItemTemplateSqlRepositoryImpl(ItemTemplateSqlMapper itemTemplateSqlMapper) {
+        this.itemTemplateSqlMapper = itemTemplateSqlMapper;
+    }
+
+    @Override
+    public ItemTemplateSql selectSql(ItemTemplateSql itemTemplateSql) {
+        return itemTemplateSqlMapper.selectSql(itemTemplateSql);
+    }
 }

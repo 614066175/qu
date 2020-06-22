@@ -14,6 +14,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -189,6 +190,9 @@ public class MeasureUtil {
             String name = entry.getKey();
             String value = entry.getValue();
             String placeHolder = "\\$\\{" + name + "}";
+            if (StringUtils.isNotBlank(value)) {
+                value = Matcher.quoteReplacement(value);
+            }
             sqlAction = sqlAction.replaceAll(placeHolder, value);
             log.info("Succeed to replace {} into {}", placeHolder, value);
         }

@@ -45,7 +45,7 @@ public class CustomFixedMeasure implements Measure {
         List<HashMap<String, String>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, String>>>() {
         });
         if (response.size() != 1 || response.get(0).size() != 1) {
-            throw new CommonException(ErrorCode.CUSTOM_SQL_ONE_VALUE);
+            throw new CommonException(ErrorCode.CHECK_ITEM_ONE_VALUE);
         }
 
         String value = (String) response.get(0).values().toArray()[0];

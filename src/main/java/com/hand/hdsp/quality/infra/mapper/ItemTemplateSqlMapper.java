@@ -10,4 +10,11 @@ import io.choerodon.mybatis.common.BaseMapper;
  */
 public interface ItemTemplateSqlMapper extends BaseMapper<ItemTemplateSql> {
 
+    /**
+     * 根据条件查询SQL
+     *
+     * @param itemTemplateSql
+     * @return
+     */
+    ItemTemplateSql selectSql(ItemTemplateSql itemTemplateSql);
 }

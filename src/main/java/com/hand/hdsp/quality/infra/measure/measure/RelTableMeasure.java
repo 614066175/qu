@@ -89,19 +89,19 @@ public class RelTableMeasure implements Measure {
         //获取表行数
         Long dataCount = batchResultBase.getDataCount();
         if (dataCount == null) {
-            List<ItemTemplateSql> list = templateSqlRepository.select(ItemTemplateSql.builder()
+            ItemTemplateSql itemTemplateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
                     .checkItem(PlanConstant.CheckItem.TABLE_LINE)
-                    .datasourceType(param.getDatasourceType())
+                    .datasourceType(batchResultBase.getDatasourceType())
                     .build());
 
             Map<String, String> variables = new HashMap<>(5);
             variables.put("table", batchResultBase.getObjectName());
 
-            datasourceDTO.setSql(MeasureUtil.replaceVariable(list.get(0).getSqlContent(), variables, batchResultBase.getWhereCondition()));
+            datasourceDTO.setSql(MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, batchResultBase.getWhereCondition()));
             List<HashMap<String, String>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, String>>>() {
             });
             if (response.size() != 1 || response.get(0).size() != 1) {
-                throw new CommonException(ErrorCode.CUSTOM_SQL_ONE_VALUE);
+                throw new CommonException(ErrorCode.CHECK_ITEM_ONE_VALUE);
             }
 
             dataCount = Long.parseLong((String) response.get(0).values().toArray()[0]);

@@ -2,17 +2,15 @@ package com.hand.hdsp.quality.infra.measure;
 
 import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
 import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.core.base.BaseConstants;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,13 +22,13 @@ import java.util.Map;
 @Slf4j
 public class MeasureCollector {
     private final LovAdapter lovAdapter;
-    @Autowired
-    private ItemTemplateSqlRepository itemTemplateSqlRepository;
+    private final ItemTemplateSqlRepository itemTemplateSqlRepository;
 
     private static final Map<String, Measure> MEASURE_MAP = new HashMap<>();
 
-    public MeasureCollector(LovAdapter lovAdapter) {
+    public MeasureCollector(LovAdapter lovAdapter, ItemTemplateSqlRepository itemTemplateSqlRepository) {
         this.lovAdapter = lovAdapter;
+        this.itemTemplateSqlRepository = itemTemplateSqlRepository;
     }
 
     public void register(String checkItem, Measure measure) {
@@ -46,14 +44,14 @@ public class MeasureCollector {
         Measure measure = MEASURE_MAP.get(checkItem.toUpperCase());
 
         if (measure == null) {
-            List<ItemTemplateSql> list = itemTemplateSqlRepository.select(ItemTemplateSql.builder().checkItem(checkItem).build());
-            if (CollectionUtils.isNotEmpty(list)) {
+            ItemTemplateSql itemTemplateSql = itemTemplateSqlRepository.selectSql(ItemTemplateSql.builder().checkItem(checkItem).build());
+            if (itemTemplateSql != null) {
                 measure = MEASURE_MAP.get(PlanConstant.COMMON_SQL);
             }
         }
         if (measure == null) {
             String meaning = lovAdapter.queryLovMeaning(PlanConstant.LOV_CHECK_ITEM, BaseConstants.DEFAULT_TENANT_ID, checkItem);
-            throw new CommonException("error.measure.check_item.not_exist", meaning);
+            throw new CommonException(ErrorCode.CHECK_ITEM_NOT_EXIST, meaning);
         }
         return measure;
     }
