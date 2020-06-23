@@ -51,14 +51,14 @@ public class MeasureUtil {
                     // 字符串
                     if (warningLevelDTO.getExpectedValue().equals(value)) {
                         batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
-                        batchResultItem.setExceptionInfo("达到阈值");
+                        batchResultItem.setExceptionInfo("固定值满足告警");
                         break;
                     }
                     // 如果是数字，则用 BigDecimal.compareTo 比较
                     if (NumberUtils.isParsable(value)
                             && new BigDecimal(value).compareTo(new BigDecimal(warningLevelDTO.getExpectedValue())) == 0) {
                         batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
-                        batchResultItem.setExceptionInfo("达到阈值");
+                        batchResultItem.setExceptionInfo("固定值满足告警");
                         break;
                     }
                 }
@@ -69,7 +69,7 @@ public class MeasureUtil {
                 if (warningLevel.getStartValue().compareTo(actualValue) <= 0
                         && warningLevel.getEndValue().compareTo(actualValue) >= 0) {
                     batchResultItem.setWarningLevel(warningLevel.getWarningLevel());
-                    batchResultItem.setExceptionInfo("波动率超过阈值范围");
+                    batchResultItem.setExceptionInfo("固定值在告警范围内");
                 }
             }
         }
@@ -117,7 +117,7 @@ public class MeasureUtil {
                         if (planWarningLevel.getStartValue().compareTo(actualValue) <= 0
                                 && planWarningLevel.getEndValue().compareTo(actualValue) >= 0) {
                             batchResultItem.setWarningLevel(planWarningLevel.getWarningLevel());
-                            batchResultItem.setExceptionInfo("波动率超过阈值范围");
+                            batchResultItem.setExceptionInfo("波动率在告警范围内");
                         }
                     }
                 } else {
@@ -132,7 +132,7 @@ public class MeasureUtil {
                         if (planWarningLevel.getStartValue().compareTo(actualValue1) <= 0
                                 && planWarningLevel.getEndValue().compareTo(actualValue1) >= 0) {
                             batchResultItem.setWarningLevel(planWarningLevel.getWarningLevel());
-                            batchResultItem.setExceptionInfo("波动率超过阈值范围");
+                            batchResultItem.setExceptionInfo("波动率在告警范围内");
                         }
                     }
                 } else {
@@ -147,7 +147,7 @@ public class MeasureUtil {
                         if (planWarningLevel.getStartValue().compareTo(actualValue2) <= 0
                                 && planWarningLevel.getEndValue().compareTo(actualValue2) >= 0) {
                             batchResultItem.setWarningLevel(planWarningLevel.getWarningLevel());
-                            batchResultItem.setExceptionInfo("波动率超过阈值范围");
+                            batchResultItem.setExceptionInfo("波动率在告警范围内");
                         }
                     }
                 } else {

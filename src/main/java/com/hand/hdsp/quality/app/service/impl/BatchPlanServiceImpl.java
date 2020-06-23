@@ -374,7 +374,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 batchResultItem.setPlanLineId(batchPlanTableConDO.getPlanLineId());
                 batchResultItem.setConditionId(batchPlanTableConDO.getConditionId());
                 batchResultItem.setWhereCondition(batchPlanTableConDO.getWhereCondition());
-                batchResultItem.setCheckWay(batchPlanTableConDO.getCompareWay());
+                batchResultItem.setCompareWay(batchPlanTableConDO.getCompareWay());
                 batchResultItem.setWarningLevelJson(batchPlanTableConDO.getWarningLevel());
                 batchResultItem.setCheckItem(batchPlanTableConDO.getCheckItem());
                 batchResultItem.setCountType(batchPlanTableConDO.getCountType());
@@ -388,6 +388,10 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
                     //异常阻断
                     if (batchPlanTable.getExceptionBlock() == 1) {
+                        batchResultBase.setExceptionRuleCount(batchResultBase.getExceptionRuleCount() + 1);
+                        batchResultBaseRepository.updateByPrimaryKeySelective(batchResultBase);
+                        batchResultRuleDTO.setResultFlag(0);
+                        batchResultRuleRepository.updateByDTOPrimaryKeySelective(batchResultRuleDTO);
                         throw new CommonException(ErrorCode.EXCEPTION_BLOCK);
                     }
                 }
@@ -488,6 +492,10 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
                     //异常阻断
                     if (batchPlanField.getExceptionBlock() == 1) {
+                        batchResultBase.setExceptionRuleCount(batchResultBase.getExceptionRuleCount() + 1);
+                        batchResultBaseRepository.updateByPrimaryKeySelective(batchResultBase);
+                        batchResultRuleDTO.setResultFlag(0);
+                        batchResultRuleRepository.updateByDTOPrimaryKeySelective(batchResultRuleDTO);
                         throw new CommonException(ErrorCode.EXCEPTION_BLOCK);
                     }
                 }
@@ -554,11 +562,15 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             batchResultItemRepository.insertSelective(batchResultItem);
 
             if (StringUtils.isNotBlank(batchResultItem.getWarningLevel())) {
+                batchResultRuleDTO.setResultFlag(0);
+                batchResultRuleRepository.updateByDTOPrimaryKeySelective(batchResultRuleDTO);
+
                 batchResultBase.setExceptionRuleCount(batchResultBase.getExceptionRuleCount() + 1);
                 batchResultBase.setExceptionCheckItemCount(batchResultBase.getExceptionCheckItemCount() + 1);
 
                 //异常阻断
                 if (batchPlanRelTable.getExceptionBlock() == 1) {
+                    batchResultBaseRepository.updateByPrimaryKeySelective(batchResultBase);
                     throw new CommonException(ErrorCode.EXCEPTION_BLOCK);
                 }
             }
