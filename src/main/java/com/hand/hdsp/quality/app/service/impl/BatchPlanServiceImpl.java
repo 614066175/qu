@@ -203,6 +203,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             batchResult.setPlanStatus(PlanConstant.PlanStatus.FAILED);
             batchResult.setExceptionInfo(MessageAccessor.getMessage(e.getMessage(), e.getParameters()).getDesc());
             batchResultRepository.updateByPrimaryKeySelective(batchResult);
+            log.error("exec plan error!", e);
             throw e;
         } catch (Exception e) {
             //更新增量参数
@@ -210,6 +211,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             batchResult.setPlanStatus(PlanConstant.PlanStatus.FAILED);
             batchResult.setExceptionInfo(ExceptionUtils.getMessage(e));
             batchResultRepository.updateByPrimaryKeySelective(batchResult);
+            log.error("exec plan error!", e);
             throw e;
         }
     }

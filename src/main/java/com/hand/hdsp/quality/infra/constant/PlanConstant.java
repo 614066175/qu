@@ -215,6 +215,10 @@ public interface PlanConstant {
          * 表行数
          */
         String TABLE_LINE = "TABLE_LINE";
+        /**
+         * 一致性
+         */
+        String CONSISTENCY = "CONSISTENCY";
 
     }
 
