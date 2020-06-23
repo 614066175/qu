@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.hand.hdsp.core.util.JsqlParser;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanBaseService;
 import com.hand.hdsp.quality.domain.entity.*;
@@ -8,7 +9,6 @@ import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
-import com.hand.hdsp.quality.infra.util.SqlParser;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.core.util.ResponseUtils;
@@ -114,7 +114,7 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
 
     @Override
     public List<ColumnDTO> columns(String sql) {
-        List<Map<String, Object>> fields = SqlParser.getFields(sql);
+        List<Map<String, Object>> fields = JsqlParser.getFields(sql);
         return fields.stream().map(map -> ColumnDTO.builder()
                 .colName((String) map.get("fieldName"))
                 .typeName("VARCHAR")

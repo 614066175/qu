@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
@@ -60,6 +61,7 @@ public class BatchResultItemController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/result-rule")
+    @ProcessLovValue(targetField = {"body", "body.warningLevelList"})
     public ResponseEntity<?> resultRule(@PathVariable(name = "organizationId") Long tenantId,
                                         BatchResultItemDTO batchResultItemDTO, @ApiIgnore @SortDefault(value = BatchResultItem.FIELD_RESULT_ITEM_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {

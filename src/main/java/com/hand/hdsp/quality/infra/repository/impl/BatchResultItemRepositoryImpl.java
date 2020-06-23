@@ -2,10 +2,11 @@ package com.hand.hdsp.quality.infra.repository.impl;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.BatchResultItemDTO;
-import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.domain.repository.BatchResultItemRepository;
 import com.hand.hdsp.quality.infra.mapper.BatchResultItemMapper;
+import com.hand.hdsp.quality.infra.util.JsonUtils;
+import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,11 @@ public class BatchResultItemRepositoryImpl extends BaseRepositoryImpl<BatchResul
     }
 
     @Override
-    public List<BatchResultItemDTO> listRuleError(PageRequest pageRequest, BatchResultItemDTO batchResultItemDTO) {
-        return PageHelper.doPage(pageRequest,() -> batchResultItemMapper.listRuleError(batchResultItemDTO));
+    public Page<BatchResultItemDTO> listRuleError(PageRequest pageRequest, BatchResultItemDTO batchResultItemDTO) {
+        Page<BatchResultItemDTO> page = PageHelper.doPage(pageRequest, () -> batchResultItemMapper.listRuleError(batchResultItemDTO));
+        for (BatchResultItemDTO dto : page.getContent()) {
+            dto.setWarningLevelList(JsonUtils.json2WarningLevel(dto.getWarningLevelJson()));
+        }
+        return page;
     }
 }

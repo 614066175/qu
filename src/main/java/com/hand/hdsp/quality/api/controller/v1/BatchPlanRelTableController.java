@@ -12,6 +12,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.*;
+import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
@@ -144,6 +145,7 @@ public class BatchPlanRelTableController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/detail-list")
+    @ProcessLovValue(targetField = {"body", "body.warningLevelList"})
     public ResponseEntity<?> detailList(@PathVariable(name = "organizationId") Long tenantId,
                                         BatchPlanRelTableDTO batchPlanRelTableDTO, @ApiIgnore @SortDefault(value = BatchPlanRelTable.FIELD_PLAN_RULE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {

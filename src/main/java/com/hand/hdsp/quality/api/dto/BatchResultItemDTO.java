@@ -9,6 +9,7 @@ import lombok.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 /**
  * <p>批数据方案结果表-校验项信息 数据传输对象</p>
@@ -128,4 +129,7 @@ public class BatchResultItemDTO extends AuditDomain {
 
     @ApiModelProperty(value = "XQUA_BATCH_RESULT_BASE.RESULT_BASE_ID")
     private Long resultBaseId;
+
+    @ApiModelProperty(value = "方案告警等级List")
+    private List<WarningLevelDTO> warningLevelList;
 }

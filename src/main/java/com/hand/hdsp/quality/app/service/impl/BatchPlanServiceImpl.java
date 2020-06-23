@@ -462,6 +462,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 batchResultItem.setPlanLineId(batchPlanFieldConDO.getPlanLineId());
                 batchResultItem.setConditionId(batchPlanFieldConDO.getConditionId());
                 batchResultItem.setWhereCondition(batchPlanFieldConDO.getWhereCondition());
+                batchResultItem.setCompareWay(batchPlanFieldConDO.getCompareWay());
                 batchResultItem.setCheckWay(batchPlanFieldConDO.getCheckWay());
                 batchResultItem.setWarningLevelJson(batchPlanFieldConDO.getWarningLevel());
                 batchResultItem.setCheckWay(batchPlanFieldConDO.getCheckWay());

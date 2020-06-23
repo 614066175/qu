@@ -5,6 +5,7 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+import org.hzero.boot.platform.lov.annotation.LovValue;
 
 import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
@@ -25,6 +26,7 @@ public class WarningLevelDTO extends AuditDomain {
 
     @ApiModelProperty(value = "告警等级 HDSP.XQUA.WARNING_LEVEL")
     @NotBlank
+    @LovValue(lovCode = "HDSP.XQUA.WARNING_LEVEL", meaningField = "warningLevelMeaning")
     private String warningLevel;
 
     @ApiModelProperty(value = "阈值范围开始")
@@ -34,6 +36,7 @@ public class WarningLevelDTO extends AuditDomain {
     private BigDecimal endValue;
 
     @ApiModelProperty(value = "比较符号 HDSP.XQUA.COMPARE_SYMBOL")
+    @LovValue(lovCode = "HDSP.XQUA.COMPARE_SYMBOL", meaningField = "compareSymbolMeaning")
     private String compareSymbol;
 
     @ApiModelProperty(value = "阈值")
@@ -41,4 +44,8 @@ public class WarningLevelDTO extends AuditDomain {
 
     @ApiModelProperty(value = "值集编码")
     private String lovCode;
+
+    private String warningLevelMeaning;
+
+    private String compareSymbolMeaning;
 }

@@ -4,6 +4,7 @@ import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.BatchResultItemDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
+import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
@@ -40,5 +41,5 @@ public interface BatchResultItemRepository extends BaseRepository<BatchResultIte
      * @param batchResultItemDTO
      * @return
      */
-    List<BatchResultItemDTO> listRuleError(PageRequest pageRequest, BatchResultItemDTO batchResultItemDTO);
+    Page<BatchResultItemDTO> listRuleError(PageRequest pageRequest, BatchResultItemDTO batchResultItemDTO);
 }

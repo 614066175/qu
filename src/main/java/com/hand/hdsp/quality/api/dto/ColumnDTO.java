@@ -62,4 +62,5 @@ public class ColumnDTO extends AuditDomain {
      */
     private String isAutoincrement;
 
+    private String sql;
 }

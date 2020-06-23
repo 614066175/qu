@@ -147,9 +147,10 @@ public class BatchPlanBaseController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/columns")
-    public ResponseEntity<List<ColumnDTO>> columns(@PathVariable("organizationId") Long tenantId, @RequestParam String sql) {
-        List<ColumnDTO> tables = batchPlanBaseService.columns(sql);
+    @PostMapping("/columns")
+    public ResponseEntity<List<ColumnDTO>> columns(@PathVariable("organizationId") Long tenantId,
+                                                   @RequestBody ColumnDTO columnDTO) {
+        List<ColumnDTO> tables = batchPlanBaseService.columns(columnDTO.getSql());
         return Results.success(tables);
     }
 }
