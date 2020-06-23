@@ -8,6 +8,7 @@ import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
+import com.hand.hdsp.quality.infra.util.SqlParser;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.core.util.ResponseUtils;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>批数据方案-基础配置表应用服务默认实现</p>
@@ -107,5 +110,14 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
             batchPlanBaseDTO.setDatasourceName(datasourceDTO.getDatasourceName());
         }
         return batchPlanBaseDTO;
+    }
+
+    @Override
+    public List<ColumnDTO> columns(String sql) {
+        List<Map<String, Object>> fields = SqlParser.getFields(sql);
+        return fields.stream().map(map -> ColumnDTO.builder()
+                .colName((String) map.get("fieldName"))
+                .typeName("VARCHAR")
+                .build()).collect(Collectors.toList());
     }
 }

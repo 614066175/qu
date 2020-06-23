@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO;
+import com.hand.hdsp.quality.api.dto.ColumnDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanBaseService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.BatchPlanBase;
@@ -17,6 +18,8 @@ import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+
+import java.util.List;
 
 /**
  * <p>批数据方案-基础配置表 管理 API</p>
@@ -134,5 +137,19 @@ public class BatchPlanBaseController extends BaseController {
         batchPlanBaseDTO.setTenantId(tenantId);
         batchPlanBaseService.delete(batchPlanBaseDTO);
         return Results.success();
+    }
+
+    @ApiOperation(value = "解析自定义SQL字段信息")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/columns")
+    public ResponseEntity<List<ColumnDTO>> columns(@PathVariable("organizationId") Long tenantId, @RequestParam String sql) {
+        List<ColumnDTO> tables = batchPlanBaseService.columns(sql);
+        return Results.success(tables);
     }
 }

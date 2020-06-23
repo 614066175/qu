@@ -1,6 +1,9 @@
 package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO;
+import com.hand.hdsp.quality.api.dto.ColumnDTO;
+
+import java.util.List;
 
 /**
  * <p>批数据方案-基础配置表应用服务</p>
@@ -25,4 +28,12 @@ public interface BatchPlanBaseService {
      * @return
      */
     BatchPlanBaseDTO detail(Long planBaseId, Long tenantId);
+
+    /**
+     * 解析自定义SQL
+     *
+     * @param sql
+     * @return
+     */
+    List<ColumnDTO> columns(String sql);
 }
