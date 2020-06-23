@@ -7,11 +7,15 @@ import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hzero.core.base.BaseConstants;
+import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -63,6 +67,17 @@ public class MeasureUtil {
                     }
 
                     //日期
+                    Date valueDate = parseDate(value);
+                    if (valueDate != null) {
+                        Date expectedDate = parseDate(warningLevelDTO.getExpectedValue());
+                        Assert.notNull(expectedDate, "hdsp.xqua.error.expected_value_is_not_date");
+                        if (DateUtils.isSameInstant(valueDate, expectedDate)) {
+                            batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
+                            batchResultItem.setExceptionInfo("固定值满足告警");
+                            break;
+                        }
+                    }
+
 
                 } else if (PlanConstant.CompareSymbol.NOT_EQUAL.equals(warningLevelDTO.getCompareSymbol())) {
                     // 字符串
@@ -80,21 +95,47 @@ public class MeasureUtil {
                     }
 
                     //日期
+                    Date valueDate = parseDate(value);
+                    if (valueDate != null) {
+                        Date expectedDate = parseDate(warningLevelDTO.getExpectedValue());
+                        Assert.notNull(expectedDate, "hdsp.xqua.error.expected_value_is_not_date");
+                        if (!DateUtils.isSameInstant(valueDate, expectedDate)) {
+                            batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
+                            batchResultItem.setExceptionInfo("固定值满足告警");
+                            break;
+                        }
+                    }
                 }
             }
         } else if (PlanConstant.CompareWay.RANGE.equals(compareWay)) {
-            BigDecimal actualValue = new BigDecimal(value);
-            for (WarningLevelDTO warningLevel : warningLevelList) {
-                if (new BigDecimal(warningLevel.getStartValue()).compareTo(actualValue) <= 0
-                        && new BigDecimal(warningLevel.getEndValue()).compareTo(actualValue) >= 0) {
-                    batchResultItem.setWarningLevel(warningLevel.getWarningLevel());
-                    batchResultItem.setExceptionInfo("固定值在告警范围内");
-                    break;
+            if (NumberUtils.isParsable(value)) {
+                BigDecimal actualValue = new BigDecimal(value);
+                for (WarningLevelDTO warningLevel : warningLevelList) {
+                    if (new BigDecimal(warningLevel.getStartValue()).compareTo(actualValue) <= 0
+                            && new BigDecimal(warningLevel.getEndValue()).compareTo(actualValue) >= 0) {
+                        batchResultItem.setWarningLevel(warningLevel.getWarningLevel());
+                        batchResultItem.setExceptionInfo("固定值在告警范围内");
+                        break;
+                    }
+                }
+            }
+            //日期
+            Date valueDate = parseDate(value);
+            if (valueDate != null) {
+                for (WarningLevelDTO warningLevel : warningLevelList) {
+                    Date startDate = parseDate(warningLevel.getStartValue());
+                    Date endDate = parseDate(warningLevel.getEndValue());
+                    Assert.notNull(startDate, "hdsp.xqua.error.expected_value_is_not_date");
+                    Assert.notNull(endDate, "hdsp.xqua.error.expected_value_is_not_date");
+                    if (startDate.compareTo(valueDate) <= 0
+                            && endDate.compareTo(valueDate) >= 0) {
+                        batchResultItem.setWarningLevel(warningLevel.getWarningLevel());
+                        batchResultItem.setExceptionInfo("固定值在告警范围内");
+                        break;
+                    }
                 }
             }
         }
-
-
     }
 
 
@@ -240,6 +281,27 @@ public class MeasureUtil {
             list.add(string.substring(0, string.indexOf('(')));
         }
         return StringUtils.join(list, BaseConstants.Symbol.COMMA);
+    }
+
+    /**
+     * 日期转换，如果失败则返回 null
+     *
+     * @param s
+     * @return
+     */
+    private static Date parseDate(String s) {
+        try {
+            //如果转换成功，则按日期处理
+            return DateUtils.parseDate(s,
+                    BaseConstants.Pattern.DATE,
+                    BaseConstants.Pattern.DATETIME,
+                    BaseConstants.Pattern.DATETIME_SSS,
+                    BaseConstants.Pattern.DATETIME_MM,
+                    BaseConstants.Pattern.TIME_SS);
+
+        } catch (ParseException e) {
+            return null;
+        }
     }
 
 }
