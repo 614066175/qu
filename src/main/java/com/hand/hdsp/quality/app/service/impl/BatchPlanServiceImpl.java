@@ -54,6 +54,7 @@ import java.util.stream.Collectors;
 public class BatchPlanServiceImpl implements BatchPlanService {
 
     private static final String JOB_URL = "/v2/%d/batch-plans/exec/%d";
+    private static final String SQL_PACK = " (%s) sql_pack";
     @Value("${hdsp.route-data.service-short}")
     private String serviceShort;
     @Value("${hdsp.route-data.service-id}")
@@ -254,20 +255,25 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
         List<BatchPlanBase> baseList = batchPlanBaseRepository.select(BatchPlanBase.FIELD_PLAN_ID, planId);
         for (BatchPlanBase batchPlanBase : baseList) {
+            String objectName = batchPlanBase.getObjectName();
 
             // 构建DatasourceDTO
             DatasourceDTO datasourceDTO = DatasourceDTO.builder()
                     .datasourceId(batchPlanBase.getDatasourceId())
                     .schema(batchPlanBase.getDatasourceSchema())
-                    .tableName(batchPlanBase.getObjectName())
+                    .tableName(objectName)
                     .tenantId(tenantId)
                     .build();
+
+            if (PlanConstant.SqlType.SQL.equals(batchPlanBase.getSqlType())) {
+                objectName = String.format(SQL_PACK, objectName);
+            }
 
             //插入批数据方案结果表-表信息
             BatchResultBase batchResultBase = BatchResultBase.builder()
                     .resultId(batchResult.getResultId())
                     .planBaseId(batchPlanBase.getPlanBaseId())
-                    .objectName(batchPlanBase.getObjectName())
+                    .objectName(objectName)
                     .datasourceType(batchPlanBase.getDatasourceType())
                     .ruleCount(0L)
                     .exceptionRuleCount(0L)

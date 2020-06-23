@@ -232,4 +232,15 @@ public interface PlanConstant {
         String LOV_VALUE = "LOV_VALUE";
 
     }
+
+    /**
+     * SQL类型
+     */
+    interface SqlType {
+        /**
+         * 查询SQL
+         */
+        String SQL = "SQL";
+
+    }
 }
