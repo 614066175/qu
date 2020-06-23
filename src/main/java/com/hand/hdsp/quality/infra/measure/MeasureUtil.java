@@ -61,15 +61,35 @@ public class MeasureUtil {
                         batchResultItem.setExceptionInfo("固定值满足告警");
                         break;
                     }
+
+                    //日期
+
+                } else if (PlanConstant.CompareSymbol.NOT_EQUAL.equals(warningLevelDTO.getCompareSymbol())) {
+                    // 字符串
+                    if (!warningLevelDTO.getExpectedValue().equals(value)) {
+                        batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
+                        batchResultItem.setExceptionInfo("固定值满足告警");
+                        break;
+                    }
+                    // 如果是数字，则用 BigDecimal.compareTo 比较
+                    if (NumberUtils.isParsable(value)
+                            && new BigDecimal(value).compareTo(new BigDecimal(warningLevelDTO.getExpectedValue())) != 0) {
+                        batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
+                        batchResultItem.setExceptionInfo("固定值满足告警");
+                        break;
+                    }
+
+                    //日期
                 }
             }
         } else if (PlanConstant.CompareWay.RANGE.equals(compareWay)) {
             BigDecimal actualValue = new BigDecimal(value);
             for (WarningLevelDTO warningLevel : warningLevelList) {
-                if (warningLevel.getStartValue().compareTo(actualValue) <= 0
-                        && warningLevel.getEndValue().compareTo(actualValue) >= 0) {
+                if (new BigDecimal(warningLevel.getStartValue()).compareTo(actualValue) <= 0
+                        && new BigDecimal(warningLevel.getEndValue()).compareTo(actualValue) >= 0) {
                     batchResultItem.setWarningLevel(warningLevel.getWarningLevel());
                     batchResultItem.setExceptionInfo("固定值在告警范围内");
+                    break;
                 }
             }
         }
@@ -114,8 +134,8 @@ public class MeasureUtil {
 
                     batchResultItem.setWaveRate(actualValue.toString() + BaseConstants.Symbol.PERCENTAGE);
                     for (WarningLevelDTO planWarningLevel : warningLevelList) {
-                        if (planWarningLevel.getStartValue().compareTo(actualValue) <= 0
-                                && planWarningLevel.getEndValue().compareTo(actualValue) >= 0) {
+                        if (new BigDecimal(planWarningLevel.getStartValue()).compareTo(actualValue) <= 0
+                                && new BigDecimal(planWarningLevel.getEndValue()).compareTo(actualValue) >= 0) {
                             batchResultItem.setWarningLevel(planWarningLevel.getWarningLevel());
                             batchResultItem.setExceptionInfo("波动率在告警范围内");
                         }
@@ -129,8 +149,8 @@ public class MeasureUtil {
                 if (sample.compareTo(base) > 0 && actualValue1 != null) {
                     batchResultItem.setWaveRate(actualValue1.toString() + BaseConstants.Symbol.PERCENTAGE);
                     for (WarningLevelDTO planWarningLevel : warningLevelList) {
-                        if (planWarningLevel.getStartValue().compareTo(actualValue1) <= 0
-                                && planWarningLevel.getEndValue().compareTo(actualValue1) >= 0) {
+                        if (new BigDecimal(planWarningLevel.getStartValue()).compareTo(actualValue1) <= 0
+                                && new BigDecimal(planWarningLevel.getEndValue()).compareTo(actualValue1) >= 0) {
                             batchResultItem.setWarningLevel(planWarningLevel.getWarningLevel());
                             batchResultItem.setExceptionInfo("波动率在告警范围内");
                         }
@@ -144,8 +164,8 @@ public class MeasureUtil {
                 if (sample.compareTo(base) < 0 && actualValue2 != null) {
                     batchResultItem.setWaveRate(actualValue2.toString() + BaseConstants.Symbol.PERCENTAGE);
                     for (WarningLevelDTO planWarningLevel : warningLevelList) {
-                        if (planWarningLevel.getStartValue().compareTo(actualValue2) <= 0
-                                && planWarningLevel.getEndValue().compareTo(actualValue2) >= 0) {
+                        if (new BigDecimal(planWarningLevel.getStartValue()).compareTo(actualValue2) <= 0
+                                && new BigDecimal(planWarningLevel.getEndValue()).compareTo(actualValue2) >= 0) {
                             batchResultItem.setWarningLevel(planWarningLevel.getWarningLevel());
                             batchResultItem.setExceptionInfo("波动率在告警范围内");
                         }

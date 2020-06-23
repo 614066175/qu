@@ -30,10 +30,10 @@ public class WarningLevelDTO extends AuditDomain {
     private String warningLevel;
 
     @ApiModelProperty(value = "阈值范围开始")
-    private BigDecimal startValue;
+    private String startValue;
 
     @ApiModelProperty(value = "阈值范围结束")
-    private BigDecimal endValue;
+    private String endValue;
 
     @ApiModelProperty(value = "比较符号 HDSP.XQUA.COMPARE_SYMBOL")
     @LovValue(lovCode = "HDSP.XQUA.COMPARE_SYMBOL", meaningField = "compareSymbolMeaning")

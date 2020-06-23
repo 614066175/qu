@@ -117,8 +117,8 @@ public class RelTableMeasure implements Measure {
         batchResultItem.setRelTableName(batchPlanRelTable.getRelTableName());
 
         for (WarningLevelDTO warningLevelDTO : warningLevelList) {
-            if (warningLevelDTO.getStartValue().compareTo(rate) <= 0
-                    && warningLevelDTO.getEndValue().compareTo(rate) >= 0) {
+            if (new BigDecimal(warningLevelDTO.getStartValue()).compareTo(rate) <= 0
+                    && new BigDecimal(warningLevelDTO.getEndValue()).compareTo(rate) >= 0) {
                 batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
                 batchResultItem.setExceptionInfo("准确率（校验表与目标表匹配条数/校验表总条数）超出阈值范围");
             }
