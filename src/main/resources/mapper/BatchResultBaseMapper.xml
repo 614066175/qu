@@ -21,18 +21,4 @@
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
 
-    <select id="queryList" resultType="com.hand.hdsp.quality.infra.dataobject.BatchResultBaseDO">
-        select data_count,
-               table_size
-        from xqua_batch_result_base xbrb
-        where plan_base_id = #{planBaseId}
-          and (data_count is not null or table_size is not null)
-          <if test="measureDate != null">
-              and date_format(creation_date, '%Y%m%d') = date_format(#{measureDate}, '%Y%m%d')
-          </if>
-        <if test="measureDateFrom != null">
-            and date_format(creation_date, '%Y%m%d') >= date_format(#{measureDateFrom}, '%Y%m%d')
-        </if>
-        order by xbrb.creation_date desc
-    </select>
 </mapper>

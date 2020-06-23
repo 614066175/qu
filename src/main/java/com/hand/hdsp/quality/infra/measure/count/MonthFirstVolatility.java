@@ -32,6 +32,7 @@ public class MonthFirstVolatility implements Count {
         //查询基础值
         List<BatchResultItemDO> baseList = batchResultItemMapper.queryList(BatchResultItemDO.builder()
                 .conditionId(param.getConditionId())
+                .ruleType(param.getBatchResultRuleDTO().getRuleType())
                 .measureDate(DateUtils.setDays(new Date(), 1))
                 .build());
         if (baseList.isEmpty()) {

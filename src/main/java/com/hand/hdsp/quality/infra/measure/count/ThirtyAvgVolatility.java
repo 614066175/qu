@@ -7,6 +7,7 @@ import com.hand.hdsp.quality.infra.mapper.BatchResultItemMapper;
 import com.hand.hdsp.quality.infra.measure.Count;
 import com.hand.hdsp.quality.infra.measure.CountType;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
 import java.math.BigDecimal;
@@ -33,25 +34,21 @@ public class ThirtyAvgVolatility implements Count {
         //查询基础值
         List<BatchResultItemDO> resultList = batchResultItemMapper.queryList(BatchResultItemDO.builder()
                 .conditionId(param.getConditionId())
-                .measureDate(DateUtils.addDays(new Date(), -30))
+                .ruleType(param.getBatchResultRuleDTO().getRuleType())
+                .measureDateFrom(DateUtils.addDays(new Date(), -30))
                 .build());
 
-
-        //求7天平均值
-        long sum = 0;
-        long count = 0;
-        for (BatchResultItemDO batchResultItemDO : resultList) {
-            if (batchResultItemDO.getCurrentValue() != null) {
-                sum += Long.parseLong(batchResultItemDO.getCurrentValue());
-                count++;
-            }
-        }
-        if (count == 0) {
+        if (CollectionUtils.isEmpty(resultList)) {
             return param.getBatchResultItem();
         }
 
+        //求30天平均值
+        BigDecimal sum = resultList.stream()
+                .map(value -> new BigDecimal(value.getCurrentValue()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         //平均值
-        BigDecimal base = BigDecimal.valueOf(sum).divide(BigDecimal.valueOf(count), 5, RoundingMode.HALF_UP);
+        BigDecimal base = sum.divide(BigDecimal.valueOf(resultList.size()), 5, RoundingMode.HALF_UP);
 
         MeasureUtil.volatilityCompare(param.getCompareWay(),
                 new BigDecimal(param.getCountValue()),

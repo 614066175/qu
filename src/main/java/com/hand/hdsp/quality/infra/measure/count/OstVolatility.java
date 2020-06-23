@@ -65,6 +65,7 @@ public class OstVolatility implements Count {
     private BatchResultItem countOne(MeasureParamDO param, int day) {
         List<BatchResultItemDO> baseList = batchResultItemMapper.queryList(BatchResultItemDO.builder()
                 .conditionId(param.getConditionId())
+                .ruleType(param.getBatchResultRuleDTO().getRuleType())
                 .measureDate(DateUtils.addDays(new Date(), day))
                 .build());
         BatchResultItem result = new BatchResultItem();

@@ -3,8 +3,6 @@ package com.hand.hdsp.quality.infra.dataobject;
 import io.choerodon.mybatis.domain.AuditDomain;
 import lombok.*;
 
-import java.util.Date;
-
 /**
  * <p>批数据方案结果表-表信息数据对象</p>
  *
@@ -44,14 +42,4 @@ public class BatchResultBaseDO extends AuditDomain {
     private Long tableSize;
 
     private Long tenantId;
-
-    /**
-     * 计算日期
-     */
-    private Date measureDate;
-
-    /**
-     * 计算日期从
-     */
-    private Date measureDateFrom;
 }

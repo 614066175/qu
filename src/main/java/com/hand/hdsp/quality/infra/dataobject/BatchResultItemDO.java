@@ -71,4 +71,11 @@ public class BatchResultItemDO extends AuditDomain {
      * 计算日期
      */
     private Date measureDate;
+
+    /**
+     * 计算日期从
+     */
+    private Date measureDateFrom;
+
+    private String ruleType;
 }

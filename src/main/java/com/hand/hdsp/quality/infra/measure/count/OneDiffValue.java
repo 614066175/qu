@@ -30,6 +30,7 @@ public class OneDiffValue implements Count {
         //查询基础值
         List<BatchResultItemDO> resultList = batchResultItemMapper.queryList(BatchResultItemDO.builder()
                 .conditionId(param.getConditionId())
+                .ruleType(param.getBatchResultRuleDTO().getRuleType())
                 .measureDate(DateUtils.addDays(new Date(), -1))
                 .build());
         if (resultList.isEmpty()) {

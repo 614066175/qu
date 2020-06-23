@@ -364,6 +364,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                         .warningLevelList(JsonUtils.json2WarningLevel(batchPlanTableConDO.getWarningLevel()))
                         .datasourceDTO(datasourceDTO)
                         .batchResultBase(batchResultBase)
+                        .batchResultRuleDTO(batchResultRuleDTO)
                         .batchResultItem(BatchResultItem.builder().build())
                         .build();
                 measure.check(param);
@@ -449,10 +450,11 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                         .whereCondition(joinWhereCondition(batchPlanFieldConDO.getWhereCondition(), batchResultBase.getWhereCondition()))
                         .warningLevelList(JsonUtils.json2WarningLevel(batchPlanFieldConDO.getWarningLevel()))
                         .datasourceDTO(datasourceDTO)
-                        .batchResultBase(batchResultBase)
                         .fieldName(batchPlanFieldConDO.getFieldName())
                         .checkFieldName(batchPlanFieldConDO.getCheckFieldName())
                         .regularExpression(batchPlanFieldConDO.getRegularExpression())
+                        .batchResultBase(batchResultBase)
+                        .batchResultRuleDTO(batchResultRuleDTO)
                         .batchResultItem(BatchResultItem.builder().build())
                         .build();
                 measure.check(param);
