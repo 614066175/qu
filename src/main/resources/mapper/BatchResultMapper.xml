@@ -299,7 +299,7 @@
     </select>
 
     <select id="listWarningLevel" resultType="com.hand.hdsp.quality.infra.vo.WarningLevelVO">
-        select date_format(xbr.end_date, '%Y-%m-%d') date,
+        select date_format(xbr.start_date, '%Y-%m-%d') date,
         xbri.warning_level warningLevel,
         count(xbri.warning_level) levelCount
         from xqua_batch_result xbr
@@ -315,8 +315,8 @@
                 <property name="mt" value="xbr"/>
             </include>
         </where>
-        group by date_format(xbr.end_date, '%Y-%m-%d'),xbri.warning_level
-        order by date_format(xbr.end_date, '%Y-%m-%d')
+        group by date_format(xbr.start_date, '%Y-%m-%d'),xbri.warning_level
+        order by date_format(xbr.start_date, '%Y-%m-%d')
 
     </select>
 
