@@ -90,7 +90,7 @@ public class FieldValueMeasure implements Measure {
         List<HashMap<String, Long>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, Long>>>() {
         });
 
-        if (CollectionUtils.isEmpty(response)) {
+        if (CollectionUtils.isNotEmpty(response)) {
             batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
         }
         return batchResultItem;
