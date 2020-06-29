@@ -1,10 +1,10 @@
 package com.hand.hdsp.quality.infra.vo;
 
-import java.math.BigDecimal;
-import java.util.Date;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
+
+import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * description

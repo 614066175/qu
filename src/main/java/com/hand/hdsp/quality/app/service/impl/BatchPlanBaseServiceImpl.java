@@ -2,7 +2,10 @@ package com.hand.hdsp.quality.app.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.core.util.JsqlParser;
-import com.hand.hdsp.quality.api.dto.*;
+import com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO;
+import com.hand.hdsp.quality.api.dto.BatchResultDTO;
+import com.hand.hdsp.quality.api.dto.ColumnDTO;
+import com.hand.hdsp.quality.api.dto.DatasourceDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanBaseService;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.domain.repository.*;

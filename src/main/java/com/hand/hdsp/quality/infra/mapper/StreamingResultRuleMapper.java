@@ -1,12 +1,11 @@
 package com.hand.hdsp.quality.infra.mapper;
 
-import java.util.List;
-
 import com.hand.hdsp.quality.api.dto.StreamingResultRuleDTO;
 import com.hand.hdsp.quality.domain.entity.StreamingResultRule;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import io.choerodon.mybatis.common.BaseMapper;
-import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>实时数据方案结果表-规则信息Mapper</p>

@@ -1,13 +1,12 @@
 package com.hand.hdsp.quality.domain.repository;
 
-import java.util.List;
-
 import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.StreamingPlanDTO;
-import com.hand.hdsp.quality.api.dto.StreamingResultDTO;
 import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.domain.entity.StreamingPlan;
+
+import java.util.List;
 
 /**
  * <p>实时数据评估方案表资源库</p>

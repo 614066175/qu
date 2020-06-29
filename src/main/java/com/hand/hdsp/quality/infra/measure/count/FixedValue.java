@@ -1,12 +1,10 @@
 package com.hand.hdsp.quality.infra.measure.count;
 
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
-import com.hand.hdsp.quality.domain.repository.BatchResultItemRepository;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.measure.Count;
 import com.hand.hdsp.quality.infra.measure.CountType;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * <p>固定值</p>

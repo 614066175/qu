@@ -6,7 +6,6 @@ import com.hand.hdsp.quality.domain.entity.BatchPlanFieldCon;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldConRepository;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanFieldConDO;
 import com.hand.hdsp.quality.infra.mapper.BatchPlanFieldConMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

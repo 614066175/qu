@@ -3,7 +3,6 @@ package com.hand.hdsp.quality.app.service.impl;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldConDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
-import com.hand.hdsp.quality.api.dto.BatchPlanTableDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanFieldService;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldCon;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;

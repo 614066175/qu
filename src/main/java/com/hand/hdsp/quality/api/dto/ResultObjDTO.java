@@ -1,7 +1,6 @@
 package com.hand.hdsp.quality.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-
 import lombok.*;
 
 /**

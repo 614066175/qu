@@ -1,21 +1,12 @@
 package com.hand.hdsp.quality.api.dto;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
-import java.util.Date;
-import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiModel;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import javax.validation.constraints.NotNull;
 
 /**
  * <p>校验项模板SQL表 数据传输对象</p>

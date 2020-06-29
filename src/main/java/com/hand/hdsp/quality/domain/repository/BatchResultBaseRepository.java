@@ -1,11 +1,11 @@
 package com.hand.hdsp.quality.domain.repository;
 
-import java.util.List;
-
 import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.BatchResultBaseDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
+
+import java.util.List;
 
 /**
  * <p>批数据方案结果表-表信息资源库</p>

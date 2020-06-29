@@ -1,7 +1,5 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
-import java.util.List;
-
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.StreamingResultBaseDTO;
 import com.hand.hdsp.quality.api.dto.StreamingResultRuleDTO;
@@ -11,6 +9,8 @@ import com.hand.hdsp.quality.infra.mapper.StreamingResultRuleMapper;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * <p>实时数据方案结果表-基础信息资源库实现</p>

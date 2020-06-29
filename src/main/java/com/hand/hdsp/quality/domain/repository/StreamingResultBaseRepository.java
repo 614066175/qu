@@ -1,11 +1,11 @@
 package com.hand.hdsp.quality.domain.repository;
 
-import java.util.List;
-
 import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.StreamingResultBaseDTO;
 import com.hand.hdsp.quality.domain.entity.StreamingResultBase;
+
+import java.util.List;
 
 /**
  * <p>实时数据方案结果表-基础信息资源库</p>

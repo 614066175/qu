@@ -1,15 +1,11 @@
 package com.hand.hdsp.quality.infra.converter;
 
+import com.hand.hdsp.quality.api.dto.ItemTemplateSqlDTO;
 import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
 import com.hand.hdsp.quality.infra.dataobject.ItemTemplateSqlDO;
-import com.hand.hdsp.quality.api.dto.ItemTemplateSqlDTO;
-
 import io.choerodon.core.convertor.ConvertorI;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 
 import java.util.Optional;
 

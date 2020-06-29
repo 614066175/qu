@@ -1,7 +1,5 @@
 package com.hand.hdsp.quality.api.dto;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -10,6 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <p>实时数据方案结果表-基础信息 数据传输对象</p>

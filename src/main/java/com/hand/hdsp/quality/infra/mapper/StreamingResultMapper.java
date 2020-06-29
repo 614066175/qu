@@ -1,8 +1,5 @@
 package com.hand.hdsp.quality.infra.mapper;
 
-import java.util.List;
-import java.util.Map;
-
 import com.hand.hdsp.quality.api.dto.StreamingResultDTO;
 import com.hand.hdsp.quality.api.dto.TimeRangeDTO;
 import com.hand.hdsp.quality.domain.entity.StreamingResult;
@@ -10,6 +7,9 @@ import com.hand.hdsp.quality.infra.vo.MarkTrendVO;
 import com.hand.hdsp.quality.infra.vo.RuleExceptionVO;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import io.choerodon.mybatis.common.BaseMapper;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>实时数据方案结果表Mapper</p>

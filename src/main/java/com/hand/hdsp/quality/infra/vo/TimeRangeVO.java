@@ -1,9 +1,9 @@
 package com.hand.hdsp.quality.infra.vo;
 
-import java.util.Date;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
+
+import java.util.Date;
 
 /**
  * description

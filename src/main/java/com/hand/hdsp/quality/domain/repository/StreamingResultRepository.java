@@ -1,8 +1,5 @@
 package com.hand.hdsp.quality.domain.repository;
 
-import java.util.List;
-import java.util.Map;
-
 import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.StreamingResultDTO;
@@ -13,6 +10,9 @@ import com.hand.hdsp.quality.infra.vo.RuleExceptionVO;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>实时数据方案结果表资源库</p>

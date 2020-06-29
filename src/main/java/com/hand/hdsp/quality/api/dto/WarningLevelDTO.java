@@ -8,7 +8,6 @@ import lombok.*;
 import org.hzero.boot.platform.lov.annotation.LovValue;
 
 import javax.validation.constraints.NotBlank;
-import java.math.BigDecimal;
 
 /**
  * <p>方案告警等级表 数据传输对象</p>

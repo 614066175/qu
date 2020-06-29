@@ -1,12 +1,12 @@
 package com.hand.hdsp.quality.domain.repository;
 
-import java.util.List;
-
 import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.BatchPlanDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlan;
 import com.hand.hdsp.quality.domain.entity.PlanGroup;
+
+import java.util.List;
 
 /**
  * <p>批数据评估方案表资源库</p>
