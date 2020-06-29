@@ -13,6 +13,9 @@ import java.text.SimpleDateFormat;
  * @author rui.jia01@hand-china.com 2020/04/02 12:43
  */
 public class TimeToString {
+    private TimeToString() {
+        throw new IllegalStateException("util class!");
+    }
 
     public static void timeToString(TimeRangeDTO timeRangeDTO) {
         String timeRange = timeRangeDTO.getTimeRange();

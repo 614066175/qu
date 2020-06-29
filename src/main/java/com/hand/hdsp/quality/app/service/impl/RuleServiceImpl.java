@@ -8,6 +8,7 @@ import com.hand.hdsp.quality.domain.repository.RuleLineRepository;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import io.choerodon.mybatis.domain.AuditDomain;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -110,7 +111,7 @@ public class RuleServiceImpl implements RuleService {
     @Transactional(rollbackFor = Exception.class)
     public int delete(RuleDTO ruleDTO) {
         List<RuleLineDTO> ruleLineDTOList = ruleLineRepository.selectDTO(RuleLine.FIELD_RULE_ID, ruleDTO.getRuleId());
-        if (ruleLineDTOList != null) {
+        if (CollectionUtils.isNotEmpty(ruleLineDTOList )) {
             ruleLineRepository.deleteByParentId(ruleDTO.getRuleId());
         }
         return ruleRepository.deleteByPrimaryKey(ruleDTO);

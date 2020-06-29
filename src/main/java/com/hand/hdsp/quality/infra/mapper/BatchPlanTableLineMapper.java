@@ -19,5 +19,13 @@ public interface BatchPlanTableLineMapper extends BaseMapper<BatchPlanTableLine>
      * @return
      */
     @Delete("delete from xqua_batch_plan_table_line where plan_rule_id = #{planRuleId}")
-    int deleteByParentId(@Param("planRuleId") Long planRuleId);
+    int deleteByPlanRuleId(@Param("planRuleId") Long planRuleId);
+
+    /**
+     * 根据 planBaseId 删除
+     *
+     * @param planBaseId
+     * @return
+     */
+    int deleteByPlanBaseId(Long planBaseId);
 }

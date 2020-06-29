@@ -71,6 +71,6 @@ public class BatchResultBaseDTO extends AuditDomain {
 
     // =========================非库字段=========================
 
-    private List<ResultWaringVO> resultWaringVOS;
+    private List<ResultWaringVO> resultWaringVOList;
 
 }

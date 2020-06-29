@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.core.util.JsqlParser;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanBaseService;
-import com.hand.hdsp.quality.domain.entity.*;
+import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,75 +29,56 @@ import java.util.stream.Collectors;
 @Service
 public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
 
-    private final BatchPlanBaseRepository batchPlanBaseRepository;
-    private final BatchPlanRepository batchPlanRepository;
-    private final BatchPlanTableRepository batchPlanTableRepository;
-    private final BatchPlanTableLineRepository batchPlanTableLineRepository;
-    private final BatchPlanFieldRepository batchPlanFieldRepository;
-    private final BatchPlanFieldLineRepository batchPlanFieldLineRepository;
-    private final BatchPlanRelTableRepository batchPlanRelTableRepository;
-    private final BatchResultRepository batchResultRepository;
-    private final DatasourceFeign datasourceFeign;
-
-    public BatchPlanBaseServiceImpl(BatchPlanBaseRepository batchPlanBaseRepository,
-                                    BatchPlanRepository batchPlanRepository,
-                                    BatchPlanTableRepository batchPlanTableRepository,
-                                    BatchPlanTableLineRepository batchPlanTableLineRepository,
-                                    BatchPlanFieldRepository batchPlanFieldRepository,
-                                    BatchPlanFieldLineRepository batchPlanFieldLineRepository,
-                                    BatchPlanRelTableRepository batchPlanRelTableRepository,
-                                    BatchResultRepository batchResultRepository,
-                                    DatasourceFeign datasourceFeign) {
-        this.batchPlanBaseRepository = batchPlanBaseRepository;
-        this.batchPlanRepository = batchPlanRepository;
-        this.batchPlanTableRepository = batchPlanTableRepository;
-        this.batchPlanTableLineRepository = batchPlanTableLineRepository;
-        this.batchPlanFieldRepository = batchPlanFieldRepository;
-        this.batchPlanFieldLineRepository = batchPlanFieldLineRepository;
-        this.batchPlanRelTableRepository = batchPlanRelTableRepository;
-        this.batchResultRepository = batchResultRepository;
-        this.datasourceFeign = datasourceFeign;
-    }
+    @Resource
+    private BatchPlanBaseRepository batchPlanBaseRepository;
+    @Resource
+    private BatchPlanTableRepository batchPlanTableRepository;
+    @Resource
+    private BatchPlanTableLineRepository batchPlanTableLineRepository;
+    @Resource
+    private BatchPlanTableConRepository batchPlanTableConRepository;
+    @Resource
+    private BatchPlanFieldRepository batchPlanFieldRepository;
+    @Resource
+    private BatchPlanFieldLineRepository batchPlanFieldLineRepository;
+    @Resource
+    private BatchPlanFieldConRepository batchPlanFieldConRepository;
+    @Resource
+    private BatchPlanRelTableRepository batchPlanRelTableRepository;
+    @Resource
+    private BatchResultRepository batchResultRepository;
+    @Resource
+    private DatasourceFeign datasourceFeign;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int delete(BatchPlanBaseDTO batchPlanBaseDTO) {
+        Long planBaseId = batchPlanBaseDTO.getPlanBaseId();
+        //判断能否删除
         List<BatchResultDTO> batchResultDTOList = batchResultRepository.selectDTO(
                 BatchResult.FIELD_PLAN_ID, batchPlanBaseDTO.getPlanId());
         if (CollectionUtils.isNotEmpty(batchResultDTOList)
                 && PlanConstant.PlanStatus.RUNNING.equals(batchResultDTOList.get(0).getPlanStatus())) {
             throw new CommonException(ErrorCode.CAN_NOT_DELETE);
         }
-        List<BatchPlanTableDTO> batchPlanTableDTOList =
-                batchPlanTableRepository.selectDTO(
-                        BatchPlanTable.FIELD_PLAN_BASE_ID, batchPlanBaseDTO.getPlanBaseId());
-        if (batchPlanTableDTOList != null) {
-            for (BatchPlanTableDTO batchPlanTableDTO : batchPlanTableDTOList) {
-                List<BatchPlanTableLineDTO> batchPlanTableLineDTOList =
-                        batchPlanTableLineRepository.selectDTO(
-                                BatchPlanTableLine.FIELD_PLAN_RULE_ID, batchPlanTableDTO.getPlanRuleId());
-                if (batchPlanTableLineDTOList != null) {
 
-                    batchPlanTableLineRepository.deleteByParentId(batchPlanTableDTO.getPlanRuleId());
-                }
-            }
-            batchPlanTableRepository.deleteByParentId(batchPlanBaseDTO.getPlanBaseId());
-        }
+        //删除表级规则条件
+        batchPlanTableConRepository.deleteByPlanBaseId(planBaseId);
+        //删除表级规则行
+        batchPlanTableLineRepository.deleteByPlanBaseId(planBaseId);
+        //删除表级规则
+        batchPlanTableRepository.deleteByPlanBaseId(planBaseId);
 
-        List<BatchPlanFieldDTO> batchPlanFieldDTOList = batchPlanFieldRepository.selectDTO(
-                BatchPlanField.FIELD_PLAN_BASE_ID, batchPlanBaseDTO.getPlanBaseId());
-        if (batchPlanFieldDTOList != null) {
-            for (BatchPlanFieldDTO batchPlanFieldDTO : batchPlanFieldDTOList) {
-                batchPlanFieldLineRepository.deleteByParentId(batchPlanFieldDTO.getPlanRuleId());
-            }
-            batchPlanFieldRepository.deleteByParentId(batchPlanBaseDTO.getPlanBaseId());
-        }
+        //删除字段规则条件
+        batchPlanFieldConRepository.deleteByPlanBaseId(planBaseId);
+        //删除字段规则行
+        batchPlanFieldLineRepository.deleteByPlanBaseId(planBaseId);
+        //删除字段规则
+        batchPlanFieldRepository.deleteByPlanBaseId(planBaseId);
 
-        List<BatchPlanRelTableDTO> batchPlanRelTableDTOList = batchPlanRelTableRepository.selectDTO(
-                BatchPlanRelTable.FIELD_PLAN_BASE_ID, batchPlanBaseDTO.getPlanBaseId());
-        if (batchPlanRelTableDTOList != null) {
-            batchPlanRelTableRepository.deleteByParentId(batchPlanBaseDTO.getPlanBaseId());
-        }
+        //删除表间规则
+        batchPlanRelTableRepository.deleteByPlanBaseId(planBaseId);
+
         return batchPlanBaseRepository.deleteByPrimaryKey(batchPlanBaseDTO);
     }
 

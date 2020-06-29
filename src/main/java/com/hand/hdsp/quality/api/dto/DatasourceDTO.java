@@ -34,24 +34,6 @@ public class DatasourceDTO extends AuditDomain {
     // 业务方法(按public protected private顺序排列)
     // ------------------------------------------------------------------------------
 
-    /**
-     * CUSTOMIZE
-     */
-    public boolean isCustomize() {
-        if (driverType == null) {
-            return false;
-        }
-        return CUSTOMIZE.equals(driverType);
-    }
-
-    /**
-     * 是否为FTP
-     *
-     * @return
-     */
-    public boolean isFTP() {
-        return FTP.equalsIgnoreCase(datasourceType);
-    }
     //
     // 数据库字段
     // ------------------------------------------------------------------------------

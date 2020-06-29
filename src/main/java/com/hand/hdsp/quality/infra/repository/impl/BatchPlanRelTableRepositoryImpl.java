@@ -22,7 +22,7 @@ public class BatchPlanRelTableRepositoryImpl extends BaseRepositoryImpl<BatchPla
     }
 
     @Override
-    public int deleteByParentId(Long planBaseId) {
-        return batchPlanRelTableMapper.deleteByParentId(planBaseId);
+    public int deleteByPlanBaseId(Long planBaseId) {
+        return batchPlanRelTableMapper.deleteByPlanBaseId(planBaseId);
     }
 }

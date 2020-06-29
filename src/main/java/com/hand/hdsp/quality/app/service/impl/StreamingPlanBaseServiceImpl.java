@@ -7,6 +7,7 @@ import com.hand.hdsp.quality.domain.entity.StreamingPlanRule;
 import com.hand.hdsp.quality.domain.repository.StreamingPlanBaseRepository;
 import com.hand.hdsp.quality.domain.repository.StreamingPlanRuleRepository;
 import io.choerodon.mybatis.domain.AuditDomain;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +34,7 @@ public class StreamingPlanBaseServiceImpl implements StreamingPlanBaseService {
     public int delete(StreamingPlanBaseDTO streamingPlanBaseDTO) {
         List<StreamingPlanRuleDTO> streamingPlanRuleDTOList = streamingPlanRuleRepository.selectDTO(
                 StreamingPlanRule.FIELD_PLAN_BASE_ID, streamingPlanBaseDTO);
-        if (streamingPlanRuleDTOList != null) {
+        if (CollectionUtils.isNotEmpty(streamingPlanRuleDTOList )) {
             streamingPlanRuleRepository.deleteByParentId(streamingPlanBaseDTO.getPlanBaseId());
         }
         return streamingPlanBaseRepository.deleteByPrimaryKey(streamingPlanBaseDTO);

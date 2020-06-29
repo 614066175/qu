@@ -34,4 +34,19 @@
                  join xqua_batch_plan_field_line xbpfl on xbpfc.plan_line_id = xbpfl.plan_line_id
         where xbpfl.plan_rule_id = #{planRuleId}
     </select>
+
+    <delete id="deleteByPlanBaseId">
+        DELETE
+        FROM xqua_batch_plan_field_con
+        WHERE condition_id IN (
+            select a.condition_id
+            from (
+                     SELECT xbpfc.condition_id
+                     FROM xqua_batch_plan_field_con xbpfc
+                              join xqua_batch_plan_field_line xbpfl on xbpfc.plan_line_id = xbpfl.plan_line_id
+                              join xqua_batch_plan_field xbpf on xbpfl.plan_rule_id = xbpf.plan_rule_id
+                     where xbpf.plan_base_id = #{planBaseId}
+                 ) a
+        )
+    </delete>
 </mapper>

@@ -19,5 +19,5 @@ public interface BatchPlanRelTableMapper extends BaseMapper<BatchPlanRelTable> {
      * @return
      */
     @Delete("delete from xqua_batch_plan_rel_table where plan_base_id = #{planBaseId}")
-    int deleteByParentId(@Param("planBaseId") Long planBaseId);
+    int deleteByPlanBaseId(@Param("planBaseId") Long planBaseId);
 }

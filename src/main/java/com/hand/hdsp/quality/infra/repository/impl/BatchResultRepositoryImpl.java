@@ -13,12 +13,17 @@ import com.hand.hdsp.quality.infra.vo.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>批数据方案结果表资源库实现</p>
@@ -63,23 +68,21 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
     @Override
     public List<CheckTypePercentageVO> checkTypePercentage(TimeRangeDTO timeRangeDTO) {
         TimeToString.timeToString(timeRangeDTO);
-        List<CheckTypePercentageVO> success = batchResultMapper.listSUCCESSTypeCount(timeRangeDTO);
+        List<CheckTypePercentageVO> success = batchResultMapper.listSuccessTypeCount(timeRangeDTO);
         List<CheckTypePercentageVO> all = batchResultMapper.listAllTypeCount(timeRangeDTO);
         List<CheckTypePercentageVO> checkTypePercentage = new ArrayList<>();
-        if (!success.isEmpty() && !all.isEmpty()) {
-            for (CheckTypePercentageVO a : all) {
-                for (CheckTypePercentageVO s : success) {
-                    if (a.getCheckType().equals(s.getCheckType())) {
-                        checkTypePercentage.add(CheckTypePercentageVO
-                                .builder()
-                                .checkType(a.getCheckType())
-                                .percentage(Double.valueOf(new DecimalFormat("#.00").format((s.getCountSum() * 1.0) / (a.getCountSum() == 0 ? 1 : a.getCountSum()))))
-                                .build());
-                    }
-                }
-            }
-        } else {
-            return Collections.singletonList(new CheckTypePercentageVO());
+        if (CollectionUtils.isNotEmpty(all)) {
+            Map<String, Long> allMap = all.stream().collect(Collectors.toMap(CheckTypePercentageVO::getCheckType, CheckTypePercentageVO::getCountSum));
+            Map<String, Long> successMap = success.stream().collect(Collectors.toMap(CheckTypePercentageVO::getCheckType, CheckTypePercentageVO::getCountSum));
+            allMap.forEach((checkType, countSum) -> {
+                Long successSum = successMap.get(checkType) == null ? 0L : successMap.get(checkType);
+                checkTypePercentage.add(CheckTypePercentageVO
+                        .builder()
+                        .checkType(checkType)
+                        .percentage(Double.valueOf(new DecimalFormat("#.00")
+                                .format((successSum * 1.0) / (countSum == 0 ? 1 : countSum))))
+                        .build());
+            });
         }
         return checkTypePercentage;
     }

@@ -55,7 +55,7 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
         List<BatchPlanFieldLineDTO> batchPlanFieldLineDTOList =
                 batchPlanFieldLineRepository.selectDTO(
                         BatchPlanFieldLine.FIELD_PLAN_RULE_ID, batchPlanFieldDTO.getPlanRuleId());
-        if (batchPlanFieldLineDTOList != null) {
+        if (CollectionUtils.isNotEmpty(batchPlanFieldLineDTOList)) {
             batchPlanFieldLineRepository.deleteByParentId(batchPlanFieldDTO.getPlanRuleId());
         }
         return batchPlanFieldRepository.deleteByPrimaryKey(batchPlanFieldDTO);

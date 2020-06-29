@@ -4,7 +4,6 @@ import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.BatchPlanTableConDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanTableCon;
-import com.hand.hdsp.quality.infra.dataobject.BatchPlanFieldConDO;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanTableConDO;
 
 import java.util.List;
@@ -24,4 +23,12 @@ public interface BatchPlanTableConRepository extends BaseRepository<BatchPlanTab
      * @return
      */
     List<BatchPlanTableConDO> selectJoinItem(BatchPlanTableConDO batchPlanFieldConDO);
+
+    /**
+     * 根据 planBaseId 删除
+     *
+     * @param planBaseId
+     * @return
+     */
+    int deleteByPlanBaseId(Long planBaseId);
 }

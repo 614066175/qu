@@ -47,8 +47,8 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
         List<BatchPlanTableLineDTO> batchPlanTableLineDTOList =
                 batchPlanTableLineRepository.selectDTO(
                         BatchPlanTableLine.FIELD_PLAN_RULE_ID, batchPlanTableDTO.getPlanRuleId());
-        if (batchPlanTableLineDTOList != null) {
-            batchPlanTableLineRepository.deleteByParentId(batchPlanTableDTO.getPlanRuleId());
+        if (CollectionUtils.isNotEmpty(batchPlanTableLineDTOList )) {
+            batchPlanTableLineRepository.deleteByPlanRuleId(batchPlanTableDTO.getPlanRuleId());
         }
         return batchPlanTableRepository.deleteByPrimaryKey(batchPlanTableDTO);
     }

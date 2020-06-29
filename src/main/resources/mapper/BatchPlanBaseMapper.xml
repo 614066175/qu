@@ -27,21 +27,9 @@
         xbpb.datasource_schema,
         xbpb.object_name,
         xbpb.description,
-        (select count(*)
-        from xqua_batch_plan_table xbpt
-        where
-        xbpt.plan_base_id = xbpb.plan_base_id
-        ) as table_num,
-        (select count(*)
-        from xqua_batch_plan_field xbpf
-        where
-        xbpf.plan_base_id = xbpb.plan_base_id
-        ) as field_num,
-        (select count(*)
-        from xqua_batch_plan_rel_table xbprt
-        where
-        xbprt.plan_base_id = xbpb.plan_base_id
-        ) as rel_table_num,
+        IFNULL(t_table_num.table_num, 0) table_num,
+        IFNULL(t_field_num.field_num, 0) field_num,
+        IFNULL(t_rel_table_num.rel_table_num,0) rel_table_num,
         xbpb.plan_base_id,
         xbpb.plan_id,
         xbpb.datasource_type,
@@ -50,6 +38,33 @@
         xbpb.sql_type
         from
         xqua_batch_plan_base xbpb
+            LEFT JOIN (
+                SELECT
+                xbpt.plan_base_id,
+                count(*) table_num
+                FROM
+                xqua_batch_plan_table xbpt
+                GROUP BY
+                xbpt.plan_base_id
+            ) t_table_num ON t_table_num.plan_base_id = xbpb.plan_base_id
+            LEFT JOIN (
+                SELECT
+                xbpf.plan_base_id,
+                count(*) field_num
+                FROM
+                xqua_batch_plan_field xbpf
+                GROUP BY
+                xbpf.plan_base_id
+            ) t_field_num ON t_field_num.plan_base_id = xbpb.plan_base_id
+            LEFT JOIN (
+                SELECT
+                xbprt.plan_base_id,
+                count(*) rel_table_num
+                FROM
+                xqua_batch_plan_rel_table xbprt
+                GROUP BY
+                xbprt.plan_base_id
+            ) t_rel_table_num ON t_rel_table_num.plan_base_id = xbpb.plan_base_id
         where
         xbpb.tenant_id = #{tenantId}
         <if test="planId != null">
@@ -71,15 +86,28 @@
         xbpb.plan_base_id desc
     </select>
     <select id="detail" resultType="com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO">
-        select
-        xbpb.*,
-        xbp.plan_name
-        from
-        xqua_batch_plan_base xbpb
-        left join
-        xqua_batch_plan xbp
-        on xbpb.plan_id = xbp.plan_id
-        where
-        xbpb.plan_base_id = #{planBaseId}
+        select xbpb.plan_base_id,
+               xbpb.plan_id,
+               xbpb.datasource_type,
+               xbpb.datasource_id,
+               xbpb.datasource_schema,
+               xbpb.sql_type,
+               xbpb.object_name,
+               xbpb.description,
+               xbpb.increment_strategy,
+               xbpb.increment_column,
+               xbpb.where_condition,
+               xbpb.tenant_id,
+               xbpb.object_version_number,
+               xbpb.creation_date,
+               xbpb.created_by,
+               xbpb.last_updated_by,
+               xbpb.last_update_date,
+               xbp.plan_name
+        from xqua_batch_plan_base xbpb
+                 left join
+             xqua_batch_plan xbp
+             on xbpb.plan_id = xbp.plan_id
+        where xbpb.plan_base_id = #{planBaseId}
     </select>
 </mapper>

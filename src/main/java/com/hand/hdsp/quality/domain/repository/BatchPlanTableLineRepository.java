@@ -18,5 +18,13 @@ public interface BatchPlanTableLineRepository extends BaseRepository<BatchPlanTa
      * @param planRuleId
      * @return
      */
-    int deleteByParentId(Long planRuleId);
+    int deleteByPlanRuleId(Long planRuleId);
+
+    /**
+     * 根据 planBaseId 删除
+     *
+     * @param planBaseId
+     * @return
+     */
+    int deleteByPlanBaseId(Long planBaseId);
 }

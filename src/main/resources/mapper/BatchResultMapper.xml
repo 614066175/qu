@@ -206,7 +206,7 @@
         </where>
     </select>
 
-    <select id="listSUCCESSTypeCount" resultType="com.hand.hdsp.quality.infra.vo.CheckTypePercentageVO">
+    <select id="listSuccessTypeCount" resultType="com.hand.hdsp.quality.infra.vo.CheckTypePercentageVO">
         SELECT
         xbrr.check_type,
         COUNT(*) count_sum
@@ -234,38 +234,28 @@
     </select>
 
     <select id="listAllTypeCount" resultType="com.hand.hdsp.quality.infra.vo.CheckTypePercentageVO">
-        select
-        a.check_type,
+        SELECT
+        xbrr.check_type,
         COUNT(*) count_sum
-        from (
-        select xbpt.check_type
-        from xqua_batch_plan_table xbpt
-        join xqua_batch_plan_base xbpb on xbpt.plan_base_id = xbpb.plan_base_id
-        <where>
-            <include refid="custom_where">
-                <property name="mt" value="xbpt"/>
-            </include>
-        </where>
-        union all
-        select xbpf.check_type
-        from xqua_batch_plan_field xbpf
-        join xqua_batch_plan_base xbpb on xbpf.plan_base_id = xbpb.plan_base_id
-        <where>
-            <include refid="custom_where">
-                <property name="mt" value="xbpf"/>
-            </include>
-        </where>
-        union all
-        select xbprt.check_type
-        from xqua_batch_plan_rel_table xbprt
-        join xqua_batch_plan_base xbpb on xbprt.plan_base_id = xbpb.plan_base_id
-        <where>
-            <include refid="custom_where">
-                <property name="mt" value="xbprt"/>
-            </include>
-        </where>
-        ) a
-        group by a.check_type
+        FROM
+        xqua_batch_result_rule xbrr
+        JOIN xqua_batch_result_base xbrb ON xbrr.result_base_id = xbrb.result_base_id
+        JOIN xqua_batch_plan_base xbpb ON xbrb.plan_base_id = xbpb.plan_base_id
+        WHERE NOT EXISTS (
+            SELECT
+            1
+            FROM
+            xqua_batch_result_rule a
+            WHERE
+            a.rule_type = xbrr.rule_type
+            AND a.plan_rule_id = xbrr.plan_rule_id
+            AND a.creation_date > xbrr.creation_date
+        )
+        <include refid="custom_where">
+            <property name="mt" value="xbrr"/>
+        </include>
+        GROUP BY
+        xbrr.check_type
     </select>
 
     <select id="listMarkTrend" resultType="com.hand.hdsp.quality.infra.vo.MarkTrendVO">

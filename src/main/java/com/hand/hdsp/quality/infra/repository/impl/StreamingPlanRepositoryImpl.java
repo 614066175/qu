@@ -12,6 +12,7 @@ import com.hand.hdsp.quality.domain.entity.StreamingPlan;
 import com.hand.hdsp.quality.domain.repository.PlanGroupRepository;
 import com.hand.hdsp.quality.domain.repository.StreamingPlanRepository;
 import com.hand.hdsp.quality.infra.constant.GroupType;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
@@ -32,7 +33,7 @@ public class StreamingPlanRepositoryImpl extends BaseRepositoryImpl<StreamingPla
 
     @Override
     public List<PlanGroup> getGroupByPlanName(StreamingPlanDTO streamingPlanDTO) {
-        if (streamingPlanDTO.getPlanName() == null || streamingPlanDTO.getPlanName().length() == 0){
+        if (StringUtils.isEmpty(streamingPlanDTO.getPlanName())){
             List<PlanGroup> all = planGroupRepository.select(PlanGroup.builder().groupType(GroupType.STREAMING).build());
             all.add(PlanGroup.ROOT_PLAN_GROUP);
             return all;
@@ -54,7 +55,7 @@ public class StreamingPlanRepositoryImpl extends BaseRepositoryImpl<StreamingPla
                         .build()
         );
         List<PlanGroup> groups = new ArrayList<>();
-        planGroups.stream().forEach(p ->{
+        planGroups.forEach(p ->{
             getGroup(p.getParentGroupId(),groups);
             groups.add(p);
         });

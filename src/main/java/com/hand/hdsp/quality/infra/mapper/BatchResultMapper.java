@@ -72,7 +72,7 @@ public interface BatchResultMapper extends BaseMapper<BatchResult> {
      * @param timeRangeDTO
      * @return CheckTypePercentageVO
      */
-    List<CheckTypePercentageVO> listSUCCESSTypeCount(TimeRangeDTO timeRangeDTO);
+    List<CheckTypePercentageVO> listSuccessTypeCount(TimeRangeDTO timeRangeDTO);
 
     /**
      * 询时间范围内各个校验类型总数

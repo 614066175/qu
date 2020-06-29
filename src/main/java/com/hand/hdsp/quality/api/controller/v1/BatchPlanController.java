@@ -28,8 +28,8 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/batch-plans")
 public class BatchPlanController extends BaseController {
 
-    private BatchPlanRepository batchPlanRepository;
-    private BatchPlanService batchPlanService;
+    private final BatchPlanRepository batchPlanRepository;
+    private final BatchPlanService batchPlanService;
 
     public BatchPlanController(BatchPlanRepository batchPlanRepository,
                                BatchPlanService batchPlanService) {
@@ -63,7 +63,7 @@ public class BatchPlanController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
-    public ResponseEntity<?> list2(@PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<?> listNoPage(@PathVariable(name = "organizationId") Long tenantId,
                                   BatchPlan batchPlan) {
         batchPlan.setTenantId(tenantId);
         return Results.success(batchPlanRepository.select(batchPlan));

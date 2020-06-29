@@ -36,7 +36,7 @@ public class BatchResultBaseRepositoryImpl extends BaseRepositoryImpl<BatchResul
                         .build()
         );
         if (CollectionUtils.isNotEmpty(batchResultBaseDTOList)) {
-            batchResultBaseDTOList.forEach(s -> s.setResultWaringVOS(batchResultItemMapper.selectWaringLevel(s)));
+            batchResultBaseDTOList.forEach(s -> s.setResultWaringVOList(batchResultItemMapper.selectWaringLevel(s)));
         }
         return batchResultBaseDTOList;
     }

@@ -29,7 +29,7 @@ public interface BatchPlanTableRepository extends BaseRepository<BatchPlanTable,
      * @param planBaseId
      * @return
      */
-    int deleteByParentId(Long planBaseId);
+    int deleteByPlanBaseId(Long planBaseId);
 
     /**
      * 表级规则-规则详情查询方法

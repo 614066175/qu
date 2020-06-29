@@ -33,12 +33,12 @@ import org.hzero.boot.platform.lov.dto.LovValueDTO;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.core.message.MessageAccessor;
 import org.hzero.core.util.ResponseUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -54,47 +54,50 @@ import java.util.stream.Collectors;
 public class BatchPlanServiceImpl implements BatchPlanService {
 
     private static final String JOB_URL = "/v2/%d/batch-plans/exec/%d";
+    private static final String JOB_BODY = "{}";
+    private static final String JOB_HEADER = "{\"content-type\": \"application/json\"}";
+    private static final String JOB_SETTING_INFO = "{\"authSettingInfo\":{\"auth\":\"OAUTH2\",\"grantType\":\"PASSWORD\"},\"apiSettingInfo\":{\"retryEnabled\":false},\"callbackApiSettingInfo\":{\"enabled\":false}}";
     private static final String SQL_PACK = " (%s) sql_pack";
     @Value("${hdsp.route-data.service-short}")
     private String serviceShort;
     @Value("${hdsp.route-data.service-id}")
     private String serviceId;
 
-    @Autowired
+    @Resource
     private BatchPlanBaseRepository batchPlanBaseRepository;
-    @Autowired
+    @Resource
     private BatchPlanRepository batchPlanRepository;
-    @Autowired
+    @Resource
     private BatchPlanTableRepository batchPlanTableRepository;
-    @Autowired
+    @Resource
     private BatchPlanTableConRepository batchPlanTableConRepository;
-    @Autowired
+    @Resource
     private BatchPlanFieldRepository batchPlanFieldRepository;
-    @Autowired
+    @Resource
     private BatchPlanFieldConRepository batchPlanFieldConRepository;
-    @Autowired
+    @Resource
     private BatchPlanRelTableRepository batchPlanRelTableRepository;
-    @Autowired
+    @Resource
     private BatchResultRepository batchResultRepository;
-    @Autowired
+    @Resource
     private BatchResultBaseRepository batchResultBaseRepository;
-    @Autowired
+    @Resource
     private BatchResultRuleRepository batchResultRuleRepository;
-    @Autowired
+    @Resource
     private BatchResultItemRepository batchResultItemRepository;
-    @Autowired
+    @Resource
     private MeasureCollector measureCollector;
-    @Autowired
+    @Resource
     private DispatchJobFeign dispatchJobFeign;
-    @Autowired
+    @Resource
     private RestJobFeign restJobFeign;
-    @Autowired
+    @Resource
     private LovAdapter lovAdapter;
-    @Autowired
+    @Resource
     private DqRuleLineFeign dqRuleLineFeign;
-    @Autowired
+    @Resource
     private MessageClient messageClient;
-    @Autowired
+    @Resource
     private TimestampFeign timestampFeign;
 
     @Override
@@ -139,9 +142,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         restJobDTO.setUseGateway(1);
         restJobDTO.setUrl(String.format(JOB_URL, tenantId, planId));
         restJobDTO.setJobName(jobName);
-        restJobDTO.setBody("{}");
-        restJobDTO.setHeader("{\"content-type\": \"application/json\"}");
-        restJobDTO.setSettingInfo("{\"authSettingInfo\":{\"auth\":\"OAUTH2\",\"grantType\":\"PASSWORD\"},\"apiSettingInfo\":{\"retryEnabled\":false},\"callbackApiSettingInfo\":{\"enabled\":false}}");
+        restJobDTO.setBody(JOB_BODY);
+        restJobDTO.setHeader(JOB_HEADER);
+        restJobDTO.setSettingInfo(JOB_SETTING_INFO);
 
         //插入或更新
         ResponseEntity<String> restJobResult = restJobFeign.create(tenantId, restJobDTO);
@@ -595,7 +598,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
         //获取所有告警等级，计算 F 值
         List<LovValueDTO> list = lovAdapter.queryLovValue(PlanConstant.LOV_WARNING_LEVEL, tenantId);
-        Map<String, BigDecimal> map = new HashMap<>();
+        Map<String, BigDecimal> map = new HashMap<>(8);
         BigDecimal n = BigDecimal.valueOf(list.size());
         BigDecimal half = BigDecimal.valueOf(0.5);
         BigDecimal f = BigDecimal.ONE.divide(n, 10, RoundingMode.HALF_UP).multiply(half);

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class BatchPlanFieldLineRepositoryImpl extends BaseRepositoryImpl<BatchPlanFieldLine, BatchPlanFieldLineDTO> implements BatchPlanFieldLineRepository {
 
-    private BatchPlanFieldLineMapper batchPlanFieldLineMapper;
+    private final BatchPlanFieldLineMapper batchPlanFieldLineMapper;
 
     public BatchPlanFieldLineRepositoryImpl(BatchPlanFieldLineMapper batchPlanFieldLineMapper) {
         this.batchPlanFieldLineMapper = batchPlanFieldLineMapper;
@@ -24,5 +24,10 @@ public class BatchPlanFieldLineRepositoryImpl extends BaseRepositoryImpl<BatchPl
     @Override
     public int deleteByParentId(Long planRuleId) {
         return batchPlanFieldLineMapper.deleteByParentId(planRuleId);
+    }
+
+    @Override
+    public int deleteByPlanBaseId(Long planBaseId) {
+        return batchPlanFieldLineMapper.deleteByPlanBaseId(planBaseId);
     }
 }

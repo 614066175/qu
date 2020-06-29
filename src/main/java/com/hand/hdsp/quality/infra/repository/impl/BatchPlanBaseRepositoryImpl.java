@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class BatchPlanBaseRepositoryImpl extends BaseRepositoryImpl<BatchPlanBase, BatchPlanBaseDTO> implements BatchPlanBaseRepository {
 
-    private BatchPlanBaseMapper batchPlanBaseMapper;
+    private final BatchPlanBaseMapper batchPlanBaseMapper;
 
     public BatchPlanBaseRepositoryImpl(BatchPlanBaseMapper batchPlanBaseMapper) {
         this.batchPlanBaseMapper = batchPlanBaseMapper;

@@ -20,7 +20,7 @@ public interface BatchPlanFieldRepository extends BaseRepository<BatchPlanField,
      * @param planBaseId
      * @return
      */
-    int deleteByParentId(Long planBaseId);
+    int deleteByPlanBaseId(Long planBaseId);
 
     /**
      * 关联查询

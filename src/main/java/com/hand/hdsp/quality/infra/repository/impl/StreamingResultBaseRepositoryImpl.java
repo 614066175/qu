@@ -36,9 +36,7 @@ public class StreamingResultBaseRepositoryImpl extends BaseRepositoryImpl<Stream
                         .build()
         );
         if (!streamingResultBases.isEmpty()){
-            streamingResultBases.stream().forEach( s -> {
-                s.setResultWaringVOS(streamingResultRuleMapper.selectWarnByTopic(StreamingResultRuleDTO.builder().tenantId(streamingResultBaseDTO.getTenantId()).topicInfo(s.getTopicInfo()).resultBaseId(s.getResultBaseId()).build()));
-            });
+            streamingResultBases.forEach( s -> s.setResultWaringVOList(streamingResultRuleMapper.selectWarnByTopic(StreamingResultRuleDTO.builder().tenantId(streamingResultBaseDTO.getTenantId()).topicInfo(s.getTopicInfo()).resultBaseId(s.getResultBaseId()).build())));
         }
         return streamingResultBases;
     }

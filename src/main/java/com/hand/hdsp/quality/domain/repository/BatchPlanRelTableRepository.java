@@ -18,5 +18,5 @@ public interface BatchPlanRelTableRepository extends BaseRepository<BatchPlanRel
      * @param planBaseId
      * @return
      */
-    int deleteByParentId(Long planBaseId);
+    int deleteByPlanBaseId(Long planBaseId);
 }

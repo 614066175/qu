@@ -1,7 +1,5 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
-import java.util.List;
-
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.StreamingResultRuleDTO;
 import com.hand.hdsp.quality.domain.entity.StreamingResultRule;
@@ -9,6 +7,8 @@ import com.hand.hdsp.quality.domain.repository.StreamingResultRuleRepository;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * <p>实时数据方案结果表-规则信息资源库实现</p>
@@ -20,13 +20,12 @@ public class StreamingResultRuleRepositoryImpl extends BaseRepositoryImpl<Stream
 
     @Override
     public List<StreamingResultRuleDTO> listResultRule(StreamingResultRuleDTO streamingResultRuleDTO) {
-        List<StreamingResultRuleDTO> streamingResultRuleDTOS = this.selectDTOByCondition(
+        return this.selectDTOByCondition(
                 Condition.builder(StreamingResultRule.class)
                         .where(Sqls.custom()
                                 .andEqualTo(StreamingResultRule.FIELD_RESULT_BASE_ID, streamingResultRuleDTO.getResultBaseId(), true)
                                 .andEqualTo(StreamingResultRule.FIELD_TENANT_ID, streamingResultRuleDTO.getTenantId(), true))
                         .build()
         );
-        return streamingResultRuleDTOS;
     }
 }

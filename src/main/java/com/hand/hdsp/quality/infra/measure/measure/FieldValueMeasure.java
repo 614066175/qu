@@ -92,6 +92,7 @@ public class FieldValueMeasure implements Measure {
 
         if (CollectionUtils.isNotEmpty(response)) {
             batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
+            batchResultItem.setExceptionInfo("不满足值集校验配置");
         }
         return batchResultItem;
     }

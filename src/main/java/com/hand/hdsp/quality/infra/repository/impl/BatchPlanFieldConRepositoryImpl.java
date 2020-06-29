@@ -29,4 +29,9 @@ public class BatchPlanFieldConRepositoryImpl extends BaseRepositoryImpl<BatchPla
     public List<BatchPlanFieldConDO> selectJoinItem(BatchPlanFieldConDO batchPlanFieldConDO) {
         return batchPlanFieldConMapper.selectJoinItem(batchPlanFieldConDO);
     }
+
+    @Override
+    public int deleteByPlanBaseId(Long planBaseId) {
+        return batchPlanFieldConMapper.deleteByPlanBaseId(planBaseId);
+    }
 }

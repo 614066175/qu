@@ -13,6 +13,7 @@ import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.*;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
+import org.hzero.mybatis.helper.SecurityTokenHelper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -95,6 +96,7 @@ public class BatchPlanFieldConController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanFieldConDTO batchPlanFieldConDTO) {
+        SecurityTokenHelper.validToken(batchPlanFieldConDTO, false);
         batchPlanFieldConRepository.updateDTOWhereTenant(batchPlanFieldConDTO, tenantId);
         return Results.success(batchPlanFieldConDTO);
     }

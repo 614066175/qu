@@ -15,4 +15,18 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+
+    <delete id="deleteByPlanBaseId">
+        DELETE
+        FROM xqua_batch_plan_table_line
+        WHERE plan_line_id IN (
+            select a.plan_line_id
+            from (
+                     SELECT xbptl.plan_line_id
+                     FROM xqua_batch_plan_table_line xbptl
+                              join xqua_batch_plan_table xbpt on xbptl.plan_rule_id = xbpt.plan_rule_id
+                     where xbpt.plan_base_id = #{planBaseId}
+                 ) a
+        )
+    </delete>
 </mapper>

@@ -20,4 +20,12 @@ public interface BatchPlanTableConMapper extends BaseMapper<BatchPlanTableCon> {
      * @return
      */
     List<BatchPlanTableConDO> selectJoinItem(BatchPlanTableConDO batchPlanFieldConDO);
+
+    /**
+     * 根据 planBaseId 删除
+     *
+     * @param planBaseId
+     * @return
+     */
+    int deleteByPlanBaseId(Long planBaseId);
 }
