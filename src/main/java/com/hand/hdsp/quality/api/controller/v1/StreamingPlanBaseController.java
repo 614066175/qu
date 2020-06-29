@@ -28,8 +28,8 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/streaming-plan-bases")
 public class StreamingPlanBaseController extends BaseController {
 
-    private StreamingPlanBaseRepository streamingPlanBaseRepository;
-    private StreamingPlanBaseService streamingPlanBaseService;
+    private final StreamingPlanBaseRepository streamingPlanBaseRepository;
+    private final StreamingPlanBaseService streamingPlanBaseService;
 
     public StreamingPlanBaseController(StreamingPlanBaseRepository streamingPlanBaseRepository,
                                        StreamingPlanBaseService streamingPlanBaseService) {
@@ -64,7 +64,7 @@ public class StreamingPlanBaseController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> listBase(@PathVariable(name = "organizationId") Long tenantId,
-                                  StreamingPlanBaseDTO streamingPlanBaseDTO, @ApiIgnore @SortDefault(value = StreamingPlanBase.FIELD_PLAN_BASE_ID,
+                                      StreamingPlanBaseDTO streamingPlanBaseDTO, @ApiIgnore @SortDefault(value = StreamingPlanBase.FIELD_PLAN_BASE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         streamingPlanBaseDTO.setTenantId(tenantId);
         Page<StreamingPlanBaseDTO> list = streamingPlanBaseRepository.list(pageRequest, streamingPlanBaseDTO);

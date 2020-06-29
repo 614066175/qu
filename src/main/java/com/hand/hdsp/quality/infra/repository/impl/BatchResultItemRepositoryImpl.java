@@ -9,7 +9,6 @@ import com.hand.hdsp.quality.infra.util.JsonUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -22,8 +21,11 @@ import java.util.List;
 @Component
 public class BatchResultItemRepositoryImpl extends BaseRepositoryImpl<BatchResultItem, BatchResultItemDTO> implements BatchResultItemRepository {
 
-    @Autowired
-    private BatchResultItemMapper batchResultItemMapper;
+    private final BatchResultItemMapper batchResultItemMapper;
+
+    public BatchResultItemRepositoryImpl(BatchResultItemMapper batchResultItemMapper) {
+        this.batchResultItemMapper = batchResultItemMapper;
+    }
 
     @Override
     public List<BatchResultItemDTO> selectByResultId(Long resultId) {

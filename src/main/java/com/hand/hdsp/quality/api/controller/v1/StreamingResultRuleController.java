@@ -27,7 +27,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/streaming-result-rules")
 public class StreamingResultRuleController extends BaseController {
 
-    private StreamingResultRuleRepository streamingResultRuleRepository;
+    private final StreamingResultRuleRepository streamingResultRuleRepository;
 
     public StreamingResultRuleController(StreamingResultRuleRepository streamingResultRuleRepository) {
         this.streamingResultRuleRepository = streamingResultRuleRepository;
@@ -60,7 +60,7 @@ public class StreamingResultRuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/result-rule")
     public ResponseEntity<?> resultRule(@PathVariable(name = "organizationId") Long tenantId,
-                                        StreamingResultRuleDTO streamingResultRuleDTO){
+                                        StreamingResultRuleDTO streamingResultRuleDTO) {
         streamingResultRuleDTO.setTenantId(tenantId);
         return Results.success(streamingResultRuleRepository.listResultRule(streamingResultRuleDTO));
     }

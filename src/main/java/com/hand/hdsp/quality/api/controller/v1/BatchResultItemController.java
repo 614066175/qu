@@ -29,7 +29,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/batch-result-items")
 public class BatchResultItemController extends BaseController {
 
-    private BatchResultItemRepository batchResultItemRepository;
+    private final BatchResultItemRepository batchResultItemRepository;
 
     public BatchResultItemController(BatchResultItemRepository batchResultItemRepository) {
         this.batchResultItemRepository = batchResultItemRepository;

@@ -30,7 +30,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/rule-lines")
 public class RuleLineSiteController extends BaseController {
 
-    private RuleLineRepository ruleLineRepository;
+    private final RuleLineRepository ruleLineRepository;
 
     public RuleLineSiteController(RuleLineRepository ruleLineRepository) {
         this.ruleLineRepository = ruleLineRepository;

@@ -22,8 +22,8 @@ import java.util.List;
 @Service
 public class PlanGroupServiceImpl implements PlanGroupService {
 
-    private PlanGroupRepository planGroupRepository;
-    private BatchPlanRepository batchPlanRepository;
+    private final PlanGroupRepository planGroupRepository;
+    private final BatchPlanRepository batchPlanRepository;
 
     public PlanGroupServiceImpl(PlanGroupRepository planGroupRepository, BatchPlanRepository batchPlanRepository) {
         this.planGroupRepository = planGroupRepository;

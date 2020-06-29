@@ -27,7 +27,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/rule-lines")
 public class RuleLineController extends BaseController {
 
-    private RuleLineRepository ruleLineRepository;
+    private final RuleLineRepository ruleLineRepository;
 
     public RuleLineController(RuleLineRepository ruleLineRepository) {
         this.ruleLineRepository = ruleLineRepository;
@@ -60,7 +60,7 @@ public class RuleLineController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> list2(@PathVariable(name = "organizationId") Long tenantId,
-                                  RuleLineDTO ruleLineDTO, @ApiIgnore @SortDefault(value = RuleLine.FIELD_RULE_LINE_ID,
+                                   RuleLineDTO ruleLineDTO, @ApiIgnore @SortDefault(value = RuleLine.FIELD_RULE_LINE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         ruleLineDTO.setTenantId(tenantId);
         Page<RuleLineDTO> list = ruleLineRepository.list2(pageRequest, ruleLineDTO);

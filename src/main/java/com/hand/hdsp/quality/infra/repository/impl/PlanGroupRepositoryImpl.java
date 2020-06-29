@@ -19,7 +19,7 @@ import java.util.List;
 @Component
 public class PlanGroupRepositoryImpl extends BaseRepositoryImpl<PlanGroup, PlanGroupDTO> implements PlanGroupRepository {
 
-    private PlanGroupMapper planGroupMapper;
+    private final PlanGroupMapper planGroupMapper;
 
     public PlanGroupRepositoryImpl(PlanGroupMapper planGroupMapper) {
         this.planGroupMapper = planGroupMapper;

@@ -29,7 +29,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/streaming-results")
 public class StreamingResultController extends BaseController {
 
-    private StreamingResultRepository streamingResultRepository;
+    private final StreamingResultRepository streamingResultRepository;
 
     public StreamingResultController(StreamingResultRepository streamingResultRepository) {
         this.streamingResultRepository = streamingResultRepository;
@@ -47,7 +47,7 @@ public class StreamingResultController extends BaseController {
     public ResponseEntity<?> listAll(@PathVariable(name = "organizationId") Long tenantId,
                                      StreamingResultDTO streamingResultDTO,
                                      @SortDefault(value = StreamingResult.FIELD_END_DATE,
-                                             direction = Sort.Direction.DESC)PageRequest pageRequest){
+                                             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         streamingResultDTO.setTenantId(tenantId);
         return Results.success(streamingResultRepository.listAll(streamingResultDTO, pageRequest));
     }
@@ -62,7 +62,7 @@ public class StreamingResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/result-head")
     public ResponseEntity<?> resultHead(@PathVariable(name = "organizationId") Long tenantId,
-                                        StreamingResultDTO streamingResultDTO){
+                                        StreamingResultDTO streamingResultDTO) {
         streamingResultDTO.setTenantId(tenantId);
         return Results.success(streamingResultRepository.showResultHead(streamingResultDTO));
     }
@@ -79,7 +79,7 @@ public class StreamingResultController extends BaseController {
     public ResponseEntity<?> listHistory(@PathVariable(name = "organizationId") Long tenantId,
                                          StreamingResultDTO streamingResultDTO,
                                          @SortDefault(value = StreamingResult.FIELD_START_DATE,
-                                                 direction = Sort.Direction.DESC)PageRequest pageRequest){
+                                                 direction = Sort.Direction.DESC) PageRequest pageRequest) {
         streamingResultDTO.setTenantId(tenantId);
         return Results.success(streamingResultRepository.listHistory(streamingResultDTO, pageRequest));
     }
@@ -94,7 +94,7 @@ public class StreamingResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/number-view")
     public ResponseEntity<?> numberView(@PathVariable(name = "organizationId") Long tenantId,
-                                        TimeRangeDTO timeRangeDTO){
+                                        TimeRangeDTO timeRangeDTO) {
         timeRangeDTO.setTenantId(tenantId);
         return Results.success(streamingResultRepository.numberView(timeRangeDTO));
     }
@@ -109,7 +109,7 @@ public class StreamingResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/mark-trend")
     public ResponseEntity<?> markTrend(@PathVariable(name = "organizationId") Long tenantId,
-                                       TimeRangeDTO timeRangeDTO){
+                                       TimeRangeDTO timeRangeDTO) {
         timeRangeDTO.setTenantId(tenantId);
         return Results.success(streamingResultRepository.markTrend(timeRangeDTO));
     }
@@ -124,7 +124,7 @@ public class StreamingResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/warning-trend")
     public ResponseEntity<?> warningTrend(@PathVariable(name = "organizationId") Long tenantId,
-                                          TimeRangeDTO timeRangeDTO){
+                                          TimeRangeDTO timeRangeDTO) {
         timeRangeDTO.setTenantId(tenantId);
         return Results.success(streamingResultRepository.warningTrend(timeRangeDTO));
     }
@@ -139,7 +139,7 @@ public class StreamingResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/delay-topic")
     public ResponseEntity<?> delayTopic(@PathVariable(name = "organizationId") Long tenantId,
-                                        TimeRangeDTO timeRangeDTO){
+                                        TimeRangeDTO timeRangeDTO) {
         timeRangeDTO.setTenantId(tenantId);
         return Results.success(streamingResultRepository.delayTopicInfo(timeRangeDTO));
     }
@@ -154,7 +154,7 @@ public class StreamingResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/rule-error-trend")
     public ResponseEntity<?> ruleErrorTrend(@PathVariable(name = "organizationId") Long tenantId,
-                                            TimeRangeDTO timeRangeDTO){
+                                            TimeRangeDTO timeRangeDTO) {
         timeRangeDTO.setTenantId(tenantId);
         return Results.success(streamingResultRepository.ruleErrorTrend(timeRangeDTO));
     }

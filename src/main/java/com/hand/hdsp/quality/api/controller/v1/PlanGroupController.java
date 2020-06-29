@@ -31,8 +31,8 @@ import java.util.List;
 @RequestMapping("/v1/{organizationId}/plan-groups")
 public class PlanGroupController extends BaseController {
 
-    private PlanGroupRepository planGroupRepository;
-    private PlanGroupService planGroupService;
+    private final PlanGroupRepository planGroupRepository;
+    private final PlanGroupService planGroupService;
 
     public PlanGroupController(PlanGroupRepository planGroupRepository,
                                PlanGroupService planGroupService) {

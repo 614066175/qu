@@ -32,8 +32,8 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/rule-groups")
 public class RuleGroupController extends BaseController {
 
-    private RuleGroupService ruleGroupService;
-    private RuleGroupRepository ruleGroupRepository;
+    private final RuleGroupService ruleGroupService;
+    private final RuleGroupRepository ruleGroupRepository;
 
     public RuleGroupController(RuleGroupService ruleGroupService, RuleGroupRepository ruleGroupRepository) {
         this.ruleGroupService = ruleGroupService;

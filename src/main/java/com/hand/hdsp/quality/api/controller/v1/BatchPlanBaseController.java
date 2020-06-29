@@ -31,8 +31,8 @@ import java.util.List;
 @RequestMapping("/v1/{organizationId}/batch-plan-bases")
 public class BatchPlanBaseController extends BaseController {
 
-    private BatchPlanBaseRepository batchPlanBaseRepository;
-    private BatchPlanBaseService batchPlanBaseService;
+    private final BatchPlanBaseRepository batchPlanBaseRepository;
+    private final BatchPlanBaseService batchPlanBaseService;
 
     public BatchPlanBaseController(BatchPlanBaseRepository batchPlanBaseRepository,
                                    BatchPlanBaseService batchPlanBaseService) {

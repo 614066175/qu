@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class StreamingPlanBaseRepositoryImpl extends BaseRepositoryImpl<StreamingPlanBase, StreamingPlanBaseDTO> implements StreamingPlanBaseRepository {
 
-    private StreamingPlanBaseMapper streamingPlanBaseMapper;
+    private final StreamingPlanBaseMapper streamingPlanBaseMapper;
 
     public StreamingPlanBaseRepositoryImpl(StreamingPlanBaseMapper streamingPlanBaseMapper) {
         this.streamingPlanBaseMapper = streamingPlanBaseMapper;

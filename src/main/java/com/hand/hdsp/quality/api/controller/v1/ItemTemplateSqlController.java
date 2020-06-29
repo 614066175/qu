@@ -28,7 +28,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/item-template-sqls")
 public class ItemTemplateSqlController extends BaseController {
 
-    private ItemTemplateSqlRepository itemTemplateSqlRepository;
+    private final ItemTemplateSqlRepository itemTemplateSqlRepository;
 
     public ItemTemplateSqlController(ItemTemplateSqlRepository itemTemplateSqlRepository) {
         this.itemTemplateSqlRepository = itemTemplateSqlRepository;
@@ -44,7 +44,7 @@ public class ItemTemplateSqlController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                ItemTemplateSqlDTO itemTemplateSqlDTO, @ApiIgnore @SortDefault(value = ItemTemplateSql.FIELD_SQL_ID,
+                                  ItemTemplateSqlDTO itemTemplateSqlDTO, @ApiIgnore @SortDefault(value = ItemTemplateSql.FIELD_SQL_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         itemTemplateSqlDTO.setTenantId(tenantId);
         Page<ItemTemplateSqlDTO> list = itemTemplateSqlRepository.pageAndSortDTO(pageRequest, itemTemplateSqlDTO);
@@ -96,7 +96,7 @@ public class ItemTemplateSqlController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody ItemTemplateSqlDTO itemTemplateSqlDTO) {
-                itemTemplateSqlRepository.updateDTOWhereTenant(itemTemplateSqlDTO, tenantId);
+        itemTemplateSqlRepository.updateDTOWhereTenant(itemTemplateSqlDTO, tenantId);
         return Results.success(itemTemplateSqlDTO);
     }
 
@@ -111,7 +111,7 @@ public class ItemTemplateSqlController extends BaseController {
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody ItemTemplateSqlDTO itemTemplateSqlDTO) {
-                itemTemplateSqlDTO.setTenantId(tenantId);
+        itemTemplateSqlDTO.setTenantId(tenantId);
         itemTemplateSqlRepository.deleteByPrimaryKey(itemTemplateSqlDTO);
         return Results.success();
     }

@@ -26,8 +26,8 @@ import java.util.List;
 @Slf4j
 public class RuleGroupServiceImpl implements RuleGroupService {
 
-    private RuleGroupRepository ruleGroupRepository;
-    private RuleRepository ruleRepository;
+    private final RuleGroupRepository ruleGroupRepository;
+    private final RuleRepository ruleRepository;
 
     public RuleGroupServiceImpl(RuleGroupRepository ruleGroupRepository, RuleRepository ruleRepository) {
         this.ruleGroupRepository = ruleGroupRepository;

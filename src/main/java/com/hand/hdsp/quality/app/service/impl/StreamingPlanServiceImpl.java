@@ -21,8 +21,8 @@ import java.util.List;
 @Service
 public class StreamingPlanServiceImpl implements StreamingPlanService {
 
-    private StreamingPlanBaseRepository streamingPlanBaseRepository;
-    private StreamingPlanRepository streamingPlanRepository;
+    private final StreamingPlanBaseRepository streamingPlanBaseRepository;
+    private final StreamingPlanRepository streamingPlanRepository;
 
     public StreamingPlanServiceImpl(StreamingPlanBaseRepository streamingPlanBaseRepository, StreamingPlanRepository streamingPlanRepository) {
         this.streamingPlanBaseRepository = streamingPlanBaseRepository;

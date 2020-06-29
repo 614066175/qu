@@ -27,7 +27,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/batch-plan-table-lines")
 public class BatchPlanTableLineController extends BaseController {
 
-    private BatchPlanTableLineRepository batchPlanTableLineRepository;
+    private final BatchPlanTableLineRepository batchPlanTableLineRepository;
 
     public BatchPlanTableLineController(BatchPlanTableLineRepository batchPlanTableLineRepository) {
         this.batchPlanTableLineRepository = batchPlanTableLineRepository;

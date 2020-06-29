@@ -29,7 +29,7 @@ import java.util.List;
 @RequestMapping("/v1/{organizationId}/batch-plan-field-lines")
 public class BatchPlanFieldLineController extends BaseController {
 
-    private BatchPlanFieldLineRepository batchPlanFieldLineRepository;
+    private final BatchPlanFieldLineRepository batchPlanFieldLineRepository;
 
     public BatchPlanFieldLineController(BatchPlanFieldLineRepository batchPlanFieldLineRepository) {
         this.batchPlanFieldLineRepository = batchPlanFieldLineRepository;

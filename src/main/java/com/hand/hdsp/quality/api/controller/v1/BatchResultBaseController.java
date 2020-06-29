@@ -27,7 +27,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/batch-result-bases")
 public class BatchResultBaseController extends BaseController {
 
-    private BatchResultBaseRepository batchResultBaseRepository;
+    private final BatchResultBaseRepository batchResultBaseRepository;
 
     public BatchResultBaseController(BatchResultBaseRepository batchResultBaseRepository) {
         this.batchResultBaseRepository = batchResultBaseRepository;
@@ -60,7 +60,7 @@ public class BatchResultBaseController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("result-base")
     public ResponseEntity<?> resultBase(@PathVariable(name = "organizationId") Long tenantId,
-                                        BatchResultBaseDTO batchResultBaseDTO){
+                                        BatchResultBaseDTO batchResultBaseDTO) {
         batchResultBaseDTO.setTenantId(tenantId);
         return Results.success(batchResultBaseRepository.listResultBase(batchResultBaseDTO));
     }

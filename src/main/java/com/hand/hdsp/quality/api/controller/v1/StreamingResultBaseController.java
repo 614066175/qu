@@ -27,7 +27,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/streaming-result-bases")
 public class StreamingResultBaseController extends BaseController {
 
-    private StreamingResultBaseRepository streamingResultBaseRepository;
+    private final StreamingResultBaseRepository streamingResultBaseRepository;
 
     public StreamingResultBaseController(StreamingResultBaseRepository streamingResultBaseRepository) {
         this.streamingResultBaseRepository = streamingResultBaseRepository;
@@ -60,7 +60,7 @@ public class StreamingResultBaseController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/result-base")
     public ResponseEntity<?> reseultBase(@PathVariable(name = "organizationId") Long tenantId,
-                                         StreamingResultBaseDTO streamingResultBaseDTO){
+                                         StreamingResultBaseDTO streamingResultBaseDTO) {
         streamingResultBaseDTO.setTenantId(tenantId);
         return Results.success(streamingResultBaseRepository.listResultBase(streamingResultBaseDTO));
     }

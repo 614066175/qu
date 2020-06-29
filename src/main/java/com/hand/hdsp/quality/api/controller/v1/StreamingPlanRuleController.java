@@ -27,7 +27,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/streaming-plan-rules")
 public class StreamingPlanRuleController extends BaseController {
 
-    private StreamingPlanRuleRepository streamingPlanRuleRepository;
+    private final StreamingPlanRuleRepository streamingPlanRuleRepository;
 
     public StreamingPlanRuleController(StreamingPlanRuleRepository streamingPlanRuleRepository) {
         this.streamingPlanRuleRepository = streamingPlanRuleRepository;

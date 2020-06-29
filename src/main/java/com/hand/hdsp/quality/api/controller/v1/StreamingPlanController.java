@@ -28,8 +28,8 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/streaming-plans")
 public class StreamingPlanController extends BaseController {
 
-    private StreamingPlanRepository streamingPlanRepository;
-    private StreamingPlanService streamingPlanService;
+    private final StreamingPlanRepository streamingPlanRepository;
+    private final StreamingPlanService streamingPlanService;
 
     public StreamingPlanController(StreamingPlanRepository streamingPlanRepository,
                                    StreamingPlanService streamingPlanService) {
@@ -79,7 +79,7 @@ public class StreamingPlanController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/group")
     public ResponseEntity<?> group(@PathVariable(name = "organizationId") Long tenantId,
-                                   StreamingPlanDTO streamingPlanDTO){
+                                   StreamingPlanDTO streamingPlanDTO) {
         streamingPlanDTO.setTenantId(tenantId);
         return Results.success(streamingPlanRepository.getGroupByPlanName(streamingPlanDTO));
     }
