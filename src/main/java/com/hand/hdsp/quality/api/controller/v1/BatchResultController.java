@@ -224,7 +224,7 @@ public class BatchResultController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/error-table-item-list")
-    @ProcessLovValue(targetField = {"body"})
+    @ProcessLovValue(targetField = {"body", "body.warningLevelList"})
     public ResponseEntity<?> errorTableItemList(@PathVariable(name = "organizationId") Long tenantId,
                                                 TimeRangeDTO timeRangeDTO,
                                                 PageRequest pageRequest) {

@@ -93,4 +93,16 @@ public class BatchPlanFieldDTO extends AuditDomain {
 
     @ApiModelProperty(value = "方案告警等级List")
     private List<WarningLevelDTO> warningLevelList;
+
+    private String datasourceName;
+
+    private String planName;
+
+    private String objectName;
+
+    private String datasourceSchema;
+
+    private String ruleType;
+
+    private String realName;
 }

@@ -1,11 +1,13 @@
 package com.hand.hdsp.quality.infra.vo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import lombok.*;
 import org.hzero.boot.platform.lov.annotation.LovValue;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * description
@@ -32,6 +34,8 @@ public class ErrorTableItemListVO {
 
     private String whereCondition;
 
+    private String compareWay;
+
     private String exceptionInfo;
 
     private String warningLevel;
@@ -43,4 +47,10 @@ public class ErrorTableItemListVO {
     private String planName;
 
     private Date startDate;
+
+    private String realName;
+
+    private String warningLevelJson;
+
+    private List<WarningLevelDTO> warningLevelList;
 }

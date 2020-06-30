@@ -8,6 +8,7 @@ import com.hand.hdsp.quality.api.dto.TimeRangeDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.domain.repository.BatchResultRepository;
 import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
+import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.util.TimeToString;
 import com.hand.hdsp.quality.infra.vo.*;
 import io.choerodon.core.domain.Page;
@@ -132,7 +133,11 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
     @Override
     public Page<ErrorTableItemListVO> errorTableItemList(PageRequest pageRequest, TimeRangeDTO timeRangeDTO) {
         TimeToString.timeToString(timeRangeDTO);
-        return PageHelper.doPage(pageRequest, () -> batchResultMapper.errorTableItemList(timeRangeDTO));
+        Page<ErrorTableItemListVO> pages = PageHelper.doPage(pageRequest, () -> batchResultMapper.errorTableItemList(timeRangeDTO));
+        for (ErrorTableItemListVO dto : pages.getContent()) {
+            dto.setWarningLevelList(JsonUtils.json2WarningLevel(dto.getWarningLevelJson()));
+        }
+        return pages;
     }
 
     @Override
