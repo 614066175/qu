@@ -66,10 +66,10 @@ public class RuleGroupController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
-    public ResponseEntity<?> list2(@PathVariable(name = "organizationId") Long tenantId,
-                                   RuleGroup ruleGroup) {
+    public ResponseEntity<?> listNoPage(@PathVariable(name = "organizationId") Long tenantId,
+                                        RuleGroup ruleGroup) {
         ruleGroup.setTenantId(tenantId);
-        return Results.success(ruleGroupService.selectList2(ruleGroup));
+        return Results.success(ruleGroupService.listNoPage(ruleGroup));
     }
 
     @ApiOperation(value = "规则分组表明细")

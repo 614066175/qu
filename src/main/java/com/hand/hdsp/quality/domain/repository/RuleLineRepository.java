@@ -40,5 +40,5 @@ public interface RuleLineRepository extends BaseRepository<RuleLine, RuleLineDTO
      * @param ruleLineDTO
      * @return
      */
-    Page<RuleLineDTO> list2(PageRequest pageRequest, RuleLineDTO ruleLineDTO);
+    Page<RuleLineDTO> listTenant(PageRequest pageRequest, RuleLineDTO ruleLineDTO);
 }

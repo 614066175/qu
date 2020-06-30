@@ -36,5 +36,5 @@ public interface RuleGroupService {
      * @param ruleGroup
      * @return
      */
-    List<RuleGroup> selectList2(RuleGroup ruleGroup);
+    List<RuleGroup> listNoPage(RuleGroup ruleGroup);
 }

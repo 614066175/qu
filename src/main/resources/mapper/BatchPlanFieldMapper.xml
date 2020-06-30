@@ -51,7 +51,7 @@
         </where>
 
     </select>
-    <select id="list2" resultType="com.hand.hdsp.quality.domain.entity.BatchPlanField">
+    <select id="list" resultType="com.hand.hdsp.quality.domain.entity.BatchPlanField">
         select
         *
         from

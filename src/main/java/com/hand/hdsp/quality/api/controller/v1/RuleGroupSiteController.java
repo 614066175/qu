@@ -55,7 +55,7 @@ public class RuleGroupSiteController extends BaseController {
     @ApiOperation(value = "规则分组表列表（不分页平台级）")
     @Permission(level = ResourceLevel.SITE)
     @GetMapping("/list")
-    public ResponseEntity<?> list2(RuleGroup ruleGroup) {
+    public ResponseEntity<?> listNoPage(RuleGroup ruleGroup) {
         return Results.success(ruleGroupService.selectList(ruleGroup));
     }
 

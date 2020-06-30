@@ -53,7 +53,7 @@ public class RuleGroupServiceImpl implements RuleGroupService {
     }
 
     @Override
-    public List<RuleGroup> selectList2(RuleGroup ruleGroup) {
+    public List<RuleGroup> listNoPage(RuleGroup ruleGroup) {
         List<RuleGroup> list = ruleGroupRepository.list(ruleGroup);
         list.add(RuleGroup.ROOT_RULE_GROUP);
         return list;

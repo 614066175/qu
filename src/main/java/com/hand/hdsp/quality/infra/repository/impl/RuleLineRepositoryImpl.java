@@ -37,7 +37,7 @@ public class RuleLineRepositoryImpl extends BaseRepositoryImpl<RuleLine, RuleLin
     }
 
     @Override
-    public Page<RuleLineDTO> list2(PageRequest pageRequest, RuleLineDTO ruleLineDTO) {
-        return PageHelper.doPage(pageRequest, () -> ruleLineMapper.list2(ruleLineDTO));
+    public Page<RuleLineDTO> listTenant(PageRequest pageRequest, RuleLineDTO ruleLineDTO) {
+        return PageHelper.doPage(pageRequest, () -> ruleLineMapper.listTenant(ruleLineDTO));
     }
 }

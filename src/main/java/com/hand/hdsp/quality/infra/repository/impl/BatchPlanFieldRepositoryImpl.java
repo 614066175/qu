@@ -35,7 +35,7 @@ public class BatchPlanFieldRepositoryImpl extends BaseRepositoryImpl<BatchPlanFi
 
     @Override
     public List<BatchPlanField> list(BatchPlanField batchPlanField) {
-        return batchPlanFieldMapper.list2(batchPlanField);
+        return batchPlanFieldMapper.list(batchPlanField);
     }
 
     @Override

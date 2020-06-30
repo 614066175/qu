@@ -38,7 +38,7 @@ public interface BatchPlanFieldMapper extends BaseMapper<BatchPlanField> {
      * @param batchPlanField 查询条件
      * @return
      */
-    List<BatchPlanField> list2(BatchPlanField batchPlanField);
+    List<BatchPlanField> list(BatchPlanField batchPlanField);
 
     /**
      * 字段规则-规则详情查询方法

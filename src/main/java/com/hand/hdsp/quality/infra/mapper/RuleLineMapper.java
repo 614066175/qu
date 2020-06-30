@@ -42,5 +42,5 @@ public interface RuleLineMapper extends BaseMapper<RuleLine> {
      * @return
      */
     @Select("select * from xqua_rule_line where rule_id = #{ruleId} and tenant_id in(0,#{tenantId})")
-    List<RuleLineDTO> list2(RuleLineDTO ruleLineDTO);
+    List<RuleLineDTO> listTenant(RuleLineDTO ruleLineDTO);
 }
