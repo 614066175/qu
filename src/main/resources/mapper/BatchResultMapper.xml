@@ -672,6 +672,7 @@
         join xqua_batch_result xbr on xbrb.result_id = xbr.result_id
         <where>
             and xbri.warning_level is not null
+            and xbrr.rule_type = #{ruleType}
             <include refid="custom_where">
                 <property name="mt" value="xbri"/>
             </include>

@@ -60,4 +60,6 @@ public class TimeRangeDTO extends AuditDomain {
     @ApiModelProperty(value = "表名/视图名/自定义SQL")
     private String objectName;
 
+    private String ruleType;
+
 }
