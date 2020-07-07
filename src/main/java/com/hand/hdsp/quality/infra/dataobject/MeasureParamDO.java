@@ -1,6 +1,5 @@
 package com.hand.hdsp.quality.infra.dataobject;
 
-import com.hand.hdsp.quality.api.dto.BatchPlanTableLineDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.api.dto.DatasourceDTO;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
@@ -66,8 +65,6 @@ public class MeasureParamDO {
     private BatchResultRuleDTO batchResultRuleDTO;
 
     private BatchResultItem batchResultItem;
-
-    private BatchPlanTableLineDTO batchPlanTableLineDTO;
 
     private BatchPlanRelTable batchPlanRelTable;
 

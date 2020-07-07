@@ -4,13 +4,11 @@ import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.BatchResultBaseDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.repository.BatchResultBaseRepository;
+import com.hand.hdsp.quality.infra.mapper.BatchResultBaseMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchResultItemMapper;
-import org.apache.commons.collections4.CollectionUtils;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * <p>批数据方案结果表-表信息资源库实现</p>
@@ -21,23 +19,19 @@ import java.util.List;
 public class BatchResultBaseRepositoryImpl extends BaseRepositoryImpl<BatchResultBase, BatchResultBaseDTO> implements BatchResultBaseRepository {
 
     private final BatchResultItemMapper batchResultItemMapper;
+    private final BatchResultBaseMapper batchResultBaseMapper;
 
-    public BatchResultBaseRepositoryImpl(BatchResultItemMapper batchResultItemMapper) {
+    public BatchResultBaseRepositoryImpl(BatchResultItemMapper batchResultItemMapper, BatchResultBaseMapper batchResultBaseMapper) {
         this.batchResultItemMapper = batchResultItemMapper;
+        this.batchResultBaseMapper = batchResultBaseMapper;
     }
 
     @Override
-    public List<BatchResultBaseDTO> listResultBase(BatchResultBaseDTO batchResultBaseDTO) {
-        List<BatchResultBaseDTO> batchResultBaseDTOList = this.selectDTOByCondition(
-                Condition.builder(BatchResultBase.class)
-                        .where(Sqls.custom()
-                                .andEqualTo(BatchResultBase.FIELD_RESULT_ID, batchResultBaseDTO.getResultId(), false)
-                                .andEqualTo(BatchResultBase.FIELD_TENANT_ID, batchResultBaseDTO.getTenantId(), false))
-                        .build()
-        );
-        if (CollectionUtils.isNotEmpty(batchResultBaseDTOList)) {
-            batchResultBaseDTOList.forEach(s -> s.setResultWaringVOList(batchResultItemMapper.selectWaringLevel(s)));
+    public Page<BatchResultBaseDTO> listResultBase(PageRequest pageRequest, BatchResultBaseDTO batchResultBaseDTO) {
+        Page<BatchResultBaseDTO> page = self().pageAndSortDTO(pageRequest, batchResultBaseDTO);
+        for (BatchResultBaseDTO dto : page.getContent()) {
+            dto.setResultWaringVOList(batchResultItemMapper.selectWaringLevel(dto));
         }
-        return batchResultBaseDTOList;
+        return page;
     }
 }

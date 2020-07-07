@@ -58,11 +58,12 @@ public class BatchResultBaseController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("result-base")
+    @GetMapping("/result-base")
     public ResponseEntity<?> resultBase(@PathVariable(name = "organizationId") Long tenantId,
-                                        BatchResultBaseDTO batchResultBaseDTO) {
+                                        BatchResultBaseDTO batchResultBaseDTO, @ApiIgnore @SortDefault(value = BatchResultBase.FIELD_RESULT_BASE_ID,
+            direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchResultBaseDTO.setTenantId(tenantId);
-        return Results.success(batchResultBaseRepository.listResultBase(batchResultBaseDTO));
+        return Results.success(batchResultBaseRepository.listResultBase(pageRequest, batchResultBaseDTO));
     }
 
     @ApiOperation(value = "批数据方案结果表-表信息明细")

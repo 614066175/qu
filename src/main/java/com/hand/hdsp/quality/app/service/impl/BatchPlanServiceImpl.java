@@ -362,6 +362,11 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
 
             for (BatchPlanTableConDO batchPlanTableConDO : conList) {
+                //自定义SQL特殊转换
+                if (PlanConstant.RuleType.SQL_CUSTOM.equals(batchPlanTable.getRuleType())) {
+                    batchPlanTableConDO.setCheckItem(PlanConstant.RuleType.SQL_CUSTOM);
+                    datasourceDTO.setSql(batchPlanTableConDO.getCustomSql());
+                }
 
                 Measure measure = measureCollector.getMeasure(batchPlanTableConDO.getCheckItem().toUpperCase());
 

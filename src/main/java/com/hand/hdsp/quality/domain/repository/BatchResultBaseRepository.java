@@ -4,8 +4,8 @@ import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.BatchResultBaseDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
-
-import java.util.List;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * <p>批数据方案结果表-表信息资源库</p>
@@ -20,5 +20,5 @@ public interface BatchResultBaseRepository extends BaseRepository<BatchResultBas
      * @param batchResultBaseDTO
      * @return
      */
-    List<BatchResultBaseDTO> listResultBase(BatchResultBaseDTO batchResultBaseDTO);
+    Page<BatchResultBaseDTO> listResultBase(PageRequest pageRequest, BatchResultBaseDTO batchResultBaseDTO);
 }
