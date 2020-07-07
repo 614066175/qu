@@ -18,6 +18,7 @@ import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import io.choerodon.core.exception.CommonException;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.core.util.ResponseUtils;
@@ -38,6 +39,7 @@ public class RelTableMeasure implements Measure {
 
     private final DatasourceFeign datasourceFeign;
     private final ItemTemplateSqlRepository templateSqlRepository;
+    private static final String SQL = "SELECT count(*) count FROM %s source WHERE EXISTS (SELECT 1 FROM %s.%s rel WHERE %s)";
 
     public RelTableMeasure(DatasourceFeign datasourceFeign, ItemTemplateSqlRepository templateSqlRepository) {
         this.datasourceFeign = datasourceFeign;
@@ -55,34 +57,20 @@ public class RelTableMeasure implements Measure {
         BatchResultItem batchResultItem = param.getBatchResultItem();
 
 
-        StringBuilder sql = new StringBuilder();
-        sql.append("select count(*) count from ")
-                .append(batchResultBase.getObjectName())
-                .append(" source, ");
-        if (StringUtils.isBlank(batchPlanRelTable.getWhereCondition())) {
-            sql.append(batchPlanRelTable.getRelSchema())
-                    .append(".")
-                    .append(batchPlanRelTable.getRelTableName())
-                    .append(" rel ");
-        } else {
-            sql.append("( select * from ")
-                    .append(batchPlanRelTable.getRelSchema())
-                    .append(".")
-                    .append(batchPlanRelTable.getRelTableName())
-                    .append(" where ")
-                    .append(batchPlanRelTable.getWhereCondition())
-                    .append(" ) rel ");
-        }
-        if (!relationshipDTOList.isEmpty()) {
-            sql.append(" where 1 = 1 ");
+        StringBuilder where = new StringBuilder();
+        where.append(" 1 = 1 ");
+        if (CollectionUtils.isNotEmpty(relationshipDTOList)) {
             for (RelationshipDTO relationshipDTO : relationshipDTOList) {
-                sql.append(" and source.").append(relationshipDTO.getSourceFieldName())
+                where.append(" and source.").append(relationshipDTO.getSourceFieldName())
                         .append(relationshipDTO.getRelCode())
                         .append(" rel.").append(relationshipDTO.getRelFieldName());
             }
         }
+        if (StringUtils.isNotBlank(batchPlanRelTable.getWhereCondition())) {
+            where.append(" and ").append(batchPlanRelTable.getWhereCondition());
+        }
 
-        datasourceDTO.setSql(sql.toString());
+        datasourceDTO.setSql(String.format(SQL, batchResultBase.getObjectName(), batchPlanRelTable.getRelSchema(), batchPlanRelTable.getRelTableName(), where.toString()));
         List<Map<String, Long>> result = ResponseUtils.getResponse(datasourceFeign.execSql(datasourceDTO.getTenantId(), datasourceDTO), new TypeReference<List<Map<String, Long>>>() {
         });
 
@@ -114,12 +102,25 @@ public class RelTableMeasure implements Measure {
         BigDecimal rate = a.divide(b, 2, RoundingMode.HALF_UP).multiply(new BigDecimal(100));
 
         batchResultItem.setActualValue(rate.toString() + BaseConstants.Symbol.PERCENTAGE);
+        batchResultItem.setCurrentValue(rate.toString());
         batchResultItem.setRelTableName(batchPlanRelTable.getRelTableName());
 
-        for (WarningLevelDTO warningLevelDTO : warningLevelList) {
-            if (new BigDecimal(warningLevelDTO.getStartValue()).compareTo(rate) <= 0
-                    && new BigDecimal(warningLevelDTO.getEndValue()).compareTo(rate) >= 0) {
-                batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
+        for (WarningLevelDTO warningLevel : warningLevelList) {
+            String startValue = warningLevel.getStartValue();
+            String endValue = warningLevel.getEndValue();
+            if (StringUtils.isBlank(startValue) && StringUtils.isBlank(endValue)) {
+                throw new CommonException(ErrorCode.WARNING_LEVEL_RANGE_NOT_ALL_EMPTY);
+            }
+            boolean startResult = true;
+            boolean endResult = true;
+            if (StringUtils.isNotBlank(startValue)) {
+                startResult = new BigDecimal(startValue).compareTo(rate) <= 0;
+            }
+            if (StringUtils.isNotBlank(endValue)) {
+                endResult = new BigDecimal(endValue).compareTo(rate) >= 0;
+            }
+            if (startResult && endResult) {
+                batchResultItem.setWarningLevel(warningLevel.getWarningLevel());
                 batchResultItem.setExceptionInfo("准确率（校验表与目标表匹配条数/校验表总条数）超出阈值范围");
             }
         }
