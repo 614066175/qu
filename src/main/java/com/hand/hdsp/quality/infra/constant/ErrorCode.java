@@ -44,4 +44,14 @@ public interface ErrorCode {
      * 校验项[{0}]未找到执行程序
      */
     String CHECK_ITEM_NOT_EXIST = "hdsp.xqua.error.measure.check_item.not_exist";
+
+    /**
+     * 阈值不是一个合法的日期
+     */
+    String EXPECTED_VALUE_IS_NOT_DATE = "hdsp.xqua.error.expected_value_is_not_date";
+
+    /**
+     * 告警等级范围不能同时为空！
+     */
+    String WARNING_LEVEL_RANGE_NOT_ALL_EMPTY = "hdsp.xqua.error.warning_level_range_not_all_empty";
 }
