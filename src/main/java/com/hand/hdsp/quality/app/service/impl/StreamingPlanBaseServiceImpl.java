@@ -34,7 +34,7 @@ public class StreamingPlanBaseServiceImpl implements StreamingPlanBaseService {
     public int delete(StreamingPlanBaseDTO streamingPlanBaseDTO) {
         List<StreamingPlanRuleDTO> streamingPlanRuleDTOList = streamingPlanRuleRepository.selectDTO(
                 StreamingPlanRule.FIELD_PLAN_BASE_ID, streamingPlanBaseDTO);
-        if (CollectionUtils.isNotEmpty(streamingPlanRuleDTOList )) {
+        if (CollectionUtils.isNotEmpty(streamingPlanRuleDTOList)) {
             streamingPlanRuleRepository.deleteByParentId(streamingPlanBaseDTO.getPlanBaseId());
         }
         return streamingPlanBaseRepository.deleteByPrimaryKey(streamingPlanBaseDTO);
@@ -44,11 +44,11 @@ public class StreamingPlanBaseServiceImpl implements StreamingPlanBaseService {
     @Transactional(rollbackFor = Exception.class)
     public void update(StreamingPlanBaseDTO streamingPlanBaseDTO) {
         Long tenantId = streamingPlanBaseDTO.getTenantId();
-        streamingPlanBaseRepository.updateDTOWhereTenant(streamingPlanBaseDTO, tenantId);
+        streamingPlanBaseRepository.updateDTOAllColumnWhereTenant(streamingPlanBaseDTO, tenantId);
         if (streamingPlanBaseDTO.getStreamingPlanRuleDTOList() != null) {
             for (StreamingPlanRuleDTO streamingPlanRuleDTO : streamingPlanBaseDTO.getStreamingPlanRuleDTOList()) {
                 if (AuditDomain.RecordStatus.update.equals(streamingPlanRuleDTO.get_status())) {
-                    streamingPlanRuleRepository.updateDTOWhereTenant(streamingPlanRuleDTO, tenantId);
+                    streamingPlanRuleRepository.updateDTOAllColumnWhereTenant(streamingPlanRuleDTO, tenantId);
                 } else if (AuditDomain.RecordStatus.create.equals(streamingPlanRuleDTO.get_status())) {
                     streamingPlanRuleDTO.setPlanBaseId(streamingPlanRuleDTO.getPlanBaseId());
                     streamingPlanRuleDTO.setTenantId(tenantId);

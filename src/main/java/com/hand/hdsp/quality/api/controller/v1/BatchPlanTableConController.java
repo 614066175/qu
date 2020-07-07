@@ -95,7 +95,7 @@ public class BatchPlanTableConController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanTableConDTO batchPlanTableConDTO) {
-        batchPlanTableConRepository.updateDTOWhereTenant(batchPlanTableConDTO, tenantId);
+        batchPlanTableConRepository.updateDTOAllColumnWhereTenant(batchPlanTableConDTO, tenantId);
         return Results.success(batchPlanTableConDTO);
     }
 

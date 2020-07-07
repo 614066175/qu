@@ -97,7 +97,7 @@ public class BatchPlanFieldConController extends BaseController {
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanFieldConDTO batchPlanFieldConDTO) {
         SecurityTokenHelper.validToken(batchPlanFieldConDTO, false);
-        batchPlanFieldConRepository.updateDTOWhereTenant(batchPlanFieldConDTO, tenantId);
+        batchPlanFieldConRepository.updateDTOAllColumnWhereTenant(batchPlanFieldConDTO, tenantId);
         return Results.success(batchPlanFieldConDTO);
     }
 

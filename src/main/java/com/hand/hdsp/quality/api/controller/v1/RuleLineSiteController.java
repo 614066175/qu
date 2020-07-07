@@ -73,7 +73,7 @@ public class RuleLineSiteController extends BaseController {
     @Permission(level = ResourceLevel.SITE)
     @PutMapping
     public ResponseEntity<?> update(@RequestBody RuleLine ruleLine) {
-        ruleLineRepository.updateByPrimaryKeySelective(ruleLine);
+        ruleLineRepository.updateByPrimaryKey(ruleLine);
         return Results.success(ruleLine);
     }
 

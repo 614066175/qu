@@ -113,7 +113,7 @@ public class BatchPlanFieldLineController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanFieldLineDTO batchPlanFieldLineDTO) {
-        batchPlanFieldLineRepository.updateDTOWhereTenant(batchPlanFieldLineDTO, tenantId);
+        batchPlanFieldLineRepository.updateDTOAllColumnWhereTenant(batchPlanFieldLineDTO, tenantId);
         return Results.success(batchPlanFieldLineDTO);
     }
 

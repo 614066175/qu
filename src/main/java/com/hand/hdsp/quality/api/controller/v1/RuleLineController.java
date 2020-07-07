@@ -112,7 +112,7 @@ public class RuleLineController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody RuleLineDTO ruleLineDTO) {
-        ruleLineRepository.updateDTOWhereTenant(ruleLineDTO, tenantId);
+        ruleLineRepository.updateDTOAllColumnWhereTenant(ruleLineDTO, tenantId);
         return Results.success(ruleLineDTO);
     }
 

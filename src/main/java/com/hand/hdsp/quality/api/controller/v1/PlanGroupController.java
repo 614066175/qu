@@ -133,7 +133,7 @@ public class PlanGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody PlanGroupDTO planGroupDTO) {
-        planGroupRepository.updateDTOWhereTenant(planGroupDTO, tenantId);
+        planGroupRepository.updateDTOAllColumnWhereTenant(planGroupDTO, tenantId);
         return Results.success(planGroupDTO);
     }
 

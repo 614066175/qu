@@ -47,7 +47,7 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
         List<BatchPlanTableLineDTO> batchPlanTableLineDTOList =
                 batchPlanTableLineRepository.selectDTO(
                         BatchPlanTableLine.FIELD_PLAN_RULE_ID, batchPlanTableDTO.getPlanRuleId());
-        if (CollectionUtils.isNotEmpty(batchPlanTableLineDTOList )) {
+        if (CollectionUtils.isNotEmpty(batchPlanTableLineDTOList)) {
             batchPlanTableLineRepository.deleteByPlanRuleId(batchPlanTableDTO.getPlanRuleId());
         }
         return batchPlanTableRepository.deleteByPrimaryKey(batchPlanTableDTO);
@@ -82,11 +82,11 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
     @Transactional(rollbackFor = Exception.class)
     public void update(BatchPlanTableDTO batchPlanTableDTO) {
         Long tenantId = batchPlanTableDTO.getTenantId();
-        batchPlanTableRepository.updateDTOWhereTenant(batchPlanTableDTO, tenantId);
+        batchPlanTableRepository.updateDTOAllColumnWhereTenant(batchPlanTableDTO, tenantId);
         if (batchPlanTableDTO.getBatchPlanTableLineDTOList() != null) {
             for (BatchPlanTableLineDTO batchPlanTableLineDTO : batchPlanTableDTO.getBatchPlanTableLineDTOList()) {
                 if (AuditDomain.RecordStatus.update.equals(batchPlanTableLineDTO.get_status())) {
-                    batchPlanTableLineRepository.updateDTOWhereTenant(batchPlanTableLineDTO, tenantId);
+                    batchPlanTableLineRepository.updateDTOAllColumnWhereTenant(batchPlanTableLineDTO, tenantId);
                 } else if (AuditDomain.RecordStatus.create.equals(batchPlanTableLineDTO.get_status())) {
                     batchPlanTableLineDTO.setPlanRuleId(batchPlanTableDTO.getPlanRuleId());
                     batchPlanTableLineDTO.setTenantId(tenantId);
@@ -100,7 +100,7 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
                         if (AuditDomain.RecordStatus.update.equals(batchPlanTableConDTO.get_status())) {
                             //todo 范围重叠判断
                             batchPlanTableConDTO.setWarningLevel(JsonUtils.object2Json(batchPlanTableConDTO.getWarningLevelList()));
-                            batchPlanTableConRepository.updateDTOWhereTenant(batchPlanTableConDTO, tenantId);
+                            batchPlanTableConRepository.updateDTOAllColumnWhereTenant(batchPlanTableConDTO, tenantId);
                         } else if (AuditDomain.RecordStatus.create.equals(batchPlanTableConDTO.get_status())) {
                             batchPlanTableConDTO.setPlanLineId(batchPlanTableLineDTO.getPlanLineId());
                             batchPlanTableConDTO.setTenantId(tenantId);

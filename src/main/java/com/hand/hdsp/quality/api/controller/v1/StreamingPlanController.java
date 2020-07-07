@@ -130,7 +130,7 @@ public class StreamingPlanController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody StreamingPlanDTO streamingPlanDTO) {
-        streamingPlanRepository.updateDTOWhereTenant(streamingPlanDTO, tenantId);
+        streamingPlanRepository.updateDTOAllColumnWhereTenant(streamingPlanDTO, tenantId);
         return Results.success(streamingPlanDTO);
     }
 

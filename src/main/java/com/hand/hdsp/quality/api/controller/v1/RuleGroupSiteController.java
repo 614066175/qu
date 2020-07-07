@@ -87,7 +87,7 @@ public class RuleGroupSiteController extends BaseController {
     @Permission(level = ResourceLevel.SITE)
     @PutMapping
     public ResponseEntity<?> update(@RequestBody RuleGroup ruleGroup) {
-        ruleGroupRepository.updateByPrimaryKeySelective(ruleGroup);
+        ruleGroupRepository.updateByPrimaryKey(ruleGroup);
         return Results.success(ruleGroup);
     }
 

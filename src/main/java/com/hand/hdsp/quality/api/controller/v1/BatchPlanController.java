@@ -64,7 +64,7 @@ public class BatchPlanController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> listNoPage(@PathVariable(name = "organizationId") Long tenantId,
-                                  BatchPlan batchPlan) {
+                                        BatchPlan batchPlan) {
         batchPlan.setTenantId(tenantId);
         return Results.success(batchPlanRepository.select(batchPlan));
     }
@@ -129,7 +129,7 @@ public class BatchPlanController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanDTO batchPlanDTO) {
-        batchPlanRepository.updateDTOWhereTenant(batchPlanDTO, tenantId);
+        batchPlanRepository.updateDTOAllColumnWhereTenant(batchPlanDTO, tenantId);
         return Results.success(batchPlanDTO);
     }
 

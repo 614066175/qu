@@ -96,7 +96,7 @@ public class ItemTemplateSqlController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody ItemTemplateSqlDTO itemTemplateSqlDTO) {
-        itemTemplateSqlRepository.updateDTOWhereTenant(itemTemplateSqlDTO, tenantId);
+        itemTemplateSqlRepository.updateDTOAllColumnWhereTenant(itemTemplateSqlDTO, tenantId);
         return Results.success(itemTemplateSqlDTO);
     }
 

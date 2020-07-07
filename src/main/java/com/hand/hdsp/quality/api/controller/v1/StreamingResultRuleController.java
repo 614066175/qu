@@ -110,7 +110,7 @@ public class StreamingResultRuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody StreamingResultRuleDTO streamingResultRuleDTO) {
-        streamingResultRuleRepository.updateDTOWhereTenant(streamingResultRuleDTO, tenantId);
+        streamingResultRuleRepository.updateDTOAllColumnWhereTenant(streamingResultRuleDTO, tenantId);
         return Results.success(streamingResultRuleDTO);
     }
 

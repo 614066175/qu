@@ -3,12 +3,13 @@ package com.hand.hdsp.quality.app.service.impl;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.api.dto.RuleLineDTO;
 import com.hand.hdsp.quality.app.service.RuleService;
-import com.hand.hdsp.quality.domain.entity.RuleLine;
+import com.hand.hdsp.quality.domain.entity.Rule;
 import com.hand.hdsp.quality.domain.repository.RuleLineRepository;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
+import com.hand.hdsp.quality.infra.converter.RuleConverter;
+import com.hand.hdsp.quality.infra.converter.RuleLineConverter;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import io.choerodon.mybatis.domain.AuditDomain;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,10 +25,14 @@ public class RuleServiceImpl implements RuleService {
 
     private final RuleRepository ruleRepository;
     private final RuleLineRepository ruleLineRepository;
+    private final RuleConverter ruleConverter;
+    private final RuleLineConverter ruleLineConverter;
 
-    public RuleServiceImpl(RuleRepository ruleRepository, RuleLineRepository ruleLineRepository) {
+    public RuleServiceImpl(RuleRepository ruleRepository, RuleLineRepository ruleLineRepository, RuleConverter ruleConverter, RuleLineConverter ruleLineConverter) {
         this.ruleRepository = ruleRepository;
         this.ruleLineRepository = ruleLineRepository;
+        this.ruleConverter = ruleConverter;
+        this.ruleLineConverter = ruleLineConverter;
     }
 
 
@@ -63,13 +68,13 @@ public class RuleServiceImpl implements RuleService {
     @Transactional(rollbackFor = Exception.class)
     public void update(RuleDTO ruleDTO) {
         Long tenantId = ruleDTO.getTenantId();
-        ruleRepository.updateDTOWhereTenant(ruleDTO, tenantId);
+        ruleRepository.updateDTOAllColumnWhereTenant(ruleDTO, tenantId);
         if (ruleDTO.getRuleLineDTOList() != null) {
             for (RuleLineDTO ruleLineDTO : ruleDTO.getRuleLineDTOList()) {
                 if (AuditDomain.RecordStatus.update.equals(ruleLineDTO.get_status())) {
                     //todo 范围重叠判断
                     ruleLineDTO.setWarningLevel(JsonUtils.object2Json(ruleLineDTO.getWarningLevelList()));
-                    ruleLineRepository.updateDTOWhereTenant(ruleLineDTO, tenantId);
+                    ruleLineRepository.updateDTOAllColumnWhereTenant(ruleLineDTO, tenantId);
                 } else if (AuditDomain.RecordStatus.create.equals(ruleLineDTO.get_status())) {
                     ruleLineDTO.setRuleId(ruleDTO.getRuleId());
                     ruleLineDTO.setTenantId(tenantId);
@@ -87,15 +92,16 @@ public class RuleServiceImpl implements RuleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateSite(RuleDTO ruleDTO) {
-        ruleRepository.updateByDTOPrimaryKeySelective(ruleDTO);
+        Rule rule = ruleConverter.dtoToEntity(ruleDTO);
+        ruleRepository.updateByPrimaryKey(rule);
         if (ruleDTO.getRuleLineDTOList() != null) {
             for (RuleLineDTO ruleLineDTO : ruleDTO.getRuleLineDTOList()) {
                 if (AuditDomain.RecordStatus.update.equals(ruleLineDTO.get_status())) {
                     //todo 范围重叠判断
                     ruleLineDTO.setWarningLevel(JsonUtils.object2Json(ruleLineDTO.getWarningLevelList()));
-                    ruleLineRepository.updateByDTOPrimaryKeySelective(ruleLineDTO);
+                    ruleLineRepository.updateByPrimaryKey(ruleLineConverter.dtoToEntity(ruleLineDTO));
                 } else if (AuditDomain.RecordStatus.create.equals(ruleLineDTO.get_status())) {
-                    ruleLineDTO.setRuleId(ruleDTO.getRuleId());
+                    ruleLineDTO.setRuleId(rule.getRuleId());
                     ruleLineDTO.setTenantId(0L);
                     //todo 范围重叠判断
                     ruleLineDTO.setWarningLevel(JsonUtils.object2Json(ruleLineDTO.getWarningLevelList()));
@@ -110,10 +116,7 @@ public class RuleServiceImpl implements RuleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int delete(RuleDTO ruleDTO) {
-        List<RuleLineDTO> ruleLineDTOList = ruleLineRepository.selectDTO(RuleLine.FIELD_RULE_ID, ruleDTO.getRuleId());
-        if (CollectionUtils.isNotEmpty(ruleLineDTOList )) {
-            ruleLineRepository.deleteByParentId(ruleDTO.getRuleId());
-        }
+        ruleLineRepository.deleteByParentId(ruleDTO.getRuleId());
         return ruleRepository.deleteByPrimaryKey(ruleDTO);
     }
 }

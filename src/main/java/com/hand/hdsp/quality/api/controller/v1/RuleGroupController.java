@@ -117,7 +117,7 @@ public class RuleGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody RuleGroupDTO ruleGroupDTO) {
-        ruleGroupRepository.updateDTOWhereTenant(ruleGroupDTO, tenantId);
+        ruleGroupRepository.updateDTOAllColumnWhereTenant(ruleGroupDTO, tenantId);
         return Results.success(ruleGroupDTO);
     }
 

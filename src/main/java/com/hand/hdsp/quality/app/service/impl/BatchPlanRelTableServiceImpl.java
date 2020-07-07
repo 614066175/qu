@@ -65,7 +65,7 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
         if (CollectionUtils.isNotEmpty(batchPlanRelTableDTO.getRelationshipList())) {
             batchPlanRelTableDTO.setRelationship(JsonUtils.object2Json(batchPlanRelTableDTO.getRelationshipList()));
         }
-        batchPlanRelTableRepository.updateDTOWhereTenant(batchPlanRelTableDTO, tenantId);
+        batchPlanRelTableRepository.updateDTOAllColumnWhereTenant(batchPlanRelTableDTO, tenantId);
 
     }
 

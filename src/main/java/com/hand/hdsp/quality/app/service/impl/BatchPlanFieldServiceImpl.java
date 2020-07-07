@@ -88,11 +88,11 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
     @Transactional(rollbackFor = Exception.class)
     public void update(BatchPlanFieldDTO batchPlanFieldDTO) {
         Long tenantId = batchPlanFieldDTO.getTenantId();
-        batchPlanFieldRepository.updateDTOWhereTenant(batchPlanFieldDTO, tenantId);
+        batchPlanFieldRepository.updateDTOAllColumnWhereTenant(batchPlanFieldDTO, tenantId);
         if (batchPlanFieldDTO.getBatchPlanFieldLineDTOList() != null) {
             for (BatchPlanFieldLineDTO batchPlanFieldLineDTO : batchPlanFieldDTO.getBatchPlanFieldLineDTOList()) {
                 if (AuditDomain.RecordStatus.update.equals(batchPlanFieldLineDTO.get_status())) {
-                    batchPlanFieldLineRepository.updateDTOWhereTenant(batchPlanFieldLineDTO, tenantId);
+                    batchPlanFieldLineRepository.updateDTOAllColumnWhereTenant(batchPlanFieldLineDTO, tenantId);
                 } else if (AuditDomain.RecordStatus.create.equals(batchPlanFieldLineDTO.get_status())) {
                     batchPlanFieldLineDTO.setPlanRuleId(batchPlanFieldDTO.getPlanRuleId());
                     batchPlanFieldLineDTO.setTenantId(tenantId);
@@ -104,7 +104,7 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
                     for (BatchPlanFieldConDTO con : batchPlanFieldLineDTO.getBatchPlanFieldConDTOList()) {
                         if (AuditDomain.RecordStatus.update.equals(con.get_status())) {
                             con.setWarningLevel(JsonUtils.object2Json(con.getWarningLevelList()));
-                            batchPlanFieldConRepository.updateDTOWhereTenant(con, tenantId);
+                            batchPlanFieldConRepository.updateDTOAllColumnWhereTenant(con, tenantId);
                         } else if (AuditDomain.RecordStatus.create.equals(con.get_status())) {
                             con.setWarningLevel(JsonUtils.object2Json(con.getWarningLevelList()));
                             con.setPlanLineId(batchPlanFieldLineDTO.getPlanLineId());

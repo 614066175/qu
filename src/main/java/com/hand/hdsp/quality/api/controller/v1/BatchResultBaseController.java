@@ -110,7 +110,7 @@ public class BatchResultBaseController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody BatchResultBaseDTO batchResultBaseDTO) {
-        batchResultBaseRepository.updateDTOWhereTenant(batchResultBaseDTO, tenantId);
+        batchResultBaseRepository.updateDTOAllColumnWhereTenant(batchResultBaseDTO, tenantId);
         return Results.success(batchResultBaseDTO);
     }
 
