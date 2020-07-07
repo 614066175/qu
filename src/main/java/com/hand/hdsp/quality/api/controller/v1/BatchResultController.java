@@ -145,6 +145,7 @@ public class BatchResultController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/error-rule-list")
+    @ProcessLovValue(targetField = {"body", "body.warningLevelList"})
     public ResponseEntity<?> errorRuleList(@PathVariable(name = "organizationId") Long tenantId,
                                            TimeRangeDTO timeRangeDTO,
                                            PageRequest pageRequest) {

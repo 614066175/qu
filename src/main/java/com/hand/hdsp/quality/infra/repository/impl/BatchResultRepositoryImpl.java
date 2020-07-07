@@ -153,9 +153,13 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
     }
 
     @Override
-    public List<BatchResultItemDTO> errorRuleList(PageRequest pageRequest, TimeRangeDTO timeRangeDTO) {
+    public Page<BatchResultItemDTO> errorRuleList(PageRequest pageRequest, TimeRangeDTO timeRangeDTO) {
         TimeToString.timeToString(timeRangeDTO);
-        return PageHelper.doPage(pageRequest, () -> batchResultMapper.errorRuleList(timeRangeDTO));
+        Page<BatchResultItemDTO> page = PageHelper.doPage(pageRequest, () -> batchResultMapper.errorRuleList(timeRangeDTO));
+        for (BatchResultItemDTO dto : page.getContent()) {
+            dto.setWarningLevelList(JsonUtils.json2WarningLevel(dto.getWarningLevelJson()));
+        }
+        return page;
     }
 
 }

@@ -132,4 +132,7 @@ public class BatchResultItemDTO extends AuditDomain {
 
     @ApiModelProperty(value = "方案告警等级List")
     private List<WarningLevelDTO> warningLevelList;
+
+    @ApiModelProperty(value = "表名/视图名/自定义SQL")
+    private String objectName;
 }

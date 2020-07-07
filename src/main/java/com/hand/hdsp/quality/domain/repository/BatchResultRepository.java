@@ -147,5 +147,5 @@ public interface BatchResultRepository extends BaseRepository<BatchResult, Batch
      * @param timeRangeDTO
      * @return
      */
-    List<BatchResultItemDTO> errorRuleList(PageRequest pageRequest, TimeRangeDTO timeRangeDTO);
+    Page<BatchResultItemDTO> errorRuleList(PageRequest pageRequest, TimeRangeDTO timeRangeDTO);
 }

@@ -665,7 +665,8 @@
         xbrr.rule_name,
         xbrr.rule_desc,
         xbrr.check_type,
-        xbrr.weight
+        xbrr.weight,
+        xbrb.object_name
         from xqua_batch_result_item xbri
         join xqua_batch_result_rule xbrr on xbri.result_rule_id = xbrr.result_rule_id
         join xqua_batch_result_base xbrb on xbrr.result_base_id = xbrb.result_base_id

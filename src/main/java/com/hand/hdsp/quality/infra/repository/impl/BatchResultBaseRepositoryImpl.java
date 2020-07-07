@@ -4,7 +4,6 @@ import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.BatchResultBaseDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.repository.BatchResultBaseRepository;
-import com.hand.hdsp.quality.infra.mapper.BatchResultBaseMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchResultItemMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -19,11 +18,9 @@ import org.springframework.stereotype.Component;
 public class BatchResultBaseRepositoryImpl extends BaseRepositoryImpl<BatchResultBase, BatchResultBaseDTO> implements BatchResultBaseRepository {
 
     private final BatchResultItemMapper batchResultItemMapper;
-    private final BatchResultBaseMapper batchResultBaseMapper;
 
-    public BatchResultBaseRepositoryImpl(BatchResultItemMapper batchResultItemMapper, BatchResultBaseMapper batchResultBaseMapper) {
+    public BatchResultBaseRepositoryImpl(BatchResultItemMapper batchResultItemMapper) {
         this.batchResultItemMapper = batchResultItemMapper;
-        this.batchResultBaseMapper = batchResultBaseMapper;
     }
 
     @Override
