@@ -34,6 +34,12 @@ public class ItemTemplateSqlDTO extends AuditDomain {
     @ApiModelProperty(value = "SQL")
     private String sqlContent;
 
+    @ApiModelProperty(value = "标记")
+    private String tag;
+
+    @ApiModelProperty(value = "备注")
+    private String remark;
+
     @ApiModelProperty(value = "是否启用 1-启用 0-不启用")
     @NotNull
     private Integer enabledFlag;

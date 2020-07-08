@@ -243,4 +243,12 @@ public interface PlanConstant {
         String SQL = "SQL";
 
     }
+
+    /**
+     * 模板SQL类型
+     */
+    interface TemplateSqlTag {
+        String JAVA = "Java";
+        String SQL = "SQL";
+    }
 }

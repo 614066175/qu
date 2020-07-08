@@ -4,6 +4,7 @@ import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 import lombok.*;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -19,17 +20,11 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
+@FieldNameConstants(prefix = "FIELD_")
 @VersionAudit
 @ModifyAudit
 @Table(name = "xqua_item_template_sql")
 public class ItemTemplateSql extends AuditDomain {
-
-    public static final String FIELD_SQL_ID = "sqlId";
-    public static final String FIELD_CHECK_ITEM = "checkItem";
-    public static final String FIELD_DATASOURCE_TYPE = "datasourceType";
-    public static final String FIELD_SQL_CONTENT = "sqlContent";
-    public static final String FIELD_ENABLED_FLAG = "enabledFlag";
-    public static final String FIELD_TENANT_ID = "tenantId";
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -48,6 +43,10 @@ public class ItemTemplateSql extends AuditDomain {
     private String datasourceType;
 
     private String sqlContent;
+
+    private String tag;
+
+    private String remark;
 
     private Integer enabledFlag;
 

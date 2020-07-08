@@ -7,6 +7,8 @@
         <result column="check_item" property="checkItem" jdbcType="VARCHAR"/>
         <result column="datasource_type" property="datasourceType" jdbcType="VARCHAR"/>
         <result column="sql_content" property="sqlContent" jdbcType="VARCHAR"/>
+        <result column="tag" property="tag" jdbcType="VARCHAR"/>
+        <result column="remark" property="remark" jdbcType="VARCHAR"/>
         <result column="enabled_flag" property="enabledFlag" jdbcType="DECIMAL"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
@@ -20,7 +22,8 @@
         select sql_id,
                check_item,
                datasource_type,
-               sql_content
+               sql_content,
+               tag
         from xqua_item_template_sql
         where enabled_flag = 1
           and check_item = #{checkItem}

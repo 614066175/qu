@@ -8,6 +8,7 @@ import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
 import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
+import com.hand.hdsp.quality.infra.dataobject.MeasureResultDO;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * <p>正则表达式</p>
@@ -29,6 +31,7 @@ public class RegularMeasure implements Measure {
 
     private final DatasourceFeign datasourceFeign;
     private final ItemTemplateSqlRepository templateSqlRepository;
+    private static final int DEFAULT_SIZE = 10000;
 
     public RegularMeasure(DatasourceFeign datasourceFeign,
                           ItemTemplateSqlRepository templateSqlRepository) {
@@ -49,21 +52,60 @@ public class RegularMeasure implements Measure {
                 .datasourceType(batchResultBase.getDatasourceType())
                 .build());
 
-        Map<String, String> variables = new HashMap<>(8);
-        variables.put("table", batchResultBase.getObjectName());
-        variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
-        variables.put("regexp", param.getRegularExpression());
+        // 用执行SQL的方式校验
+        if (PlanConstant.TemplateSqlTag.SQL.equals(itemTemplateSql.getTag())) {
+            Map<String, String> variables = new HashMap<>(8);
+            variables.put("table", batchResultBase.getObjectName());
+            variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
+            variables.put("regexp", param.getRegularExpression());
 
-        datasourceDTO.setSql(MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
+            datasourceDTO.setSql(MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
 
-        List<HashMap<String, String>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, String>>>() {
-        });
+            List<HashMap<String, String>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, String>>>() {
+            });
 
-        String value = response.get(0).values().toArray(new String[0])[0];
-        BigDecimal result = new BigDecimal(value);
-        if (result.compareTo(BigDecimal.ONE) != 0) {
-            batchResultItem.setWarningLevel(param.getWarningLevelList().get(0).getWarningLevel());
-            batchResultItem.setExceptionInfo("不满足正则表达式");
+            String value = response.get(0).values().toArray(new String[0])[0];
+            BigDecimal result = new BigDecimal(value);
+            if (result.compareTo(BigDecimal.ONE) != 0) {
+                batchResultItem.setWarningLevel(param.getWarningLevelList().get(0).getWarningLevel());
+                batchResultItem.setExceptionInfo("不满足正则表达式");
+            }
+        }
+        // 查询出数据在Java里校验
+        else if (PlanConstant.TemplateSqlTag.JAVA.equals(itemTemplateSql.getTag())) {
+            Map<String, String> variables = new HashMap<>(8);
+            variables.put("table", batchResultBase.getObjectName());
+            variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
+            variables.put("size", DEFAULT_SIZE + "");
+
+            Pattern pattern = Pattern.compile(param.getRegularExpression());
+
+            boolean successFlag = true;
+            for (int i = 0; ; i++) {
+                int start = i * DEFAULT_SIZE;
+                variables.put("start", start + "");
+
+                datasourceDTO.setSql(MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
+
+                List<MeasureResultDO> list = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<MeasureResultDO>>() {
+                });
+
+                for (MeasureResultDO measureResultDO : list) {
+                    if (!pattern.matcher(measureResultDO.getResult()).find()) {
+                        batchResultItem.setActualValue(measureResultDO.getResult());
+                        batchResultItem.setWarningLevel(param.getWarningLevelList().get(0).getWarningLevel());
+                        batchResultItem.setExceptionInfo("不满足正则表达式");
+                        successFlag = false;
+                        break;
+                    }
+                }
+
+                //当成功标记为false 或者 查询出来的数据量小于每页大小时（即已到最后一页了）退出
+                if (!successFlag || list.size() < DEFAULT_SIZE) {
+                    break;
+                }
+            }
+
         }
 
         return batchResultItem;

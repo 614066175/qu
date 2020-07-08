@@ -23,6 +23,10 @@ public class ItemTemplateSqlDO extends AuditDomain {
 
     private String sqlContent;
 
+    private String tag;
+
+    private String remark;
+
     private Integer enabledFlag;
 
     private Long tenantId;
