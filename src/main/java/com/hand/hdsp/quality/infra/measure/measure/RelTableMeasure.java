@@ -75,26 +75,22 @@ public class RelTableMeasure implements Measure {
         });
 
         //获取表行数
-        Long dataCount = batchResultBase.getDataCount();
-        if (dataCount == null) {
-            ItemTemplateSql itemTemplateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
-                    .checkItem(PlanConstant.CheckItem.TABLE_LINE)
-                    .datasourceType(batchResultBase.getDatasourceType())
-                    .build());
+        ItemTemplateSql itemTemplateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                .checkItem(PlanConstant.CheckItem.TABLE_LINE)
+                .datasourceType(batchResultBase.getDatasourceType())
+                .build());
 
-            Map<String, String> variables = new HashMap<>(5);
-            variables.put("table", batchResultBase.getObjectName());
+        Map<String, String> variables = new HashMap<>(5);
+        variables.put("table", batchPlanRelTable.getRelSchema() + "." + batchPlanRelTable.getRelTableName());
 
-            datasourceDTO.setSql(MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, batchResultBase.getWhereCondition()));
-            List<HashMap<String, String>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, String>>>() {
-            });
-            if (response.size() != 1 || response.get(0).size() != 1) {
-                throw new CommonException(ErrorCode.CHECK_ITEM_ONE_VALUE);
-            }
-
-            dataCount = Long.parseLong((String) response.get(0).values().toArray()[0]);
-            batchResultBase.setDataCount(dataCount);
+        datasourceDTO.setSql(MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, batchResultBase.getWhereCondition()));
+        List<HashMap<String, String>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, String>>>() {
+        });
+        if (response.size() != 1 || response.get(0).size() != 1) {
+            throw new CommonException(ErrorCode.CHECK_ITEM_ONE_VALUE);
         }
+
+        long dataCount = Long.parseLong((String) response.get(0).values().toArray()[0]);
 
         //计算准确率
         BigDecimal a = new BigDecimal(result.get(0).get("count"));
