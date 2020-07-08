@@ -35,7 +35,7 @@ public class MeasureUtil {
 
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(".*\\$\\{(.*)}.*");
     private static final String FILTER_PLACEHOLDER = "${filter}";
-    private static final String FIXED_VALUE_WARNING_INFO = "固定值满足告警";
+    private static final String FIXED_VALUE_WARNING_INFO = "固定值满足告警条件";
     private static final String FIXED_RANGE_WARNING_INFO = "固定值在告警范围内";
     private static final String VOLATILITY_WARNING_INFO = "波动率在告警范围内";
 

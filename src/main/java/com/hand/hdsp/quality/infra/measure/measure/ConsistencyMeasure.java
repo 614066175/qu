@@ -63,7 +63,7 @@ public class ConsistencyMeasure implements Measure {
 
         if (CollectionUtils.isNotEmpty(response)) {
             batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
-            batchResultItem.setExceptionInfo("不满足一致性");
+            batchResultItem.setExceptionInfo("不满足一致性（规则字段组合相同时，校验字段均相同）");
         }
 
         return batchResultItem;

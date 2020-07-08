@@ -117,7 +117,7 @@ public class RelTableMeasure implements Measure {
             }
             if (startResult && endResult) {
                 batchResultItem.setWarningLevel(warningLevel.getWarningLevel());
-                batchResultItem.setExceptionInfo("准确率（校验表与目标表匹配条数/校验表总条数）超出阈值范围");
+                batchResultItem.setExceptionInfo("准确率（目标表与源表匹配条数/源表总条数）在告警范围内");
             }
         }
 
