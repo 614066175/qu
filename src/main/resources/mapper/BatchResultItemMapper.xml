@@ -114,7 +114,6 @@
                  join xqua_batch_result_base xbrb on xbrr.result_base_id = xbrb.result_base_id
                  join xqua_batch_result xbr on xbrb.result_id = xbr.result_id
         <where>
-            and xbri.warning_level is not null
             <if test="resultId != null">
                 and xbr.result_id = #{resultId}
             </if>
