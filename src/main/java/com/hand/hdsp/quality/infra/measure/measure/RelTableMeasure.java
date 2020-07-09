@@ -39,7 +39,7 @@ public class RelTableMeasure implements Measure {
 
     private final DatasourceFeign datasourceFeign;
     private final ItemTemplateSqlRepository templateSqlRepository;
-    private static final String SQL = "SELECT count(*) count FROM %s source WHERE EXISTS (SELECT 1 FROM %s.%s rel WHERE %s)";
+    private static final String SQL = "SELECT count(*) count FROM %s source WHERE EXISTS (SELECT 1 FROM %s.%s rel WHERE %s) and %s";
 
     public RelTableMeasure(DatasourceFeign datasourceFeign, ItemTemplateSqlRepository templateSqlRepository) {
         this.datasourceFeign = datasourceFeign;
@@ -70,7 +70,7 @@ public class RelTableMeasure implements Measure {
             where.append(" and ").append(batchPlanRelTable.getWhereCondition());
         }
 
-        datasourceDTO.setSql(String.format(SQL, batchResultBase.getObjectName(), batchPlanRelTable.getRelSchema(), batchPlanRelTable.getRelTableName(), where.toString()));
+        datasourceDTO.setSql(String.format(SQL, batchResultBase.getObjectName(), batchPlanRelTable.getRelSchema(), batchPlanRelTable.getRelTableName(), where.toString(), batchResultBase.getWhereCondition()));
         List<Map<String, Long>> result = ResponseUtils.getResponse(datasourceFeign.execSql(datasourceDTO.getTenantId(), datasourceDTO), new TypeReference<List<Map<String, Long>>>() {
         });
 
@@ -83,7 +83,7 @@ public class RelTableMeasure implements Measure {
         Map<String, String> variables = new HashMap<>(5);
         variables.put("table", batchPlanRelTable.getRelSchema() + "." + batchPlanRelTable.getRelTableName());
 
-        datasourceDTO.setSql(MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, batchResultBase.getWhereCondition()));
+        datasourceDTO.setSql(MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, batchPlanRelTable.getWhereCondition()));
         List<HashMap<String, String>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, String>>>() {
         });
         if (response.size() != 1 || response.get(0).size() != 1) {
@@ -95,7 +95,10 @@ public class RelTableMeasure implements Measure {
         //计算准确率
         BigDecimal a = new BigDecimal(result.get(0).get("count"));
         BigDecimal b = BigDecimal.valueOf(dataCount);
-        BigDecimal rate = a.divide(b, 2, RoundingMode.HALF_UP).multiply(new BigDecimal(100));
+        BigDecimal rate = BigDecimal.ZERO;
+        if (BigDecimal.ZERO.compareTo(b) != 0) {
+            rate = a.divide(b, 2, RoundingMode.HALF_UP).multiply(new BigDecimal(100));
+        }
 
         batchResultItem.setActualValue(rate.toString() + BaseConstants.Symbol.PERCENTAGE);
         batchResultItem.setCurrentValue(rate.toString());
