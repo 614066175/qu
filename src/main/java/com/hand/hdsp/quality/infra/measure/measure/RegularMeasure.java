@@ -31,7 +31,6 @@ public class RegularMeasure implements Measure {
 
     private final DatasourceFeign datasourceFeign;
     private final ItemTemplateSqlRepository templateSqlRepository;
-    private static final int DEFAULT_SIZE = 10000;
 
     public RegularMeasure(DatasourceFeign datasourceFeign,
                           ItemTemplateSqlRepository templateSqlRepository) {
@@ -76,13 +75,13 @@ public class RegularMeasure implements Measure {
             Map<String, String> variables = new HashMap<>(8);
             variables.put("table", batchResultBase.getObjectName());
             variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
-            variables.put("size", DEFAULT_SIZE + "");
+            variables.put("size", PlanConstant.DEFAULT_SIZE + "");
 
             Pattern pattern = Pattern.compile(param.getRegularExpression());
 
             boolean successFlag = true;
             for (int i = 0; ; i++) {
-                int start = i * DEFAULT_SIZE;
+                int start = i * PlanConstant.DEFAULT_SIZE;
                 variables.put("start", start + "");
 
                 datasourceDTO.setSql(MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
@@ -101,7 +100,7 @@ public class RegularMeasure implements Measure {
                 }
 
                 //当成功标记为false 或者 查询出来的数据量小于每页大小时（即已到最后一页了）退出
-                if (!successFlag || list.size() < DEFAULT_SIZE) {
+                if (!successFlag || list.size() < PlanConstant.DEFAULT_SIZE) {
                     break;
                 }
             }

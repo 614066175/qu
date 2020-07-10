@@ -28,6 +28,9 @@
         where enabled_flag = 1
           and check_item = #{checkItem}
           and datasource_type in (#{datasourceType}, '_ALL')
+            <if test="tag != null">
+                and tag = #{tag}
+            </if>
         ORDER BY datasource_type
         LIMIT 1
     </select>

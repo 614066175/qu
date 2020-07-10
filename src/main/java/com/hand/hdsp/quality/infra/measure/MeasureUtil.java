@@ -218,7 +218,7 @@ public class MeasureUtil {
                     break;
                 }
                 // 如果是数字，则用 BigDecimal.compareTo 比较
-                if (NumberUtils.isParsable(value)
+                if (NumberUtils.isParsable(value) && NumberUtils.isParsable(warningLevelDTO.getExpectedValue())
                         && new BigDecimal(value).compareTo(new BigDecimal(warningLevelDTO.getExpectedValue())) == 0) {
                     batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
                     batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);

@@ -9,13 +9,14 @@ import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
 import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
+import com.hand.hdsp.quality.infra.dataobject.MeasureResultDO;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
-import com.hand.hdsp.quality.infra.measure.MeasureCollector;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.boot.platform.lov.dto.LovValueDTO;
 import org.hzero.core.base.BaseConstants;
@@ -40,60 +41,98 @@ public class FieldValueMeasure implements Measure {
 
     private final DatasourceFeign datasourceFeign;
     private final ItemTemplateSqlRepository templateSqlRepository;
-    private final MeasureCollector measureCollector;
     private final LovAdapter lovAdapter;
 
     public FieldValueMeasure(DatasourceFeign datasourceFeign,
                              ItemTemplateSqlRepository templateSqlRepository,
-                             MeasureCollector measureCollector, LovAdapter lovAdapter) {
+                             LovAdapter lovAdapter) {
         this.datasourceFeign = datasourceFeign;
         this.templateSqlRepository = templateSqlRepository;
-        this.measureCollector = measureCollector;
         this.lovAdapter = lovAdapter;
     }
 
     @Override
     public BatchResultItem check(MeasureParamDO param) {
-        // 非值集校验，继续走通用SQL逻辑
-        String countType = param.getCountType();
-        if (!PlanConstant.CountType.LOV_VALUE.equals(countType)) {
-            Measure measure = measureCollector.getMeasure(PlanConstant.COMMON_SQL);
-            return measure.check(param);
-        }
-
         Long tenantId = param.getTenantId();
         DatasourceDTO datasourceDTO = param.getDatasourceDTO();
         BatchResultBase batchResultBase = param.getBatchResultBase();
         BatchResultItem batchResultItem = param.getBatchResultItem();
-        WarningLevelDTO warningLevelDTO = param.getWarningLevelList().get(0);
-        List<LovValueDTO> lovValueDTOList = lovAdapter.queryLovValue(warningLevelDTO.getLovCode(), tenantId);
-        if (CollectionUtils.isEmpty(lovValueDTOList)) {
-            throw new CommonException("未查询到值集的值");
+        List<WarningLevelDTO> warningLevelList = param.getWarningLevelList();
+
+        // 值集校验
+        String countType = param.getCountType();
+        if (PlanConstant.CountType.LOV_VALUE.equals(countType)) {
+            WarningLevelDTO warningLevelDTO = warningLevelList.get(0);
+            List<LovValueDTO> lovValueDTOList = lovAdapter.queryLovValue(warningLevelDTO.getLovCode(), tenantId);
+            if (CollectionUtils.isEmpty(lovValueDTOList)) {
+                throw new CommonException("未查询到值集的值");
+            }
+
+            // 查询要执行的SQL
+            ItemTemplateSql itemTemplateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                    .checkItem(countType + "_" + warningLevelDTO.getCompareSymbol())
+                    .datasourceType(batchResultBase.getDatasourceType())
+                    .build());
+
+            Map<String, String> variables = new HashMap<>(8);
+            variables.put("table", batchResultBase.getObjectName());
+            variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
+            variables.put("listValue", lovValueDTOList.stream()
+                    .map(lovValueDTO -> "'" + lovValueDTO.getValue() + "'")
+                    .collect(Collectors.joining(BaseConstants.Symbol.COMMA))
+            );
+
+            datasourceDTO.setSql(MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
+
+            List<HashMap<String, Long>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, Long>>>() {
+            });
+
+            if (CollectionUtils.isNotEmpty(response)) {
+                batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
+                batchResultItem.setExceptionInfo("不满足值集校验配置");
+            }
+
+        } else if (PlanConstant.CountType.FIXED_VALUE.equals(countType)) {
+            // 查询要执行的SQL
+            ItemTemplateSql itemTemplateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                    .checkItem(param.getCheckItem())
+                    .datasourceType(batchResultBase.getDatasourceType())
+                    .build());
+
+            Map<String, String> variables = new HashMap<>(8);
+            variables.put("table", batchResultBase.getObjectName());
+            variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
+            variables.put("size", PlanConstant.DEFAULT_SIZE + "");
+
+            boolean successFlag = true;
+            for (int i = 0; ; i++) {
+                int start = i * PlanConstant.DEFAULT_SIZE;
+                variables.put("start", start + "");
+
+                datasourceDTO.setSql(MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
+
+                List<MeasureResultDO> list = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<MeasureResultDO>>() {
+                });
+                for (MeasureResultDO measureResultDO : list) {
+                    MeasureUtil.fixedCompare(param.getCompareWay(), measureResultDO.getResult(), warningLevelList, batchResultItem);
+                    if (StringUtils.isNotBlank(batchResultItem.getWarningLevel())) {
+                        batchResultItem.setActualValue(measureResultDO.getResult());
+                        successFlag = false;
+                        break;
+                    }
+                }
+
+                //当成功标记为false 或者 查询出来的数据量小于每页大小时（即已到最后一页了）退出
+                if (!successFlag || list.size() < PlanConstant.DEFAULT_SIZE) {
+                    break;
+                }
+            }
+
+
+        } else {
+            throw new CommonException("字段值校验项不支持此校验类型");
         }
 
-        // 查询要执行的SQL
-        ItemTemplateSql itemTemplateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
-                .checkItem(countType + "_" + warningLevelDTO.getCompareSymbol())
-                .datasourceType(batchResultBase.getDatasourceType())
-                .build());
-
-        Map<String, String> variables = new HashMap<>(8);
-        variables.put("table", batchResultBase.getObjectName());
-        variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
-        variables.put("listValue", lovValueDTOList.stream()
-                .map(lovValueDTO -> "'" + lovValueDTO.getValue() + "'")
-                .collect(Collectors.joining(BaseConstants.Symbol.COMMA))
-        );
-
-        datasourceDTO.setSql(MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
-
-        List<HashMap<String, Long>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, Long>>>() {
-        });
-
-        if (CollectionUtils.isNotEmpty(response)) {
-            batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
-            batchResultItem.setExceptionInfo("不满足值集校验配置");
-        }
         return batchResultItem;
     }
 }

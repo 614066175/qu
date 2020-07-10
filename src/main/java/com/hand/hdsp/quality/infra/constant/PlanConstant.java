@@ -80,6 +80,11 @@ public interface PlanConstant {
     String COMMON_SQL = "COMMON_SQL";
 
     /**
+     * 默认页大小
+     */
+    int DEFAULT_SIZE = 10000;
+
+    /**
      * 比较方式
      */
     interface CompareWay {
@@ -230,6 +235,11 @@ public interface PlanConstant {
          * 值集
          */
         String LOV_VALUE = "LOV_VALUE";
+
+        /**
+         * 固定值
+         */
+        String FIXED_VALUE = "FIXED_VALUE";
 
     }
 
