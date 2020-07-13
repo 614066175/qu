@@ -316,7 +316,7 @@
 
     <select id="errorTablePercentage" resultType="com.hand.hdsp.quality.infra.vo.ErrorTablePercentageVO">
         SELECT
-        xbrb.object_name,
+        xbpb.object_name,
         COUNT(*) count_sum
         FROM
         xqua_batch_result_rule xbrr
@@ -328,7 +328,7 @@
             <property name="mt" value="xbrr"/>
         </include>
         GROUP BY
-        xbrb.object_name
+        xbpb.object_name
     </select>
 
     <select id="errorTableItemPercentage" resultType="com.hand.hdsp.quality.infra.vo.ErrorTablePercentageVO">
@@ -365,11 +365,11 @@
 
     <select id="errorTableList" resultType="com.hand.hdsp.quality.infra.vo.ErrorTableListVO">
         SELECT
-        xbrb.object_name,
+        xbpb.object_name,
         xbpb.datasource_id,
         concat(xd.datasource_name,'.',xbpb.datasource_schema) datasource_schema,
-        COUNT(distinct xbrr.result_rule_id) exception_rule_count,
-        COUNT(distinct xbri.plan_line_id) exception_item_count,
+        COUNT(distinct xbri.result_rule_id) exception_rule_count,
+        COUNT(distinct xbri.result_rule_id,IFNULL(xbri.plan_line_id,0),IFNULL(xbri.condition_id,0)) exception_item_count,
         COUNT(*) exception_warn_count
         FROM
         xqua_batch_result_item xbri
@@ -383,7 +383,7 @@
             <property name="mt" value="xbri"/>
         </include>
         GROUP BY
-        xbrb.object_name,
+        xbpb.object_name,
         xbpb.datasource_id,
         xd.datasource_name,
         xbpb.datasource_schema

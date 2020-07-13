@@ -75,7 +75,7 @@ public class FieldValueMeasure implements Measure {
                     .build());
 
             Map<String, String> variables = new HashMap<>(8);
-            variables.put("table", batchResultBase.getObjectName());
+            variables.put("table", batchResultBase.getPackageObjectName());
             variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
             variables.put("listValue", lovValueDTOList.stream()
                     .map(lovValueDTO -> "'" + lovValueDTO.getValue() + "'")
@@ -100,7 +100,7 @@ public class FieldValueMeasure implements Measure {
                     .build());
 
             Map<String, String> variables = new HashMap<>(8);
-            variables.put("table", batchResultBase.getObjectName());
+            variables.put("table", batchResultBase.getPackageObjectName());
             variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
             variables.put("size", PlanConstant.DEFAULT_SIZE + "");
 

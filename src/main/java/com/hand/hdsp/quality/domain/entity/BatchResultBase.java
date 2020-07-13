@@ -68,4 +68,11 @@ public class BatchResultBase extends AuditDomain {
     @Transient
     private String datasourceType;
 
+    /**
+     * 封装后的objectName
+     * 自定义SQL时需要包装一层
+     */
+    @Transient
+    private String packageObjectName;
+
 }

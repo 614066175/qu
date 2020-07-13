@@ -52,7 +52,7 @@ public class ConsistencyMeasure implements Measure {
                 .build());
 
         Map<String, String> variables = new HashMap<>(8);
-        variables.put("table", batchResultBase.getObjectName());
+        variables.put("table", batchResultBase.getPackageObjectName());
         variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
         variables.put("checkField", MeasureUtil.handleFieldName(param.getCheckFieldName()));
 

@@ -70,7 +70,7 @@ public class RelTableMeasure implements Measure {
             where.append(" and ").append(batchPlanRelTable.getWhereCondition());
         }
 
-        datasourceDTO.setSql(String.format(SQL, batchResultBase.getObjectName(), batchPlanRelTable.getRelSchema(), batchPlanRelTable.getRelTableName(), where.toString(), batchResultBase.getWhereCondition()));
+        datasourceDTO.setSql(String.format(SQL, batchResultBase.getPackageObjectName(), batchPlanRelTable.getRelSchema(), batchPlanRelTable.getRelTableName(), where.toString(), batchResultBase.getWhereCondition()));
         List<Map<String, Long>> result = ResponseUtils.getResponse(datasourceFeign.execSql(datasourceDTO.getTenantId(), datasourceDTO), new TypeReference<List<Map<String, Long>>>() {
         });
 

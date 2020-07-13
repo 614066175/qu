@@ -54,7 +54,7 @@ public class RegularMeasure implements Measure {
         // 用执行SQL的方式校验
         if (PlanConstant.TemplateSqlTag.SQL.equals(itemTemplateSql.getTag())) {
             Map<String, String> variables = new HashMap<>(8);
-            variables.put("table", batchResultBase.getObjectName());
+            variables.put("table", batchResultBase.getPackageObjectName());
             variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
             variables.put("regexp", param.getRegularExpression());
 
@@ -73,7 +73,7 @@ public class RegularMeasure implements Measure {
         // 查询出数据在Java里校验
         else if (PlanConstant.TemplateSqlTag.JAVA.equals(itemTemplateSql.getTag())) {
             Map<String, String> variables = new HashMap<>(8);
-            variables.put("table", batchResultBase.getObjectName());
+            variables.put("table", batchResultBase.getPackageObjectName());
             variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
             variables.put("size", PlanConstant.DEFAULT_SIZE + "");
 

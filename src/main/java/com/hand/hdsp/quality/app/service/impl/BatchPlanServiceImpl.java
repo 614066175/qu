@@ -268,8 +268,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     .tenantId(tenantId)
                     .build();
 
+            String packageObjectName = objectName;
             if (PlanConstant.SqlType.SQL.equals(batchPlanBase.getSqlType())) {
-                objectName = String.format(SQL_PACK, objectName);
+                packageObjectName = String.format(SQL_PACK, objectName);
             }
 
             //插入批数据方案结果表-表信息
@@ -277,6 +278,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     .resultId(batchResult.getResultId())
                     .planBaseId(batchPlanBase.getPlanBaseId())
                     .objectName(objectName)
+                    .packageObjectName(packageObjectName)
                     .datasourceType(batchPlanBase.getDatasourceType())
                     .ruleCount(0L)
                     .exceptionRuleCount(0L)
