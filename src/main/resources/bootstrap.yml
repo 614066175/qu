@@ -1,8 +1,8 @@
 server:
-  port: 8457
+  port: 8547
 management:
   server:
-    port: 8458
+    port: 8548
   endpoints:
     web:
       exposure:
