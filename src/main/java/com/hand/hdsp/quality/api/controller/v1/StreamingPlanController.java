@@ -63,7 +63,7 @@ public class StreamingPlanController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
-    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<?> listWithOutPage(@PathVariable(name = "organizationId") Long tenantId,
                                   StreamingPlan streamingPlan) {
         streamingPlan.setTenantId(tenantId);
         return Results.success(streamingPlanRepository.select(streamingPlan));
