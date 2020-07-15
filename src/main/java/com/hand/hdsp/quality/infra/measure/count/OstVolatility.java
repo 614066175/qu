@@ -40,7 +40,7 @@ public class OstVolatility implements Count {
         BatchResultItem thirtyResult = countOne(param, -7);
 
         //最终结果
-        batchResultItem.setWaveRate(oneResult.getWaveRate() + "、" + sevenResult.getWaveRate() + "、" + thirtyResult.getWaveRate());
+        batchResultItem.setActualValue(oneResult.getActualValue() + "、" + sevenResult.getActualValue() + "、" + thirtyResult.getActualValue());
         if (oneResult.getWarningLevel() != null) {
             batchResultItem.setWarningLevel(oneResult.getWarningLevel());
             batchResultItem.setExceptionInfo(oneResult.getExceptionInfo());
@@ -70,7 +70,7 @@ public class OstVolatility implements Count {
                 .build());
         BatchResultItem result = new BatchResultItem();
         if (baseList.isEmpty()) {
-            result.setWaveRate("0%");
+            result.setActualValue("0%");
         } else {
             MeasureUtil.volatilityCompare(param.getCompareWay(),
                     new BigDecimal(param.getCountValue()),

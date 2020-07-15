@@ -99,7 +99,7 @@ public class MeasureUtil {
                 if (sample.compareTo(base) > 0) {
                     volatilityCompareCount(sample, base, warningLevelList, batchResultItem);
                 } else {
-                    batchResultItem.setWaveRate("0%");
+                    batchResultItem.setActualValue("0%");
                 }
                 break;
             case PlanConstant.CompareWay.DOWN_RATE:
@@ -107,7 +107,7 @@ public class MeasureUtil {
                 if (sample.compareTo(base) < 0) {
                     volatilityCompareCount(sample, base, warningLevelList, batchResultItem);
                 } else {
-                    batchResultItem.setWaveRate("0%");
+                    batchResultItem.setActualValue("0%");
                 }
                 break;
             default:
@@ -347,7 +347,7 @@ public class MeasureUtil {
                                                BatchResultItem batchResultItem) {
         BigDecimal actualValue = volatility(sample, base);
         if (actualValue != null) {
-            batchResultItem.setWaveRate(actualValue.toString() + BaseConstants.Symbol.PERCENTAGE);
+            batchResultItem.setActualValue(actualValue.toString() + BaseConstants.Symbol.PERCENTAGE);
             for (WarningLevelDTO warningLevel : warningLevelList) {
                 String startValue = warningLevel.getStartValue();
                 String endValue = warningLevel.getEndValue();
@@ -368,7 +368,7 @@ public class MeasureUtil {
                 }
             }
         } else {
-            batchResultItem.setWaveRate("0%");
+            batchResultItem.setActualValue("0%");
         }
     }
 }

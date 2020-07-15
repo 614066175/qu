@@ -33,14 +33,16 @@ public class OneDiffValue implements Count {
                 .ruleType(param.getBatchResultRuleDTO().getRuleType())
                 .measureDate(DateUtils.addDays(new Date(), -1))
                 .build());
+        BatchResultItem batchResultItem = param.getBatchResultItem();
         if (resultList.isEmpty()) {
-            return param.getBatchResultItem();
+            return batchResultItem;
         }
 
         double countValue = Double.parseDouble(param.getCountValue()) - Double.parseDouble(resultList.get(0).getCurrentValue());
         param.setCountValue(countValue + "");
+        batchResultItem.setActualValue(countValue + "");
 
-        MeasureUtil.fixedCompare(param.getCompareWay(), countValue + "", param.getWarningLevelList(), param.getBatchResultItem());
-        return param.getBatchResultItem();
+        MeasureUtil.fixedCompare(param.getCompareWay(), countValue + "", param.getWarningLevelList(), batchResultItem);
+        return batchResultItem;
     }
 }
