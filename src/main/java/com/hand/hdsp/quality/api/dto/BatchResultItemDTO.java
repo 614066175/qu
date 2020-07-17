@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
+import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -135,4 +136,16 @@ public class BatchResultItemDTO extends AuditDomain {
 
     @ApiModelProperty(value = "表名/视图名/自定义SQL")
     private String objectName;
+
+    @Transient
+    private String planName;
+
+    @Transient
+    private String warningCode;
+
+    @Transient
+    private Long datasourceId;
+
+    @Transient
+    private String datasourceSchema;
 }

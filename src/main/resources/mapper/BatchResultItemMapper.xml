@@ -150,4 +150,49 @@
         </where>
         GROUP BY xbri.warning_level
     </select>
+    <select id="assetTable" resultType="com.hand.hdsp.quality.api.dto.BatchResultItemDTO">
+        SELECT
+            xbri.result_rule_id,
+            xbri.plan_line_id,
+            xbri.condition_id,
+            xbri.check_way,
+            xbri.check_item,
+            xbri.count_type,
+            xbri.field_name,
+            xbri.check_field_name,
+            xbri.where_condition,
+            xbri.compare_way,
+            xbri.regular_expression,
+            xbri.lov_code,
+            xbri.rel_datasource_id,
+            xbri.rel_schema,
+            xbri.rel_table_name,
+            xbri.relationship,
+            xbri.warning_level_json,
+            xbri.actual_value,
+            xbri.wave_rate,
+            xbri.current_value,
+            xbri.warning_level,
+            xbri.tenant_id,
+            xbrr.rule_type,
+            xbrr.rule_code,
+            xbrr.rule_name,
+            xbrr.rule_desc,
+            xbrb.object_name,
+            xbri.creation_date,
+            xbp.plan_name,
+            xbp.warning_code
+        FROM
+            xqua_batch_result_item xbri
+            JOIN xqua_batch_result_rule xbrr ON xbri.result_rule_id = xbrr.result_rule_id
+            JOIN xqua_batch_result_base xbrb ON xbrr.result_base_id = xbrb.result_base_id
+            JOIN xqua_batch_result xbr ON xbrb.result_id = xbr.result_id
+            JOIN xqua_batch_plan_base xbpb ON xbpb.plan_base_id = xbrb.plan_base_id
+            JOIN xqua_batch_plan xbp ON xbpb.plan_id = xbp.plan_id
+        WHERE
+            xbpb.datasource_id = #{datasourceId}
+            AND xbpb.datasource_schema = #{datasourceSchema}
+            AND xbpb.sql_type = 'TABLE'
+            AND xbpb.object_name = #{objectName}
+    </select>
 </mapper>

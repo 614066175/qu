@@ -50,6 +50,14 @@ public interface BatchResultItemMapper extends BaseMapper<BatchResultItem> {
     List<BatchResultItemDTO> listRuleError(BatchResultItemDTO batchResultItemDTO);
 
     /**
+     * 关联asset_table表
+     *
+     * @param batchResultItemDTO 实体类
+     * @return List<BatchResultItemDTO> list
+     */
+    List<BatchResultItemDTO> assetTable(BatchResultItemDTO batchResultItemDTO);
+
+    /**
      * 查询每个告警等级的数量
      *
      * @param batchResultBaseDTO

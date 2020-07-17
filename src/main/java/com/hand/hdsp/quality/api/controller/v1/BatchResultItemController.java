@@ -52,6 +52,23 @@ public class BatchResultItemController extends BaseController {
         return Results.success(list);
     }
 
+    @ApiOperation(value = "关联asset_table表")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/asset-table")
+    public ResponseEntity<?> assetTable(@PathVariable(name = "organizationId") Long tenantId,
+                                  BatchResultItemDTO batchResultItemDTO, @ApiIgnore @SortDefault(value = BatchResultItem.FIELD_RESULT_ITEM_ID,
+            direction = Sort.Direction.DESC) PageRequest pageRequest) {
+        batchResultItemDTO.setTenantId(tenantId);
+        Page<BatchResultItemDTO> list = batchResultItemRepository.assetTable(pageRequest, batchResultItemDTO);
+        return Results.success(list);
+    }
+
     @ApiOperation(value = "评估结果各级规则错误信息")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",

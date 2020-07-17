@@ -42,4 +42,13 @@ public interface BatchResultItemRepository extends BaseRepository<BatchResultIte
      * @return
      */
     Page<BatchResultItemDTO> listRuleError(PageRequest pageRequest, BatchResultItemDTO batchResultItemDTO);
+
+    /**
+     * 关联asset_table表
+     *
+     * @param pageRequest        分页
+     * @param batchResultItemDTO 实体类
+     * @return Page<BatchResultItemDTO> page
+     */
+    Page<BatchResultItemDTO> assetTable(PageRequest pageRequest, BatchResultItemDTO batchResultItemDTO);
 }

@@ -46,4 +46,13 @@ public class BatchResultItemRepositoryImpl extends BaseRepositoryImpl<BatchResul
         }
         return page;
     }
+
+    @Override
+    public Page<BatchResultItemDTO> assetTable(PageRequest pageRequest, BatchResultItemDTO batchResultItemDTO) {
+        Page<BatchResultItemDTO> page = PageHelper.doPage(pageRequest, () -> batchResultItemMapper.assetTable(batchResultItemDTO));
+        for (BatchResultItemDTO dto : page.getContent()) {
+            dto.setWarningLevelList(JsonUtils.json2WarningLevel(dto.getWarningLevelJson()));
+        }
+        return page;
+    }
 }
