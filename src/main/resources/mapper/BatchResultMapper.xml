@@ -351,7 +351,6 @@
         JOIN xqua_batch_plan_base xbpb ON xbrb.plan_base_id = xbpb.plan_base_id
         WHERE
         xbri.warning_level IS NOT NULL
-        AND condition_id IS NOT NULL
         AND xbpb.object_name = #{objectName}
         <include refid="custom_where">
             <property name="mt" value="xbrr"/>
@@ -414,7 +413,6 @@
         join xqua_batch_plan xbp on xbpb.plan_id = xbp.plan_id
         WHERE
         xbri.warning_level IS NOT NULL
-        AND xbri.condition_id IS NOT NULL
         AND xbpb.object_name = #{objectName}
         <include refid="custom_where">
             <property name="mt" value="xbri"/>
