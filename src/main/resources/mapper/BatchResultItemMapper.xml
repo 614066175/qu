@@ -190,9 +190,20 @@
             JOIN xqua_batch_plan_base xbpb ON xbpb.plan_base_id = xbrb.plan_base_id
             JOIN xqua_batch_plan xbp ON xbpb.plan_id = xbp.plan_id
         WHERE
-            xbpb.datasource_id = #{datasourceId}
-            AND xbpb.datasource_schema = #{datasourceSchema}
-            AND xbpb.sql_type = 'TABLE'
-            AND xbpb.object_name = #{objectName}
+            xbpb.sql_type = 'TABLE'
+            <if test="datasourceId != null ">
+                AND xbpb.datasource_id = #{datasourceId}
+            </if>
+            <if test="datasourceSchema != null ">
+                AND xbpb.datasource_schema = #{datasourceSchema}
+            </if>
+            <if test="objectName != null ">
+                AND xbpb.object_name = #{objectName}
+            </if>
+            <if test="fieldName != null ">
+                AND FIND_IN_SET(#{fieldName},
+                REPLACE(REPLACE(REPLACE(xbri.field_name,SUBSTRING_INDEX(SUBSTRING_INDEX(xbri.field_name,')',1),'(',-1),''),
+                SUBSTRING_INDEX(SUBSTRING_INDEX(xbri.field_name,'(',-1),')',1),''),'()',''))
+            </if>
     </select>
 </mapper>
