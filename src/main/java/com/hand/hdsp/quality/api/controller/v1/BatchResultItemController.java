@@ -60,9 +60,9 @@ public class BatchResultItemController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/asset-table")
+    @PostMapping("/asset-table")
     public ResponseEntity<?> assetTable(@PathVariable(name = "organizationId") Long tenantId,
-                                  BatchResultItemDTO batchResultItemDTO, @ApiIgnore @SortDefault(value = BatchResultItem.FIELD_RESULT_ITEM_ID,
+                                        @RequestBody BatchResultItemDTO batchResultItemDTO, @ApiIgnore @SortDefault(value = BatchResultItem.FIELD_RESULT_ITEM_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchResultItemDTO.setTenantId(tenantId);
         Page<BatchResultItemDTO> list = batchResultItemRepository.assetTable(pageRequest, batchResultItemDTO);
