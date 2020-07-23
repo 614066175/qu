@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.PlanGroup;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -25,6 +27,8 @@ import javax.validation.constraints.Size;
 @EqualsAndHashCode(callSuper = false)
 @ApiModel("批数据评估方案表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@VersionAudit
+@ModifyAudit
 public class BatchPlanDTO extends AuditDomain {
 
     @ApiModelProperty("表ID，主键，供其他表做外键")

@@ -1,6 +1,8 @@
 package com.hand.hdsp.quality.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -23,6 +25,8 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 @ApiModel("批数据方案-字段规则表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@VersionAudit
+@ModifyAudit
 public class BatchPlanFieldDTO extends AuditDomain {
 
     @ApiModelProperty("表ID，主键，供其他表做外键")
