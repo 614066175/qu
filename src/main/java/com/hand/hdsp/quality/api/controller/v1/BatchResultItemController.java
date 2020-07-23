@@ -61,6 +61,7 @@ public class BatchResultItemController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/asset-table")
+    @ProcessLovValue(targetField = {"body", "body.warningLevelList"})
     public ResponseEntity<?> assetTable(@PathVariable(name = "organizationId") Long tenantId,
                                         @RequestBody BatchResultItemDTO batchResultItemDTO, @ApiIgnore @SortDefault(value = BatchResultItem.FIELD_RESULT_ITEM_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
