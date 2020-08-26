@@ -1,11 +1,9 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import com.hand.hdsp.driver.core.domain.entity.PluginDatasource;
-import com.hand.hdsp.driver.core.domain.repository.PluginDatasourceRedisRepository;
-import com.hand.hdsp.driver.core.domain.repository.PluginDatasourceRepository;
-import com.hand.hdsp.driver.core.infra.mapper.PluginDatasourceMapper;
 import com.hand.hdsp.quality.api.dto.BatchPlanRelTableDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanRelTableService;
+import com.hand.hdsp.quality.domain.entity.BatchPlanBase;
+import com.hand.hdsp.quality.domain.repository.BatchPlanBaseRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanRelTableRepository;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import io.choerodon.core.domain.Page;
@@ -23,20 +21,20 @@ import org.springframework.transaction.annotation.Transactional;
 public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
 
     private final BatchPlanRelTableRepository batchPlanRelTableRepository;
-    private final PluginDatasourceRepository pluginDatasourceRepository;
+    private final BatchPlanBaseRepository batchPlanBaseRepository;
 
     public BatchPlanRelTableServiceImpl(BatchPlanRelTableRepository batchPlanRelTableRepository,
-                                        PluginDatasourceRepository pluginDatasourceRepository) {
+                                         BatchPlanBaseRepository batchPlanBaseRepository) {
         this.batchPlanRelTableRepository = batchPlanRelTableRepository;
-        this.pluginDatasourceRepository = pluginDatasourceRepository;
+        this.batchPlanBaseRepository = batchPlanBaseRepository;
     }
 
     @Override
     public BatchPlanRelTableDTO detail(Long planRuleId) {
         BatchPlanRelTableDTO dto = batchPlanRelTableRepository.selectDTOByPrimaryKey(planRuleId);
-        PluginDatasource datasourceDTO = pluginDatasourceRepository.selectByPrimaryKey(dto.getRelDatasourceId());
-        if (datasourceDTO != null) {
-            dto.setDatasourceName(datasourceDTO.getDatasourceCode());
+        BatchPlanBase batchPlanBase = batchPlanBaseRepository.selectByPrimaryKey(dto.getPlanBaseId());
+        if (batchPlanBase != null) {
+            dto.setDatasourceName(batchPlanBase.getDatasourceCode());
         }
         dto.setWarningLevelList(JsonUtils.json2WarningLevel(dto.getWarningLevel()));
         dto.setRelationshipList(JsonUtils.json2Relationship(dto.getRelationship()));

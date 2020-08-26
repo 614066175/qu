@@ -1,8 +1,6 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 import com.hand.hdsp.core.util.JsqlParser;
-import com.hand.hdsp.driver.core.domain.repository.PluginDatasourceRepository;
-import com.hand.hdsp.driver.core.infra.context.PluginDatasourceHelper;
 import com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
 import com.hand.hdsp.quality.api.dto.ColumnDTO;
@@ -47,10 +45,6 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
     private BatchPlanRelTableRepository batchPlanRelTableRepository;
     @Resource
     private BatchResultRepository batchResultRepository;
-    @Resource
-    private PluginDatasourceRepository pluginDatasourceRepository;
-    @Resource
-    private PluginDatasourceHelper pluginDatasourceHelper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
