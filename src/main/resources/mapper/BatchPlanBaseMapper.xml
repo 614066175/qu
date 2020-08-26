@@ -90,6 +90,7 @@
                xbpb.plan_id,
                xbpb.datasource_type,
                xbpb.datasource_id,
+               xbpb.datasource_code,
                xbpb.datasource_schema,
                xbpb.sql_type,
                xbpb.object_name,
