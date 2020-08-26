@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.infra.dataobject;
 
+import com.hand.hdsp.driver.core.api.dto.PluginDatasourceDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.api.dto.DatasourceDTO;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
@@ -58,7 +59,11 @@ public class MeasureParamDO {
 
     private String regularExpression;
 
-    private DatasourceDTO datasourceDTO;
+    private PluginDatasourceDTO pluginDatasourceDTO;
+
+    private String sql;
+
+    private String schema;
 
     private BatchResultBase batchResultBase;
 

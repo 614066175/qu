@@ -1,15 +1,16 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import com.hand.hdsp.driver.core.domain.entity.PluginDatasource;
+import com.hand.hdsp.driver.core.domain.repository.PluginDatasourceRedisRepository;
+import com.hand.hdsp.driver.core.domain.repository.PluginDatasourceRepository;
+import com.hand.hdsp.driver.core.infra.mapper.PluginDatasourceMapper;
 import com.hand.hdsp.quality.api.dto.BatchPlanRelTableDTO;
-import com.hand.hdsp.quality.api.dto.DatasourceDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanRelTableService;
 import com.hand.hdsp.quality.domain.repository.BatchPlanRelTableRepository;
-import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
-import org.hzero.core.util.ResponseUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,21 +23,20 @@ import org.springframework.transaction.annotation.Transactional;
 public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
 
     private final BatchPlanRelTableRepository batchPlanRelTableRepository;
-    private final DatasourceFeign datasourceFeign;
+    private final PluginDatasourceRepository pluginDatasourceRepository;
 
     public BatchPlanRelTableServiceImpl(BatchPlanRelTableRepository batchPlanRelTableRepository,
-                                        DatasourceFeign datasourceFeign) {
+                                        PluginDatasourceRepository pluginDatasourceRepository) {
         this.batchPlanRelTableRepository = batchPlanRelTableRepository;
-        this.datasourceFeign = datasourceFeign;
+        this.pluginDatasourceRepository = pluginDatasourceRepository;
     }
 
     @Override
     public BatchPlanRelTableDTO detail(Long planRuleId) {
         BatchPlanRelTableDTO dto = batchPlanRelTableRepository.selectDTOByPrimaryKey(planRuleId);
-        datasourceFeign.detail(dto.getTenantId(), dto.getRelDatasourceId());
-        DatasourceDTO datasourceDTO = ResponseUtils.getResponse(datasourceFeign.detail(dto.getTenantId(), dto.getRelDatasourceId()), DatasourceDTO.class);
+        PluginDatasource datasourceDTO = pluginDatasourceRepository.selectByPrimaryKey(dto.getRelDatasourceId());
         if (datasourceDTO != null) {
-            dto.setDatasourceName(datasourceDTO.getDatasourceName());
+            dto.setDatasourceName(datasourceDTO.getDatasourceCode());
         }
         dto.setWarningLevelList(JsonUtils.json2WarningLevel(dto.getWarningLevel()));
         dto.setRelationshipList(JsonUtils.json2Relationship(dto.getRelationship()));

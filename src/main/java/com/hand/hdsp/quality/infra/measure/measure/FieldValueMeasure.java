@@ -1,6 +1,8 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.hand.hdsp.driver.core.app.service.DriverSessionService;
+import com.hand.hdsp.driver.core.app.service.session.DriverSession;
 import com.hand.hdsp.quality.api.dto.DatasourceDTO;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
@@ -10,7 +12,6 @@ import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.dataobject.MeasureResultDO;
-import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
@@ -21,10 +22,9 @@ import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.boot.platform.lov.dto.LovValueDTO;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.core.util.ResponseUtils;
+import org.springframework.http.ResponseEntity;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -39,25 +39,24 @@ import java.util.stream.Collectors;
 @CheckItem("FIELD_VALUE")
 public class FieldValueMeasure implements Measure {
 
-    private final DatasourceFeign datasourceFeign;
     private final ItemTemplateSqlRepository templateSqlRepository;
     private final LovAdapter lovAdapter;
+    private final DriverSessionService driverSessionService;
 
-    public FieldValueMeasure(DatasourceFeign datasourceFeign,
-                             ItemTemplateSqlRepository templateSqlRepository,
-                             LovAdapter lovAdapter) {
-        this.datasourceFeign = datasourceFeign;
+    public FieldValueMeasure(ItemTemplateSqlRepository templateSqlRepository,
+                             LovAdapter lovAdapter, DriverSessionService driverSessionService) {
         this.templateSqlRepository = templateSqlRepository;
         this.lovAdapter = lovAdapter;
+        this.driverSessionService = driverSessionService;
     }
 
     @Override
     public BatchResultItem check(MeasureParamDO param) {
         Long tenantId = param.getTenantId();
-        DatasourceDTO datasourceDTO = param.getDatasourceDTO();
         BatchResultBase batchResultBase = param.getBatchResultBase();
         BatchResultItem batchResultItem = param.getBatchResultItem();
         List<WarningLevelDTO> warningLevelList = param.getWarningLevelList();
+        DriverSession driverSession = driverSessionService.getDriverSession(tenantId, param.getPluginDatasourceDTO().getDatasourceCode());
 
         // 值集校验
         String countType = param.getCountType();
@@ -81,12 +80,8 @@ public class FieldValueMeasure implements Measure {
                     .map(lovValueDTO -> "'" + lovValueDTO.getValue() + "'")
                     .collect(Collectors.joining(BaseConstants.Symbol.COMMA))
             );
-
-            datasourceDTO.setSql(MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
-
-            List<HashMap<String, Long>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, Long>>>() {
-            });
-
+            List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(),
+                    MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
             if (CollectionUtils.isNotEmpty(response)) {
                 batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
                 batchResultItem.setExceptionInfo("存在字段值满足值集校验配置");
@@ -108,11 +103,9 @@ public class FieldValueMeasure implements Measure {
             for (int i = 0; ; i++) {
                 int start = i * PlanConstant.DEFAULT_SIZE;
                 variables.put("start", start + "");
-
-                datasourceDTO.setSql(MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
-
-                List<MeasureResultDO> list = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<MeasureResultDO>>() {
-                });
+                List<Map<String, Object>> maps = driverSession.executeOneQuery(param.getSchema(), MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
+                List<MeasureResultDO> list = new ArrayList<>();
+                maps.forEach((map) -> map.forEach((k, v) -> list.add(new MeasureResultDO(String.valueOf(v)))));
                 for (MeasureResultDO measureResultDO : list) {
                     MeasureUtil.fixedCompare(param.getCompareWay(), measureResultDO.getResult(), warningLevelList, batchResultItem);
                     if (StringUtils.isNotBlank(batchResultItem.getWarningLevel())) {

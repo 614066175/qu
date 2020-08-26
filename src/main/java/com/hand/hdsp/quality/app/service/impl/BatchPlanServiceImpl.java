@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.hand.hdsp.driver.core.api.dto.PluginDatasourceDTO;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanService;
 import com.hand.hdsp.quality.domain.entity.*;
@@ -260,13 +261,14 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         for (BatchPlanBase batchPlanBase : baseList) {
             String objectName = batchPlanBase.getObjectName();
 
-            // 构建DatasourceDTO
-            DatasourceDTO datasourceDTO = DatasourceDTO.builder()
+
+            PluginDatasourceDTO pluginDatasourceDTO=PluginDatasourceDTO.builder()
                     .datasourceId(batchPlanBase.getDatasourceId())
-                    .schema(batchPlanBase.getDatasourceSchema())
-                    .tableName(objectName)
                     .tenantId(tenantId)
+                    .datasourceCode(batchPlanBase.getDatasourceCode())
                     .build();
+
+
 
             String packageObjectName = objectName;
             if (PlanConstant.SqlType.SQL.equals(batchPlanBase.getSqlType())) {
@@ -292,9 +294,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
             batchResultBaseRepository.insertSelective(batchResultBase);
 
-            handleTableRule(tenantId, batchResultBase, datasourceDTO);
-            handleFieldRule(tenantId, batchResultBase, datasourceDTO);
-            handleRelTableRule(tenantId, batchResultBase, datasourceDTO);
+            handleTableRule(tenantId, batchResultBase, batchPlanBase.getDatasourceSchema(), pluginDatasourceDTO);
+            handleFieldRule(tenantId, batchResultBase, batchPlanBase.getDatasourceSchema(), pluginDatasourceDTO);
+            handleRelTableRule(tenantId, batchResultBase, batchPlanBase.getDatasourceSchema(), pluginDatasourceDTO);
 
             batchResultBaseRepository.updateByPrimaryKeySelective(batchResultBase);
         }
@@ -336,9 +338,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
      *
      * @param tenantId        tenantId
      * @param batchResultBase batchResultBase
-     * @param datasourceDTO   datasourceDTO
+     * @param schema   String
      */
-    private void handleTableRule(Long tenantId, BatchResultBase batchResultBase, DatasourceDTO datasourceDTO) {
+    private void handleTableRule(Long tenantId, BatchResultBase batchResultBase, String schema, PluginDatasourceDTO pluginDatasourceDTO) {
         List<BatchPlanTable> tableList = batchPlanTableRepository.select(BatchPlanTable.FIELD_PLAN_BASE_ID, batchResultBase.getPlanBaseId());
         batchResultBase.setRuleCount(batchResultBase.getRuleCount() + tableList.size());
 
@@ -367,7 +369,6 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 //自定义SQL特殊转换
                 if (PlanConstant.RuleType.SQL_CUSTOM.equals(batchPlanTable.getRuleType())) {
                     batchPlanTableConDO.setCheckItem(PlanConstant.RuleType.SQL_CUSTOM);
-                    datasourceDTO.setSql(batchPlanTableConDO.getCustomSql());
                 }
 
                 Measure measure = measureCollector.getMeasure(batchPlanTableConDO.getCheckItem().toUpperCase());
@@ -380,7 +381,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                         .compareWay(batchPlanTableConDO.getCompareWay())
                         .whereCondition(joinWhereCondition(batchPlanTableConDO.getWhereCondition(), batchResultBase.getWhereCondition()))
                         .warningLevelList(JsonUtils.json2WarningLevel(batchPlanTableConDO.getWarningLevel()))
-                        .datasourceDTO(datasourceDTO)
+                        .schema(schema)
+                        .pluginDatasourceDTO(pluginDatasourceDTO)
                         .batchResultBase(batchResultBase)
                         .batchResultRuleDTO(batchResultRuleDTO)
                         .batchResultItem(BatchResultItem.builder().build())
@@ -428,9 +430,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
      *
      * @param tenantId        tenantId
      * @param batchResultBase batchResultBase
-     * @param datasourceDTO   datasourceDTO
+     * @param schema   String
      */
-    private void handleFieldRule(Long tenantId, BatchResultBase batchResultBase, DatasourceDTO datasourceDTO) {
+    private void handleFieldRule(Long tenantId, BatchResultBase batchResultBase, String schema, PluginDatasourceDTO pluginDatasourceDTO) {
         List<BatchPlanField> fieldList = batchPlanFieldRepository.select(BatchPlanTable.FIELD_PLAN_BASE_ID, batchResultBase.getPlanBaseId());
         batchResultBase.setRuleCount(batchResultBase.getRuleCount() + fieldList.size());
 
@@ -471,7 +473,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                         .compareWay(batchPlanFieldConDO.getCompareWay())
                         .whereCondition(joinWhereCondition(batchPlanFieldConDO.getWhereCondition(), batchResultBase.getWhereCondition()))
                         .warningLevelList(JsonUtils.json2WarningLevel(batchPlanFieldConDO.getWarningLevel()))
-                        .datasourceDTO(datasourceDTO)
+                        .schema(schema)
+                        .pluginDatasourceDTO(pluginDatasourceDTO)
                         .fieldName(batchPlanFieldConDO.getFieldName())
                         .checkFieldName(batchPlanFieldConDO.getCheckFieldName())
                         .regularExpression(batchPlanFieldConDO.getRegularExpression())
@@ -533,9 +536,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
      *
      * @param tenantId        tenantId
      * @param batchResultBase batchResultBase
-     * @param datasourceDTO   datasourceDTO
+     * @param schema   String
      */
-    private void handleRelTableRule(Long tenantId, BatchResultBase batchResultBase, DatasourceDTO datasourceDTO) {
+    private void handleRelTableRule(Long tenantId, BatchResultBase batchResultBase, String schema, PluginDatasourceDTO pluginDatasourceDTO) {
 
         List<BatchPlanRelTable> relTableList = batchPlanRelTableRepository.select(BatchPlanTable.FIELD_PLAN_BASE_ID, batchResultBase.getPlanBaseId());
         batchResultBase.setRuleCount(batchResultBase.getRuleCount() + relTableList.size());
@@ -546,7 +549,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
             MeasureParamDO param = MeasureParamDO.builder()
                     .tenantId(tenantId)
-                    .datasourceDTO(datasourceDTO)
+                    .schema(schema)
+                    .pluginDatasourceDTO(pluginDatasourceDTO)
                     .batchPlanRelTable(batchPlanRelTable)
                     .batchResultBase(batchResultBase)
                     .batchResultItem(BatchResultItem.builder().build())

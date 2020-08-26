@@ -1,21 +1,18 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.core.util.JsqlParser;
+import com.hand.hdsp.driver.core.domain.entity.PluginDatasource;
+import com.hand.hdsp.driver.core.domain.repository.PluginDatasourceRepository;
 import com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
 import com.hand.hdsp.quality.api.dto.ColumnDTO;
-import com.hand.hdsp.quality.api.dto.DatasourceDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanBaseService;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
-import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
-import org.hzero.core.util.ResponseUtils;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,7 +48,7 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
     @Resource
     private BatchResultRepository batchResultRepository;
     @Resource
-    private DatasourceFeign datasourceFeign;
+    private PluginDatasourceRepository pluginDatasourceRepository;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -88,11 +85,9 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
     @Override
     public BatchPlanBaseDTO detail(Long planBaseId, Long tenantId) {
         BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseRepository.detail(planBaseId);
-        ResponseEntity<String> result = datasourceFeign.detail(tenantId, batchPlanBaseDTO.getDatasourceId());
-        DatasourceDTO datasourceDTO = ResponseUtils.getResponse(result, new TypeReference<DatasourceDTO>() {
-        });
+        PluginDatasource datasourceDTO=pluginDatasourceRepository.selectByPrimaryKey(batchPlanBaseDTO.getDatasourceId());
         if (datasourceDTO != null) {
-            batchPlanBaseDTO.setDatasourceName(datasourceDTO.getDatasourceName());
+            batchPlanBaseDTO.setDatasourceName(datasourceDTO.getDatasourceCode());
         }
         return batchPlanBaseDTO;
     }

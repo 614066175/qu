@@ -40,6 +40,9 @@ public class BatchPlanBaseDTO extends AuditDomain {
     @ApiModelProperty(value = "数据源ID")
     private Long datasourceId;
 
+    @ApiModelProperty(value = "数据源编码")
+    private String datasourceCode;
+
     @ApiModelProperty(value = "数据库")
     private String datasourceSchema;
 

@@ -1,7 +1,7 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.hand.hdsp.quality.api.dto.DatasourceDTO;
+import com.hand.hdsp.driver.core.app.service.DriverSessionService;
+import com.hand.hdsp.driver.core.app.service.session.DriverSession;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
@@ -9,13 +9,12 @@ import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.dataobject.MeasureResultDO;
-import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
-import org.hzero.core.util.ResponseUtils;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,21 +28,20 @@ import java.util.regex.Pattern;
 @CheckItem(PlanConstant.CheckWay.REGULAR)
 public class RegularMeasure implements Measure {
 
-    private final DatasourceFeign datasourceFeign;
     private final ItemTemplateSqlRepository templateSqlRepository;
+    private final DriverSessionService driverSessionService;
 
-    public RegularMeasure(DatasourceFeign datasourceFeign,
-                          ItemTemplateSqlRepository templateSqlRepository) {
-        this.datasourceFeign = datasourceFeign;
+    public RegularMeasure(ItemTemplateSqlRepository templateSqlRepository, DriverSessionService driverSessionService) {
         this.templateSqlRepository = templateSqlRepository;
+        this.driverSessionService = driverSessionService;
     }
 
     @Override
     public BatchResultItem check(MeasureParamDO param) {
         Long tenantId = param.getTenantId();
-        DatasourceDTO datasourceDTO = param.getDatasourceDTO();
         BatchResultBase batchResultBase = param.getBatchResultBase();
         BatchResultItem batchResultItem = param.getBatchResultItem();
+        DriverSession driverSession = driverSessionService.getDriverSession(tenantId, param.getPluginDatasourceDTO().getDatasourceCode());
 
         // 查询要执行的SQL
         ItemTemplateSql itemTemplateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
@@ -58,10 +56,9 @@ public class RegularMeasure implements Measure {
             variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
             variables.put("regexp", param.getRegularExpression());
 
-            datasourceDTO.setSql(MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
 
-            List<HashMap<String, String>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, String>>>() {
-            });
+            List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(),
+                    MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
 
             String value = response.get(0).values().toArray(new String[0])[0];
             BigDecimal result = new BigDecimal(value);
@@ -83,12 +80,10 @@ public class RegularMeasure implements Measure {
             for (int i = 0; ; i++) {
                 int start = i * PlanConstant.DEFAULT_SIZE;
                 variables.put("start", start + "");
-
-                datasourceDTO.setSql(MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
-
-                List<MeasureResultDO> list = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<MeasureResultDO>>() {
-                });
-
+                List<Map<String, Object>> maps = driverSession.executeOneQuery(param.getSchema(),
+                        MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
+                List<MeasureResultDO> list = new ArrayList<>();
+                maps.forEach((map) -> map.forEach((k, v) -> list.add(new MeasureResultDO(String.valueOf(v)))));
                 for (MeasureResultDO measureResultDO : list) {
                     if (!pattern.matcher(measureResultDO.getResult()).find()) {
                         batchResultItem.setActualValue(measureResultDO.getResult());

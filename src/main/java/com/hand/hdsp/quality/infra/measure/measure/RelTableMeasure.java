@@ -1,7 +1,7 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.hand.hdsp.quality.api.dto.DatasourceDTO;
+import com.hand.hdsp.driver.core.app.service.DriverSessionService;
+import com.hand.hdsp.driver.core.app.service.session.DriverSession;
 import com.hand.hdsp.quality.api.dto.RelationshipDTO;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanRelTable;
@@ -12,7 +12,6 @@ import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
-import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
@@ -21,7 +20,6 @@ import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
-import org.hzero.core.util.ResponseUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -37,13 +35,13 @@ import java.util.Map;
 @CheckItem(PlanConstant.RuleType.TABLE_RELATION)
 public class RelTableMeasure implements Measure {
 
-    private final DatasourceFeign datasourceFeign;
     private final ItemTemplateSqlRepository templateSqlRepository;
+    private final DriverSessionService driverSessionService;
     private static final String SQL = "SELECT count(*) count FROM %s source WHERE EXISTS (SELECT 1 FROM %s.%s rel WHERE %s) and %s";
 
-    public RelTableMeasure(DatasourceFeign datasourceFeign, ItemTemplateSqlRepository templateSqlRepository) {
-        this.datasourceFeign = datasourceFeign;
+    public RelTableMeasure(ItemTemplateSqlRepository templateSqlRepository, DriverSessionService driverSessionService) {
         this.templateSqlRepository = templateSqlRepository;
+        this.driverSessionService = driverSessionService;
     }
 
     @Override
@@ -51,7 +49,6 @@ public class RelTableMeasure implements Measure {
         Long tenantId = param.getTenantId();
         BatchResultBase batchResultBase = param.getBatchResultBase();
         BatchPlanRelTable batchPlanRelTable = param.getBatchPlanRelTable();
-        DatasourceDTO datasourceDTO = param.getDatasourceDTO();
         List<RelationshipDTO> relationshipDTOList = JsonUtils.json2Relationship(batchPlanRelTable.getRelationship());
         List<WarningLevelDTO> warningLevelList = JsonUtils.json2WarningLevel(batchPlanRelTable.getWarningLevel());
         BatchResultItem batchResultItem = param.getBatchResultItem();
@@ -69,11 +66,9 @@ public class RelTableMeasure implements Measure {
         if (StringUtils.isNotBlank(batchPlanRelTable.getWhereCondition())) {
             where.append(" and ").append(batchPlanRelTable.getWhereCondition());
         }
-
-        datasourceDTO.setSql(String.format(SQL, batchResultBase.getPackageObjectName(), batchPlanRelTable.getRelSchema(), batchPlanRelTable.getRelTableName(), where.toString(), batchResultBase.getWhereCondition()));
-        List<Map<String, Long>> result = ResponseUtils.getResponse(datasourceFeign.execSql(datasourceDTO.getTenantId(), datasourceDTO), new TypeReference<List<Map<String, Long>>>() {
-        });
-
+        DriverSession driverSession = driverSessionService.getDriverSession(tenantId, param.getPluginDatasourceDTO().getDatasourceCode());
+        List<Map<String, Object>> result = driverSession.executeOneQuery(param.getSchema(),
+                String.format(SQL, batchResultBase.getPackageObjectName(), batchPlanRelTable.getRelSchema(), batchPlanRelTable.getRelTableName(), where.toString(), batchResultBase.getWhereCondition()));
         //获取表行数
         ItemTemplateSql itemTemplateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
                 .checkItem(PlanConstant.CheckItem.TABLE_LINE)
@@ -83,9 +78,8 @@ public class RelTableMeasure implements Measure {
         Map<String, String> variables = new HashMap<>(5);
         variables.put("table", batchPlanRelTable.getRelSchema() + "." + batchPlanRelTable.getRelTableName());
 
-        datasourceDTO.setSql(MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, batchPlanRelTable.getWhereCondition()));
-        List<HashMap<String, String>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, String>>>() {
-        });
+        List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(),
+                MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, batchPlanRelTable.getWhereCondition()));
         if (response.size() != 1 || response.get(0).size() != 1) {
             throw new CommonException(ErrorCode.CHECK_ITEM_ONE_VALUE);
         }
@@ -93,7 +87,7 @@ public class RelTableMeasure implements Measure {
         long dataCount = Long.parseLong((String) response.get(0).values().toArray()[0]);
 
         //计算准确率
-        BigDecimal a = new BigDecimal(result.get(0).get("count"));
+        BigDecimal a = new BigDecimal((Long) result.get(0).get("count"));
         BigDecimal b = BigDecimal.valueOf(dataCount);
         BigDecimal rate = BigDecimal.ZERO;
         if (BigDecimal.ZERO.compareTo(b) != 0) {

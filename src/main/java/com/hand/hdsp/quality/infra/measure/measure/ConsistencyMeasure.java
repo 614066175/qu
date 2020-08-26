@@ -1,6 +1,8 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.hand.hdsp.driver.core.app.service.DriverSessionService;
+import com.hand.hdsp.driver.core.app.service.session.DriverSession;
 import com.hand.hdsp.quality.api.dto.DatasourceDTO;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
@@ -9,12 +11,10 @@ import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
 import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
-import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
 import org.apache.commons.collections4.CollectionUtils;
-import org.hzero.core.util.ResponseUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,19 +28,17 @@ import java.util.Map;
 @CheckItem(PlanConstant.CheckItem.CONSISTENCY)
 public class ConsistencyMeasure implements Measure {
 
-    private final DatasourceFeign datasourceFeign;
     private final ItemTemplateSqlRepository templateSqlRepository;
+    private final DriverSessionService driverSessionService;
 
-    public ConsistencyMeasure(DatasourceFeign datasourceFeign,
-                              ItemTemplateSqlRepository templateSqlRepository) {
-        this.datasourceFeign = datasourceFeign;
+    public ConsistencyMeasure(ItemTemplateSqlRepository templateSqlRepository, DriverSessionService driverSessionService) {
         this.templateSqlRepository = templateSqlRepository;
+        this.driverSessionService = driverSessionService;
     }
 
     @Override
     public BatchResultItem check(MeasureParamDO param) {
         Long tenantId = param.getTenantId();
-        DatasourceDTO datasourceDTO = param.getDatasourceDTO();
         BatchResultBase batchResultBase = param.getBatchResultBase();
         BatchResultItem batchResultItem = param.getBatchResultItem();
         WarningLevelDTO warningLevelDTO = param.getWarningLevelList().get(0);
@@ -56,10 +54,9 @@ public class ConsistencyMeasure implements Measure {
         variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
         variables.put("checkField", MeasureUtil.handleFieldName(param.getCheckFieldName()));
 
-        datasourceDTO.setSql(MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
-
-        List<HashMap<String, Long>> response = ResponseUtils.getResponse(datasourceFeign.execSql(tenantId, datasourceDTO), new TypeReference<List<HashMap<String, Long>>>() {
-        });
+        DriverSession driverSession = driverSessionService.getDriverSession(tenantId, param.getPluginDatasourceDTO().getDatasourceCode());
+        List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(),
+                MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
 
         if (CollectionUtils.isNotEmpty(response)) {
             batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
