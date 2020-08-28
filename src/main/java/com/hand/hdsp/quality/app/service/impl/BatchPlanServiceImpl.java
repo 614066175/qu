@@ -1,5 +1,11 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
+import java.util.stream.Collectors;
+import javax.annotation.Resource;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.driver.core.api.dto.PluginDatasourceDTO;
 import com.hand.hdsp.quality.api.dto.*;
@@ -38,12 +44,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.Resource;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * <p>批数据评估方案表应用服务默认实现</p>
@@ -161,6 +161,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                                 .tenantId(tenantId)
                                 .timestampType(String.format(PlanConstant.TIMESTAMP_TYPE, tenantId, batchPlanDTO.getPlanCode(), base.getPlanBaseId()))
                                 .datasourceId(base.getDatasourceId())
+                                .datasourceCode(base.getDatasourceCode())
                                 .sourceTableName(base.getObjectName())
                                 .sourceSchema(base.getDatasourceSchema())
                                 .incrementStrategy(base.getIncrementStrategy())
