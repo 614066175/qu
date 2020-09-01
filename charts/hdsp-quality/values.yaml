@@ -10,35 +10,59 @@ image:
 
 preJob:
   timeout: 300
-  image: registry.cn-hangzhou.aliyuncs.com/choerodon-tools/dbtool:0.6.1
   preConfig:
-    enable: true
+    enable: false
     configFile: application.yml
     datasource:
       url: jdbc:mysql://localhost:3306/manager_service?useUnicode=true&characterEncoding=utf-8&useSSL=false
       username: choerodon
       password: 123456
   preInitDB:
-    enable: true
+    enable: false
     datasource:
       url: jdbc:mysql://localhost:3306/demo_service?useUnicode=true&characterEncoding=utf-8&useSSL=false
       username: choerodon
       password: 123456
 
-deployment:
-  managementPort: 18081
-
 env:
   open:
-    ## register-server 
-    EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://register-server.io-choerodon:8000/eureka/
-    ## config-server
+    # 是否自动刷新服务权限
+    CHOERODON_EUREKA_EVENT_PARSE_PERMISSION: true
+    # Eureka 注册中心地址
+    EUREKA_DEFAULT_ZONE: http://register.trial:8000/eureka/
+    # 服务以IP地址注册
+    EUREKA_INSTANCE_PREFER_IP_ADDRESS: true
+    # 是否启用配置中心
     SPRING_CLOUD_CONFIG_ENABLED: true
-    SPRING_CLOUD_CONFIG_URI: http://config-server.framework:8010/
-    ## mysql
-    SPRING_DATASOURCE_URL: jdbc:mysql://localhost::3306/demo_service?useUnicode=true&characterEncoding=utf-8&useSSL=false
-    SPRING_DATASOURCE_USERNAME: choerodon
-    SPRING_DATASOURCE_PASSWORD: 123456
+    SPRING_PROFILES_ACTIVE: default
+    # 配置中心地址
+    SPRING_CLOUD_CONFIG_URI: http://config.trial:8010/
+    # 数据库地址
+    SPRING_DATASOURCE_URL: jdbc:mysql://172.23.40.31:3307/hdsp_quality?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    # 数据库用户名
+    SPRING_DATASOURCE_USERNAME: hdsp
+    # 数据库密码
+    SPRING_DATASOURCE_PASSWORD: HDSP@test123
+    # Redis host
+    SPRING_REDIS_HOST: 172.23.40.31
+    # Redis DB
+    SPRING_REDIS_DATABASE: 1
+    SPRING_REDIS_PORT: 6389
+    # Hystrix 熔断超时时间
+    HYSTRIX_COMMAND_TIMEOUT_IN_MILLISECONDS: 40000
+    # Ribbon 读取超时时间
+    RIBBON_READ_TIMEOUT: 30000
+    # Ribbon 连接超时时间
+    RIBBON_CONNECT_TIMEOUT: 3000
+    # 日志级别
+    LOG_LEVEL: info
+
+    # hdsp-quality
+
+
+    JAVA_OPTS: >
+      -Xms500m
+      -Xmx500m
 
 metrics:
   path: /prometheus
@@ -59,7 +83,10 @@ service:
   name: hdsp-quality
   enabled: false
   type: ClusterIP
-  port: 18080
+  port: 8547
+
+deployment:
+  managementPort: 8548
   
 ingress:
   enabled: false
@@ -71,7 +98,14 @@ resources:
   # lines,adjust them as necessary,and remove the curly braces after 'resources:'.
   limits:
     # cpu: 100m
-    memory: 2Gi
+    memory: 1.5Gi
   requests:
     # cpu: 100m
-    memory: 1.5Gi
+    memory: 1Gi
+
+hzero:
+  HZERO_NODE_GROUP_ID: 0
+  HZERO_PRODUCT_CODE: DEFAULT
+  HZERO_PRODUCT_VERSION_CODE: DEFAULT
+  HZERO_PRODUCT_ENV_CODE: DEFAULT
+  HZERO_SERVICE_VERSION_CODE: DEFAULT
