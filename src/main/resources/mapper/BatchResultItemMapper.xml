@@ -206,4 +206,21 @@
                 SUBSTRING_INDEX(SUBSTRING_INDEX(xbri.field_name,'(',-1),')',1),''),'()',''))
             </if>
     </select>
+    <select id="selectWarningLevelByPlanId" resultType="java.lang.String">
+            select DISTINCT(warning_level)
+            from xqua_batch_result_item xbri
+            where xbri.result_rule_id in (
+	            select result_rule_id
+	            from xqua_batch_result_rule xbrr
+	            where xbrr.result_base_id in(
+		                select result_base_id
+		                from xqua_batch_result_base xbrb
+		                where xbrb.result_id in (
+			                    select max(result_id)
+			                    from xqua_batch_result xbr
+			                    where xbr.plan_id = #{planId}
+		                )
+	            )
+             )
+    </select>
 </mapper>

@@ -32,4 +32,10 @@ public interface BatchPlanService {
      * @param planId
      */
     void generate(Long tenantId, Long planId);
+
+    /**
+     * 根据方案发送告警消息
+     * @param planId
+     */
+    void sendMessage(Long planId);
 }

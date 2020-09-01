@@ -1,5 +1,11 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
+import java.util.stream.Collectors;
+import javax.annotation.Resource;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanService;
@@ -7,6 +13,7 @@ import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
+import com.hand.hdsp.quality.infra.constant.WarningLevel;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanFieldConDO;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanTableConDO;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
@@ -15,6 +22,8 @@ import com.hand.hdsp.quality.infra.feign.DispatchJobFeign;
 import com.hand.hdsp.quality.infra.feign.DqRuleLineFeign;
 import com.hand.hdsp.quality.infra.feign.RestJobFeign;
 import com.hand.hdsp.quality.infra.feign.TimestampFeign;
+import com.hand.hdsp.quality.infra.mapper.BatchResultItemMapper;
+import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureCollector;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
@@ -26,6 +35,8 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.hzero.boot.alert.service.AlertMessageHandler;
+import org.hzero.boot.alert.vo.InboundMessage;
 import org.hzero.boot.message.MessageClient;
 import org.hzero.boot.message.entity.MessageSender;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
@@ -37,12 +48,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.Resource;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * <p>批数据评估方案表应用服务默认实现</p>
@@ -99,6 +104,12 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     private MessageClient messageClient;
     @Resource
     private TimestampFeign timestampFeign;
+    @Resource
+    private BatchResultItemMapper batchResultItemMapper;
+    @Resource
+    private BatchResultMapper batchResultMapper;
+    @Resource
+    private AlertMessageHandler alertMessageHandler;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -172,6 +183,30 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
         }
 
+    }
+
+
+    @Override
+    public void sendMessage(Long planId) {
+        HashMap<String, String> labels = new HashMap<>();
+        List<String> warningLevels = batchResultItemMapper.selectWarningLevelByPlanId(planId);
+        BatchResultDTO batchResultDTO = batchResultMapper.selectByPlanId(planId);
+        if (warningLevels.contains(WarningLevel.RED)) {
+            BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(planId);
+            if ((batchPlan != null) && (batchPlan.getWarningCode() != null)) {
+                InboundMessage inboundMessage = new InboundMessage();
+                inboundMessage.setAlertCode(String.format("%s-red", batchPlan.getWarningCode()));
+                inboundMessage.setTenantId(0L);
+                labels.put("planName", batchResultDTO.getPlanName());
+                labels.put("mark", batchResultDTO.getMark() != null ? batchResultDTO.getMark().toString() : "");
+                labels.put("startDate", DateFormatUtils.format(batchResultDTO.getStartDate(), BaseConstants.Pattern.DATETIME));
+                labels.put("status", batchResultDTO.getPlanStatus());
+                labels.put("exceptionInfo", batchResultDTO.getExceptionInfo() != null ? batchResultDTO.getExceptionInfo() : "");
+                labels.put("warningLevel", "RED");
+                inboundMessage.setLabels(labels);
+                alertMessageHandler.sendMessage(inboundMessage);
+            }
+        }
     }
 
     @Override
@@ -718,5 +753,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             return where2;
         }
         return where1 + " and " + where2;
+    }
+
+    public void setAlertMessageHandler(AlertMessageHandler alertMessageHandler) {
+        this.alertMessageHandler = alertMessageHandler;
     }
 }

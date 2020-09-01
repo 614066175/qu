@@ -64,7 +64,11 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.hzero.boot</groupId>
+            <artifactId>hzero-boot-alert</artifactId>
+            <version>${hzero.boot.version}</version>
+        </dependency>
 
     </dependencies>
 

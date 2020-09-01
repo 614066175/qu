@@ -31,6 +31,7 @@ public class BatchPlanController extends BaseController {
 
     private final BatchPlanService batchPlanService;
 
+
     public BatchPlanController(BatchPlanService batchPlanService) {
         this.batchPlanService = batchPlanService;
     }
@@ -52,6 +53,7 @@ public class BatchPlanController extends BaseController {
     public ResponseEntity<?> exec(@PathVariable("organizationId") Long tenantId,
                                   @PathVariable Long planId) {
         batchPlanService.exec(tenantId, planId);
+        batchPlanService.sendMessage(planId);
         return Results.success();
     }
 }

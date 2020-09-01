@@ -677,4 +677,23 @@
             </include>
         </where>
     </select>
+    <select id="selectByPlanId" resultType="com.hand.hdsp.quality.api.dto.BatchResultDTO">
+        SELECT
+	    xbr.result_id,
+	    xbr.plan_id,
+	    xbp.plan_name,
+        xbr.mark,
+        xbr.start_date,
+        xbr.end_date,
+        xbr.plan_status,
+        xbr.next_count_date,
+        xbr.exception_info
+        FROM
+        xqua_batch_result xbr
+        left join xqua_batch_plan xbp on xbr.plan_id=xbp.plan_id
+        WHERE
+	    xbr.result_id IN (
+	            SELECT max( result_id ) FROM xqua_batch_result WHERE plan_id = #{planId}
+	        )
+    </select>
 </mapper>
