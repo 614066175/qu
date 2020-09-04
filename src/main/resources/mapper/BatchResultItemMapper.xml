@@ -224,5 +224,6 @@
 		                )
 	            )
              )
+             and  warning_level is not NULL
     </select>
 </mapper>

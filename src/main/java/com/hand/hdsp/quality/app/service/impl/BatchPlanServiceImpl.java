@@ -191,6 +191,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     public void sendMessage(Long planId) {
         HashMap<String, String> labels = new HashMap<>();
         List<ResultWaringVO> resultWaringVOS = batchResultItemMapper.selectWarningLevelByPlanId(planId);
+        if(CollectionUtils.isEmpty(resultWaringVOS)){
+            return;
+        }
         List<String> warningLevels = resultWaringVOS.stream().map(ResultWaringVO::getWarningLevel).collect(Collectors.toList());
         BatchResultDTO batchResultDTO = batchResultMapper.selectByPlanId(planId);
         if (warningLevels.contains(WarningLevel.RED)) {
