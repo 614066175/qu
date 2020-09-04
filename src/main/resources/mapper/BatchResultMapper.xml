@@ -687,7 +687,8 @@
         xbr.end_date,
         xbr.plan_status,
         xbr.next_count_date,
-        xbr.exception_info
+        xbr.exception_info,
+        xbr.tenant_id
         FROM
         xqua_batch_result xbr
         left join xqua_batch_plan xbp on xbr.plan_id=xbp.plan_id
