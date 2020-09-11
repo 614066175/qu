@@ -19,4 +19,6 @@ public class ResultWaringVO {
     private String warningLevel;
 
     private Long countSum;
+
+    private String exceptionInfo;
 }

@@ -14,6 +14,7 @@ import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
+import com.hand.hdsp.quality.infra.constant.WarningLevel;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanFieldConDO;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanTableConDO;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
@@ -22,10 +23,13 @@ import com.hand.hdsp.quality.infra.feign.DispatchJobFeign;
 import com.hand.hdsp.quality.infra.feign.DqRuleLineFeign;
 import com.hand.hdsp.quality.infra.feign.RestJobFeign;
 import com.hand.hdsp.quality.infra.feign.TimestampFeign;
+import com.hand.hdsp.quality.infra.mapper.BatchResultItemMapper;
+import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureCollector;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.util.ParamsUtil;
+import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -33,6 +37,8 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.hzero.boot.alert.service.AlertMessageHandler;
+import org.hzero.boot.alert.vo.InboundMessage;
 import org.hzero.boot.message.MessageClient;
 import org.hzero.boot.message.entity.MessageSender;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
@@ -100,6 +106,12 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     private MessageClient messageClient;
     @Resource
     private TimestampFeign timestampFeign;
+    @Resource
+    private BatchResultItemMapper batchResultItemMapper;
+    @Resource
+    private BatchResultMapper batchResultMapper;
+    @Resource
+    private AlertMessageHandler alertMessageHandler;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -174,6 +186,78 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
         }
 
+    }
+
+
+    @Override
+    public void sendMessage(Long planId) {
+        HashMap<String, String> labels = new HashMap<>();
+        List<ResultWaringVO> resultWaringVOS = batchResultItemMapper.selectWarningLevelByPlanId(planId);
+        if(CollectionUtils.isEmpty(resultWaringVOS)){
+            return;
+        }
+        List<String> warningLevels = resultWaringVOS.stream().map(ResultWaringVO::getWarningLevel).collect(Collectors.toList());
+        BatchResultDTO batchResultDTO = batchResultMapper.selectByPlanId(planId);
+        if (warningLevels.contains(WarningLevel.RED)) {
+            BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(planId);
+            if ((batchPlan != null) && (batchPlan.getWarningCode() != null)) {
+                List<String> exceptionInfos = resultWaringVOS.stream()
+                        .filter(vo -> WarningLevel.RED.equals(vo.getWarningLevel()))
+                        .map(ResultWaringVO::getExceptionInfo)
+                        .collect(Collectors.toList());
+                InboundMessage inboundMessage = new InboundMessage();
+                inboundMessage.setAlertCode(String.format("%s-red", batchPlan.getWarningCode()));
+                inboundMessage.setTenantId(batchResultDTO.getTenantId());
+                labels.put("planName", batchResultDTO.getPlanName());
+                labels.put("mark", batchResultDTO.getMark() != null ? batchResultDTO.getMark().toString() : "");
+                labels.put("startDate", DateFormatUtils.format(batchResultDTO.getStartDate(), BaseConstants.Pattern.DATETIME));
+                labels.put("status", batchResultDTO.getPlanStatus());
+                labels.put("exceptionInfo", String.valueOf(exceptionInfos));
+                labels.put("warningLevel", WarningLevel.RED);
+                inboundMessage.setLabels(labels);
+                alertMessageHandler.sendMessage(inboundMessage);
+            }
+        }
+        if (warningLevels.contains(WarningLevel.YELLOW)) {
+            BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(planId);
+            if ((batchPlan != null) && (batchPlan.getWarningCode() != null)) {
+                List<String> exceptionInfos = resultWaringVOS.stream()
+                        .filter(vo -> WarningLevel.YELLOW.equals(vo.getWarningLevel()))
+                        .map(ResultWaringVO::getExceptionInfo)
+                        .collect(Collectors.toList());
+                InboundMessage inboundMessage = new InboundMessage();
+                inboundMessage.setAlertCode(String.format("%s-yellow", batchPlan.getWarningCode()));
+                inboundMessage.setTenantId(batchResultDTO.getTenantId());
+                labels.put("planName", batchResultDTO.getPlanName());
+                labels.put("mark", batchResultDTO.getMark() != null ? batchResultDTO.getMark().toString() : "");
+                labels.put("startDate", DateFormatUtils.format(batchResultDTO.getStartDate(), BaseConstants.Pattern.DATETIME));
+                labels.put("status", batchResultDTO.getPlanStatus());
+                labels.put("exceptionInfo", String.valueOf(exceptionInfos));
+                labels.put("warningLevel", WarningLevel.YELLOW);
+                inboundMessage.setLabels(labels);
+                alertMessageHandler.sendMessage(inboundMessage);
+            }
+        }
+        if (warningLevels.contains(WarningLevel.ORANGE)) {
+            BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(planId);
+            if ((batchPlan != null) && (batchPlan.getWarningCode() != null)) {
+                List<String> exceptionInfos = resultWaringVOS.stream()
+                        .filter(vo -> WarningLevel.ORANGE.equals(vo.getWarningLevel()))
+                        .map(ResultWaringVO::getExceptionInfo)
+                        .collect(Collectors.toList());
+                InboundMessage inboundMessage = new InboundMessage();
+                inboundMessage.setAlertCode(String.format("%s-orange", batchPlan.getWarningCode()));
+                inboundMessage.setTenantId(batchResultDTO.getTenantId());
+                labels.put("planName", batchResultDTO.getPlanName());
+                labels.put("mark", batchResultDTO.getMark() != null ? batchResultDTO.getMark().toString() : "");
+                labels.put("startDate", DateFormatUtils.format(batchResultDTO.getStartDate(), BaseConstants.Pattern.DATETIME));
+                labels.put("status", batchResultDTO.getPlanStatus());
+                labels.put("exceptionInfo", String.valueOf(exceptionInfos));
+                labels.put("warningLevel", WarningLevel.ORANGE);
+                inboundMessage.setLabels(labels);
+                alertMessageHandler.sendMessage(inboundMessage);
+            }
+        }
     }
 
     @Override
@@ -723,5 +807,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             return where2;
         }
         return where1 + " and " + where2;
+    }
+
+    public void setAlertMessageHandler(AlertMessageHandler alertMessageHandler) {
+        this.alertMessageHandler = alertMessageHandler;
     }
 }

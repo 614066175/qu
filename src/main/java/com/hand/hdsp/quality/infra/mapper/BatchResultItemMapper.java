@@ -1,13 +1,14 @@
 package com.hand.hdsp.quality.infra.mapper;
 
+import java.util.List;
+
 import com.hand.hdsp.quality.api.dto.BatchResultBaseDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultItemDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.infra.dataobject.BatchResultItemDO;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import io.choerodon.mybatis.common.BaseMapper;
-
-import java.util.List;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>批数据方案结果表-校验项信息Mapper</p>
@@ -64,4 +65,11 @@ public interface BatchResultItemMapper extends BaseMapper<BatchResultItem> {
      * @return
      */
     List<ResultWaringVO> selectWaringLevel(BatchResultBaseDTO batchResultBaseDTO);
+
+    /**
+     * 根据planI查询告警等级
+     * @param planId
+     * @return
+     */
+    List<ResultWaringVO> selectWarningLevelByPlanId(@Param("planId") Long planId);
 }

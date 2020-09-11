@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.hand.hdsp</groupId>
         <artifactId>hdsp-parent</artifactId>
-        <version>1.4.0-SNAPSHOT</version>
+        <version>1.4.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>hdsp-quality</artifactId>
@@ -63,6 +63,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hzero.boot</groupId>
+            <artifactId>hzero-boot-alert</artifactId>
+            <version>${hzero.boot.version}</version>
         </dependency>
         <dependency>
             <groupId>com.hand.hdsp</groupId>
