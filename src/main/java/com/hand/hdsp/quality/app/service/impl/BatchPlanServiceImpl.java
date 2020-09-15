@@ -46,6 +46,8 @@ import org.hzero.boot.platform.lov.dto.LovValueDTO;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.core.message.MessageAccessor;
 import org.hzero.core.util.ResponseUtils;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -92,6 +94,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     private BatchResultRuleRepository batchResultRuleRepository;
     @Resource
     private BatchResultItemRepository batchResultItemRepository;
+    @Resource
+    private BatchPlanTableLineRepository batchPlanTableLineRepository;
     @Resource
     private MeasureCollector measureCollector;
     @Resource
@@ -193,7 +197,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     public void sendMessage(Long planId) {
         HashMap<String, String> labels = new HashMap<>();
         List<ResultWaringVO> resultWaringVOS = batchResultItemMapper.selectWarningLevelByPlanId(planId);
-        if(CollectionUtils.isEmpty(resultWaringVOS)){
+        if (CollectionUtils.isEmpty(resultWaringVOS)) {
             return;
         }
         List<String> warningLevels = resultWaringVOS.stream().map(ResultWaringVO::getWarningLevel).collect(Collectors.toList());
@@ -347,12 +351,11 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             String objectName = batchPlanBase.getObjectName();
 
 
-            PluginDatasourceDTO pluginDatasourceDTO=PluginDatasourceDTO.builder()
+            PluginDatasourceDTO pluginDatasourceDTO = PluginDatasourceDTO.builder()
                     .datasourceId(batchPlanBase.getDatasourceId())
                     .tenantId(tenantId)
                     .datasourceCode(batchPlanBase.getDatasourceCode())
                     .build();
-
 
 
             String packageObjectName = objectName;
@@ -423,7 +426,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
      *
      * @param tenantId        tenantId
      * @param batchResultBase batchResultBase
-     * @param schema   String
+     * @param schema          String
      */
     private void handleTableRule(Long tenantId, BatchResultBase batchResultBase, String schema, PluginDatasourceDTO pluginDatasourceDTO) {
         List<BatchPlanTable> tableList = batchPlanTableRepository.select(BatchPlanTable.FIELD_PLAN_BASE_ID, batchResultBase.getPlanBaseId());
@@ -450,12 +453,16 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     .build();
             batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
 
+            List<BatchPlanTableLine> batchPlanTableLines = null;
             for (BatchPlanTableConDO batchPlanTableConDO : conList) {
                 //自定义SQL特殊转换
                 if (PlanConstant.RuleType.SQL_CUSTOM.equals(batchPlanTable.getRuleType())) {
                     batchPlanTableConDO.setCheckItem(PlanConstant.RuleType.SQL_CUSTOM);
+                    batchPlanTableLines = batchPlanTableLineRepository.selectByCondition(Condition.builder(BatchPlanTableLine.class)
+                            .where(Sqls.custom().andEqualTo(BatchPlanTableLine.FIELD_PLAN_RULE_ID, batchPlanTable.getPlanRuleId()))
+                            .build()
+                    );
                 }
-
                 Measure measure = measureCollector.getMeasure(batchPlanTableConDO.getCheckItem().toUpperCase());
 
                 MeasureParamDO param = MeasureParamDO.builder()
@@ -472,6 +479,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                         .batchResultRuleDTO(batchResultRuleDTO)
                         .batchResultItem(BatchResultItem.builder().build())
                         .build();
+                if (batchPlanTableLines != null) {
+                    param.setSql(batchPlanTableLines.get(0).getCustomSql());
+                }
                 measure.check(param);
 
                 BatchResultItem batchResultItem = param.getBatchResultItem();
@@ -515,7 +525,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
      *
      * @param tenantId        tenantId
      * @param batchResultBase batchResultBase
-     * @param schema   String
+     * @param schema          String
      */
     private void handleFieldRule(Long tenantId, BatchResultBase batchResultBase, String schema, PluginDatasourceDTO pluginDatasourceDTO) {
         List<BatchPlanField> fieldList = batchPlanFieldRepository.select(BatchPlanTable.FIELD_PLAN_BASE_ID, batchResultBase.getPlanBaseId());
@@ -621,7 +631,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
      *
      * @param tenantId        tenantId
      * @param batchResultBase batchResultBase
-     * @param schema   String
+     * @param schema          String
      */
     private void handleRelTableRule(Long tenantId, BatchResultBase batchResultBase, String schema, PluginDatasourceDTO pluginDatasourceDTO) {
 
