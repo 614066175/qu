@@ -2,10 +2,7 @@ package com.hand.hdsp.quality.infra.measure.measure;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import com.hand.hdsp.driver.core.app.service.DriverSessionService;
 import com.hand.hdsp.driver.core.app.service.session.DriverSession;
@@ -89,7 +86,7 @@ public class RelTableMeasure implements Measure {
         long dataCount = Long.parseLong(String.valueOf(response.get(0).values().toArray()[0]));
 
         //计算准确率
-        BigDecimal a = new BigDecimal(String.valueOf(result.get(0).get("COUNT")));
+        BigDecimal a = new BigDecimal(String.valueOf(Optional.ofNullable(result.get(0).get("count")).orElse(result.get(0).get("COUNT"))));
         BigDecimal b = BigDecimal.valueOf(dataCount);
         BigDecimal rate = BigDecimal.ZERO;
         if (BigDecimal.ZERO.compareTo(b) != 0) {
