@@ -12,6 +12,7 @@ import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanService;
 import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
+import com.hand.hdsp.quality.infra.constant.AlertTemplate;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.constant.WarningLevel;
@@ -67,6 +68,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     private static final String JOB_HEADER = "{\"content-type\": \"application/json\"}";
     private static final String JOB_SETTING_INFO = "{\"authSettingInfo\":{\"auth\":\"OAUTH2\",\"grantType\":\"PASSWORD\"},\"apiSettingInfo\":{\"retryEnabled\":false},\"callbackApiSettingInfo\":{\"enabled\":false}}";
     private static final String SQL_PACK = " (%s) sql_pack";
+    private static final String ALERT_CODE="%s-%s";
     @Value("${hdsp.route-data.service-short}")
     private String serviceShort;
     @Value("${hdsp.route-data.service-id}")
@@ -195,7 +197,6 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
     @Override
     public void sendMessage(Long planId) {
-        HashMap<String, String> labels = new HashMap<>();
         List<ResultWaringVO> resultWaringVOS = batchResultItemMapper.selectWarningLevelByPlanId(planId);
         if (CollectionUtils.isEmpty(resultWaringVOS)) {
             return;
@@ -203,64 +204,35 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         List<String> warningLevels = resultWaringVOS.stream().map(ResultWaringVO::getWarningLevel).collect(Collectors.toList());
         BatchResultDTO batchResultDTO = batchResultMapper.selectByPlanId(planId);
         if (warningLevels.contains(WarningLevel.RED)) {
-            BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(planId);
-            if ((batchPlan != null) && (batchPlan.getWarningCode() != null)) {
-                List<String> exceptionInfos = resultWaringVOS.stream()
-                        .filter(vo -> WarningLevel.RED.equals(vo.getWarningLevel()))
-                        .map(ResultWaringVO::getExceptionInfo)
-                        .collect(Collectors.toList());
-                InboundMessage inboundMessage = new InboundMessage();
-                inboundMessage.setAlertCode(String.format("%s-red", batchPlan.getWarningCode()));
-                inboundMessage.setTenantId(batchResultDTO.getTenantId());
-                labels.put("planName", batchResultDTO.getPlanName());
-                labels.put("mark", batchResultDTO.getMark() != null ? batchResultDTO.getMark().toString() : "");
-                labels.put("startDate", DateFormatUtils.format(batchResultDTO.getStartDate(), BaseConstants.Pattern.DATETIME));
-                labels.put("status", batchResultDTO.getPlanStatus());
-                labels.put("exceptionInfo", String.valueOf(exceptionInfos));
-                labels.put("warningLevel", WarningLevel.RED);
-                inboundMessage.setLabels(labels);
-                alertMessageHandler.sendMessage(inboundMessage);
-            }
+            doSend(planId,resultWaringVOS,batchResultDTO,WarningLevel.RED);
         }
         if (warningLevels.contains(WarningLevel.YELLOW)) {
-            BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(planId);
-            if ((batchPlan != null) && (batchPlan.getWarningCode() != null)) {
-                List<String> exceptionInfos = resultWaringVOS.stream()
-                        .filter(vo -> WarningLevel.YELLOW.equals(vo.getWarningLevel()))
-                        .map(ResultWaringVO::getExceptionInfo)
-                        .collect(Collectors.toList());
-                InboundMessage inboundMessage = new InboundMessage();
-                inboundMessage.setAlertCode(String.format("%s-yellow", batchPlan.getWarningCode()));
-                inboundMessage.setTenantId(batchResultDTO.getTenantId());
-                labels.put("planName", batchResultDTO.getPlanName());
-                labels.put("mark", batchResultDTO.getMark() != null ? batchResultDTO.getMark().toString() : "");
-                labels.put("startDate", DateFormatUtils.format(batchResultDTO.getStartDate(), BaseConstants.Pattern.DATETIME));
-                labels.put("status", batchResultDTO.getPlanStatus());
-                labels.put("exceptionInfo", String.valueOf(exceptionInfos));
-                labels.put("warningLevel", WarningLevel.YELLOW);
-                inboundMessage.setLabels(labels);
-                alertMessageHandler.sendMessage(inboundMessage);
-            }
+            doSend(planId,resultWaringVOS,batchResultDTO,WarningLevel.YELLOW);
         }
         if (warningLevels.contains(WarningLevel.ORANGE)) {
-            BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(planId);
-            if ((batchPlan != null) && (batchPlan.getWarningCode() != null)) {
-                List<String> exceptionInfos = resultWaringVOS.stream()
-                        .filter(vo -> WarningLevel.ORANGE.equals(vo.getWarningLevel()))
-                        .map(ResultWaringVO::getExceptionInfo)
-                        .collect(Collectors.toList());
-                InboundMessage inboundMessage = new InboundMessage();
-                inboundMessage.setAlertCode(String.format("%s-orange", batchPlan.getWarningCode()));
-                inboundMessage.setTenantId(batchResultDTO.getTenantId());
-                labels.put("planName", batchResultDTO.getPlanName());
-                labels.put("mark", batchResultDTO.getMark() != null ? batchResultDTO.getMark().toString() : "");
-                labels.put("startDate", DateFormatUtils.format(batchResultDTO.getStartDate(), BaseConstants.Pattern.DATETIME));
-                labels.put("status", batchResultDTO.getPlanStatus());
-                labels.put("exceptionInfo", String.valueOf(exceptionInfos));
-                labels.put("warningLevel", WarningLevel.ORANGE);
-                inboundMessage.setLabels(labels);
-                alertMessageHandler.sendMessage(inboundMessage);
-            }
+            doSend(planId,resultWaringVOS,batchResultDTO,WarningLevel.ORANGE);
+        }
+    }
+
+    private void doSend(Long planId, List<ResultWaringVO> resultWaringVOS, BatchResultDTO batchResultDTO, String warningLevel) {
+        HashMap<String, String> labels = new HashMap<>();
+        BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(planId);
+        if ((batchPlan != null) && (batchPlan.getWarningCode() != null)) {
+            List<String> exceptionInfos = resultWaringVOS.stream()
+                    .filter(vo -> warningLevel.equals(vo.getWarningLevel()))
+                    .map(ResultWaringVO::getExceptionInfo)
+                    .collect(Collectors.toList());
+            InboundMessage inboundMessage = new InboundMessage();
+            inboundMessage.setAlertCode(String.format(ALERT_CODE, batchPlan.getWarningCode(), warningLevel.toLowerCase()));
+            inboundMessage.setTenantId(batchResultDTO.getTenantId());
+            labels.put(AlertTemplate.PLAN_NAME, batchResultDTO.getPlanName());
+            labels.put(AlertTemplate.MARK, batchResultDTO.getMark() != null ? batchResultDTO.getMark().toString() : "");
+            labels.put(AlertTemplate.START_DATE, DateFormatUtils.format(batchResultDTO.getStartDate(), BaseConstants.Pattern.DATETIME));
+            labels.put(AlertTemplate.STATUS, batchResultDTO.getPlanStatus());
+            labels.put(AlertTemplate.EXCEPTION_INFO, String.valueOf(exceptionInfos));
+            labels.put(AlertTemplate.WARNING_LEVEL, warningLevel);
+            inboundMessage.setLabels(labels);
+            alertMessageHandler.sendMessage(inboundMessage);
         }
     }
 
