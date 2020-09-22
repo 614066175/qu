@@ -1,14 +1,14 @@
 package com.hand.hdsp.quality.domain.entity;
 
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 import lombok.*;
 import lombok.experimental.FieldNameConstants;
-
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
 
 /**
  * <p>批数据评估方案表实体</p>
@@ -43,6 +43,8 @@ public class BatchPlan extends AuditDomain {
     private String planCode;
 
     private String planName;
+
+    private String planJobName;
 
     private String planDesc;
 

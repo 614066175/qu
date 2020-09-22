@@ -169,6 +169,10 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         ResponseEntity<String> restJobResult = restJobFeign.create(tenantId, restJobDTO);
         ResponseUtils.getResponse(restJobResult, RestJobDTO.class);
 
+        //保存jobName到BatchPlan中
+        batchPlanDTO.setPlanJobName(jobName);
+        batchPlanRepository.updateByDTOPrimaryKeySelective(batchPlanDTO);
+
         // 创建更新时间戳表
         List<BatchPlanBase> list = batchPlanBaseRepository.select(BatchPlanBase.builder().planId(planId).build());
         for (BatchPlanBase base : list) {
