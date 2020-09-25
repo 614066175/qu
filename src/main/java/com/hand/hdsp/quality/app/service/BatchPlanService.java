@@ -22,8 +22,9 @@ public interface BatchPlanService {
      *
      * @param tenantId tenantId
      * @param planId   planId
+     * @return Long
      */
-    void exec(Long tenantId, Long planId);
+    Long exec(Long tenantId, Long planId);
 
     /**
      * 生成数据质量任务
@@ -36,6 +37,7 @@ public interface BatchPlanService {
     /**
      * 根据方案发送告警消息
      * @param planId
+     * @param resultId
      */
-    void sendMessage(Long planId);
+    void sendMessage(Long planId, Long resultId);
 }

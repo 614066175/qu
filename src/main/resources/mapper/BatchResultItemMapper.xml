@@ -206,24 +206,18 @@
                 SUBSTRING_INDEX(SUBSTRING_INDEX(xbri.field_name,'(',-1),')',1),''),'()',''))
             </if>
     </select>
-    <select id="selectWarningLevelByPlanId" resultType="com.hand.hdsp.quality.infra.vo.ResultWaringVO">
-            select
-            warning_level,
-            exception_info
-            from xqua_batch_result_item xbri
-            where xbri.result_rule_id in (
-	            select result_rule_id
-	            from xqua_batch_result_rule xbrr
-	            where xbrr.result_base_id in(
-		                select result_base_id
-		                from xqua_batch_result_base xbrb
-		                where xbrb.result_id in (
-			                    select max(result_id)
-			                    from xqua_batch_result xbr
-			                    where xbr.plan_id = #{planId}
-		                )
-	            )
-             )
-             and  warning_level is not NULL
+    <select id="selectWarningLevelByResultId" resultType="com.hand.hdsp.quality.infra.vo.ResultWaringVO">
+            SELECT
+	            warning_level,
+	            exception_info
+            FROM
+	            xqua_batch_result_base xbrb
+	        LEFT JOIN xqua_batch_result_rule xbrr
+	        ON xbrb.result_base_id = xbrr.result_base_id
+	        LEFT JOIN xqua_batch_result_item xbri
+	        ON xbri.result_rule_id = xbrr.result_rule_id
+            WHERE
+	            result_id = #{resultId}
+	            AND warning_level IS NOT NULL
     </select>
 </mapper>

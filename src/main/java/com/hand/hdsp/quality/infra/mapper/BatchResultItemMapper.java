@@ -68,8 +68,8 @@ public interface BatchResultItemMapper extends BaseMapper<BatchResultItem> {
 
     /**
      * 根据planI查询告警等级
-     * @param planId
+     * @param resultId
      * @return
      */
-    List<ResultWaringVO> selectWarningLevelByPlanId(@Param("planId") Long planId);
+    List<ResultWaringVO> selectWarningLevelByResultId(@Param("resultId") Long resultId);
 }

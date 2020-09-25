@@ -52,8 +52,8 @@ public class BatchPlanController extends BaseController {
     @GetMapping("/exec/{planId}")
     public ResponseEntity<?> exec(@PathVariable("organizationId") Long tenantId,
                                   @PathVariable Long planId) {
-        batchPlanService.exec(tenantId, planId);
-        batchPlanService.sendMessage(planId);
+        Long resultId = batchPlanService.exec(tenantId, planId);
+        batchPlanService.sendMessage(planId, resultId);
         return Results.success();
     }
 }
