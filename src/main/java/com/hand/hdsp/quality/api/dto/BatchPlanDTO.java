@@ -1,5 +1,9 @@
 package com.hand.hdsp.quality.api.dto;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
@@ -10,10 +14,6 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 /**
  * <p>批数据评估方案表 数据传输对象</p>
@@ -47,6 +47,10 @@ public class BatchPlanDTO extends AuditDomain {
     @NotBlank
     @Size(max = 255)
     private String planName;
+
+    @ApiModelProperty(value = "方案任务名称")
+    @Size(max = 255)
+    private String planJobName;
 
     @ApiModelProperty(value = "方案描述")
     private String planDesc;

@@ -1,5 +1,9 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
+
 import com.hand.hdsp.driver.core.app.service.DriverSessionService;
 import com.hand.hdsp.driver.core.app.service.session.DriverSession;
 import com.hand.hdsp.quality.api.dto.RelationshipDTO;
@@ -20,12 +24,6 @@ import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * <p>表间关系</p>
@@ -68,7 +66,8 @@ public class RelTableMeasure implements Measure {
         }
         DriverSession driverSession = driverSessionService.getDriverSession(tenantId, param.getPluginDatasourceDTO().getDatasourceCode());
         List<Map<String, Object>> result = driverSession.executeOneQuery(param.getSchema(),
-                String.format(SQL, batchResultBase.getPackageObjectName(), batchPlanRelTable.getRelSchema(), batchPlanRelTable.getRelTableName(), where.toString(), batchResultBase.getWhereCondition()));
+                String.format(SQL, batchResultBase.getPackageObjectName(), batchPlanRelTable.getRelSchema(),
+                        batchPlanRelTable.getRelTableName(), where.toString(), Objects.isNull(batchResultBase.getWhereCondition()) ? "1=1" : batchPlanRelTable.getWhereCondition()));
         //获取表行数
         ItemTemplateSql itemTemplateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
                 .checkItem(PlanConstant.CheckItem.TABLE_LINE)
@@ -84,10 +83,10 @@ public class RelTableMeasure implements Measure {
             throw new CommonException(ErrorCode.CHECK_ITEM_ONE_VALUE);
         }
 
-        long dataCount = Long.parseLong((String) response.get(0).values().toArray()[0]);
+        long dataCount = Long.parseLong(String.valueOf(response.get(0).values().toArray()[0]));
 
         //计算准确率
-        BigDecimal a = new BigDecimal((Long) result.get(0).get("count"));
+        BigDecimal a = new BigDecimal(String.valueOf(Optional.ofNullable(result.get(0).get("count")).orElse(result.get(0).get("COUNT"))));
         BigDecimal b = BigDecimal.valueOf(dataCount);
         BigDecimal rate = BigDecimal.ZERO;
         if (BigDecimal.ZERO.compareTo(b) != 0) {
