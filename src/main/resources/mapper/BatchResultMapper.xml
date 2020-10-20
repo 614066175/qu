@@ -366,7 +366,7 @@
         SELECT
         xbpb.object_name,
         xbpb.datasource_id,
-        concat(xd.datasource_name,'.',xbpb.datasource_schema) datasource_schema,
+        concat(xd.datasource_code,'.',xbpb.datasource_schema) datasource_schema,
         COUNT(distinct xbri.result_rule_id) exception_rule_count,
         COUNT(distinct xbri.result_rule_id,IFNULL(xbri.plan_line_id,0),IFNULL(xbri.condition_id,0)) exception_item_count,
         COUNT(*) exception_warn_count
@@ -375,7 +375,7 @@
         JOIN xqua_batch_result_rule xbrr ON xbri.result_rule_id = xbrr.result_rule_id
         JOIN xqua_batch_result_base xbrb ON xbrr.result_base_id = xbrb.result_base_id
         JOIN xqua_batch_plan_base xbpb ON xbrb.plan_base_id = xbpb.plan_base_id
-        JOIN xcor_datasource xd ON xd.datasource_id = xbpb.datasource_id
+        JOIN hpfm_datasource xd ON xd.datasource_id = xbpb.datasource_id
         WHERE
         xbrr.result_flag = 0
         <include refid="custom_where">
@@ -384,7 +384,7 @@
         GROUP BY
         xbpb.object_name,
         xbpb.datasource_id,
-        xd.datasource_name,
+        xd.datasource_code,
         xbpb.datasource_schema
     </select>
 
@@ -433,7 +433,7 @@
         xbpt.creation_date,
         xbpb.datasource_type,
         xbpb.datasource_id,
-        xd.datasource_name,
+        xd.datasource_code as datasourceName,
         xbpb.datasource_schema,
         xbpb.sql_type,
         xbpb.object_name,
@@ -446,7 +446,7 @@
         xqua_batch_plan_table xbpt
         JOIN xqua_batch_plan_base xbpb ON xbpt.plan_base_id = xbpb.plan_base_id
         JOIN xqua_batch_plan xbp on xbpb.plan_id = xbp.plan_id
-        JOIN xcor_datasource xd ON xd.datasource_id = xbpb.datasource_id
+        JOIN hpfm_datasource xd ON xd.datasource_id = xbpb.datasource_id
         <where>
             <include refid="custom_where">
                 <property name="mt" value="xbpt"/>
@@ -465,7 +465,7 @@
         xbpt.creation_date,
         xbpb.datasource_type,
         xbpb.datasource_id,
-        xd.datasource_name,
+        xd.datasource_code as datasourceName,
         xbpb.datasource_schema,
         xbpb.sql_type,
         xbpb.object_name,
@@ -478,7 +478,7 @@
         xqua_batch_plan_field xbpt
         JOIN xqua_batch_plan_base xbpb ON xbpt.plan_base_id = xbpb.plan_base_id
         JOIN xqua_batch_plan xbp on xbpb.plan_id = xbp.plan_id
-        JOIN xcor_datasource xd ON xd.datasource_id = xbpb.datasource_id
+        JOIN hpfm_datasource xd ON xd.datasource_id = xbpb.datasource_id
         <where>
             <include refid="custom_where">
                 <property name="mt" value="xbpt"/>
@@ -497,7 +497,7 @@
         xbpt.creation_date,
         xbpb.datasource_type,
         xbpb.datasource_id,
-        xd.datasource_name,
+        xd.datasource_code as datasourceName,
         xbpb.datasource_schema,
         xbpb.sql_type,
         xbpb.object_name,
@@ -510,7 +510,7 @@
         xqua_batch_plan_rel_table xbpt
         JOIN xqua_batch_plan_base xbpb ON xbpt.plan_base_id = xbpb.plan_base_id
         JOIN xqua_batch_plan xbp on xbpb.plan_id = xbp.plan_id
-        JOIN xcor_datasource xd ON xd.datasource_id = xbpb.datasource_id
+        JOIN hpfm_datasource xd ON xd.datasource_id = xbpb.datasource_id
         <where>
             <include refid="custom_where">
                 <property name="mt" value="xbpt"/>
@@ -540,7 +540,7 @@
         xbptc.compare_way,
         xbptc.warning_level,
         xbptc.creation_date,
-        xd.datasource_name,
+        xd.datasource_code as datasourceName,
         xbpb.datasource_schema,
         xbpb.object_name,
         xbp.plan_name
@@ -549,7 +549,7 @@
         join xqua_batch_plan_table xbpt on xbptl.plan_rule_id = xbpt.plan_rule_id
         JOIN xqua_batch_plan_base xbpb ON xbpt.plan_base_id = xbpb.plan_base_id
         JOIN xqua_batch_plan xbp on xbpb.plan_id = xbp.plan_id
-        JOIN xcor_datasource xd ON xd.datasource_id = xbpb.datasource_id
+        JOIN hpfm_datasource xd ON xd.datasource_id = xbpb.datasource_id
         <where>
             <include refid="custom_where">
                 <property name="mt" value="xbptc"/>
@@ -577,7 +577,7 @@
         xbpfc.compare_way,
         xbpfc.warning_level,
         xbpfc.creation_date,
-        xd.datasource_name,
+        xd.datasource_code as datasourceName,
         xbpb.datasource_schema,
         xbpb.object_name,
         xbp.plan_name
@@ -586,7 +586,7 @@
         join xqua_batch_plan_field xbpf on xbptl.plan_rule_id = xbpf.plan_rule_id
         JOIN xqua_batch_plan_base xbpb ON xbpf.plan_base_id = xbpb.plan_base_id
         JOIN xqua_batch_plan xbp on xbpb.plan_id = xbp.plan_id
-        JOIN xcor_datasource xd ON xd.datasource_id = xbpb.datasource_id
+        JOIN hpfm_datasource xd ON xd.datasource_id = xbpb.datasource_id
         <where>
             <include refid="custom_where">
                 <property name="mt" value="xbpfc"/>
@@ -614,7 +614,7 @@
         null compare_way,
         null warning_level,
         xbpt.creation_date,
-        xd.datasource_name,
+        xd.datasource_code datasource_name,
         xbpb.datasource_schema,
         xbpb.object_name,
         xbp.plan_name
@@ -622,7 +622,7 @@
         xqua_batch_plan_rel_table xbpt
         JOIN xqua_batch_plan_base xbpb ON xbpt.plan_base_id = xbpb.plan_base_id
         JOIN xqua_batch_plan xbp on xbpb.plan_id = xbp.plan_id
-        JOIN xcor_datasource xd ON xd.datasource_id = xbpb.datasource_id
+        JOIN hpfm_datasource xd ON xd.datasource_id = xbpb.datasource_id
         <where>
             <include refid="custom_where">
                 <property name="mt" value="xbpt"/>
