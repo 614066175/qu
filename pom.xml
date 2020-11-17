@@ -67,12 +67,11 @@
         <dependency>
             <groupId>org.hzero.boot</groupId>
             <artifactId>hzero-boot-alert</artifactId>
-            <version>${hzero.boot.version}</version>
+            <version>1.5.0.RELEASE</version>
         </dependency>
         <dependency>
-            <groupId>com.hand.hdsp</groupId>
-            <artifactId>hdsp-plugin-driver-core</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <groupId>org.hzero.boot</groupId>
+            <artifactId>hzero-boot-platform-driver</artifactId>
         </dependency>
 
 

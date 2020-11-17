@@ -3,8 +3,6 @@ package com.hand.hdsp.quality.infra.measure.measure;
 import java.util.List;
 import java.util.Map;
 
-import com.hand.hdsp.driver.core.app.service.DriverSessionService;
-import com.hand.hdsp.driver.core.app.service.session.DriverSession;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
@@ -15,6 +13,8 @@ import com.hand.hdsp.quality.infra.measure.CountCollector;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.lang3.StringUtils;
+import org.hzero.boot.driver.app.service.DriverSessionService;
+import org.hzero.starter.driver.core.session.DriverSession;
 
 /**
  * <p>自定义SQL</p>

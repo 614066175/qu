@@ -1,7 +1,9 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
-import com.hand.hdsp.driver.core.app.service.DriverSessionService;
-import com.hand.hdsp.driver.core.app.service.session.DriverSession;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
@@ -9,13 +11,10 @@ import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
-import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import com.hand.hdsp.quality.infra.measure.*;
 import io.choerodon.core.exception.CommonException;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.hzero.boot.driver.app.service.DriverSessionService;
+import org.hzero.starter.driver.core.session.DriverSession;
 
 /**
  * <p>通用SQL处理</p>

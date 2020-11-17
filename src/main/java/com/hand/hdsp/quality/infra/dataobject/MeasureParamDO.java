@@ -1,15 +1,15 @@
 package com.hand.hdsp.quality.infra.dataobject;
 
-import com.hand.hdsp.driver.core.api.dto.PluginDatasourceDTO;
+
+import java.util.List;
+
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
-import com.hand.hdsp.quality.api.dto.DatasourceDTO;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanRelTable;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import lombok.*;
-
-import java.util.List;
+import org.hzero.boot.driver.api.dto.PluginDatasourceDTO;
 
 /**
  * <p>方案评估参数封装对象</p>
