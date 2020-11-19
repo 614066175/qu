@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
-    <property name="INFO_FILE_PATH" value="logs/${SPRING_APPLICATION_NAME}-info.%d.log"/>
-    <property name="DEBUG_FILE_PATH" value="logs/${SPRING_APPLICATION_NAME}-debug.%d.log"/>
-    <property name="ERROR_FILE_PATH" value="logs/${SPRING_APPLICATION_NAME}-error.%d.log"/>
+    <property name="INFO_FILE_PATH" value="logs/hdsp-quality-info.%d.log"/>
+    <property name="DEBUG_FILE_PATH" value="logs/hdsp-quality-debug.%d.log"/>
+    <property name="ERROR_FILE_PATH" value="logs/hdsp-quality-error.%d.log"/>
     <appender name="consoleLog" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>

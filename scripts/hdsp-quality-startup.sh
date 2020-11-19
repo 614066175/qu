@@ -2,7 +2,7 @@
 
 appName=hdsp-quality
 source /etc/profile
-exec nohup java -Xmx500m -Xms500m \
+java -Xmx500m -Xms500m \
   -DSPRING_CLOUD_CONFIG_ENABLED=true \
   -DSPRING_PROFILES_ACTIVE=default \
   -DSPRING_DATASOURCE_URL='jdbc:mysql://ip:23306/hdsp_quality?useUnicode=true&characterEncoding=utf-8&useSSL=false' \
@@ -17,4 +17,4 @@ exec nohup java -Xmx500m -Xms500m \
   -DHDSP_ACCESS_SIGN_URL_SUFFIX='/v2/.*' \
   -DHDSP_ACCESS_SIGN_EXCLUDE_URL_SUFFIX ='/v1/.*' \
   -DHDSP_ACCESS_SIGN_INIT_TOKEN_NUM=10 \
-  -jar $appName.jar 2>&1 &
+  -jar $appName.jar &
