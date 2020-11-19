@@ -17,4 +17,4 @@ exec nohup java -Xmx500m -Xms500m \
   -DHDSP_ACCESS_SIGN_URL_SUFFIX='/v2/.*' \
   -DHDSP_ACCESS_SIGN_EXCLUDE_URL_SUFFIX ='/v1/.*' \
   -DHDSP_ACCESS_SIGN_INIT_TOKEN_NUM=10 \
-  -jar $appName.jar >./logs/$appName.log 2>&1 &
+  -jar $appName.jar 2>&1 &
