@@ -1,5 +1,8 @@
 package com.hand.hdsp.quality.api.dto;
 
+import java.util.Map;
+import javax.persistence.Transient;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
@@ -82,4 +85,9 @@ public class DataStandardDTO extends AuditDomain {
 
     @ApiModelProperty(value = "租户ID")
     private Long tenantId;
+
+
+
+    @Transient
+    private Map<String,String> extra;
 }

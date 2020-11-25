@@ -17,4 +17,26 @@ public interface DataStandardService {
      * @param dataStandardDTO
      */
     void create(DataStandardDTO dataStandardDTO);
+
+    /**
+     * 数据标准详情
+     * @param tenantId
+     * @param standardId
+     * @return
+     */
+    DataStandardDTO detail(Long tenantId, Long standardId);
+
+
+
+    /**
+     * 删除数据标准
+     * @param dataStandardDTO
+     */
+    void delete(DataStandardDTO dataStandardDTO);
+
+    /**
+     * 数据标准修改状态
+     * @param dataStandardDTO
+     */
+    void updateStatus(DataStandardDTO dataStandardDTO);
 }

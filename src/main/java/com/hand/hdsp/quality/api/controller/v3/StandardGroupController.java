@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
  * @author lgl 2020/11/23 20:57
  * @since 1.0
  */
-@Api(tags = SwaggerTags.BATCH_PLAN)
+@Api(tags = SwaggerTags.STANDARD_GROUP)
 @RestController("standardGroupController.v3")
 @RequestMapping("/v3/{organizationId}/standard-group")
 public class StandardGroupController extends BaseController {
