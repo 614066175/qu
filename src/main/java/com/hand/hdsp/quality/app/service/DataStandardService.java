@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.app.service;
 
+import com.hand.hdsp.quality.api.dto.DataStandardDTO;
+
 /**
  * <p>
  * description
@@ -10,4 +12,9 @@ package com.hand.hdsp.quality.app.service;
  */
 public interface DataStandardService {
 
+    /**
+     * 创建数据标准
+     * @param dataStandardDTO
+     */
+    void create(DataStandardDTO dataStandardDTO);
 }

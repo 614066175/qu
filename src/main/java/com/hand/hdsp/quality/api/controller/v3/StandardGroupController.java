@@ -95,19 +95,4 @@ public class StandardGroupController extends BaseController {
         standardGroupService.delete(standardGroupDTO);
         return Results.success(standardGroupDTO);
     }
-
-    @ApiOperation(value = "修改分组")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping
-    public ResponseEntity<?> update(@PathVariable(name = "organizationId") Long tenantId, @RequestBody StandardGroupDTO standardGroupDTO) {
-        standardGroupDTO.setTenantId(tenantId);
-        standardGroupRepository.updateByDTOPrimaryKeySelective(standardGroupDTO);
-        return Results.success(standardGroupDTO);
-    }
 }
