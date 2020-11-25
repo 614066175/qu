@@ -4,8 +4,8 @@ import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.app.service.DataStandardService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
-import com.hand.hdsp.quality.domain.repository.StandardExtraRepository;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -32,12 +32,24 @@ public class DataStandardController {
 
     private final DataStandardRepository dataStandardRepository;
 
-    private final StandardExtraRepository standardExtraRepository;
-
-    public DataStandardController(DataStandardService dataStandardService, DataStandardRepository dataStandardRepository, StandardExtraRepository standardExtraRepository) {
+    public DataStandardController(DataStandardService dataStandardService, DataStandardRepository dataStandardRepository) {
         this.dataStandardService = dataStandardService;
         this.dataStandardRepository = dataStandardRepository;
-        this.standardExtraRepository = standardExtraRepository;
+    }
+
+
+    @ApiOperation(value = "数据标准列表")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/list")
+    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId, DataStandardDTO dataStandardDTO, PageRequest pageRequest) {
+        dataStandardDTO.setTenantId(tenantId);
+        return Results.success(dataStandardService.list(pageRequest, dataStandardDTO));
     }
 
     @ApiOperation(value = "数据标准详情")

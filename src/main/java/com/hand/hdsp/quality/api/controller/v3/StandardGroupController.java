@@ -6,6 +6,7 @@ import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.vo.StandardGroupVO;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -36,6 +37,19 @@ public class StandardGroupController extends BaseController {
                                    StandardGroupRepository standardGroupRepository) {
         this.standardGroupService = standardGroupService;
         this.standardGroupRepository = standardGroupRepository;
+    }
+
+    @ApiOperation(value = "根据标准名找到对应分组")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/list")
+    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId, StandardGroupVO standardGroupVO , PageRequest pageRequest) {
+        return Results.success(standardGroupService.list(pageRequest,standardGroupVO));
     }
 
     @ApiOperation(value = "根据标准名找到对应分组")

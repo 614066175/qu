@@ -5,20 +5,15 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.choerodon.mybatis.annotation.ModifyAudit;
-import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 /**
- * <p>
- * description
- * </p>
+ * <p>标准分组表 数据传输对象</p>
  *
- * @author lgl 2020/11/23 20:53
- * @since 1.0
+ * @author guoliangli01.@hand-china.com 2020-11-25 17:03:12
  */
 @Data
 @Builder
@@ -27,14 +22,12 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = false)
 @ApiModel("标准分组表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@VersionAudit
-@ModifyAudit
 public class StandardGroupDTO extends AuditDomain {
 
-    @ApiModelProperty("表ID，主键，供其他表做外键")
+    @ApiModelProperty("分组ID，主键，供其他表做外键")
     private Long groupId;
 
-    @ApiModelProperty(value = "父级分组ID")
+    @ApiModelProperty(value = "父分组ID")
     @NotNull
     private Long parentGroupId;
 
@@ -51,13 +44,17 @@ public class StandardGroupDTO extends AuditDomain {
     @ApiModelProperty(value = "分组描述")
     private String groupDesc;
 
-    @ApiModelProperty(value = "分组类型BATCH/STREAMING")
+    @ApiModelProperty(value = "分组类型(数据标准，字段标准，命名标准)")
+    @NotBlank
+    @Size(max = 50)
     private String groupType;
 
     @ApiModelProperty(value = "是否启用 1-启用 0-不启用")
+    @NotNull
     private Integer enabledFlag;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;
+
 }

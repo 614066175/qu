@@ -6,12 +6,9 @@ import com.hand.hdsp.quality.api.dto.StandardExtraDTO;
 import com.hand.hdsp.quality.domain.entity.StandardExtra;
 
 /**
- * <p>
- * description
- * </p>
+ * <p>标准额外信息表资源库</p>
  *
- * @author lgl 2020/11/25 10:45
- * @since 1.0
+ * @author guoliangli01.@hand-china.com 2020-11-25 17:03:11
  */
 public interface StandardExtraRepository extends BaseRepository<StandardExtra, StandardExtraDTO>, ProxySelf<StandardExtraRepository> {
 

@@ -11,42 +11,43 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 /**
- * <p>标准额外信息表 数据传输对象</p>
+ * <p>标准申请记录表 数据传输对象</p>
  *
- * @author guoliangli01@hand-china.com 2020-11-25 17:27:05
+ * @author guoliangli01.@hand-china.com 2020-11-25 17:03:12
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@ApiModel("标准额外信息表")
+@ApiModel("标准申请记录表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class StandardExtraDTO extends AuditDomain {
+public class StandardApproveDTO extends AuditDomain {
 
     @ApiModelProperty("表ID，主键，供其他表做外键")
-    private Long extraId;
+    private Long approveId;
 
-    @ApiModelProperty(value = "标准ID")
-    @NotNull
-    private Long standardId;
-
-    @ApiModelProperty(value = "标准类别")
-    @NotBlank
-    @Size(max = 50)
-    private String standardType;
-
-    @ApiModelProperty(value = "标准版本号")
-    @NotNull
-    private Long versionNumber;
-
-    @ApiModelProperty(value = "额外信息键")
+    @ApiModelProperty(value = "资源名(标准名)")
     @NotBlank
     @Size(max = 255)
-    private String extraKey;
+    private String standardName;
 
-    @ApiModelProperty(value = "额外信息值")
-    private String extraValue;
+    @ApiModelProperty(value = "资源描述(标准描述)")
+    private String standardDesc;
+
+    @ApiModelProperty(value = "事项类型（标准类型）")
+    @NotBlank
+    @Size(max = 255)
+    private String standardType;
+
+    @ApiModelProperty(value = "操作类型")
+    @NotBlank
+    @Size(max = 50)
+    private String operation;
+
+    @ApiModelProperty(value = "申请人ID")
+    @NotNull
+    private Long applyId;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull

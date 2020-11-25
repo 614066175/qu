@@ -2,6 +2,9 @@ package com.hand.hdsp.quality.api.dto;
 
 import java.util.Map;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -10,12 +13,9 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 /**
- * <p>
- * description
- * </p>
+ * <p>数据标准表 数据传输对象</p>
  *
- * @author lgl 2020/11/24 14:02
- * @since 1.0
+ * @author guoliangli01.@hand-china.com 2020-11-25 17:20:48
  */
 @Data
 @Builder
@@ -26,25 +26,33 @@ import lombok.*;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DataStandardDTO extends AuditDomain {
 
-    @ApiModelProperty(value = "表主键")
+    @ApiModelProperty("数据标准ID，主键，供其他表做外键")
     private Long standardId;
 
-    @ApiModelProperty(value = "标准版本")
+    @ApiModelProperty(value = "数据标准版本号")
+    @NotNull
     private Long versionNumber;
 
-    @ApiModelProperty(value = "分组Id")
+    @ApiModelProperty(value = "分组ID")
+    @NotNull
     private Long groupId;
 
-    @ApiModelProperty(value = "标准编码")
+    @ApiModelProperty(value = "数据标准编码")
+    @NotBlank
+    @Size(max = 50)
     private String standardCode;
 
-    @ApiModelProperty(value = "标准名称")
+    @ApiModelProperty(value = "数据标准名称")
+    @NotBlank
+    @Size(max = 255)
     private String standardName;
 
-    @ApiModelProperty(value = "标准描述")
+    @ApiModelProperty(value = "数据标准描述")
     private String standardDesc;
 
     @ApiModelProperty(value = "数据类型")
+    @NotBlank
+    @Size(max = 50)
     private String dataType;
 
     @ApiModelProperty(value = "数据格式")
@@ -59,7 +67,7 @@ public class DataStandardDTO extends AuditDomain {
     @ApiModelProperty(value = "值域类型")
     private String valueType;
 
-    @ApiModelProperty(value = "值域值")
+    @ApiModelProperty(value = "值域")
     private String valueRange;
 
     @ApiModelProperty(value = "标准依据")
@@ -68,26 +76,29 @@ public class DataStandardDTO extends AuditDomain {
     @ApiModelProperty(value = "标准来源")
     private String standardSource;
 
-    @ApiModelProperty(value = "责任人部门ID")
+    @ApiModelProperty(value = "责任部门ID")
+    @NotNull
     private Long chargeDeptId;
 
     @ApiModelProperty(value = "责任人ID")
+    @NotNull
     private Long chargeId;
 
-    @ApiModelProperty(value = "责任认电话")
+    @ApiModelProperty(value = "责任人电话")
     private String chargeTel;
 
     @ApiModelProperty(value = "责任人邮箱")
     private String chargeEmail;
 
-    @ApiModelProperty(value = "状态")
+    @ApiModelProperty(value = "数据标准状态(新建，在线，离线，待审核)")
+    @NotBlank
+    @Size(max = 50)
     private String status;
 
     @ApiModelProperty(value = "租户ID")
+    @NotNull
     private Long tenantId;
 
-
-
     @Transient
-    private Map<String,String> extra;
+    private Map<String, String> extra;
 }

@@ -11,8 +11,11 @@ import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.mapper.StandardGroupMapper;
 import com.hand.hdsp.quality.infra.vo.StandardGroupVO;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.poi.ss.formula.functions.T;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Service;
@@ -63,5 +66,10 @@ public class StandardGroupServiceImpl implements StandardGroupService {
             throw new CommonException("hdsp.xsta.err.group_has_standard");
         }
         standardGroupRepository.deleteDTO(standardGroupDTO);
+    }
+
+    @Override
+    public Page<T> list(PageRequest pageRequest, StandardGroupVO standardGroupVO) {
+        return null;
     }
 }

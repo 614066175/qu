@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.DataStandardMapper">
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.DataStandard">
+        <result column="standard_id" property="standardId" jdbcType="DECIMAL"/>
+        <result column="version_number" property="versionNumber" jdbcType="DECIMAL"/>
+        <result column="group_Id" property="groupId" jdbcType="DECIMAL"/>
+        <result column="standard_code" property="standardCode" jdbcType="VARCHAR"/>
+        <result column="standard_name" property="standardName" jdbcType="VARCHAR"/>
+        <result column="standard_desc" property="standardDesc" jdbcType="VARCHAR"/>
+        <result column="data_type" property="dataType" jdbcType="VARCHAR"/>
+        <result column="data_pattern" property="dataPattern" jdbcType="VARCHAR"/>
+        <result column="length_type" property="lengthType" jdbcType="VARCHAR"/>
+        <result column="data_length" property="dataLength" jdbcType="VARCHAR"/>
+        <result column="value_type" property="valueType" jdbcType="VARCHAR"/>
+        <result column="value_range" property="valueRange" jdbcType="VARCHAR"/>
+        <result column="standard_accord" property="standardAccord" jdbcType="VARCHAR"/>
+        <result column="standard_source" property="standardSource" jdbcType="VARCHAR"/>
+        <result column="charge_dept_id" property="chargeDeptId" jdbcType="DECIMAL"/>
+        <result column="charge_id" property="chargeId" jdbcType="DECIMAL"/>
+        <result column="charge_tel" property="chargeTel" jdbcType="VARCHAR"/>
+        <result column="charge_email" property="chargeEmail" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="VARCHAR"/>
+        <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
+        <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
+        <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
+        <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="baseColumn">
+          ${ds}.standard_id,
+          ${ds}.version_number,
+          ${ds}.group_id,
+          ${ds}.standard_code,
+          ${ds}.standard_name,
+          ${ds}.standard_desc,
+          ${ds}.data_type,
+          ${ds}.data_pattern,
+          ${ds}.length_type,
+          ${ds}.data_length,
+          ${ds}.value_type,
+          ${ds}.value_range,
+          ${ds}.standard_accord,
+          ${ds}.standard_source,
+          ${ds}.charge_dept_id,
+          ${ds}.charge_id,
+          ${ds}.charge_tel,
+          ${ds}.charge_email,
+          ${ds}.status,
+          ${ds}.tenant_id,
+          ${ds}.object_version_number
+    </sql>
+
+    <select id="list" resultType="com.hand.hdsp.quality.api.dto.DataStandardDTO">
+        select
+        <include refid="baseColumn">
+            <property name="ds" value="ds"/>
+        </include>
+        from xsta_data_standard ds
+        <where>
+            <if test="dataStandardDTO.standardCode!=null">
+                ds.standard_code=#{dataStandardDTO.standardCode}
+            </if>
+            <if test="dataStandardDTO.standardName">
+                and ds.standard_name=#{dataStandardDTO.standardName}
+            </if>
+            <if test="dataStandardDTO.tenantId!=null">
+                and ds.tenantId=#{dataStandardDTO.tenantId}
+            </if>
+        </where>
+    </select>
+
+</mapper>

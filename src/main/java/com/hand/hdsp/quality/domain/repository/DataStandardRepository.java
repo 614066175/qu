@@ -6,12 +6,9 @@ import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.domain.entity.DataStandard;
 
 /**
- * <p>
- * description
- * </p>
+ * <p>数据标准表资源库</p>
  *
- * @author lgl 2020/11/25 10:45
- * @since 1.0
+ * @author guoliangli01.@hand-china.com 2020-11-25 17:03:11
  */
 public interface DataStandardRepository extends BaseRepository<DataStandard, DataStandardDTO>, ProxySelf<DataStandardRepository> {
 

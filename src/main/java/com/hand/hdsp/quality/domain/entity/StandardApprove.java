@@ -10,9 +10,9 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import lombok.*;
 
 /**
- * <p>标准额外信息表实体</p>
+ * <p>标准申请记录表实体</p>
  *
- * @author guoliangli01@hand-china.com 2020-11-25 17:27:05
+ * @author guoliangli01.@hand-china.com 2020-11-25 17:03:12
  */
 @Data
 @Builder
@@ -21,15 +21,15 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = false)
 @VersionAudit
 @ModifyAudit
-@Table(name = "xsta_standard_extra")
-public class StandardExtra extends AuditDomain {
+@Table(name = "xsta_standard_approve")
+public class StandardApprove extends AuditDomain {
 
-    public static final String FIELD_EXTRA_ID = "extraId";
-    public static final String FIELD_STANDARD_ID = "standardId";
+    public static final String FIELD_APPROVE_ID = "approveId";
+    public static final String FIELD_STANDARD_NAME = "standardName";
+    public static final String FIELD_STANDARD_DESC = "standardDesc";
     public static final String FIELD_STANDARD_TYPE = "standardType";
-    public static final String FIELD_VERSION_NUMBER = "versionNumber";
-    public static final String FIELD_EXTRA_KEY = "extraKey";
-    public static final String FIELD_EXTRA_VALUE = "extraValue";
+    public static final String FIELD_OPERATION = "operation";
+    public static final String FIELD_APPLY_ID = "applyId";
     public static final String FIELD_TENANT_ID = "tenantId";
 
     //
@@ -42,17 +42,17 @@ public class StandardExtra extends AuditDomain {
 
     @Id
     @GeneratedValue
-    private Long extraId;
+    private Long approveId;
 
-    private Long standardId;
+    private String standardName;
+
+    private String standardDesc;
 
     private String standardType;
 
-    private Long versionNumber;
+    private String operation;
 
-    private String extraKey;
-
-    private String extraValue;
+    private Long applyId;
 
     private Long tenantId;
 

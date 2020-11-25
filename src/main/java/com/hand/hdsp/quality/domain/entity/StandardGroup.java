@@ -8,32 +8,30 @@ import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 import lombok.*;
-import lombok.experimental.FieldNameConstants;
 
 /**
- * <p>
- * 标准分组表
- * </p>
+ * <p>标准分组表实体</p>
  *
- * @author lgl 2020/11/23 20:53
- * @since 1.0
+ * @author guoliangli01.@hand-china.com 2020-11-25 17:03:12
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@FieldNameConstants(prefix = "FIELD_")
 @VersionAudit
 @ModifyAudit
 @Table(name = "xsta_standard_group")
 public class StandardGroup extends AuditDomain {
 
-    public static final StandardGroup ROOT_STANDARD_GROUP = StandardGroup.builder()
-            .groupId(0L)
-            .groupCode("root")
-            .groupName("分组")
-            .build();
+    public static final String FIELD_GROUP_ID = "groupId";
+    public static final String FIELD_PARENT_GROUP_ID = "parentGroupId";
+    public static final String FIELD_GROUP_CODE = "groupCode";
+    public static final String FIELD_GROUP_NAME = "groupName";
+    public static final String FIELD_GROUP_DESC = "groupDesc";
+    public static final String FIELD_GROUP_TYPE = "groupType";
+    public static final String FIELD_ENABLED_FLAG = "enabledFlag";
+    public static final String FIELD_TENANT_ID = "tenantId";
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -60,4 +58,6 @@ public class StandardGroup extends AuditDomain {
     private Integer enabledFlag;
 
     private Long tenantId;
+
+
 }

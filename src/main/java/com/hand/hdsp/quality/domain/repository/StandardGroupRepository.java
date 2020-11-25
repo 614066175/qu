@@ -6,12 +6,9 @@ import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.domain.entity.StandardGroup;
 
 /**
- * <p>
- * description
- * </p>
+ * <p>标准分组表资源库</p>
  *
- * @author lgl 2020/11/23 21:05
- * @since 1.0
+ * @author guoliangli01.@hand-china.com 2020-11-25 17:03:12
  */
 public interface StandardGroupRepository extends BaseRepository<StandardGroup, StandardGroupDTO>, ProxySelf<StandardGroupRepository> {
 

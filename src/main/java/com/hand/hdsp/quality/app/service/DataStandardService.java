@@ -1,6 +1,8 @@
 package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * <p>
@@ -39,4 +41,12 @@ public interface DataStandardService {
      * @param dataStandardDTO
      */
     void updateStatus(DataStandardDTO dataStandardDTO);
+
+    /**
+     * 分页查询列表
+     * @param pageRequest
+     * @param dataStandardDTO
+     * @return
+     */
+    Page<DataStandardDTO> list(PageRequest pageRequest, DataStandardDTO dataStandardDTO);
 }

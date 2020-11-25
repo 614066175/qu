@@ -19,6 +19,8 @@ import lombok.*;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class StandardGroupVO {
 
+    private String groupId;
+
     private String groupName;
 
     private String standardName;

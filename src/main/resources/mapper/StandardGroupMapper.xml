@@ -3,8 +3,8 @@
 <mapper namespace="com.hand.hdsp.quality.infra.mapper.StandardGroupMapper">
     <!-- 可根据自己的需求，是否要使用 -->
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.StandardGroup">
-        <result column="standard_id" property="groupId" jdbcType="DECIMAL"/>
-        <result column="parent_standard_id" property="parentGroupId" jdbcType="DECIMAL"/>
+        <result column="group_id" property="groupId" jdbcType="DECIMAL"/>
+        <result column="parent_group_id" property="parentGroupId" jdbcType="DECIMAL"/>
         <result column="group_code" property="groupCode" jdbcType="VARCHAR"/>
         <result column="group_name" property="groupName" jdbcType="VARCHAR"/>
         <result column="group_desc" property="groupDesc" jdbcType="VARCHAR"/>

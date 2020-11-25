@@ -4,6 +4,9 @@ import java.util.List;
 
 import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.infra.vo.StandardGroupVO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.apache.poi.ss.formula.functions.T;
 
 /**
  * <p>
@@ -27,4 +30,12 @@ public interface StandardGroupService {
      * @param standardGroupDTO
      */
     void delete(StandardGroupDTO standardGroupDTO);
+
+    /**
+     * 查询列表
+     * @param pageRequest
+     * @param standardGroupVO
+     * @return
+     */
+    Page<T> list(PageRequest pageRequest, StandardGroupVO standardGroupVO);
 }
