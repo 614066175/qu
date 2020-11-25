@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.StandardGroupMapper">
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.StandardGroup">
+        <result column="standard_id" property="groupId" jdbcType="DECIMAL"/>
+        <result column="parent_standard_id" property="parentGroupId" jdbcType="DECIMAL"/>
+        <result column="group_code" property="groupCode" jdbcType="VARCHAR"/>
+        <result column="group_name" property="groupName" jdbcType="VARCHAR"/>
+        <result column="group_desc" property="groupDesc" jdbcType="VARCHAR"/>
+        <result column="group_type" property="groupType" jdbcType="VARCHAR"/>
+        <result column="enabled_flag" property="enabledFlag" jdbcType="DECIMAL"/>
+        <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
+        <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
+        <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
+        <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="baseColumn">
+        ${sta}.group_id,
+        ${sta}.parent_group_id,
+        ${sta}.group_code,
+        ${sta}.group_name,
+        ${sta}.group_desc,
+        ${sta}.group_type,
+        ${sta}.enabled_flag,
+        ${sta}.tenant_id
+    </sql>
+
+    <select id="listByGroup" resultType="com.hand.hdsp.quality.api.dto.StandardGroupDTO">
+        select
+            <include refid="baseColumn">
+                <property name="sta" value="xsg"/>
+            </include>
+        from xsta_standard_group xsg
+        <where>
+            <if test="standardGroupVO.groupType!=null">
+                xsg.group_type=#{standardGroupVO.groupType}
+            </if>
+            <if test="standardGroupVO.groupName">
+                and xsg.group_name=#{standardGroupVO.groupName}
+            </if>
+            <if test="standardGroupVO.tenantId!=null">
+                and xsg.tenantId=#{standardGroupVO.tenantId}
+            </if>
+            and xsg.enabled_flag=1
+        </where>
+    </select>
+
+</mapper>
