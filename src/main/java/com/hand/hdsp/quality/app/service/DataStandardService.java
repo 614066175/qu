@@ -49,4 +49,10 @@ public interface DataStandardService {
      * @return
      */
     Page<DataStandardDTO> list(PageRequest pageRequest, DataStandardDTO dataStandardDTO);
+
+    /**
+     * 修改数据标准
+     * @param dataStandardDTO
+     */
+    void update(DataStandardDTO dataStandardDTO);
 }

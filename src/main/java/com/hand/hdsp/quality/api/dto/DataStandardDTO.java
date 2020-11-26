@@ -1,6 +1,6 @@
 package com.hand.hdsp.quality.api.dto;
 
-import java.util.Map;
+import java.util.List;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -100,5 +100,5 @@ public class DataStandardDTO extends AuditDomain {
     private Long tenantId;
 
     @Transient
-    private Map<String, String> extra;
+    private List<StandardExtraDTO> standardExtraDTOList;
 }

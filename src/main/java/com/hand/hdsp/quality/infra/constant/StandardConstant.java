@@ -23,5 +23,12 @@ public interface StandardConstant {
 
     String ONLINE_APPROVING="ONLINE_APPROVING";
 
-    //-----------
+    //----------
+
+    /**
+     * 审核状态（申请中，通过，驳回）
+     */
+    String APPROVING="APPROVING";
+    String ADOPT="ADOPT";
+    String SUBJET="SUBJET";
 }

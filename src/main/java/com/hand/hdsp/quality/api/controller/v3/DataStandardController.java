@@ -1,8 +1,11 @@
 package com.hand.hdsp.quality.api.controller.v3;
 
+import java.util.List;
+
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.app.service.DataStandardService;
 import com.hand.hdsp.quality.config.SwaggerTags;
+import com.hand.hdsp.quality.domain.entity.DataStandard;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -11,7 +14,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.core.util.Results;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -106,7 +112,7 @@ public class DataStandardController {
     @PutMapping
     public ResponseEntity<?> update(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
-        dataStandardRepository.updateByDTOPrimaryKey(dataStandardDTO);
+        dataStandardService.update(dataStandardDTO);
         return Results.success(dataStandardDTO);
     }
 
@@ -123,6 +129,29 @@ public class DataStandardController {
     public ResponseEntity<?> updateStatus(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
         dataStandardService.updateStatus(dataStandardDTO);
+        return Results.success(dataStandardDTO);
+    }
+
+    @ApiOperation(value = "根据唯一索引查询数据标准")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/get-by-unique")
+    public ResponseEntity<DataStandardDTO> getByUnique(@PathVariable(name = "organizationId") Long tenantId, DataStandardDTO dataStandardDTO) {
+        dataStandardDTO.setTenantId(tenantId);
+        List<DataStandardDTO> standardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(DataStandard.FIELD_STANDARD_NAME, dataStandardDTO.getStandardName())
+                        .andEqualTo(DataStandard.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
+                .build());
+        dataStandardDTO=null;
+        if (CollectionUtils.isNotEmpty(standardDTOList)){
+            dataStandardDTO=standardDTOList.get(0);
+        }
         return Results.success(dataStandardDTO);
     }
 }
