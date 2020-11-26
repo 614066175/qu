@@ -5,7 +5,6 @@ import java.util.Objects;
 
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.DataStandardService;
-import com.hand.hdsp.quality.domain.entity.ApprovalHeader;
 import com.hand.hdsp.quality.domain.entity.DataStandard;
 import com.hand.hdsp.quality.domain.entity.DataStandardVersion;
 import com.hand.hdsp.quality.domain.entity.StandardExtra;
@@ -124,17 +123,9 @@ public class DataStandServiceImpl implements DataStandardService {
             throw new CommonException("hdsp.xsta.err.data_standard_status_can_not_delete");
         }
         if(StandardConstant.ONLINE_APPROVING.equals(dataStandardDTO.getStatus())){
-            //删除申请记录表记录
-            List<ApprovalHeaderDTO> approvalHeaderDTOS = approvalHeaderRepository.selectDTOByCondition(Condition.builder(ApprovalHeader.class)
-                    .andWhere(Sqls.custom()
-                            .andEqualTo(ApprovalHeader.FIELD_RESOURCE_NAME, dataStandardDTO.getStandardName())
-                            .andEqualTo(ApprovalHeader.FIELD_ITEM_TYPE, DATA_STANDARD)
-                            .andEqualTo(ApprovalHeader.FIELD_OPERATION, StandardConstant.OFFLINE_APPROVING)
-                            .andEqualTo(ApprovalHeader.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
-                    .build());
-            if(CollectionUtils.isNotEmpty(approvalHeaderDTOS)){
-                approvalHeaderRepository.deleteDTO(approvalHeaderDTOS.get(0));
-            }
+            //删除申请头表
+
+            //删除申请行标
         }
         dataStandardRepository.deleteDTO(dataStandardDTO);
         //删除版本表数据

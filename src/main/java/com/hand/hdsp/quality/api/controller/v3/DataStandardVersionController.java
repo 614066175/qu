@@ -25,7 +25,7 @@ import springfox.documentation.annotations.ApiIgnore;
  * @author guoliangli01@hand-china.com 2020-11-26 16:00:31
  */
 @RestController("dataStandardVersionController.v1")
-@RequestMapping("/v1/{organizationId}/data-standard-versions")
+@RequestMapping("/v3/{organizationId}/data-standard-versions")
 public class DataStandardVersionController extends BaseController {
 
     private DataStandardVersionRepository dataStandardVersionRepository;
