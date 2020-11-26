@@ -42,6 +42,7 @@ public class SwaggerTags {
     public static final String STREAMING_RESULT_RULE = "STREAMING RESULT RULE";
     public static final String STANDARD_GROUP="STANDARD GROUP CONTROLLER";
     public static final String DATA_STANDARD="DATA STANDARD CONTROLLER";
+    public static final String NAME_STANDARD="NAME STANDARD CONTROLLER";
 
     @Autowired
     public SwaggerTags(Docket docket) {
@@ -74,7 +75,8 @@ public class SwaggerTags {
                 new Tag(STREAMING_RESULT_BASE, "实时数据方案结果表-基础信息 管理 API"),
                 new Tag(STREAMING_RESULT_RULE, "实时数据方案结果表-规则信息 管理 API"),
                 new Tag(STANDARD_GROUP, "标准分组 管理 API"),
-                new Tag(DATA_STANDARD, "数据标准 管理 API")
+                new Tag(DATA_STANDARD, "数据标准 管理 API"),
+                new Tag(NAME_STANDARD,"命名标准 管理 API")
         );
     }
 }

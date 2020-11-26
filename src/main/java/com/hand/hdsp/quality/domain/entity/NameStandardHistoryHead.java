@@ -50,7 +50,7 @@ public class NameStandardHistoryHead extends AuditDomain {
     @GeneratedValue
     private Long historyHeadId;
 
-    private Long nameStandartId;
+    private Long nameStandardId;
 
     private Long checkedNum;
 
@@ -60,7 +60,7 @@ public class NameStandardHistoryHead extends AuditDomain {
 
     private Date execEndTime;
 
-    private Integer checkedStatus;
+    private String checkedStatus;
 
     private Long tenantId;
 

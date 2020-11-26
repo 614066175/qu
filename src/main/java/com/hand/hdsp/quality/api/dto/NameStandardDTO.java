@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.dto;
 
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -16,6 +17,8 @@ import lombok.NoArgsConstructor;
 import lombok.*;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.hzero.boot.platform.lov.annotation.LovValue;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * <p>命名标准表 数据传输对象</p>
@@ -86,5 +89,34 @@ public class NameStandardDTO extends AuditDomain {
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;
+
+    //===============================================================================
+    //  说明：业务字段
+    //===============================================================================
+
+    /**
+     * 最近修订人姓名
+     */
+    @Transient
+    private String lastUpdateName;
+
+    /**
+     * 稽核状态
+     */
+    @LovValue(lovCode = "HDSP.XSTA.NAME_STANDARD_CKECKED_STATUS",meaningField = "checkedStatusMeaning")
+    @Transient
+    private String checkedStatus;
+
+    /**
+     * 稽核状态意义
+     */
+    @Transient
+    private String checkedStatusMeaning;
+
+    /**
+     * 异常数据数量
+     */
+    @Transient
+    private Long abnormalNum;
 
 }

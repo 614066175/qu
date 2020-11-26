@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.infra.mapper;
 
+import java.util.List;
+
 import com.hand.hdsp.quality.domain.entity.NameStandardContentLine;
 import io.choerodon.mybatis.common.BaseMapper;
 
@@ -9,5 +11,4 @@ import io.choerodon.mybatis.common.BaseMapper;
  * @author 张鹏 2020-11-26 11:11:24
  */
 public interface NameStandardContentLineMapper extends BaseMapper<NameStandardContentLine> {
-
 }

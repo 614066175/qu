@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v3;
 
+import io.choerodon.mybatis.pagehelper.PageHelper;
 import org.hzero.core.util.Results;
 import org.hzero.core.base.BaseController;
 import com.hand.hdsp.quality.domain.entity.NameStandard;
@@ -49,7 +50,7 @@ public class NameStandardController extends BaseController {
                 NameStandardDTO nameStandardDTO, @ApiIgnore @SortDefault(value = NameStandard.FIELD_STANDARD_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         nameStandardDTO.setTenantId(tenantId);
-        Page<NameStandardDTO> list = nameStandardRepository.pageAndSortDTO(pageRequest, nameStandardDTO);
+        Page<NameStandardDTO> list = PageHelper.doPage(pageRequest,()->nameStandardRepository.list(nameStandardDTO));
         return Results.success(list);
     }
 

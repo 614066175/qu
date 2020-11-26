@@ -4,12 +4,12 @@
 	<!-- 可根据自己的需求，是否要使用 -->
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.NameStandardHistoryHead">
         <result column="history_head_id" property="historyHeadId" jdbcType="DECIMAL"/>
-        <result column="name_standart_id" property="nameStandartId" jdbcType="DECIMAL"/>
+        <result column="name_standard_id" property="nameStandardId" jdbcType="DECIMAL"/>
         <result column="checked_num" property="checkedNum" jdbcType="DECIMAL"/>
         <result column="abnormal_num" property="abnormalNum" jdbcType="DECIMAL"/>
         <result column="exec_start_time" property="execStartTime" jdbcType="TIMESTAMP"/>
         <result column="exec_end_time" property="execEndTime" jdbcType="TIMESTAMP"/>
-        <result column="checked_status" property="checkedStatus" jdbcType="DECIMAL"/>
+        <result column="checked_status" property="checkedStatus" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
         <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>

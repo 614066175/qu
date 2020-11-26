@@ -36,7 +36,7 @@ public class NameStandardHistoryHeadDTO extends AuditDomain {
 
     @ApiModelProperty(value = "命名标准ID，关联表XSTA_NAME_STANDARD")
     @NotNull
-    private Long nameStandartId;
+    private Long nameStandardId;
 
     @ApiModelProperty(value = "稽核总数")
     @NotNull
@@ -54,9 +54,9 @@ public class NameStandardHistoryHeadDTO extends AuditDomain {
     @NotNull
     private Date execEndTime;
 
-    @ApiModelProperty(value = "稽核状态 1-失败 0-成功")
+    @ApiModelProperty(value = "稽核状态 值集 HDSP.XSTA.NAME_STANDARD_CKECKED_STATUS")
     @NotNull
-    private Integer checkedStatus;
+    private String checkedStatus;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull

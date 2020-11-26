@@ -23,4 +23,111 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+
+    <resultMap id="DtoResultMap" type="com.hand.hdsp.quality.api.dto.NameStandardDTO" extends="BaseResultMap">
+        <result column="lastUpdateName" property="lastUpdateName"/>
+        <result column="checkedStatus" property="checkedStatus"/>
+        <result column="abnormalNum" property="abnormalNum"/>
+    </resultMap>
+
+    <sql id="BaseProperties">
+        ${prefix}.standard_id,
+        ${prefix}.group_id,
+        ${prefix}.standard_code,
+        ${prefix}.standard_name,
+        ${prefix}.standard_desc,
+        ${prefix}.standard_type,
+        ${prefix}.standard_role,
+        ${prefix}.ignore_case_flag,
+        ${prefix}.charge_id,
+        ${prefix}.charge_dept_id,
+        ${prefix}.charge_tel,
+        ${prefix}.charge_email,
+        ${prefix}.enabled_flag,
+        ${prefix}.tenant_id,
+        ${prefix}.object_version_number,
+        ${prefix}.creation_date,
+        ${prefix}.created_by,
+        ${prefix}.last_updated_by,
+        ${prefix}.last_update_date
+    </sql>
+
+    <sql id="BaseWhere">
+        <where>
+            <if test="standardId != null">
+                AND ${prefix}.standard_id = #{standardId}
+            </if>
+
+            <if test="groupId != null">
+                AND ${prefix}.group_id = #{groupId}
+            </if>
+
+            <if test="standardCode != null">
+                <bind name="standardCodeLike" value="'%'+standardCode+'%'"/>
+                AND ${prefix}.standard_code LIKE #{standardCodeLike}
+            </if>
+
+            <if test="standardName != null">
+                <bind name="standardNameLike" value="'%'+standardName+'%'"/>
+                AND ${prefix}.standard_name LIKE #{standardNameLike}
+            </if>
+
+            <if test="standardDesc != null">
+                <bind name="standardDescLike" value="'%'+standardDesc+'%'"/>
+                AND ${prefix}.standard_desc LIKE #{standardDescLike}
+            </if>
+
+            <if test="standardType != null">
+                <bind name="standardTypeLike" value="'%'+standardType+'%'"/>
+                AND ${prefix}.standard_type LIKE #{standardTypeLike}
+            </if>
+
+            <if test="ignoreCaseFlag != null">
+                AND ${prefix}.ignore_case_flag = #{ignoreCaseFlag}
+            </if>
+
+            <if test="tenantId != null">
+                AND ${prefix}.tenant_id = #{tenantId}
+            </if>
+
+            <if test="lastUpdateDate != null">
+                AND ${prefix}.last_update_date &gt;= #{lastUpdateDate}
+            </if>
+
+            <if test="lastUpdatedBy != null">
+                AND ${prefix}.last_updated_by = #{lastUpdatedBy}
+            </if>
+
+            <if test="enabledFlag != null">
+                AND ${prefix}.enabled_flag = #{enabledFlag}
+            </if>
+        </where>
+    </sql>
+
+    <select id="list" resultMap="DtoResultMap">
+        SELECT
+        iu.login_name AS lastUpdateName,
+        IFNULL(xnshh.checked_status,"UNEXECUTE") AS checkedStatus,
+        IFNULL(xnshh.abnormal_num,0) AS abnormalNum,
+        <include refid="BaseProperties">
+            <property name="prefix" value="xns"/>
+        </include>
+        FROM
+        xsta_name_standard xns
+        LEFT JOIN iam_user iu ON (xns.last_updated_by = iu.id)
+        LEFT JOIN xsta_name_standard_history_head xnshh ON (xns.standard_id = xnshh.name_standard_id)
+        <include refid="BaseWhere">
+            <property name="prefix" value="xns"/>
+        </include>
+        <if test="lastUpdateName != null">
+            <bind name="lastUpdateNameLike" value="'%'+lastUpdateName+'%'"/>
+            AND iu.login_name LIKE #{lastUpdateNameLike}
+        </if>
+
+        <if test="checkedStatus != null">
+            <bind name="checkedStatusLike" value="'%'+checkedStatus+'%'"/>
+            AND xnshh.checked_status LIKE #{checkedStatusLike}
+        </if>
+        AND xnshh.history_head_id = (SELECT max(xnshh.history_head_id) FROM xsta_name_standard xns LEFT JOIN xsta_name_standard_history_head xnshh ON (xns.standard_id = xnshh.name_standard_id))
+    </select>
 </mapper>
