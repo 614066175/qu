@@ -4,12 +4,9 @@ import com.hand.hdsp.quality.domain.entity.StandardExtra;
 import io.choerodon.mybatis.common.BaseMapper;
 
 /**
- * <p>
- * description
- * </p>
+ * <p>标准附加信息表Mapper</p>
  *
- * @author lgl 2020/11/25 10:33
- * @since 1.0
+ * @author guoliangli01@hand-china.com 2020-11-27 14:36:45
  */
 public interface StandardExtraMapper extends BaseMapper<StandardExtra> {
 

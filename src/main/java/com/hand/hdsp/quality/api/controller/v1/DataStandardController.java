@@ -132,6 +132,22 @@ public class DataStandardController {
         return Results.success(dataStandardDTO);
     }
 
+    @ApiOperation(value = "发布数据标准")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/publish-off")
+    public ResponseEntity<?> publishOrOff(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
+        dataStandardDTO.setTenantId(tenantId);
+        dataStandardService.publishOrOff(dataStandardDTO);
+        return Results.success(dataStandardDTO);
+    }
+
+
     @ApiOperation(value = "根据唯一索引查询数据标准")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",

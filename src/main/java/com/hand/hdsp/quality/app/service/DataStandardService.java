@@ -55,4 +55,10 @@ public interface DataStandardService {
      * @param dataStandardDTO
      */
     void update(DataStandardDTO dataStandardDTO);
+
+    /**
+     * 发布数据标准
+     * @param dataStandardDTO
+     */
+    void publishOrOff(DataStandardDTO dataStandardDTO);
 }

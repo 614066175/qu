@@ -10,9 +10,9 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import lombok.*;
 
 /**
- * <p>标准额外信息表实体</p>
+ * <p>标准附加信息表实体</p>
  *
- * @author guoliangli01@hand-china.com 2020-11-25 17:27:05
+ * @author guoliangli01@hand-china.com 2020-11-27 14:36:45
  */
 @Data
 @Builder
@@ -27,7 +27,6 @@ public class StandardExtra extends AuditDomain {
     public static final String FIELD_EXTRA_ID = "extraId";
     public static final String FIELD_STANDARD_ID = "standardId";
     public static final String FIELD_STANDARD_TYPE = "standardType";
-    public static final String FIELD_VERSION_NUMBER = "versionNumber";
     public static final String FIELD_EXTRA_KEY = "extraKey";
     public static final String FIELD_EXTRA_VALUE = "extraValue";
     public static final String FIELD_TENANT_ID = "tenantId";
@@ -47,8 +46,6 @@ public class StandardExtra extends AuditDomain {
     private Long standardId;
 
     private String standardType;
-
-    private Long versionNumber;
 
     private String extraKey;
 

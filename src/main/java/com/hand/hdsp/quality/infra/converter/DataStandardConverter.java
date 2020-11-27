@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 /**
  * <p>数据标准表转换器</p>
  *
- * @author guoliangli01.@hand-china.com 2020-11-25 17:03:11
+ * @author guoliangli01@hand-china.com 2020-11-27 14:36:44
  */
 @Component
 public class DataStandardConverter implements ConvertorI<DataStandard, DataStandardDO, DataStandardDTO> {

@@ -8,47 +8,89 @@ import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 import lombok.*;
-import lombok.experimental.FieldNameConstants;
 
 /**
- * <p>
- * description
- * </p>
+ * <p>数据标准版本表实体</p>
  *
- * @author lgl 2020/11/24 14:10
- * @since 1.0
+ * @author guoliangli01@hand-china.com 2020-11-27 14:36:44
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@FieldNameConstants(prefix = "FIELD_")
 @VersionAudit
 @ModifyAudit
 @Table(name = "xsta_data_standard_version")
 public class DataStandardVersion extends AuditDomain {
 
+    public static final String FIELD_VERSION_ID = "versionId";
+    public static final String FIELD_STANDARD_ID = "standardId";
+    public static final String FIELD_STANDARD_CODE = "standardCode";
+    public static final String FIELD_STANDARD_NAME = "standardName";
+    public static final String FIELD_STANDARD_DESC = "standardDesc";
+    public static final String FIELD_DATA_TYPE = "dataType";
+    public static final String FIELD_DATA_PATTERN = "dataPattern";
+    public static final String FIELD_LENGTH_TYPE = "lengthType";
+    public static final String FIELD_DATA_LENGTH = "dataLength";
+    public static final String FIELD_VALUE_TYPE = "valueType";
+    public static final String FIELD_VALUE_RANGE = "valueRange";
+    public static final String FIELD_STANDARD_ACCORD = "standardAccord";
+    public static final String FIELD_ACCORD_CONTENT = "accordContent";
+    public static final String FIELD_CHARGE_DEPT_ID = "chargeDeptId";
+    public static final String FIELD_CHARGE_ID = "chargeId";
+    public static final String FIELD_CHARGE_TEL = "chargeTel";
+    public static final String FIELD_CHARGE_EMAIL = "chargeEmail";
+    public static final String FIELD_VERSION_NUMBER = "versionNumber";
+    public static final String FIELD_TENANT_ID = "tenantId";
+
+    //
+    // 业务方法(按public protected private顺序排列)
+    // ------------------------------------------------------------------------------
+
+    //
+    // 数据库字段
+    // ------------------------------------------------------------------------------
+
     @Id
     @GeneratedValue
     private Long versionId;
+
     private Long standardId;
+
     private String standardCode;
+
     private String standardName;
+
     private String standardDesc;
+
     private String dataType;
+
     private String dataPattern;
+
     private String lengthType;
+
     private String dataLength;
+
     private String valueType;
+
     private String valueRange;
+
     private String standardAccord;
-    private String standardSource;
+
+    private String accordContent;
+
     private Long chargeDeptId;
+
     private Long chargeId;
+
     private String chargeTel;
+
     private String chargeEmail;
-    private String versionNumber;
+
+    private Long versionNumber;
+
     private Long tenantId;
+
 
 }

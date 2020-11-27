@@ -12,7 +12,7 @@ import lombok.*;
 /**
  * <p>数据标准表实体</p>
  *
- * @author guoliangli01.@hand-china.com 2020-11-25 17:20:48
+ * @author guoliangli01@hand-china.com 2020-11-27 14:36:44
  */
 @Data
 @Builder
@@ -25,7 +25,6 @@ import lombok.*;
 public class DataStandard extends AuditDomain {
 
     public static final String FIELD_STANDARD_ID = "standardId";
-    public static final String FIELD_VERSION_NUMBER = "versionNumber";
     public static final String FIELD_GROUP_ID = "groupId";
     public static final String FIELD_STANDARD_CODE = "standardCode";
     public static final String FIELD_STANDARD_NAME = "standardName";
@@ -37,12 +36,12 @@ public class DataStandard extends AuditDomain {
     public static final String FIELD_VALUE_TYPE = "valueType";
     public static final String FIELD_VALUE_RANGE = "valueRange";
     public static final String FIELD_STANDARD_ACCORD = "standardAccord";
-    public static final String FIELD_STANDARD_SOURCE = "standardSource";
+    public static final String FIELD_ACCORD_CONTENT = "accordContent";
     public static final String FIELD_CHARGE_DEPT_ID = "chargeDeptId";
     public static final String FIELD_CHARGE_ID = "chargeId";
     public static final String FIELD_CHARGE_TEL = "chargeTel";
     public static final String FIELD_CHARGE_EMAIL = "chargeEmail";
-    public static final String FIELD_STATUS = "status";
+    public static final String FIELD_STANDARD_STATUS = "standardStatus";
     public static final String FIELD_TENANT_ID = "tenantId";
 
     //
@@ -56,8 +55,6 @@ public class DataStandard extends AuditDomain {
     @Id
     @GeneratedValue
     private Long standardId;
-
-    private Long versionNumber;
 
     private Long groupId;
 
@@ -81,7 +78,7 @@ public class DataStandard extends AuditDomain {
 
     private String standardAccord;
 
-    private String standardSource;
+    private String accordContent;
 
     private Long chargeDeptId;
 
@@ -91,7 +88,7 @@ public class DataStandard extends AuditDomain {
 
     private String chargeEmail;
 
-    private String status;
+    private String standardStatus;
 
     private Long tenantId;
 

@@ -8,7 +8,7 @@
         <result column="group_code" property="groupCode" jdbcType="VARCHAR"/>
         <result column="group_name" property="groupName" jdbcType="VARCHAR"/>
         <result column="group_desc" property="groupDesc" jdbcType="VARCHAR"/>
-        <result column="group_type" property="groupType" jdbcType="VARCHAR"/>
+        <result column="standard_type" property="standardType" jdbcType="VARCHAR"/>
         <result column="enabled_flag" property="enabledFlag" jdbcType="DECIMAL"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>

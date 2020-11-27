@@ -15,7 +15,7 @@
         <result column="value_type" property="valueType" jdbcType="VARCHAR"/>
         <result column="value_range" property="valueRange" jdbcType="VARCHAR"/>
         <result column="standard_accord" property="standardAccord" jdbcType="VARCHAR"/>
-        <result column="standard_source" property="standardSource" jdbcType="VARCHAR"/>
+        <result column="accord_content" property="accordContent" jdbcType="VARCHAR"/>
         <result column="charge_dept_id" property="chargeDeptId" jdbcType="DECIMAL"/>
         <result column="charge_id" property="chargeId" jdbcType="DECIMAL"/>
         <result column="charge_tel" property="chargeTel" jdbcType="VARCHAR"/>

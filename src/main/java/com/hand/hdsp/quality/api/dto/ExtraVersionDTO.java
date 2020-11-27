@@ -11,47 +11,42 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 /**
- * <p>标准分组表 数据传输对象</p>
+ * <p>附加信息版本表 数据传输对象</p>
  *
- * @author guoliangli01@hand-china.com 2020-11-27 14:36:44
+ * @author guoliangli01@hand-china.com 2020-11-27 14:36:45
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@ApiModel("标准分组表")
+@ApiModel("附加信息版本表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class StandardGroupDTO extends AuditDomain {
+public class ExtraVersionDTO extends AuditDomain {
 
-    @ApiModelProperty("分组ID，主键，供其他表做外键")
-    private Long groupId;
+    @ApiModelProperty("表ID，主键，供其他表做外键")
+    private Long versionId;
 
-    @ApiModelProperty(value = "父分组ID")
+    @ApiModelProperty(value = "标准ID")
     @NotNull
-    private Long parentGroupId;
-
-    @ApiModelProperty(value = "分组编码")
-    @NotBlank
-    @Size(max = 50)
-    private String groupCode;
-
-    @ApiModelProperty(value = "分组名称")
-    @NotBlank
-    @Size(max = 120)
-    private String groupName;
-
-    @ApiModelProperty(value = "分组描述")
-    private String groupDesc;
+    private Long standardId;
 
     @ApiModelProperty(value = "标准类型(快码：HDSP.XSTA.STANDARD_TYPE：DATA/数据标准，FIELD/字段标准，NAME/命名标准)")
     @NotBlank
     @Size(max = 30)
     private String standardType;
 
-    @ApiModelProperty(value = "是否启用 1-启用 0-不启用")
+    @ApiModelProperty(value = "版本号")
     @NotNull
-    private Integer enabledFlag;
+    private Long versionNumber;
+
+    @ApiModelProperty(value = "额外信息键")
+    @NotBlank
+    @Size(max = 30)
+    private String extraKey;
+
+    @ApiModelProperty(value = "额外信息值")
+    private String extraValue;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull

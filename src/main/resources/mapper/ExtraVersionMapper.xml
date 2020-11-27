@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.StandardApproveMapper">
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.ExtraVersionMapper">
 	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.StandardApprove">
-        <result column="approve_id" property="approveId" jdbcType="DECIMAL"/>
-        <result column="standard_name" property="standardName" jdbcType="VARCHAR"/>
-        <result column="standard_desc" property="standardDesc" jdbcType="VARCHAR"/>
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.ExtraVersion">
+        <result column="version_id" property="versionId" jdbcType="DECIMAL"/>
+        <result column="standard_id" property="standardId" jdbcType="DECIMAL"/>
         <result column="standard_type" property="standardType" jdbcType="VARCHAR"/>
-        <result column="operation" property="operation" jdbcType="VARCHAR"/>
-        <result column="apply_id" property="applyId" jdbcType="DECIMAL"/>
+        <result column="version_number" property="versionNumber" jdbcType="DECIMAL"/>
+        <result column="extra_key" property="extraKey" jdbcType="VARCHAR"/>
+        <result column="extra_value" property="extraValue" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
         <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>

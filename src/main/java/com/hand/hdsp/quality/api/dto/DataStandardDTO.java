@@ -15,7 +15,7 @@ import lombok.*;
 /**
  * <p>数据标准表 数据传输对象</p>
  *
- * @author guoliangli01.@hand-china.com 2020-11-25 17:20:48
+ * @author guoliangli01@hand-china.com 2020-11-27 14:36:44
  */
 @Data
 @Builder
@@ -29,10 +29,6 @@ public class DataStandardDTO extends AuditDomain {
     @ApiModelProperty("数据标准ID，主键，供其他表做外键")
     private Long standardId;
 
-    @ApiModelProperty(value = "数据标准版本号")
-    @NotNull
-    private Long versionNumber;
-
     @ApiModelProperty(value = "分组ID")
     @NotNull
     private Long groupId;
@@ -44,37 +40,37 @@ public class DataStandardDTO extends AuditDomain {
 
     @ApiModelProperty(value = "数据标准名称")
     @NotBlank
-    @Size(max = 255)
+    @Size(max = 120)
     private String standardName;
 
     @ApiModelProperty(value = "数据标准描述")
     private String standardDesc;
 
-    @ApiModelProperty(value = "数据类型")
+    @ApiModelProperty(value = "数据类型 (HDSP.XDMP.LABEL_DATA_TYPE)")
     @NotBlank
-    @Size(max = 50)
+    @Size(max = 30)
     private String dataType;
 
     @ApiModelProperty(value = "数据格式")
     private String dataPattern;
 
-    @ApiModelProperty(value = "长度类型")
+    @ApiModelProperty(value = "长度类型（快码HSDP.XSTA.LENGTH_TYPE）")
     private String lengthType;
 
     @ApiModelProperty(value = "数据长度")
     private String dataLength;
 
-    @ApiModelProperty(value = "值域类型")
+    @ApiModelProperty(value = "值域类型（快码HDSP.XSTA.VALUE_TYPE）")
     private String valueType;
 
     @ApiModelProperty(value = "值域")
     private String valueRange;
 
-    @ApiModelProperty(value = "标准依据")
+    @ApiModelProperty(value = "标准依据（快码HDSP.XSTA.STANDARD_ACCORD）")
     private String standardAccord;
 
-    @ApiModelProperty(value = "标准来源")
-    private String standardSource;
+    @ApiModelProperty(value = "依据内容")
+    private String accordContent;
 
     @ApiModelProperty(value = "责任部门ID")
     @NotNull
@@ -90,10 +86,10 @@ public class DataStandardDTO extends AuditDomain {
     @ApiModelProperty(value = "责任人邮箱")
     private String chargeEmail;
 
-    @ApiModelProperty(value = "数据标准状态(新建，在线，离线，待审核)")
+    @ApiModelProperty(value = "数据标准状态(快码HSDP.XSTA.STANDARD_STATUS)")
     @NotBlank
-    @Size(max = 50)
-    private String status;
+    @Size(max = 30)
+    private String standardStatus;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull
@@ -101,4 +97,8 @@ public class DataStandardDTO extends AuditDomain {
 
     @Transient
     private List<StandardExtraDTO> standardExtraDTOList;
+
+    @Transient
+    private Long versionNumber;
+
 }

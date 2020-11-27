@@ -7,12 +7,9 @@ import com.hand.hdsp.quality.domain.repository.StandardExtraRepository;
 import org.springframework.stereotype.Component;
 
 /**
- * <p>
- * description
- * </p>
+ * <p>标准附加信息表资源库实现</p>
  *
- * @author lgl 2020/11/25 11:33
- * @since 1.0
+ * @author guoliangli01@hand-china.com 2020-11-27 14:36:45
  */
 @Component
 public class StandardExtraRepositoryImpl extends BaseRepositoryImpl<StandardExtra, StandardExtraDTO> implements StandardExtraRepository {

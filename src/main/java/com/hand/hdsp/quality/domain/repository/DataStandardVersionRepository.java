@@ -6,12 +6,9 @@ import com.hand.hdsp.quality.api.dto.DataStandardVersionDTO;
 import com.hand.hdsp.quality.domain.entity.DataStandardVersion;
 
 /**
- * <p>
- * description
- * </p>
+ * <p>数据标准版本表资源库</p>
  *
- * @author lgl 2020/11/25 10:45
- * @since 1.0
+ * @author guoliangli01@hand-china.com 2020-11-27 14:36:44
  */
 public interface DataStandardVersionRepository extends BaseRepository<DataStandardVersion, DataStandardVersionDTO>, ProxySelf<DataStandardVersionRepository> {
 

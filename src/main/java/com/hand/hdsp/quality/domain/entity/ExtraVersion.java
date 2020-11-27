@@ -10,9 +10,9 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import lombok.*;
 
 /**
- * <p>标准分组表实体</p>
+ * <p>附加信息版本表实体</p>
  *
- * @author guoliangli01@hand-china.com 2020-11-27 14:36:44
+ * @author guoliangli01@hand-china.com 2020-11-27 14:36:45
  */
 @Data
 @Builder
@@ -21,16 +21,15 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = false)
 @VersionAudit
 @ModifyAudit
-@Table(name = "xsta_standard_group")
-public class StandardGroup extends AuditDomain {
+@Table(name = "xsta_extra_version")
+public class ExtraVersion extends AuditDomain {
 
-    public static final String FIELD_GROUP_ID = "groupId";
-    public static final String FIELD_PARENT_GROUP_ID = "parentGroupId";
-    public static final String FIELD_GROUP_CODE = "groupCode";
-    public static final String FIELD_GROUP_NAME = "groupName";
-    public static final String FIELD_GROUP_DESC = "groupDesc";
+    public static final String FIELD_VERSION_ID = "versionId";
+    public static final String FIELD_STANDARD_ID = "standardId";
     public static final String FIELD_STANDARD_TYPE = "standardType";
-    public static final String FIELD_ENABLED_FLAG = "enabledFlag";
+    public static final String FIELD_VERSION_NUMBER = "versionNumber";
+    public static final String FIELD_EXTRA_KEY = "extraKey";
+    public static final String FIELD_EXTRA_VALUE = "extraValue";
     public static final String FIELD_TENANT_ID = "tenantId";
 
     //
@@ -43,19 +42,17 @@ public class StandardGroup extends AuditDomain {
 
     @Id
     @GeneratedValue
-    private Long groupId;
+    private Long versionId;
 
-    private Long parentGroupId;
-
-    private String groupCode;
-
-    private String groupName;
-
-    private String groupDesc;
+    private Long standardId;
 
     private String standardType;
 
-    private Integer enabledFlag;
+    private Long versionNumber;
+
+    private String extraKey;
+
+    private String extraValue;
 
     private Long tenantId;
 

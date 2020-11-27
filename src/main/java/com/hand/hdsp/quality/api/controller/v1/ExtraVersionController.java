@@ -1,8 +1,8 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
-import com.hand.hdsp.quality.api.dto.StandardExtraDTO;
-import com.hand.hdsp.quality.domain.entity.StandardExtra;
-import com.hand.hdsp.quality.domain.repository.StandardExtraRepository;
+import com.hand.hdsp.quality.api.dto.ExtraVersionDTO;
+import com.hand.hdsp.quality.domain.entity.ExtraVersion;
+import com.hand.hdsp.quality.domain.repository.ExtraVersionRepository;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
@@ -20,21 +20,21 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 /**
- * <p>标准附加信息表 管理 API</p>
+ * <p>附加信息版本表 管理 API</p>
  *
  * @author guoliangli01@hand-china.com 2020-11-27 14:36:45
  */
-@RestController("standardExtraController.v1")
-@RequestMapping("/v1/{organizationId}/standard-extras")
-public class StandardExtraController extends BaseController {
+@RestController("extraVersionController.v1")
+@RequestMapping("/v1/{organizationId}/extra-versions")
+public class ExtraVersionController extends BaseController {
 
-    private StandardExtraRepository standardExtraRepository;
+    private ExtraVersionRepository extraVersionRepository;
 
-    public StandardExtraController(StandardExtraRepository standardExtraRepository) {
-        this.standardExtraRepository = standardExtraRepository;
+    public ExtraVersionController(ExtraVersionRepository extraVersionRepository) {
+        this.extraVersionRepository = extraVersionRepository;
     }
 
-    @ApiOperation(value = "标准附加信息表列表")
+    @ApiOperation(value = "附加信息版本表列表")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -44,33 +44,33 @@ public class StandardExtraController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  StandardExtraDTO standardExtraDTO, @ApiIgnore @SortDefault(value = StandardExtra.FIELD_EXTRA_ID,
+                                  ExtraVersionDTO extraVersionDTO, @ApiIgnore @SortDefault(value = ExtraVersion.FIELD_VERSION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
-        standardExtraDTO.setTenantId(tenantId);
-        Page<StandardExtraDTO> list = standardExtraRepository.pageAndSortDTO(pageRequest, standardExtraDTO);
+        extraVersionDTO.setTenantId(tenantId);
+        Page<ExtraVersionDTO> list = extraVersionRepository.pageAndSortDTO(pageRequest, extraVersionDTO);
         return Results.success(list);
     }
 
-    @ApiOperation(value = "标准附加信息表明细")
+    @ApiOperation(value = "附加信息版本表明细")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
             paramType = "path",
             required = true
     ), @ApiImplicitParam(
-            name = "extraId",
-            value = "标准附加信息表主键",
+            name = "versionId",
+            value = "附加信息版本表主键",
             paramType = "path",
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/{extraId}")
-    public ResponseEntity<?> detail(@PathVariable Long extraId) {
-        StandardExtraDTO standardExtraDTO = standardExtraRepository.selectDTOByPrimaryKeyAndTenant(extraId);
-        return Results.success(standardExtraDTO);
+    @GetMapping("/{versionId}")
+    public ResponseEntity<?> detail(@PathVariable Long versionId) {
+        ExtraVersionDTO extraVersionDTO = extraVersionRepository.selectDTOByPrimaryKeyAndTenant(versionId);
+        return Results.success(extraVersionDTO);
     }
 
-    @ApiOperation(value = "创建标准附加信息表")
+    @ApiOperation(value = "创建附加信息版本表")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -79,14 +79,14 @@ public class StandardExtraController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody StandardExtraDTO standardExtraDTO) {
-        standardExtraDTO.setTenantId(tenantId);
-        this.validObject(standardExtraDTO);
-        standardExtraRepository.insertDTOSelective(standardExtraDTO);
-        return Results.success(standardExtraDTO);
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody ExtraVersionDTO extraVersionDTO) {
+        extraVersionDTO.setTenantId(tenantId);
+        this.validObject(extraVersionDTO);
+        extraVersionRepository.insertDTOSelective(extraVersionDTO);
+        return Results.success(extraVersionDTO);
     }
 
-    @ApiOperation(value = "修改标准附加信息表")
+    @ApiOperation(value = "修改附加信息版本表")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -95,12 +95,12 @@ public class StandardExtraController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody StandardExtraDTO standardExtraDTO) {
-                standardExtraRepository.updateDTOWhereTenant(standardExtraDTO, tenantId);
-        return Results.success(standardExtraDTO);
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody ExtraVersionDTO extraVersionDTO) {
+                extraVersionRepository.updateDTOWhereTenant(extraVersionDTO, tenantId);
+        return Results.success(extraVersionDTO);
     }
 
-    @ApiOperation(value = "删除标准附加信息表")
+    @ApiOperation(value = "删除附加信息版本表")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -110,9 +110,9 @@ public class StandardExtraController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestBody StandardExtraDTO standardExtraDTO) {
-                standardExtraDTO.setTenantId(tenantId);
-        standardExtraRepository.deleteByPrimaryKey(standardExtraDTO);
+                                    @RequestBody ExtraVersionDTO extraVersionDTO) {
+                extraVersionDTO.setTenantId(tenantId);
+        extraVersionRepository.deleteByPrimaryKey(extraVersionDTO);
         return Results.success();
     }
 }

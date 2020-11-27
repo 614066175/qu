@@ -7,12 +7,9 @@ import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import org.springframework.stereotype.Component;
 
 /**
- * <p>
- * description
- * </p>
+ * <p>标准分组表资源库实现</p>
  *
- * @author lgl 2020/11/25 11:29
- * @since 1.0
+ * @author guoliangli01@hand-china.com 2020-11-27 14:36:44
  */
 @Component
 public class StandardGroupRepositoryImpl extends BaseRepositoryImpl<StandardGroup, StandardGroupDTO> implements StandardGroupRepository {

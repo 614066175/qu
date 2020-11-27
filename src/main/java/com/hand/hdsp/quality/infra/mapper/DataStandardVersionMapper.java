@@ -4,12 +4,9 @@ import com.hand.hdsp.quality.domain.entity.DataStandardVersion;
 import io.choerodon.mybatis.common.BaseMapper;
 
 /**
- * <p>
- * description
- * </p>
+ * <p>数据标准版本表Mapper</p>
  *
- * @author lgl 2020/11/25 10:32
- * @since 1.0
+ * @author guoliangli01@hand-china.com 2020-11-27 14:36:44
  */
 public interface DataStandardVersionMapper extends BaseMapper<DataStandardVersion> {
 

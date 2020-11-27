@@ -11,16 +11,16 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 /**
- * <p>标准额外信息表 数据传输对象</p>
+ * <p>标准附加信息表 数据传输对象</p>
  *
- * @author guoliangli01@hand-china.com 2020-11-25 17:27:05
+ * @author guoliangli01@hand-china.com 2020-11-27 14:36:45
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@ApiModel("标准额外信息表")
+@ApiModel("标准附加信息表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StandardExtraDTO extends AuditDomain {
 
@@ -31,18 +31,14 @@ public class StandardExtraDTO extends AuditDomain {
     @NotNull
     private Long standardId;
 
-    @ApiModelProperty(value = "标准类别")
+    @ApiModelProperty(value = "标准类型(快码：HDSP.XSTA.STANDARD_TYPE：DATA/数据标准，FIELD/字段标准，NAME/命名标准)")
     @NotBlank
-    @Size(max = 50)
+    @Size(max = 30)
     private String standardType;
-
-    @ApiModelProperty(value = "标准版本号")
-    @NotNull
-    private Long versionNumber;
 
     @ApiModelProperty(value = "额外信息键")
     @NotBlank
-    @Size(max = 255)
+    @Size(max = 30)
     private String extraKey;
 
     @ApiModelProperty(value = "额外信息值")

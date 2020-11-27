@@ -4,7 +4,7 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import lombok.*;
 
 /**
- * <p>标准附加信息表数据对象</p>
+ * <p>附加信息版本表数据对象</p>
  *
  * @author guoliangli01@hand-china.com 2020-11-27 14:36:45
  */
@@ -13,13 +13,15 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class StandardExtraDO extends AuditDomain {
+public class ExtraVersionDO extends AuditDomain {
 
-    private Long extraId;
+    private Long versionId;
 
     private Long standardId;
 
     private String standardType;
+
+    private Long versionNumber;
 
     private String extraKey;
 

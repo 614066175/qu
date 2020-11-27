@@ -16,12 +16,12 @@
         <result column="value_type" property="valueType" jdbcType="VARCHAR"/>
         <result column="value_range" property="valueRange" jdbcType="VARCHAR"/>
         <result column="standard_accord" property="standardAccord" jdbcType="VARCHAR"/>
-        <result column="standard_source" property="standardSource" jdbcType="VARCHAR"/>
+        <result column="accord_content" property="accordContent" jdbcType="VARCHAR"/>
         <result column="charge_dept_id" property="chargeDeptId" jdbcType="DECIMAL"/>
         <result column="charge_id" property="chargeId" jdbcType="DECIMAL"/>
         <result column="charge_tel" property="chargeTel" jdbcType="VARCHAR"/>
         <result column="charge_email" property="chargeEmail" jdbcType="VARCHAR"/>
-        <result column="status" property="status" jdbcType="VARCHAR"/>
+        <result column="standard_status" property="standardStatus" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
         <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
@@ -32,7 +32,6 @@
 
     <sql id="baseColumn">
           ${ds}.standard_id,
-          ${ds}.version_number,
           ${ds}.group_id,
           ${ds}.standard_code,
           ${ds}.standard_name,
@@ -44,12 +43,12 @@
           ${ds}.value_type,
           ${ds}.value_range,
           ${ds}.standard_accord,
-          ${ds}.standard_source,
+          ${ds}.accord_content,
           ${ds}.charge_dept_id,
           ${ds}.charge_id,
           ${ds}.charge_tel,
           ${ds}.charge_email,
-          ${ds}.status,
+          ${ds}.standard_status,
           ${ds}.tenant_id,
           ${ds}.object_version_number
     </sql>
@@ -68,7 +67,7 @@
                 and ds.standard_name=#{dataStandardDTO.standardName}
             </if>
             <if test="dataStandardDTO.tenantId!=null">
-                and ds.tenantId=#{dataStandardDTO.tenantId}
+                and ds.tenant_id=#{dataStandardDTO.tenantId}
             </if>
         </where>
     </select>

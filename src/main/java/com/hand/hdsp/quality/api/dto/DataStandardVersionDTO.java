@@ -1,20 +1,19 @@
 package com.hand.hdsp.quality.api.dto;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.choerodon.mybatis.annotation.ModifyAudit;
-import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 /**
- * <p>
- * description
- * </p>
+ * <p>数据标准版本表 数据传输对象</p>
  *
- * @author lgl 2020/11/25 10:42
- * @since 1.0
+ * @author guoliangli01@hand-china.com 2020-11-27 14:36:44
  */
 @Data
 @Builder
@@ -23,62 +22,74 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = false)
 @ApiModel("数据标准版本表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@VersionAudit
-@ModifyAudit
 public class DataStandardVersionDTO extends AuditDomain {
 
-    @ApiModelProperty(value = "表主键")
+    @ApiModelProperty("版本ID，主键，供其他表做外键")
     private Long versionId;
+
     @ApiModelProperty(value = "标准ID")
+    @NotNull
     private Long standardId;
-    @ApiModelProperty(value = "标准编码")
+
+    @ApiModelProperty(value = "数据标准编码")
+    @NotBlank
+    @Size(max = 50)
     private String standardCode;
 
-    @ApiModelProperty(value = "标准名称")
+    @ApiModelProperty(value = "数据标准名称")
+    @NotBlank
+    @Size(max = 120)
     private String standardName;
 
-    @ApiModelProperty(value = "标准描述")
+    @ApiModelProperty(value = "数据标准描述")
     private String standardDesc;
 
-    @ApiModelProperty(value = "数据类型")
+    @ApiModelProperty(value = "数据类型(快码：HDSP.XDMP.LABEL_DATA_TYPE)")
+    @NotBlank
+    @Size(max = 30)
     private String dataType;
 
     @ApiModelProperty(value = "数据格式")
     private String dataPattern;
 
-    @ApiModelProperty(value = "长度类型")
+    @ApiModelProperty(value = "长度类型（快码：HSDP.XSTA.LENGTH_TYPE）")
     private String lengthType;
 
     @ApiModelProperty(value = "数据长度")
     private String dataLength;
 
-    @ApiModelProperty(value = "值域类型")
+    @ApiModelProperty(value = "值域类型（快码：HDSP.XSTA.VALUE_TYPE）")
     private String valueType;
 
-    @ApiModelProperty(value = "值域值")
+    @ApiModelProperty(value = "值域")
     private String valueRange;
 
-    @ApiModelProperty(value = "标准依据")
+    @ApiModelProperty(value = "标准依据（快码：HDSP.XSTA.STANDARD_ACCORD）")
     private String standardAccord;
 
-    @ApiModelProperty(value = "标准来源")
-    private String standardSource;
+    @ApiModelProperty(value = "依据内容")
+    private String accordContent;
 
-    @ApiModelProperty(value = "责任人部门ID")
+    @ApiModelProperty(value = "责任部门ID")
+    @NotNull
     private Long chargeDeptId;
 
     @ApiModelProperty(value = "责任人ID")
+    @NotNull
     private Long chargeId;
 
-    @ApiModelProperty(value = "责任认电话")
+    @ApiModelProperty(value = "责任人电话")
     private String chargeTel;
 
     @ApiModelProperty(value = "责任人邮箱")
     private String chargeEmail;
 
     @ApiModelProperty(value = "版本号")
-    private String versionNumber;
+    @NotNull
+    private Long versionNumber;
 
     @ApiModelProperty(value = "租户ID")
+    @NotNull
     private Long tenantId;
+
 }

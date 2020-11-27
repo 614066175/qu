@@ -6,7 +6,7 @@ import lombok.*;
 /**
  * <p>标准分组表数据对象</p>
  *
- * @author guoliangli01.@hand-china.com 2020-11-25 17:03:12
+ * @author guoliangli01@hand-china.com 2020-11-27 14:36:44
  */
 @Data
 @Builder
@@ -25,7 +25,7 @@ public class StandardGroupDO extends AuditDomain {
 
     private String groupDesc;
 
-    private String groupType;
+    private String standardType;
 
     private Integer enabledFlag;
 

@@ -6,7 +6,6 @@
         <result column="extra_id" property="extraId" jdbcType="DECIMAL"/>
         <result column="standard_id" property="standardId" jdbcType="DECIMAL"/>
         <result column="standard_type" property="standardType" jdbcType="VARCHAR"/>
-        <result column="version_number" property="versionNumber" jdbcType="DECIMAL"/>
         <result column="extra_key" property="extraKey" jdbcType="VARCHAR"/>
         <result column="extra_value" property="extraValue" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>

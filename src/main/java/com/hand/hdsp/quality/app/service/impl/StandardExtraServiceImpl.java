@@ -4,12 +4,9 @@ import com.hand.hdsp.quality.app.service.StandardExtraService;
 import org.springframework.stereotype.Service;
 
 /**
- * <p>
- * description
- * </p>
+ * <p>标准附加信息表应用服务默认实现</p>
  *
- * @author lgl 2020/11/25 10:42
- * @since 1.0
+ * @author guoliangli01@hand-china.com 2020-11-27 14:36:45
  */
 @Service
 public class StandardExtraServiceImpl implements StandardExtraService {
