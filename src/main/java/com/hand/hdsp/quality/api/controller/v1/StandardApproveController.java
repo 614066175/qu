@@ -1,4 +1,4 @@
-package com.hand.hdsp.quality.api.controller.v3;
+package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.quality.api.dto.StandardApproveDTO;
 import com.hand.hdsp.quality.domain.entity.StandardApprove;
@@ -24,8 +24,8 @@ import springfox.documentation.annotations.ApiIgnore;
  *
  * @author guoliangli01.@hand-china.com 2020-11-25 16:49:46
  */
-@RestController("standardApproveController.v3")
-@RequestMapping("/v3/{organizationId}/standard-approves")
+@RestController("standardApproveController.v1")
+@RequestMapping("/v1/{organizationId}/standard-approves")
 public class StandardApproveController extends BaseController {
 
     private StandardApproveRepository standardApproveRepository;

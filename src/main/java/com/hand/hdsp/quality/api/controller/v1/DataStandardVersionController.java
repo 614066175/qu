@@ -1,4 +1,4 @@
-package com.hand.hdsp.quality.api.controller.v3;
+package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.quality.api.dto.DataStandardVersionDTO;
 import com.hand.hdsp.quality.domain.entity.DataStandardVersion;
@@ -25,7 +25,7 @@ import springfox.documentation.annotations.ApiIgnore;
  * @author guoliangli01@hand-china.com 2020-11-26 16:00:31
  */
 @RestController("dataStandardVersionController.v1")
-@RequestMapping("/v3/{organizationId}/data-standard-versions")
+@RequestMapping("/v1/{organizationId}/data-standard-versions")
 public class DataStandardVersionController extends BaseController {
 
     private DataStandardVersionRepository dataStandardVersionRepository;

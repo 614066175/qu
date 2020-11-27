@@ -1,4 +1,4 @@
-package com.hand.hdsp.quality.api.controller.v3;
+package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.app.service.StandardGroupService;
@@ -26,8 +26,8 @@ import org.springframework.web.bind.annotation.*;
  * @since 1.0
  */
 @Api(tags = SwaggerTags.STANDARD_GROUP)
-@RestController("standardGroupController.v3")
-@RequestMapping("/v3/{organizationId}/standard-group")
+@RestController("standardGroupController.v1")
+@RequestMapping("/v1/{organizationId}/standard-group")
 public class StandardGroupController extends BaseController {
 
     private final StandardGroupService standardGroupService;

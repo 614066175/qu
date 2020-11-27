@@ -1,4 +1,4 @@
-package com.hand.hdsp.quality.api.controller.v3;
+package com.hand.hdsp.quality.api.controller.v1;
 
 import java.util.List;
 
@@ -30,8 +30,8 @@ import org.springframework.web.bind.annotation.*;
  * @since 1.0
  */
 @Api(tags = SwaggerTags.DATA_STANDARD)
-@RestController("dataStandardController.v3")
-@RequestMapping("/v3/{organizationId}/data-standard")
+@RestController("dataStandardController.v1")
+@RequestMapping("/v1/{organizationId}/data-standard")
 public class DataStandardController {
 
     private final DataStandardService dataStandardService;

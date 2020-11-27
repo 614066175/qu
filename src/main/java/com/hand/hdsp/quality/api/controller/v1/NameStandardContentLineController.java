@@ -1,24 +1,22 @@
-package com.hand.hdsp.quality.api.controller.v3;
+package com.hand.hdsp.quality.api.controller.v1;
 
-import org.hzero.core.util.Results;
-import org.hzero.core.base.BaseController;
-import com.hand.hdsp.quality.domain.entity.NameStandardContentLine;
 import com.hand.hdsp.quality.api.dto.NameStandardContentLineDTO;
+import com.hand.hdsp.quality.domain.entity.NameStandardContentLine;
 import com.hand.hdsp.quality.domain.repository.NameStandardContentLineRepository;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.hzero.mybatis.helper.SecurityTokenHelper;
-
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.core.base.BaseController;
+import org.hzero.core.util.Results;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 /**
