@@ -1,17 +1,18 @@
 package com.hand.hdsp.quality.infra.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.hand.hdsp.quality.api.dto.RelationshipDTO;
-import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
-import io.choerodon.core.exception.CommonException;
-import org.apache.commons.lang3.StringUtils;
-import org.hzero.core.util.ResponseUtils;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.hand.hdsp.quality.api.dto.RelationshipDTO;
+import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import io.choerodon.core.exception.CommonException;
+import org.apache.commons.lang3.StringUtils;
+import org.hzero.core.util.ResponseUtils;
 
 /**
  * <p>对象、json转换工具类</p>
@@ -35,7 +36,7 @@ public class JsonUtils {
         try {
             return ResponseUtils.getObjectMapper().writeValueAsString(obj);
         } catch (JsonProcessingException e) {
-            throw new CommonException("Json Process Error");
+            throw new CommonException(ErrorCode.JSON_PROCESS);
         }
     }
 
@@ -53,7 +54,7 @@ public class JsonUtils {
             return ResponseUtils.getObjectMapper().readValue(content, new TypeReference<List<WarningLevelDTO>>() {
             });
         } catch (IOException e) {
-            throw new CommonException("Json Process Error");
+            throw new CommonException(ErrorCode.JSON_PROCESS);
         }
     }
 
@@ -71,7 +72,7 @@ public class JsonUtils {
             return ResponseUtils.getObjectMapper().readValue(content, new TypeReference<List<RelationshipDTO>>() {
             });
         } catch (IOException e) {
-            throw new CommonException("Json Process Error");
+            throw new CommonException(ErrorCode.JSON_PROCESS);
         }
     }
 

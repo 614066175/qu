@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
+import com.hand.hdsp.quality.app.service.StandardAimService;
 import com.hand.hdsp.quality.domain.entity.StandardAim;
 import com.hand.hdsp.quality.domain.repository.StandardAimRepository;
 import io.choerodon.core.domain.Page;
@@ -30,8 +31,11 @@ public class StandardAimController extends BaseController {
 
     private StandardAimRepository standardAimRepository;
 
-    public StandardAimController(StandardAimRepository standardAimRepository) {
+    private StandardAimService standardAimService;
+
+    public StandardAimController(StandardAimRepository standardAimRepository, StandardAimService standardAimService) {
         this.standardAimRepository = standardAimRepository;
+        this.standardAimService = standardAimService;
     }
 
     @ApiOperation(value = "标准落标表列表")
@@ -82,7 +86,7 @@ public class StandardAimController extends BaseController {
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody StandardAimDTO standardAimDTO) {
         standardAimDTO.setTenantId(tenantId);
         this.validObject(standardAimDTO);
-        standardAimRepository.insertDTOSelective(standardAimDTO);
+        standardAimService.aim(standardAimDTO);
         return Results.success(standardAimDTO);
     }
 

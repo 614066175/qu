@@ -1,5 +1,8 @@
 package com.hand.hdsp.quality.infra.measure;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
 import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
@@ -9,9 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.core.base.BaseConstants;
 import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * <p>校验项处理程序收集器</p>
@@ -34,7 +34,7 @@ public class MeasureCollector {
     public void register(String checkItem, Measure measure) {
         if (MEASURE_MAP.containsKey(checkItem)) {
             log.error("CheckItem {} exists", checkItem);
-            throw new CommonException("error.measure.check_item.exist");
+            throw new CommonException(ErrorCode.CHECK_ITEM_EXIST);
         }
         MEASURE_MAP.put(checkItem, measure);
     }

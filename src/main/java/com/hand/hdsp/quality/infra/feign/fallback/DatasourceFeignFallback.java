@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.infra.feign.fallback;
 
 import com.hand.hdsp.quality.api.dto.DatasourceDTO;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.feign.DatasourceFeign;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -17,26 +18,26 @@ import org.springframework.stereotype.Component;
 public class DatasourceFeignFallback implements DatasourceFeign {
     @Override
     public Page<DatasourceDTO> list(Long tenantId, String datasourceName) {
-        throw new CommonException("error.feign.core.datasource.list");
+        throw new CommonException(ErrorCode.CORE_DATASOURCE_LIST);
     }
 
     @Override
     public ResponseEntity<String> execSql(Long tenantId, DatasourceDTO datasourceDTO) {
-        throw new CommonException("error.feign.core.datasource.exec_sql");
+        throw new CommonException(ErrorCode.CORE_DATASOURCE_EXEC_SQL);
     }
 
     @Override
     public ResponseEntity<String> execQuery(Long tenantId, DatasourceDTO datasourceDTO) {
-        throw new CommonException("error.feign.core.datasource.exec_query");
+        throw new CommonException(ErrorCode.CORE_DATASOURCE_EXEC_QUERY);
     }
 
     @Override
     public ResponseEntity<String> execSqlBatch(Long tenantId, DatasourceDTO datasourceDTO) {
-        throw new CommonException("error.feign.core.datasource.exec_sql_batch");
+        throw new CommonException(ErrorCode.CORE_DATASOURCE_EXEC_SQL_BATCH);
     }
 
     @Override
     public ResponseEntity<String> detail(Long tenantId, Long datasourceId) {
-        throw new CommonException("error.feign.core.datasource.detail");
+        throw new CommonException(ErrorCode.CORE_DATASOURCE_DETAIL);
     }
 }

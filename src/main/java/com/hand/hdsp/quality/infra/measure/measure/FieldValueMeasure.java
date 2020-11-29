@@ -11,6 +11,7 @@ import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
 import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.dataobject.MeasureResultDO;
@@ -63,7 +64,7 @@ public class FieldValueMeasure implements Measure {
             WarningLevelDTO warningLevelDTO = warningLevelList.get(0);
             List<LovValueDTO> lovValueDTOList = lovAdapter.queryLovValue(warningLevelDTO.getLovCode(), tenantId);
             if (CollectionUtils.isEmpty(lovValueDTOList)) {
-                throw new CommonException("未查询到值集的值");
+                throw new CommonException(ErrorCode.NOT_FIND_VALUE);
             }
 
             // 查询要执行的SQL
@@ -122,7 +123,7 @@ public class FieldValueMeasure implements Measure {
 
 
         } else {
-            throw new CommonException("字段值校验项不支持此校验类型");
+            throw new CommonException(ErrorCode.FIELD_NO_SUPPORT_CHECK_TYPE);
         }
 
         return batchResultItem;

@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.infra.feign.fallback;
 
 import com.hand.hdsp.quality.api.dto.DqRuleLineDTO;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.feign.DqRuleLineFeign;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,6 @@ public class DqRuleLineFeignFallback implements DqRuleLineFeign {
 
     @Override
     public ResponseEntity<String> listAll(Long tenantId, DqRuleLineDTO dqRuleLineDTO) {
-        throw new CommonException("error.feign.ops.dq_rule_line.list_all");
+        throw new CommonException(ErrorCode.DQ_RULE_LINE_LIST_ALL);
     }
 }

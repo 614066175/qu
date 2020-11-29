@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.infra.feign.fallback;
 
 import com.hand.hdsp.quality.api.dto.JobDTO;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.feign.DispatchJobFeign;
 import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +27,7 @@ public class DispatchJobFeignFallBack implements DispatchJobFeign {
     @Override
     public ResponseEntity<String> createOrUpdate(Long tenantId, JobDTO jobDTO) {
         log.error("feign调用job createOrUpdate错误, jobDTO: {}", jobDTO);
-        throw new CommonException("error.feign.job.create_update");
+        throw new CommonException(ErrorCode.JOB_CREATE_UPDATE);
     }
 
 }

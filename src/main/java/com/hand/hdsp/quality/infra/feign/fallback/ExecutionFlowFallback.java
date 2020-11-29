@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.infra.feign.fallback;
 
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.feign.ExecutionFlowFeign;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,6 @@ public class ExecutionFlowFallback implements ExecutionFlowFeign {
 
     @Override
     public ResponseEntity<String> getJobLog(Long tenantId, int execId, String jobId) {
-        throw new CommonException("error.feign.dispatch.executionflow.get_job_log");
+        throw new CommonException(ErrorCode.DISPATCH_GET_JOB_LOG);
     }
 }

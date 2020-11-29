@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.app.service;
 
+import com.hand.hdsp.quality.api.dto.StandardAimDTO;
+
 /**
  * <p>标准落标表应用服务</p>
  *
@@ -7,4 +9,9 @@ package com.hand.hdsp.quality.app.service;
  */
 public interface StandardAimService {
 
+    /**
+     * 标准落标
+     * @param standardAimDTO
+     */
+    void aim(StandardAimDTO standardAimDTO);
 }

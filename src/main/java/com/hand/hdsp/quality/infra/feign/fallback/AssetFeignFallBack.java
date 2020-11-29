@@ -3,7 +3,6 @@ package com.hand.hdsp.quality.infra.feign.fallback;
 import com.hand.hdsp.quality.api.dto.ApprovalHeaderDTO;
 import com.hand.hdsp.quality.api.dto.ApprovalLineDTO;
 import com.hand.hdsp.quality.infra.feign.AssetFeign;
-import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -22,8 +21,7 @@ public class AssetFeignFallBack implements AssetFeign {
 
     @Override
     public ResponseEntity<?> create(Long tenantId, ApprovalHeaderDTO approvalHeaderDTO) {
-        log.error("error");
-        throw new CommonException("");
+       return null;
     }
 
     @Override

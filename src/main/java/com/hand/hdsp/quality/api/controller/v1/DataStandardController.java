@@ -7,6 +7,7 @@ import com.hand.hdsp.quality.app.service.DataStandardService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.DataStandard;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.Permission;
@@ -53,7 +54,7 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
-    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId, DataStandardDTO dataStandardDTO, PageRequest pageRequest) {
+    public ResponseEntity<Page<DataStandardDTO>> list(@PathVariable(name = "organizationId") Long tenantId, DataStandardDTO dataStandardDTO, PageRequest pageRequest) {
         dataStandardDTO.setTenantId(tenantId);
         return Results.success(dataStandardService.list(pageRequest, dataStandardDTO));
     }
@@ -67,7 +68,7 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/detail/{standardId}")
-    public ResponseEntity<?> detail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable(name = "standardId") Long standardId) {
+    public ResponseEntity<DataStandardDTO> detail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable(name = "standardId") Long standardId) {
         return Results.success(dataStandardService.detail(tenantId, standardId));
     }
 
@@ -80,7 +81,7 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
+    public ResponseEntity<DataStandardDTO> create(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
         dataStandardService.create(dataStandardDTO);
         return Results.success(dataStandardDTO);
@@ -95,7 +96,7 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
-    public ResponseEntity<?> delete(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
+    public ResponseEntity<DataStandardDTO> delete(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
         dataStandardService.delete(dataStandardDTO);
         return Results.success(dataStandardDTO);
@@ -110,7 +111,7 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
+    public ResponseEntity<DataStandardDTO> update(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
         dataStandardService.update(dataStandardDTO);
         return Results.success(dataStandardDTO);
@@ -126,7 +127,7 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/update-status")
-    public ResponseEntity<?> updateStatus(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
+    public ResponseEntity<DataStandardDTO> updateStatus(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
         dataStandardService.updateStatus(dataStandardDTO);
         return Results.success(dataStandardDTO);
@@ -141,7 +142,7 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/publish-off")
-    public ResponseEntity<?> publishOrOff(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
+    public ResponseEntity<DataStandardDTO> publishOrOff(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
         dataStandardService.publishOrOff(dataStandardDTO);
         return Results.success(dataStandardDTO);
@@ -169,5 +170,19 @@ public class DataStandardController {
             dataStandardDTO=standardDTOList.get(0);
         }
         return Results.success(dataStandardDTO);
+    }
+
+    @ApiOperation(value = "批量删除")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @DeleteMapping("/batch-delete")
+    public ResponseEntity<Void> batchDelete(@PathVariable(name = "organizationId") Long tenantId, List<DataStandardDTO> dataStandardDTOList) {
+        dataStandardRepository.batchDTODelete(dataStandardDTOList);
+        return Results.success();
     }
 }

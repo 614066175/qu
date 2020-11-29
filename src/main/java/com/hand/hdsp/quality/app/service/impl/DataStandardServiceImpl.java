@@ -16,6 +16,7 @@ import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.domain.repository.DataStandardVersionRepository;
 import com.hand.hdsp.quality.domain.repository.ExtraVersionRepository;
 import com.hand.hdsp.quality.domain.repository.StandardExtraRepository;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import io.choerodon.core.domain.Page;
@@ -69,7 +70,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .andEqualTo(DataStandard.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                 .build());
         if (CollectionUtils.isNotEmpty(dataStandardDTOS)) {
-            throw new CommonException("hdsp.xsta.err.data_standard_code_exist");
+            throw new CommonException(ErrorCode.DATA_STANDARD_CODE_EXIST);
         }
 
         List<DataStandardDTO> standardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
@@ -78,7 +79,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .andEqualTo(DataStandard.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                 .build());
         if (CollectionUtils.isNotEmpty(standardDTOList)) {
-            throw new CommonException("hdsp.xsta.err.data_standard_name_exist");
+            throw new CommonException(ErrorCode.DATA_STANDARD_NAME_EXIST);
         }
 
         dataStandardDTO.setStandardStatus(StandardConstant.CREATE);
@@ -119,7 +120,7 @@ public class DataStandardServiceImpl implements DataStandardService {
     public void delete(DataStandardDTO dataStandardDTO) {
         if (StandardConstant.ONLINE.equals(dataStandardDTO.getStandardStatus())
                 || StandardConstant.OFFLINE_APPROVING.equals(dataStandardDTO.getStandardStatus())) {
-            throw new CommonException("hdsp.xsta.err.data_standard_status_can_not_delete");
+            throw new CommonException(ErrorCode.DATA_STANDARD_CAN_NOT_DELETE);
         }
         //暂未做申请审核 todo 删除申请头表行表
 
@@ -154,7 +155,7 @@ public class DataStandardServiceImpl implements DataStandardService {
     public void updateStatus(DataStandardDTO dataStandardDTO) {
         DataStandardDTO oldDataStandardDTO = dataStandardRepository.selectDTOByPrimaryKey(dataStandardDTO.getStandardId());
         if (Objects.isNull(oldDataStandardDTO)) {
-            throw new CommonException("hdsp.xsta.err.data_standard_not_exist");
+            throw new CommonException(ErrorCode.DATA_STANDARD_NOT_EXIST);
         }
         oldDataStandardDTO.setStandardStatus(dataStandardDTO.getStandardStatus());
         if (StandardConstant.ONLINE_APPROVING.equals(dataStandardDTO.getStandardStatus())) {
@@ -239,7 +240,7 @@ public class DataStandardServiceImpl implements DataStandardService {
     public void publishOrOff(DataStandardDTO dataStandardDTO) {
         DataStandardDTO dto = dataStandardRepository.selectDTOByPrimaryKey(dataStandardDTO.getStandardId());
         if (Objects.isNull(dto)) {
-            throw new CommonException("hdsp.xsta.err.data_standard_not_exist");
+            throw new CommonException(ErrorCode.DATA_STANDARD_NOT_EXIST);
         }
         dataStandardDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
         dataStandardRepository.updateDTOOptional(dataStandardDTO,DataStandard.FIELD_STANDARD_STATUS);

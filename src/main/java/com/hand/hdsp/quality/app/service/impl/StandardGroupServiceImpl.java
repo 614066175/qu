@@ -9,6 +9,7 @@ import com.hand.hdsp.quality.domain.entity.DataStandard;
 import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.mapper.StandardGroupMapper;
 import com.hand.hdsp.quality.infra.vo.StandardGroupVO;
 import io.choerodon.core.domain.Page;
@@ -56,14 +57,14 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                 .andWhere(Sqls.custom().andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID, standardGroupDTO.getGroupId()))
                 .build());
         if(CollectionUtils.isNotEmpty(standardGroups)){
-            throw new CommonException("hdsp.xsta.err.group_has_child_group");
+            throw new CommonException(ErrorCode.GROUP_HAS_CHILD_GROUP);
         }
         //判断是否包含标准
         List<DataStandardDTO> dataStandardDTOS = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                 .andWhere(Sqls.custom().andEqualTo(DataStandard.FIELD_GROUP_ID, standardGroupDTO.getGroupId()))
                 .build());
         if(CollectionUtils.isNotEmpty(dataStandardDTOS)){
-            throw new CommonException("hdsp.xsta.err.group_has_standard");
+            throw new CommonException(ErrorCode.GROUP_HAS_STANDARD);
         }
         standardGroupRepository.deleteDTO(standardGroupDTO);
     }
