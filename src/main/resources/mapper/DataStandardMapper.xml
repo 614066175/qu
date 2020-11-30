@@ -4,7 +4,6 @@
     <!-- 可根据自己的需求，是否要使用 -->
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.DataStandard">
         <result column="standard_id" property="standardId" jdbcType="DECIMAL"/>
-        <result column="version_number" property="versionNumber" jdbcType="DECIMAL"/>
         <result column="group_Id" property="groupId" jdbcType="DECIMAL"/>
         <result column="standard_code" property="standardCode" jdbcType="VARCHAR"/>
         <result column="standard_name" property="standardName" jdbcType="VARCHAR"/>
