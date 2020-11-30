@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.DataFieldMapper">
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.DataField">
+        <result column="field_id" property="fieldId" jdbcType="DECIMAL"/>
+        <result column="group_id" property="groupId" jdbcType="DECIMAL"/>
+        <result column="field_name" property="fieldName" jdbcType="VARCHAR"/>
+        <result column="field_comment" property="fieldComment" jdbcType="VARCHAR"/>
+        <result column="sys_common_name" property="sysCommonName" jdbcType="VARCHAR"/>
+        <result column="standard_desc" property="standardDesc" jdbcType="VARCHAR"/>
+        <result column="field_type" property="fieldType" jdbcType="VARCHAR"/>
+        <result column="field_length" property="fieldLength" jdbcType="VARCHAR"/>
+        <result column="data_pattern" property="dataPattern" jdbcType="VARCHAR"/>
+        <result column="value_type" property="valueType" jdbcType="VARCHAR"/>
+        <result column="value_range" property="valueRange" jdbcType="VARCHAR"/>
+        <result column="charge_dept_id" property="chargeDeptId" jdbcType="DECIMAL"/>
+        <result column="charge_id" property="chargeId" jdbcType="DECIMAL"/>
+        <result column="charge_tel" property="chargeTel" jdbcType="VARCHAR"/>
+        <result column="charge_email" property="chargeEmail" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="VARCHAR"/>
+        <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
+        <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
+        <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
+        <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="baseColumn">
+          ${fs}.field_id,
+          ${fs}.group_id,
+          ${fs}.field_name,
+          ${fs}.field_comment,
+          ${fs}.sys_common_name,
+          ${fs}.standard_desc,
+          ${fs}.field_type,
+          ${fs}.field_length,
+          ${fs}.data_pattern,
+          ${fs}.value_type,
+          ${fs}.value_range,
+          ${fs}.charge_dept_id,
+          ${fs}.charge_id,
+          ${fs}.charge_tel,
+          ${fs}.charge_email,
+          ${fs}.status,
+          ${fs}.tenant_id,
+          ${fs}.object_version_number
+    </sql>
+
+    <select id="list" resultType="com.hand.hdsp.quality.api.dto.DataFieldDTO">
+        select
+        <include refid="baseColumn">
+            <property name="fs" value="fs"/>
+        </include>
+        from xsta_field_standard fs
+        <where>
+            <if test="dataFieldDTO.fieldName">
+                and fs.field_name=#{dataFieldDTO.fieldName}
+            </if>
+            <if test="dataFieldDTO.tenantId!=null">
+                and fs.tenant_id=#{dataFieldDTO.tenantId}
+            </if>
+        </where>
+    </select>
+</mapper>
