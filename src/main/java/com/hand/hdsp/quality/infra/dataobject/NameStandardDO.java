@@ -11,7 +11,7 @@ import lombok.*;
 /**
  * <p>命名标准表数据对象</p>
  *
- * @author 张鹏 2020-11-26 11:11:24
+ * @author 张鹏 2020-11-27 16:35:40
  */
 @Data
 @Builder
@@ -32,7 +32,7 @@ public class NameStandardDO extends AuditDomain {
 
     private String standardType;
 
-    private String standardRole;
+    private String standardRule;
 
     private Integer ignoreCaseFlag;
 
@@ -43,6 +43,10 @@ public class NameStandardDO extends AuditDomain {
     private String chargeTel;
 
     private String chargeEmail;
+
+    private String latestCheckedStatus;
+
+    private Long latestAbnormalNum;
 
     private Integer enabledFlag;
 

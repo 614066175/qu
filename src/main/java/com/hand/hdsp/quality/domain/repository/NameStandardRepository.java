@@ -10,7 +10,7 @@ import com.hand.hdsp.core.base.ProxySelf;
 /**
  * <p>命名标准表资源库</p>
  *
- * @author 张鹏 2020-11-26 11:11:24
+ * @author 张鹏 2020-11-27 16:35:40
  */
 public interface NameStandardRepository extends BaseRepository<NameStandard, NameStandardDTO>, ProxySelf<NameStandardRepository> {
 

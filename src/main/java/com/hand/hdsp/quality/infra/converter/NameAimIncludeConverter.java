@@ -1,8 +1,8 @@
 package com.hand.hdsp.quality.infra.converter;
 
-import com.hand.hdsp.quality.domain.entity.NameStandard;
-import com.hand.hdsp.quality.infra.dataobject.NameStandardDO;
-import com.hand.hdsp.quality.api.dto.NameStandardDTO;
+import com.hand.hdsp.quality.domain.entity.NameAimInclude;
+import com.hand.hdsp.quality.infra.dataobject.NameAimIncludeDO;
+import com.hand.hdsp.quality.api.dto.NameAimIncludeDTO;
 
 import io.choerodon.core.convertor.ConvertorI;
 import org.apache.commons.lang3.StringUtils;
@@ -14,29 +14,29 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 /**
- * <p>命名标准表转换器</p>
+ * <p>落标包含表转换器</p>
  *
  * @author 张鹏 2020-11-27 16:35:40
  */
 @Component
-public class NameStandardConverter implements ConvertorI<NameStandard, NameStandardDO, NameStandardDTO> {
+public class NameAimIncludeConverter implements ConvertorI<NameAimInclude, NameAimIncludeDO, NameAimIncludeDTO> {
 
     @Override
-    public NameStandard dtoToEntity( NameStandardDTO dto) {
+    public NameAimInclude dtoToEntity( NameAimIncludeDTO dto) {
         return Optional.ofNullable(dto)
                 .map(o -> {
-                    NameStandard entity = NameStandard.builder().build();
+                    NameAimInclude entity = NameAimInclude.builder().build();
                     BeanUtils.copyProperties(dto, entity);
                     return entity;
                 }).orElseThrow(IllegalArgumentException::new);
     }
 
     @Override
-    public NameStandardDTO entityToDto(NameStandard entity) {
+    public NameAimIncludeDTO entityToDto(NameAimInclude entity) {
 
         return Optional.ofNullable(entity)
                 .map(o -> {
-                    NameStandardDTO dto= NameStandardDTO.builder().build();
+                    NameAimIncludeDTO dto= NameAimIncludeDTO.builder().build();
                     BeanUtils.copyProperties(entity,dto);
                     return dto;
                 }).orElseThrow(IllegalArgumentException::new);

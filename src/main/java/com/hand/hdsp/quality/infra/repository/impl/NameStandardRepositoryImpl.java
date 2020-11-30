@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 /**
  * <p>命名标准表资源库实现</p>
  *
- * @author 张鹏 2020-11-26 11:11:24
+ * @author 张鹏 2020-11-27 16:35:40
  */
 @Component
 public class NameStandardRepositoryImpl extends BaseRepositoryImpl<NameStandard, NameStandardDTO> implements NameStandardRepository {

@@ -17,7 +17,7 @@ import lombok.*;
 /**
  * <p>命名标准表实体</p>
  *
- * @author 张鹏 2020-11-26 11:11:24
+ * @author 张鹏 2020-11-27 16:35:40
  */
 @Data
 @Builder
@@ -35,12 +35,14 @@ public class NameStandard extends AuditDomain {
     public static final String FIELD_STANDARD_NAME = "standardName";
     public static final String FIELD_STANDARD_DESC = "standardDesc";
     public static final String FIELD_STANDARD_TYPE = "standardType";
-    public static final String FIELD_STANDARD_ROLE = "standardRole";
+    public static final String FIELD_STANDARD_RULE = "standardRule";
     public static final String FIELD_IGNORE_CASE_FLAG = "ignoreCaseFlag";
     public static final String FIELD_CHARGE_ID = "chargeId";
     public static final String FIELD_CHARGE_DEPT_ID = "chargeDeptId";
     public static final String FIELD_CHARGE_TEL = "chargeTel";
     public static final String FIELD_CHARGE_EMAIL = "chargeEmail";
+    public static final String FIELD_LATEST_CHECKED_STATUS = "latestCheckedStatus";
+    public static final String FIELD_LATEST_ABNORMAL_NUM = "latestAbnormalNum";
     public static final String FIELD_ENABLED_FLAG = "enabledFlag";
     public static final String FIELD_TENANT_ID = "tenantId";
 
@@ -66,7 +68,7 @@ public class NameStandard extends AuditDomain {
 
     private String standardType;
 
-    private String standardRole;
+    private String standardRule;
 
     private Integer ignoreCaseFlag;
 
@@ -79,6 +81,10 @@ public class NameStandard extends AuditDomain {
     private String chargeEmail;
 
     private Integer enabledFlag;
+
+    private String latestCheckedStatus;
+
+    private Long latestAbnormalNum;
 
     private Long tenantId;
 

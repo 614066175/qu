@@ -9,7 +9,7 @@ import io.choerodon.mybatis.common.BaseMapper;
 /**
  * <p>命名标准表Mapper</p>
  *
- * @author 张鹏 2020-11-26 11:11:24
+ * @author 张鹏 2020-11-27 16:35:40
  */
 public interface NameStandardMapper extends BaseMapper<NameStandard> {
 
