@@ -36,8 +36,8 @@
             </include>
         from xsta_standard_group xsg
         <where>
-            <if test="standardGroupVO.groupType!=null">
-                xsg.group_type=#{standardGroupVO.groupType}
+            <if test="standardGroupVO.standardType!=null">
+                xsg.standard_type=#{standardGroupVO.standardType}
             </if>
             <if test="standardGroupVO.groupName">
                 and xsg.group_name=#{standardGroupVO.groupName}

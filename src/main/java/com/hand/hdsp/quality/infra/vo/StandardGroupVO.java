@@ -25,7 +25,7 @@ public class StandardGroupVO {
 
     private String standardName;
 
-    private String groupType;
+    private String standardType;
 
     private Long tenantId;
 }
