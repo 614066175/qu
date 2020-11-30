@@ -60,8 +60,11 @@
         </include>
         from xsta_data_standard ds
         <where>
+            <if test="dataStandardDTO.groupId!=null">
+                ds.group_id=#{dataStandardDTO.groupId}
+            </if>
             <if test="dataStandardDTO.standardCode!=null">
-                ds.standard_code=#{dataStandardDTO.standardCode}
+               and ds.standard_code=#{dataStandardDTO.standardCode}
             </if>
             <if test="dataStandardDTO.standardName">
                 and ds.standard_name=#{dataStandardDTO.standardName}
