@@ -9,12 +9,14 @@
         <result column="standard_name" property="standardName" jdbcType="VARCHAR"/>
         <result column="standard_desc" property="standardDesc" jdbcType="VARCHAR"/>
         <result column="standard_type" property="standardType" jdbcType="VARCHAR"/>
-        <result column="standard_role" property="standardRole" jdbcType="VARCHAR"/>
+        <result column="standard_rule" property="standardRule" jdbcType="VARCHAR"/>
         <result column="ignore_case_flag" property="ignoreCaseFlag" jdbcType="DECIMAL"/>
         <result column="charge_id" property="chargeId" jdbcType="DECIMAL"/>
         <result column="charge_dept_id" property="chargeDeptId" jdbcType="DECIMAL"/>
         <result column="charge_tel" property="chargeTel" jdbcType="VARCHAR"/>
         <result column="charge_email" property="chargeEmail" jdbcType="VARCHAR"/>
+        <result column="latest_checked_status" property="latestCheckedStatus" jdbcType="VARCHAR"/>
+        <result column="latest_abnormal_num" property="latestAbnormalNum" jdbcType="DECIMAL"/>
         <result column="enabled_flag" property="enabledFlag" jdbcType="DECIMAL"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
@@ -26,8 +28,6 @@
 
     <resultMap id="DtoResultMap" type="com.hand.hdsp.quality.api.dto.NameStandardDTO" extends="BaseResultMap">
         <result column="lastUpdateName" property="lastUpdateName"/>
-        <result column="checkedStatus" property="checkedStatus"/>
-        <result column="abnormalNum" property="abnormalNum"/>
     </resultMap>
 
     <sql id="BaseProperties">
@@ -37,13 +37,15 @@
         ${prefix}.standard_name,
         ${prefix}.standard_desc,
         ${prefix}.standard_type,
-        ${prefix}.standard_role,
+        ${prefix}.standard_rule,
         ${prefix}.ignore_case_flag,
         ${prefix}.charge_id,
         ${prefix}.charge_dept_id,
         ${prefix}.charge_tel,
         ${prefix}.charge_email,
         ${prefix}.enabled_flag,
+        ${prefix}.latest_checked_status,
+        ${prefix}.latest_abnormal_num,
         ${prefix}.tenant_id,
         ${prefix}.object_version_number,
         ${prefix}.creation_date,
@@ -101,21 +103,27 @@
             <if test="enabledFlag != null">
                 AND ${prefix}.enabled_flag = #{enabledFlag}
             </if>
+
+            <if test="latestCheckedStatus != null">
+                <bind name="latestCheckedStatusLike" value="'%'+latestCheckedStatus+'%'"/>
+                AND ${prefix}.latest_checked_status LIKE #{latestCheckedStatusLike}
+            </if>
+
+            <if test="latestAbnormalNum != null">
+                AND ${prefix}.latest_abnormal_num = #{latestAbnormalNum}
+            </if>
         </where>
     </sql>
 
     <select id="list" resultMap="DtoResultMap">
         SELECT
         iu.login_name AS lastUpdateName,
-        IFNULL(xnshh.checked_status,"UNEXECUTE") AS checkedStatus,
-        IFNULL(xnshh.abnormal_num,0) AS abnormalNum,
         <include refid="BaseProperties">
             <property name="prefix" value="xns"/>
         </include>
         FROM
         xsta_name_standard xns
         LEFT JOIN iam_user iu ON (xns.last_updated_by = iu.id)
-        LEFT JOIN xsta_name_standard_history_head xnshh ON (xns.standard_id = xnshh.name_standard_id)
         <include refid="BaseWhere">
             <property name="prefix" value="xns"/>
         </include>
@@ -123,11 +131,5 @@
             <bind name="lastUpdateNameLike" value="'%'+lastUpdateName+'%'"/>
             AND iu.login_name LIKE #{lastUpdateNameLike}
         </if>
-
-        <if test="checkedStatus != null">
-            <bind name="checkedStatusLike" value="'%'+checkedStatus+'%'"/>
-            AND xnshh.checked_status LIKE #{checkedStatusLike}
-        </if>
-        AND xnshh.history_head_id = (SELECT max(xnshh.history_head_id) FROM xsta_name_standard xns LEFT JOIN xsta_name_standard_history_head xnshh ON (xns.standard_id = xnshh.name_standard_id))
     </select>
 </mapper>

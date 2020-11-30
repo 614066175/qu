@@ -18,12 +18,11 @@ import lombok.*;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hzero.boot.platform.lov.annotation.LovValue;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * <p>命名标准表 数据传输对象</p>
  *
- * @author 张鹏 2020-11-26 11:11:24
+ * @author 张鹏 2020-11-27 16:35:40
  */
 @Data
 @Builder
@@ -43,26 +42,27 @@ public class NameStandardDTO extends AuditDomain {
 
     @ApiModelProperty(value = "命名标准编码")
     @NotBlank
-    @Size(max = 50)
+    @Size(max = 80)
     private String standardCode;
 
     @ApiModelProperty(value = "命名标准名称")
     @NotBlank
-    @Size(max = 255)
+    @Size(max = 120)
     private String standardName;
 
     @ApiModelProperty(value = "命名标准描述")
     private String standardDesc;
 
-    @ApiModelProperty(value = "命名标准类型")
+    @LovValue(lovCode = "HDSP.XSTA.NAME_STANDARD_TYPE",meaningField = "standardTypeMeaning")
+    @ApiModelProperty(value = "命名标准类型，快码：HDSP.XSTA.NAME_STANDARD_TYPE <TABLE:表名称>")
     @NotBlank
-    @Size(max = 50)
+    @Size(max = 30)
     private String standardType;
 
     @ApiModelProperty(value = "命名标准规则")
     @NotBlank
-    @Size(max = 255)
-    private String standardRole;
+    @Size(max = 240)
+    private String standardRule;
 
     @ApiModelProperty(value = "是否忽略大小写 1-忽略 0-不忽略")
     @NotNull
@@ -82,6 +82,13 @@ public class NameStandardDTO extends AuditDomain {
     @ApiModelProperty(value = "责任人邮箱")
     private String chargeEmail;
 
+    @LovValue(lovCode = "HDSP.XSTA.EXEC_STATUS",meaningField = "latestCheckedStatusMeaning")
+    @ApiModelProperty(value = "最新稽核状态，值集：HDSP.XSTA.EXEC_STATUS")
+    private String latestCheckedStatus;
+
+    @ApiModelProperty("最新稽核异常数量")
+    private Long latestAbnormalNum;
+
     @ApiModelProperty(value = "是否启用 1-启用 0-不启用")
     @NotNull
     private Integer enabledFlag;
@@ -100,23 +107,17 @@ public class NameStandardDTO extends AuditDomain {
     @Transient
     private String lastUpdateName;
 
-    /**
-     * 稽核状态
-     */
-    @LovValue(lovCode = "HDSP.XSTA.NAME_STANDARD_CKECKED_STATUS",meaningField = "checkedStatusMeaning")
-    @Transient
-    private String checkedStatus;
 
     /**
-     * 稽核状态意义
+     * 标准类型值集意义
      */
     @Transient
-    private String checkedStatusMeaning;
+    private String standardTypeMeaning;
 
     /**
-     * 异常数据数量
+     * 执行状态意义
      */
     @Transient
-    private Long abnormalNum;
+    private String latestCheckedStatusMeaning;
 
 }
