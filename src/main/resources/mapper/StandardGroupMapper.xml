@@ -24,7 +24,7 @@
         ${sta}.group_code,
         ${sta}.group_name,
         ${sta}.group_desc,
-        ${sta}.group_type,
+        ${sta}.standard_type,
         ${sta}.enabled_flag,
         ${sta}.tenant_id
     </sql>
