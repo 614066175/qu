@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 /**
  * <p>标准落标表资源库实现</p>
  *
- * @author guoliangli01@hand-china.com 2020-11-27 14:36:44
+ * @author guoliangli01@hand-china.com 2020-11-30 10:23:51
  */
 @Component
 public class StandardAimRepositoryImpl extends BaseRepositoryImpl<StandardAim, StandardAimDTO> implements StandardAimRepository {

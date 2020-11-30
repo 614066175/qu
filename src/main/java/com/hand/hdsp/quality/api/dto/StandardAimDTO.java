@@ -13,7 +13,7 @@ import lombok.*;
 /**
  * <p>标准落标表 数据传输对象</p>
  *
- * @author guoliangli01@hand-china.com 2020-11-27 14:36:44
+ * @author guoliangli01@hand-china.com 2020-11-30 10:23:51
  */
 @Data
 @Builder
@@ -64,14 +64,6 @@ public class StandardAimDTO extends AuditDomain {
 
     @ApiModelProperty(value = "表描述")
     private String tableDesc;
-
-    @ApiModelProperty(value = "落标类型(HDSP.XSTA.AIM_TYPE AIM：落标，REFERENCE:引用)")
-    @NotBlank
-    @Size(max = 30)
-    private String aimType;
-
-    @ApiModelProperty(value = "评估方案ID")
-    private Long planId;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull

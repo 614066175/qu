@@ -6,7 +6,7 @@ import lombok.*;
 /**
  * <p>标准落标表数据对象</p>
  *
- * @author guoliangli01@hand-china.com 2020-11-27 14:36:44
+ * @author guoliangli01@hand-china.com 2020-11-30 10:23:51
  */
 @Data
 @Builder
@@ -34,10 +34,6 @@ public class StandardAimDO extends AuditDomain {
     private String tableName;
 
     private String tableDesc;
-
-    private String aimType;
-
-    private Long planId;
 
     private Long tenantId;
 

@@ -12,7 +12,7 @@ import lombok.*;
 /**
  * <p>标准落标表实体</p>
  *
- * @author guoliangli01@hand-china.com 2020-11-27 14:36:44
+ * @author guoliangli01@hand-china.com 2020-11-30 10:23:51
  */
 @Data
 @Builder
@@ -34,8 +34,6 @@ public class StandardAim extends AuditDomain {
     public static final String FIELD_SCHEMA_NAME = "schemaName";
     public static final String FIELD_TABLE_NAME = "tableName";
     public static final String FIELD_TABLE_DESC = "tableDesc";
-    public static final String FIELD_AIM_TYPE = "aimType";
-    public static final String FIELD_PLAN_ID = "planId";
     public static final String FIELD_TENANT_ID = "tenantId";
 
     //
@@ -67,10 +65,6 @@ public class StandardAim extends AuditDomain {
     private String tableName;
 
     private String tableDesc;
-
-    private String aimType;
-
-    private Long planId;
 
     private Long tenantId;
 

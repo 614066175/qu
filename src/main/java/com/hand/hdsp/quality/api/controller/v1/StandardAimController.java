@@ -1,7 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
-import com.hand.hdsp.quality.app.service.StandardAimService;
 import com.hand.hdsp.quality.domain.entity.StandardAim;
 import com.hand.hdsp.quality.domain.repository.StandardAimRepository;
 import io.choerodon.core.domain.Page;
@@ -23,7 +22,7 @@ import springfox.documentation.annotations.ApiIgnore;
 /**
  * <p>标准落标表 管理 API</p>
  *
- * @author guoliangli01@hand-china.com 2020-11-27 14:36:44
+ * @author guoliangli01@hand-china.com 2020-11-30 10:23:51
  */
 @RestController("standardAimController.v1")
 @RequestMapping("/v1/{organizationId}/standard-aims")
@@ -31,11 +30,8 @@ public class StandardAimController extends BaseController {
 
     private StandardAimRepository standardAimRepository;
 
-    private StandardAimService standardAimService;
-
-    public StandardAimController(StandardAimRepository standardAimRepository, StandardAimService standardAimService) {
+    public StandardAimController(StandardAimRepository standardAimRepository) {
         this.standardAimRepository = standardAimRepository;
-        this.standardAimService = standardAimService;
     }
 
     @ApiOperation(value = "标准落标表列表")
@@ -86,7 +82,7 @@ public class StandardAimController extends BaseController {
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody StandardAimDTO standardAimDTO) {
         standardAimDTO.setTenantId(tenantId);
         this.validObject(standardAimDTO);
-        standardAimService.aim(standardAimDTO);
+        standardAimRepository.insertDTOSelective(standardAimDTO);
         return Results.success(standardAimDTO);
     }
 

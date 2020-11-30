@@ -6,7 +6,7 @@ import io.choerodon.mybatis.common.BaseMapper;
 /**
  * <p>标准落标表Mapper</p>
  *
- * @author guoliangli01@hand-china.com 2020-11-27 14:36:44
+ * @author guoliangli01@hand-china.com 2020-11-30 10:23:51
  */
 public interface StandardAimMapper extends BaseMapper<StandardAim> {
 
