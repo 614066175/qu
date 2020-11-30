@@ -14,6 +14,7 @@ import com.hand.hdsp.quality.infra.mapper.StandardGroupMapper;
 import com.hand.hdsp.quality.infra.vo.StandardGroupVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.formula.functions.T;
@@ -56,14 +57,14 @@ public class StandardGroupServiceImpl implements StandardGroupService {
         List<StandardGroupDTO> standardGroups = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                 .andWhere(Sqls.custom().andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID, standardGroupDTO.getGroupId()))
                 .build());
-        if(CollectionUtils.isNotEmpty(standardGroups)){
+        if (CollectionUtils.isNotEmpty(standardGroups)) {
             throw new CommonException(ErrorCode.GROUP_HAS_CHILD_GROUP);
         }
         //判断是否包含标准
         List<DataStandardDTO> dataStandardDTOS = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                 .andWhere(Sqls.custom().andEqualTo(DataStandard.FIELD_GROUP_ID, standardGroupDTO.getGroupId()))
                 .build());
-        if(CollectionUtils.isNotEmpty(dataStandardDTOS)){
+        if (CollectionUtils.isNotEmpty(dataStandardDTOS)) {
             throw new CommonException(ErrorCode.GROUP_HAS_STANDARD);
         }
         standardGroupRepository.deleteDTO(standardGroupDTO);
@@ -71,6 +72,17 @@ public class StandardGroupServiceImpl implements StandardGroupService {
 
     @Override
     public Page<T> list(PageRequest pageRequest, StandardGroupVO standardGroupVO) {
+        //数据标准
+        if ("DATA".equals(standardGroupVO.getStandardType())) {
+            Condition condition = Condition.builder(DataStandard.class)
+                    .andWhere(Sqls.custom()
+                            .andEqualTo(DataStandard.FIELD_GROUP_ID, standardGroupVO.getGroupId()))
+                    .build();
+            return PageHelper.doPageAndSort(pageRequest, () -> dataStandardRepository.selectDTOByCondition(condition));
+        }
+        //字段标准
+        //命名标准
+        //标准文档
         return null;
     }
 }

@@ -39,7 +39,7 @@ public class StandardGroupController extends BaseController {
         this.standardGroupRepository = standardGroupRepository;
     }
 
-    @ApiOperation(value = "根据标准名找到对应分组")
+    @ApiOperation(value = "根据分组查询标准")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -74,9 +74,9 @@ public class StandardGroupController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable(name = "organizationId") Long tenantId, StandardGroupDTO standardGroupDTO) {
+    public ResponseEntity<?> create(@PathVariable(name = "organizationId") Long tenantId,
+                                    @RequestBody StandardGroupDTO standardGroupDTO) {
         standardGroupDTO.setTenantId(tenantId);
-        this.validObject(standardGroupDTO);
         return Results.success(standardGroupRepository.insertDTOSelective(standardGroupDTO));
     }
 

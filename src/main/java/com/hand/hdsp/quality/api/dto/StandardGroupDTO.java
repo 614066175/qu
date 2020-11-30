@@ -57,4 +57,6 @@ public class StandardGroupDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
+
+
 }

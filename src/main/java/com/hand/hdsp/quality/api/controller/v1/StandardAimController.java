@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
+import com.hand.hdsp.quality.app.service.StandardAimService;
 import com.hand.hdsp.quality.domain.entity.StandardAim;
 import com.hand.hdsp.quality.domain.repository.StandardAimRepository;
 import io.choerodon.core.domain.Page;
@@ -29,6 +30,8 @@ import springfox.documentation.annotations.ApiIgnore;
 public class StandardAimController extends BaseController {
 
     private StandardAimRepository standardAimRepository;
+
+    private StandardAimService standardAimService;
 
     public StandardAimController(StandardAimRepository standardAimRepository) {
         this.standardAimRepository = standardAimRepository;
@@ -82,7 +85,7 @@ public class StandardAimController extends BaseController {
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody StandardAimDTO standardAimDTO) {
         standardAimDTO.setTenantId(tenantId);
         this.validObject(standardAimDTO);
-        standardAimRepository.insertDTOSelective(standardAimDTO);
+
         return Results.success(standardAimDTO);
     }
 

@@ -26,7 +26,8 @@
         ${sta}.group_desc,
         ${sta}.standard_type,
         ${sta}.enabled_flag,
-        ${sta}.tenant_id
+        ${sta}.tenant_id,
+        ${sta}.object_version_number
     </sql>
 
     <select id="listByGroup" resultType="com.hand.hdsp.quality.api.dto.StandardGroupDTO">
