@@ -1,6 +1,9 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import java.util.List;
+
 import com.hand.hdsp.quality.api.dto.StandardExtraDTO;
+import com.hand.hdsp.quality.app.service.StandardExtraService;
 import com.hand.hdsp.quality.domain.entity.StandardExtra;
 import com.hand.hdsp.quality.domain.repository.StandardExtraRepository;
 import io.choerodon.core.domain.Page;
@@ -29,9 +32,11 @@ import springfox.documentation.annotations.ApiIgnore;
 public class StandardExtraController extends BaseController {
 
     private StandardExtraRepository standardExtraRepository;
+    private StandardExtraService standardExtraService;
 
-    public StandardExtraController(StandardExtraRepository standardExtraRepository) {
+    public StandardExtraController(StandardExtraRepository standardExtraRepository, StandardExtraService standardExtraService) {
         this.standardExtraRepository = standardExtraRepository;
+        this.standardExtraService = standardExtraService;
     }
 
     @ApiOperation(value = "标准附加信息表列表")
@@ -114,5 +119,49 @@ public class StandardExtraController extends BaseController {
                 standardExtraDTO.setTenantId(tenantId);
         standardExtraRepository.deleteByPrimaryKey(standardExtraDTO);
         return Results.success();
+    }
+
+
+    @ApiOperation(value = "批量创建标准附加信息表")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/batch-create")
+    public ResponseEntity<?> batchCreate(@PathVariable("organizationId") Long tenantId, @RequestBody List<StandardExtraDTO> standardExtraDTOList) {
+        standardExtraRepository.batchInsertDTOSelective(standardExtraDTOList);
+        return Results.success(standardExtraDTOList);
+    }
+
+    @ApiOperation(value = "批量修改标准附加信息表")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/batch-update")
+    public ResponseEntity<?> batchUpdate(@PathVariable("organizationId") Long tenantId, @RequestBody List<StandardExtraDTO> standardExtraDTOList) {
+        standardExtraService.batchUpdate(standardExtraDTOList);
+        return Results.success(standardExtraDTOList);
+    }
+
+    @ApiOperation(value = "删除标准附加信息表")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @DeleteMapping("/batch-remove")
+    public ResponseEntity<?> batchRemove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                    @RequestBody List<StandardExtraDTO> standardExtraDTOList) {
+        standardExtraRepository.batchDTODelete(standardExtraDTOList);
+        return Results.success(standardExtraDTOList);
     }
 }

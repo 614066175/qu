@@ -12,12 +12,12 @@ public interface ErrorCode {
     /**
      * 编码已存在
      */
-    String CODE_ALREADY_EXISTS = "hdp.err.code_already_exists";
+    String CODE_ALREADY_EXISTS = "hdsp.xqua.err.code_already_exists";
 
     /**
      * 规则分组父级分类ID不能为空
      */
-    String PARENT_NULL = "err.parent_null";
+    String PARENT_NULL = "hdsp.xqua.err.parent_null";
 
     /**
      * 分组下存在规则或其他分组，方案下存在行信息，或方案正在运行，无法删除
@@ -66,8 +66,10 @@ public interface ErrorCode {
     String DATA_STANDARD_NOT_EXIST = "hdsp.xqua.err.data_standard_not_exist";
 
     // DATA_FILED_ERROR
-    String DATA_FIELD_NAME_EXIST = "hdsp.xsta.err.data_field_name_already_exist";
-    String DATA_FIELD_CAN_NOT_DELETE = "hdsp.xsta.err.data_field_status_can_not_delete";
+
+
+    String DATA_FIELD_NAME_EXIST = "hdsp.xqua.err.data_field_name_already_exist";
+    String DATA_FIELD_CAN_NOT_DELETE = "hdsp.xqua.err.data_field_status_can_not_delete";
 
     String GROUP_HAS_CHILD_GROUP = "hdsp.xqua.err.group_has_child_group";
 
@@ -108,5 +110,9 @@ public interface ErrorCode {
     String CHECK_ITEM_EXIST = "hdsp.xqua.err.check_item_exist";
 
     String CONVERT_SQL = "hdsp.xqua.err.convert_sql";
+
+    String STANDARD_AIM_EXIST= "hdsp.xqua.err.standard_aim_exist";
+
+    String STANDARD_EXTRA_LIST_IS_EMPTY="hdsp.xqua.err.standard_extra_list_is_empty";
 
 }

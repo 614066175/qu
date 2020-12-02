@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.dto;
 
+import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -44,6 +45,11 @@ public class StandardAimDTO extends AuditDomain {
     @ApiModelProperty(value = "字段描述")
     private String fieldDesc;
 
+    @ApiModelProperty(value = "数据源ID")
+    @NotBlank
+    @Size(max = 20)
+    private Long datasourceId;
+
     @ApiModelProperty(value = "数据源编码")
     @NotBlank
     @Size(max = 30)
@@ -55,6 +61,7 @@ public class StandardAimDTO extends AuditDomain {
     private String datasourceType;
 
     @ApiModelProperty(value = "数据库库名")
+    @NotBlank
     private String schemaName;
 
     @ApiModelProperty(value = "表名称")
@@ -68,5 +75,11 @@ public class StandardAimDTO extends AuditDomain {
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;
+
+    @Transient
+    private String nameLevelPath;
+
+    @Transient
+    private Long planId;
 
 }

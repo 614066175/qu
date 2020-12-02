@@ -29,6 +29,7 @@ public class StandardAim extends AuditDomain {
     public static final String FIELD_STANDARD_TYPE = "standardType";
     public static final String FIELD_FIELD_NAME = "fieldName";
     public static final String FIELD_FIELD_DESC = "fieldDesc";
+    public static final String FIELD_DATASOURCE_ID = "datasourceId";
     public static final String FIELD_DATASOURCE_CODE = "datasourceCode";
     public static final String FIELD_DATASOURCE_TYPE = "datasourceType";
     public static final String FIELD_SCHEMA_NAME = "schemaName";
@@ -55,6 +56,8 @@ public class StandardAim extends AuditDomain {
     private String fieldName;
 
     private String fieldDesc;
+
+    private Long datasourceId;
 
     private String datasourceCode;
 

@@ -1,8 +1,8 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
-import com.hand.hdsp.quality.api.dto.StanardAimRelationDTO;
-import com.hand.hdsp.quality.domain.entity.StanardAimRelation;
-import com.hand.hdsp.quality.domain.repository.StanardAimRelationRepository;
+import com.hand.hdsp.quality.api.dto.StandardAimRelationDTO;
+import com.hand.hdsp.quality.domain.entity.StandardAimRelation;
+import com.hand.hdsp.quality.domain.repository.StandardAimRelationRepository;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
@@ -28,9 +28,9 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/stanard-aim-relations")
 public class StanardAimRelationController extends BaseController {
 
-    private StanardAimRelationRepository stanardAimRelationRepository;
+    private StandardAimRelationRepository stanardAimRelationRepository;
 
-    public StanardAimRelationController(StanardAimRelationRepository stanardAimRelationRepository) {
+    public StanardAimRelationController(StandardAimRelationRepository stanardAimRelationRepository) {
         this.stanardAimRelationRepository = stanardAimRelationRepository;
     }
 
@@ -44,10 +44,10 @@ public class StanardAimRelationController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  StanardAimRelationDTO stanardAimRelationDTO, @ApiIgnore @SortDefault(value = StanardAimRelation.FIELD_RELATION_ID,
+                                  StandardAimRelationDTO standardAimRelationDTO, @ApiIgnore @SortDefault(value = StandardAimRelation.FIELD_RELATION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
-        stanardAimRelationDTO.setTenantId(tenantId);
-        Page<StanardAimRelationDTO> list = stanardAimRelationRepository.pageAndSortDTO(pageRequest, stanardAimRelationDTO);
+        standardAimRelationDTO.setTenantId(tenantId);
+        Page<StandardAimRelationDTO> list = stanardAimRelationRepository.pageAndSortDTO(pageRequest, standardAimRelationDTO);
         return Results.success(list);
     }
 
@@ -66,8 +66,8 @@ public class StanardAimRelationController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{relationId}")
     public ResponseEntity<?> detail(@PathVariable Long relationId) {
-        StanardAimRelationDTO stanardAimRelationDTO = stanardAimRelationRepository.selectDTOByPrimaryKeyAndTenant(relationId);
-        return Results.success(stanardAimRelationDTO);
+        StandardAimRelationDTO standardAimRelationDTO = stanardAimRelationRepository.selectDTOByPrimaryKeyAndTenant(relationId);
+        return Results.success(standardAimRelationDTO);
     }
 
     @ApiOperation(value = "创建标准落标关系表")
@@ -79,11 +79,11 @@ public class StanardAimRelationController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody StanardAimRelationDTO stanardAimRelationDTO) {
-        stanardAimRelationDTO.setTenantId(tenantId);
-        this.validObject(stanardAimRelationDTO);
-        stanardAimRelationRepository.insertDTOSelective(stanardAimRelationDTO);
-        return Results.success(stanardAimRelationDTO);
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody StandardAimRelationDTO standardAimRelationDTO) {
+        standardAimRelationDTO.setTenantId(tenantId);
+        this.validObject(standardAimRelationDTO);
+        stanardAimRelationRepository.insertDTOSelective(standardAimRelationDTO);
+        return Results.success(standardAimRelationDTO);
     }
 
     @ApiOperation(value = "修改标准落标关系表")
@@ -95,9 +95,9 @@ public class StanardAimRelationController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody StanardAimRelationDTO stanardAimRelationDTO) {
-                stanardAimRelationRepository.updateDTOWhereTenant(stanardAimRelationDTO, tenantId);
-        return Results.success(stanardAimRelationDTO);
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody StandardAimRelationDTO standardAimRelationDTO) {
+                stanardAimRelationRepository.updateDTOWhereTenant(standardAimRelationDTO, tenantId);
+        return Results.success(standardAimRelationDTO);
     }
 
     @ApiOperation(value = "删除标准落标关系表")
@@ -110,9 +110,9 @@ public class StanardAimRelationController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestBody StanardAimRelationDTO stanardAimRelationDTO) {
-                stanardAimRelationDTO.setTenantId(tenantId);
-        stanardAimRelationRepository.deleteByPrimaryKey(stanardAimRelationDTO);
+                                    @RequestBody StandardAimRelationDTO standardAimRelationDTO) {
+                standardAimRelationDTO.setTenantId(tenantId);
+        stanardAimRelationRepository.deleteByPrimaryKey(standardAimRelationDTO);
         return Results.success();
     }
 }

@@ -22,7 +22,7 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = false)
 @ApiModel("标准落标关系表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class StanardAimRelationDTO extends AuditDomain {
+public class StandardAimRelationDTO extends AuditDomain {
 
     @ApiModelProperty("表ID，主键，供其他表做外键")
     private Long relationId;

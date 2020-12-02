@@ -8,6 +8,7 @@
         <result column="standard_type" property="standardType" jdbcType="VARCHAR"/>
         <result column="field_name" property="fieldName" jdbcType="VARCHAR"/>
         <result column="field_desc" property="fieldDesc" jdbcType="VARCHAR"/>
+        <result column="datasource_id" property="datasourceId" jdbcType="DECIMAL"/>
         <result column="datasource_code" property="datasourceCode" jdbcType="VARCHAR"/>
         <result column="datasource_type" property="datasourceType" jdbcType="VARCHAR"/>
         <result column="schema_name" property="schemaName" jdbcType="VARCHAR"/>

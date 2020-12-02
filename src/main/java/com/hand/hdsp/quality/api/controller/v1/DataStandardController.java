@@ -183,7 +183,9 @@ public class DataStandardController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping("/batch-delete")
     public ResponseEntity<Void> batchDelete(@PathVariable(name = "organizationId") Long tenantId, List<DataStandardDTO> dataStandardDTOList) {
-        dataStandardRepository.batchDTODelete(dataStandardDTOList);
+        if(CollectionUtils.isNotEmpty(dataStandardDTOList)){
+            dataStandardDTOList.forEach(dataStandardService::delete);
+        }
         return Results.success();
     }
 
@@ -199,6 +201,20 @@ public class DataStandardController {
     public ResponseEntity<Void> standardAim(@PathVariable(name = "organizationId") Long tenantId, @RequestBody StandardAimDTO standardAimDTO) {
         standardAimDTO.setTenantId(tenantId);
         dataStandardService.aim(standardAimDTO);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "数据标准批量关联评估方案")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/batch-relate-plan")
+    public ResponseEntity<Void> batchRelatePlan(@PathVariable(name = "organizationId") Long tenantId, @RequestBody List<StandardAimDTO> standardAimDTOList) {
+        dataStandardService.batchRelatePlan(standardAimDTOList);
         return Results.success();
     }
 }

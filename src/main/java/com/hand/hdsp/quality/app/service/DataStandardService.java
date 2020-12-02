@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.app.service;
 
+import java.util.List;
+
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import io.choerodon.core.domain.Page;
@@ -68,4 +70,10 @@ public interface DataStandardService {
      * @param standardAimDTO StandardAimDTO
      */
     void aim(StandardAimDTO standardAimDTO);
+
+    /**
+     * 数据标准批量关联评估方案
+     * @param standardAimDTOList
+     */
+    void batchRelatePlan(List<StandardAimDTO> standardAimDTOList);
 }

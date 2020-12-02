@@ -22,7 +22,7 @@ import lombok.*;
 @VersionAudit
 @ModifyAudit
 @Table(name = "xsta_stanard_aim_relation")
-public class StanardAimRelation extends AuditDomain {
+public class StandardAimRelation extends AuditDomain {
 
     public static final String FIELD_RELATION_ID = "relationId";
     public static final String FIELD_AIM_ID = "aimId";

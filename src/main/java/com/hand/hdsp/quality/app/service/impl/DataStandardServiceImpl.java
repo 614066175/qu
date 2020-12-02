@@ -4,15 +4,10 @@ import java.util.List;
 import java.util.Objects;
 
 import com.hand.hdsp.quality.api.dto.*;
+import com.hand.hdsp.quality.app.service.BatchPlanBaseService;
 import com.hand.hdsp.quality.app.service.DataStandardService;
-import com.hand.hdsp.quality.domain.entity.DataStandard;
-import com.hand.hdsp.quality.domain.entity.DataStandardVersion;
-import com.hand.hdsp.quality.domain.entity.ExtraVersion;
-import com.hand.hdsp.quality.domain.entity.StandardExtra;
-import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
-import com.hand.hdsp.quality.domain.repository.DataStandardVersionRepository;
-import com.hand.hdsp.quality.domain.repository.ExtraVersionRepository;
-import com.hand.hdsp.quality.domain.repository.StandardExtraRepository;
+import com.hand.hdsp.quality.domain.entity.*;
+import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
@@ -21,8 +16,12 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
+import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.starter.driver.core.infra.meta.Column;
+import org.hzero.starter.driver.core.infra.meta.Table;
+import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,13 +47,36 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     private final ExtraVersionRepository extraVersionRepository;
 
+    private final StandardAimRepository standardAimRepository;
 
-    public DataStandardServiceImpl(DataStandardRepository dataStandardRepository, DataStandardVersionRepository dataStandardVersionRepository, StandardExtraRepository standardExtraRepository, DataStandardMapper dataStandardMapper, ExtraVersionRepository extraVersionRepository) {
+    private final DriverSessionService driverSessionService;
+
+    private final StandardAimRelationRepository standardAimRelationRepository;
+
+    private final BatchPlanBaseService batchPlanBaseService;
+
+    private final BatchPlanBaseRepository batchPlanBaseRepository;
+
+    private final BatchPlanFieldRepository batchPlanFieldRepository;
+
+
+    public DataStandardServiceImpl(DataStandardRepository dataStandardRepository,
+                                   DataStandardVersionRepository dataStandardVersionRepository,
+                                   StandardExtraRepository standardExtraRepository,
+                                   DataStandardMapper dataStandardMapper,
+                                   ExtraVersionRepository extraVersionRepository,
+                                   StandardAimRepository standardAimRepository, DriverSessionService driverSessionService, StandardAimRelationRepository standardAimRelationRepository, BatchPlanBaseService batchPlanBaseService, BatchPlanBaseRepository batchPlanBaseRepository, BatchPlanFieldRepository batchPlanFieldRepository) {
         this.dataStandardRepository = dataStandardRepository;
         this.dataStandardVersionRepository = dataStandardVersionRepository;
         this.standardExtraRepository = standardExtraRepository;
         this.dataStandardMapper = dataStandardMapper;
         this.extraVersionRepository = extraVersionRepository;
+        this.standardAimRepository = standardAimRepository;
+        this.driverSessionService = driverSessionService;
+        this.standardAimRelationRepository = standardAimRelationRepository;
+        this.batchPlanBaseService = batchPlanBaseService;
+        this.batchPlanBaseRepository = batchPlanBaseRepository;
+        this.batchPlanFieldRepository = batchPlanFieldRepository;
     }
 
 
@@ -99,14 +121,14 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     @Override
     public DataStandardDTO detail(Long tenantId, Long standardId) {
-        List<DataStandardDTO> dataStandardDTOList=dataStandardMapper.list(DataStandardDTO
+        List<DataStandardDTO> dataStandardDTOList = dataStandardMapper.list(DataStandardDTO
                 .builder()
                 .standardId(standardId)
                 .build());
-        if(CollectionUtils.isEmpty(dataStandardDTOList)){
+        if (CollectionUtils.isEmpty(dataStandardDTOList)) {
             throw new CommonException(ErrorCode.DATA_STANDARD_NOT_EXIST);
         }
-        DataStandardDTO dataStandardDTO=dataStandardDTOList.get(0);
+        DataStandardDTO dataStandardDTO = dataStandardDTOList.get(0);
         List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardExtra.FIELD_STANDARD_ID, standardId)
@@ -217,7 +239,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .andWhere(Sqls.custom()
                                 .andEqualTo(StandardExtra.FIELD_STANDARD_ID, dataStandardDTO.getStandardId())
                                 .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, "DATA")
-                                .andEqualTo(StandardExtra.FIELD_TENANT_ID,dataStandardDTO.getTenantId()))
+                                .andEqualTo(StandardExtra.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                         .build());
         if (CollectionUtils.isNotEmpty(oldStandardExtraDTOS)) {
             standardExtraRepository.batchDTODelete(oldStandardExtraDTOS);
@@ -247,10 +269,10 @@ public class DataStandardServiceImpl implements DataStandardService {
             throw new CommonException(ErrorCode.DATA_STANDARD_NOT_EXIST);
         }
         dataStandardDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
-        dataStandardRepository.updateDTOOptional(dataStandardDTO,DataStandard.FIELD_STANDARD_STATUS);
+        dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS);
         //判断数据标准状态,如果是发布上线状态，则存版本表
         if (StandardConstant.ONLINE.equals(dataStandardDTO.getStandardStatus())) {
-            Long lastVersion=1L;
+            Long lastVersion = 1L;
             List<DataStandardVersionDTO> dataStandardVersionDTOS = dataStandardVersionRepository.selectDTOByCondition(Condition.builder(DataStandardVersion.class)
                     .andWhere(Sqls.custom()
                             .andEqualTo(DataStandardVersion.FIELD_STANDARD_ID, dataStandardDTO.getStandardId()))
@@ -258,7 +280,7 @@ public class DataStandardServiceImpl implements DataStandardService {
             DataStandardVersionDTO dataStandardVersionDTO = new DataStandardVersionDTO();
             //不为空则取最新版本
             if (CollectionUtils.isNotEmpty(dataStandardVersionDTOS)) {
-                lastVersion=dataStandardVersionDTOS.get(0).getVersionNumber()+1;
+                lastVersion = dataStandardVersionDTOS.get(0).getVersionNumber() + 1;
             }
             //存入版本表
             BeanUtils.copyProperties(dataStandardDTO, dataStandardVersionDTO);
@@ -271,7 +293,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                             .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, "DATA")
                             .andEqualTo(StandardExtra.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                     .build());
-            ExtraVersionDTO extraVersionDTO=new ExtraVersionDTO();
+            ExtraVersionDTO extraVersionDTO = new ExtraVersionDTO();
             if (CollectionUtils.isNotEmpty(standardExtraDTOS)) {
                 //存附件信息版本表
                 for (StandardExtraDTO s : standardExtraDTOS) {
@@ -285,6 +307,84 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     @Override
     public void aim(StandardAimDTO standardAimDTO) {
+        List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardAim.FIELD_STANDARD_ID, standardAimDTO.getStandardId())
+                        .andEqualTo(StandardAim.FIELD_DATASOURCE_TYPE, standardAimDTO.getDatasourceType())
+                        .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, standardAimDTO.getSchemaName())
+                        .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, standardAimDTO.getDatasourceCode())
+                        .andEqualTo(StandardAim.FIELD_FIELD_NAME, standardAimDTO.getFieldName()))
+                .build());
+        if(CollectionUtils.isNotEmpty(standardAimDTOS)){
+            throw new CommonException(ErrorCode.STANDARD_AIM_EXIST);
+        }
+        DriverSession driverSession = driverSessionService.getDriverSession(standardAimDTO.getTenantId(), standardAimDTO.getDatasourceCode());
+        //字段注释
+        List<Column> columns = driverSession.columnMetaData(standardAimDTO.getSchemaName(), standardAimDTO.getTableName());
+        if(CollectionUtils.isNotEmpty(columns)){
+            columns.forEach(column -> {
+                if(column.getColumnName().equals(standardAimDTO.getFieldName())){
+                    standardAimDTO.setFieldDesc(column.getRemarks());
+                }
+            });
+        }
+        //表注释
+        List<Table> tables = driverSession.tablesNameAndDesc(standardAimDTO.getSchemaName(), standardAimDTO.getTableName());
+        if(CollectionUtils.isNotEmpty(tables)){
+            tables.forEach(table -> {
+                if(table.getTableName().equals(standardAimDTO.getTableName())){
+                    standardAimDTO.setTableDesc(table.getRemarks());
+                }
+            });
+        }
+        //存入落标表
+        standardAimRepository.insertDTOSelective(standardAimDTO);
+    }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void batchRelatePlan(List<StandardAimDTO> standardAimDTOList) {
+        if(CollectionUtils.isNotEmpty(standardAimDTOList)){
+            standardAimDTOList.forEach(standardAimDTO -> {
+                //在该评估方案下生成base
+                BatchPlanBaseDTO batchPlanBaseDTO = BatchPlanBaseDTO.builder()
+                        .datasourceCode(standardAimDTO.getDatasourceCode())
+                        .datasourceId(standardAimDTO.getDatasourceId())
+                        .datasourceSchema(standardAimDTO.getSchemaName())
+                        .planId(standardAimDTO.getPlanId())
+                        .sqlType("TABLE")
+                        .objectName(standardAimDTO.getTableName())
+                        .incrementStrategy("NONE")
+                        .tenantId(standardAimDTO.getTenantId())
+                        .build();
+                batchPlanBaseRepository.insertDTOSelective(batchPlanBaseDTO);
+
+
+                //根据数据标准在base下生成字段规则头batch_plan_field
+                DataStandardDTO dataStandardDTO = dataStandardRepository.selectDTOByPrimaryKey(standardAimDTO.getStandardId());
+                BatchPlanFieldDTO batchPlanFieldDTO = BatchPlanFieldDTO.builder()
+                        .planBaseId(batchPlanBaseDTO.getPlanBaseId())
+                        .ruleCode(dataStandardDTO.getStandardCode())
+                        .ruleName(dataStandardDTO.getStandardName())
+                        .ruleDesc(dataStandardDTO.getStandardDesc())
+                        .checkType("STANDARD")
+                        .weight(5L)
+                        .build();
+                batchPlanFieldRepository.insertDTOSelective(batchPlanFieldDTO);
+
+                //根据数据标准生成具体的校验项batch_plan_field_line
+
+
+                //根据具体落标存入落标关系表
+                StandardAimRelationDTO standardAimRelationDTO = StandardAimRelationDTO.builder()
+                        .aimId(standardAimDTO.getAimId())
+                        .aimType("AIM")
+                        .planId(standardAimDTO.getPlanId())
+                        .planBaseId(batchPlanBaseDTO.getPlanBaseId())
+                        .planRuleId(batchPlanFieldDTO.getPlanRuleId())
+                        .build();
+                standardAimRelationRepository.insertDTOSelective(standardAimRelationDTO);
+            });
+        }
     }
 }
