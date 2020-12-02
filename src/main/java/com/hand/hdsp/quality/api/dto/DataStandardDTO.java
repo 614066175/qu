@@ -101,4 +101,17 @@ public class DataStandardDTO extends AuditDomain {
     @Transient
     private Long versionNumber;
 
+    @Transient
+    private String lastUpdateName;
+
+    @Transient
+    private String chargeName;
+
+    @Transient
+    private String chargeDeptName;
+
+    @Transient
+    private String groupName;
+
+
 }

@@ -49,18 +49,30 @@
           ${ds}.charge_email,
           ${ds}.standard_status,
           ${ds}.tenant_id,
-          ${ds}.object_version_number
+          ${ds}.object_version_number,
+          ${ds}.last_update_date
     </sql>
 
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.DataStandardDTO">
         select
+        iu.login_name lastUpdateName,
+        iu2.login_name chargeName,
+        hu.unit_name chargeDeptName,
+        xsg.group_name,
         <include refid="baseColumn">
             <property name="ds" value="ds"/>
         </include>
         from xsta_data_standard ds
+        left join xsta_standard_group xsg on xsg.group_id=ds.group_id
+        left join hzero_platform.iam_user iu on ds.last_updated_by=iu.id
+        left join hzero_platform.iam_user iu2 on ds.charge_id=iu2.id
+        left join hzero_platform.hpfm_unit hu on hu.unit_id=ds.charge_dept_id
         <where>
+            <if test="dataStandardDTO.standardId!=null">
+                ds.standard_id=#{dataStandardDTO.standardId}
+            </if>
             <if test="dataStandardDTO.groupId!=null">
-                ds.group_id=#{dataStandardDTO.groupId}
+                and ds.group_id=#{dataStandardDTO.groupId}
             </if>
             <if test="dataStandardDTO.standardCode!=null">
                and ds.standard_code=#{dataStandardDTO.standardCode}

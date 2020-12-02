@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.api.controller.v1;
 import java.util.List;
 
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
+import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import com.hand.hdsp.quality.app.service.DataStandardService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.DataStandard;
@@ -183,6 +184,21 @@ public class DataStandardController {
     @DeleteMapping("/batch-delete")
     public ResponseEntity<Void> batchDelete(@PathVariable(name = "organizationId") Long tenantId, List<DataStandardDTO> dataStandardDTOList) {
         dataStandardRepository.batchDTODelete(dataStandardDTOList);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "数据标准落标")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/standard-aim")
+    public ResponseEntity<Void> standardAim(@PathVariable(name = "organizationId") Long tenantId, @RequestBody StandardAimDTO standardAimDTO) {
+        standardAimDTO.setTenantId(tenantId);
+        dataStandardService.aim(standardAimDTO);
         return Results.success();
     }
 }

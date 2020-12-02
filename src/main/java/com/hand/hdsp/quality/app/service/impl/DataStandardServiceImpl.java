@@ -3,10 +3,7 @@ package com.hand.hdsp.quality.app.service.impl;
 import java.util.List;
 import java.util.Objects;
 
-import com.hand.hdsp.quality.api.dto.DataStandardDTO;
-import com.hand.hdsp.quality.api.dto.DataStandardVersionDTO;
-import com.hand.hdsp.quality.api.dto.ExtraVersionDTO;
-import com.hand.hdsp.quality.api.dto.StandardExtraDTO;
+import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.DataStandardService;
 import com.hand.hdsp.quality.domain.entity.DataStandard;
 import com.hand.hdsp.quality.domain.entity.DataStandardVersion;
@@ -102,7 +99,14 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     @Override
     public DataStandardDTO detail(Long tenantId, Long standardId) {
-        DataStandardDTO dataStandardDTO = dataStandardRepository.selectDTOByPrimaryKey(standardId);
+        List<DataStandardDTO> dataStandardDTOList=dataStandardMapper.list(DataStandardDTO
+                .builder()
+                .standardId(standardId)
+                .build());
+        if(CollectionUtils.isEmpty(dataStandardDTOList)){
+            throw new CommonException(ErrorCode.DATA_STANDARD_NOT_EXIST);
+        }
+        DataStandardDTO dataStandardDTO=dataStandardDTOList.get(0);
         List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardExtra.FIELD_STANDARD_ID, standardId)
@@ -277,5 +281,10 @@ public class DataStandardServiceImpl implements DataStandardService {
                 }
             }
         }
+    }
+
+    @Override
+    public void aim(StandardAimDTO standardAimDTO) {
+
     }
 }

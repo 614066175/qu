@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
+import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
@@ -61,4 +62,10 @@ public interface DataStandardService {
      * @param dataStandardDTO
      */
     void publishOrOff(DataStandardDTO dataStandardDTO);
+
+    /**
+     * 数据标准落标
+     * @param standardAimDTO StandardAimDTO
+     */
+    void aim(StandardAimDTO standardAimDTO);
 }
