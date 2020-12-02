@@ -60,12 +60,15 @@ public interface ErrorCode {
     String NOT_FIND_VALUE = "hdsp.xqua.err.not_find_value";
 
     //DATA_STANDARD_ERROR
-
-
     String DATA_STANDARD_CODE_EXIST = "hdsp.xqua.err.data_standard_code_exist";
     String DATA_STANDARD_NAME_EXIST = "hdsp.xqua.err.data_standard_name_exist";
     String DATA_STANDARD_CAN_NOT_DELETE = "hdsp.xqua.err.data_standard_status_can_not_delete";
     String DATA_STANDARD_NOT_EXIST = "hdsp.xqua.err.data_standard_not_exist";
+
+    // DATA_FILED_ERROR
+    String DATA_FIELD_NAME_EXIST = "hdsp.xsta.err.data_field_name_already_exist";
+    String DATA_FIELD_CAN_NOT_DELETE = "hdsp.xsta.err.data_field_status_can_not_delete";
+
     String GROUP_HAS_CHILD_GROUP = "hdsp.xqua.err.group_has_child_group";
 
     String GROUP_HAS_STANDARD = "hdsp.xqua.err.group_has_standard";
@@ -104,6 +107,6 @@ public interface ErrorCode {
 
     String CHECK_ITEM_EXIST = "hdsp.xqua.err.check_item_exist";
 
-    String CONVERT_SQL="hdsp.xqua.err.convert_sql";
+    String CONVERT_SQL = "hdsp.xqua.err.convert_sql";
 
 }

@@ -13,9 +13,9 @@ import com.hand.hdsp.quality.domain.repository.DataFieldRepository;
 import com.hand.hdsp.quality.domain.repository.DataFieldVersionRepository;
 import com.hand.hdsp.quality.domain.repository.StandardApproveRepository;
 import com.hand.hdsp.quality.domain.repository.StandardExtraRepository;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
-import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -65,7 +65,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                         .andEqualTo(DataField.FIELD_TENANT_ID, dataFieldDTO.getTenantId()))
                 .build());
         if (CollectionUtils.isNotEmpty(dataFieldDTOS)) {
-            throw new CommonException("hdsp.xsta.err.data_field_name_already_exist");
+            throw new CommonException(ErrorCode.DATA_FIELD_NAME_EXIST);
         }
 
         dataFieldDTO.setStatus(StandardConstant.CREATE);
@@ -106,7 +106,7 @@ public class DataFieldServiceImpl implements DataFieldService {
     public void delete(DataFieldDTO dataFieldDTO) {
         if (StandardConstant.ONLINE.equals(dataFieldDTO.getStatus())
                 || StandardConstant.OFFLINE_APPROVING.equals(dataFieldDTO.getStatus())) {
-            throw new CommonException("hdsp.xsta.err.data_field_status_can_not_delete");
+            throw new CommonException(ErrorCode.DATA_FIELD_CAN_NOT_DELETE);
         }
         if (StandardConstant.ONLINE_APPROVING.equals(dataFieldDTO.getStatus())) {
             //删除申请记录表记录
