@@ -1,7 +1,9 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanBaseService;
@@ -104,7 +106,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         if (CollectionUtils.isNotEmpty(standardDTOList)) {
             throw new CommonException(ErrorCode.DATA_STANDARD_NAME_EXIST);
         }
-        convertDataLength(dataStandardDTO);
+        convertToDataLength(dataStandardDTO);
         dataStandardDTO.setStandardStatus(StandardConstant.CREATE);
         dataStandardRepository.insertDTOSelective(dataStandardDTO);
 
@@ -133,16 +135,17 @@ public class DataStandardServiceImpl implements DataStandardService {
             throw new CommonException(ErrorCode.DATA_STANDARD_NOT_EXIST);
         }
         DataStandardDTO dataStandardDTO = dataStandardDTOList.get(0);
-        List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
-                .andWhere(Sqls.custom()
-                        .andEqualTo(StandardExtra.FIELD_STANDARD_ID, standardId)
-                        .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, "DATA")
-                        .andEqualTo(StandardExtra.FIELD_TENANT_ID, tenantId))
-                .build());
-        if (CollectionUtils.isNotEmpty(standardExtraDTOS)) {
-            dataStandardDTO.setStandardExtraDTOList(standardExtraDTOS);
-        }
+        convertToDataLengthList(dataStandardDTO);
         return dataStandardDTO;
+    }
+
+    private void convertToDataLengthList(DataStandardDTO dataStandardDTO) {
+        //对数据长度进行处理
+        if(dataStandardDTO.getDataLength()!=null){
+            List<String>  dataLength= Arrays.asList(dataStandardDTO.getDataLength().split(","));
+            List<Long> dataLengthList = dataLength.stream().map(Long::parseLong).collect(Collectors.toList());
+            dataStandardDTO.setDataLengthList(dataLengthList);
+        }
     }
 
     @Override
@@ -234,11 +237,11 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     @Override
     public void update(DataStandardDTO dataStandardDTO) {
-        convertDataLength(dataStandardDTO);
+        convertToDataLength(dataStandardDTO);
         dataStandardRepository.updateByDTOPrimaryKey(dataStandardDTO);
     }
 
-    private void convertDataLength(DataStandardDTO dataStandardDTO){
+    private void convertToDataLength(DataStandardDTO dataStandardDTO){
         //对数据长度进行处理
         List<Long> dataLengthList = dataStandardDTO.getDataLengthList();
         if(CollectionUtils.isNotEmpty(dataLengthList)){
