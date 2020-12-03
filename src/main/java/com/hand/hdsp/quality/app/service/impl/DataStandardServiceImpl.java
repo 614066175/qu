@@ -153,6 +153,13 @@ public class DataStandardServiceImpl implements DataStandardService {
         }
         DataStandardDTO dataStandardDTO = dataStandardDTOList.get(0);
         convertToDataLengthList(dataStandardDTO);
+        List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
+                .andWhere(Sqls.custom()
+                .andEqualTo(StandardExtra.FIELD_STANDARD_ID,standardId)
+                .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE,"DATA")
+                .andEqualTo(StandardExtra.FIELD_TENANT_ID,tenantId))
+                .build());
+        dataStandardDTO.setStandardExtraDTOList(standardExtraDTOS);
         return dataStandardDTO;
     }
 
@@ -320,12 +327,31 @@ public class DataStandardServiceImpl implements DataStandardService {
                                         .andEqualTo(StandardAimRelation.FIELD_AIM_ID, standardAimDTO.getAimId())
                                         .andEqualTo(StandardAimRelation.FIELD_TENANT_ID, standardAimDTO.getTenantId()))
                                 .build());
-                if(CollectionUtils.isNotEmpty(standardAimRelationDTOS)){
+                //已落标关联
+                if (CollectionUtils.isNotEmpty(standardAimRelationDTOS)) {
                     StandardAimRelationDTO standardAimRelationDTO = standardAimRelationDTOS.get(0);
-                    //删除数据质量字段规则数据
-
+                    //查找出数据标准生成的行信息
+                    List<BatchPlanFieldLineDTO> batchPlanFieldLineDTOS = batchPlanFieldLineRepository.
+                            selectDTOByCondition(Condition.builder(BatchPlanFieldLine.class)
+                                    .andWhere(Sqls.custom()
+                                            .andEqualTo(BatchPlanFieldLine.FIELD_PLAN_RULE_ID, standardAimRelationDTO.getPlanRuleId())
+                                            .andEqualTo(BatchPlanFieldLine.FIELD_TENANT_ID, standardAimRelationDTO.getTenantId()))
+                                    .build());
+                    //根据行ID删除数据质量字段规则Condition
+                    if (CollectionUtils.isNotEmpty(batchPlanFieldLineDTOS)) {
+                        batchPlanFieldLineDTOS.forEach(batchPlanFieldLineDTO -> {
+                            batchPlanFieldConRepository.deleteByPlanLineId(batchPlanFieldLineDTO.getPlanLineId());
+                        });
+                    }
+                    //批量删除line
+                    batchPlanFieldLineRepository.batchDTODelete(batchPlanFieldLineDTOS);
+                    //删除file_rule
+                    batchPlanFieldRepository.deleteByPrimaryKey(standardAimRelationDTO.getPlanRuleId());
                     //删除落标关系表数据
+                    standardAimRelationRepository.deleteDTO(standardAimRelationDTO);
                 }
+                //关联评估方案生成数据质量规则
+                doRelatePlan(standardAimDTO);
             });
         }
     }

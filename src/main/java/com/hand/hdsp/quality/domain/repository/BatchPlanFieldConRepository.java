@@ -1,12 +1,12 @@
 package com.hand.hdsp.quality.domain.repository;
 
+import java.util.List;
+
 import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldConDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldCon;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanFieldConDO;
-
-import java.util.List;
 
 /**
  * <p>批数据方案-字段规则条件表资源库</p>
@@ -30,4 +30,12 @@ public interface BatchPlanFieldConRepository extends BaseRepository<BatchPlanFie
      * @return
      */
     int deleteByPlanBaseId(Long planBaseId);
+
+    /**
+     * 根据 plan_line_id 删除
+     *
+     * @param planLineId
+     * @return
+     */
+    int deleteByPlanLineId(Long planLineId);
 }

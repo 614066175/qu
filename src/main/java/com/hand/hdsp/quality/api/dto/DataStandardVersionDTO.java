@@ -29,6 +29,10 @@ public class DataStandardVersionDTO extends AuditDomain {
     @ApiModelProperty("版本ID，主键，供其他表做外键")
     private Long versionId;
 
+    @ApiModelProperty(value = "分组ID")
+    @NotNull
+    private Long groupId;
+
     @ApiModelProperty(value = "标准ID")
     @NotNull
     private Long standardId;
@@ -109,4 +113,7 @@ public class DataStandardVersionDTO extends AuditDomain {
 
     @Transient
     private String chargeDeptName;
+
+    @Transient
+    private String groupName;
 }

@@ -25,6 +25,7 @@ import lombok.*;
 public class DataStandardVersion extends AuditDomain {
 
     public static final String FIELD_VERSION_ID = "versionId";
+    public static final String FIELD_GROUP_ID="groupId";
     public static final String FIELD_STANDARD_ID = "standardId";
     public static final String FIELD_STANDARD_CODE = "standardCode";
     public static final String FIELD_STANDARD_NAME = "standardName";
@@ -55,6 +56,8 @@ public class DataStandardVersion extends AuditDomain {
     @Id
     @GeneratedValue
     private Long versionId;
+
+    private Long groupId;
 
     private Long standardId;
 

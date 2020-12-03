@@ -1,10 +1,11 @@
 package com.hand.hdsp.quality.infra.mapper;
 
+import java.util.List;
+
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldCon;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanFieldConDO;
 import io.choerodon.mybatis.common.BaseMapper;
-
-import java.util.List;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>批数据方案-字段规则条件表Mapper</p>
@@ -28,4 +29,11 @@ public interface BatchPlanFieldConMapper extends BaseMapper<BatchPlanFieldCon> {
      * @return
      */
     int deleteByPlanBaseId(Long planBaseId);
+
+    /**
+     * 根据 planId 删除
+     * @param planLineId
+     * @return
+     */
+    int deleteByPlanLineId(@Param("planLineId") Long planLineId);
 }

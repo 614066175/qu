@@ -49,4 +49,11 @@
                  ) a
         )
     </delete>
+    <delete id="deleteByPlanLineId">
+        DELETE
+        FROM
+            xqua_batch_plan_field_con
+        WHERE
+            plan_line_id=#{planLineId}
+    </delete>
 </mapper>

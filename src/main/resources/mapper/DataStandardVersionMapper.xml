@@ -4,6 +4,7 @@
 	<!-- 可根据自己的需求，是否要使用 -->
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.DataStandardVersion">
         <result column="version_id" property="versionId" jdbcType="DECIMAL"/>
+        <result column="group_id" property="groupId" jdbcType="DECIMAL"/>
         <result column="standard_id" property="standardId" jdbcType="DECIMAL"/>
         <result column="standard_code" property="standardCode" jdbcType="VARCHAR"/>
         <result column="standard_name" property="standardName" jdbcType="VARCHAR"/>
@@ -60,11 +61,13 @@
         iu.login_name lastUpdateName,
         iu2.login_name chargeName,
         hu.unit_name chargeDeptName,
+        xsg.group_name,
          <include refid="baseColumn">
              <property name="dsv" value="dsv"/>
          </include>
         FROM
         xsta_data_standard_version  dsv
+        left join xsta_standard_group xsg on xsg.group_id=dsv.group_id
         left join hzero_platform.iam_user iu on dsv.last_updated_by=iu.id
         left join hzero_platform.iam_user iu2 on dsv.charge_id=iu2.id
         left join hzero_platform.hpfm_unit hu on hu.unit_id=dsv.charge_dept_id
@@ -76,11 +79,13 @@
         iu.login_name lastUpdateName,
         iu2.login_name chargeName,
         hu.unit_name chargeDeptName,
+        xsg.group_name,
         <include refid="baseColumn">
             <property name="dsv" value="dsv"/>
         </include>
         FROM
         xsta_data_standard_version  dsv
+        left join xsta_standard_group xsg on xsg.group_id=ds.group_id
         left join hzero_platform.iam_user iu on dsv.last_updated_by=iu.id
         left join hzero_platform.iam_user iu2 on dsv.charge_id=iu2.id
         left join hzero_platform.hpfm_unit hu on hu.unit_id=dsv.charge_dept_id
