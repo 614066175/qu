@@ -282,35 +282,83 @@ public class DataStandardServiceImpl implements DataStandardService {
         dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS);
         //判断数据标准状态,如果是发布上线状态，则存版本表
         if (StandardConstant.ONLINE.equals(dataStandardDTO.getStandardStatus())) {
-            Long lastVersion = 1L;
-            List<DataStandardVersionDTO> dataStandardVersionDTOS = dataStandardVersionRepository.selectDTOByCondition(Condition.builder(DataStandardVersion.class)
+            //存版本表
+            doVersion(dataStandardDTO);
+            //1.数据标准没有关联评估方案，直接发布，不做处理
+            //2.数据标准关联了评估方案，第一次发布，则落标到数据质量生成规则
+            //3.数据标准关联了评估方案，不是第一发布，则更新落标到数据质量的规则
+
+            //查看此标准落标表的情况
+            List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
                     .andWhere(Sqls.custom()
-                            .andEqualTo(DataStandardVersion.FIELD_STANDARD_ID, dataStandardDTO.getStandardId()))
-                    .orderByDesc(DataStandardVersion.FIELD_VERSION_NUMBER).build());
-            DataStandardVersionDTO dataStandardVersionDTO = new DataStandardVersionDTO();
-            //不为空则取最新版本
-            if (CollectionUtils.isNotEmpty(dataStandardVersionDTOS)) {
-                lastVersion = dataStandardVersionDTOS.get(0).getVersionNumber() + 1;
-            }
-            //存入版本表
-            BeanUtils.copyProperties(dataStandardDTO, dataStandardVersionDTO);
-            dataStandardVersionDTO.setVersionNumber(lastVersion);
-            dataStandardVersionRepository.insertDTOSelective(dataStandardVersionDTO);
-            //存附加信息版本表
-            List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
-                    .andWhere(Sqls.custom()
-                            .andEqualTo(StandardExtra.FIELD_STANDARD_ID, dataStandardDTO.getStandardId())
-                            .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, "DATA")
-                            .andEqualTo(StandardExtra.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
+                            .andEqualTo(StandardAim.FIELD_STANDARD_ID, dataStandardDTO.getStandardId())
+                            .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, "DATA")
+                            .andEqualTo(StandardAim.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                     .build());
-            if (CollectionUtils.isNotEmpty(standardExtraDTOS)) {
-                //存附件信息版本表
-                for (StandardExtraDTO s : standardExtraDTOS) {
-                    ExtraVersionDTO extraVersionDTO = new ExtraVersionDTO();
-                    BeanUtils.copyProperties(s, extraVersionDTO);
-                    extraVersionDTO.setVersionNumber(lastVersion);
-                    extraVersionRepository.insertDTOSelective(extraVersionDTO);
+            if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
+                //过滤出关联了评估方案的落标
+                List<StandardAimDTO> aimDTOS = standardAimDTOS.stream()
+                        .filter(s -> Objects.nonNull(s.getPlanId()))
+                        .collect(Collectors.toList());
+                publishRelatePlan(aimDTOS);
+            }
+        }
+    }
+
+    /**
+     * 发布时处理关联了评估的落标
+     *
+     * @param aimDTOS
+     */
+    private void publishRelatePlan(List<StandardAimDTO> aimDTOS) {
+        if (CollectionUtils.isNotEmpty(aimDTOS)) {
+            aimDTOS.forEach(standardAimDTO -> {
+                //判断落标是否已经关联到数据质量，如果已关联则更新（删除重建）
+                List<StandardAimRelationDTO> standardAimRelationDTOS = standardAimRelationRepository
+                        .selectDTOByCondition(Condition.builder(StandardAimRelation.class)
+                                .andWhere(Sqls.custom()
+                                        .andEqualTo(StandardAimRelation.FIELD_AIM_ID, standardAimDTO.getAimId())
+                                        .andEqualTo(StandardAimRelation.FIELD_TENANT_ID, standardAimDTO.getTenantId()))
+                                .build());
+                if(CollectionUtils.isNotEmpty(standardAimRelationDTOS)){
+                    StandardAimRelationDTO standardAimRelationDTO = standardAimRelationDTOS.get(0);
+                    //删除数据质量字段规则数据
+
+                    //删除落标关系表数据
                 }
+            });
+        }
+    }
+
+    private void doVersion(DataStandardDTO dataStandardDTO) {
+        Long lastVersion = 1L;
+        List<DataStandardVersionDTO> dataStandardVersionDTOS = dataStandardVersionRepository.selectDTOByCondition(Condition.builder(DataStandardVersion.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(DataStandardVersion.FIELD_STANDARD_ID, dataStandardDTO.getStandardId()))
+                .orderByDesc(DataStandardVersion.FIELD_VERSION_NUMBER).build());
+        DataStandardVersionDTO dataStandardVersionDTO = new DataStandardVersionDTO();
+        //不为空则取最新版本
+        if (CollectionUtils.isNotEmpty(dataStandardVersionDTOS)) {
+            lastVersion = dataStandardVersionDTOS.get(0).getVersionNumber() + 1;
+        }
+        //存入版本表
+        BeanUtils.copyProperties(dataStandardDTO, dataStandardVersionDTO);
+        dataStandardVersionDTO.setVersionNumber(lastVersion);
+        dataStandardVersionRepository.insertDTOSelective(dataStandardVersionDTO);
+        //存附加信息版本表
+        List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardExtra.FIELD_STANDARD_ID, dataStandardDTO.getStandardId())
+                        .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, "DATA")
+                        .andEqualTo(StandardExtra.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
+                .build());
+        if (CollectionUtils.isNotEmpty(standardExtraDTOS)) {
+            //存附件信息版本表
+            for (StandardExtraDTO s : standardExtraDTOS) {
+                ExtraVersionDTO extraVersionDTO = new ExtraVersionDTO();
+                BeanUtils.copyProperties(s, extraVersionDTO);
+                extraVersionDTO.setVersionNumber(lastVersion);
+                extraVersionRepository.insertDTOSelective(extraVersionDTO);
             }
         }
     }
@@ -361,13 +409,13 @@ public class DataStandardServiceImpl implements DataStandardService {
     public void batchRelatePlan(List<StandardAimDTO> standardAimDTOList) {
 
         //判断数据标准状态，非在线状态，则只存落标表，在数据质量不生成规则
-        if(CollectionUtils.isEmpty(standardAimDTOList)){
+        if (CollectionUtils.isEmpty(standardAimDTOList)) {
             throw new CommonException(ErrorCode.STANDARD_AIM_LIST_IS_EMPTY);
         }
         standardAimDTOList.forEach(standardAimDTO -> {
             DataStandardDTO dataStandardDTO = dataStandardRepository.selectDTOByPrimaryKey(standardAimDTO.getStandardId());
             //如果标准为在线状态则去数据质量落标对应规则
-            if(StandardStatus.ONLINE.equals(dataStandardDTO.getStandardStatus())){
+            if (StandardStatus.ONLINE.equals(dataStandardDTO.getStandardStatus())) {
                 doRelatePlan(standardAimDTO);
             }
             //其余状态只是将评估方案保存下来

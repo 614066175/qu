@@ -12,7 +12,10 @@ import com.hand.hdsp.quality.domain.entity.ExtraVersion;
 import com.hand.hdsp.quality.domain.repository.ExtraVersionRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.mapper.DataStandardVersionMapper;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Service;
@@ -36,8 +39,8 @@ public class DataStandardVersionServiceImpl implements DataStandardVersionServic
 
     @Override
     public DataStandardVersionDTO detail(Long versionId) {
-        DataStandardVersionDTO dataStandardVersionDTO=dataStandardVersionMapper.detail(versionId);
-        if(Objects.isNull(dataStandardVersionDTO)){
+        DataStandardVersionDTO dataStandardVersionDTO = dataStandardVersionMapper.detail(versionId);
+        if (Objects.isNull(dataStandardVersionDTO)) {
             throw new CommonException(ErrorCode.DATA_STANDARD_VERSION_NOT_EXIST);
         }
         convertToDataLengthList(dataStandardVersionDTO);
@@ -50,6 +53,11 @@ public class DataStandardVersionServiceImpl implements DataStandardVersionServic
                 .build());
         dataStandardVersionDTO.setExtraVersionDTOList(extraVersionDTOS);
         return dataStandardVersionDTO;
+    }
+
+    @Override
+    public Page<DataStandardVersionDTO> list(PageRequest pageRequest, DataStandardVersionDTO dataStandardVersionDTO) {
+        return PageHelper.doPageAndSort(pageRequest, () -> dataStandardVersionMapper.list(dataStandardVersionDTO));
     }
 
     private void convertToDataLengthList(DataStandardVersionDTO dataStandardVersionDTO) {

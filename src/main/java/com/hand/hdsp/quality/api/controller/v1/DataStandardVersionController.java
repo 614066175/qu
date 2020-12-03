@@ -51,7 +51,7 @@ public class DataStandardVersionController extends BaseController {
                                   DataStandardVersionDTO dataStandardVersionDTO, @ApiIgnore @SortDefault(value = DataStandardVersion.FIELD_VERSION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         dataStandardVersionDTO.setTenantId(tenantId);
-        Page<DataStandardVersionDTO> list = dataStandardVersionRepository.pageAndSortDTO(pageRequest, dataStandardVersionDTO);
+        Page<DataStandardVersionDTO> list=dataStandardVersionService.list(pageRequest,dataStandardVersionDTO);
         return Results.success(list);
     }
 
