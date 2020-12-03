@@ -115,6 +115,4 @@ public class DataStandardDTO extends AuditDomain {
 
     @Transient
     private List<Long> dataLengthList;
-
-
 }

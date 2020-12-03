@@ -1,13 +1,13 @@
 package com.hand.hdsp.quality.api.dto;
 
+import javax.validation.constraints.NotBlank;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.hzero.boot.platform.lov.annotation.LovValue;
-
-import javax.validation.constraints.NotBlank;
 
 /**
  * <p>方案告警等级表 数据传输对象</p>
@@ -43,6 +43,9 @@ public class WarningLevelDTO extends AuditDomain {
 
     @ApiModelProperty(value = "值集编码")
     private String lovCode;
+
+    @ApiModelProperty(value = "枚举值")
+    private String enumValue;
 
     private String warningLevelMeaning;
 

@@ -1,5 +1,15 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.*;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckWay.COMMON;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckWay.REGULAR;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareSymbol.*;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.RANGE;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.VALUE;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CountType.*;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.SqlType.TABLE;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -12,6 +22,7 @@ import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardConstant;
+import com.hand.hdsp.quality.infra.constant.WarningLevel;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -24,6 +35,7 @@ import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.infra.meta.Column;
 import org.hzero.starter.driver.core.infra.meta.Table;
+import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -39,6 +51,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class DataStandardServiceImpl implements DataStandardService {
+
+    public static Long DEFAULT_WEIGHT = 5L;
 
     private final DataStandardRepository dataStandardRepository;
 
@@ -64,13 +78,15 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     private final BatchPlanFieldLineRepository batchPlanFieldLineRepository;
 
+    private final BatchPlanFieldConRepository batchPlanFieldConRepository;
+
 
     public DataStandardServiceImpl(DataStandardRepository dataStandardRepository,
                                    DataStandardVersionRepository dataStandardVersionRepository,
                                    StandardExtraRepository standardExtraRepository,
                                    DataStandardMapper dataStandardMapper,
                                    ExtraVersionRepository extraVersionRepository,
-                                   StandardAimRepository standardAimRepository, DriverSessionService driverSessionService, StandardAimRelationRepository standardAimRelationRepository, BatchPlanBaseService batchPlanBaseService, BatchPlanBaseRepository batchPlanBaseRepository, BatchPlanFieldRepository batchPlanFieldRepository, BatchPlanFieldLineRepository batchPlanFieldLineRepository) {
+                                   StandardAimRepository standardAimRepository, DriverSessionService driverSessionService, StandardAimRelationRepository standardAimRelationRepository, BatchPlanBaseService batchPlanBaseService, BatchPlanBaseRepository batchPlanBaseRepository, BatchPlanFieldRepository batchPlanFieldRepository, BatchPlanFieldLineRepository batchPlanFieldLineRepository, BatchPlanFieldConRepository batchPlanFieldConRepository) {
         this.dataStandardRepository = dataStandardRepository;
         this.dataStandardVersionRepository = dataStandardVersionRepository;
         this.standardExtraRepository = standardExtraRepository;
@@ -83,6 +99,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         this.batchPlanBaseRepository = batchPlanBaseRepository;
         this.batchPlanFieldRepository = batchPlanFieldRepository;
         this.batchPlanFieldLineRepository = batchPlanFieldLineRepository;
+        this.batchPlanFieldConRepository = batchPlanFieldConRepository;
     }
 
 
@@ -141,8 +158,8 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     private void convertToDataLengthList(DataStandardDTO dataStandardDTO) {
         //对数据长度进行处理
-        if(dataStandardDTO.getDataLength()!=null){
-            List<String>  dataLength= Arrays.asList(dataStandardDTO.getDataLength().split(","));
+        if (dataStandardDTO.getDataLength() != null) {
+            List<String> dataLength = Arrays.asList(dataStandardDTO.getDataLength().split(","));
             List<Long> dataLengthList = dataLength.stream().map(Long::parseLong).collect(Collectors.toList());
             dataStandardDTO.setDataLengthList(dataLengthList);
         }
@@ -241,15 +258,15 @@ public class DataStandardServiceImpl implements DataStandardService {
         dataStandardRepository.updateByDTOPrimaryKey(dataStandardDTO);
     }
 
-    private void convertToDataLength(DataStandardDTO dataStandardDTO){
+    private void convertToDataLength(DataStandardDTO dataStandardDTO) {
         //对数据长度进行处理
         List<Long> dataLengthList = dataStandardDTO.getDataLengthList();
-        if(CollectionUtils.isNotEmpty(dataLengthList)){
-            if(dataLengthList.size()==1){
+        if (CollectionUtils.isNotEmpty(dataLengthList)) {
+            if (dataLengthList.size() == 1) {
                 dataStandardDTO.setDataLength(String.valueOf(dataLengthList.get(0)));
             }
-            if(dataLengthList.size()==2){
-                dataStandardDTO.setDataLength(String.format("%s,%s",dataLengthList.get(0),dataLengthList.get(1)));
+            if (dataLengthList.size() == 2) {
+                dataStandardDTO.setDataLength(String.format("%s,%s", dataLengthList.get(0), dataLengthList.get(1)));
             }
         }
     }
@@ -286,10 +303,10 @@ public class DataStandardServiceImpl implements DataStandardService {
                             .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, "DATA")
                             .andEqualTo(StandardExtra.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                     .build());
-            ExtraVersionDTO extraVersionDTO = new ExtraVersionDTO();
             if (CollectionUtils.isNotEmpty(standardExtraDTOS)) {
                 //存附件信息版本表
                 for (StandardExtraDTO s : standardExtraDTOS) {
+                    ExtraVersionDTO extraVersionDTO = new ExtraVersionDTO();
                     BeanUtils.copyProperties(s, extraVersionDTO);
                     extraVersionDTO.setVersionNumber(lastVersion);
                     extraVersionRepository.insertDTOSelective(extraVersionDTO);
@@ -308,24 +325,24 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, standardAimDTO.getDatasourceCode())
                         .andEqualTo(StandardAim.FIELD_FIELD_NAME, standardAimDTO.getFieldName()))
                 .build());
-        if(CollectionUtils.isNotEmpty(standardAimDTOS)){
+        if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
             throw new CommonException(ErrorCode.STANDARD_AIM_EXIST);
         }
         DriverSession driverSession = driverSessionService.getDriverSession(standardAimDTO.getTenantId(), standardAimDTO.getDatasourceCode());
         //字段注释
         List<Column> columns = driverSession.columnMetaData(standardAimDTO.getSchemaName(), standardAimDTO.getTableName());
-        if(CollectionUtils.isNotEmpty(columns)){
+        if (CollectionUtils.isNotEmpty(columns)) {
             columns.forEach(column -> {
-                if(column.getColumnName().equals(standardAimDTO.getFieldName())){
+                if (column.getColumnName().equals(standardAimDTO.getFieldName())) {
                     standardAimDTO.setFieldDesc(column.getRemarks());
                 }
             });
         }
         //表注释
         List<Table> tables = driverSession.tablesNameAndDesc(standardAimDTO.getSchemaName(), standardAimDTO.getTableName());
-        if(CollectionUtils.isNotEmpty(tables)){
+        if (CollectionUtils.isNotEmpty(tables)) {
             tables.forEach(table -> {
-                if(table.getTableName().equals(standardAimDTO.getTableName())){
+                if (table.getTableName().equals(standardAimDTO.getTableName())) {
                     standardAimDTO.setTableDesc(table.getRemarks());
                 }
             });
@@ -334,10 +351,24 @@ public class DataStandardServiceImpl implements DataStandardService {
         standardAimRepository.insertDTOSelective(standardAimDTO);
     }
 
+    /**
+     * 批量关联评估方案
+     *
+     * @param standardAimDTOList
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void batchRelatePlan(List<StandardAimDTO> standardAimDTOList) {
-        if(CollectionUtils.isNotEmpty(standardAimDTOList)){
+
+        //判断数据标准状态，非在线状态，则只存落标表，在数据质量不生成规则
+        if(CollectionUtils.isEmpty(standardAimDTOList)){
+
+        }
+
+
+
+
+        if (CollectionUtils.isNotEmpty(standardAimDTOList)) {
             standardAimDTOList.forEach(standardAimDTO -> {
                 //在该评估方案下生成base
                 BatchPlanBaseDTO batchPlanBaseDTO = BatchPlanBaseDTO.builder()
@@ -345,9 +376,9 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .datasourceId(standardAimDTO.getDatasourceId())
                         .datasourceSchema(standardAimDTO.getSchemaName())
                         .planId(standardAimDTO.getPlanId())
-                        .sqlType("TABLE")
+                        .sqlType(TABLE)
                         .objectName(standardAimDTO.getTableName())
-                        .incrementStrategy("NONE")
+                        .incrementStrategy(IncrementStrategy.NONE)
                         .tenantId(standardAimDTO.getTenantId())
                         .build();
                 batchPlanBaseRepository.insertDTOSelective(batchPlanBaseDTO);
@@ -360,32 +391,157 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .ruleCode(dataStandardDTO.getStandardCode())
                         .ruleName(dataStandardDTO.getStandardName())
                         .ruleDesc(dataStandardDTO.getStandardDesc())
-                        .checkType("STANDARD")
-                        .weight(5L)
+                        .checkType(STANDARD)
+                        .weight(DEFAULT_WEIGHT)
                         .build();
                 batchPlanFieldRepository.insertDTOSelective(batchPlanFieldDTO);
 
                 //根据数据标准生成具体的校验项batch_plan_field_line
                 //数据格式
-                if(Strings.isNotEmpty(dataStandardDTO.getDataPattern())){
+                if (Strings.isNotEmpty(dataStandardDTO.getDataPattern())) {
                     BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()
-                            .checkWay("REGULAR")
-                            .checkItem("REGULAR")
+                            .checkWay(REGULAR)
+                            .checkItem(REGULAR)
                             .planRuleId(batchPlanFieldDTO.getPlanRuleId())
                             .fieldName(standardAimDTO.getFieldName())
                             .regularExpression(dataStandardDTO.getDataPattern())
                             .tenantId(standardAimDTO.getTenantId())
                             .build();
-
+                    batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
+                    //生成每个校验项的配置项
+                    WarningLevelDTO warningLevelDTO = WarningLevelDTO.builder()
+                            .warningLevel(WarningLevel.ORANGE)
+                            .compareSymbol(EQUAL)
+                            .build();
+                    String warningLevel = JsonUtil.toJson(warningLevelDTO);
+                    BatchPlanFieldConDTO batchPlanFieldConDTO = BatchPlanFieldConDTO.builder()
+                            .planLineId(batchPlanFieldLineDTO.getPlanLineId())
+                            .warningLevel(warningLevel)
+                            .build();
+                    batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
                 }
                 //数据长度
-                if(Strings.isNotEmpty(dataStandardDTO.getDataLength())){
-
+                if (Strings.isNotEmpty(dataStandardDTO.getDataLength())) {
+                    BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()
+                            .checkWay(COMMON)
+                            .checkItem(CheckItem.DATA_LENGTH)
+                            .planRuleId(batchPlanFieldDTO.getPlanRuleId())
+                            .fieldName(standardAimDTO.getFieldName())
+                            .tenantId(standardAimDTO.getTenantId())
+                            .build();
+                    //固定值
+                    if (FIXED_VALUE.equals(dataStandardDTO.getDataType())) {
+                        batchPlanFieldLineDTO.setCountType(FIXED_VALUE);
+                        batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
+                        //生成每个校验项的配置项
+                        WarningLevelDTO warningLevelDTO = WarningLevelDTO.builder()
+                                .warningLevel(WarningLevel.ORANGE)
+                                .compareSymbol(NOT_EQUAL)
+                                .expectedValue(dataStandardDTO.getDataLength())
+                                .build();
+                        String warningLevel = JsonUtil.toJson(warningLevelDTO);
+                        BatchPlanFieldConDTO batchPlanFieldConDTO = BatchPlanFieldConDTO.builder()
+                                .planLineId(batchPlanFieldLineDTO.getPlanLineId())
+                                .warningLevel(warningLevel)
+                                .compareWay(VALUE)
+                                .build();
+                        batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
+                    }
+                    //长度范围
+                    if (RANGE.equals(dataStandardDTO.getDataType())) {
+                        convertToDataLengthList(dataStandardDTO);
+                        batchPlanFieldLineDTO.setCountType(LENGTH_RANGE);
+                        batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
+                        //生成每个校验项的配置项
+                        //两个值都存在生成告警规则
+                        List<Long> dataLengthList = dataStandardDTO.getDataLengthList();
+                        String warningLevel = "";
+                        if (CollectionUtils.isNotEmpty(dataLengthList)
+                                && dataLengthList.size() == 2) {
+                            WarningLevelDTO firstWarningLevelDTO = WarningLevelDTO.builder()
+                                    .warningLevel(WarningLevel.ORANGE)
+                                    .endValue(String.valueOf(dataLengthList.get(0) - 1))
+                                    .compareSymbol(EQUAL)
+                                    .build();
+                            WarningLevelDTO secondWarningLevelDTO = WarningLevelDTO.builder()
+                                    .warningLevel(WarningLevel.ORANGE)
+                                    .startValue(String.valueOf(dataLengthList.get(1) + 1))
+                                    .compareSymbol(EQUAL)
+                                    .build();
+                            List<WarningLevelDTO> warningLevelDTOList = Arrays.asList(firstWarningLevelDTO
+                                    , secondWarningLevelDTO);
+                            warningLevel = JsonUtil.toJson(warningLevelDTOList);
+                        }
+                        BatchPlanFieldConDTO batchPlanFieldConDTO = BatchPlanFieldConDTO.builder()
+                                .planLineId(batchPlanFieldLineDTO.getPlanLineId())
+                                .warningLevel(warningLevel)
+                                .compareWay(RANGE)
+                                .build();
+                        batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
+                    }
                 }
                 //值域
-
-
-
+                if (Strings.isNotEmpty(dataStandardDTO.getValueRange())) {
+                    BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()
+                            .checkWay(COMMON)
+                            .checkItem(FIXED_VALUE)
+                            .planRuleId(batchPlanFieldDTO.getPlanRuleId())
+                            .fieldName(standardAimDTO.getFieldName())
+                            .tenantId(standardAimDTO.getTenantId())
+                            .build();
+                    //判断类型，并生成不同的配置项告警规则
+                    String warningLevel = "";
+                    WarningLevelDTO warningLevelDTO;
+                    switch (dataStandardDTO.getValueType()) {
+                        case StandardValueType.AREA:
+                            batchPlanFieldLineDTO.setCountType(FIXED_VALUE);
+                            List<String> valueRangeList = Arrays.asList(dataStandardDTO.getValueRange().split(","));
+                            if (CollectionUtils.isNotEmpty(valueRangeList)
+                                    && valueRangeList.size() == 2) {
+                                WarningLevelDTO firstWarningLevelDTO = WarningLevelDTO.builder()
+                                        .warningLevel(WarningLevel.ORANGE)
+                                        .endValue(valueRangeList.get(0))
+                                        .compareSymbol(EQUAL)
+                                        .build();
+                                WarningLevelDTO secondWarningLevelDTO = WarningLevelDTO.builder()
+                                        .warningLevel(WarningLevel.ORANGE)
+                                        .startValue(valueRangeList.get(1))
+                                        .compareSymbol(EQUAL)
+                                        .build();
+                                List<WarningLevelDTO> warningLevelDTOList = Arrays.
+                                        asList(firstWarningLevelDTO, secondWarningLevelDTO);
+                                warningLevel = JsonUtil.toJson(warningLevelDTOList);
+                            }
+                            break;
+                        case StandardValueType.ENUM:
+                            batchPlanFieldLineDTO.setCountType(ENUM_VALUE);
+                            warningLevelDTO = WarningLevelDTO.builder()
+                                    .warningLevel(WarningLevel.ORANGE)
+                                    .compareSymbol(INCLUDED)
+                                    .enumValue(dataStandardDTO.getValueRange())
+                                    .build();
+                            warningLevel = JsonUtil.toJson(warningLevelDTO);
+                            break;
+                        case StandardValueType.VALUE_SET:
+                            batchPlanFieldLineDTO.setCountType(LOV_VALUE);
+                            warningLevelDTO = WarningLevelDTO.builder()
+                                    .warningLevel(WarningLevel.ORANGE)
+                                    .compareSymbol(INCLUDED)
+                                    .enumValue(dataStandardDTO.getValueRange())
+                                    .build();
+                            warningLevel = JsonUtil.toJson(warningLevelDTO);
+                            break;
+                        default:
+                            break;
+                    }
+                    batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
+                    //生成每个校验项的配置项
+                    BatchPlanFieldConDTO batchPlanFieldConDTO = BatchPlanFieldConDTO.builder()
+                            .planLineId(batchPlanFieldLineDTO.getPlanLineId())
+                            .warningLevel(warningLevel)
+                            .build();
+                    batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
+                }
                 //根据具体落标存入落标关系表
                 StandardAimRelationDTO standardAimRelationDTO = StandardAimRelationDTO.builder()
                         .aimId(standardAimDTO.getAimId())
@@ -393,9 +549,13 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .planId(standardAimDTO.getPlanId())
                         .planBaseId(batchPlanBaseDTO.getPlanBaseId())
                         .planRuleId(batchPlanFieldDTO.getPlanRuleId())
+                        .tenantId(standardAimDTO.getTenantId())
                         .build();
                 standardAimRelationRepository.insertDTOSelective(standardAimRelationDTO);
             });
         }
     }
+
+
+
 }

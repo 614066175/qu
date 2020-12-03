@@ -182,11 +182,11 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping("/batch-delete")
-    public ResponseEntity<Void> batchDelete(@PathVariable(name = "organizationId") Long tenantId, List<DataStandardDTO> dataStandardDTOList) {
+    public ResponseEntity<List<DataStandardDTO>> batchDelete(@PathVariable(name = "organizationId") Long tenantId, @RequestBody List<DataStandardDTO> dataStandardDTOList) {
         if(CollectionUtils.isNotEmpty(dataStandardDTOList)){
             dataStandardDTOList.forEach(dataStandardService::delete);
         }
-        return Results.success();
+        return Results.success(dataStandardDTOList);
     }
 
     @ApiOperation(value = "数据标准落标")

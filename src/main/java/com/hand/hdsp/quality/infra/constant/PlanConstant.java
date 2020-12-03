@@ -191,6 +191,14 @@ public interface PlanConstant {
          * 不等于
          */
         String NOT_EQUAL = "NOT_EQUAL";
+        /**
+         * 包含
+         */
+        String INCLUDED = "INCLUDED";
+        /**
+         * 不包含
+         */
+        String NOT_INCLUDED = "NOT_INCLUDED";
     }
 
     /**
@@ -211,6 +219,12 @@ public interface PlanConstant {
         String ID = "ID";
     }
 
+    interface CheckType{
+        /**
+         * 标准规范
+         */
+        String STANDARD="STANDARD";
+    }
 
     /**
      * 校验项
@@ -224,6 +238,11 @@ public interface PlanConstant {
          * 一致性
          */
         String CONSISTENCY = "CONSISTENCY";
+
+        /**
+         * 一致性
+         */
+        String DATA_LENGTH = "DATA_LENGTH";
 
     }
 
@@ -240,6 +259,14 @@ public interface PlanConstant {
          * 固定值
          */
         String FIXED_VALUE = "FIXED_VALUE";
+        /**
+         * 枚举值
+         */
+        String ENUM_VALUE = "ENUM_VALUE";
+        /**
+         * 枚举值
+         */
+        String LENGTH_RANGE = "LENGTH_RANGE";
 
     }
 
@@ -252,6 +279,11 @@ public interface PlanConstant {
          */
         String SQL = "SQL";
 
+        /**
+         * TABLE
+         */
+        String TABLE = "TABLE";
+
     }
 
     /**
@@ -260,5 +292,12 @@ public interface PlanConstant {
     interface TemplateSqlTag {
         String JAVA = "Java";
         String SQL = "SQL";
+    }
+
+    interface StandardValueType{
+        String AREA="AREA";
+        String ENUM="ENUM";
+        String VALUE_SET="VALUE_SET";
+
     }
 }
