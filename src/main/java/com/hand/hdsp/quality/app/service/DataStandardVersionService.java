@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.app.service;
 
+import com.hand.hdsp.quality.api.dto.DataStandardVersionDTO;
+
 /**
  * <p>数据标准版本表应用服务</p>
  *
@@ -7,4 +9,10 @@ package com.hand.hdsp.quality.app.service;
  */
 public interface DataStandardVersionService {
 
+    /**
+     * 数据标准历史表数据
+     * @param versionId
+     * @return
+     */
+    DataStandardVersionDTO detail(Long versionId);
 }

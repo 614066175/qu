@@ -300,4 +300,10 @@ public interface PlanConstant {
         String VALUE_SET="VALUE_SET";
 
     }
+    interface StandardStatus{
+        String ONLINE="ONLINE";
+        String ONLINE_APPROVING="ONLINE_APPROVING";
+        String OFFLINE="OFFLINE_APPROVING";
+        String OFFLINE_APPROVING="OFFLINE_APPROVING";
+    }
 }

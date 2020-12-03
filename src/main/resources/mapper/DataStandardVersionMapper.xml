@@ -28,4 +28,47 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+
+    <sql id="baseColumn">
+        ${dsv}.creation_date,
+        ${dsv}.created_by,
+        ${dsv}.last_update_date,
+        ${dsv}.last_updated_by,
+        ${dsv}.object_version_number,
+        ${dsv}.version_id,
+        ${dsv}.standard_id,
+        ${dsv}.standard_code,
+        ${dsv}.standard_name,
+        ${dsv}.standard_desc,
+        ${dsv}.data_type,
+        ${dsv}.data_pattern,
+        ${dsv}.length_type,
+        ${dsv}.data_length,
+        ${dsv}.value_type,
+        ${dsv}.value_range,
+        ${dsv}.standard_accord,
+        ${dsv}.accord_content,
+        ${dsv}.charge_dept_id,
+        ${dsv}.charge_id,
+        ${dsv}.charge_tel,
+        ${dsv}.charge_email,
+        ${dsv}.version_number,
+        ${dsv}.tenant_id
+    </sql>
+    <select id="detail" resultType="com.hand.hdsp.quality.api.dto.DataStandardVersionDTO">
+        SELECT
+        iu.login_name lastUpdateName,
+        iu2.login_name chargeName,
+        hu.unit_name chargeDeptName,
+         <include refid="baseColumn">
+             <property name="dsv" value="dsv"/>
+         </include>
+        FROM
+        xsta_data_standard_version  dsv
+        left join hzero_platform.iam_user iu on dsv.last_updated_by=iu.id
+        left join hzero_platform.iam_user iu2 on dsv.charge_id=iu2.id
+        left join hzero_platform.hpfm_unit hu on hu.unit_id=dsv.charge_dept_id
+        WHERE
+        version_id = #{versionId}
+    </select>
 </mapper>

@@ -1,6 +1,20 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import com.hand.hdsp.quality.api.dto.DataStandardVersionDTO;
+import com.hand.hdsp.quality.api.dto.ExtraVersionDTO;
 import com.hand.hdsp.quality.app.service.DataStandardVersionService;
+import com.hand.hdsp.quality.domain.entity.ExtraVersion;
+import com.hand.hdsp.quality.domain.repository.ExtraVersionRepository;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.mapper.DataStandardVersionMapper;
+import io.choerodon.core.exception.CommonException;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Service;
 
 /**
@@ -11,4 +25,39 @@ import org.springframework.stereotype.Service;
 @Service
 public class DataStandardVersionServiceImpl implements DataStandardVersionService {
 
+    private DataStandardVersionMapper dataStandardVersionMapper;
+
+    private ExtraVersionRepository extraVersionRepository;
+
+    public DataStandardVersionServiceImpl(DataStandardVersionMapper dataStandardVersionMapper, ExtraVersionRepository extraVersionRepository) {
+        this.dataStandardVersionMapper = dataStandardVersionMapper;
+        this.extraVersionRepository = extraVersionRepository;
+    }
+
+    @Override
+    public DataStandardVersionDTO detail(Long versionId) {
+        DataStandardVersionDTO dataStandardVersionDTO=dataStandardVersionMapper.detail(versionId);
+        if(Objects.isNull(dataStandardVersionDTO)){
+            throw new CommonException(ErrorCode.DATA_STANDARD_VERSION_NOT_EXIST);
+        }
+        convertToDataLengthList(dataStandardVersionDTO);
+        List<ExtraVersionDTO> extraVersionDTOS = extraVersionRepository.selectDTOByCondition(Condition.builder(ExtraVersion.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(ExtraVersion.FIELD_STANDARD_ID, dataStandardVersionDTO.getStandardId())
+                        .andEqualTo(ExtraVersion.FIELD_STANDARD_TYPE, "DATA")
+                        .andEqualTo(ExtraVersion.FIELD_VERSION_NUMBER, dataStandardVersionDTO.getVersionNumber())
+                        .andEqualTo(ExtraVersion.FIELD_TENANT_ID, dataStandardVersionDTO.getTenantId()))
+                .build());
+        dataStandardVersionDTO.setExtraVersionDTOList(extraVersionDTOS);
+        return dataStandardVersionDTO;
+    }
+
+    private void convertToDataLengthList(DataStandardVersionDTO dataStandardVersionDTO) {
+        //对数据长度进行处理
+        if (dataStandardVersionDTO.getDataLength() != null) {
+            List<String> dataLength = Arrays.asList(dataStandardVersionDTO.getDataLength().split(","));
+            List<Long> dataLengthList = dataLength.stream().map(Long::parseLong).collect(Collectors.toList());
+            dataStandardVersionDTO.setDataLengthList(dataLengthList);
+        }
+    }
 }

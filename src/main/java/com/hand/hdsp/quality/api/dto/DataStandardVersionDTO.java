@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.api.dto;
 
+import java.util.List;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -92,4 +94,19 @@ public class DataStandardVersionDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
+
+    @Transient
+    private List<ExtraVersionDTO> extraVersionDTOList;
+
+    @Transient
+    private List<Long> dataLengthList;
+
+    @Transient
+    private String lastUpdateName;
+
+    @Transient
+    private String chargeName;
+
+    @Transient
+    private String chargeDeptName;
 }

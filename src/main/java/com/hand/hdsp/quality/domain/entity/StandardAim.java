@@ -35,6 +35,7 @@ public class StandardAim extends AuditDomain {
     public static final String FIELD_SCHEMA_NAME = "schemaName";
     public static final String FIELD_TABLE_NAME = "tableName";
     public static final String FIELD_TABLE_DESC = "tableDesc";
+    public static final String FIELD_PLAN_ID="planId";
     public static final String FIELD_TENANT_ID = "tenantId";
 
     //
@@ -68,6 +69,8 @@ public class StandardAim extends AuditDomain {
     private String tableName;
 
     private String tableDesc;
+
+    private Long planId;
 
     private Long tenantId;
 

@@ -362,200 +362,203 @@ public class DataStandardServiceImpl implements DataStandardService {
 
         //判断数据标准状态，非在线状态，则只存落标表，在数据质量不生成规则
         if(CollectionUtils.isEmpty(standardAimDTOList)){
-
+            throw new CommonException(ErrorCode.STANDARD_AIM_LIST_IS_EMPTY);
         }
-
-
-
-
-        if (CollectionUtils.isNotEmpty(standardAimDTOList)) {
-            standardAimDTOList.forEach(standardAimDTO -> {
-                //在该评估方案下生成base
-                BatchPlanBaseDTO batchPlanBaseDTO = BatchPlanBaseDTO.builder()
-                        .datasourceCode(standardAimDTO.getDatasourceCode())
-                        .datasourceId(standardAimDTO.getDatasourceId())
-                        .datasourceSchema(standardAimDTO.getSchemaName())
-                        .planId(standardAimDTO.getPlanId())
-                        .sqlType(TABLE)
-                        .objectName(standardAimDTO.getTableName())
-                        .incrementStrategy(IncrementStrategy.NONE)
-                        .tenantId(standardAimDTO.getTenantId())
-                        .build();
-                batchPlanBaseRepository.insertDTOSelective(batchPlanBaseDTO);
-
-
-                //根据数据标准在base下生成字段规则头batch_plan_field
-                DataStandardDTO dataStandardDTO = dataStandardRepository.selectDTOByPrimaryKey(standardAimDTO.getStandardId());
-                BatchPlanFieldDTO batchPlanFieldDTO = BatchPlanFieldDTO.builder()
-                        .planBaseId(batchPlanBaseDTO.getPlanBaseId())
-                        .ruleCode(dataStandardDTO.getStandardCode())
-                        .ruleName(dataStandardDTO.getStandardName())
-                        .ruleDesc(dataStandardDTO.getStandardDesc())
-                        .checkType(STANDARD)
-                        .weight(DEFAULT_WEIGHT)
-                        .build();
-                batchPlanFieldRepository.insertDTOSelective(batchPlanFieldDTO);
-
-                //根据数据标准生成具体的校验项batch_plan_field_line
-                //数据格式
-                if (Strings.isNotEmpty(dataStandardDTO.getDataPattern())) {
-                    BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()
-                            .checkWay(REGULAR)
-                            .checkItem(REGULAR)
-                            .planRuleId(batchPlanFieldDTO.getPlanRuleId())
-                            .fieldName(standardAimDTO.getFieldName())
-                            .regularExpression(dataStandardDTO.getDataPattern())
-                            .tenantId(standardAimDTO.getTenantId())
-                            .build();
-                    batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
-                    //生成每个校验项的配置项
-                    WarningLevelDTO warningLevelDTO = WarningLevelDTO.builder()
-                            .warningLevel(WarningLevel.ORANGE)
-                            .compareSymbol(EQUAL)
-                            .build();
-                    String warningLevel = JsonUtil.toJson(warningLevelDTO);
-                    BatchPlanFieldConDTO batchPlanFieldConDTO = BatchPlanFieldConDTO.builder()
-                            .planLineId(batchPlanFieldLineDTO.getPlanLineId())
-                            .warningLevel(warningLevel)
-                            .build();
-                    batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
-                }
-                //数据长度
-                if (Strings.isNotEmpty(dataStandardDTO.getDataLength())) {
-                    BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()
-                            .checkWay(COMMON)
-                            .checkItem(CheckItem.DATA_LENGTH)
-                            .planRuleId(batchPlanFieldDTO.getPlanRuleId())
-                            .fieldName(standardAimDTO.getFieldName())
-                            .tenantId(standardAimDTO.getTenantId())
-                            .build();
-                    //固定值
-                    if (FIXED_VALUE.equals(dataStandardDTO.getDataType())) {
-                        batchPlanFieldLineDTO.setCountType(FIXED_VALUE);
-                        batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
-                        //生成每个校验项的配置项
-                        WarningLevelDTO warningLevelDTO = WarningLevelDTO.builder()
-                                .warningLevel(WarningLevel.ORANGE)
-                                .compareSymbol(NOT_EQUAL)
-                                .expectedValue(dataStandardDTO.getDataLength())
-                                .build();
-                        String warningLevel = JsonUtil.toJson(warningLevelDTO);
-                        BatchPlanFieldConDTO batchPlanFieldConDTO = BatchPlanFieldConDTO.builder()
-                                .planLineId(batchPlanFieldLineDTO.getPlanLineId())
-                                .warningLevel(warningLevel)
-                                .compareWay(VALUE)
-                                .build();
-                        batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
-                    }
-                    //长度范围
-                    if (RANGE.equals(dataStandardDTO.getDataType())) {
-                        convertToDataLengthList(dataStandardDTO);
-                        batchPlanFieldLineDTO.setCountType(LENGTH_RANGE);
-                        batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
-                        //生成每个校验项的配置项
-                        //两个值都存在生成告警规则
-                        List<Long> dataLengthList = dataStandardDTO.getDataLengthList();
-                        String warningLevel = "";
-                        if (CollectionUtils.isNotEmpty(dataLengthList)
-                                && dataLengthList.size() == 2) {
-                            WarningLevelDTO firstWarningLevelDTO = WarningLevelDTO.builder()
-                                    .warningLevel(WarningLevel.ORANGE)
-                                    .endValue(String.valueOf(dataLengthList.get(0) - 1))
-                                    .compareSymbol(EQUAL)
-                                    .build();
-                            WarningLevelDTO secondWarningLevelDTO = WarningLevelDTO.builder()
-                                    .warningLevel(WarningLevel.ORANGE)
-                                    .startValue(String.valueOf(dataLengthList.get(1) + 1))
-                                    .compareSymbol(EQUAL)
-                                    .build();
-                            List<WarningLevelDTO> warningLevelDTOList = Arrays.asList(firstWarningLevelDTO
-                                    , secondWarningLevelDTO);
-                            warningLevel = JsonUtil.toJson(warningLevelDTOList);
-                        }
-                        BatchPlanFieldConDTO batchPlanFieldConDTO = BatchPlanFieldConDTO.builder()
-                                .planLineId(batchPlanFieldLineDTO.getPlanLineId())
-                                .warningLevel(warningLevel)
-                                .compareWay(RANGE)
-                                .build();
-                        batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
-                    }
-                }
-                //值域
-                if (Strings.isNotEmpty(dataStandardDTO.getValueRange())) {
-                    BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()
-                            .checkWay(COMMON)
-                            .checkItem(FIXED_VALUE)
-                            .planRuleId(batchPlanFieldDTO.getPlanRuleId())
-                            .fieldName(standardAimDTO.getFieldName())
-                            .tenantId(standardAimDTO.getTenantId())
-                            .build();
-                    //判断类型，并生成不同的配置项告警规则
-                    String warningLevel = "";
-                    WarningLevelDTO warningLevelDTO;
-                    switch (dataStandardDTO.getValueType()) {
-                        case StandardValueType.AREA:
-                            batchPlanFieldLineDTO.setCountType(FIXED_VALUE);
-                            List<String> valueRangeList = Arrays.asList(dataStandardDTO.getValueRange().split(","));
-                            if (CollectionUtils.isNotEmpty(valueRangeList)
-                                    && valueRangeList.size() == 2) {
-                                WarningLevelDTO firstWarningLevelDTO = WarningLevelDTO.builder()
-                                        .warningLevel(WarningLevel.ORANGE)
-                                        .endValue(valueRangeList.get(0))
-                                        .compareSymbol(EQUAL)
-                                        .build();
-                                WarningLevelDTO secondWarningLevelDTO = WarningLevelDTO.builder()
-                                        .warningLevel(WarningLevel.ORANGE)
-                                        .startValue(valueRangeList.get(1))
-                                        .compareSymbol(EQUAL)
-                                        .build();
-                                List<WarningLevelDTO> warningLevelDTOList = Arrays.
-                                        asList(firstWarningLevelDTO, secondWarningLevelDTO);
-                                warningLevel = JsonUtil.toJson(warningLevelDTOList);
-                            }
-                            break;
-                        case StandardValueType.ENUM:
-                            batchPlanFieldLineDTO.setCountType(ENUM_VALUE);
-                            warningLevelDTO = WarningLevelDTO.builder()
-                                    .warningLevel(WarningLevel.ORANGE)
-                                    .compareSymbol(INCLUDED)
-                                    .enumValue(dataStandardDTO.getValueRange())
-                                    .build();
-                            warningLevel = JsonUtil.toJson(warningLevelDTO);
-                            break;
-                        case StandardValueType.VALUE_SET:
-                            batchPlanFieldLineDTO.setCountType(LOV_VALUE);
-                            warningLevelDTO = WarningLevelDTO.builder()
-                                    .warningLevel(WarningLevel.ORANGE)
-                                    .compareSymbol(INCLUDED)
-                                    .enumValue(dataStandardDTO.getValueRange())
-                                    .build();
-                            warningLevel = JsonUtil.toJson(warningLevelDTO);
-                            break;
-                        default:
-                            break;
-                    }
-                    batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
-                    //生成每个校验项的配置项
-                    BatchPlanFieldConDTO batchPlanFieldConDTO = BatchPlanFieldConDTO.builder()
-                            .planLineId(batchPlanFieldLineDTO.getPlanLineId())
-                            .warningLevel(warningLevel)
-                            .build();
-                    batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
-                }
-                //根据具体落标存入落标关系表
-                StandardAimRelationDTO standardAimRelationDTO = StandardAimRelationDTO.builder()
-                        .aimId(standardAimDTO.getAimId())
-                        .aimType("AIM")
-                        .planId(standardAimDTO.getPlanId())
-                        .planBaseId(batchPlanBaseDTO.getPlanBaseId())
-                        .planRuleId(batchPlanFieldDTO.getPlanRuleId())
-                        .tenantId(standardAimDTO.getTenantId())
-                        .build();
-                standardAimRelationRepository.insertDTOSelective(standardAimRelationDTO);
-            });
-        }
+        standardAimDTOList.forEach(standardAimDTO -> {
+            DataStandardDTO dataStandardDTO = dataStandardRepository.selectDTOByPrimaryKey(standardAimDTO.getStandardId());
+            //如果标准为在线状态则去数据质量落标对应规则
+            if(StandardStatus.ONLINE.equals(dataStandardDTO.getStandardStatus())){
+                doRelatePlan(standardAimDTO);
+            }
+            //其余状态只是将评估方案保存下来
+            standardAimRepository.insertDTOSelective(standardAimDTO);
+        });
     }
 
+    private void doRelatePlan(StandardAimDTO standardAimDTO) {
+        //在该评估方案下生成base
+        BatchPlanBaseDTO batchPlanBaseDTO = BatchPlanBaseDTO.builder()
+                .datasourceCode(standardAimDTO.getDatasourceCode())
+                .datasourceId(standardAimDTO.getDatasourceId())
+                .datasourceSchema(standardAimDTO.getSchemaName())
+                .planId(standardAimDTO.getPlanId())
+                .sqlType(TABLE)
+                .objectName(standardAimDTO.getTableName())
+                .incrementStrategy(IncrementStrategy.NONE)
+                .tenantId(standardAimDTO.getTenantId())
+                .build();
+        batchPlanBaseRepository.insertDTOSelective(batchPlanBaseDTO);
 
+
+        //根据数据标准在base下生成字段规则头batch_plan_field
+        DataStandardDTO dataStandardDTO = dataStandardRepository.selectDTOByPrimaryKey(standardAimDTO.getStandardId());
+        BatchPlanFieldDTO batchPlanFieldDTO = BatchPlanFieldDTO.builder()
+                .planBaseId(batchPlanBaseDTO.getPlanBaseId())
+                .ruleCode(dataStandardDTO.getStandardCode())
+                .ruleName(dataStandardDTO.getStandardName())
+                .ruleDesc(dataStandardDTO.getStandardDesc())
+                .checkType(STANDARD)
+                .weight(DEFAULT_WEIGHT)
+                .build();
+        batchPlanFieldRepository.insertDTOSelective(batchPlanFieldDTO);
+
+        //根据数据标准生成具体的校验项batch_plan_field_line
+        //数据格式
+        if (Strings.isNotEmpty(dataStandardDTO.getDataPattern())) {
+            BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()
+                    .checkWay(REGULAR)
+                    .checkItem(REGULAR)
+                    .planRuleId(batchPlanFieldDTO.getPlanRuleId())
+                    .fieldName(standardAimDTO.getFieldName())
+                    .regularExpression(dataStandardDTO.getDataPattern())
+                    .tenantId(standardAimDTO.getTenantId())
+                    .build();
+            batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
+            //生成每个校验项的配置项
+            WarningLevelDTO warningLevelDTO = WarningLevelDTO.builder()
+                    .warningLevel(WarningLevel.ORANGE)
+                    .compareSymbol(EQUAL)
+                    .build();
+            String warningLevel = JsonUtil.toJson(warningLevelDTO);
+            BatchPlanFieldConDTO batchPlanFieldConDTO = BatchPlanFieldConDTO.builder()
+                    .planLineId(batchPlanFieldLineDTO.getPlanLineId())
+                    .warningLevel(warningLevel)
+                    .build();
+            batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
+        }
+        //数据长度
+        if (Strings.isNotEmpty(dataStandardDTO.getDataLength())) {
+            BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()
+                    .checkWay(COMMON)
+                    .checkItem(CheckItem.DATA_LENGTH)
+                    .planRuleId(batchPlanFieldDTO.getPlanRuleId())
+                    .fieldName(standardAimDTO.getFieldName())
+                    .tenantId(standardAimDTO.getTenantId())
+                    .build();
+            //固定值
+            if (FIXED_VALUE.equals(dataStandardDTO.getDataType())) {
+                batchPlanFieldLineDTO.setCountType(FIXED_VALUE);
+                batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
+                //生成每个校验项的配置项
+                WarningLevelDTO warningLevelDTO = WarningLevelDTO.builder()
+                        .warningLevel(WarningLevel.ORANGE)
+                        .compareSymbol(NOT_EQUAL)
+                        .expectedValue(dataStandardDTO.getDataLength())
+                        .build();
+                String warningLevel = JsonUtil.toJson(warningLevelDTO);
+                BatchPlanFieldConDTO batchPlanFieldConDTO = BatchPlanFieldConDTO.builder()
+                        .planLineId(batchPlanFieldLineDTO.getPlanLineId())
+                        .warningLevel(warningLevel)
+                        .compareWay(VALUE)
+                        .build();
+                batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
+            }
+            //长度范围
+            if (RANGE.equals(dataStandardDTO.getDataType())) {
+                convertToDataLengthList(dataStandardDTO);
+                batchPlanFieldLineDTO.setCountType(LENGTH_RANGE);
+                batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
+                //生成每个校验项的配置项
+                //两个值都存在生成告警规则
+                List<Long> dataLengthList = dataStandardDTO.getDataLengthList();
+                String warningLevel = "";
+                if (CollectionUtils.isNotEmpty(dataLengthList)
+                        && dataLengthList.size() == 2) {
+                    WarningLevelDTO firstWarningLevelDTO = WarningLevelDTO.builder()
+                            .warningLevel(WarningLevel.ORANGE)
+                            .endValue(String.valueOf(dataLengthList.get(0) - 1))
+                            .compareSymbol(EQUAL)
+                            .build();
+                    WarningLevelDTO secondWarningLevelDTO = WarningLevelDTO.builder()
+                            .warningLevel(WarningLevel.ORANGE)
+                            .startValue(String.valueOf(dataLengthList.get(1) + 1))
+                            .compareSymbol(EQUAL)
+                            .build();
+                    List<WarningLevelDTO> warningLevelDTOList = Arrays.asList(firstWarningLevelDTO
+                            , secondWarningLevelDTO);
+                    warningLevel = JsonUtil.toJson(warningLevelDTOList);
+                }
+                BatchPlanFieldConDTO batchPlanFieldConDTO = BatchPlanFieldConDTO.builder()
+                        .planLineId(batchPlanFieldLineDTO.getPlanLineId())
+                        .warningLevel(warningLevel)
+                        .compareWay(RANGE)
+                        .build();
+                batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
+            }
+        }
+        //值域
+        if (Strings.isNotEmpty(dataStandardDTO.getValueRange())) {
+            BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()
+                    .checkWay(COMMON)
+                    .checkItem(FIXED_VALUE)
+                    .planRuleId(batchPlanFieldDTO.getPlanRuleId())
+                    .fieldName(standardAimDTO.getFieldName())
+                    .tenantId(standardAimDTO.getTenantId())
+                    .build();
+            //判断类型，并生成不同的配置项告警规则
+            String warningLevel = "";
+            WarningLevelDTO warningLevelDTO;
+            switch (dataStandardDTO.getValueType()) {
+                case StandardValueType.AREA:
+                    batchPlanFieldLineDTO.setCountType(FIXED_VALUE);
+                    List<String> valueRangeList = Arrays.asList(dataStandardDTO.getValueRange().split(","));
+                    if (CollectionUtils.isNotEmpty(valueRangeList)
+                            && valueRangeList.size() == 2) {
+                        WarningLevelDTO firstWarningLevelDTO = WarningLevelDTO.builder()
+                                .warningLevel(WarningLevel.ORANGE)
+                                .endValue(valueRangeList.get(0))
+                                .compareSymbol(EQUAL)
+                                .build();
+                        WarningLevelDTO secondWarningLevelDTO = WarningLevelDTO.builder()
+                                .warningLevel(WarningLevel.ORANGE)
+                                .startValue(valueRangeList.get(1))
+                                .compareSymbol(EQUAL)
+                                .build();
+                        List<WarningLevelDTO> warningLevelDTOList = Arrays.
+                                asList(firstWarningLevelDTO, secondWarningLevelDTO);
+                        warningLevel = JsonUtil.toJson(warningLevelDTOList);
+                    }
+                    break;
+                case StandardValueType.ENUM:
+                    batchPlanFieldLineDTO.setCountType(ENUM_VALUE);
+                    warningLevelDTO = WarningLevelDTO.builder()
+                            .warningLevel(WarningLevel.ORANGE)
+                            .compareSymbol(INCLUDED)
+                            .enumValue(dataStandardDTO.getValueRange())
+                            .build();
+                    warningLevel = JsonUtil.toJson(warningLevelDTO);
+                    break;
+                case StandardValueType.VALUE_SET:
+                    batchPlanFieldLineDTO.setCountType(LOV_VALUE);
+                    warningLevelDTO = WarningLevelDTO.builder()
+                            .warningLevel(WarningLevel.ORANGE)
+                            .compareSymbol(INCLUDED)
+                            .enumValue(dataStandardDTO.getValueRange())
+                            .build();
+                    warningLevel = JsonUtil.toJson(warningLevelDTO);
+                    break;
+                default:
+                    break;
+            }
+            batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
+            //生成每个校验项的配置项
+            BatchPlanFieldConDTO batchPlanFieldConDTO = BatchPlanFieldConDTO.builder()
+                    .planLineId(batchPlanFieldLineDTO.getPlanLineId())
+                    .warningLevel(warningLevel)
+                    .build();
+            batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
+
+            //根据具体落标存入落标关系表
+            StandardAimRelationDTO standardAimRelationDTO = StandardAimRelationDTO.builder()
+                    .aimId(standardAimDTO.getAimId())
+                    .aimType("AIM")
+                    .planId(standardAimDTO.getPlanId())
+                    .planBaseId(batchPlanBaseDTO.getPlanBaseId())
+                    .planRuleId(batchPlanFieldDTO.getPlanRuleId())
+                    .tenantId(standardAimDTO.getTenantId())
+                    .build();
+            standardAimRelationRepository.insertDTOSelective(standardAimRelationDTO);
+        }
+    }
 
 }

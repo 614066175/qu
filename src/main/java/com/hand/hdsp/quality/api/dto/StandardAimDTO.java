@@ -72,14 +72,14 @@ public class StandardAimDTO extends AuditDomain {
     @ApiModelProperty(value = "表描述")
     private String tableDesc;
 
+    @ApiModelProperty(value = "评估方案ID")
+    private Long planId;
+
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;
 
     @Transient
     private String nameLevelPath;
-
-    @Transient
-    private Long planId;
 
 }

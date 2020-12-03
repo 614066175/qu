@@ -14,6 +14,7 @@
         <result column="schema_name" property="schemaName" jdbcType="VARCHAR"/>
         <result column="table_name" property="tableName" jdbcType="VARCHAR"/>
         <result column="table_desc" property="tableDesc" jdbcType="VARCHAR"/>
+        <result column="plan_id" property="planId" jdbcType="DECIMAL"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
         <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>

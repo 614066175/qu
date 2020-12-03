@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.infra.mapper;
 
+import com.hand.hdsp.quality.api.dto.DataStandardVersionDTO;
 import com.hand.hdsp.quality.domain.entity.DataStandardVersion;
 import io.choerodon.mybatis.common.BaseMapper;
 
@@ -10,4 +11,9 @@ import io.choerodon.mybatis.common.BaseMapper;
  */
 public interface DataStandardVersionMapper extends BaseMapper<DataStandardVersion> {
 
+    /**
+     * @param versionId
+     * @return
+     */
+    DataStandardVersionDTO detail(Long versionId);
 }

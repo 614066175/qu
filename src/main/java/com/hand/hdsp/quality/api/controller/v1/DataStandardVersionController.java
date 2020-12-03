@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.quality.api.dto.DataStandardVersionDTO;
+import com.hand.hdsp.quality.app.service.DataStandardVersionService;
 import com.hand.hdsp.quality.domain.entity.DataStandardVersion;
 import com.hand.hdsp.quality.domain.repository.DataStandardVersionRepository;
 import io.choerodon.core.domain.Page;
@@ -30,8 +31,11 @@ public class DataStandardVersionController extends BaseController {
 
     private DataStandardVersionRepository dataStandardVersionRepository;
 
-    public DataStandardVersionController(DataStandardVersionRepository dataStandardVersionRepository) {
+    private DataStandardVersionService dataStandardVersionService;
+
+    public DataStandardVersionController(DataStandardVersionRepository dataStandardVersionRepository, DataStandardVersionService dataStandardVersionService) {
         this.dataStandardVersionRepository = dataStandardVersionRepository;
+        this.dataStandardVersionService = dataStandardVersionService;
     }
 
     @ApiOperation(value = "数据标准版本表列表")
@@ -66,8 +70,7 @@ public class DataStandardVersionController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{versionId}")
     public ResponseEntity<?> detail(@PathVariable Long versionId) {
-        DataStandardVersionDTO dataStandardVersionDTO = dataStandardVersionRepository.selectDTOByPrimaryKeyAndTenant(versionId);
-        return Results.success(dataStandardVersionDTO);
+        return Results.success(dataStandardVersionService.detail(versionId));
     }
 
     @ApiOperation(value = "创建数据标准版本表")
