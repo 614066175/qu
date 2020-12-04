@@ -45,6 +45,7 @@ public class SwaggerTags {
     public static final String NAME_STANDARD = "NAME STANDARD CONTROLLER";
     public static final String FIELD_STANDARD = "FIELD STANDARD CONTROLLER";
     public static final String STANDARD_DOC = "STANDARD DOC";
+    public static final String NAME_STANDARD_AIM = "NAME STANDARD AIM CONTROLLER";
 
 
     @Autowired
@@ -82,7 +83,8 @@ public class SwaggerTags {
                 new Tag(NAME_STANDARD, "命名标准 管理 API"),
                 new Tag(FIELD_STANDARD, "字段标准 管理 API"),
                 new Tag(STREAMING_RESULT_RULE, "实时数据方案结果表-规则信息 管理 API"),
-                new Tag(STANDARD_DOC, "数据标准-标准文档 管理 API")
+                new Tag(STANDARD_DOC, "数据标准-标准文档 管理 API"),
+                new Tag(NAME_STANDARD_AIM,"命名标准落标 管理 API")
         );
     }
 }

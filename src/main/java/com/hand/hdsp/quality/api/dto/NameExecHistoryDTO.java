@@ -7,6 +7,8 @@ import javax.validation.constraints.Size;
 
 import io.choerodon.mybatis.domain.AuditDomain;
 import java.util.Date;
+import java.util.List;
+
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiModel;
 
@@ -75,5 +77,8 @@ public class NameExecHistoryDTO extends AuditDomain {
      */
     @Transient
     private String execStatusMeaning;
+
+    @Transient
+    private List<NameExecHisDetailDTO> execDetails;
 
 }

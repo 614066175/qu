@@ -1,8 +1,10 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import java.util.List;
+
+import com.hand.hdsp.quality.app.service.NameStandardService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.swagger.SwaggerConfig;
 import io.swagger.annotations.*;
 import org.hzero.core.util.Results;
 import org.hzero.core.base.BaseController;
@@ -11,7 +13,6 @@ import com.hand.hdsp.quality.api.dto.NameStandardDTO;
 import com.hand.hdsp.quality.domain.repository.NameStandardRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.hzero.mybatis.helper.SecurityTokenHelper;
 
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
@@ -31,10 +32,13 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/name-standards")
 public class NameStandardController extends BaseController {
 
-    private NameStandardRepository nameStandardRepository;
+    private final NameStandardRepository nameStandardRepository;
+    private final NameStandardService nameStandardService;
 
-    public NameStandardController(NameStandardRepository nameStandardRepository) {
+    public NameStandardController(NameStandardRepository nameStandardRepository,
+                                  NameStandardService nameStandardService) {
         this.nameStandardRepository = nameStandardRepository;
+        this.nameStandardService = nameStandardService;
     }
 
     @ApiOperation(value = "命名标准表列表")
@@ -98,9 +102,8 @@ public class NameStandardController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody NameStandardDTO nameStandardDTO) {
-                nameStandardRepository.updateDTOWhereTenant(nameStandardDTO, tenantId);
-        return Results.success(nameStandardDTO);
+    public ResponseEntity<NameStandardDTO> update(@PathVariable("organizationId") Long tenantId, @RequestBody NameStandardDTO nameStandardDTO) {
+        return Results.success(nameStandardService.update(nameStandardDTO));
     }
 
     @ApiOperation(value = "删除命名标准表")
@@ -112,10 +115,10 @@ public class NameStandardController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
-    public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestBody NameStandardDTO nameStandardDTO) {
-                nameStandardDTO.setTenantId(tenantId);
-        nameStandardRepository.deleteByPrimaryKey(nameStandardDTO);
+    public ResponseEntity<Void> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                    @RequestBody List<NameStandardDTO> nameStandardDtoList) {
+                nameStandardDtoList.forEach(x->x.setTenantId(tenantId));
+                nameStandardService.bitchRemove(nameStandardDtoList);
         return Results.success();
     }
 }

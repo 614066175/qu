@@ -13,4 +13,23 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+    
+    <resultMap id="DtoResultMap" type="com.hand.hdsp.quality.api.dto.NameAimIncludeDTO" extends="BaseResultMap">
+
+    </resultMap>
+    <sql id="BaseProperties">
+        ${prefix}.include_id,
+        ${prefix}.aim_id,
+        ${prefix}.schema_name,
+        ${prefix}.tenant_id,
+        ${prefix}.object_version_number
+    </sql>
+    <select id="getListByAimId" resultType="com.hand.hdsp.quality.domain.entity.NameAimInclude">
+        SELECT
+        <include refid="BaseProperties">
+            <property name="prefix" value="xnai"/>
+        </include>
+        FROM xsta_name_aim_include xnai
+        WHERE xnai.aim_id=#{aimId}
+    </select>
 </mapper>

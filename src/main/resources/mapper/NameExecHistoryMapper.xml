@@ -17,4 +17,51 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+    <resultMap id="DtoResultMap" type="com.hand.hdsp.quality.api.dto.NameExecHistoryDTO" extends="BaseResultMap">
+        <collection property="execDetails" ofType="com.hand.hdsp.quality.api.dto.NameExecHisDetailDTO"
+                    column="{historyId=history_id}"
+                    select="com.hand.hdsp.quality.infra.mapper.NameExecHisDetailMapper.list"/>
+    </resultMap>
+
+    <sql id="BaseProperties">
+        ${prefix}.history_id,
+        ${prefix}.standard_id,
+        ${prefix}.checked_num,
+        ${prefix}.abnormal_num,
+        ${prefix}.exec_start_time,
+        ${prefix}.exec_end_time,
+        ${prefix}.exec_status,
+        ${prefix}.tenant_id,
+        ${prefix}.object_version_number
+    </sql>
+    <select id="getLatestHistory" resultMap="DtoResultMap">
+        SELECT
+        <include refid="BaseProperties">
+            <property name="prefix" value="xneh"/>
+        </include>
+        FROM xsta_name_exec_history xneh
+        LEFT JOIN xsta_name_exec_his_detail xnehd ON (xneh.history_id=xnehd.history_id)
+        WHERE xneh.standard_id=#{standardId}
+        ORDER BY xneh.history_id DESC LIMIT 1
+    </select>
+
+    <select id="getHistoryList" resultMap="DtoResultMap">
+        SELECT
+        <include refid="BaseProperties">
+            <property name="prefix" value="xneh"/>
+        </include>
+        FROM xsta_name_exec_history xneh
+        LEFT JOIN xsta_name_exec_his_detail xnehd ON (xneh.history_id=xnehd.history_id)
+        WHERE xneh.standard_id=#{standardId}
+    </select>
+
+    <select id="detail" resultMap="DtoResultMap">
+        SELECT
+        <include refid="BaseProperties">
+            <property name="prefix" value="xneh"/>
+        </include>
+        FROM xsta_name_exec_history xneh
+        WHERE xneh.history_id=#{historyId}
+    </select>
+
 </mapper>

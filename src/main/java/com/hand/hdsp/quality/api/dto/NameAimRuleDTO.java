@@ -1,11 +1,13 @@
 package com.hand.hdsp.quality.api.dto;
 
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 import io.choerodon.mybatis.domain.AuditDomain;
-import java.util.Date;
+import java.util.List;
+
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiModel;
 
@@ -50,5 +52,4 @@ public class NameAimRuleDTO extends AuditDomain {
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;
-
 }

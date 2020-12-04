@@ -24,8 +24,6 @@ public class NameAimExcludeDO extends AuditDomain {
 
     private Long aimId;
 
-    private Long includeId;
-
     private String schemaName;
 
     private String tableName;

@@ -16,4 +16,24 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+    <resultMap id="DtoResultMap" type="com.hand.hdsp.quality.api.dto.NameExecHisDetailDTO" extends="BaseResultMap">
+
+    </resultMap>
+    <sql id="BaseProperties">
+        ${prefix}.detail_id,
+        ${prefix}.history_id,
+        ${prefix}.schema_name,
+        ${prefix}.error_message,
+        ${prefix}.source_path,
+        ${prefix}.tenant_id,
+        ${prefix}.object_version_number
+    </sql>
+    <select id="list" resultType="com.hand.hdsp.quality.api.dto.NameExecHisDetailDTO">
+        SELECT
+        <include refid="BaseProperties">
+            <property name="prefix" value="xnehd"/>
+        </include>
+        FROM xsta_name_exec_his_detail xnehd
+        WHERE xnehd.history_id=#{historyId}
+    </select>
 </mapper>

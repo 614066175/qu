@@ -1,5 +1,8 @@
 package com.hand.hdsp.quality.infra.mapper;
 
+import java.util.List;
+
+import com.hand.hdsp.quality.api.dto.NameAimExcludeDTO;
 import com.hand.hdsp.quality.domain.entity.NameAimInclude;
 import io.choerodon.mybatis.common.BaseMapper;
 
@@ -10,4 +13,11 @@ import io.choerodon.mybatis.common.BaseMapper;
  */
 public interface NameAimIncludeMapper extends BaseMapper<NameAimInclude> {
 
+    /**
+     * 获取落标排除项
+     *
+     * @param aimId 落标ID
+     * @return List<NameAimExcludeDTO>
+     */
+    List<NameAimInclude> getListByAimId(Long aimId);
 }

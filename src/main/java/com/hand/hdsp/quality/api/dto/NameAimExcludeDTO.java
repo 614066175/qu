@@ -38,9 +38,6 @@ public class NameAimExcludeDTO extends AuditDomain {
     @NotNull
     private Long aimId;
 
-    @ApiModelProperty(value = "落表包含表ID XSTA_NAME_AIM_INCLUDE")
-    @NotNull
-    private Long includeId;
 
     @ApiModelProperty(value = "数据库名称")
     @NotBlank

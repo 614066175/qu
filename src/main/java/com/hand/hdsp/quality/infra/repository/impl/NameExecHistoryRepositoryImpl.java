@@ -1,9 +1,12 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
+import java.util.List;
+
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.domain.entity.NameExecHistory;
 import com.hand.hdsp.quality.api.dto.NameExecHistoryDTO;
 import com.hand.hdsp.quality.domain.repository.NameExecHistoryRepository;
+import com.hand.hdsp.quality.infra.mapper.NameExecHistoryMapper;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,4 +17,24 @@ import org.springframework.stereotype.Component;
 @Component
 public class NameExecHistoryRepositoryImpl extends BaseRepositoryImpl<NameExecHistory, NameExecHistoryDTO> implements NameExecHistoryRepository {
 
+    private final NameExecHistoryMapper nameExecHistoryMapper;
+
+    public NameExecHistoryRepositoryImpl(NameExecHistoryMapper nameExecHistoryMapper) {
+        this.nameExecHistoryMapper = nameExecHistoryMapper;
+    }
+
+    @Override
+    public NameExecHistoryDTO getLatestHistory(Long standardId) {
+        return nameExecHistoryMapper.getLatestHistory(standardId);
+    }
+
+    @Override
+    public List<NameExecHistoryDTO> getHistoryList(Long standardId) {
+        return nameExecHistoryMapper.getHistoryList(standardId);
+    }
+
+    @Override
+    public NameExecHistoryDTO detail(Long historyId) {
+        return nameExecHistoryMapper.detail(historyId);
+    }
 }

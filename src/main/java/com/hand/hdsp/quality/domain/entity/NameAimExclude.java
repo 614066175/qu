@@ -31,7 +31,6 @@ public class NameAimExclude extends AuditDomain {
 
     public static final String FIELD_EXCLUDE_ID = "excludeId";
     public static final String FIELD_AIM_ID = "aimId";
-    public static final String FIELD_INCLUDE_ID = "includeId";
     public static final String FIELD_SCHEMA_NAME = "schemaName";
     public static final String FIELD_TABLE_NAME = "tableName";
     public static final String FIELD_TENANT_ID = "tenantId";
@@ -49,8 +48,6 @@ public class NameAimExclude extends AuditDomain {
     private Long excludeId;
 
     private Long aimId;
-
-    private Long includeId;
 
     private String schemaName;
 

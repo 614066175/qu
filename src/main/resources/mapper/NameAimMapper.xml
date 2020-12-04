@@ -17,4 +17,33 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+    <resultMap id="DtoResultMap" type="com.hand.hdsp.quality.api.dto.NameAimDTO" extends="BaseResultMap">
+        <collection property="nameAimIncludeDTOList"
+                    column="{aimId=aim_id}" ofType="com.hand.hdsp.quality.api.dto.NameAimIncludeDTO"
+                    select="com.hand.hdsp.quality.infra.mapper.NameAimIncludeMapper.getListByAimId"/>
+        <collection property="nameAimExcludeDTOList" column="{aimId=aim_id}"
+                    ofType="com.hand.hdsp.quality.api.dto.NameAimExcludeDTO"
+                    select="com.hand.hdsp.quality.infra.mapper.NameAimExcludeMapper.getListByAimId"/>
+    </resultMap>
+    <sql id="BaseProperties">
+        ${prefix}.aim_id,
+        ${prefix}.standard_id,
+        ${prefix}.datasource_code,
+        ${prefix}.datasource_type,
+        ${prefix}.exclude_rule,
+        ${prefix}.exclude_desc,
+        ${prefix}.enabled_flag,
+        ${prefix}.tenant_id,
+        ${prefix}.aim_id,
+        ${prefix}.object_version_number
+    </sql>
+    <select id="list" resultMap="DtoResultMap">
+        SELECT
+        <include refid="BaseProperties">
+            <property name="prefix" value="xna"/>
+        </include>
+        FROM
+        xsta_name_aim xna
+        WHERE xna.standard_id=#{standardId}
+    </select>
 </mapper>

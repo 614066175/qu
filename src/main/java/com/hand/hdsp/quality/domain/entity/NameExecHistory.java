@@ -30,7 +30,7 @@ import lombok.*;
 public class NameExecHistory extends AuditDomain {
 
     public static final String FIELD_HISTORY_ID = "historyId";
-    public static final String FIELD_STANDART_ID = "standartId";
+    public static final String FIELD_STANDARD_ID = "standardId";
     public static final String FIELD_CHECKED_NUM = "checkedNum";
     public static final String FIELD_ABNORMAL_NUM = "abnormalNum";
     public static final String FIELD_EXEC_START_TIME = "execStartTime";

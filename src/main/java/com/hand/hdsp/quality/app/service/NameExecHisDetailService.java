@@ -6,5 +6,4 @@ package com.hand.hdsp.quality.app.service;
  * @author 张鹏 2020-11-27 16:35:40
  */
 public interface NameExecHisDetailService {
-
 }

@@ -72,49 +72,4 @@ public class NameExecHisDetailController extends BaseController {
         return Results.success(nameExecHisDetailDTO);
     }
 
-    @ApiOperation(value = "创建命名标准执行历史详情表")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody NameExecHisDetailDTO nameExecHisDetailDTO) {
-        nameExecHisDetailDTO.setTenantId(tenantId);
-        this.validObject(nameExecHisDetailDTO);
-        nameExecHisDetailRepository.insertDTOSelective(nameExecHisDetailDTO);
-        return Results.success(nameExecHisDetailDTO);
-    }
-
-    @ApiOperation(value = "修改命名标准执行历史详情表")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody NameExecHisDetailDTO nameExecHisDetailDTO) {
-                nameExecHisDetailRepository.updateDTOWhereTenant(nameExecHisDetailDTO, tenantId);
-        return Results.success(nameExecHisDetailDTO);
-    }
-
-    @ApiOperation(value = "删除命名标准执行历史详情表")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @DeleteMapping
-    public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestBody NameExecHisDetailDTO nameExecHisDetailDTO) {
-                nameExecHisDetailDTO.setTenantId(tenantId);
-        nameExecHisDetailRepository.deleteByPrimaryKey(nameExecHisDetailDTO);
-        return Results.success();
-    }
 }

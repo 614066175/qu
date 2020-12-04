@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import java.util.List;
+
 import org.hzero.core.util.Results;
 import org.hzero.core.base.BaseController;
 import com.hand.hdsp.quality.domain.entity.NameExecHistory;
@@ -30,7 +32,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/name-exec-historys")
 public class NameExecHistoryController extends BaseController {
 
-    private NameExecHistoryRepository nameExecHistoryRepository;
+    private final NameExecHistoryRepository nameExecHistoryRepository;
 
     public NameExecHistoryController(NameExecHistoryRepository nameExecHistoryRepository) {
         this.nameExecHistoryRepository = nameExecHistoryRepository;
@@ -42,17 +44,17 @@ public class NameExecHistoryController extends BaseController {
             value = "租户",
             paramType = "path",
             required = true
+    ), @ApiImplicitParam(
+            name = "standardId",
+            value = "命名标准主键",
+            paramType = "path",
+            required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping
-    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                NameExecHistoryDTO nameExecHistoryDTO, @ApiIgnore @SortDefault(value = NameExecHistory.FIELD_HISTORY_ID,
-            direction = Sort.Direction.DESC) PageRequest pageRequest) {
-        nameExecHistoryDTO.setTenantId(tenantId);
-        Page<NameExecHistoryDTO> list = nameExecHistoryRepository.pageAndSortDTO(pageRequest, nameExecHistoryDTO);
-        return Results.success(list);
+    @GetMapping("/list/{standardId}")
+    public ResponseEntity<List<NameExecHistoryDTO>> list(@PathVariable Long standardId) {
+        return Results.success(nameExecHistoryRepository.getHistoryList(standardId));
     }
-
     @ApiOperation(value = "命名标准执行历史表明细")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
@@ -67,54 +69,27 @@ public class NameExecHistoryController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{historyId}")
-    public ResponseEntity<?> detail(@PathVariable Long historyId) {
-        NameExecHistoryDTO nameExecHistoryDTO = nameExecHistoryRepository.selectDTOByPrimaryKeyAndTenant(historyId);
+    public ResponseEntity<NameExecHistoryDTO> detail(@PathVariable Long historyId) {
+        NameExecHistoryDTO nameExecHistoryDTO = nameExecHistoryRepository.detail(historyId);
         return Results.success(nameExecHistoryDTO);
     }
 
-    @ApiOperation(value = "创建命名标准执行历史表")
+    @ApiOperation(value = "最新执行结果")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
             paramType = "path",
             required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody NameExecHistoryDTO nameExecHistoryDTO) {
-        nameExecHistoryDTO.setTenantId(tenantId);
-        this.validObject(nameExecHistoryDTO);
-        nameExecHistoryRepository.insertDTOSelective(nameExecHistoryDTO);
-        return Results.success(nameExecHistoryDTO);
-    }
-
-    @ApiOperation(value = "修改命名标准执行历史表")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
+    ), @ApiImplicitParam(
+            name = "standardId",
+            value = "命名标准主键",
             paramType = "path",
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody NameExecHistoryDTO nameExecHistoryDTO) {
-                nameExecHistoryRepository.updateDTOWhereTenant(nameExecHistoryDTO, tenantId);
+    @GetMapping("/latest/{standardId}")
+    public ResponseEntity<NameExecHistoryDTO> latest(@PathVariable Long standardId) {
+        NameExecHistoryDTO nameExecHistoryDTO = nameExecHistoryRepository.getLatestHistory(standardId);
         return Results.success(nameExecHistoryDTO);
-    }
-
-    @ApiOperation(value = "删除命名标准执行历史表")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @DeleteMapping
-    public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestBody NameExecHistoryDTO nameExecHistoryDTO) {
-                nameExecHistoryDTO.setTenantId(tenantId);
-        nameExecHistoryRepository.deleteByPrimaryKey(nameExecHistoryDTO);
-        return Results.success();
     }
 }

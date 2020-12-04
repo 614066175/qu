@@ -7,6 +7,8 @@ import javax.validation.constraints.Size;
 
 import io.choerodon.mybatis.domain.AuditDomain;
 import java.util.Date;
+import java.util.List;
+
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiModel;
 
@@ -71,5 +73,11 @@ public class NameAimDTO extends AuditDomain {
 
     @Transient
     private String datasourceTypeMeaning;
+
+    @Transient
+    private List<NameAimIncludeDTO> nameAimIncludeDTOList;
+
+    @Transient
+    private List<NameAimExcludeDTO> nameAimExcludeDTOList;
 
 }
