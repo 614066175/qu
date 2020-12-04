@@ -85,5 +85,21 @@
             </if>
         </where>
     </select>
+    <select id="selectIdByChargeDeptName" resultType="java.lang.Integer">
+        SELECT
+            unit_id
+        FROM
+            hzero_platform.hpfm_unit
+        WHERE
+            unit_name=#{chargeDeptName}
+    </select>
+    <select id="selectIdByChargetName" resultType="java.lang.Integer">
+        SELECT
+            id
+        FROM
+            hzero_platform.iam_user
+        WHERE
+            login_name=#{chargeName}
+    </select>
 
 </mapper>

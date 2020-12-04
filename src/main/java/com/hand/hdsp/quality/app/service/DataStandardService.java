@@ -6,6 +6,7 @@ import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.hzero.export.vo.ExportParam;
 
 /**
  * <p>
@@ -76,4 +77,13 @@ public interface DataStandardService {
      * @param standardAimDTOList
      */
     void batchRelatePlan(List<StandardAimDTO> standardAimDTOList);
+
+    /**
+     * 数据标准导出
+     * @param dto
+     * @param exportParam
+     * @param pageRequest
+     * @return
+     */
+    List<DataStandardDTO> export(DataStandardDTO dto, ExportParam exportParam, PageRequest pageRequest);
 }

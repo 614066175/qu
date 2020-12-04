@@ -1,5 +1,8 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import java.util.List;
+import javax.servlet.http.HttpServletResponse;
+
 import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.app.service.StandardGroupService;
 import com.hand.hdsp.quality.config.SwaggerTags;
@@ -8,12 +11,11 @@ import com.hand.hdsp.quality.infra.vo.StandardGroupVO;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.Permission;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
+import org.hzero.export.annotation.ExcelExport;
+import org.hzero.export.vo.ExportParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -108,5 +110,20 @@ public class StandardGroupController extends BaseController {
         standardGroupDTO.setTenantId(tenantId);
         standardGroupService.delete(standardGroupDTO);
         return Results.success(standardGroupDTO);
+    }
+
+    @ApiOperation(value = "导出标准分组")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/export")
+    @ExcelExport(value = StandardGroupDTO.class)
+    public ResponseEntity<List<StandardGroupDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                                        StandardGroupDTO dto,
+                                                        ExportParam exportParam,
+                                                        HttpServletResponse response) {
+
+        dto.setTenantId(tenantId);
+        List<StandardGroupDTO> dtoList =
+                standardGroupService.export(dto, exportParam);
+        return Results.success(dtoList);
     }
 }

@@ -1,9 +1,11 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
+import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.app.service.DataStandardService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.DataStandard;
@@ -12,12 +14,11 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.Permission;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.core.util.Results;
+import org.hzero.export.annotation.ExcelExport;
+import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.http.ResponseEntity;
@@ -216,5 +217,22 @@ public class DataStandardController {
     public ResponseEntity<Void> batchRelatePlan(@PathVariable(name = "organizationId") Long tenantId, @RequestBody List<StandardAimDTO> standardAimDTOList) {
         dataStandardService.batchRelatePlan(standardAimDTOList);
         return Results.success();
+    }
+
+
+    @ApiOperation(value = "导出数据标准")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/export")
+    @ExcelExport(value = StandardGroupDTO.class)
+    public ResponseEntity<List<DataStandardDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                                            DataStandardDTO dto,
+                                                            ExportParam exportParam,
+                                                            HttpServletResponse response,
+                                                            PageRequest pageRequest) {
+
+        dto.setTenantId(tenantId);
+        List<DataStandardDTO> dtoList =
+                dataStandardService.export(dto, exportParam, pageRequest);
+        return Results.success(dtoList);
     }
 }

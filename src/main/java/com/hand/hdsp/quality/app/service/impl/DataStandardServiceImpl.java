@@ -31,6 +31,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
+import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.infra.meta.Column;
@@ -447,6 +448,11 @@ public class DataStandardServiceImpl implements DataStandardService {
             //其余状态只是将评估方案保存下来
             standardAimRepository.insertDTOSelective(standardAimDTO);
         });
+    }
+
+    @Override
+    public List<DataStandardDTO> export(DataStandardDTO dto, ExportParam exportParam, PageRequest pageRequest) {
+        return list(pageRequest,dto);
     }
 
     private void doRelatePlan(StandardAimDTO standardAimDTO) {

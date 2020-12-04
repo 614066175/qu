@@ -92,6 +92,9 @@ mybatis:
 
 
 hzero:
+  import:
+    transactionControl: true
+    batch-size: 3000
   lov:
     value:
       enabled: true

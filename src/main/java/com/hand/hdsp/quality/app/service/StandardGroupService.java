@@ -7,6 +7,7 @@ import com.hand.hdsp.quality.infra.vo.StandardGroupVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.poi.ss.formula.functions.T;
+import org.hzero.export.vo.ExportParam;
 
 /**
  * <p>
@@ -38,4 +39,12 @@ public interface StandardGroupService {
      * @return
      */
     Page<T> list(PageRequest pageRequest, StandardGroupVO standardGroupVO);
+
+    /**
+     *
+     * @param dto
+     * @param exportParam
+     * @return
+     */
+    List<StandardGroupDTO> export(StandardGroupDTO dto, ExportParam exportParam);
 }

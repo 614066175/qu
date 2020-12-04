@@ -26,6 +26,17 @@
         </dependency>
 
         <dependency>
+            <groupId>org.hzero.starter</groupId>
+            <artifactId>hzero-starter-export</artifactId>
+            <version>${hzero.starter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hzero.boot</groupId>
+            <artifactId>hzero-boot-import</artifactId>
+            <version>${hzero.boot.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.hand.hdsp.starter</groupId>
             <artifactId>hdsp-sign-starter</artifactId>
             <exclusions>
