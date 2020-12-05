@@ -451,7 +451,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                 doRelatePlan(standardAimDTO);
             }
             //其余状态只是将评估方案保存下来
-            standardAimRepository.insertDTOSelective(standardAimDTO);
+            standardAimRepository.updateByDTOPrimaryKeySelective(standardAimDTO);
         });
     }
 
