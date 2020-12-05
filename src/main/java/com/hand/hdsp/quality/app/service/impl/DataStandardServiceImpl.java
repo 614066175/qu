@@ -391,39 +391,44 @@ public class DataStandardServiceImpl implements DataStandardService {
     }
 
     @Override
-    public void aim(StandardAimDTO standardAimDTO) {
-        List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
-                .andWhere(Sqls.custom()
-                        .andEqualTo(StandardAim.FIELD_STANDARD_ID, standardAimDTO.getStandardId())
-                        .andEqualTo(StandardAim.FIELD_DATASOURCE_TYPE, standardAimDTO.getDatasourceType())
-                        .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, standardAimDTO.getSchemaName())
-                        .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, standardAimDTO.getDatasourceCode())
-                        .andEqualTo(StandardAim.FIELD_FIELD_NAME, standardAimDTO.getFieldName()))
-                .build());
-        if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
-            throw new CommonException(ErrorCode.STANDARD_AIM_EXIST);
-        }
-        DriverSession driverSession = driverSessionService.getDriverSession(standardAimDTO.getTenantId(), standardAimDTO.getDatasourceCode());
-        //字段注释
-        List<Column> columns = driverSession.columnMetaData(standardAimDTO.getSchemaName(), standardAimDTO.getTableName());
-        if (CollectionUtils.isNotEmpty(columns)) {
-            columns.forEach(column -> {
-                if (column.getColumnName().equals(standardAimDTO.getFieldName())) {
-                    standardAimDTO.setFieldDesc(column.getRemarks());
+    @Transactional(rollbackFor = Exception.class)
+    public void aim(List<StandardAimDTO> standardAimDTOList) {
+        if(CollectionUtils.isNotEmpty(standardAimDTOList)) {
+            standardAimDTOList.forEach(standardAimDTO -> {
+                List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
+                        .andWhere(Sqls.custom()
+                                .andEqualTo(StandardAim.FIELD_STANDARD_ID, standardAimDTO.getStandardId())
+                                .andEqualTo(StandardAim.FIELD_DATASOURCE_TYPE, standardAimDTO.getDatasourceType())
+                                .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, standardAimDTO.getSchemaName())
+                                .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, standardAimDTO.getDatasourceCode())
+                                .andEqualTo(StandardAim.FIELD_FIELD_NAME, standardAimDTO.getFieldName()))
+                        .build());
+                if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
+                    throw new CommonException(ErrorCode.STANDARD_AIM_EXIST);
                 }
+                DriverSession driverSession = driverSessionService.getDriverSession(standardAimDTO.getTenantId(), standardAimDTO.getDatasourceCode());
+                //字段注释
+                List<Column> columns = driverSession.columnMetaData(standardAimDTO.getSchemaName(), standardAimDTO.getTableName());
+                if (CollectionUtils.isNotEmpty(columns)) {
+                    columns.forEach(column -> {
+                        if (column.getColumnName().equals(standardAimDTO.getFieldName())) {
+                            standardAimDTO.setFieldDesc(column.getRemarks());
+                        }
+                    });
+                }
+                //表注释
+                List<Table> tables = driverSession.tablesNameAndDesc(standardAimDTO.getSchemaName(), standardAimDTO.getTableName());
+                if (CollectionUtils.isNotEmpty(tables)) {
+                    tables.forEach(table -> {
+                        if (table.getTableName().equals(standardAimDTO.getTableName())) {
+                            standardAimDTO.setTableDesc(table.getRemarks());
+                        }
+                    });
+                }
+                //存入落标表
+                standardAimRepository.insertDTOSelective(standardAimDTO);
             });
         }
-        //表注释
-        List<Table> tables = driverSession.tablesNameAndDesc(standardAimDTO.getSchemaName(), standardAimDTO.getTableName());
-        if (CollectionUtils.isNotEmpty(tables)) {
-            tables.forEach(table -> {
-                if (table.getTableName().equals(standardAimDTO.getTableName())) {
-                    standardAimDTO.setTableDesc(table.getRemarks());
-                }
-            });
-        }
-        //存入落标表
-        standardAimRepository.insertDTOSelective(standardAimDTO);
     }
 
     /**

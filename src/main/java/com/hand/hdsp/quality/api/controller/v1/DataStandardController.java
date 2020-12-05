@@ -5,7 +5,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
-import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.app.service.DataStandardService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.DataStandard;
@@ -199,9 +198,8 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/standard-aim")
-    public ResponseEntity<Void> standardAim(@PathVariable(name = "organizationId") Long tenantId, @RequestBody StandardAimDTO standardAimDTO) {
-        standardAimDTO.setTenantId(tenantId);
-        dataStandardService.aim(standardAimDTO);
+    public ResponseEntity<Void> standardAim(@PathVariable(name = "organizationId") Long tenantId, @RequestBody List<StandardAimDTO> standardAimDTOList) {
+        dataStandardService.aim(standardAimDTOList);
         return Results.success();
     }
 
@@ -223,7 +221,7 @@ public class DataStandardController {
     @ApiOperation(value = "导出数据标准")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/export")
-    @ExcelExport(value = StandardGroupDTO.class)
+    @ExcelExport(value = DataStandardDTO.class)
     public ResponseEntity<List<DataStandardDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                                             DataStandardDTO dto,
                                                             ExportParam exportParam,

@@ -1,5 +1,10 @@
 package com.hand.hdsp.quality.app.service;
 
+import java.util.List;
+
+import com.hand.hdsp.quality.api.dto.StandardAimDTO;
+import com.hand.hdsp.quality.infra.vo.ColumnVO;
+
 /**
  * <p>标准落标表应用服务</p>
  *
@@ -7,4 +12,10 @@ package com.hand.hdsp.quality.app.service;
  */
 public interface StandardAimService {
 
+    /**
+     * 查找未落标的字段
+     * @param standardAimDTO
+     * @return
+     */
+    List<ColumnVO> unAimField(StandardAimDTO standardAimDTO);
 }

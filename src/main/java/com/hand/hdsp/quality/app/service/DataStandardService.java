@@ -68,9 +68,9 @@ public interface DataStandardService {
 
     /**
      * 数据标准落标
-     * @param standardAimDTO StandardAimDTO
+     * @param standardAimDTOList List<StandardAimDTO>
      */
-    void aim(StandardAimDTO standardAimDTO);
+    void aim(List<StandardAimDTO> standardAimDTOList);
 
     /**
      * 数据标准批量关联评估方案

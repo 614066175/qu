@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import java.util.List;
+
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import com.hand.hdsp.quality.app.service.StandardAimService;
 import com.hand.hdsp.quality.domain.entity.StandardAim;
@@ -113,9 +115,22 @@ public class StandardAimController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestBody StandardAimDTO standardAimDTO) {
-                standardAimDTO.setTenantId(tenantId);
-        standardAimRepository.deleteByPrimaryKey(standardAimDTO);
+                                    @RequestBody List<StandardAimDTO> standardAimDTOList) {
+        standardAimRepository.batchDTODelete(standardAimDTOList);
         return Results.success();
+    }
+
+    @ApiOperation(value = "落标查询标准未落标字段")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/un-aimed-field")
+    public ResponseEntity<?> unAimedField(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                    @RequestBody StandardAimDTO standardAimDTO) {
+        return Results.success( standardAimService.unAimField(standardAimDTO));
     }
 }
