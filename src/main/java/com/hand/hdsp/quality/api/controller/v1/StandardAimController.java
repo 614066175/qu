@@ -131,7 +131,7 @@ public class StandardAimController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/un-aimed-field")
     public ResponseEntity<?> unAimedField(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                          @RequestBody StandardAimDTO standardAimDTO) {
+                                          StandardAimDTO standardAimDTO) {
         return Results.success(standardAimService.unAimField(standardAimDTO));
     }
 }
