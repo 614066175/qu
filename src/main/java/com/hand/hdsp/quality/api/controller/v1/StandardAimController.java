@@ -35,8 +35,9 @@ public class StandardAimController extends BaseController {
 
     private StandardAimService standardAimService;
 
-    public StandardAimController(StandardAimRepository standardAimRepository) {
+    public StandardAimController(StandardAimRepository standardAimRepository, StandardAimService standardAimService) {
         this.standardAimRepository = standardAimRepository;
+        this.standardAimService = standardAimService;
     }
 
     @ApiOperation(value = "标准落标表列表")
@@ -52,7 +53,7 @@ public class StandardAimController extends BaseController {
                                   StandardAimDTO standardAimDTO, @ApiIgnore @SortDefault(value = StandardAim.FIELD_AIM_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardAimDTO.setTenantId(tenantId);
-        Page<StandardAimDTO> list = standardAimRepository.pageAndSortDTO(pageRequest, standardAimDTO);
+        Page<StandardAimDTO> list = standardAimService.list(pageRequest, standardAimDTO);
         return Results.success(list);
     }
 
@@ -101,7 +102,7 @@ public class StandardAimController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody StandardAimDTO standardAimDTO) {
-                standardAimRepository.updateDTOWhereTenant(standardAimDTO, tenantId);
+        standardAimRepository.updateDTOWhereTenant(standardAimDTO, tenantId);
         return Results.success(standardAimDTO);
     }
 
@@ -130,7 +131,7 @@ public class StandardAimController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/un-aimed-field")
     public ResponseEntity<?> unAimedField(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestBody StandardAimDTO standardAimDTO) {
-        return Results.success( standardAimService.unAimField(standardAimDTO));
+                                          @RequestBody StandardAimDTO standardAimDTO) {
+        return Results.success(standardAimService.unAimField(standardAimDTO));
     }
 }

@@ -2,14 +2,19 @@ package com.hand.hdsp.quality.app.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import com.hand.hdsp.quality.app.service.StandardAimService;
+import com.hand.hdsp.quality.domain.entity.BatchPlan;
 import com.hand.hdsp.quality.domain.entity.StandardAim;
+import com.hand.hdsp.quality.domain.repository.BatchPlanRepository;
 import com.hand.hdsp.quality.domain.repository.DataFieldRepository;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.domain.repository.StandardAimRepository;
 import com.hand.hdsp.quality.infra.vo.ColumnVO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.mybatis.domian.Condition;
@@ -30,13 +35,15 @@ public class StandardAimServiceImpl implements StandardAimService {
     private final DataStandardRepository dataStandardRepository;
     private final DataFieldRepository dataFieldRepository;
     private final StandardAimRepository standardAimRepository;
+    private final BatchPlanRepository batchPlanRepository;
 
-    public StandardAimServiceImpl(DriverSessionService driverSessionService, DataStandardRepository dataStandardRepository, DataFieldRepository dataFieldRepository, StandardAimRepository standardAimRepository) {
+    public StandardAimServiceImpl(DriverSessionService driverSessionService, DataStandardRepository dataStandardRepository, DataFieldRepository dataFieldRepository, StandardAimRepository standardAimRepository, BatchPlanRepository batchPlanRepository) {
 
         this.driverSessionService = driverSessionService;
         this.dataStandardRepository = dataStandardRepository;
         this.dataFieldRepository = dataFieldRepository;
         this.standardAimRepository = standardAimRepository;
+        this.batchPlanRepository = batchPlanRepository;
     }
 
     @Override
@@ -69,5 +76,25 @@ public class StandardAimServiceImpl implements StandardAimService {
             });
         }
         return columnVOS;
+    }
+
+    @Override
+    public Page<StandardAimDTO> list(PageRequest pageRequest, StandardAimDTO standardAimDTO) {
+        Page<StandardAimDTO> list = standardAimRepository.pageAndSortDTO(pageRequest, standardAimDTO);
+        List<StandardAimDTO> content = list.getContent();
+        if (CollectionUtils.isNotEmpty(content)) {
+            content.forEach(dto -> {
+                dto.setNameLevelPath(String.format("%s/%s/%s/%s",
+                        dto.getDatasourceCode(),
+                        dto.getSchemaName(),
+                        dto.getTableName(),
+                        dto.getFieldName()));
+                if(Objects.nonNull(dto.getPlanId())){
+                    BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(dto.getPlanId());
+                    dto.setPlanName(batchPlan.getPlanName());
+                }
+            });
+        }
+        return list;
     }
 }

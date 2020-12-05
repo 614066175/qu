@@ -82,4 +82,7 @@ public class StandardAimDTO extends AuditDomain {
     @Transient
     private String nameLevelPath;
 
+    @Transient
+    private String planName;
+
 }
