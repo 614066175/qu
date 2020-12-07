@@ -2,6 +2,8 @@ package com.hand.hdsp.quality.app.service.impl;
 
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.*;
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.RANGE;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,10 +13,10 @@ import java.util.stream.Collectors;
 
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.DataStandardService;
+import com.hand.hdsp.quality.app.service.StandardAimService;
 import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
-import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.constant.WarningLevel;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import io.choerodon.core.domain.Page;
@@ -71,7 +73,9 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     private final BatchPlanFieldConRepository batchPlanFieldConRepository;
 
-    public DataStandardServiceImpl(DataStandardRepository dataStandardRepository, DataStandardVersionRepository dataStandardVersionRepository, StandardExtraRepository standardExtraRepository, DataStandardMapper dataStandardMapper, ExtraVersionRepository extraVersionRepository, StandardAimRepository standardAimRepository, DriverSessionService driverSessionService, StandardAimRelationRepository standardAimRelationRepository, BatchPlanBaseRepository batchPlanBaseRepository, BatchPlanFieldRepository batchPlanFieldRepository, BatchPlanFieldLineRepository batchPlanFieldLineRepository, BatchPlanFieldConRepository batchPlanFieldConRepository) {
+    private final StandardAimService standardAimService;
+
+    public DataStandardServiceImpl(DataStandardRepository dataStandardRepository, DataStandardVersionRepository dataStandardVersionRepository, StandardExtraRepository standardExtraRepository, DataStandardMapper dataStandardMapper, ExtraVersionRepository extraVersionRepository, StandardAimRepository standardAimRepository, DriverSessionService driverSessionService, StandardAimRelationRepository standardAimRelationRepository, BatchPlanBaseRepository batchPlanBaseRepository, BatchPlanFieldRepository batchPlanFieldRepository, BatchPlanFieldLineRepository batchPlanFieldLineRepository, BatchPlanFieldConRepository batchPlanFieldConRepository, StandardAimService standardAimService) {
         this.dataStandardRepository = dataStandardRepository;
         this.dataStandardVersionRepository = dataStandardVersionRepository;
         this.standardExtraRepository = standardExtraRepository;
@@ -84,6 +88,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         this.batchPlanFieldRepository = batchPlanFieldRepository;
         this.batchPlanFieldLineRepository = batchPlanFieldLineRepository;
         this.batchPlanFieldConRepository = batchPlanFieldConRepository;
+        this.standardAimService = standardAimService;
     }
 
 
@@ -108,7 +113,7 @@ public class DataStandardServiceImpl implements DataStandardService {
             throw new CommonException(ErrorCode.DATA_STANDARD_NAME_EXIST);
         }
         convertToDataLength(dataStandardDTO);
-        dataStandardDTO.setStandardStatus(StandardConstant.CREATE);
+        dataStandardDTO.setStandardStatus(CREATE);
         dataStandardRepository.insertDTOSelective(dataStandardDTO);
 
         List<StandardExtraDTO> standardExtraDTOList = dataStandardDTO.getStandardExtraDTOList();
@@ -118,7 +123,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .standardId(dataStandardDTO.getStandardId())
                         .extraKey(s.getExtraKey())
                         .extraValue(s.getExtraValue())
-                        .standardType("DATA")
+                        .standardType(DATA)
                         .tenantId(dataStandardDTO.getTenantId())
                         .build();
                 standardExtraRepository.insertDTOSelective(extraDTO);
@@ -140,7 +145,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardExtra.FIELD_STANDARD_ID, standardId)
-                        .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, "DATA")
+                        .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, DATA)
                         .andEqualTo(StandardExtra.FIELD_TENANT_ID, tenantId))
                 .build());
         dataStandardDTO.setStandardExtraDTOList(standardExtraDTOS);
@@ -159,8 +164,8 @@ public class DataStandardServiceImpl implements DataStandardService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delete(DataStandardDTO dataStandardDTO) {
-        if (StandardConstant.ONLINE.equals(dataStandardDTO.getStandardStatus())
-                || StandardConstant.OFFLINE_APPROVING.equals(dataStandardDTO.getStandardStatus())) {
+        if (ONLINE.equals(dataStandardDTO.getStandardStatus())
+                || OFFLINE_APPROVING.equals(dataStandardDTO.getStandardStatus())) {
             throw new CommonException(ErrorCode.DATA_STANDARD_CAN_NOT_DELETE);
         }
         //暂未做申请审核 todo 删除申请头表行表
@@ -177,7 +182,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardExtra.FIELD_STANDARD_ID, dataStandardDTO.getStandardId())
-                        .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, "DATA")
+                        .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, DATA)
                         .andEqualTo(StandardExtra.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                 .build());
         standardExtraRepository.batchDTODelete(standardExtraDTOS);
@@ -185,10 +190,18 @@ public class DataStandardServiceImpl implements DataStandardService {
         List<ExtraVersionDTO> extraVersionDTOS = extraVersionRepository.selectDTOByCondition(Condition.builder(ExtraVersion.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(ExtraVersion.FIELD_STANDARD_ID, dataStandardDTO.getStandardId())
-                        .andEqualTo(ExtraVersion.FIELD_STANDARD_TYPE, "DATA")
+                        .andEqualTo(ExtraVersion.FIELD_STANDARD_TYPE, DATA)
                         .andEqualTo(ExtraVersion.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                 .build());
         extraVersionRepository.batchDTODelete(extraVersionDTOS);
+        //删除数据标准的标准落标以及关系表
+        List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardAim.FIELD_STANDARD_ID, dataStandardDTO.getStandardId())
+                        .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, DATA)
+                        .andEqualTo(StandardAim.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
+                .build());
+        standardAimService.batchDelete(standardAimDTOS);
     }
 
     @Override
@@ -199,10 +212,10 @@ public class DataStandardServiceImpl implements DataStandardService {
             throw new CommonException(ErrorCode.DATA_STANDARD_NOT_EXIST);
         }
         oldDataStandardDTO.setStandardStatus(dataStandardDTO.getStandardStatus());
-        if (StandardConstant.ONLINE_APPROVING.equals(dataStandardDTO.getStandardStatus())) {
+        if (ONLINE_APPROVING.equals(dataStandardDTO.getStandardStatus())) {
             doApprove(oldDataStandardDTO);
         }
-        if (StandardConstant.OFFLINE_APPROVING.equals(dataStandardDTO.getStandardStatus())) {
+        if (OFFLINE_APPROVING.equals(dataStandardDTO.getStandardStatus())) {
             doApprove(oldDataStandardDTO);
         }
         dataStandardRepository.updateByDTOPrimaryKey(oldDataStandardDTO);
@@ -272,7 +285,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         dataStandardDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
         dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS);
         //判断数据标准状态,如果是发布上线状态，则存版本表
-        if (StandardConstant.ONLINE.equals(dataStandardDTO.getStandardStatus())) {
+        if (ONLINE.equals(dataStandardDTO.getStandardStatus())) {
             //存版本表
             doVersion(dataStandardDTO);
             //1.数据标准没有关联评估方案，直接发布，不做处理
@@ -283,7 +296,7 @@ public class DataStandardServiceImpl implements DataStandardService {
             List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
                     .andWhere(Sqls.custom()
                             .andEqualTo(StandardAim.FIELD_STANDARD_ID, dataStandardDTO.getStandardId())
-                            .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, "DATA")
+                            .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, DATA)
                             .andEqualTo(StandardAim.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                     .build());
             if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
@@ -359,7 +372,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardExtra.FIELD_STANDARD_ID, dataStandardDTO.getStandardId())
-                        .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, "DATA")
+                        .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, DATA)
                         .andEqualTo(StandardExtra.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                 .build());
         if (CollectionUtils.isNotEmpty(standardExtraDTOS)) {

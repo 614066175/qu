@@ -10,25 +10,38 @@ package com.hand.hdsp.quality.infra.constant;
  */
 public interface StandardConstant {
 
-    /**
-     * 标准状态
-     */
-    String CREATE="CREATE";
+    interface Status{
+        /**
+         * 标准状态
+         */
+        String CREATE="CREATE";
 
-    String ONLINE="ONLINE";
+        String ONLINE="ONLINE";
 
-    String OFFLINE="OFFLINE";
+        String OFFLINE="OFFLINE";
 
-    String OFFLINE_APPROVING="OFFLINE_APPROVING";
+        String OFFLINE_APPROVING="OFFLINE_APPROVING";
 
-    String ONLINE_APPROVING="ONLINE_APPROVING";
+        String ONLINE_APPROVING="ONLINE_APPROVING";
 
-    //----------
+        //----------
 
-    /**
-     * 审核状态（申请中，通过，驳回）
-     */
-    String APPROVING="APPROVING";
-    String ADOPT="ADOPT";
-    String SUBJET="SUBJET";
+        /**
+         * 审核状态（申请中，通过，驳回）
+         */
+        String APPROVING="APPROVING";
+        String ADOPT="ADOPT";
+        String SUBJET="SUBJET";
+    }
+
+   interface StandardType{
+        String DATA="DATA";
+        String FIELD="FIELD";
+        String NAME="NAME";
+        String DOC="DOC";
+   }
+
+
+
+
 }

@@ -28,4 +28,10 @@ public interface StandardAimService {
      * @return
      */
     Page<StandardAimDTO> list(PageRequest pageRequest, StandardAimDTO standardAimDTO);
+
+    /**
+     *
+     * @param standardAimDTOList
+     */
+    void batchDelete(List<StandardAimDTO> standardAimDTOList);
 }

@@ -117,7 +117,7 @@ public class StandardAimController extends BaseController {
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody List<StandardAimDTO> standardAimDTOList) {
-        standardAimRepository.batchDTODelete(standardAimDTOList);
+        standardAimService.batchDelete(standardAimDTOList);
         return Results.success();
     }
 
