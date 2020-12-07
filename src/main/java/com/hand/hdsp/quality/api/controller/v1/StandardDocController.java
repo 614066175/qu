@@ -17,6 +17,8 @@ import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.*;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
+import org.hzero.export.annotation.ExcelExport;
+import org.hzero.export.vo.ExportParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -138,6 +140,22 @@ public class StandardDocController extends BaseController {
                          HttpServletResponse response) {
         standardDocDTO.setTenantId(tenantId);
         standardDocService.downloadStandardDoc(standardDocDTO, response);
+    }
+
+    @ApiOperation(value = "导出标准标准文档")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/export")
+    @ExcelExport(value = StandardDocDTO.class)
+    public ResponseEntity<List<StandardDocDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                                       StandardDocDTO dto,
+                                                       ExportParam exportParam,
+                                                       HttpServletResponse response,
+                                                       @ApiIgnore @SortDefault(value = StandardDoc.FIELD_DOC_ID,
+                                                               direction = Sort.Direction.DESC) PageRequest pageRequest) {
+        dto.setTenantId(tenantId);
+        List<StandardDocDTO> dtoList =
+                standardDocService.export(dto, exportParam, pageRequest);
+        return Results.success(dtoList);
     }
 
 }

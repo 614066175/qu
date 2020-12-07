@@ -1,9 +1,11 @@
 package com.hand.hdsp.quality.domain.repository;
 
-import com.hand.hdsp.core.base.repository.BaseRepository;
-import com.hand.hdsp.quality.domain.entity.StandardDoc;
-import com.hand.hdsp.quality.api.dto.StandardDocDTO;
+import java.util.List;
+
 import com.hand.hdsp.core.base.ProxySelf;
+import com.hand.hdsp.core.base.repository.BaseRepository;
+import com.hand.hdsp.quality.api.dto.StandardDocDTO;
+import com.hand.hdsp.quality.domain.entity.StandardDoc;
 
 /**
  * <p>标准文档管理表资源库</p>
@@ -12,4 +14,10 @@ import com.hand.hdsp.core.base.ProxySelf;
  */
 public interface StandardDocRepository extends BaseRepository<StandardDoc, StandardDocDTO>, ProxySelf<StandardDocRepository> {
 
+    /**
+     * 批量导入标准文档方法
+     *
+     * @param standardDocDTOList List<StandardDocDTO>
+     */
+    void batchImport(List<StandardDocDTO> standardDocDTOList);
 }

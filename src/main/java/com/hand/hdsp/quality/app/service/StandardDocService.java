@@ -4,6 +4,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.hand.hdsp.quality.api.dto.StandardDocDTO;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.hzero.export.vo.ExportParam;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -34,7 +36,7 @@ public interface StandardDocService {
      * 删除标准文档
      *
      * @param standardDocDTOList List<StandardDocDTO>
-     * @param tenantId 租户ID
+     * @param tenantId           租户ID
      */
     void remove(List<StandardDocDTO> standardDocDTOList, Long tenantId);
 
@@ -42,7 +44,17 @@ public interface StandardDocService {
      * 下载标准文档
      *
      * @param standardDocDTO StandardDocDTO
-     * @param response  响应
+     * @param response       HttpServletResponse
      */
     void downloadStandardDoc(StandardDocDTO standardDocDTO, HttpServletResponse response);
+
+    /**
+     * 标准文档导出
+     *
+     * @param dto         StandardDocDTO
+     * @param exportParam ExportParam
+     * @param pageRequest PageRequest
+     * @return List<StandardDocDTO>
+     */
+    List<StandardDocDTO> export(StandardDocDTO dto, ExportParam exportParam, PageRequest pageRequest);
 }
