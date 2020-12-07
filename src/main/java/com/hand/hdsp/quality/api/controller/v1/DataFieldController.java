@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import java.util.List;
+
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import com.hand.hdsp.quality.app.service.DataFieldService;
@@ -16,8 +18,6 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * <p>字段标准表 管理 API</p>
@@ -82,22 +82,6 @@ public class DataFieldController extends BaseController {
     @GetMapping("/detail/{fieldId}")
     public ResponseEntity<?> detail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable(name = "fieldId") Long fieldId) {
         return Results.success(dataFieldService.detail(tenantId, fieldId));
-    }
-
-    @ApiOperation(value = "字段标准删除")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @DeleteMapping
-    public ResponseEntity<?> delete(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestBody DataFieldDTO dataFieldDTO) {
-        dataFieldDTO.setTenantId(tenantId);
-        dataFieldService.delete(dataFieldDTO);
-        return Results.success();
     }
 
     @ApiOperation(value = "字段标准批量删除")
