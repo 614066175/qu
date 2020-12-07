@@ -56,6 +56,7 @@ public class StandardAimServiceImpl implements StandardAimService {
             columns.forEach(column -> {
                 ColumnVO columnVO = ColumnVO.builder()
                         .columnName(column.getColumnName())
+                        .typeName(column.getTypeName())
                         .selectable(true)
                         .build();
                 List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)

@@ -426,6 +426,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                         }
                     });
                 }
+                standardAimDTO.setFieldName(String.format("%s(%s)",standardAimDTO.getFieldName(),standardAimDTO.getTypeName()));
                 //存入落标表
                 standardAimRepository.insertDTOSelective(standardAimDTO);
             });
