@@ -27,9 +27,9 @@ import java.util.Objects;
 @Service
 public class DataFieldVersionServiceImpl implements DataFieldVersionService {
 
-    private DataFieldVersionMapper dataFieldVersionMapper;
+    private final DataFieldVersionMapper dataFieldVersionMapper;
 
-    private ExtraVersionRepository extraVersionRepository;
+    private final ExtraVersionRepository extraVersionRepository;
 
     public DataFieldVersionServiceImpl(DataFieldVersionMapper dataFieldVersionMapper, ExtraVersionRepository extraVersionRepository) {
         this.dataFieldVersionMapper = dataFieldVersionMapper;

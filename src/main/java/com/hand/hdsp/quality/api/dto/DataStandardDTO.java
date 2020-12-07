@@ -95,6 +95,7 @@ public class DataStandardDTO extends AuditDomain{
     private Long chargeId;
 
     @ApiModelProperty(value = "责任人电话")
+    @ExcelColumn(zh = "责任人电话",en = "chargeTel",groups = {Group2.class})
     private String chargeTel;
 
     @ExcelColumn(zh = "责任人邮箱",en = "chargeEmail",groups = {Group2.class})

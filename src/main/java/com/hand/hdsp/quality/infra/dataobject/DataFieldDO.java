@@ -45,7 +45,7 @@ public class DataFieldDO extends AuditDomain {
 
     private String chargeEmail;
 
-    private String status;
+    private String standardStatus;
 
     private Long tenantId;
 
