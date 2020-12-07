@@ -2,7 +2,6 @@ package com.hand.hdsp.quality.infra.validation;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
@@ -12,7 +11,6 @@ import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
-import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -40,15 +38,12 @@ public class DataStandardValidator extends ValidatorHandler {
 
     private final StandardGroupRepository standardGroupRepository;
 
-    private final DataStandardMapper dataStandardMapper;
-
-
-    public DataStandardValidator(ObjectMapper objectMapper, DataStandardRepository dataStandardRepository, StandardGroupRepository standardGroupRepository, DataStandardMapper dataStandardMapper) {
+    public DataStandardValidator(ObjectMapper objectMapper, DataStandardRepository dataStandardRepository, StandardGroupRepository standardGroupRepository) {
         this.objectMapper = objectMapper;
         this.dataStandardRepository = dataStandardRepository;
         this.standardGroupRepository = standardGroupRepository;
-        this.dataStandardMapper = dataStandardMapper;
     }
+
 
     @Override
     public boolean validate(String data) {
@@ -84,14 +79,6 @@ public class DataStandardValidator extends ValidatorHandler {
                         .build());
                 //标准名称存在
                 if (CollectionUtils.isNotEmpty(dataStandardDTOList)){
-                    return false;
-                }
-                int chargeId = dataStandardMapper.selectIdByChargetName(dataStandardDTO.getChargeName());
-                if(Objects.isNull(chargeId)||chargeId==0){
-                    return false;
-                }
-                int chargeDeptId = dataStandardMapper.selectIdByChargeDeptName(dataStandardDTO.getChargeDeptName());
-                if(Objects.isNull(chargeDeptId)||chargeDeptId==0){
                     return false;
                 }
                 return true;

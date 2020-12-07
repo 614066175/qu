@@ -53,12 +53,6 @@ public class DataStandardRepositoryImpl extends BaseRepositoryImpl<DataStandard,
                 if(CollectionUtils.isNotEmpty(dataStandards)){
                     return;
                 }
-                int chargeId = dataStandardMapper
-                        .selectIdByChargetName(dataStandardDTO.getChargeName());
-                dataStandardDTO.setChargeId(Long.parseLong(String.valueOf(chargeId)));
-                int chargeDeptId = dataStandardMapper
-                        .selectIdByChargeDeptName(dataStandardDTO.getChargeDeptName());
-                dataStandardDTO.setChargeId(Long.parseLong(String.valueOf(chargeDeptId)));
                 importDataStandardDTOList.add(dataStandardDTO);
             });
         }
