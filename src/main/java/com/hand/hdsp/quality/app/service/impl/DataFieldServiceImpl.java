@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.*;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
 import java.util.List;
@@ -15,6 +16,8 @@ import com.hand.hdsp.quality.domain.entity.StandardApprove;
 import com.hand.hdsp.quality.domain.entity.StandardExtra;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.constant.StandardConstant;
+import com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -36,6 +39,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class DataFieldServiceImpl implements DataFieldService {
+
+    public static final Long DEFAULT_VERSION = 1L;
 
     private final DataFieldRepository dataFieldRepository;
 
@@ -87,7 +92,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                         .standardId(dataFieldDTO.getFieldId())
                         .extraKey(s.getExtraKey())
                         .extraValue(s.getExtraValue())
-                        .standardType("FIELD")
+                        .standardType(FIELD)
                         .tenantId(dataFieldDTO.getTenantId())
                         .build();
                 standardExtraRepository.insertDTOSelective(extraDTO);
@@ -101,7 +106,7 @@ public class DataFieldServiceImpl implements DataFieldService {
         List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardExtra.FIELD_STANDARD_ID, fieldId)
-                        .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, "FIELD")
+                        .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, FIELD)
                         .andEqualTo(StandardExtra.FIELD_TENANT_ID, tenantId))
                 .build());
         if (CollectionUtils.isNotEmpty(standardExtraDTOS)) {
@@ -117,19 +122,19 @@ public class DataFieldServiceImpl implements DataFieldService {
                 || OFFLINE_APPROVING.equals(dataFieldDTO.getStandardStatus())) {
             throw new CommonException(ErrorCode.DATA_FIELD_CAN_NOT_DELETE);
         }
-        if (ONLINE_APPROVING.equals(dataFieldDTO.getStandardStatus())) {
-            //删除申请记录表记录
-            List<StandardApproveDTO> standardApproveDTOS = standardApproveRepository.selectDTOByCondition(Condition.builder(StandardApprove.class)
-                    .andWhere(Sqls.custom()
-                            .andEqualTo(StandardApprove.FIELD_STANDARD_NAME, dataFieldDTO.getFieldName())
-                            .andEqualTo(StandardApprove.FIELD_STANDARD_TYPE, "FIELD")
-                            .andEqualTo(StandardApprove.FIELD_OPERATION, OFFLINE_APPROVING)
-                            .andEqualTo(StandardApprove.FIELD_TENANT_ID, dataFieldDTO.getTenantId()))
-                    .build());
-            if (CollectionUtils.isNotEmpty(standardApproveDTOS)) {
-                standardApproveRepository.deleteDTO(standardApproveDTOS.get(0));
-            }
-        }
+//        if (ONLINE_APPROVING.equals(dataFieldDTO.getStandardStatus())) {
+//            //删除申请记录表记录
+//            List<StandardApproveDTO> standardApproveDTOS = standardApproveRepository.selectDTOByCondition(Condition.builder(StandardApprove.class)
+//                    .andWhere(Sqls.custom()
+//                            .andEqualTo(StandardApprove.FIELD_STANDARD_NAME, dataFieldDTO.getFieldName())
+//                            .andEqualTo(StandardApprove.FIELD_STANDARD_TYPE, FIELD)
+//                            .andEqualTo(StandardApprove.FIELD_OPERATION, OFFLINE_APPROVING)
+//                            .andEqualTo(StandardApprove.FIELD_TENANT_ID, dataFieldDTO.getTenantId()))
+//                    .build());
+//            if (CollectionUtils.isNotEmpty(standardApproveDTOS)) {
+//                standardApproveRepository.deleteDTO(standardApproveDTOS.get(0));
+//            }
+//        }
         dataFieldRepository.deleteDTO(dataFieldDTO);
         //删除版本表数据
         List<DataFieldVersionDTO> dataStandardVersionDTOS = dataFieldVersionRepository.selectDTOByCondition(Condition.builder(DataFieldVersion.class)
@@ -142,9 +147,10 @@ public class DataFieldServiceImpl implements DataFieldService {
         List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardExtra.FIELD_STANDARD_ID, dataFieldDTO.getFieldId())
-                        .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, "FIELD")
+                        .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, FIELD)
                         .andEqualTo(StandardExtra.FIELD_TENANT_ID, dataFieldDTO.getTenantId())
                 ).build());
+        //todo 删除落标表
         standardExtraRepository.batchDTODelete(standardExtraDTOS);
     }
 
@@ -183,7 +189,7 @@ public class DataFieldServiceImpl implements DataFieldService {
         }
         dataFieldDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
         dataFieldRepository.updateDTOOptional(dataFieldDTO, DataField.FIELD_STANDARD_STATUS);
-        if(ONLINE.equals(dataFieldDTO.getStandardStatus())){
+        if (ONLINE.equals(dataFieldDTO.getStandardStatus())) {
             //存版本表
             doVersion(dataFieldDTO);
         }
@@ -195,7 +201,7 @@ public class DataFieldServiceImpl implements DataFieldService {
     }
 
     private void doVersion(DataFieldDTO dataFieldDTO) {
-        Long lastVersion = 1L;
+        Long lastVersion = DEFAULT_VERSION;
         List<DataFieldVersionDTO> dataFieldVersionDTOS = dataFieldVersionRepository.selectDTOByCondition(Condition.builder(DataFieldVersion.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(DataField.FIELD_FIELD_ID, dataFieldDTO.getFieldId()))
@@ -213,7 +219,7 @@ public class DataFieldServiceImpl implements DataFieldService {
         List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardExtra.FIELD_STANDARD_ID, dataFieldDTO.getFieldId())
-                        .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, "FIELD")
+                        .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, FIELD)
                         .andEqualTo(StandardExtra.FIELD_TENANT_ID, dataFieldDTO.getTenantId()))
                 .build());
         if (CollectionUtils.isNotEmpty(standardExtraDTOS)) {
