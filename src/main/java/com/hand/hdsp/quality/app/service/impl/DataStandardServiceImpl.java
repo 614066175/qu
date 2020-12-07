@@ -417,12 +417,18 @@ public class DataStandardServiceImpl implements DataStandardService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void batchRelatePlan(List<StandardAimDTO> standardAimDTOList) {
-
         //判断数据标准状态，非在线状态，则只存落标表，在数据质量不生成规则
         if (CollectionUtils.isEmpty(standardAimDTOList)) {
             throw new CommonException(ErrorCode.STANDARD_AIM_LIST_IS_EMPTY);
         }
         standardAimDTOList.forEach(standardAimDTO -> {
+            //删除原先的落标关系表
+            List<StandardAimRelationDTO> standardAimRelationDTOS = standardAimRelationRepository.selectDTOByCondition(Condition.builder(StandardAimRelation.class)
+                    .andWhere(Sqls.custom()
+                            .andEqualTo(StandardAimRelation.FIELD_AIM_ID, standardAimDTO.getAimId())
+                            .andEqualTo(StandardAimRelation.FIELD_TENANT_ID, standardAimDTO.getTenantId()))
+                    .build());
+            standardAimRelationRepository.batchDTODelete(standardAimRelationDTOS);
             DataStandardDTO dataStandardDTO = dataStandardRepository.selectDTOByPrimaryKey(standardAimDTO.getStandardId());
             //如果标准为在线状态则去数据质量落标对应规则
             if (StandardStatus.ONLINE.equals(dataStandardDTO.getStandardStatus())) {
@@ -449,6 +455,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         //判断在评估方案下是否已存在相同base
         List<BatchPlanBaseDTO> batchPlanBaseDTOS = batchPlanBaseRepository.selectDTOByCondition(Condition.builder(BatchPlanBase.class)
                 .andWhere(Sqls.custom()
+                        .andEqualTo(BatchPlanBase.FIELD_PLAN_ID,standardAimDTO.getPlanId())
                         .andEqualTo(BatchPlanBase.FIELD_DATASOURCE_TYPE, standardAimDTO.getDatasourceType())
                         .andEqualTo(BatchPlanBase.FIELD_DATASOURCE_CODE, standardAimDTO.getDatasourceCode())
                         .andEqualTo(BatchPlanBase.FIELD_DATASOURCE_SCHEMA, standardAimDTO.getSchemaName())
