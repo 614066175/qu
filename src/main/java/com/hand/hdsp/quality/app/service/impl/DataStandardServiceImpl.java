@@ -465,15 +465,29 @@ public class DataStandardServiceImpl implements DataStandardService {
 
         //根据数据标准在base下生成字段规则头batch_plan_field
         DataStandardDTO dataStandardDTO = dataStandardRepository.selectDTOByPrimaryKey(standardAimDTO.getStandardId());
-        BatchPlanFieldDTO batchPlanFieldDTO = BatchPlanFieldDTO.builder()
-                .planBaseId(batchPlanBaseDTO.getPlanBaseId())
-                .ruleCode(dataStandardDTO.getStandardCode())
-                .ruleName(dataStandardDTO.getStandardName())
-                .ruleDesc(dataStandardDTO.getStandardDesc())
-                .checkType(CheckType.STANDARD)
-                .weight(DEFAULT_WEIGHT)
-                .build();
-        batchPlanFieldRepository.insertDTOSelective(batchPlanFieldDTO);
+        List<BatchPlanFieldDTO> batchPlanFieldDTOS = batchPlanFieldRepository.selectDTOByCondition(Condition.builder(BatchPlanField.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(BatchPlanField.FIELD_PLAN_BASE_ID, batchPlanBaseDTO.getPlanBaseId())
+                        .andEqualTo(BatchPlanField.FIELD_RULE_CODE, dataStandardDTO.getStandardCode())
+                        .andEqualTo(BatchPlanField.FIELD_RULE_NAME, dataStandardDTO.getStandardName())
+                        .andEqualTo(BatchPlanField.FIELD_RULE_DESC, dataStandardDTO.getStandardDesc())
+                        .andEqualTo(BatchPlanField.FIELD_CHECK_TYPE, CheckType.STANDARD))
+                .build());
+        BatchPlanFieldDTO batchPlanFieldDTO;
+        if (CollectionUtils.isEmpty(batchPlanFieldDTOS)) {
+            batchPlanFieldDTO = BatchPlanFieldDTO.builder()
+                    .planBaseId(batchPlanBaseDTO.getPlanBaseId())
+                    .ruleCode(dataStandardDTO.getStandardCode())
+                    .ruleName(dataStandardDTO.getStandardName())
+                    .ruleDesc(dataStandardDTO.getStandardDesc())
+                    .checkType(CheckType.STANDARD)
+                    .weight(DEFAULT_WEIGHT)
+                    .build();
+            batchPlanFieldRepository.insertDTOSelective(batchPlanFieldDTO);
+        } else {
+            batchPlanFieldDTO = batchPlanFieldDTOS.get(0);
+        }
+
 
         //根据数据标准生成具体的校验项batch_plan_field_line
         //数据格式
@@ -624,7 +638,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                     .warningLevel(warningLevel)
                     .build();
             //如果校验类型为固定值，默认给范围比较
-            if(CountType.FIXED_VALUE.equals(batchPlanFieldLineDTO.getCountType())){
+            if (CountType.FIXED_VALUE.equals(batchPlanFieldLineDTO.getCountType())) {
                 batchPlanFieldConDTO.setCompareWay(RANGE);
             }
             batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
