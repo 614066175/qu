@@ -17,6 +17,7 @@ import com.hand.hdsp.quality.app.service.StandardAimService;
 import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.constant.StandardConstant.AimType;
 import com.hand.hdsp.quality.infra.constant.WarningLevel;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import io.choerodon.core.domain.Page;
@@ -25,7 +26,6 @@ import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
-import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
@@ -61,7 +61,6 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     private final StandardAimRepository standardAimRepository;
 
-    private final DriverSessionService driverSessionService;
 
     private final StandardAimRelationRepository standardAimRelationRepository;
 
@@ -75,14 +74,24 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     private final StandardAimService standardAimService;
 
-    public DataStandardServiceImpl(DataStandardRepository dataStandardRepository, DataStandardVersionRepository dataStandardVersionRepository, StandardExtraRepository standardExtraRepository, DataStandardMapper dataStandardMapper, ExtraVersionRepository extraVersionRepository, StandardAimRepository standardAimRepository, DriverSessionService driverSessionService, StandardAimRelationRepository standardAimRelationRepository, BatchPlanBaseRepository batchPlanBaseRepository, BatchPlanFieldRepository batchPlanFieldRepository, BatchPlanFieldLineRepository batchPlanFieldLineRepository, BatchPlanFieldConRepository batchPlanFieldConRepository, StandardAimService standardAimService) {
+    public DataStandardServiceImpl(DataStandardRepository dataStandardRepository,
+                                   DataStandardVersionRepository dataStandardVersionRepository,
+                                   StandardExtraRepository standardExtraRepository,
+                                   DataStandardMapper dataStandardMapper,
+                                   ExtraVersionRepository extraVersionRepository,
+                                   StandardAimRepository standardAimRepository,
+                                   StandardAimRelationRepository standardAimRelationRepository,
+                                   BatchPlanBaseRepository batchPlanBaseRepository,
+                                   BatchPlanFieldRepository batchPlanFieldRepository,
+                                   BatchPlanFieldLineRepository batchPlanFieldLineRepository,
+                                   BatchPlanFieldConRepository batchPlanFieldConRepository,
+                                   StandardAimService standardAimService) {
         this.dataStandardRepository = dataStandardRepository;
         this.dataStandardVersionRepository = dataStandardVersionRepository;
         this.standardExtraRepository = standardExtraRepository;
         this.dataStandardMapper = dataStandardMapper;
         this.extraVersionRepository = extraVersionRepository;
         this.standardAimRepository = standardAimRepository;
-        this.driverSessionService = driverSessionService;
         this.standardAimRelationRepository = standardAimRelationRepository;
         this.batchPlanBaseRepository = batchPlanBaseRepository;
         this.batchPlanFieldRepository = batchPlanFieldRepository;
@@ -312,7 +321,7 @@ public class DataStandardServiceImpl implements DataStandardService {
     /**
      * 发布时处理关联了评估的落标
      *
-     * @param aimDTOS
+     * @param aimDTOS List<StandardAimDTO>
      */
     private void publishRelatePlan(List<StandardAimDTO> aimDTOS) {
         if (CollectionUtils.isNotEmpty(aimDTOS)) {
@@ -336,9 +345,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                                     .build());
                     //根据行ID删除数据质量字段规则Condition
                     if (CollectionUtils.isNotEmpty(batchPlanFieldLineDTOS)) {
-                        batchPlanFieldLineDTOS.forEach(batchPlanFieldLineDTO -> {
-                            batchPlanFieldConRepository.deleteByPlanLineId(batchPlanFieldLineDTO.getPlanLineId());
-                        });
+                        batchPlanFieldLineDTOS.forEach(batchPlanFieldLineDTO -> batchPlanFieldConRepository.deleteByPlanLineId(batchPlanFieldLineDTO.getPlanLineId()));
                     }
                     //批量删除line
                     batchPlanFieldLineRepository.batchDTODelete(batchPlanFieldLineDTOS);
@@ -417,12 +424,19 @@ public class DataStandardServiceImpl implements DataStandardService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void batchRelatePlan(List<StandardAimDTO> standardAimDTOList) {
-
         //判断数据标准状态，非在线状态，则只存落标表，在数据质量不生成规则
         if (CollectionUtils.isEmpty(standardAimDTOList)) {
             throw new CommonException(ErrorCode.STANDARD_AIM_LIST_IS_EMPTY);
         }
         standardAimDTOList.forEach(standardAimDTO -> {
+            //删除原先的落标关系表
+            List<StandardAimRelationDTO> standardAimRelationDTOS = standardAimRelationRepository.selectDTOByCondition(Condition.builder(StandardAimRelation.class)
+                    .andWhere(Sqls.custom()
+                            .andEqualTo(StandardAimRelation.FIELD_AIM_ID, standardAimDTO.getAimId())
+                            .andEqualTo(StandardAimRelation.FIELD_AIM_TYPE, AimType.AIM)
+                            .andEqualTo(StandardAimRelation.FIELD_TENANT_ID, standardAimDTO.getTenantId()))
+                    .build());
+            standardAimRelationRepository.batchDTODelete(standardAimRelationDTOS);
             DataStandardDTO dataStandardDTO = dataStandardRepository.selectDTOByPrimaryKey(standardAimDTO.getStandardId());
             //如果标准为在线状态则去数据质量落标对应规则
             if (StandardStatus.ONLINE.equals(dataStandardDTO.getStandardStatus())) {
@@ -449,6 +463,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         //判断在评估方案下是否已存在相同base
         List<BatchPlanBaseDTO> batchPlanBaseDTOS = batchPlanBaseRepository.selectDTOByCondition(Condition.builder(BatchPlanBase.class)
                 .andWhere(Sqls.custom()
+                        .andEqualTo(BatchPlanBase.FIELD_PLAN_ID,standardAimDTO.getPlanId())
                         .andEqualTo(BatchPlanBase.FIELD_DATASOURCE_TYPE, standardAimDTO.getDatasourceType())
                         .andEqualTo(BatchPlanBase.FIELD_DATASOURCE_CODE, standardAimDTO.getDatasourceCode())
                         .andEqualTo(BatchPlanBase.FIELD_DATASOURCE_SCHEMA, standardAimDTO.getSchemaName())
@@ -659,7 +674,7 @@ public class DataStandardServiceImpl implements DataStandardService {
             //根据具体落标存入落标关系表
             StandardAimRelationDTO standardAimRelationDTO = StandardAimRelationDTO.builder()
                     .aimId(standardAimDTO.getAimId())
-                    .aimType("AIM")
+                    .aimType(AimType.AIM)
                     .planId(standardAimDTO.getPlanId())
                     .planBaseId(batchPlanBaseDTO.getPlanBaseId())
                     .planRuleId(batchPlanFieldDTO.getPlanRuleId())

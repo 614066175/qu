@@ -41,7 +41,10 @@ public interface StandardConstant {
         String DOC="DOC";
    }
 
-
+    interface AimType{
+      String AIM="AIM";
+      String REFERENCE="REFERENCE";
+    }
 
 
 }
