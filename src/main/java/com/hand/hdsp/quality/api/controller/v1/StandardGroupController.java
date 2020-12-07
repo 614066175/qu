@@ -116,7 +116,7 @@ public class StandardGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/export")
     @ExcelExport(value = StandardGroupDTO.class)
-    public ResponseEntity<List<StandardGroupDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<?> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                                         StandardGroupDTO dto,
                                                         ExportParam exportParam,
                                                         HttpServletResponse response) {
@@ -124,7 +124,6 @@ public class StandardGroupController extends BaseController {
         dto.setTenantId(tenantId);
         List<StandardGroupDTO> dtoList =
                 standardGroupService.export(dto, exportParam);
-        response.addHeader("Access-Control-Expose-Headers","Content-Disposition");
         return Results.success(dtoList);
     }
 }

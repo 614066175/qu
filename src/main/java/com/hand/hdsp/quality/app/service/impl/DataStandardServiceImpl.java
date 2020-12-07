@@ -11,6 +11,7 @@ import static com.hand.hdsp.quality.infra.constant.PlanConstant.CountType.*;
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.SqlType.TABLE;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -461,8 +462,11 @@ public class DataStandardServiceImpl implements DataStandardService {
     }
 
     private void doRelatePlan(StandardAimDTO standardAimDTO) {
+        //告警等级集合
+        List<WarningLevelDTO> warningLevelDTOList = Collections.EMPTY_LIST;
         //在该评估方案下生成base
         BatchPlanBaseDTO batchPlanBaseDTO = BatchPlanBaseDTO.builder()
+                .datasourceType(standardAimDTO.getDatasourceType())
                 .datasourceCode(standardAimDTO.getDatasourceCode())
                 .datasourceId(standardAimDTO.getDatasourceId())
                 .datasourceSchema(standardAimDTO.getSchemaName())
@@ -504,7 +508,8 @@ public class DataStandardServiceImpl implements DataStandardService {
                     .warningLevel(WarningLevel.ORANGE)
                     .compareSymbol(EQUAL)
                     .build();
-            String warningLevel = JsonUtil.toJson(warningLevelDTO);
+            warningLevelDTOList.add(warningLevelDTO);
+            String warningLevel = JsonUtil.toJson(warningLevelDTOList);
             BatchPlanFieldConDTO batchPlanFieldConDTO = BatchPlanFieldConDTO.builder()
                     .planLineId(batchPlanFieldLineDTO.getPlanLineId())
                     .warningLevel(warningLevel)
@@ -530,7 +535,8 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .compareSymbol(NOT_EQUAL)
                         .expectedValue(dataStandardDTO.getDataLength())
                         .build();
-                String warningLevel = JsonUtil.toJson(warningLevelDTO);
+                warningLevelDTOList.add(warningLevelDTO);
+                String warningLevel = JsonUtil.toJson(warningLevelDTOList);
                 BatchPlanFieldConDTO batchPlanFieldConDTO = BatchPlanFieldConDTO.builder()
                         .planLineId(batchPlanFieldLineDTO.getPlanLineId())
                         .warningLevel(warningLevel)
@@ -559,7 +565,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                             .startValue(String.valueOf(dataLengthList.get(1) + 1))
                             .compareSymbol(EQUAL)
                             .build();
-                    List<WarningLevelDTO> warningLevelDTOList = Arrays.asList(firstWarningLevelDTO
+                    warningLevelDTOList = Arrays.asList(firstWarningLevelDTO
                             , secondWarningLevelDTO);
                     warningLevel = JsonUtil.toJson(warningLevelDTOList);
                 }
@@ -599,7 +605,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                                 .startValue(valueRangeList.get(1))
                                 .compareSymbol(EQUAL)
                                 .build();
-                        List<WarningLevelDTO> warningLevelDTOList = Arrays.
+                        warningLevelDTOList = Arrays.
                                 asList(firstWarningLevelDTO, secondWarningLevelDTO);
                         warningLevel = JsonUtil.toJson(warningLevelDTOList);
                     }
@@ -611,7 +617,8 @@ public class DataStandardServiceImpl implements DataStandardService {
                             .compareSymbol(INCLUDED)
                             .enumValue(dataStandardDTO.getValueRange())
                             .build();
-                    warningLevel = JsonUtil.toJson(warningLevelDTO);
+                    warningLevelDTOList.add(warningLevelDTO);
+                    warningLevel = JsonUtil.toJson(warningLevelDTOList);
                     break;
                 case StandardValueType.VALUE_SET:
                     batchPlanFieldLineDTO.setCountType(LOV_VALUE);
@@ -620,7 +627,8 @@ public class DataStandardServiceImpl implements DataStandardService {
                             .compareSymbol(INCLUDED)
                             .enumValue(dataStandardDTO.getValueRange())
                             .build();
-                    warningLevel = JsonUtil.toJson(warningLevelDTO);
+                    warningLevelDTOList.add(warningLevelDTO);
+                    warningLevel = JsonUtil.toJson(warningLevelDTOList);
                     break;
                 default:
                     break;
