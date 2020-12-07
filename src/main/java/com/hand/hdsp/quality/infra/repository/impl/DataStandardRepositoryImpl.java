@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.CREATE;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +12,6 @@ import com.hand.hdsp.quality.domain.entity.DataStandard;
 import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
-import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.mybatis.domian.Condition;
@@ -69,7 +70,7 @@ public class DataStandardRepositoryImpl extends BaseRepositoryImpl<DataStandard,
                     dataStandardDTO.setGroupId(standardGroupDTOS.get(0).getGroupId());
                 }
                 importDataStandardDTOList.add(dataStandardDTO);
-                dataStandardDTO.setStandardStatus(StandardConstant.CREATE);
+                dataStandardDTO.setStandardStatus(CREATE);
             });
         }
         batchInsertDTOSelective(importDataStandardDTOList);

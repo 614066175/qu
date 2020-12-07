@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.CREATE;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -9,7 +11,6 @@ import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
-import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -71,7 +72,7 @@ public class DataStandardImportServiceImpl implements IDoImportService {
         if(CollectionUtils.isNotEmpty(standardGroupDTOS)){
             dataStandardDTO.setGroupId(standardGroupDTOS.get(0).getGroupId());
         }
-        dataStandardDTO.setStandardStatus(StandardConstant.CREATE);
+        dataStandardDTO.setStandardStatus(CREATE);
         //插入数据
         dataStandardRepository.insertDTOSelective(dataStandardDTO);
         return true;

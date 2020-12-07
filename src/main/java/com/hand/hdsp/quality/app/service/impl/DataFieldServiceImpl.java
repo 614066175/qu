@@ -1,5 +1,11 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
+
+import java.util.List;
+import java.util.Objects;
+
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.DataFieldService;
 import com.hand.hdsp.quality.app.service.DataStandardService;
@@ -9,7 +15,6 @@ import com.hand.hdsp.quality.domain.entity.StandardApprove;
 import com.hand.hdsp.quality.domain.entity.StandardExtra;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
-import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -23,9 +28,6 @@ import org.hzero.mybatis.util.Sqls;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Objects;
 
 /**
  * <p>字段标准表应用服务默认实现</p>
@@ -75,7 +77,7 @@ public class DataFieldServiceImpl implements DataFieldService {
             throw new CommonException(ErrorCode.DATA_FIELD_NAME_EXIST);
         }
 
-        dataFieldDTO.setStandardStatus(StandardConstant.CREATE);
+        dataFieldDTO.setStandardStatus(CREATE);
         dataFieldRepository.insertDTOSelective(dataFieldDTO);
 
         val standardExtraDTOList = dataFieldDTO.getStandardExtraDTOList();
@@ -111,17 +113,17 @@ public class DataFieldServiceImpl implements DataFieldService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delete(DataFieldDTO dataFieldDTO) {
-        if (StandardConstant.ONLINE.equals(dataFieldDTO.getStandardStatus())
-                || StandardConstant.OFFLINE_APPROVING.equals(dataFieldDTO.getStandardStatus())) {
+        if (ONLINE.equals(dataFieldDTO.getStandardStatus())
+                || OFFLINE_APPROVING.equals(dataFieldDTO.getStandardStatus())) {
             throw new CommonException(ErrorCode.DATA_FIELD_CAN_NOT_DELETE);
         }
-        if (StandardConstant.ONLINE_APPROVING.equals(dataFieldDTO.getStandardStatus())) {
+        if (ONLINE_APPROVING.equals(dataFieldDTO.getStandardStatus())) {
             //删除申请记录表记录
             List<StandardApproveDTO> standardApproveDTOS = standardApproveRepository.selectDTOByCondition(Condition.builder(StandardApprove.class)
                     .andWhere(Sqls.custom()
                             .andEqualTo(StandardApprove.FIELD_STANDARD_NAME, dataFieldDTO.getFieldName())
                             .andEqualTo(StandardApprove.FIELD_STANDARD_TYPE, "FIELD")
-                            .andEqualTo(StandardApprove.FIELD_OPERATION, StandardConstant.OFFLINE_APPROVING)
+                            .andEqualTo(StandardApprove.FIELD_OPERATION, OFFLINE_APPROVING)
                             .andEqualTo(StandardApprove.FIELD_TENANT_ID, dataFieldDTO.getTenantId()))
                     .build());
             if (CollectionUtils.isNotEmpty(standardApproveDTOS)) {
@@ -158,10 +160,10 @@ public class DataFieldServiceImpl implements DataFieldService {
             throw new CommonException(ErrorCode.DATA_FIELD_NAME_EXIST);
         }
         oldDataFieldDTO.setStandardStatus(dataFieldDTO.getStandardStatus());
-        if (StandardConstant.ONLINE_APPROVING.equals(dataFieldDTO.getStandardStatus())) {
+        if (ONLINE_APPROVING.equals(dataFieldDTO.getStandardStatus())) {
             doApprove(oldDataFieldDTO);
         }
-        if (StandardConstant.OFFLINE_APPROVING.equals(dataFieldDTO.getStandardStatus())) {
+        if (OFFLINE_APPROVING.equals(dataFieldDTO.getStandardStatus())) {
             doApprove(oldDataFieldDTO);
         }
         dataFieldRepository.updateByDTOPrimaryKey(oldDataFieldDTO);
@@ -181,7 +183,7 @@ public class DataFieldServiceImpl implements DataFieldService {
         }
         dataFieldDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
         dataFieldRepository.updateDTOOptional(dataFieldDTO, DataField.FIELD_STANDARD_STATUS);
-        if(StandardConstant.ONLINE.equals(dataFieldDTO.getStandardStatus())){
+        if(ONLINE.equals(dataFieldDTO.getStandardStatus())){
             //存版本表
             doVersion(dataFieldDTO);
         }
