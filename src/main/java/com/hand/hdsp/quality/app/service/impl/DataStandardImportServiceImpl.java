@@ -1,7 +1,6 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 import java.io.IOException;
-import java.util.Objects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
@@ -53,20 +52,6 @@ public class DataStandardImportServiceImpl implements IDoImportService {
         if (tenantId != 0) {
             dataStandardDTO.setTenantId(tenantId);
         }
-        //设置负责部门id
-        int chargeDeptId = dataStandardMapper.selectIdByChargeDeptName(dataStandardDTO.getChargeDeptName());
-        if(Objects.isNull(chargeDeptId)||chargeDeptId==0){
-            log.error("chargeDept not find");
-            return false;
-        }
-        dataStandardDTO.setChargeDeptId(Long.parseLong(String.valueOf(chargeDeptId)));
-        //设置负责人id
-        int chargeId = dataStandardMapper.selectIdByChargetName(dataStandardDTO.getChargeName());
-        if(Objects.isNull(chargeDeptId)||chargeDeptId==0){
-            log.error("chargeDept not find");
-            return false;
-        }
-        dataStandardDTO.setChargeId(Long.parseLong(String.valueOf(chargeId)));
         //插入数据
         dataStandardRepository.insertDTOSelective(dataStandardDTO);
         return true;

@@ -462,6 +462,10 @@ public class DataStandardServiceImpl implements DataStandardService {
         return list(pageRequest,dto);
     }
 
+    /**
+     * 关联评估方案
+     * @param standardAimDTO
+     */
     private void doRelatePlan(StandardAimDTO standardAimDTO) {
         //告警等级集合
         List<WarningLevelDTO> warningLevelDTOList = Collections.EMPTY_LIST;
