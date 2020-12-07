@@ -1,14 +1,7 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.*;
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckWay.COMMON;
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckWay.REGULAR;
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareSymbol.*;
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.RANGE;
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.VALUE;
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.CountType.*;
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.SqlType.TABLE;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -468,7 +461,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .andEqualTo(BatchPlanBase.FIELD_DATASOURCE_TYPE, standardAimDTO.getDatasourceType())
                         .andEqualTo(BatchPlanBase.FIELD_DATASOURCE_CODE, standardAimDTO.getDatasourceCode())
                         .andEqualTo(BatchPlanBase.FIELD_DATASOURCE_SCHEMA, standardAimDTO.getSchemaName())
-                        .andEqualTo(BatchPlanBase.FIELD_SQL_TYPE, TABLE)
+                        .andEqualTo(BatchPlanBase.FIELD_SQL_TYPE, SqlType.TABLE)
                         .andEqualTo(BatchPlanBase.FIELD_OBJECT_NAME, standardAimDTO.getTableName())
                         .andEqualTo(BatchPlanBase.FIELD_TENANT_ID, standardAimDTO.getTenantId()))
                 .build());
@@ -481,7 +474,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                     .datasourceId(standardAimDTO.getDatasourceId())
                     .datasourceSchema(standardAimDTO.getSchemaName())
                     .planId(standardAimDTO.getPlanId())
-                    .sqlType(TABLE)
+                    .sqlType(SqlType.TABLE)
                     .objectName(standardAimDTO.getTableName())
                     .incrementStrategy(IncrementStrategy.NONE)
                     .tenantId(standardAimDTO.getTenantId())
@@ -499,7 +492,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                 .ruleCode(dataStandardDTO.getStandardCode())
                 .ruleName(dataStandardDTO.getStandardName())
                 .ruleDesc(dataStandardDTO.getStandardDesc())
-                .checkType(STANDARD)
+                .checkType(CheckType.STANDARD)
                 .weight(DEFAULT_WEIGHT)
                 .build();
         batchPlanFieldRepository.insertDTOSelective(batchPlanFieldDTO);
@@ -508,8 +501,8 @@ public class DataStandardServiceImpl implements DataStandardService {
         //数据格式
         if (Strings.isNotEmpty(dataStandardDTO.getDataPattern())) {
             BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()
-                    .checkWay(REGULAR)
-                    .checkItem(REGULAR)
+                    .checkWay(CheckWay.REGULAR)
+                    .checkItem(CheckItem.REGULAR)
                     .planRuleId(batchPlanFieldDTO.getPlanRuleId())
                     .fieldName(standardAimDTO.getFieldName())
                     .regularExpression(dataStandardDTO.getDataPattern())
@@ -519,7 +512,7 @@ public class DataStandardServiceImpl implements DataStandardService {
             //生成每个校验项的配置项
             WarningLevelDTO warningLevelDTO = WarningLevelDTO.builder()
                     .warningLevel(WarningLevel.ORANGE)
-                    .compareSymbol(EQUAL)
+                    .compareSymbol(CompareSymbol.EQUAL)
                     .build();
             warningLevelDTOList = Collections.singletonList(warningLevelDTO);
             String warningLevel = JsonUtil.toJson(warningLevelDTOList);
@@ -532,20 +525,20 @@ public class DataStandardServiceImpl implements DataStandardService {
         //数据长度
         if (Strings.isNotEmpty(dataStandardDTO.getDataLength())) {
             BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()
-                    .checkWay(COMMON)
+                    .checkWay(CheckWay.COMMON)
                     .checkItem(CheckItem.DATA_LENGTH)
                     .planRuleId(batchPlanFieldDTO.getPlanRuleId())
                     .fieldName(standardAimDTO.getFieldName())
                     .tenantId(standardAimDTO.getTenantId())
                     .build();
             //固定值
-            if (FIXED_VALUE.equals(dataStandardDTO.getDataType())) {
-                batchPlanFieldLineDTO.setCountType(FIXED_VALUE);
+            if (CountType.FIXED_VALUE.equals(dataStandardDTO.getDataType())) {
+                batchPlanFieldLineDTO.setCountType(CountType.FIXED_VALUE);
                 batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
                 //生成每个校验项的配置项
                 WarningLevelDTO warningLevelDTO = WarningLevelDTO.builder()
                         .warningLevel(WarningLevel.ORANGE)
-                        .compareSymbol(NOT_EQUAL)
+                        .compareSymbol(CompareSymbol.NOT_EQUAL)
                         .expectedValue(dataStandardDTO.getDataLength())
                         .build();
                 warningLevelDTOList = Collections.singletonList(warningLevelDTO);
@@ -553,14 +546,14 @@ public class DataStandardServiceImpl implements DataStandardService {
                 BatchPlanFieldConDTO batchPlanFieldConDTO = BatchPlanFieldConDTO.builder()
                         .planLineId(batchPlanFieldLineDTO.getPlanLineId())
                         .warningLevel(warningLevel)
-                        .compareWay(VALUE)
+                        .compareWay(CompareWay.VALUE)
                         .build();
                 batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
             }
             //长度范围
             if (RANGE.equals(dataStandardDTO.getDataType())) {
                 convertToDataLengthList(dataStandardDTO);
-                batchPlanFieldLineDTO.setCountType(LENGTH_RANGE);
+                batchPlanFieldLineDTO.setCountType(CountType.LENGTH_RANGE);
                 batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
                 //生成每个校验项的配置项
                 //两个值都存在生成告警规则
@@ -571,12 +564,12 @@ public class DataStandardServiceImpl implements DataStandardService {
                     WarningLevelDTO firstWarningLevelDTO = WarningLevelDTO.builder()
                             .warningLevel(WarningLevel.ORANGE)
                             .endValue(String.valueOf(dataLengthList.get(0) - 1))
-                            .compareSymbol(EQUAL)
+                            .compareSymbol(CompareSymbol.EQUAL)
                             .build();
                     WarningLevelDTO secondWarningLevelDTO = WarningLevelDTO.builder()
                             .warningLevel(WarningLevel.ORANGE)
                             .startValue(String.valueOf(dataLengthList.get(1) + 1))
-                            .compareSymbol(EQUAL)
+                            .compareSymbol(CompareSymbol.EQUAL)
                             .build();
                     warningLevelDTOList = Arrays.asList(firstWarningLevelDTO
                             , secondWarningLevelDTO);
@@ -593,8 +586,8 @@ public class DataStandardServiceImpl implements DataStandardService {
         //值域
         if (Strings.isNotEmpty(dataStandardDTO.getValueRange())) {
             BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()
-                    .checkWay(COMMON)
-                    .checkItem(FIXED_VALUE)
+                    .checkWay(CheckWay.COMMON)
+                    .checkItem(CheckItem.FIELD_VALUE)
                     .planRuleId(batchPlanFieldDTO.getPlanRuleId())
                     .fieldName(standardAimDTO.getFieldName())
                     .tenantId(standardAimDTO.getTenantId())
@@ -604,19 +597,19 @@ public class DataStandardServiceImpl implements DataStandardService {
             WarningLevelDTO warningLevelDTO;
             switch (dataStandardDTO.getValueType()) {
                 case StandardValueType.AREA:
-                    batchPlanFieldLineDTO.setCountType(FIXED_VALUE);
+                    batchPlanFieldLineDTO.setCountType(CountType.FIXED_VALUE);
                     List<String> valueRangeList = Arrays.asList(dataStandardDTO.getValueRange().split(","));
                     if (CollectionUtils.isNotEmpty(valueRangeList)
                             && valueRangeList.size() == 2) {
                         WarningLevelDTO firstWarningLevelDTO = WarningLevelDTO.builder()
                                 .warningLevel(WarningLevel.ORANGE)
                                 .endValue(valueRangeList.get(0))
-                                .compareSymbol(EQUAL)
+                                .compareSymbol(CompareSymbol.EQUAL)
                                 .build();
                         WarningLevelDTO secondWarningLevelDTO = WarningLevelDTO.builder()
                                 .warningLevel(WarningLevel.ORANGE)
                                 .startValue(valueRangeList.get(1))
-                                .compareSymbol(EQUAL)
+                                .compareSymbol(CompareSymbol.EQUAL)
                                 .build();
                         warningLevelDTOList = Arrays.
                                 asList(firstWarningLevelDTO, secondWarningLevelDTO);
@@ -624,20 +617,20 @@ public class DataStandardServiceImpl implements DataStandardService {
                     }
                     break;
                 case StandardValueType.ENUM:
-                    batchPlanFieldLineDTO.setCountType(ENUM_VALUE);
+                    batchPlanFieldLineDTO.setCountType(CountType.ENUM_VALUE);
                     warningLevelDTO = WarningLevelDTO.builder()
                             .warningLevel(WarningLevel.ORANGE)
-                            .compareSymbol(INCLUDED)
+                            .compareSymbol(CompareSymbol.INCLUDED)
                             .enumValue(dataStandardDTO.getValueRange())
                             .build();
                     warningLevelDTOList = Collections.singletonList(warningLevelDTO);
                     warningLevel = JsonUtil.toJson(warningLevelDTOList);
                     break;
                 case StandardValueType.VALUE_SET:
-                    batchPlanFieldLineDTO.setCountType(LOV_VALUE);
+                    batchPlanFieldLineDTO.setCountType(CountType.LOV_VALUE);
                     warningLevelDTO = WarningLevelDTO.builder()
                             .warningLevel(WarningLevel.ORANGE)
-                            .compareSymbol(INCLUDED)
+                            .compareSymbol(CompareSymbol.INCLUDED)
                             .enumValue(dataStandardDTO.getValueRange())
                             .build();
                     warningLevelDTOList = Collections.singletonList(warningLevelDTO);

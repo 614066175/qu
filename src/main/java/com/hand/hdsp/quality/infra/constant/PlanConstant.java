@@ -243,7 +243,14 @@ public interface PlanConstant {
          * 一致性
          */
         String DATA_LENGTH = "DATA_LENGTH";
-
+        /**
+         * 字段值
+         */
+        String FIELD_VALUE="FIELD_VALUE";
+        /**
+         * 正则
+         */
+        String REGULAR="REGULAR";
     }
 
     /**

@@ -67,7 +67,7 @@ public class StandardAimServiceImpl implements StandardAimService {
                                 .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, standardAimDTO.getDatasourceCode())
                                 .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, standardAimDTO.getSchemaName())
                                 .andEqualTo(StandardAim.FIELD_TABLE_NAME, standardAimDTO.getTableName())
-                                .andEqualTo(StandardAim.FIELD_FIELD_NAME, column.getColumnName())
+                                .andEqualTo(StandardAim.FIELD_FIELD_NAME, String.format("%s(%s)",column.getColumnName(),column.getTypeName()))
                                 .andEqualTo(StandardAim.FIELD_TENANT_ID, standardAimDTO.getTenantId()))
                         .build());
                 if(CollectionUtils.isNotEmpty(standardAimDTOS)){
