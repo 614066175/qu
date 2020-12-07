@@ -21,4 +21,5 @@ public class ColumnVO {
     private String columnName;
     private Boolean selectable;
     private String typeName;
+    private String columnDesc;
 }

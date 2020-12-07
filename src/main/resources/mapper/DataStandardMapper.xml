@@ -75,10 +75,27 @@
                 and ds.group_id=#{dataStandardDTO.groupId}
             </if>
             <if test="dataStandardDTO.standardCode!=null">
-               and ds.standard_code=#{dataStandardDTO.standardCode}
+                <bind name="standardCode" value="'%'+ dataStandardDTO.standardCode +'%'"/>
+               and ds.standard_code=#{standardCode}
             </if>
             <if test="dataStandardDTO.standardName">
-                and ds.standard_name=#{dataStandardDTO.standardName}
+                <bind name="standardName" value="'%'+ dataStandardDTO.standardName +'%'"/>
+                and ds.standard_name=#{standardName}
+            </if>
+            <if test="dataStandardDTO.standardDesc!=null">
+                <bind name="standardDesc" value="'%'+ dataStandardDTO.standardDesc +'%'"/>
+                and ds.standard_desc=#{standardDesc}
+            </if>
+            <if test="dataStandardDTO.standardStatus!=null">
+                <bind name="standardStatus" value="'%'+ dataStandardDTO.standardStatus +'%'"/>
+                and ds.standard_status=#{standardStatus}
+            </if>
+            <if test="dataStandardDTO.chargeId!=null">
+                and iu2.ud=#{dataStandardDTO.chargeId}
+            </if>
+            <if test="dataStandardDTO.lastUpdateName!=null">
+                <bind name="lastUpdateName" value="'%'+ dataStandardDTO.lastUpdateName +'%'"/>
+                and iu.login_name=#{lastUpdateName}
             </if>
             <if test="dataStandardDTO.tenantId!=null">
                 and ds.tenant_id=#{dataStandardDTO.tenantId}
@@ -93,7 +110,7 @@
         WHERE
             unit_name=#{chargeDeptName}
     </select>
-    <select id="selectIdByChargetName" resultType="java.lang.Integer">
+    <select id="selectIdByChargeName" resultType="java.lang.Integer">
         SELECT
             id
         FROM

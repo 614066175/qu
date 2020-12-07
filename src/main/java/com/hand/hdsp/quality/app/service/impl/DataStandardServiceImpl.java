@@ -27,10 +27,7 @@ import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
-import org.hzero.starter.driver.core.infra.meta.Column;
-import org.hzero.starter.driver.core.infra.meta.Table;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
-import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -392,25 +389,6 @@ public class DataStandardServiceImpl implements DataStandardService {
                 if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
                     throw new CommonException(ErrorCode.STANDARD_AIM_EXIST);
                 }
-                DriverSession driverSession = driverSessionService.getDriverSession(standardAimDTO.getTenantId(), standardAimDTO.getDatasourceCode());
-                //字段注释
-                List<Column> columns = driverSession.columnMetaData(standardAimDTO.getSchemaName(), standardAimDTO.getTableName());
-                if (CollectionUtils.isNotEmpty(columns)) {
-                    columns.forEach(column -> {
-                        if (column.getColumnName().equals(standardAimDTO.getFieldName())) {
-                            standardAimDTO.setFieldDesc(column.getRemarks());
-                        }
-                    });
-                }
-                //表注释
-                List<Table> tables = driverSession.tablesNameAndDesc(standardAimDTO.getSchemaName(), standardAimDTO.getTableName());
-                if (CollectionUtils.isNotEmpty(tables)) {
-                    tables.forEach(table -> {
-                        if (table.getTableName().equals(standardAimDTO.getTableName())) {
-                            standardAimDTO.setTableDesc(table.getRemarks());
-                        }
-                    });
-                }
                 standardAimDTO.setFieldName(String.format("%s(%s)", standardAimDTO.getFieldName(), standardAimDTO.getTypeName()));
                 //存入落标表
                 standardAimRepository.insertDTOSelective(standardAimDTO);
@@ -645,6 +623,10 @@ public class DataStandardServiceImpl implements DataStandardService {
                     .planLineId(batchPlanFieldLineDTO.getPlanLineId())
                     .warningLevel(warningLevel)
                     .build();
+            //如果校验类型为固定值，默认给范围比较
+            if(CountType.FIXED_VALUE.equals(batchPlanFieldLineDTO.getCountType())){
+                batchPlanFieldConDTO.setCompareWay(RANGE);
+            }
             batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
 
             //根据具体落标存入落标关系表

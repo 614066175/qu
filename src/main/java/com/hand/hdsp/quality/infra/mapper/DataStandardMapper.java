@@ -27,7 +27,7 @@ public interface DataStandardMapper extends BaseMapper<DataStandard> {
      * 根据负责部门名称获取负责部门id
      * @param chargeName 负责人名称
      */
-    int selectIdByChargetName(@Param("chargeName") String chargeName);
+    int selectIdByChargeName(@Param("chargeName") String chargeName);
     /**
      * 查询数据标准列表
      * @param dataStandardDTO

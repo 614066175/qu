@@ -57,6 +57,7 @@ public class StandardAimServiceImpl implements StandardAimService {
                 ColumnVO columnVO = ColumnVO.builder()
                         .columnName(column.getColumnName())
                         .typeName(column.getTypeName())
+                        .columnDesc(column.getRemarks())
                         .selectable(true)
                         .build();
                 List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
