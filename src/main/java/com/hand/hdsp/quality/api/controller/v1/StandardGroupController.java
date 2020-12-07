@@ -124,6 +124,7 @@ public class StandardGroupController extends BaseController {
         dto.setTenantId(tenantId);
         List<StandardGroupDTO> dtoList =
                 standardGroupService.export(dto, exportParam);
+        response.addHeader("Access-Control-Expose-Headers","Content-Disposition");
         return Results.success(dtoList);
     }
 }

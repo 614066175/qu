@@ -21,7 +21,7 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = false)
 @VersionAudit
 @ModifyAudit
-@Table(name = "xsta_stanard_aim_relation")
+@Table(name = "xsta_standard_aim_relation")
 public class StandardAimRelation extends AuditDomain {
 
     public static final String FIELD_RELATION_ID = "relationId";
