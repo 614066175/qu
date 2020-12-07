@@ -1,8 +1,10 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.hand.hdsp.quality.api.dto.*;
@@ -12,11 +14,20 @@ import com.hand.hdsp.quality.domain.entity.NameExecHistory;
 import com.hand.hdsp.quality.domain.entity.NameStandard;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.converter.NameStandardConverter;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
+import org.hzero.boot.driver.app.service.DriverSessionService;
+import org.hzero.boot.platform.lov.adapter.LovAdapter;
+import org.hzero.boot.platform.lov.annotation.LovValue;
+import org.hzero.boot.platform.lov.dto.LovValueDTO;
+import org.hzero.export.vo.ExportParam;
+import org.hzero.starter.driver.core.session.DriverSession;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +46,10 @@ public class NameStandardServiceImpl implements NameStandardService {
     private final NameExecHisDetailRepository nameExecHisDetailRepository;
     private final NameExecHistoryRepository nameExecHistoryRepository;
     private final NameStandardConverter nameStandardConverter;
+    private final DriverSessionService driverSessionService;
+    private final LovAdapter lovAdapter;
+    private static final String ERROR_MESSAGE = "";
+
 
     public NameStandardServiceImpl(NameStandardRepository nameStandardRepository,
                                    NameAimRepository nameAimRepository,
@@ -42,7 +57,9 @@ public class NameStandardServiceImpl implements NameStandardService {
                                    NameAimExcludeRepository nameAimExcludeRepository,
                                    NameExecHisDetailRepository nameExecHisDetailRepository,
                                    NameExecHistoryRepository nameExecHistoryRepository,
-                                   NameStandardConverter nameStandardConverter) {
+                                   NameStandardConverter nameStandardConverter,
+                                   DriverSessionService driverSessionService,
+                                   LovAdapter lovAdapter) {
         this.nameStandardRepository = nameStandardRepository;
         this.nameAimRepository = nameAimRepository;
         this.nameAimIncludeRepository = nameAimIncludeRepository;
@@ -50,6 +67,8 @@ public class NameStandardServiceImpl implements NameStandardService {
         this.nameExecHisDetailRepository = nameExecHisDetailRepository;
         this.nameExecHistoryRepository = nameExecHistoryRepository;
         this.nameStandardConverter = nameStandardConverter;
+        this.driverSessionService = driverSessionService;
+        this.lovAdapter = lovAdapter;
     }
 
 
@@ -119,5 +138,100 @@ public class NameStandardServiceImpl implements NameStandardService {
         }
         nameStandardRepository.updateByDTOPrimaryKeySelective(nameStandardDTO);
         return nameStandardDTO;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void executeStandard(Long standardId) {
+        NameStandardDTO nameStandardDTO = Optional
+                .ofNullable(nameStandardRepository.selectDTOByPrimaryKey(standardId))
+                .orElseThrow(() -> new CommonException("hdsp.xsta.err.not_exist"));
+        List<LovValueDTO> lovValueDTOList = lovAdapter.queryLovValue("HDSP.XSTA.EXEC_STATUS",
+                DetailsHelper.getUserDetails().getTenantId());
+        List<NameAimDTO> nameAimDTOList = nameAimRepository.list(nameStandardDTO.getStandardId());
+        NameExecHistoryDTO nameExecHistoryDTO = new NameExecHistoryDTO();
+        nameExecHistoryDTO.setExecStartTime(new Date());
+        nameExecHistoryDTO.setStandardId(nameStandardDTO.getStandardId());
+        try {
+            nameStandardDTO.setLatestCheckedStatus(lovValueDTOList.get(1).getValue());
+            nameStandardDTO.setLatestAbnormalNum(-1L);
+            nameStandardRepository.updateDTOOptional(nameStandardDTO,NameStandard.FIELD_LATEST_CHECKED_STATUS,
+                    NameStandard.FIELD_LATEST_ABNORMAL_NUM);
+            List<NameExecHisDetailDTO> nameExecHisDetailDTOList = this.getAimTable(nameAimDTOList);
+            nameExecHistoryDTO.setCheckedNum((long) nameExecHisDetailDTOList.size());
+            List<NameExecHisDetailDTO> abnormalList = new ArrayList<>();
+            nameExecHisDetailDTOList.forEach(x -> {
+                if (!Pattern.matches(nameStandardDTO.getStandardRule(), x.getTableName())) {
+                    x.setErrorMessage(ERROR_MESSAGE);
+                    abnormalList.add(x);
+                }
+            });
+            nameExecHistoryDTO.setAbnormalNum((long) abnormalList.size());
+            nameExecHistoryDTO.setExecEndTime(new Date());
+            nameExecHistoryDTO.setExecStatus(lovValueDTOList.get(2).getValue());
+            nameExecHistoryRepository.insertDTOSelective(nameExecHistoryDTO);
+            abnormalList.forEach(x->x.setHistoryId(nameExecHistoryDTO.getHistoryId()));
+            nameExecHisDetailRepository.batchInsertDTOSelective(abnormalList);
+
+            nameStandardDTO.setLatestCheckedStatus(lovValueDTOList.get(2).getValue());
+            nameStandardDTO.setLatestAbnormalNum((long)abnormalList.size());
+            nameStandardRepository.updateDTOOptional(nameStandardDTO,NameStandard.FIELD_LATEST_CHECKED_STATUS,
+                    NameStandard.FIELD_LATEST_ABNORMAL_NUM);
+
+        }catch (Exception e){
+            nameStandardDTO.setLatestCheckedStatus(lovValueDTOList.get(1).getValue());
+            nameStandardRepository.updateDTOOptional(nameStandardDTO,NameStandard.FIELD_LATEST_CHECKED_STATUS);
+            nameExecHistoryDTO.setExecStatus(lovValueDTOList.get(3).getValue());
+            nameExecHistoryRepository.insertDTOSelective(nameExecHistoryDTO);
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void batchExecuteStandard(List<Long> standardIdList) {
+        if (CollectionUtils.isEmpty(standardIdList)){
+            throw new CommonException("hdsp.xsta.err.is_empty");
+        }
+        standardIdList.forEach(this::executeStandard);
+    }
+
+    @Override
+    public Page<NameStandardDTO> export(NameStandardDTO dto, ExportParam exportParam, PageRequest pageRequest) {
+        return PageHelper.doPageAndSort(pageRequest,()->nameStandardRepository.list(dto));
+    }
+
+    /**
+     * 获取要校验的表
+     *
+     * @param nameAimDTO 落标
+     * @param aimTableList 接收结果的list
+     */
+    private void getAimTableFromNameAimDTO(NameAimDTO nameAimDTO,List<NameExecHisDetailDTO> aimTableList){
+        DriverSession driverSession = driverSessionService.getDriverSession(nameAimDTO.getTenantId(),nameAimDTO.getDatasourceCode());
+        nameAimDTO.getNameAimIncludeDTOList().forEach(x->{
+            List<String> tables = driverSession.tableList(x.getSchemaName()).stream()
+                    .filter(o->!Pattern.matches(nameAimDTO.getExcludeRule(),o))
+                    .collect(Collectors.toList());
+            List<String> excludeTables = nameAimDTO.getNameAimExcludeDTOList().stream()
+                    .filter(o->o.getSchemaName().equals(x.getSchemaName()))
+                    .map(NameAimExcludeDTO::getTableName)
+                    .collect(Collectors.toList());
+            tables.removeAll(excludeTables);
+            aimTableList.addAll(tables.stream()
+                    .map(o-> NameExecHisDetailDTO.builder()
+                            .tenantId(nameAimDTO.getTenantId())
+                            .tableName(o)
+                            .schemaName(x.getSchemaName())
+                            .sourcePath(nameAimDTO.getDatasourceCode()+"/"+x.getSchemaName()+"/"+o)
+                            .build())
+                    .collect(Collectors.toList())
+            );
+        });
+    }
+
+    private List<NameExecHisDetailDTO> getAimTable(List<NameAimDTO> nameAimDTOList) {
+        List<NameExecHisDetailDTO> aimTableList = new ArrayList<>();
+        nameAimDTOList.forEach(x -> this.getAimTableFromNameAimDTO(x, aimTableList));
+        return aimTableList;
     }
 }

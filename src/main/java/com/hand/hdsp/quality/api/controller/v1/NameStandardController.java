@@ -2,6 +2,8 @@ package com.hand.hdsp.quality.api.controller.v1;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.app.service.NameStandardService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -11,6 +13,8 @@ import org.hzero.core.base.BaseController;
 import com.hand.hdsp.quality.domain.entity.NameStandard;
 import com.hand.hdsp.quality.api.dto.NameStandardDTO;
 import com.hand.hdsp.quality.domain.repository.NameStandardRepository;
+import org.hzero.export.annotation.ExcelExport;
+import org.hzero.export.vo.ExportParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -120,5 +124,35 @@ public class NameStandardController extends BaseController {
                 nameStandardDtoList.forEach(x->x.setTenantId(tenantId));
                 nameStandardService.bitchRemove(nameStandardDtoList);
         return Results.success();
+    }
+
+    @ApiOperation(value = "批量执行标准")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/execute")
+    public ResponseEntity<Void> execute(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                       @RequestBody List<Long> nameStandardIdList) {
+        nameStandardService.batchExecuteStandard(nameStandardIdList);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "命名标准导出")
+    @Permission(level = ResourceLevel.ORGANIZATION,permissionPublic = true)
+    @GetMapping("/name-export")
+    @ExcelExport(value = NameStandardDTO.class)
+    public ResponseEntity<List<NameStandardDTO>> nameStandardExport(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                                        NameStandardDTO dto,
+                                                        ExportParam exportParam,
+                                                        HttpServletResponse response,
+                                                        PageRequest pageRequest) {
+
+        dto.setTenantId(tenantId);
+        Page<NameStandardDTO> dtoList = nameStandardService.export(dto, exportParam, pageRequest);
+        return Results.success(dtoList);
     }
 }

@@ -27,7 +27,7 @@
 
     </resultMap>
 
-    <select id="getListByAimId" resultType="com.hand.hdsp.quality.api.dto.NameAimExcludeDTO">
+    <select id="getListByAimId" resultMap="DtoResultMap">
         SELECT
         <include refid="BaseProperties">
             <property name="prefix" value="xnae"/>

@@ -20,4 +20,12 @@ public interface NameStandardMapper extends BaseMapper<NameStandard> {
      * @return List<NameStandardDTO>
      */
     List<NameStandardDTO> list(NameStandardDTO nameStandardDTO);
+
+    /**
+     * 获取分组ID
+     *
+     * @param groupCode 分组编码
+     * @return Long
+     */
+    Long getGroupId(String groupCode);
 }
