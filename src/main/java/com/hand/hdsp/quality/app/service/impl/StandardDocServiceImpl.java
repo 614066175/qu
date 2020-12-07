@@ -14,7 +14,9 @@ import com.hand.hdsp.quality.domain.entity.StandardDoc;
 import com.hand.hdsp.quality.domain.repository.StandardDocRepository;
 import com.hand.hdsp.quality.infra.constant.StandardDocConstant;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections.CollectionUtils;
+import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Service;
@@ -108,6 +110,11 @@ public class StandardDocServiceImpl implements StandardDocService {
         } catch (Exception e) {
             throw new CommonException("hdsp.xqua.error.file.download.fail", e);
         }
+    }
+
+    @Override
+    public List<StandardDocDTO> export(StandardDocDTO dto, ExportParam exportParam, PageRequest pageRequest) {
+        return standardDocRepository.pageAndSortDTO(pageRequest, dto);
     }
 
 

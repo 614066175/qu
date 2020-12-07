@@ -10,4 +10,5 @@ package com.hand.hdsp.quality.infra.constant;
  */
 public interface TemplateCodeConstants {
     String TEMPLAT_CODE_DATA_STANDARD="HDSP.XQUA.DATA_STANDARD";
+    String TEMPLAT_CODE_STANDARD_DOC="HDSP.XQUA.STANDARD_DOC";
 }
