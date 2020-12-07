@@ -19,6 +19,6 @@ public interface DataFieldMapper extends BaseMapper<DataField> {
      * @param dataFieldDTO
      * @return
      */
-    List<DataFieldDTO> list(@Param("DataFieldDTO") DataFieldDTO dataFieldDTO);
+    List<DataFieldDTO> list(@Param("dataFieldDTO") DataFieldDTO dataFieldDTO);
 
 }

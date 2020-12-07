@@ -18,7 +18,7 @@
         <result column="charge_id" property="chargeId" jdbcType="DECIMAL"/>
         <result column="charge_tel" property="chargeTel" jdbcType="VARCHAR"/>
         <result column="charge_email" property="chargeEmail" jdbcType="VARCHAR"/>
-        <result column="status" property="status" jdbcType="VARCHAR"/>
+        <result column="standard_status" property="standardStatus" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
         <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
@@ -43,7 +43,7 @@
           ${fs}.charge_id,
           ${fs}.charge_tel,
           ${fs}.charge_email,
-          ${fs}.status,
+          ${fs}.standard_status,
           ${fs}.tenant_id,
           ${fs}.object_version_number
     </sql>

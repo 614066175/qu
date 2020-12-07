@@ -2,8 +2,10 @@ package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
+import com.hand.hdsp.quality.domain.entity.DataField;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.hzero.export.vo.ExportParam;
 
 import java.util.List;
 
@@ -63,4 +65,15 @@ public interface DataFieldService {
      * @param dataFieldDTO DataFieldDTO
      */
     void publishOrOff(DataFieldDTO  dataFieldDTO);
+
+
+    /**
+     * 数据标准导出
+     * @param dto
+     * @param exportParam
+     * @param pageRequest
+     * @return
+     */
+    List<DataFieldDTO> export(DataFieldDTO dto, ExportParam exportParam, PageRequest pageRequest);
+
 }
