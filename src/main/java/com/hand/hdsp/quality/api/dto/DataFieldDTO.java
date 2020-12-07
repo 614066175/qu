@@ -1,25 +1,16 @@
 package com.hand.hdsp.quality.api.dto;
 
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiModel;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.List;
 
 /**
  * <p>字段标准表 数据传输对象</p>
@@ -58,7 +49,7 @@ public class DataFieldDTO extends AuditDomain {
     @ApiModelProperty(value = "标准描述")
     private String standardDesc;
 
-    @ApiModelProperty(value = "字段类型")
+    @ApiModelProperty(value = "字段类型 (HDSP.XDMP.LABEL_DATA_TYPE)")
     @NotBlank
     private String fieldType;
 
@@ -68,7 +59,7 @@ public class DataFieldDTO extends AuditDomain {
     @ApiModelProperty(value = "数据格式")
     private String dataPattern;
 
-    @ApiModelProperty(value = "值域类型")
+    @ApiModelProperty(value = "值域类型（快码HDSP.XSTA.VALUE_TYPE）")
     private String valueType;
 
     @ApiModelProperty(value = "值域")
@@ -88,7 +79,7 @@ public class DataFieldDTO extends AuditDomain {
     @ApiModelProperty(value = "责任人邮箱")
     private String chargeEmail;
 
-    @ApiModelProperty(value = "字段标准状态(新建，在线，离线，待审核)")
+    @ApiModelProperty(value = "字段标准状态(快码HSDP.XSTA.STANDARD_STATUS)")
     @NotBlank
     @Size(max = 50)
     private String status;

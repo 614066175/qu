@@ -27,4 +27,72 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+
+    <sql id="baseColumn">
+        ${dfv}.creation_date,
+        ${dfv}.created_by,
+        ${dfv}.last_update_date,
+        ${dfv}.last_updated_by,
+        ${dfv}.object_version_number,
+        ${dfv}.version_id,
+        ${dfv}.field_id,
+        ${dfv}.group_id,
+        ${dfv}.field_name,
+        ${dfv}.field_comment,
+        ${dfv}.standard_desc,
+        ${dfv}.field_type,
+        ${dfv}.field_length,
+        ${dfv}.data_pattern,
+        ${dfv}.value_type,
+        ${dfv}.value_range,
+        ${dfv}.charge_dept_id,
+        ${dfv}.charge_id,
+        ${dfv}.charge_tel,
+        ${dfv}.charge_email,
+        ${dfv}.version_number,
+        ${dfv}.tenant_id
+    </sql>
+
+    <select id="detail" resultType="com.hand.hdsp.quality.api.dto.DataFieldVersionDTO">
+        SELECT
+        iu.login_name lastUpdateName,
+        iu2.login_name chargeName,
+        hu.unit_name chargeDeptName,
+        xsg.group_name,
+        <include refid="baseColumn">
+            <property name="dfv" value="dfv"/>
+        </include>
+        FROM
+        xsta_data_field_version  dfv
+        left join xsta_standard_group xsg on xsg.group_id=dfv.group_id
+        left join hzero_platform.iam_user iu on dfv.last_updated_by=iu.id
+        left join hzero_platform.iam_user iu2 on dfv.charge_id=iu2.id
+        left join hzero_platform.hpfm_unit hu on hu.unit_id=dfv.charge_dept_id
+        WHERE
+        dfv.version_id = #{versionId}
+    </select>
+
+    <select id="list" resultType="com.hand.hdsp.quality.api.dto.DataFieldVersionDTO">
+        SELECT
+        iu.login_name lastUpdateName,
+        iu2.login_name chargeName,
+        hu.unit_name chargeDeptName,
+        xsg.group_name,
+        <include refid="baseColumn">
+            <property name="dfv" value="dfv"/>
+        </include>
+        FROM
+        xsta_data_field_version  dfv
+        left join xsta_standard_group xsg on xsg.group_id=dfv.group_id
+        left join hzero_platform.iam_user iu on dfv.last_updated_by=iu.id
+        left join hzero_platform.iam_user iu2 on dfv.charge_id=iu2.id
+        left join hzero_platform.hpfm_unit hu on hu.unit_id=dfv.charge_dept_id
+        WHERE
+        <if test="dataFieldVersionDTO.fieldId!=null">
+            dfv.standard_id=#{dataFieldVersionDTO.fieldId}
+        </if>
+        <if test="dataFieldVersionDTO.versionId!=null">
+            dfv.version_id = #{dataFieldVersionDTO.versionId}
+        </if>
+    </select>
 </mapper>

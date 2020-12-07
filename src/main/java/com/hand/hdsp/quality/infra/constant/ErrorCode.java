@@ -66,10 +66,10 @@ public interface ErrorCode {
     String DATA_STANDARD_NOT_EXIST = "hdsp.xqua.err.data_standard_not_exist";
 
     // DATA_FILED_ERROR
-
-
     String DATA_FIELD_NAME_EXIST = "hdsp.xqua.err.data_field_name_already_exist";
     String DATA_FIELD_CAN_NOT_DELETE = "hdsp.xqua.err.data_field_status_can_not_delete";
+    String DATA_FIELD_VERSION_NOT_EXIST = "hdsp.xqua.err.data_field_version_not_exists";
+    String DATA_FIELD_STANDARD_NOT_EXIST = "hdsp.xqua.err.data_field_standard_not_exists";
 
     String GROUP_HAS_CHILD_GROUP = "hdsp.xqua.err.group_has_child_group";
 

@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
+import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import com.hand.hdsp.quality.app.service.DataFieldService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.repository.DataFieldRepository;
@@ -10,10 +11,13 @@ import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.*;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * <p>字段标准表 管理 API</p>
@@ -89,10 +93,27 @@ public class DataFieldController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
-    public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<?> delete(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody DataFieldDTO dataFieldDTO) {
         dataFieldDTO.setTenantId(tenantId);
         dataFieldService.delete(dataFieldDTO);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "字段标准批量删除")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @DeleteMapping
+    public ResponseEntity<?> batchDelete(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                    @RequestBody List<DataFieldDTO> dataFieldDTOList) {
+        if(CollectionUtils.isNotEmpty(dataFieldDTOList)){
+            dataFieldDTOList.forEach(dataFieldService::delete);
+        }
         return Results.success();
     }
 
@@ -110,4 +131,49 @@ public class DataFieldController extends BaseController {
         dataFieldRepository.updateByDTOPrimaryKey(dataFieldDTO);
         return Results.success(dataFieldDTO);
     }
+
+    @ApiOperation(value = "数据标准修改状态")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/update-status")
+    public ResponseEntity<DataFieldDTO> updateStatus(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataFieldDTO dataFieldDTO) {
+        dataFieldDTO.setTenantId(tenantId);
+        dataFieldService.updateStatus(dataFieldDTO);
+        return Results.success(dataFieldDTO);
+    }
+
+    @ApiOperation(value = "字段标准落标")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/field-standard-aim")
+    public ResponseEntity<Void> standardAim(@PathVariable(name = "organizationId") Long tenantId, @RequestBody List<StandardAimDTO> standardAimDTOList) {
+        dataFieldService.aim(standardAimDTOList);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "发布字段标准")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/publish-off")
+    public ResponseEntity<DataFieldDTO> publishOrOff(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataFieldDTO dataFieldDTO) {
+        dataFieldDTO.setTenantId(tenantId);
+        dataFieldService.publishOrOff(dataFieldDTO);
+        return Results.success(dataFieldDTO);
+    }
+
 }

@@ -1,9 +1,11 @@
 package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
-import com.hand.hdsp.quality.api.dto.DataStandardDTO;
+import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import java.util.List;
 
 /**
  * <p>字段标准表应用服务</p>
@@ -42,4 +44,23 @@ public interface DataFieldService {
      * @param dataFieldDTO
      */
     Page<DataFieldDTO> list(PageRequest pageRequest, DataFieldDTO dataFieldDTO);
+
+    /**
+     * 字段标准状态更新
+     *
+     * @param dataFieldDTO DataFieldDTO
+     */
+    void updateStatus(DataFieldDTO dataFieldDTO);
+
+    /**
+     * 字段标准落标
+     * @param standardAimDTOList List<StandardAimDTO>
+     */
+    void aim(List<StandardAimDTO> standardAimDTOList);
+
+    /**
+     * 发布数字段标准
+     * @param dataFieldDTO DataFieldDTO
+     */
+    void publishOrOff(DataFieldDTO  dataFieldDTO);
 }
