@@ -90,7 +90,7 @@
                 and ds.standard_status=#{dataStandardDTO.standardStatus}
             </if>
             <if test="dataStandardDTO.chargeId!=null">
-                and iu2.ud=#{dataStandardDTO.chargeId}
+                and iu2.id=#{dataStandardDTO.chargeId}
             </if>
             <if test="dataStandardDTO.lastUpdateName!=null">
                 <bind name="lastUpdateName" value="'%'+ dataStandardDTO.lastUpdateName +'%'"/>
@@ -100,7 +100,7 @@
                 and ds.tenant_id=#{dataStandardDTO.tenantId}
             </if>
         </where>
-        order by ds.creation_date desc
+        order by ds.last_update_date desc
     </select>
     <select id="selectIdByChargeDeptName" resultType="java.lang.Integer">
         SELECT
