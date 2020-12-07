@@ -76,26 +76,25 @@
             </if>
             <if test="dataStandardDTO.standardCode!=null">
                 <bind name="standardCode" value="'%'+ dataStandardDTO.standardCode +'%'"/>
-               and ds.standard_code=#{standardCode}
+               and ds.standard_code like #{standardCode}
             </if>
             <if test="dataStandardDTO.standardName">
                 <bind name="standardName" value="'%'+ dataStandardDTO.standardName +'%'"/>
-                and ds.standard_name=#{standardName}
+                and ds.standard_name like #{standardName}
             </if>
             <if test="dataStandardDTO.standardDesc!=null">
                 <bind name="standardDesc" value="'%'+ dataStandardDTO.standardDesc +'%'"/>
-                and ds.standard_desc=#{standardDesc}
+                and ds.standard_desc like #{standardDesc}
             </if>
             <if test="dataStandardDTO.standardStatus!=null">
-                <bind name="standardStatus" value="'%'+ dataStandardDTO.standardStatus +'%'"/>
-                and ds.standard_status=#{standardStatus}
+                and ds.standard_status=#{dataStandardDTO.standardStatus}
             </if>
             <if test="dataStandardDTO.chargeId!=null">
                 and iu2.ud=#{dataStandardDTO.chargeId}
             </if>
             <if test="dataStandardDTO.lastUpdateName!=null">
                 <bind name="lastUpdateName" value="'%'+ dataStandardDTO.lastUpdateName +'%'"/>
-                and iu.login_name=#{lastUpdateName}
+                and iu.login_name like #{lastUpdateName}
             </if>
             <if test="dataStandardDTO.tenantId!=null">
                 and ds.tenant_id=#{dataStandardDTO.tenantId}

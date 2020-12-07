@@ -5,8 +5,11 @@ import java.util.List;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
+import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.domain.entity.DataStandard;
+import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
+import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.mybatis.domian.Condition;
@@ -23,8 +26,11 @@ public class DataStandardRepositoryImpl extends BaseRepositoryImpl<DataStandard,
 
     private final DataStandardMapper dataStandardMapper;
 
-    public DataStandardRepositoryImpl(DataStandardMapper dataStandardMapper) {
+    private final StandardGroupRepository standardGroupRepository;
+
+    public DataStandardRepositoryImpl(DataStandardMapper dataStandardMapper, StandardGroupRepository standardGroupRepository) {
         this.dataStandardMapper = dataStandardMapper;
+        this.standardGroupRepository = standardGroupRepository;
     }
 
     @Override
@@ -52,6 +58,14 @@ public class DataStandardRepositoryImpl extends BaseRepositoryImpl<DataStandard,
                         .build());
                 if(CollectionUtils.isNotEmpty(dataStandards)){
                     return;
+                }
+                List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
+                        .andWhere(Sqls.custom()
+                                .andEqualTo(StandardGroup.FIELD_GROUP_CODE, dataStandardDTO.getGroupCode())
+                                .andEqualTo(StandardGroup.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
+                        .build());
+                if(CollectionUtils.isNotEmpty(standardGroupDTOS)){
+                    dataStandardDTO.setGroupId(standardGroupDTOS.get(0).getGroupId());
                 }
                 importDataStandardDTOList.add(dataStandardDTO);
             });
