@@ -58,10 +58,10 @@
             <property name="fs" value="fs"/>
         </include>
         from xsta_field_standard fs
-        left join xsta_standard_group xsg on xsg.group_id=ds.group_id
-        left join hzero_platform.iam_user iu on ds.last_updated_by=iu.id
-        left join hzero_platform.iam_user iu2 on ds.charge_id=iu2.id
-        left join hzero_platform.hpfm_unit hu on hu.unit_id=ds.charge_dept_id
+        left join xsta_standard_group xsg on xsg.group_id=fs.group_id
+        left join hzero_platform.iam_user iu on fs.last_updated_by=iu.id
+        left join hzero_platform.iam_user iu2 on fs.charge_id=iu2.id
+        left join hzero_platform.hpfm_unit hu on hu.unit_id=fs.charge_dept_id
         <where>
             <if test="dataFieldDTO.fieldId!=null">
                 fs.field_id=#{dataFieldDTO.fieldId}
@@ -91,5 +91,21 @@
             </if>
         </where>
         order by fs.last_update_date desc
+    </select>
+    <select id="selectIdByChargeDeptName" resultType="java.lang.Integer">
+        SELECT
+            unit_id
+        FROM
+            hzero_platform.hpfm_unit
+        WHERE
+            unit_name=#{chargeDeptName}
+    </select>
+    <select id="selectIdByChargeName" resultType="java.lang.Integer">
+        SELECT
+            id
+        FROM
+            hzero_platform.iam_user
+        WHERE
+            login_name=#{chargeName}
     </select>
 </mapper>
