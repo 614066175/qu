@@ -39,42 +39,42 @@ public class DataFieldDTO extends AuditDomain {
     @ApiModelProperty(value = "字段名称")
     @NotBlank
     @Size(max = 255)
-    @ExcelColumn(zh = "字段名称", en = "fieldName" ,groups = {Group1.class})
+    @ExcelColumn(zh = "字段名称", en = "fieldName", groups = {Group1.class})
     private String fieldName;
 
     @ApiModelProperty(value = "字段注释")
     @NotBlank
     @Size(max = 255)
-    @ExcelColumn(zh = "字段注释", en = "fieldComment" ,groups = {Group1.class})
+    @ExcelColumn(zh = "字段注释", en = "fieldComment", groups = {Group1.class})
     private String fieldComment;
 
     @ApiModelProperty(value = "系统常用名")
-    @ExcelColumn(zh = "标准常用名", en = "sysCommonName" ,groups = {Group1.class})
+    @ExcelColumn(zh = "标准常用名", en = "sysCommonName", groups = {Group1.class})
     private String sysCommonName;
 
     @ApiModelProperty(value = "标准描述")
-    @ExcelColumn(zh = "标准描述", en = "standardDesc" ,groups = {Group1.class})
+    @ExcelColumn(zh = "标准描述", en = "standardDesc", groups = {Group1.class})
     private String standardDesc;
 
     @ApiModelProperty(value = "字段类型 (HDSP.XDMP.LABEL_DATA_TYPE)")
     @NotBlank
-    @ExcelColumn(zh = "字段类型", en = "fieldType" ,groups = {Group1.class})
+    @ExcelColumn(zh = "字段类型", en = "fieldType", groups = {Group1.class})
     private String fieldType;
 
     @ApiModelProperty(value = "字段长度")
-    @ExcelColumn(zh = "字段长度", en = "fieldLength" ,groups = {Group1.class})
+    @ExcelColumn(zh = "字段长度", en = "fieldLength", groups = {Group1.class})
     private String fieldLength;
 
     @ApiModelProperty(value = "数据格式")
-    @ExcelColumn(zh = "数据格式", en = "dataPattern" ,groups = {Group1.class})
+    @ExcelColumn(zh = "数据格式", en = "dataPattern", groups = {Group1.class})
     private String dataPattern;
 
     @ApiModelProperty(value = "值域类型（快码HDSP.XSTA.VALUE_TYPE）")
-    @ExcelColumn(zh = "值域类型", en = "valueType" ,groups = {Group1.class})
+    @ExcelColumn(zh = "值域类型", en = "valueType", groups = {Group1.class})
     private String valueType;
 
     @ApiModelProperty(value = "值域范围")
-    @ExcelColumn(zh = "值域范围", en = "valueRange" ,groups = {Group1.class})
+    @ExcelColumn(zh = "值域范围", en = "valueRange", groups = {Group1.class})
     private String valueRange;
 
     @ApiModelProperty(value = "责任部门ID")
@@ -86,11 +86,11 @@ public class DataFieldDTO extends AuditDomain {
     private Long chargeId;
 
     @ApiModelProperty(value = "责任人电话")
-    @ExcelColumn(zh = "责任人电话",en = "chargeTel",groups = {Group2.class})
+    @ExcelColumn(zh = "责任人电话", en = "chargeTel", groups = {Group2.class})
     private String chargeTel;
 
     @ApiModelProperty(value = "责任人邮箱")
-    @ExcelColumn(zh = "责任人邮箱",en = "chargeEmail",groups = {Group2.class})
+    @ExcelColumn(zh = "责任人邮箱", en = "chargeEmail", groups = {Group2.class})
     private String chargeEmail;
 
     @ApiModelProperty(value = "字段标准状态(快码HSDP.XSTA.STANDARD_STATUS)")
@@ -112,17 +112,19 @@ public class DataFieldDTO extends AuditDomain {
     private String lastUpdateName;
 
     @Transient
-    @ExcelColumn(zh = "责任人",en = "chargeName",groups = {Group2.class})
+    @ExcelColumn(zh = "责任人", en = "chargeName", groups = {Group2.class})
     private String chargeName;
 
     @Transient
-    @ExcelColumn(zh = "责任部门", en = "chargeDeptName",groups = {Group2.class})
+    @ExcelColumn(zh = "责任部门", en = "chargeDeptName", groups = {Group2.class})
     private String chargeDeptName;
 
     @Transient
+    @ExcelColumn(zh = "分组名称", en = "groupName", groups = {Group1.class})
     private String groupName;
 
     @Transient
+    @ExcelColumn(zh = "分组编码", en = "groupCode", groups = {Group1.class})
     private String groupCode;
 
     @Transient
