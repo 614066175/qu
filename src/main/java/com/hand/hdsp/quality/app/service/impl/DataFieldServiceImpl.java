@@ -85,8 +85,8 @@ public class DataFieldServiceImpl implements DataFieldService {
         dataFieldDTO.setStandardStatus(CREATE);
         dataFieldRepository.insertDTOSelective(dataFieldDTO);
 
-        val standardExtraDTOList = dataFieldDTO.getStandardExtraDTOList();
-        if (CollectionUtils.isNotEmpty(dataFieldDTOS)) {
+        List<StandardExtraDTO> standardExtraDTOList = dataFieldDTO.getStandardExtraDTOList();
+        if (CollectionUtils.isNotEmpty(standardExtraDTOList)) {
             standardExtraDTOList.forEach(s -> {
                 StandardExtraDTO extraDTO = StandardExtraDTO.builder()
                         .standardId(dataFieldDTO.getFieldId())
