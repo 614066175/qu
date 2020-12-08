@@ -77,7 +77,7 @@ public class NameStandardController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{standardId}")
     public ResponseEntity<?> detail(@PathVariable Long standardId) {
-        NameStandardDTO nameStandardDTO = nameStandardRepository.selectDTOByPrimaryKeyAndTenant(standardId);
+        NameStandardDTO nameStandardDTO = nameStandardRepository.detail(standardId);
         return Results.success(nameStandardDTO);
     }
 
@@ -142,10 +142,10 @@ public class NameStandardController extends BaseController {
     }
 
     @ApiOperation(value = "命名标准导出")
-    @Permission(level = ResourceLevel.ORGANIZATION,permissionPublic = true)
-    @GetMapping("/name-export")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/export")
     @ExcelExport(value = NameStandardDTO.class)
-    public ResponseEntity<List<NameStandardDTO>> nameStandardExport(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<List<NameStandardDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                                         NameStandardDTO dto,
                                                         ExportParam exportParam,
                                                         HttpServletResponse response,
@@ -153,6 +153,7 @@ public class NameStandardController extends BaseController {
 
         dto.setTenantId(tenantId);
         Page<NameStandardDTO> dtoList = nameStandardService.export(dto, exportParam, pageRequest);
+        response.addHeader("Access-Control-Expose-Headers","Content-Disposition");
         return Results.success(dtoList);
     }
 }

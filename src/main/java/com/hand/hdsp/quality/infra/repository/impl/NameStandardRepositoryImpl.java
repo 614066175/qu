@@ -41,7 +41,7 @@ public class NameStandardRepositoryImpl extends BaseRepositoryImpl<NameStandard,
                         .andEqualTo(NameStandard.FIELD_STANDARD_CODE,nameStandardDTO.getStandardCode())
                         .andEqualTo(NameStandard.FIELD_TENANT_ID,nameStandardDTO.getTenantId()))
                 .build());
-        if (CollectionUtils.isEmpty(nameStandardDTOList)){
+        if (!CollectionUtils.isEmpty(nameStandardDTOList)){
             return;
         }
         Long groupId = nameStandardMapper.getGroupId(nameStandardDTO.getGroupCode());
@@ -57,5 +57,10 @@ public class NameStandardRepositoryImpl extends BaseRepositoryImpl<NameStandard,
             throw new CommonException("hdsp.xsta.err.is_empty");
         }
         nameStandardDTOList.forEach(this::importStandard);
+    }
+
+    @Override
+    public NameStandardDTO detail(Long standardId) {
+        return nameStandardMapper.detail(standardId);
     }
 }

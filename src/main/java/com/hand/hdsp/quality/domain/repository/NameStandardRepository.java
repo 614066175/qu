@@ -35,4 +35,12 @@ public interface NameStandardRepository extends BaseRepository<NameStandard, Nam
      * @param nameStandardDTOList 命名标准列表
      */
     void batchImportStandard(List<NameStandardDTO> nameStandardDTOList);
+
+    /**
+     * 命名标准明细
+     *
+     * @param standardId 标准ID
+     * @return NameStandardDTO
+     */
+    NameStandardDTO detail(Long standardId);
 }

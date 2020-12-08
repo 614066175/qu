@@ -31,6 +31,7 @@
         <result property="chargeName" column="chargeName"/>
         <result property="chargeDeptName" column="chargeDeptName"/>
         <result property="groupCode" column="groupCode"/>
+        <result property="groupName" column="groupName"/>
     </resultMap>
 
     <sql id="BaseProperties">
@@ -124,6 +125,7 @@
         iu2.login_name AS chargeName,
         hu.unit_name AS chargeDeptName,
         xsg.group_code AS groupCode,
+        xsg.group_name AS groupName,
         <include refid="BaseProperties">
             <property name="prefix" value="xns"/>
         </include>
@@ -143,5 +145,23 @@
     </select>
     <select id="getGroupId" resultType="java.lang.Long">
         SELECT xsg.group_id FROM xsta_standard_group xsg WHERE xsg.group_code=#{groupCode}
+    </select>
+    <select id="detail" resultMap="DtoResultMap">
+        SELECT
+        iu1.login_name AS lastUpdateName,
+        iu2.login_name AS chargeName,
+        hu.unit_name AS chargeDeptName,
+        xsg.group_code AS groupCode,
+        xsg.group_name AS groupName,
+        <include refid="BaseProperties">
+            <property name="prefix" value="xns"/>
+        </include>
+        FROM
+        xsta_name_standard xns
+        LEFT JOIN iam_user iu1 ON (xns.last_updated_by = iu1.id)
+        LEFT JOIN iam_user iu2 ON (xns.charge_id = iu2.id)
+        LEFT JOIN hpfm_unit hu ON (hu.unit_id=xns.charge_dept_id)
+        LEFT JOIN xsta_standard_group xsg ON (xsg.group_id=xns.group_id)
+        WHERE xns.standard_id=#{standardId}
     </select>
 </mapper>

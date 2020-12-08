@@ -151,4 +151,7 @@ public class NameStandardDTO extends AuditDomain {
     @Transient
     private String groupCode;
 
+    @Transient
+    private String groupName;
+
 }

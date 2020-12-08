@@ -28,4 +28,11 @@ public interface NameStandardMapper extends BaseMapper<NameStandard> {
      * @return Long
      */
     Long getGroupId(String groupCode);
+
+    /**
+     *
+     * @param standardId 标准ID
+     * @return NameStandardDTO
+     */
+    NameStandardDTO detail(Long standardId);
 }
