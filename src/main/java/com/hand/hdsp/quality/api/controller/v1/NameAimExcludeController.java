@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+
 import org.hzero.core.util.Results;
 import org.hzero.core.base.BaseController;
 import com.hand.hdsp.quality.domain.entity.NameAimExclude;
@@ -7,7 +8,7 @@ import com.hand.hdsp.quality.api.dto.NameAimExcludeDTO;
 import com.hand.hdsp.quality.domain.repository.NameAimExcludeRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.hzero.mybatis.helper.SecurityTokenHelper;
+
 
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
@@ -30,7 +31,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/name-aim-excludes")
 public class NameAimExcludeController extends BaseController {
 
-    private NameAimExcludeRepository nameAimExcludeRepository;
+    private final NameAimExcludeRepository nameAimExcludeRepository;
 
     public NameAimExcludeController(NameAimExcludeRepository nameAimExcludeRepository) {
         this.nameAimExcludeRepository = nameAimExcludeRepository;
@@ -45,8 +46,8 @@ public class NameAimExcludeController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
-    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                NameAimExcludeDTO nameAimExcludeDTO, @ApiIgnore @SortDefault(value = NameAimExclude.FIELD_EXCLUDE_ID,
+    public ResponseEntity<Page<NameAimExcludeDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
+                                                        NameAimExcludeDTO nameAimExcludeDTO, @ApiIgnore @SortDefault(value = NameAimExclude.FIELD_EXCLUDE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         nameAimExcludeDTO.setTenantId(tenantId);
         Page<NameAimExcludeDTO> list = nameAimExcludeRepository.pageAndSortDTO(pageRequest, nameAimExcludeDTO);
@@ -67,7 +68,7 @@ public class NameAimExcludeController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{excludeId}")
-    public ResponseEntity<?> detail(@PathVariable Long excludeId) {
+    public ResponseEntity<NameAimExcludeDTO> detail(@PathVariable Long excludeId) {
         NameAimExcludeDTO nameAimExcludeDTO = nameAimExcludeRepository.selectDTOByPrimaryKeyAndTenant(excludeId);
         return Results.success(nameAimExcludeDTO);
     }
@@ -81,7 +82,7 @@ public class NameAimExcludeController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody NameAimExcludeDTO nameAimExcludeDTO) {
+    public ResponseEntity<NameAimExcludeDTO> create(@PathVariable("organizationId") Long tenantId, @RequestBody NameAimExcludeDTO nameAimExcludeDTO) {
         nameAimExcludeDTO.setTenantId(tenantId);
         this.validObject(nameAimExcludeDTO);
         nameAimExcludeRepository.insertDTOSelective(nameAimExcludeDTO);
@@ -97,7 +98,7 @@ public class NameAimExcludeController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody NameAimExcludeDTO nameAimExcludeDTO) {
+    public ResponseEntity<NameAimExcludeDTO> update(@PathVariable("organizationId") Long tenantId, @RequestBody NameAimExcludeDTO nameAimExcludeDTO) {
                 nameAimExcludeRepository.updateDTOWhereTenant(nameAimExcludeDTO, tenantId);
         return Results.success(nameAimExcludeDTO);
     }
@@ -111,7 +112,7 @@ public class NameAimExcludeController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
-    public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<Void> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody NameAimExcludeDTO nameAimExcludeDTO) {
                 nameAimExcludeDTO.setTenantId(tenantId);
         nameAimExcludeRepository.deleteByPrimaryKey(nameAimExcludeDTO);

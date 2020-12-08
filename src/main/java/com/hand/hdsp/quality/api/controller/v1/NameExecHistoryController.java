@@ -4,24 +4,16 @@ import java.util.List;
 
 import org.hzero.core.util.Results;
 import org.hzero.core.base.BaseController;
-import com.hand.hdsp.quality.domain.entity.NameExecHistory;
 import com.hand.hdsp.quality.api.dto.NameExecHistoryDTO;
 import com.hand.hdsp.quality.domain.repository.NameExecHistoryRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.hzero.mybatis.helper.SecurityTokenHelper;
 
-import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiParam;
-import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * <p>命名标准执行历史表 管理 API</p>

@@ -15,6 +15,7 @@ import com.hand.hdsp.quality.domain.entity.NameAimInclude;
 import com.hand.hdsp.quality.domain.repository.NameAimExcludeRepository;
 import com.hand.hdsp.quality.domain.repository.NameAimIncludeRepository;
 import com.hand.hdsp.quality.domain.repository.NameAimRepository;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -44,7 +45,7 @@ public class NameAimServiceImpl implements NameAimService {
     @Override
     public List<NameAimDTO> batchCreate(List<NameAimDTO> nameAimDtoList) {
         if(CollectionUtils.isEmpty(nameAimDtoList)){
-            throw new CommonException("hdsp.xsta.err.is_empty");
+            throw new CommonException(ErrorCode.NAME_STANDARD_PARAMS_EMPTY);
         }
         //批量插入主键无法回写，这里选择单个插入
         nameAimDtoList.forEach(nameAimRepository::insertDTOSelective);
@@ -75,7 +76,7 @@ public class NameAimServiceImpl implements NameAimService {
     public void remove(Long primaryKey) {
         NameAimDTO nameAimDTO = nameAimRepository.selectDTOByPrimaryKey(primaryKey);
         if (Objects.isNull(nameAimDTO)) {
-            throw new CommonException("hdsp.xsta.err.not_exist");
+            throw new CommonException(ErrorCode.NAME_STANDARD_NOT_EXIST);
         }
         nameAimIncludeRepository.deleteDTO(NameAimIncludeDTO.builder().aimId(nameAimDTO.getAimId()).build());
         nameAimExcludeRepository.deleteDTO(NameAimExcludeDTO.builder().aimId(nameAimDTO.getAimId()).build());
@@ -86,7 +87,7 @@ public class NameAimServiceImpl implements NameAimService {
     @Override
     public NameAimDTO update(NameAimDTO nameAimDTO) {
         if(Objects.isNull(nameAimDTO)){
-            throw new CommonException("hdsp.xsta.err.not_exist");
+            throw new CommonException(ErrorCode.NAME_STANDARD_NOT_EXIST);
         }
        nameAimRepository.updateDTOOptional(nameAimDTO,
                NameAim.FIELD_ENABLED_FLAG,
@@ -145,7 +146,7 @@ public class NameAimServiceImpl implements NameAimService {
     @Override
     public List<NameAimDTO> bitchUpdate(List<NameAimDTO> nameAimDTOList) {
         if(CollectionUtils.isEmpty(nameAimDTOList)){
-            throw new CommonException("hdsp.xsta.err.is_empty");
+            throw new CommonException(ErrorCode.NAME_STANDARD_PARAMS_EMPTY);
         }
         List<NameAimDTO> existNameAimDTOList = nameAimDTOList.stream()
                 .filter(x->!Objects.isNull(x.getAimId()))

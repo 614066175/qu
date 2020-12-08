@@ -13,6 +13,7 @@ import com.hand.hdsp.quality.domain.entity.NameAim;
 import com.hand.hdsp.quality.domain.entity.NameExecHistory;
 import com.hand.hdsp.quality.domain.entity.NameStandard;
 import com.hand.hdsp.quality.domain.repository.*;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.converter.NameStandardConverter;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -23,11 +24,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
-import org.hzero.boot.platform.lov.annotation.LovValue;
 import org.hzero.boot.platform.lov.dto.LovValueDTO;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.starter.driver.core.session.DriverSession;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,7 +47,7 @@ public class NameStandardServiceImpl implements NameStandardService {
     private final NameStandardConverter nameStandardConverter;
     private final DriverSessionService driverSessionService;
     private final LovAdapter lovAdapter;
-    private static final String ERROR_MESSAGE = "";
+    private static final String ERROR_MESSAGE = "table name cannot match rule: %s";
 
 
     public NameStandardServiceImpl(NameStandardRepository nameStandardRepository,
@@ -76,7 +75,7 @@ public class NameStandardServiceImpl implements NameStandardService {
     @Override
     public void remove(NameStandardDTO nameStandardDTO) {
         if (nameStandardRepository.selectCount(nameStandardConverter.dtoToEntity(nameStandardDTO))<=0){
-            throw new CommonException("hdsp.xsta.err.not_exist");
+            throw new CommonException(ErrorCode.NAME_STANDARD_NOT_EXIST);
         }
         List<NameExecHistoryDTO> historyList = nameExecHistoryRepository.selectDTO(NameExecHistory.FIELD_STANDARD_ID,
                 nameStandardDTO.getStandardId());
@@ -123,7 +122,7 @@ public class NameStandardServiceImpl implements NameStandardService {
     @Override
     public void bitchRemove(List<NameStandardDTO> standardDtoList) {
         if (CollectionUtils.isEmpty(standardDtoList)){
-            throw new CommonException("hdsp.xsta.err.is_empty");
+            throw new CommonException(ErrorCode.NAME_STANDARD_PARAMS_EMPTY);
         }
         standardDtoList.forEach(this::remove);
     }
@@ -132,7 +131,7 @@ public class NameStandardServiceImpl implements NameStandardService {
     public NameStandardDTO update(NameStandardDTO nameStandardDTO) {
         NameStandardDTO exist = Optional.ofNullable(nameStandardRepository
                 .selectDTOByPrimaryKey(nameStandardDTO.getStandardId()))
-                .orElseThrow(()->new CommonException("hdsp.xsta.err.not_exist"));
+                .orElseThrow(()->new CommonException(ErrorCode.NAME_STANDARD_NOT_EXIST));
         if (StringUtils.isNotEmpty(nameStandardDTO.getStandardCode())&&!exist.getStandardCode().equals(nameStandardDTO.getStandardCode())){
             throw new CommonException("hdsp.xsta.err.cannot_update_field", NameStandard.FIELD_STANDARD_CODE);
         }
@@ -145,7 +144,7 @@ public class NameStandardServiceImpl implements NameStandardService {
     public void executeStandard(Long standardId) {
         NameStandardDTO nameStandardDTO = Optional
                 .ofNullable(nameStandardRepository.selectDTOByPrimaryKey(standardId))
-                .orElseThrow(() -> new CommonException("hdsp.xsta.err.not_exist"));
+                .orElseThrow(() -> new CommonException(ErrorCode.NAME_STANDARD_NOT_EXIST));
         List<LovValueDTO> lovValueDTOList = lovAdapter.queryLovValue("HDSP.XSTA.EXEC_STATUS",
                 DetailsHelper.getUserDetails().getTenantId());
         List<NameAimDTO> nameAimDTOList = nameAimRepository.list(nameStandardDTO.getStandardId());
@@ -162,7 +161,7 @@ public class NameStandardServiceImpl implements NameStandardService {
             List<NameExecHisDetailDTO> abnormalList = new ArrayList<>();
             nameExecHisDetailDTOList.forEach(x -> {
                 if (!Pattern.matches(nameStandardDTO.getStandardRule(), x.getTableName())) {
-                    x.setErrorMessage(ERROR_MESSAGE);
+                    x.setErrorMessage(String.format(ERROR_MESSAGE,nameStandardDTO.getStandardRule()));
                     abnormalList.add(x);
                 }
             });
@@ -190,7 +189,7 @@ public class NameStandardServiceImpl implements NameStandardService {
     @Override
     public void batchExecuteStandard(List<Long> standardIdList) {
         if (CollectionUtils.isEmpty(standardIdList)){
-            throw new CommonException("hdsp.xsta.err.is_empty");
+            throw new CommonException(ErrorCode.NAME_STANDARD_PARAMS_EMPTY);
         }
         standardIdList.forEach(this::executeStandard);
     }

@@ -3,7 +3,6 @@ package com.hand.hdsp.quality.api.controller.v1;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
-import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.app.service.NameStandardService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -54,7 +53,7 @@ public class NameStandardController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
-    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<Page<NameStandardDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
                 NameStandardDTO nameStandardDTO, @ApiIgnore @SortDefault(value = NameStandard.FIELD_STANDARD_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         nameStandardDTO.setTenantId(tenantId);
@@ -76,7 +75,7 @@ public class NameStandardController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{standardId}")
-    public ResponseEntity<?> detail(@PathVariable Long standardId) {
+    public ResponseEntity<NameStandardDTO> detail(@PathVariable Long standardId) {
         NameStandardDTO nameStandardDTO = nameStandardRepository.detail(standardId);
         return Results.success(nameStandardDTO);
     }
@@ -90,7 +89,7 @@ public class NameStandardController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody NameStandardDTO nameStandardDTO) {
+    public ResponseEntity<NameStandardDTO> create(@PathVariable("organizationId") Long tenantId, @RequestBody NameStandardDTO nameStandardDTO) {
         nameStandardDTO.setTenantId(tenantId);
         this.validObject(nameStandardDTO);
         nameStandardRepository.insertDTOSelective(nameStandardDTO);

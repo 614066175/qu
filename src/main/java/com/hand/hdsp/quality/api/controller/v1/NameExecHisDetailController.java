@@ -7,7 +7,6 @@ import com.hand.hdsp.quality.api.dto.NameExecHisDetailDTO;
 import com.hand.hdsp.quality.domain.repository.NameExecHisDetailRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.hzero.mybatis.helper.SecurityTokenHelper;
 
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
@@ -18,7 +17,6 @@ import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiParam;
 import springfox.documentation.annotations.ApiIgnore;
 
 /**
@@ -45,7 +43,7 @@ public class NameExecHisDetailController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
-    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<Page<NameExecHisDetailDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
                 NameExecHisDetailDTO nameExecHisDetailDTO, @ApiIgnore @SortDefault(value = NameExecHisDetail.FIELD_DETAIL_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         nameExecHisDetailDTO.setTenantId(tenantId);
@@ -67,7 +65,7 @@ public class NameExecHisDetailController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{detailId}")
-    public ResponseEntity<?> detail(@PathVariable Long detailId) {
+    public ResponseEntity<NameExecHisDetailDTO> detail(@PathVariable Long detailId) {
         NameExecHisDetailDTO nameExecHisDetailDTO = nameExecHisDetailRepository.selectDTOByPrimaryKeyAndTenant(detailId);
         return Results.success(nameExecHisDetailDTO);
     }

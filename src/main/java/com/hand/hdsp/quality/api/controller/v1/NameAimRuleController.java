@@ -7,7 +7,6 @@ import com.hand.hdsp.quality.api.dto.NameAimRuleDTO;
 import com.hand.hdsp.quality.domain.repository.NameAimRuleRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.hzero.mybatis.helper.SecurityTokenHelper;
 
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
@@ -30,7 +29,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/name-aim-rules")
 public class NameAimRuleController extends BaseController {
 
-    private NameAimRuleRepository nameAimRuleRepository;
+    private final NameAimRuleRepository nameAimRuleRepository;
 
     public NameAimRuleController(NameAimRuleRepository nameAimRuleRepository) {
         this.nameAimRuleRepository = nameAimRuleRepository;
@@ -45,7 +44,7 @@ public class NameAimRuleController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
-    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<Page<NameAimRuleDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
                 NameAimRuleDTO nameAimRuleDTO, @ApiIgnore @SortDefault(value = NameAimRule.FIELD_RULE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         nameAimRuleDTO.setTenantId(tenantId);
@@ -67,7 +66,7 @@ public class NameAimRuleController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{ruleId}")
-    public ResponseEntity<?> detail(@PathVariable Long ruleId) {
+    public ResponseEntity<NameAimRuleDTO> detail(@PathVariable Long ruleId) {
         NameAimRuleDTO nameAimRuleDTO = nameAimRuleRepository.selectDTOByPrimaryKeyAndTenant(ruleId);
         return Results.success(nameAimRuleDTO);
     }
@@ -81,7 +80,7 @@ public class NameAimRuleController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody NameAimRuleDTO nameAimRuleDTO) {
+    public ResponseEntity<NameAimRuleDTO> create(@PathVariable("organizationId") Long tenantId, @RequestBody NameAimRuleDTO nameAimRuleDTO) {
         nameAimRuleDTO.setTenantId(tenantId);
         this.validObject(nameAimRuleDTO);
         nameAimRuleRepository.insertDTOSelective(nameAimRuleDTO);
@@ -97,7 +96,7 @@ public class NameAimRuleController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody NameAimRuleDTO nameAimRuleDTO) {
+    public ResponseEntity<NameAimRuleDTO> update(@PathVariable("organizationId") Long tenantId, @RequestBody NameAimRuleDTO nameAimRuleDTO) {
                 nameAimRuleRepository.updateDTOWhereTenant(nameAimRuleDTO, tenantId);
         return Results.success(nameAimRuleDTO);
     }
@@ -111,7 +110,7 @@ public class NameAimRuleController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
-    public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<Void> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody NameAimRuleDTO nameAimRuleDTO) {
                 nameAimRuleDTO.setTenantId(tenantId);
         nameAimRuleRepository.deleteByPrimaryKey(nameAimRuleDTO);

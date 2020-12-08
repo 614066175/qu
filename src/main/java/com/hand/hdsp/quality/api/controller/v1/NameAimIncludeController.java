@@ -7,7 +7,6 @@ import com.hand.hdsp.quality.api.dto.NameAimIncludeDTO;
 import com.hand.hdsp.quality.domain.repository.NameAimIncludeRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.hzero.mybatis.helper.SecurityTokenHelper;
 
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
@@ -30,7 +29,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/name-aim-includes")
 public class NameAimIncludeController extends BaseController {
 
-    private NameAimIncludeRepository nameAimIncludeRepository;
+    private final NameAimIncludeRepository nameAimIncludeRepository;
 
     public NameAimIncludeController(NameAimIncludeRepository nameAimIncludeRepository) {
         this.nameAimIncludeRepository = nameAimIncludeRepository;
@@ -45,7 +44,7 @@ public class NameAimIncludeController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
-    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<Page<NameAimIncludeDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
                 NameAimIncludeDTO nameAimIncludeDTO, @ApiIgnore @SortDefault(value = NameAimInclude.FIELD_INCLUDE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         nameAimIncludeDTO.setTenantId(tenantId);
@@ -67,7 +66,7 @@ public class NameAimIncludeController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{includeId}")
-    public ResponseEntity<?> detail(@PathVariable Long includeId) {
+    public ResponseEntity<NameAimIncludeDTO> detail(@PathVariable Long includeId) {
         NameAimIncludeDTO nameAimIncludeDTO = nameAimIncludeRepository.selectDTOByPrimaryKeyAndTenant(includeId);
         return Results.success(nameAimIncludeDTO);
     }
@@ -81,7 +80,7 @@ public class NameAimIncludeController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody NameAimIncludeDTO nameAimIncludeDTO) {
+    public ResponseEntity<NameAimIncludeDTO> create(@PathVariable("organizationId") Long tenantId, @RequestBody NameAimIncludeDTO nameAimIncludeDTO) {
         nameAimIncludeDTO.setTenantId(tenantId);
         this.validObject(nameAimIncludeDTO);
         nameAimIncludeRepository.insertDTOSelective(nameAimIncludeDTO);
@@ -97,7 +96,7 @@ public class NameAimIncludeController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody NameAimIncludeDTO nameAimIncludeDTO) {
+    public ResponseEntity<NameAimIncludeDTO> update(@PathVariable("organizationId") Long tenantId, @RequestBody NameAimIncludeDTO nameAimIncludeDTO) {
                 nameAimIncludeRepository.updateDTOWhereTenant(nameAimIncludeDTO, tenantId);
         return Results.success(nameAimIncludeDTO);
     }
@@ -111,7 +110,7 @@ public class NameAimIncludeController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
-    public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<Void> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody NameAimIncludeDTO nameAimIncludeDTO) {
                 nameAimIncludeDTO.setTenantId(tenantId);
         nameAimIncludeRepository.deleteByPrimaryKey(nameAimIncludeDTO);

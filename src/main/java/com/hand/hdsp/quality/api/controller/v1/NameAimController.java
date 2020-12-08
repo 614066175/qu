@@ -68,7 +68,7 @@ public class NameAimController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{aimId}")
-    public ResponseEntity<?> detail(@PathVariable Long aimId) {
+    public ResponseEntity<NameAimDTO> detail(@PathVariable Long aimId) {
         NameAimDTO nameAimDTO = nameAimRepository.selectDTOByPrimaryKeyAndTenant(aimId);
         return Results.success(nameAimDTO);
     }
@@ -97,7 +97,7 @@ public class NameAimController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody List<NameAimDTO> nameAimDTOList) {
+    public ResponseEntity<List<NameAimDTO>> update(@PathVariable("organizationId") Long tenantId, @RequestBody List<NameAimDTO> nameAimDTOList) {
         return Results.success(nameAimService.bitchUpdate(nameAimDTOList));
     }
 

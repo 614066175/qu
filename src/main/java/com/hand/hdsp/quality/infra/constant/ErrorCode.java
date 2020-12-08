@@ -118,4 +118,7 @@ public interface ErrorCode {
     String STANDARD_AIM_LIST_IS_EMPTY="hdsp.xqua.err.standard_aim_list_is_empty";
 
     String DATA_STANDARD_VERSION_NOT_EXIST = "hdsp.xqua.err.data_standard_version_not_exist";
+
+    String NAME_STANDARD_PARAMS_EMPTY = "hdsp.xsta.err.is_empty";
+    String NAME_STANDARD_NOT_EXIST = "hdsp.xsta.err.not_exist";
 }
