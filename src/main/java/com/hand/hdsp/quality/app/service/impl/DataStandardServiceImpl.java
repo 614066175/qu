@@ -552,7 +552,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                     .tenantId(standardAimDTO.getTenantId())
                     .build();
             //固定值
-            if (CountType.FIXED_VALUE.equals(dataStandardDTO.getDataType())) {
+            if (CountType.FIXED_VALUE.equals(dataStandardDTO.getLengthType())) {
                 batchPlanFieldLineDTO.setCountType(CountType.FIXED_VALUE);
                 batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
                 //生成每个校验项的配置项
@@ -571,7 +571,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                 batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
             }
             //长度范围
-            if (RANGE.equals(dataStandardDTO.getDataType())) {
+            if (RANGE.equals(dataStandardDTO.getLengthType())) {
                 convertToDataLengthList(dataStandardDTO);
                 batchPlanFieldLineDTO.setCountType(CountType.LENGTH_RANGE);
                 batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
