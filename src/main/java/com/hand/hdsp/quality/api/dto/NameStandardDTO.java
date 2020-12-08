@@ -18,6 +18,8 @@ import lombok.*;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.hzero.boot.platform.lov.annotation.LovValue;
+import org.hzero.export.annotation.ExcelColumn;
+import org.hzero.export.annotation.ExcelSheet;
 
 /**
  * <p>命名标准表 数据传输对象</p>
@@ -31,6 +33,7 @@ import org.hzero.boot.platform.lov.annotation.LovValue;
 @EqualsAndHashCode(callSuper = false)
 @ApiModel("命名标准表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@ExcelSheet(zh = "命名标准", en = "Name Standard")
 public class NameStandardDTO extends AuditDomain {
 
     @ApiModelProperty("命名标准ID，主键，供其他表做外键")
@@ -40,30 +43,36 @@ public class NameStandardDTO extends AuditDomain {
     @NotNull
     private Long groupId;
 
+    @ExcelColumn(zh = "标准编码",en="standardCode",order = 3)
     @ApiModelProperty(value = "命名标准编码")
     @NotBlank
     @Size(max = 80)
     private String standardCode;
 
+    @ExcelColumn(zh = "命名标准名称",en="standardName",order = 4)
     @ApiModelProperty(value = "命名标准名称")
     @NotBlank
     @Size(max = 120)
     private String standardName;
 
+    @ExcelColumn(zh = "命名标准描述",en="standardDesc",order = 5)
     @ApiModelProperty(value = "命名标准描述")
     private String standardDesc;
 
+    @ExcelColumn(zh = "命名标准类型",en="standardType",order = 6)
     @LovValue(lovCode = "HDSP.XSTA.NAME_STANDARD_TYPE",meaningField = "standardTypeMeaning")
     @ApiModelProperty(value = "命名标准类型，快码：HDSP.XSTA.NAME_STANDARD_TYPE <TABLE:表名称>")
     @NotBlank
     @Size(max = 30)
     private String standardType;
 
+    @ExcelColumn(zh = "命名标准规则",en="standardRule",order = 7)
     @ApiModelProperty(value = "命名标准规则")
     @NotBlank
     @Size(max = 240)
     private String standardRule;
 
+    @ExcelColumn(zh = "是否忽略大小写",en="ignoreCaseFlag",order = 8)
     @ApiModelProperty(value = "是否忽略大小写 1-忽略 0-不忽略")
     @NotNull
     private Integer ignoreCaseFlag;
@@ -76,9 +85,11 @@ public class NameStandardDTO extends AuditDomain {
     @NotNull
     private Long chargeDeptId;
 
+    @ExcelColumn(zh = "责任人电话",en="chargeTel",order = 9)
     @ApiModelProperty(value = "责任人电话")
     private String chargeTel;
 
+    @ExcelColumn(zh = "责任人邮箱",en="chargeEmail",order = 10)
     @ApiModelProperty(value = "责任人邮箱")
     private String chargeEmail;
 
@@ -90,7 +101,6 @@ public class NameStandardDTO extends AuditDomain {
     private Long latestAbnormalNum;
 
     @ApiModelProperty(value = "是否启用 1-启用 0-不启用")
-    @NotNull
     private Integer enabledFlag;
 
     @ApiModelProperty(value = "租户ID")
@@ -119,5 +129,26 @@ public class NameStandardDTO extends AuditDomain {
      */
     @Transient
     private String latestCheckedStatusMeaning;
+
+    /**
+     * 责任人姓名
+     */
+    @ExcelColumn(zh = "责任人姓名",en="chargeName",order = 11)
+    @Transient
+    private String chargeName;
+
+    /**
+     * 责任部门名称
+     */
+    @ExcelColumn(zh = "责任部门",en="chargeDeptName",order = 12)
+    @Transient
+    private String chargeDeptName;
+
+    /**
+     * 分组编码
+     */
+    @ExcelColumn(zh = "分组编码",en="groupCode",order = 2)
+    @Transient
+    private String groupCode;
 
 }
