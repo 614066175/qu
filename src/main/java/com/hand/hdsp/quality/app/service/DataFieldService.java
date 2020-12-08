@@ -2,7 +2,6 @@ package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
-import com.hand.hdsp.quality.domain.entity.DataField;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.export.vo.ExportParam;

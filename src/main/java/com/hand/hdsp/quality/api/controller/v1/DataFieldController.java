@@ -1,7 +1,5 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
-import java.util.List;
-
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import com.hand.hdsp.quality.app.service.DataFieldService;
@@ -22,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * <p>字段标准表 管理 API</p>
@@ -68,7 +67,7 @@ public class DataFieldController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataFieldDTO dataFieldDTO) {
+    public ResponseEntity<DataFieldDTO> create(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataFieldDTO dataFieldDTO) {
         dataFieldDTO.setTenantId(tenantId);
         dataFieldService.create(dataFieldDTO);
         return Results.success(dataFieldDTO);
@@ -84,7 +83,7 @@ public class DataFieldController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/detail/{fieldId}")
-    public ResponseEntity<?> detail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable(name = "fieldId") Long fieldId) {
+    public ResponseEntity<DataFieldDTO> detail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable(name = "fieldId") Long fieldId) {
         return Results.success(dataFieldService.detail(tenantId, fieldId));
     }
 
@@ -97,7 +96,7 @@ public class DataFieldController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
-    public ResponseEntity<?> batchDelete(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<Void> batchDelete(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                          @RequestBody List<DataFieldDTO> dataFieldDTOList) {
         if (CollectionUtils.isNotEmpty(dataFieldDTOList)) {
             dataFieldDTOList.forEach(dataFieldService::delete);
@@ -114,7 +113,7 @@ public class DataFieldController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataFieldDTO dataFieldDTO) {
+    public ResponseEntity<DataFieldDTO> update(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataFieldDTO dataFieldDTO) {
         dataFieldDTO.setTenantId(tenantId);
         dataFieldRepository.updateByDTOPrimaryKey(dataFieldDTO);
         return Results.success(dataFieldDTO);
@@ -174,6 +173,7 @@ public class DataFieldController extends BaseController {
                                                      HttpServletResponse response,
                                                      PageRequest pageRequest) {
 
+        response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
         dto.setTenantId(tenantId);
         List<DataFieldDTO> dtoList =
                 dataFieldService.export(dto, exportParam, pageRequest);
