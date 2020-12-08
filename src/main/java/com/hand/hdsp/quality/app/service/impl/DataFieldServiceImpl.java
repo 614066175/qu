@@ -102,16 +102,21 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     @Override
     public DataFieldDTO detail(Long tenantId, Long fieldId) {
-        DataFieldDTO dataFieldDTO = dataFieldRepository.selectDTOByPrimaryKey(fieldId);
+        List<DataFieldDTO> dataFieldDTOList = dataFieldMapper.list(DataFieldDTO
+                .builder()
+                .fieldId(fieldId)
+                .build());
+        if (CollectionUtils.isEmpty(dataFieldDTOList)) {
+            throw new CommonException(ErrorCode.DATA_FIELD_STANDARD_NOT_EXIST);
+        }
+        DataFieldDTO dataFieldDTO = dataFieldDTOList.get(0);
         List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardExtra.FIELD_STANDARD_ID, fieldId)
                         .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, FIELD)
                         .andEqualTo(StandardExtra.FIELD_TENANT_ID, tenantId))
                 .build());
-        if (CollectionUtils.isNotEmpty(standardExtraDTOS)) {
-            dataFieldDTO.setStandardExtraDTOList(standardExtraDTOS);
-        }
+        dataFieldDTO.setStandardExtraDTOList(standardExtraDTOS);
         return dataFieldDTO;
     }
 
