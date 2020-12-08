@@ -24,7 +24,7 @@
         ${prefix}.tenant_id,
         ${prefix}.object_version_number
     </sql>
-    <select id="getListByAimId" resultType="com.hand.hdsp.quality.domain.entity.NameAimInclude">
+    <select id="getListByAimId" resultMap="DtoResultMap">
         SELECT
         <include refid="BaseProperties">
             <property name="prefix" value="xnai"/>

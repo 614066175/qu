@@ -21,4 +21,18 @@ public interface NameStandardRepository extends BaseRepository<NameStandard, Nam
      * @return List<NameStandardDTO>
      */
     List<NameStandardDTO> list(NameStandardDTO nameStandardDTO);
+
+    /**
+     * 导入标准
+     *
+     * @param nameStandardDTO 命名标准
+     */
+    void importStandard(NameStandardDTO nameStandardDTO);
+
+    /**
+     * 批量导入
+     *
+     * @param nameStandardDTOList 命名标准列表
+     */
+    void batchImportStandard(List<NameStandardDTO> nameStandardDTOList);
 }
