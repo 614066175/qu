@@ -16,8 +16,12 @@ import io.swagger.annotations.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
+import org.hzero.export.annotation.ExcelExport;
+import org.hzero.export.vo.ExportParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * <p>字段标准表 管理 API</p>
@@ -94,8 +98,8 @@ public class DataFieldController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<?> batchDelete(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestBody List<DataFieldDTO> dataFieldDTOList) {
-        if(CollectionUtils.isNotEmpty(dataFieldDTOList)){
+                                         @RequestBody List<DataFieldDTO> dataFieldDTOList) {
+        if (CollectionUtils.isNotEmpty(dataFieldDTOList)) {
             dataFieldDTOList.forEach(dataFieldService::delete);
         }
         return Results.success();
@@ -158,6 +162,22 @@ public class DataFieldController extends BaseController {
         dataFieldDTO.setTenantId(tenantId);
         dataFieldService.publishOrOff(dataFieldDTO);
         return Results.success(dataFieldDTO);
+    }
+
+    @ApiOperation(value = "导出字段标准")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/export")
+    @ExcelExport(value = DataFieldDTO.class)
+    public ResponseEntity<List<DataFieldDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                                     DataFieldDTO dto,
+                                                     ExportParam exportParam,
+                                                     HttpServletResponse response,
+                                                     PageRequest pageRequest) {
+
+        dto.setTenantId(tenantId);
+        List<DataFieldDTO> dtoList =
+                dataFieldService.export(dto, exportParam, pageRequest);
+        return Results.success(dtoList);
     }
 
 }
