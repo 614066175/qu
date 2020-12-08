@@ -463,7 +463,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         //判断在评估方案下是否已存在相同base
         List<BatchPlanBaseDTO> batchPlanBaseDTOS = batchPlanBaseRepository.selectDTOByCondition(Condition.builder(BatchPlanBase.class)
                 .andWhere(Sqls.custom()
-                        .andEqualTo(BatchPlanBase.FIELD_PLAN_ID,standardAimDTO.getPlanId())
+                        .andEqualTo(BatchPlanBase.FIELD_PLAN_ID, standardAimDTO.getPlanId())
                         .andEqualTo(BatchPlanBase.FIELD_DATASOURCE_TYPE, standardAimDTO.getDatasourceType())
                         .andEqualTo(BatchPlanBase.FIELD_DATASOURCE_CODE, standardAimDTO.getDatasourceCode())
                         .andEqualTo(BatchPlanBase.FIELD_DATASOURCE_SCHEMA, standardAimDTO.getSchemaName())
@@ -514,6 +514,24 @@ public class DataStandardServiceImpl implements DataStandardService {
             batchPlanFieldRepository.insertDTOSelective(batchPlanFieldDTO);
         } else {
             batchPlanFieldDTO = batchPlanFieldDTOS.get(0);
+        }
+
+        //删除此评估方案，此规则下的所有line和condition
+        List<BatchPlanFieldLineDTO> batchPlanFieldLineDTOS = batchPlanFieldLineRepository.selectDTOByCondition(Condition.builder(BatchPlanFieldLine.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(BatchPlanFieldLine.FIELD_PLAN_RULE_ID, batchPlanFieldDTO.getPlanRuleId())
+                        .andEqualTo(BatchPlanFieldLine.FIELD_TENANT_ID, batchPlanFieldDTO.getTenantId()))
+                .build());
+        if(CollectionUtils.isNotEmpty(batchPlanFieldLineDTOS)){
+            batchPlanFieldLineDTOS.forEach(batchPlanFieldLineDTO -> {
+                List<BatchPlanFieldConDTO> batchPlanFieldConDTOS = batchPlanFieldConRepository.selectDTOByCondition(Condition.builder(BatchPlanFieldConDTO.class)
+                        .andWhere(Sqls.custom()
+                                .andEqualTo(BatchPlanFieldCon.FIELD_PLAN_LINE_ID, batchPlanFieldLineDTO.getPlanLineId())
+                                .andEqualTo(BatchPlanFieldCon.FIELD_TENANT_ID, batchPlanFieldLineDTO.getTenantId()))
+                        .build());
+                batchPlanFieldConRepository.batchDTODelete(batchPlanFieldConDTOS);
+            });
+            batchPlanFieldLineRepository.batchDTODelete(batchPlanFieldLineDTOS);
         }
 
 

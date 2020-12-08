@@ -143,10 +143,9 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/publish-off")
-    public ResponseEntity<DataStandardDTO> publishOrOff(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
-        dataStandardDTO.setTenantId(tenantId);
-        dataStandardService.publishOrOff(dataStandardDTO);
-        return Results.success(dataStandardDTO);
+    public ResponseEntity<List<DataStandardDTO>> publishOrOff(@PathVariable(name = "organizationId") Long tenantId, @RequestBody List<DataStandardDTO> dataStandardDTOList) {
+        dataStandardDTOList.forEach(dataStandardService::publishOrOff);
+        return Results.success(dataStandardDTOList);
     }
 
 
