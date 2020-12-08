@@ -157,10 +157,10 @@ public class DataFieldController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/publish-off")
-    public ResponseEntity<DataFieldDTO> publishOrOff(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataFieldDTO dataFieldDTO) {
-        dataFieldDTO.setTenantId(tenantId);
-        dataFieldService.publishOrOff(dataFieldDTO);
-        return Results.success(dataFieldDTO);
+    public ResponseEntity<List<DataFieldDTO>> publishOrOff(@PathVariable(name = "organizationId") Long tenantId, @RequestBody List<DataFieldDTO> dataFieldDTOList) {
+        dataFieldDTOList.forEach(dataFieldService::publishOrOff);
+//        dataFieldService.publishOrOff(dataFieldDTO);
+        return Results.success(dataFieldDTOList);
     }
 
     @ApiOperation(value = "导出字段标准")

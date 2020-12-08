@@ -24,5 +24,5 @@ public interface DataFieldVersionMapper extends BaseMapper<DataFieldVersion> {
      * @param dataFieldVersionDTO DataFieldVersionDTO
      * @return List<DataFieldVersionDTO>
      */
-    List<DataFieldVersionDTO> list(@Param("dataStandardVersionDTO") DataFieldVersionDTO dataFieldVersionDTO);
+    List<DataFieldVersionDTO> list(@Param("dataFieldVersionDTO") DataFieldVersionDTO dataFieldVersionDTO);
 }

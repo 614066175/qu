@@ -55,6 +55,7 @@
         iu2.login_name chargeName,
         hu.unit_name chargeDeptName,
         xsg.group_name,
+        xsg.group_code,
         <include refid="baseColumn">
             <property name="fs" value="fs"/>
         </include>
