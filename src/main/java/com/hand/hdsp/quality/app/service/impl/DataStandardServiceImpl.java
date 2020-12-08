@@ -670,18 +670,18 @@ public class DataStandardServiceImpl implements DataStandardService {
                 batchPlanFieldConDTO.setCompareWay(RANGE);
             }
             batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
-
-            //根据具体落标存入落标关系表
-            StandardAimRelationDTO standardAimRelationDTO = StandardAimRelationDTO.builder()
-                    .aimId(standardAimDTO.getAimId())
-                    .aimType(AimType.AIM)
-                    .planId(standardAimDTO.getPlanId())
-                    .planBaseId(batchPlanBaseDTO.getPlanBaseId())
-                    .planRuleId(batchPlanFieldDTO.getPlanRuleId())
-                    .tenantId(standardAimDTO.getTenantId())
-                    .build();
-            standardAimRelationRepository.insertDTOSelective(standardAimRelationDTO);
         }
+
+        //根据具体落标存入落标关系表
+        StandardAimRelationDTO standardAimRelationDTO = StandardAimRelationDTO.builder()
+                .aimId(standardAimDTO.getAimId())
+                .aimType(AimType.AIM)
+                .planId(standardAimDTO.getPlanId())
+                .planBaseId(batchPlanBaseDTO.getPlanBaseId())
+                .planRuleId(batchPlanFieldDTO.getPlanRuleId())
+                .tenantId(standardAimDTO.getTenantId())
+                .build();
+        standardAimRelationRepository.insertDTOSelective(standardAimRelationDTO);
     }
 
 }
