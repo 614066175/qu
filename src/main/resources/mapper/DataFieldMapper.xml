@@ -45,7 +45,8 @@
           ${fs}.charge_email,
           ${fs}.standard_status,
           ${fs}.tenant_id,
-          ${fs}.object_version_number
+          ${fs}.object_version_number,
+          ${fs}.last_update_date
     </sql>
 
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.DataFieldDTO">
