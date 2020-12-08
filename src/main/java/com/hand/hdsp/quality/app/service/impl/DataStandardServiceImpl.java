@@ -516,24 +516,6 @@ public class DataStandardServiceImpl implements DataStandardService {
             batchPlanFieldDTO = batchPlanFieldDTOS.get(0);
         }
 
-        //删除此评估方案，此规则下的所有line和condition
-        List<BatchPlanFieldLineDTO> batchPlanFieldLineDTOS = batchPlanFieldLineRepository.selectDTOByCondition(Condition.builder(BatchPlanFieldLine.class)
-                .andWhere(Sqls.custom()
-                        .andEqualTo(BatchPlanFieldLine.FIELD_PLAN_RULE_ID, batchPlanFieldDTO.getPlanRuleId())
-                        .andEqualTo(BatchPlanFieldLine.FIELD_TENANT_ID, batchPlanFieldDTO.getTenantId()))
-                .build());
-        if(CollectionUtils.isNotEmpty(batchPlanFieldLineDTOS)){
-            batchPlanFieldLineDTOS.forEach(batchPlanFieldLineDTO -> {
-                List<BatchPlanFieldConDTO> batchPlanFieldConDTOS = batchPlanFieldConRepository.selectDTOByCondition(Condition.builder(BatchPlanFieldConDTO.class)
-                        .andWhere(Sqls.custom()
-                                .andEqualTo(BatchPlanFieldCon.FIELD_PLAN_LINE_ID, batchPlanFieldLineDTO.getPlanLineId())
-                                .andEqualTo(BatchPlanFieldCon.FIELD_TENANT_ID, batchPlanFieldLineDTO.getTenantId()))
-                        .build());
-                batchPlanFieldConRepository.batchDTODelete(batchPlanFieldConDTOS);
-            });
-            batchPlanFieldLineRepository.batchDTODelete(batchPlanFieldLineDTOS);
-        }
-
 
         //根据数据标准生成具体的校验项batch_plan_field_line
         //数据格式
