@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.hand.hdsp.quality.infra.mapper.DataFieldMapper">
-	<!-- 可根据自己的需求，是否要使用 -->
+    <!-- 可根据自己的需求，是否要使用 -->
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.DataField">
         <result column="field_id" property="fieldId" jdbcType="DECIMAL"/>
         <result column="group_id" property="groupId" jdbcType="DECIMAL"/>
@@ -50,17 +50,46 @@
 
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.DataFieldDTO">
         select
+        iu.login_name lastUpdateName,
+        iu2.login_name chargeName,
+        hu.unit_name chargeDeptName,
+        xsg.group_name,
         <include refid="baseColumn">
             <property name="fs" value="fs"/>
         </include>
         from xsta_field_standard fs
+        left join xsta_standard_group xsg on xsg.group_id=ds.group_id
+        left join hzero_platform.iam_user iu on ds.last_updated_by=iu.id
+        left join hzero_platform.iam_user iu2 on ds.charge_id=iu2.id
+        left join hzero_platform.hpfm_unit hu on hu.unit_id=ds.charge_dept_id
         <where>
+            <if test="dataFieldDTO.fieldId!=null">
+                fs.field_id=#{dataFieldDTO.fieldId}
+            </if>
+            <if test="dataFieldDTO.groupId!=null">
+                and fs.group_id=#{dataFieldDTO.groupId}
+            </if>
             <if test="dataFieldDTO.fieldName">
                 and fs.field_name=#{dataFieldDTO.fieldName}
+            </if>
+            <if test="dataFieldDTO.sysCommonName!=null">
+                <bind name="sysCommonName" value="'%'+ dataFieldDTO.sysCommonName +'%'"/>
+                and fs.sysCommonName like #{sysCommonName}
+            </if>
+            <if test="dataFieldDTO.standardStatus!=null">
+                and fs.standard_status=#{dataFieldDTO.standardStatus}
+            </if>
+            <if test="dataFieldDTO.chargeId!=null">
+                and iu2.id=#{dataFieldDTO.chargeId}
+            </if>
+            <if test="dataFieldDTO.lastUpdateName!=null">
+                <bind name="lastUpdateName" value="'%'+ dataFieldDTO.lastUpdateName +'%'"/>
+                and iu.login_name like #{lastUpdateName}
             </if>
             <if test="dataFieldDTO.tenantId!=null">
                 and fs.tenant_id=#{dataFieldDTO.tenantId}
             </if>
         </where>
+        order by fs.last_update_date desc
     </select>
 </mapper>
