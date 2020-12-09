@@ -50,7 +50,9 @@
         ${fsv}.charge_tel,
         ${fsv}.charge_email,
         ${fsv}.version_number,
-        ${fsv}.tenant_id
+        ${fsv}.tenant_id,
+        ${fsv}.object_version_number,
+        ${fsv}.last_update_date
     </sql>
 
     <select id="detail" resultType="com.hand.hdsp.quality.api.dto.DataFieldVersionDTO">
@@ -59,6 +61,7 @@
         iu2.login_name chargeName,
         hu.unit_name chargeDeptName,
         xsg.group_name,
+        xsg.group_code,
         <include refid="baseColumn">
             <property name="fsv" value="fsv"/>
         </include>
@@ -78,6 +81,7 @@
         iu2.login_name chargeName,
         hu.unit_name chargeDeptName,
         xsg.group_name,
+        xsg.group_code,
         <include refid="baseColumn">
             <property name="fsv" value="fsv"/>
         </include>

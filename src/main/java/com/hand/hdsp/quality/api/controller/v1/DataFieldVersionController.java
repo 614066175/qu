@@ -48,7 +48,7 @@ public class DataFieldVersionController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
-    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<Page<DataFieldVersionDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
                 DataFieldVersionDTO dataFieldVersionDTO, @ApiIgnore @SortDefault(value = DataFieldVersion.FIELD_VERSION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         dataFieldVersionDTO.setTenantId(tenantId);
@@ -70,8 +70,8 @@ public class DataFieldVersionController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{versionId}")
-    public ResponseEntity<?> detail(@PathVariable Long versionId) {
-        DataFieldVersionDTO dataFieldVersionDTO = dataFieldVersionRepository.selectDTOByPrimaryKeyAndTenant(versionId);
+    public ResponseEntity<DataFieldVersionDTO> detail(@PathVariable Long versionId) {
+        DataFieldVersionDTO dataFieldVersionDTO = dataFieldVersionService.detail(versionId);
         return Results.success(dataFieldVersionDTO);
     }
 
@@ -84,7 +84,7 @@ public class DataFieldVersionController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody DataFieldVersionDTO dataFieldVersionDTO) {
+    public ResponseEntity<DataFieldVersionDTO> create(@PathVariable("organizationId") Long tenantId, @RequestBody DataFieldVersionDTO dataFieldVersionDTO) {
         dataFieldVersionDTO.setTenantId(tenantId);
         this.validObject(dataFieldVersionDTO);
         dataFieldVersionRepository.insertDTOSelective(dataFieldVersionDTO);
@@ -100,7 +100,7 @@ public class DataFieldVersionController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody DataFieldVersionDTO dataFieldVersionDTO) {
+    public ResponseEntity<DataFieldVersionDTO> update(@PathVariable("organizationId") Long tenantId, @RequestBody DataFieldVersionDTO dataFieldVersionDTO) {
                 dataFieldVersionRepository.updateDTOWhereTenant(dataFieldVersionDTO, tenantId);
         return Results.success(dataFieldVersionDTO);
     }
@@ -114,7 +114,7 @@ public class DataFieldVersionController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
-    public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<DataFieldVersionDTO> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody DataFieldVersionDTO dataFieldVersionDTO) {
                 dataFieldVersionDTO.setTenantId(tenantId);
         dataFieldVersionRepository.deleteByPrimaryKey(dataFieldVersionDTO);

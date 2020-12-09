@@ -159,7 +159,6 @@ public class DataFieldController extends BaseController {
     @PutMapping("/publish-off")
     public ResponseEntity<List<DataFieldDTO>> publishOrOff(@PathVariable(name = "organizationId") Long tenantId, @RequestBody List<DataFieldDTO> dataFieldDTOList) {
         dataFieldDTOList.forEach(dataFieldService::publishOrOff);
-//        dataFieldService.publishOrOff(dataFieldDTO);
         return Results.success(dataFieldDTOList);
     }
 
