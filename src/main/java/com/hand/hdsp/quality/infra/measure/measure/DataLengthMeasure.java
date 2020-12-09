@@ -1,52 +1,46 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
 import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
-import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.dataobject.MeasureResultDO;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
-import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
-import org.hzero.boot.platform.lov.adapter.LovAdapter;
-import org.hzero.boot.platform.lov.dto.LovValueDTO;
-import org.hzero.core.base.BaseConstants;
 import org.hzero.starter.driver.core.session.DriverSession;
 
 /**
  * <p>
- * 字段值
- * 特殊处理值集校验
- * 其他校验类型继续走通用SQL
+ * description
  * </p>
  *
- * @author feng.liu01@hand-china.com 2020-06-09 10:06:43
+ * @author lgl 2020/12/07 20:55
+ * @since 1.0
  */
-@CheckItem("FIELD_VALUE")
-public class FieldValueMeasure implements Measure {
+@CheckItem(PlanConstant.CheckItem.DATA_LENGTH)
+public class DataLengthMeasure implements Measure {
 
+    public static final String COUNT = "COUNT";
     private final ItemTemplateSqlRepository templateSqlRepository;
-    private final LovAdapter lovAdapter;
     private final DriverSessionService driverSessionService;
 
-    public FieldValueMeasure(ItemTemplateSqlRepository templateSqlRepository,
-                             LovAdapter lovAdapter, DriverSessionService driverSessionService) {
+    public DataLengthMeasure(ItemTemplateSqlRepository templateSqlRepository, DriverSessionService driverSessionService) {
         this.templateSqlRepository = templateSqlRepository;
-        this.lovAdapter = lovAdapter;
         this.driverSessionService = driverSessionService;
     }
+
 
     @Override
     public BatchResultItem check(MeasureParamDO param) {
@@ -55,40 +49,13 @@ public class FieldValueMeasure implements Measure {
         BatchResultItem batchResultItem = param.getBatchResultItem();
         List<WarningLevelDTO> warningLevelList = param.getWarningLevelList();
         DriverSession driverSession = driverSessionService.getDriverSession(tenantId, param.getPluginDatasourceDTO().getDatasourceCode());
-
         // 值集校验
         String countType = param.getCountType();
-        if (PlanConstant.CountType.LOV_VALUE.equals(countType)) {
-            WarningLevelDTO warningLevelDTO = warningLevelList.get(0);
-            List<LovValueDTO> lovValueDTOList = lovAdapter.queryLovValue(warningLevelDTO.getLovCode(), tenantId);
-            if (CollectionUtils.isEmpty(lovValueDTOList)) {
-                throw new CommonException(ErrorCode.NOT_FIND_VALUE);
-            }
-
+        //固定值
+        if (PlanConstant.CountType.FIXED_VALUE.equals(countType)) {
             // 查询要执行的SQL
             ItemTemplateSql itemTemplateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
-                    .checkItem(countType + "_" + warningLevelDTO.getCompareSymbol())
-                    .datasourceType(batchResultBase.getDatasourceType())
-                    .build());
-
-            Map<String, String> variables = new HashMap<>(8);
-            variables.put("table", batchResultBase.getPackageObjectName());
-            variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
-            variables.put("listValue", lovValueDTOList.stream()
-                    .map(lovValueDTO -> "'" + lovValueDTO.getValue() + "'")
-                    .collect(Collectors.joining(BaseConstants.Symbol.COMMA))
-            );
-            List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(),
-                    MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
-            if (CollectionUtils.isNotEmpty(response)) {
-                batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
-                batchResultItem.setExceptionInfo("存在字段值满足值集校验配置");
-            }
-
-        } else if (PlanConstant.CountType.FIXED_VALUE.equals(countType)) {
-            // 查询要执行的SQL
-            ItemTemplateSql itemTemplateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
-                    .checkItem(param.getCheckItem())
+                    .checkItem(param.getCountType())
                     .datasourceType(batchResultBase.getDatasourceType())
                     .build());
 
@@ -118,43 +85,35 @@ public class FieldValueMeasure implements Measure {
                     break;
                 }
             }
-
         }
-        //枚举值
-        else if (PlanConstant.CountType.ENUM_VALUE.equals(countType)) {
-            WarningLevelDTO warningLevelDTO = warningLevelList.get(0);
-            String enumValue = warningLevelDTO.getEnumValue();
-            List<String> enumValueList = new ArrayList<>();
-            if(Strings.isNotEmpty(enumValue)){
-                enumValueList= Arrays.asList(enumValue.split(","));
-            }
+        //长度范围
+        else if (PlanConstant.CountType.LENGTH_RANGE.equals(countType)) {
             // 查询要执行的SQL
             ItemTemplateSql itemTemplateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
-                    .checkItem(countType + "_" + warningLevelDTO.getCompareSymbol())
+                    .checkItem(param.getCountType())
                     .datasourceType(batchResultBase.getDatasourceType())
                     .build());
+            long count;
+            long start = 0L;
+            long end = 0L;
+            if (CollectionUtils.isNotEmpty(warningLevelList) && warningLevelList.size() == 2) {
+                start = Long.parseLong(warningLevelList.get(0).getEndValue()) + 1;
+                end = Long.parseLong(warningLevelList.get(1).getStartValue()) - 1;
+            }
 
             Map<String, String> variables = new HashMap<>(8);
             variables.put("table", batchResultBase.getPackageObjectName());
             variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
-            variables.put("listValue", enumValueList.stream()
-                    .map(e -> "'" +e+ "'")
-                    .collect(Collectors.joining(BaseConstants.Symbol.COMMA))
-            );
-            List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(),
+            variables.put("start", Long.toString(start));
+            variables.put("end", Long.toString(end));
+            List<Map<String, Object>> maps = driverSession.executeOneQuery(param.getSchema(),
                     MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
-            if (CollectionUtils.isNotEmpty(response)) {
-                batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
-                batchResultItem.setExceptionInfo("存在枚举值满足值集校验配置");
+            if (CollectionUtils.isNotEmpty(maps)) {
+                count= (long) maps.get(0).get(COUNT);
+                batchResultItem.setWarningLevel(warningLevelList.get(0).getWarningLevel());
+                batchResultItem.setExceptionInfo(String.format("存在%d条数据不满足(%s,%s)范围",count,start,end));
             }
         }
-        //逻辑值
-        else if (PlanConstant.CountType.LOGIC_VALUE.equals(countType)) {
-
-        } else {
-            throw new CommonException(ErrorCode.FIELD_NO_SUPPORT_CHECK_TYPE);
-        }
-
         return batchResultItem;
     }
 }

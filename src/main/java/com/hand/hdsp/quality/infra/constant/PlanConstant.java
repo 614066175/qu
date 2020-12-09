@@ -271,9 +271,11 @@ public interface PlanConstant {
          */
         String ENUM_VALUE = "ENUM_VALUE";
         /**
-         * 枚举值
+         * 逻辑值
          */
-        String LENGTH_RANGE = "LENGTH_RANGE";
+        String LOGIC_VALUE = "LOGIC_VALUE";
+
+        String LENGTH_RANGE="LENGTH_RANGE";
 
     }
 

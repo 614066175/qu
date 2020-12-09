@@ -26,7 +26,7 @@ import org.hzero.mybatis.util.Sqls;
  * @author StoneHell
  */
 @Slf4j
-@ImportValidators(value = {@ImportValidator(templateCode = TemplateCodeConstants.TEMPLAT_CODE_STANDARD_DOC)})
+@ImportValidators(value = {@ImportValidator(templateCode = TemplateCodeConstants.TEMPLATE_CODE_STANDARD_DOC)})
 public class StandardDocValidator extends ValidatorHandler {
     private final ObjectMapper objectMapper;
     private final StandardDocRepository standardDocRepository;

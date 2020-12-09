@@ -44,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class DataStandardServiceImpl implements DataStandardService {
+    public static final String DEFAULT_START="0";
 
     public static final Long DEFAULT_WEIGHT = 5L;
 
@@ -583,6 +584,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                         && dataLengthList.size() == 2) {
                     WarningLevelDTO firstWarningLevelDTO = WarningLevelDTO.builder()
                             .warningLevel(WarningLevel.ORANGE)
+                            .startValue(DEFAULT_START)
                             .endValue(String.valueOf(dataLengthList.get(0) - 1))
                             .compareSymbol(CompareSymbol.EQUAL)
                             .build();
@@ -623,6 +625,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                             && valueRangeList.size() == 2) {
                         WarningLevelDTO firstWarningLevelDTO = WarningLevelDTO.builder()
                                 .warningLevel(WarningLevel.ORANGE)
+                                .startValue(DEFAULT_START)
                                 .endValue(valueRangeList.get(0))
                                 .compareSymbol(CompareSymbol.EQUAL)
                                 .build();

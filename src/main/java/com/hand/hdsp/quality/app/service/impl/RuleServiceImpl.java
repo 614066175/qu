@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import java.util.List;
+
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.api.dto.RuleLineDTO;
 import com.hand.hdsp.quality.app.service.RuleService;
@@ -10,10 +12,9 @@ import com.hand.hdsp.quality.infra.converter.RuleConverter;
 import com.hand.hdsp.quality.infra.converter.RuleLineConverter;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import io.choerodon.mybatis.domain.AuditDomain;
+import org.hzero.export.vo.ExportParam;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * <p>规则表应用服务默认实现</p>
@@ -28,7 +29,10 @@ public class RuleServiceImpl implements RuleService {
     private final RuleConverter ruleConverter;
     private final RuleLineConverter ruleLineConverter;
 
-    public RuleServiceImpl(RuleRepository ruleRepository, RuleLineRepository ruleLineRepository, RuleConverter ruleConverter, RuleLineConverter ruleLineConverter) {
+    public RuleServiceImpl(RuleRepository ruleRepository,
+                           RuleLineRepository ruleLineRepository,
+                           RuleConverter ruleConverter,
+                           RuleLineConverter ruleLineConverter) {
         this.ruleRepository = ruleRepository;
         this.ruleLineRepository = ruleLineRepository;
         this.ruleConverter = ruleConverter;
@@ -118,5 +122,10 @@ public class RuleServiceImpl implements RuleService {
     public int delete(RuleDTO ruleDTO) {
         ruleLineRepository.deleteByParentId(ruleDTO.getRuleId());
         return ruleRepository.deleteByPrimaryKey(ruleDTO);
+    }
+
+    @Override
+    public List<RuleDTO> export(RuleDTO dto, ExportParam exportParam) {
+       return ruleRepository.listAll(dto);
     }
 }

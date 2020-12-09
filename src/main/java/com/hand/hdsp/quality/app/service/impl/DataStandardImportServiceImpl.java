@@ -11,6 +11,7 @@ import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
+import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -30,7 +31,7 @@ import org.hzero.mybatis.util.Sqls;
  * @since 1.0
  */
 @Slf4j
-@ImportService(templateCode = TemplateCodeConstants.TEMPLAT_CODE_DATA_STANDARD)
+@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_DATA_STANDARD)
 public class DataStandardImportServiceImpl implements IDoImportService {
 
     private final ObjectMapper objectMapper;
@@ -71,6 +72,17 @@ public class DataStandardImportServiceImpl implements IDoImportService {
                 .build());
         if(CollectionUtils.isNotEmpty(standardGroupDTOS)){
             dataStandardDTO.setGroupId(standardGroupDTOS.get(0).getGroupId());
+        }else{
+            //创建分组
+            StandardGroupDTO standardGroupDTO = StandardGroupDTO.builder()
+                    .groupCode(dataStandardDTO.getGroupCode())
+                    .groupName(dataStandardDTO.getGroupName())
+                    .groupDesc(dataStandardDTO.getStandardDesc())
+                    .standardType(StandardConstant.StandardType.DATA)
+                    .tenantId(dataStandardDTO.getTenantId())
+                    .build();
+            standardGroupRepository.insertDTOSelective(standardGroupDTO);
+            dataStandardDTO.setGroupId(standardGroupDTO.getGroupId());
         }
         dataStandardDTO.setStandardStatus(CREATE);
         //插入数据

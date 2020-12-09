@@ -1,5 +1,10 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.CREATE;
+
+import java.io.IOException;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
@@ -15,11 +20,6 @@ import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 
-import java.io.IOException;
-import java.util.List;
-
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.CREATE;
-
 /**
  * <p>
  * description
@@ -29,7 +29,7 @@ import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.CREAT
  * @since 1.0
  */
 @Slf4j
-@ImportService(templateCode = TemplateCodeConstants.TEMPLAT_CODE_DATA_FIELD)
+@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_DATA_FIELD)
 public class DataFieldStandardImportServiceImpl implements IDoImportService {
 
     private final ObjectMapper objectMapper;

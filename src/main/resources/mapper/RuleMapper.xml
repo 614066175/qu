@@ -67,34 +67,37 @@
     </select>
     <select id="listAll" resultType="com.hand.hdsp.quality.api.dto.RuleDTO">
         select
-        rule_id,
-        group_id,
-        rule_code,
-        rule_name,
-        rule_desc,
-        check_type,
-        rule_type,
-        exception_block,
-        weight,
-        enabled_flag,
-        tenant_id,
-        object_version_number
-        from xqua_rule
+        xr.rule_id,
+        xr.group_id,
+        xrg.group_code,
+        xr.rule_code,
+        xr.rule_name,
+        xr.rule_desc,
+        xr.check_type,
+        xr.rule_type,
+        xr.exception_block,
+        xr.weight,
+        xr.enabled_flag,
+        xr.tenant_id,
+        xr.object_version_number
+        from xqua_rule xr
+        left join xqua_rule_group xrg
+        on xr.group_id=xrg.group_id
         <where>
             <if test="ruleName != null">
                 <bind name="ruleName" value="'%' + ruleName + '%'"/>
-                and rule_name like #{ruleName}
+                and xr.rule_name like #{ruleName}
             </if>
-            and rule_type in('FIELD_NUMERICAL','FIELD_CHAR','FIELD_DATE')
+            and xr.rule_type in('FIELD_NUMERICAL','FIELD_CHAR','FIELD_DATE')
             <if test='ruleModel == "STANDARD"'>
-                and tenant_id in(0,#{tenantId})
+                and xr.tenant_id in(0,#{tenantId})
             </if>
             <if test='ruleModel != "STANDARD"'>
-                and tenant_id = #{tenantId}
+                and xr.tenant_id = #{tenantId}
             </if>
-            and enabled_flag = 1
+            and xr.enabled_flag = 1
         </where>
-        order by rule_name
+        order by xr.rule_name
     </select>
     <select id="listTenant" resultType="com.hand.hdsp.quality.api.dto.RuleDTO">
         select

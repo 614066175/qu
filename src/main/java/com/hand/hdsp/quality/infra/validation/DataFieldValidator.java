@@ -1,5 +1,8 @@
 package com.hand.hdsp.quality.infra.validation;
 
+import java.io.IOException;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
@@ -18,9 +21,6 @@ import org.hzero.boot.imported.infra.validator.annotation.ImportValidators;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 
-import java.io.IOException;
-import java.util.List;
-
 /**
  * <p>
  * description
@@ -30,7 +30,7 @@ import java.util.List;
  * @since 1.0
  */
 @Slf4j
-@ImportValidators(value = {@ImportValidator(templateCode = TemplateCodeConstants.TEMPLAT_CODE_DATA_FIELD)})
+@ImportValidators(value = {@ImportValidator(templateCode = TemplateCodeConstants.TEMPLATE_CODE_DATA_FIELD)})
 public class DataFieldValidator extends ValidatorHandler {
     private final ObjectMapper objectMapper;
 

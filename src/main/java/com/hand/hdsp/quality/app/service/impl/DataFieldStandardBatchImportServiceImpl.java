@@ -1,5 +1,9 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.domain.repository.DataFieldRepository;
@@ -9,15 +13,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author wsl
  */
 @Slf4j
-@ImportService(templateCode = TemplateCodeConstants.TEMPLAT_CODE_DATA_FIELD)
+@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_DATA_FIELD)
 public class DataFieldStandardBatchImportServiceImpl implements IBatchImportService {
 
     private final ObjectMapper objectMapper;

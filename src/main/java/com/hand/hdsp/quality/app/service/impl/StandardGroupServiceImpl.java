@@ -13,6 +13,7 @@ import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.domain.repository.StandardDocRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.mapper.StandardGroupMapper;
 import com.hand.hdsp.quality.infra.vo.StandardGroupVO;
 import io.choerodon.core.domain.Page;
@@ -96,11 +97,11 @@ public class StandardGroupServiceImpl implements StandardGroupService {
     @Override
     public List<StandardGroupDTO> export(StandardGroupDTO dto, ExportParam exportParam) {
         List<StandardGroupDTO> standardGroupDTOS = null;
-        if ("DATA".equals(dto.getStandardType())) {
+        if (StandardConstant.StandardType.DATA.equals(dto.getStandardType())) {
             //获取DATA所有的分组已经分组下的标准
             standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                     .andWhere(Sqls.custom()
-                            .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, "DATA"))
+                            .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, StandardConstant.StandardType.DATA))
                     .build());
             if (CollectionUtils.isNotEmpty(standardGroupDTOS)) {
                 standardGroupDTOS.forEach(standardGroupDTO -> {
@@ -113,11 +114,11 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                 });
             }
         }
-        if ("DOC".equals(dto.getStandardType())) {
+        if (StandardConstant.StandardType.DOC.equals(dto.getStandardType())) {
             //获取DATA所有的分组已经分组下的标准
             standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                     .andWhere(Sqls.custom()
-                            .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, "DOC"))
+                            .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, StandardConstant.StandardType.DOC))
                     .build());
             if (CollectionUtils.isNotEmpty(standardGroupDTOS)) {
                 standardGroupDTOS.forEach(standardGroupDTO -> {

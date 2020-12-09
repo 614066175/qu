@@ -30,7 +30,7 @@ import org.hzero.mybatis.util.Sqls;
  * @since 1.0
  */
 @Slf4j
-@ImportValidators(value = {@ImportValidator(templateCode = TemplateCodeConstants.TEMPLAT_CODE_DATA_STANDARD)})
+@ImportValidators(value = {@ImportValidator(templateCode = TemplateCodeConstants.TEMPLATE_CODE_DATA_STANDARD)})
 public class DataStandardValidator extends ValidatorHandler {
     private final ObjectMapper objectMapper;
 

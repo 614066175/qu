@@ -1,6 +1,9 @@
 package com.hand.hdsp.quality.app.service;
 
+import java.util.List;
+
 import com.hand.hdsp.quality.api.dto.RuleDTO;
+import org.hzero.export.vo.ExportParam;
 
 /**
  * <p>规则表应用服务</p>
@@ -46,4 +49,12 @@ public interface RuleService {
      * @return 删除结果
      */
     int delete(RuleDTO ruleDTO);
+
+    /**
+     * 导出标准规则
+     * @param dto
+     * @param exportParam
+     * @return
+     */
+    List<RuleDTO> export(RuleDTO dto, ExportParam exportParam);
 }

@@ -17,7 +17,7 @@ import org.hzero.boot.imported.infra.validator.annotation.ImportService;
  * @author StoneHell
  */
 @Slf4j
-@ImportService(templateCode = TemplateCodeConstants.TEMPLAT_CODE_STANDARD_DOC)
+@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_STANDARD_DOC)
 public class StandardDocBatchImportServiceImpl implements IBatchImportService {
 
     private final ObjectMapper objectMapper;

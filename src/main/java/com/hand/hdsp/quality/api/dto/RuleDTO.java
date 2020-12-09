@@ -1,6 +1,14 @@
 package com.hand.hdsp.quality.api.dto;
 
+import java.util.List;
+import javax.persistence.Id;
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.hand.hdsp.quality.infra.render.BooleanColumnRender;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -8,12 +16,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.hzero.boot.platform.lov.annotation.LovValue;
-
-import javax.persistence.Id;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.List;
+import org.hzero.export.annotation.ExcelColumn;
+import org.hzero.export.annotation.ExcelSheet;
 
 /**
  * 规则表 数据传输对象
@@ -31,7 +35,11 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @VersionAudit
 @ModifyAudit
+@ExcelSheet(zh = "标准规则", en = "Rule")
 public class RuleDTO extends AuditDomain {
+
+    @ExcelColumn(zh = "分组编码",en = "group code")
+    private String groupCode;
 
     @ApiModelProperty("表ID，主键，供其他表做外键")
     @Id
@@ -43,39 +51,54 @@ public class RuleDTO extends AuditDomain {
     @ApiModelProperty("规则编码")
     @NotBlank
     @Size(max = 50)
+    @ExcelColumn(zh = "规则编码",en = "rule code")
     private String ruleCode;
 
     @ApiModelProperty("规则名称")
     @NotBlank
+    @ExcelColumn(zh = "规则名称",en="rule name")
     private String ruleName;
 
     @ApiModelProperty("规则描述")
+    @ExcelColumn(zh = "规则描述",en = "rule desc")
     private String ruleDesc;
 
     @ApiModelProperty("校验类别")
     @LovValue(lovCode = "HDSP.XQUA.CHECK_TYPE", meaningField = "checkTypeMeaning")
+    @ExcelColumn(zh = "校验类别",en = "check type")
     private String checkType;
 
     @ApiModelProperty("规则类型")
     @LovValue(lovCode = "HDSP.XQUA.RULE_TYPE", meaningField = "ruleTypeMeaning")
+    @ExcelColumn(zh = "规则类型",en = "rule type")
     private String ruleType;
 
     @ApiModelProperty("是否异常阻断")
     @NotNull
+    @ExcelColumn(zh = "是否异常阻断",en = "rule type" , renderers = BooleanColumnRender.class)
     private Integer exceptionBlock;
 
     @ApiModelProperty("权重")
+    @ExcelColumn(zh = "权重",en = "weight")
     private Long weight;
 
     @ApiModelProperty("是否启用 1-启用 0-不启用")
+    @ExcelColumn(zh = "是否启用",en = "enable flag",renderers = BooleanColumnRender.class)
     @NotNull
     private Integer enabledFlag;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull
+    @ExcelColumn(zh = "租户ID",en = "tenant id")
     private Long tenantId;
 
     @ApiModelProperty(value = "规则校验项List")
     private List<RuleLineDTO> ruleLineDTOList;
+
+    @Transient
+    private String groupDesc;
+
+    @Transient
+    private String groupName;
 
 }
