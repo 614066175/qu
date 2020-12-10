@@ -15,6 +15,8 @@ import com.hand.hdsp.quality.domain.entity.NameStandard;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.converter.NameStandardConverter;
+import com.hand.hdsp.quality.infra.vo.NameStandardDatasourceVO;
+import com.hand.hdsp.quality.infra.vo.NameStandardTableVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -197,6 +199,20 @@ public class NameStandardServiceImpl implements NameStandardService {
     @Override
     public Page<NameStandardDTO> export(NameStandardDTO dto, ExportParam exportParam, PageRequest pageRequest) {
         return PageHelper.doPageAndSort(pageRequest,()->nameStandardRepository.list(dto));
+    }
+
+    @Override
+    public List<NameStandardTableVO> getTables(NameStandardDatasourceVO nameStandardDatasourceVO) {
+        if(StringUtils.isEmpty(nameStandardDatasourceVO.getDatasource())
+                ||CollectionUtils.isEmpty(nameStandardDatasourceVO.getSchemas())){
+            throw new CommonException(ErrorCode.NAME_STANDARD_PARAMS_EMPTY);
+        }
+        List<NameStandardTableVO> nameStandardTableVoList = new ArrayList<>(nameStandardDatasourceVO.getSchemas().size());
+        DriverSession driverSession = driverSessionService.getDriverSession(DetailsHelper.getUserDetails().getTenantId(),
+                nameStandardDatasourceVO.getDatasource());
+        nameStandardDatasourceVO.getSchemas().forEach(x-> nameStandardTableVoList.add(NameStandardTableVO
+                .builder().schema(x).tables(driverSession.tableList(x)).build()));
+        return nameStandardTableVoList;
     }
 
     /**

@@ -5,6 +5,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import com.hand.hdsp.quality.app.service.NameStandardService;
 import com.hand.hdsp.quality.config.SwaggerTags;
+import com.hand.hdsp.quality.infra.vo.NameStandardDatasourceVO;
+import com.hand.hdsp.quality.infra.vo.NameStandardTableVO;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.swagger.annotations.*;
 import org.hzero.core.util.Results;
@@ -154,5 +156,18 @@ public class NameStandardController extends BaseController {
         Page<NameStandardDTO> dtoList = nameStandardService.export(dto, exportParam, pageRequest);
         response.addHeader("Access-Control-Expose-Headers","Content-Disposition");
         return Results.success(dtoList);
+    }
+
+    @ApiOperation(value = "获取表")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/tables")
+    public ResponseEntity<List<NameStandardTableVO>> getTables(NameStandardDatasourceVO nameStandardDatasourceVO) {
+        return Results.success(nameStandardService.getTables(nameStandardDatasourceVO));
     }
 }

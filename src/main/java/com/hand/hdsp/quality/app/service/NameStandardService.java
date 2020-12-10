@@ -2,9 +2,9 @@ package com.hand.hdsp.quality.app.service;
 
 import java.util.List;
 
-import com.hand.hdsp.quality.api.dto.DataStandardDTO;
-import com.hand.hdsp.quality.api.dto.NameExecHisDetailDTO;
 import com.hand.hdsp.quality.api.dto.NameStandardDTO;
+import com.hand.hdsp.quality.infra.vo.NameStandardDatasourceVO;
+import com.hand.hdsp.quality.infra.vo.NameStandardTableVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.export.vo.ExportParam;
@@ -60,5 +60,13 @@ public interface NameStandardService {
      * @return Page<NameStandardDTO>
      */
     Page<NameStandardDTO> export(NameStandardDTO dto, ExportParam exportParam, PageRequest pageRequest);
+
+    /**
+     * 获取表
+     *
+     * @param nameStandardDatasourceVO 数据源信息
+     * @return List<NameStandardTableVO>
+     */
+    List<NameStandardTableVO> getTables(NameStandardDatasourceVO nameStandardDatasourceVO);
 
 }
