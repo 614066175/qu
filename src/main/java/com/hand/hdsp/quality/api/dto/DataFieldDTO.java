@@ -128,6 +128,11 @@ public class DataFieldDTO extends AuditDomain {
     private String groupCode;
 
     @Transient
+    @ExcelColumn(zh = "分组描述", en = "groupDesc", groups = {Group1.class})
+    private String groupDesc;
+
+
+    @Transient
     private List<Long> dataLengthList;
 
     public interface Group1 {
