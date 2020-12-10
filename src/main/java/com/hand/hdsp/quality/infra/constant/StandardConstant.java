@@ -46,5 +46,9 @@ public interface StandardConstant {
       String REFERENCE="REFERENCE";
     }
 
+    interface LengthType{
+        String FIXED="FIXED";
+        String RANGE="RANGE";
+    }
 
 }

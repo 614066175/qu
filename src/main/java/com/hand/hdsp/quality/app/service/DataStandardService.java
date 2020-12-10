@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.app.service;
 
 import java.util.List;
 
+import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import io.choerodon.core.domain.Page;
@@ -86,4 +87,12 @@ public interface DataStandardService {
      * @return
      */
     List<DataStandardDTO> export(DataStandardDTO dto, ExportParam exportParam, PageRequest pageRequest);
+
+    /**
+     *
+     * 标准转换为规则
+     * @param standardId
+     * @return
+     */
+    BatchPlanFieldDTO standardToRule(Long standardId);
 }

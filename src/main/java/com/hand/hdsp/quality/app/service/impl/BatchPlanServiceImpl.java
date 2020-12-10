@@ -33,6 +33,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.alert.service.AlertMessageHandler;
 import org.hzero.boot.alert.vo.InboundMessage;
 import org.hzero.boot.driver.api.dto.PluginDatasourceDTO;
@@ -203,7 +204,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     private void doSendMessage(Long planId, List<ResultWaringVO> resultWaringVOS, BatchResultDTO batchResultDTO, String warningLevel) {
         HashMap<String, String> labels = new HashMap<>();
         BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(planId);
-        if ((batchPlan != null) && (batchPlan.getWarningCode() != null)) {
+        if (Objects.nonNull(batchPlan) && Strings.isNotEmpty(batchPlan.getWarningCode())) {
             List<String> exceptionInfos = resultWaringVOS.stream()
                     .filter(vo -> warningLevel.equals(vo.getWarningLevel()))
                     .map(ResultWaringVO::getExceptionInfo)
