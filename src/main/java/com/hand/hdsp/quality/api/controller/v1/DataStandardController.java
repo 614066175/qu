@@ -238,7 +238,6 @@ public class DataStandardController {
     @ApiOperation(value = "数据标准转换标准规则")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/standard-to-rule")
-    @ExcelExport(value = DataStandardDTO.class)
     public ResponseEntity<?> standardToRule(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                             Long standardId) {
         BatchPlanFieldDTO batchPlanFieldDTO =dataStandardService.standardToRule(standardId);
