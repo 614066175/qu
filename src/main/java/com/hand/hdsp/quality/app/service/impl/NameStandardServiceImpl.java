@@ -210,8 +210,15 @@ public class NameStandardServiceImpl implements NameStandardService {
         List<NameStandardTableVO> nameStandardTableVoList = new ArrayList<>(nameStandardDatasourceVO.getSchemas().size());
         DriverSession driverSession = driverSessionService.getDriverSession(DetailsHelper.getUserDetails().getTenantId(),
                 nameStandardDatasourceVO.getDatasource());
-        nameStandardDatasourceVO.getSchemas().forEach(x-> nameStandardTableVoList.add(NameStandardTableVO
-                .builder().schema(x).tables(driverSession.tableList(x)).build()));
+        nameStandardDatasourceVO.getSchemas().forEach(x-> nameStandardTableVoList
+                .add(NameStandardTableVO.builder()
+                        .title(x)
+                        .id(x)
+                        .children(driverSession.tableList(x).stream()
+                                .map(o->NameStandardTableVO.builder()
+                                        .id(x+"."+o).title(o)
+                                        .build()).collect(Collectors.toList()))
+                        .build()));
         return nameStandardTableVoList;
     }
 

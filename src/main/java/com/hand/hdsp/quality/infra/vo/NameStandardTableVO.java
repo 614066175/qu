@@ -21,6 +21,7 @@ import lombok.*;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class NameStandardTableVO {
 
-    private String schema;
-    private List<String> tables;
+    private String id;
+    private String title;
+    private List<NameStandardTableVO> children;
 }
