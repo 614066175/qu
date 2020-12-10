@@ -30,7 +30,7 @@ import org.hzero.mybatis.util.Sqls;
  * @since 1.0
  */
 @Slf4j
-@ImportValidators(value = {@ImportValidator(templateCode = TemplateCodeConstants.TEMPLATE_CODE_DATA_FIELD)})
+@ImportValidators(value = {@ImportValidator(templateCode = TemplateCodeConstants.TEMPLATE_CODE_FIELD_STANDARD)})
 public class DataFieldValidator extends ValidatorHandler {
     private final ObjectMapper objectMapper;
 
@@ -53,15 +53,6 @@ public class DataFieldValidator extends ValidatorHandler {
                 dataFieldDTO = objectMapper.readValue(data, DataFieldDTO.class);
                 //导入数据标准分组是否存在
                 Long tenantId = DetailsHelper.getUserDetails().getTenantId();
-                List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
-                        .andWhere(Sqls.custom()
-                                .andEqualTo(StandardGroup.FIELD_GROUP_CODE, dataFieldDTO.getGroupCode())
-                                .andEqualTo(StandardGroup.FIELD_TENANT_ID, tenantId))
-                        .build());
-                //分组不存在
-                if (CollectionUtils.isEmpty(standardGroupDTOS)) {
-                    return false;
-                }
                 List<DataFieldDTO> dataFieldDTOList;
                 dataFieldDTOList = dataFieldRepository.selectDTOByCondition(Condition.builder(DataField.class)
                         .andWhere(Sqls.custom()
@@ -69,10 +60,7 @@ public class DataFieldValidator extends ValidatorHandler {
                                 .andEqualTo(DataField.FIELD_TENANT_ID, tenantId))
                         .build());
                 //标准名称存在
-                if (CollectionUtils.isNotEmpty(dataFieldDTOList)){
-                    return false;
-                }
-                return true;
+                return CollectionUtils.isEmpty(dataFieldDTOList);
             } catch (IOException e) {
                 return false;
             }

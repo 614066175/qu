@@ -17,7 +17,7 @@ import org.hzero.boot.imported.infra.validator.annotation.ImportService;
  * @author wsl
  */
 @Slf4j
-@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_DATA_FIELD)
+@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_FIELD_STANDARD)
 public class DataFieldStandardBatchImportServiceImpl implements IBatchImportService {
 
     private final ObjectMapper objectMapper;

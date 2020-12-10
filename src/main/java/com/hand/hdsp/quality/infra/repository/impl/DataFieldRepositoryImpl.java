@@ -7,6 +7,7 @@ import com.hand.hdsp.quality.domain.entity.DataField;
 import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.DataFieldRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
+import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
@@ -55,6 +56,17 @@ public class DataFieldRepositoryImpl extends BaseRepositoryImpl<DataField, DataF
                         .build());
                 if(CollectionUtils.isNotEmpty(standardGroupDTOS)){
                     dataFieldDTO.setGroupId(standardGroupDTOS.get(0).getGroupId());
+                }else {
+                    //创建分组
+                    StandardGroupDTO standardGroupDTO = StandardGroupDTO.builder()
+                            .groupCode(dataFieldDTO.getGroupCode())
+                            .groupName(dataFieldDTO.getGroupName())
+                            .groupDesc(dataFieldDTO.getStandardDesc())
+                            .standardType(StandardConstant.StandardType.FIELD)
+                            .tenantId(dataFieldDTO.getTenantId())
+                            .build();
+                    standardGroupRepository.insertDTOSelective(standardGroupDTO);
+                    dataFieldDTO.setGroupId(standardGroupDTO.getGroupId());
                 }
                 importDataFieldDTOList.add(dataFieldDTO);
                 dataFieldDTO.setStandardStatus(CREATE);
