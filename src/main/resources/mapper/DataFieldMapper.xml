@@ -92,9 +92,16 @@
             <if test="dataFieldDTO.tenantId!=null">
                 and fs.tenant_id=#{dataFieldDTO.tenantId}
             </if>
+            <if test="dataFieldDTO.lastUpdateDateFrom !=null">
+                AND fs.last_update_date &gt;= #{lastUpdateDateFrom}
+            </if>
+            <if test="dataFieldDTO.lastUpdateDateTo != null">
+                AND fs.last_update_date &lt;= #{lastUpdateDateTo}
+            </if>
         </where>
         order by fs.last_update_date desc
     </select>
+
     <select id="selectIdByChargeDeptName" resultType="java.lang.Integer">
         SELECT
             unit_id
@@ -103,6 +110,7 @@
         WHERE
             unit_name=#{chargeDeptName}
     </select>
+
     <select id="selectIdByChargeName" resultType="java.lang.Integer">
         SELECT
             id

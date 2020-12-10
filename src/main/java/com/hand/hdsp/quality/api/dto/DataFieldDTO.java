@@ -135,6 +135,12 @@ public class DataFieldDTO extends AuditDomain {
     @Transient
     private List<Long> dataLengthList;
 
+    @Transient
+    private String lastUpdateDateFrom;
+
+    @Transient
+    private String lastUpdateDateTo;
+
     public interface Group1 {
     }
 
