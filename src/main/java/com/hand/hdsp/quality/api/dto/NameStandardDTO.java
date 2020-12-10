@@ -154,4 +154,10 @@ public class NameStandardDTO extends AuditDomain {
     @Transient
     private String groupName;
 
+    @Transient
+    private Date lastUpdateDateFrom;
+
+    @Transient
+    private Date lastUpdateDateTo;
+
 }

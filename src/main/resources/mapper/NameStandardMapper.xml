@@ -142,6 +142,12 @@
             <bind name="lastUpdateNameLike" value="'%'+lastUpdateName+'%'"/>
             AND iu.login_name LIKE #{lastUpdateNameLike}
         </if>
+        <if test="lastUpdateDateFrom !=null">
+            AND xns.last_update_date &gt;= #{lastUpdateDateFrom}
+        </if>
+        <if test="lastUpdateDateTo != null">
+            AND xns.last_update_date &lt;= #{lastUpdateDateTo}
+        </if>
     </select>
     <select id="getGroupId" resultType="java.lang.Long">
         SELECT xsg.group_id FROM xsta_standard_group xsg WHERE xsg.group_code=#{groupCode}
