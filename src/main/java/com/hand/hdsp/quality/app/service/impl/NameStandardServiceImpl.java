@@ -1,9 +1,6 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -14,6 +11,7 @@ import com.hand.hdsp.quality.domain.entity.NameExecHistory;
 import com.hand.hdsp.quality.domain.entity.NameStandard;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.constant.NameStandardStatusEnum;
 import com.hand.hdsp.quality.infra.converter.NameStandardConverter;
 import com.hand.hdsp.quality.infra.vo.NameStandardDatasourceVO;
 import com.hand.hdsp.quality.infra.vo.NameStandardTableVO;
@@ -26,7 +24,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
-import org.hzero.boot.platform.lov.dto.LovValueDTO;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.stereotype.Service;
@@ -48,7 +45,6 @@ public class NameStandardServiceImpl implements NameStandardService {
     private final NameExecHistoryRepository nameExecHistoryRepository;
     private final NameStandardConverter nameStandardConverter;
     private final DriverSessionService driverSessionService;
-    private final LovAdapter lovAdapter;
     private static final String ERROR_MESSAGE = "table name cannot match rule: %s";
 
 
@@ -59,8 +55,7 @@ public class NameStandardServiceImpl implements NameStandardService {
                                    NameExecHisDetailRepository nameExecHisDetailRepository,
                                    NameExecHistoryRepository nameExecHistoryRepository,
                                    NameStandardConverter nameStandardConverter,
-                                   DriverSessionService driverSessionService,
-                                   LovAdapter lovAdapter) {
+                                   DriverSessionService driverSessionService) {
         this.nameStandardRepository = nameStandardRepository;
         this.nameAimRepository = nameAimRepository;
         this.nameAimIncludeRepository = nameAimIncludeRepository;
@@ -69,7 +64,6 @@ public class NameStandardServiceImpl implements NameStandardService {
         this.nameExecHistoryRepository = nameExecHistoryRepository;
         this.nameStandardConverter = nameStandardConverter;
         this.driverSessionService = driverSessionService;
-        this.lovAdapter = lovAdapter;
     }
 
 
@@ -147,14 +141,12 @@ public class NameStandardServiceImpl implements NameStandardService {
         NameStandardDTO nameStandardDTO = Optional
                 .ofNullable(nameStandardRepository.selectDTOByPrimaryKey(standardId))
                 .orElseThrow(() -> new CommonException(ErrorCode.NAME_STANDARD_NOT_EXIST));
-        List<LovValueDTO> lovValueDTOList = lovAdapter.queryLovValue("HDSP.XSTA.EXEC_STATUS",
-                DetailsHelper.getUserDetails().getTenantId());
         List<NameAimDTO> nameAimDTOList = nameAimRepository.list(nameStandardDTO.getStandardId());
         NameExecHistoryDTO nameExecHistoryDTO = new NameExecHistoryDTO();
         nameExecHistoryDTO.setExecStartTime(new Date());
         nameExecHistoryDTO.setStandardId(nameStandardDTO.getStandardId());
         try {
-            nameStandardDTO.setLatestCheckedStatus(lovValueDTOList.get(1).getValue());
+            nameStandardDTO.setLatestCheckedStatus(NameStandardStatusEnum.RUNNING.getStatusCode());
             nameStandardDTO.setLatestAbnormalNum(-1L);
             nameStandardRepository.updateDTOOptional(nameStandardDTO,NameStandard.FIELD_LATEST_CHECKED_STATUS,
                     NameStandard.FIELD_LATEST_ABNORMAL_NUM);
@@ -169,20 +161,20 @@ public class NameStandardServiceImpl implements NameStandardService {
             });
             nameExecHistoryDTO.setAbnormalNum((long) abnormalList.size());
             nameExecHistoryDTO.setExecEndTime(new Date());
-            nameExecHistoryDTO.setExecStatus(lovValueDTOList.get(2).getValue());
+            nameExecHistoryDTO.setExecStatus(NameStandardStatusEnum.SUCCESS.getStatusCode());
             nameExecHistoryRepository.insertDTOSelective(nameExecHistoryDTO);
             abnormalList.forEach(x->x.setHistoryId(nameExecHistoryDTO.getHistoryId()));
             nameExecHisDetailRepository.batchInsertDTOSelective(abnormalList);
 
-            nameStandardDTO.setLatestCheckedStatus(lovValueDTOList.get(2).getValue());
+            nameStandardDTO.setLatestCheckedStatus(NameStandardStatusEnum.SUCCESS.getStatusCode());
             nameStandardDTO.setLatestAbnormalNum((long)abnormalList.size());
             nameStandardRepository.updateDTOOptional(nameStandardDTO,NameStandard.FIELD_LATEST_CHECKED_STATUS,
                     NameStandard.FIELD_LATEST_ABNORMAL_NUM);
 
         }catch (Exception e){
-            nameStandardDTO.setLatestCheckedStatus(lovValueDTOList.get(1).getValue());
+            nameStandardDTO.setLatestCheckedStatus(NameStandardStatusEnum.FAILED.getStatusCode());
             nameStandardRepository.updateDTOOptional(nameStandardDTO,NameStandard.FIELD_LATEST_CHECKED_STATUS);
-            nameExecHistoryDTO.setExecStatus(lovValueDTOList.get(3).getValue());
+            nameExecHistoryDTO.setExecStatus(NameStandardStatusEnum.FAILED.getStatusCode());
             nameExecHistoryRepository.insertDTOSelective(nameExecHistoryDTO);
             e.printStackTrace();
         }
@@ -231,14 +223,23 @@ public class NameStandardServiceImpl implements NameStandardService {
     private void getAimTableFromNameAimDTO(NameAimDTO nameAimDTO,List<NameExecHisDetailDTO> aimTableList){
         DriverSession driverSession = driverSessionService.getDriverSession(nameAimDTO.getTenantId(),nameAimDTO.getDatasourceCode());
         nameAimDTO.getNameAimIncludeDTOList().forEach(x->{
-            List<String> tables = driverSession.tableList(x.getSchemaName()).stream()
-                    .filter(o->!Pattern.matches(nameAimDTO.getExcludeRule(),o))
-                    .collect(Collectors.toList());
+            List<String> tables = driverSession.tableList(x.getSchemaName());
+            if(CollectionUtils.isEmpty(tables)){
+                throw new CommonException("invalid schema:{0}/{1}",nameAimDTO.getDatasourceCode(),x.getSchemaName());
+            }
+            if(!Objects.isNull(nameAimDTO.getExcludeRule())) {
+                List<String> excludeRuleTable = tables.stream().filter(o -> Pattern.matches(nameAimDTO.getExcludeRule(), o)).collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(excludeRuleTable)){
+                    tables.removeAll(excludeRuleTable);
+                }
+            }
             List<String> excludeTables = nameAimDTO.getNameAimExcludeDTOList().stream()
                     .filter(o->o.getSchemaName().equals(x.getSchemaName()))
                     .map(NameAimExcludeDTO::getTableName)
                     .collect(Collectors.toList());
-            tables.removeAll(excludeTables);
+            if (CollectionUtils.isNotEmpty(excludeTables)){
+                tables.removeAll(excludeTables);
+            }
             aimTableList.addAll(tables.stream()
                     .map(o-> NameExecHisDetailDTO.builder()
                             .tenantId(nameAimDTO.getTenantId())
