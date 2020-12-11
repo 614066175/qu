@@ -1,14 +1,13 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.*;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.RANGE;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.LengthType.FIXED;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.hand.hdsp.quality.api.dto.*;
@@ -20,6 +19,9 @@ import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardConstant.AimType;
 import com.hand.hdsp.quality.infra.constant.WarningLevel;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
+import com.hand.hdsp.quality.infra.util.DataLengthHandler;
+import com.hand.hdsp.quality.infra.util.DataPatternHandler;
+import com.hand.hdsp.quality.infra.util.ValueRangeHandler;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -31,6 +33,7 @@ import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class DataStandardServiceImpl implements DataStandardService {
-    public static final String DEFAULT_START="0";
+    public static final String DEFAULT_START = "0";
 
     public static final Long DEFAULT_WEIGHT = 5L;
 
@@ -74,6 +77,13 @@ public class DataStandardServiceImpl implements DataStandardService {
     private final BatchPlanFieldConRepository batchPlanFieldConRepository;
 
     private final StandardAimService standardAimService;
+
+    @Autowired
+    private DataPatternHandler dataPatternHandler;
+    @Autowired
+    private DataLengthHandler dataLengthHandler;
+    @Autowired
+    private ValueRangeHandler valueRangeHandler;
 
     public DataStandardServiceImpl(DataStandardRepository dataStandardRepository,
                                    DataStandardVersionRepository dataStandardVersionRepository,
@@ -453,6 +463,30 @@ public class DataStandardServiceImpl implements DataStandardService {
         return list(pageRequest, dto);
     }
 
+    @Override
+    public BatchPlanFieldDTO standardToRule(Long standardId) {
+        DataStandardDTO dataStandardDTO = dataStandardRepository.selectDTOByPrimaryKey(standardId);
+        BatchPlanFieldDTO batchPlanFieldDTO = BatchPlanFieldDTO.builder()
+                .ruleCode(dataStandardDTO.getStandardCode())
+                .ruleName(dataStandardDTO.getStandardName())
+                .ruleDesc(dataStandardDTO.getStandardDesc())
+                .checkType(STANDARD)
+                .weight(DEFAULT_WEIGHT)
+                .build();
+        List<BatchPlanFieldLineDTO> batchPlanFieldLineDTOList=new ArrayList<>();
+        if(Strings.isNotEmpty(dataStandardDTO.getDataPattern())){
+           batchPlanFieldLineDTOList.add(dataPatternHandler.handle(dataStandardDTO));
+        }
+        if(Strings.isNotEmpty(dataStandardDTO.getDataLength())){
+            batchPlanFieldLineDTOList.add(dataLengthHandler.handle(dataStandardDTO));
+        }
+        if(Strings.isNotEmpty(dataStandardDTO.getValueRange())){
+            batchPlanFieldLineDTOList.add(valueRangeHandler.handle(dataStandardDTO));
+        }
+        batchPlanFieldDTO.setBatchPlanFieldLineDTOList(batchPlanFieldLineDTOList);
+        return batchPlanFieldDTO;
+    }
+
     /**
      * 关联评估方案
      *
@@ -500,7 +534,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .andEqualTo(BatchPlanField.FIELD_RULE_CODE, dataStandardDTO.getStandardCode())
                         .andEqualTo(BatchPlanField.FIELD_RULE_NAME, dataStandardDTO.getStandardName())
                         .andEqualTo(BatchPlanField.FIELD_RULE_DESC, dataStandardDTO.getStandardDesc())
-                        .andEqualTo(BatchPlanField.FIELD_CHECK_TYPE, CheckType.STANDARD))
+                        .andEqualTo(BatchPlanField.FIELD_CHECK_TYPE, STANDARD))
                 .build());
         BatchPlanFieldDTO batchPlanFieldDTO;
         if (CollectionUtils.isEmpty(batchPlanFieldDTOS)) {
@@ -509,7 +543,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                     .ruleCode(dataStandardDTO.getStandardCode())
                     .ruleName(dataStandardDTO.getStandardName())
                     .ruleDesc(dataStandardDTO.getStandardDesc())
-                    .checkType(CheckType.STANDARD)
+                    .checkType(STANDARD)
                     .weight(DEFAULT_WEIGHT)
                     .build();
             batchPlanFieldRepository.insertDTOSelective(batchPlanFieldDTO);
@@ -553,7 +587,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                     .tenantId(standardAimDTO.getTenantId())
                     .build();
             //固定值
-            if (CountType.FIXED_VALUE.equals(dataStandardDTO.getLengthType())) {
+            if (FIXED.equals(dataStandardDTO.getLengthType())) {
                 batchPlanFieldLineDTO.setCountType(CountType.FIXED_VALUE);
                 batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
                 //生成每个校验项的配置项

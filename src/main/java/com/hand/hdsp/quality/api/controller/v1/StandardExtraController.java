@@ -132,6 +132,7 @@ public class StandardExtraController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/batch-create")
     public ResponseEntity<?> batchCreate(@PathVariable("organizationId") Long tenantId, @RequestBody List<StandardExtraDTO> standardExtraDTOList) {
+        standardExtraDTOList.forEach(standardExtraDTO -> standardExtraDTO.setTenantId(tenantId));
         standardExtraRepository.batchInsertDTOSelective(standardExtraDTOList);
         return Results.success(standardExtraDTOList);
     }
@@ -146,6 +147,7 @@ public class StandardExtraController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/batch-update")
     public ResponseEntity<?> batchUpdate(@PathVariable("organizationId") Long tenantId, @RequestBody List<StandardExtraDTO> standardExtraDTOList) {
+        standardExtraDTOList.forEach(standardExtraDTO -> standardExtraDTO.setTenantId(tenantId));
         standardExtraService.batchUpdate(standardExtraDTOList);
         return Results.success(standardExtraDTOList);
     }
@@ -161,6 +163,7 @@ public class StandardExtraController extends BaseController {
     @DeleteMapping("/batch-remove")
     public ResponseEntity<?> batchRemove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody List<StandardExtraDTO> standardExtraDTOList) {
+        standardExtraDTOList.forEach(standardExtraDTO -> standardExtraDTO.setTenantId(tenantId));
         standardExtraRepository.batchDTODelete(standardExtraDTOList);
         return Results.success(standardExtraDTOList);
     }

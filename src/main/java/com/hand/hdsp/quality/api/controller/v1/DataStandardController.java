@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.api.controller.v1;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
+import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import com.hand.hdsp.quality.app.service.DataStandardService;
@@ -231,5 +232,15 @@ public class DataStandardController {
         List<DataStandardDTO> dtoList =
                 dataStandardService.export(dto, exportParam, pageRequest);
         return Results.success(dtoList);
+    }
+
+
+    @ApiOperation(value = "数据标准转换标准规则")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/standard-to-rule")
+    public ResponseEntity<?> standardToRule(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                            Long standardId) {
+        BatchPlanFieldDTO batchPlanFieldDTO =dataStandardService.standardToRule(standardId);
+        return Results.success(batchPlanFieldDTO);
     }
 }
