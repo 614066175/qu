@@ -58,6 +58,10 @@ public class NameExecHistoryDTO extends AuditDomain {
     @NotNull
     private Date execEndTime;
 
+    @ApiModelProperty(value = "校验规则")
+    @NotBlank
+    private String execRule;
+
     @LovValue(lovCode = "HDSP.XSTA.EXEC_STATUS",meaningField = "execStatusMeaning")
     @ApiModelProperty(value = "稽核状态 (快码：HDSP.XSTA.EXEC_STATUS) <READY:就绪 RUNNING：执行中 SUCCESS：成功 FAILED：失败>")
     @NotBlank

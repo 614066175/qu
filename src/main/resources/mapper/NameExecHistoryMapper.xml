@@ -9,6 +9,7 @@
         <result column="abnormal_num" property="abnormalNum" jdbcType="DECIMAL"/>
         <result column="exec_start_time" property="execStartTime" jdbcType="TIMESTAMP"/>
         <result column="exec_end_time" property="execEndTime" jdbcType="TIMESTAMP"/>
+        <result column="exec_rulr" property="execRule" jdbcType="VARCHAR"/>
         <result column="exec_status" property="execStatus" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
@@ -30,6 +31,7 @@
         ${prefix}.abnormal_num,
         ${prefix}.exec_start_time,
         ${prefix}.exec_end_time,
+        ${prefix}.exec_rule,
         ${prefix}.exec_status,
         ${prefix}.tenant_id,
         ${prefix}.object_version_number
@@ -51,7 +53,6 @@
             <property name="prefix" value="xneh"/>
         </include>
         FROM xsta_name_exec_history xneh
---         LEFT JOIN xsta_name_exec_his_detail xnehd ON (xneh.history_id=xnehd.history_id)
         WHERE xneh.standard_id=#{standardId}
     </select>
 

@@ -144,6 +144,7 @@ public class NameStandardServiceImpl implements NameStandardService {
         List<NameAimDTO> nameAimDTOList = nameAimRepository.list(nameStandardDTO.getStandardId());
         NameExecHistoryDTO nameExecHistoryDTO = new NameExecHistoryDTO();
         nameExecHistoryDTO.setExecStartTime(new Date());
+        nameExecHistoryDTO.setExecRule(nameStandardDTO.getStandardRule());
         nameExecHistoryDTO.setStandardId(nameStandardDTO.getStandardId());
         try {
             nameStandardDTO.setLatestCheckedStatus(NameStandardStatusEnum.RUNNING.getStatusCode());
@@ -228,7 +229,8 @@ public class NameStandardServiceImpl implements NameStandardService {
                 throw new CommonException("invalid schema:{0}/{1}",nameAimDTO.getDatasourceCode(),x.getSchemaName());
             }
             if(!Objects.isNull(nameAimDTO.getExcludeRule())) {
-                List<String> excludeRuleTable = tables.stream().filter(o -> Pattern.matches(nameAimDTO.getExcludeRule(), o)).collect(Collectors.toList());
+                List<String> excludeRuleTable = tables.stream().filter(o -> Pattern.matches(nameAimDTO.getExcludeRule(), o))
+                        .collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(excludeRuleTable)){
                     tables.removeAll(excludeRuleTable);
                 }

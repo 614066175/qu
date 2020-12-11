@@ -37,6 +37,7 @@ public class NameExecHistory extends AuditDomain {
     public static final String FIELD_EXEC_END_TIME = "execEndTime";
     public static final String FIELD_EXEC_STATUS = "execStatus";
     public static final String FIELD_TENANT_ID = "tenantId";
+    public static final String FIELD_EXEC_RULE = "execRule";
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -59,6 +60,8 @@ public class NameExecHistory extends AuditDomain {
     private Date execStartTime;
 
     private Date execEndTime;
+
+    private String execRule;
 
     private String execStatus;
 
