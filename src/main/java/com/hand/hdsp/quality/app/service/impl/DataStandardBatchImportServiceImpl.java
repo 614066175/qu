@@ -42,9 +42,7 @@ public class DataStandardBatchImportServiceImpl implements IBatchImportService {
         try {
             for (String json : data) {
                 DataStandardDTO dataStandardDTO = objectMapper.readValue(json, DataStandardDTO.class);
-                if (tenantId != 0) {
-                    dataStandardDTO.setTenantId(tenantId);
-                }
+                dataStandardDTO.setTenantId(tenantId);
                 dataStandardDTOList.add(dataStandardDTO);
             }
         } catch (IOException e) {
