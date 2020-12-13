@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.infra.vo;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
@@ -21,4 +23,6 @@ public class ResultWaringVO {
     private Long countSum;
 
     private String exceptionInfo;
+
+    private List<WarningLevelVO> warningLevelVOList;
 }

@@ -17,6 +17,8 @@ import com.hand.hdsp.quality.infra.dataobject.MeasureResultDO;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
+import com.hand.hdsp.quality.infra.util.JsonUtils;
+import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.starter.driver.core.session.DriverSession;
 
@@ -63,7 +65,9 @@ public class RegularMeasure implements Measure {
             String value = response.get(0).values().toArray(new String[0])[0];
             BigDecimal result = new BigDecimal(value);
             if (result.compareTo(BigDecimal.ONE) != 0) {
-                batchResultItem.setWarningLevel(param.getWarningLevelList().get(0).getWarningLevel());
+                batchResultItem.setWarningLevel(JsonUtils.object2Json(WarningLevelVO.builder()
+                        .warningLevel(param.getWarningLevelList().get(0).getWarningLevel())
+                        .build()));
                 batchResultItem.setExceptionInfo("不满足正则表达式");
             }
         }
@@ -87,7 +91,9 @@ public class RegularMeasure implements Measure {
                 for (MeasureResultDO measureResultDO : list) {
                     if (!pattern.matcher(measureResultDO.getResult()).find()) {
                         batchResultItem.setActualValue(measureResultDO.getResult());
-                        batchResultItem.setWarningLevel(param.getWarningLevelList().get(0).getWarningLevel());
+                        batchResultItem.setWarningLevel(JsonUtils.object2Json(WarningLevelVO.builder()
+                                .warningLevel(param.getWarningLevelList().get(0).getWarningLevel())
+                                .build()));
                         batchResultItem.setExceptionInfo("不满足正则表达式");
                         successFlag = false;
                         break;

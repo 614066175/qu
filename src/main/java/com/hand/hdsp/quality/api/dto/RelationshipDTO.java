@@ -1,13 +1,13 @@
 package com.hand.hdsp.quality.api.dto;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 
 /**
  * <p>批数据方案-表间规则关联关系表 数据传输对象</p>
@@ -36,4 +36,7 @@ public class RelationshipDTO extends AuditDomain {
     @NotBlank
     @Size(max = 50)
     private String relFieldName;
+
+
+    private TableRelCheckDTO tableRelCheckDTO;
 }

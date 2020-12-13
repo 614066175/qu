@@ -219,11 +219,11 @@ public interface PlanConstant {
         String ID = "ID";
     }
 
-    interface CheckType{
+    interface CheckType {
         /**
          * 标准规范
          */
-        String STANDARD="STANDARD";
+        String STANDARD = "STANDARD";
     }
 
     /**
@@ -246,11 +246,21 @@ public interface PlanConstant {
         /**
          * 字段值
          */
-        String FIELD_VALUE="FIELD_VALUE";
+        String FIELD_VALUE = "FIELD_VALUE";
         /**
          * 正则
          */
-        String REGULAR="REGULAR";
+        String REGULAR = "REGULAR";
+
+        /**
+         * accuracy rate 准确率
+         */
+        String ACCURACY_RATE = "ACCURACY_RATE";
+
+        /**
+         * 计算值比较 calculated value
+         */
+        String CALCULATED_VALUE="CALCULATED_VALUE";
     }
 
     /**
@@ -275,7 +285,7 @@ public interface PlanConstant {
          */
         String LOGIC_VALUE = "LOGIC_VALUE";
 
-        String LENGTH_RANGE="LENGTH_RANGE";
+        String LENGTH_RANGE = "LENGTH_RANGE";
 
     }
 
@@ -303,16 +313,17 @@ public interface PlanConstant {
         String SQL = "SQL";
     }
 
-    interface StandardValueType{
-        String AREA="AREA";
-        String ENUM="ENUM";
-        String VALUE_SET="VALUE_SET";
+    interface StandardValueType {
+        String AREA = "AREA";
+        String ENUM = "ENUM";
+        String VALUE_SET = "VALUE_SET";
 
     }
-    interface StandardStatus{
-        String ONLINE="ONLINE";
-        String ONLINE_APPROVING="ONLINE_APPROVING";
-        String OFFLINE="OFFLINE_APPROVING";
-        String OFFLINE_APPROVING="OFFLINE_APPROVING";
+
+    interface StandardStatus {
+        String ONLINE = "ONLINE";
+        String ONLINE_APPROVING = "ONLINE_APPROVING";
+        String OFFLINE = "OFFLINE_APPROVING";
+        String OFFLINE_APPROVING = "OFFLINE_APPROVING";
     }
 }

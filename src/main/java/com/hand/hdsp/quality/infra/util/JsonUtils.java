@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.quality.api.dto.RelationshipDTO;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.util.ResponseUtils;
@@ -52,6 +53,24 @@ public class JsonUtils {
         }
         try {
             return ResponseUtils.getObjectMapper().readValue(content, new TypeReference<List<WarningLevelDTO>>() {
+            });
+        } catch (IOException e) {
+            throw new CommonException(ErrorCode.JSON_PROCESS);
+        }
+    }
+
+    /**
+     * json 转告警等级VO
+     *
+     * @param content
+     * @return
+     */
+    public static List<WarningLevelVO> json2WarningLevelVO(String content) {
+        if (StringUtils.isBlank(content)) {
+            return Collections.emptyList();
+        }
+        try {
+            return ResponseUtils.getObjectMapper().readValue(content, new TypeReference<List<WarningLevelVO>>() {
             });
         } catch (IOException e) {
             throw new CommonException(ErrorCode.JSON_PROCESS);

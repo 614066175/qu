@@ -11,6 +11,7 @@ import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
+import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -38,10 +39,13 @@ public class DataStandardValidator extends ValidatorHandler {
 
     private final StandardGroupRepository standardGroupRepository;
 
-    public DataStandardValidator(ObjectMapper objectMapper, DataStandardRepository dataStandardRepository, StandardGroupRepository standardGroupRepository) {
+    private final DataStandardMapper dataStandardMapper;
+
+    public DataStandardValidator(ObjectMapper objectMapper, DataStandardRepository dataStandardRepository, StandardGroupRepository standardGroupRepository, DataStandardMapper dataStandardMapper) {
         this.objectMapper = objectMapper;
         this.dataStandardRepository = dataStandardRepository;
         this.standardGroupRepository = standardGroupRepository;
+        this.dataStandardMapper = dataStandardMapper;
     }
 
 
@@ -51,8 +55,13 @@ public class DataStandardValidator extends ValidatorHandler {
         if (StringUtils.isNoneBlank(data)) {
             try {
                 dataStandardDTO = objectMapper.readValue(data, DataStandardDTO.class);
-                //导入数据标准分组是否存在
+                //判断导入数据的负责人租户是不是和当前登录用户租户相同
                 Long tenantId = DetailsHelper.getUserDetails().getTenantId();
+                Long chargeTenantId = dataStandardMapper.selectTenantIdByChargeName(dataStandardDTO.getChargeName());
+                if(tenantId.compareTo(chargeTenantId)!=0){
+                    return false;
+                }
+                //导入数据标准分组是否存在
                 List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                         .andWhere(Sqls.custom()
                                 .andEqualTo(StandardGroup.FIELD_GROUP_CODE, dataStandardDTO.getGroupCode())

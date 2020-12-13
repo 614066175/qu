@@ -11,6 +11,7 @@
         <result column="check_type" property="checkType" jdbcType="VARCHAR"/>
         <result column="exception_block" property="exceptionBlock" jdbcType="DECIMAL"/>
         <result column="weight" property="weight" jdbcType="DECIMAL"/>
+        <result column="check_item" property="checkItem" jdbcType="VARCHAR"/>
         <result column="rel_datasource_type" property="relDatasourceType" jdbcType="VARCHAR"/>
         <result column="rel_datasource_id" property="relDatasourceId" jdbcType="DECIMAL"/>
         <result column="rel_schema" property="relSchema" jdbcType="VARCHAR"/>

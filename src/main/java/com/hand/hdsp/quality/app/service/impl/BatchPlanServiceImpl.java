@@ -27,6 +27,7 @@ import com.hand.hdsp.quality.infra.measure.MeasureCollector;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.util.ParamsUtil;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
+import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -196,7 +197,13 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         if (CollectionUtils.isEmpty(resultWaringVOS)) {
             return;
         }
-        List<String> warningLevels = resultWaringVOS.stream().map(ResultWaringVO::getWarningLevel).distinct().collect(Collectors.toList());
+        List<String> warningLevels=new ArrayList<>();
+        for (ResultWaringVO resultWaringVO : resultWaringVOS) {
+            List<WarningLevelVO> warningLevelVOS = JsonUtils.json2WarningLevelVO(resultWaringVO.getWarningLevel());
+            resultWaringVO.setWarningLevelVOList(warningLevelVOS);
+            warningLevels.addAll(warningLevelVOS.stream().map(WarningLevelVO::getWarningLevel).distinct().collect(Collectors.toList()));
+        }
+        warningLevels=warningLevels.stream().distinct().collect(Collectors.toList());
         BatchResultDTO batchResultDTO = batchResultMapper.selectByPlanId(planId);
         warningLevels.forEach(warningLevel->doSendMessage(planId,resultWaringVOS,batchResultDTO,warningLevel));
     }
@@ -602,6 +609,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             Measure measure = measureCollector.getMeasure(PlanConstant.RuleType.TABLE_RELATION);
 
             MeasureParamDO param = MeasureParamDO.builder()
+                    .checkItem(batchPlanRelTable.getCheckItem())
                     .tenantId(tenantId)
                     .schema(schema)
                     .pluginDatasourceDTO(pluginDatasourceDTO)
@@ -679,10 +687,18 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         BigDecimal w = BigDecimal.valueOf(itemDTOList.stream().mapToLong(BatchResultItemDTO::getWeight).sum());
         BigDecimal sum = BigDecimal.ZERO;
         for (BatchResultItemDTO batchResultItemDTO : itemDTOList) {
-            BigDecimal multiply = BigDecimal.valueOf(batchResultItemDTO.getWeight())
-                    .divide(w, 10, RoundingMode.HALF_UP)
-                    .multiply(map.get(batchResultItemDTO.getWarningLevel()));
-            sum = sum.add(multiply);
+            //一个校验项满足多个告警
+            List<WarningLevelVO> warningLevelVOS = JsonUtils.json2WarningLevelVO(batchResultItemDTO.getWarningLevel());
+            for (WarningLevelVO warningLevelVO : warningLevelVOS) {
+                BigDecimal multiply = BigDecimal.valueOf(batchResultItemDTO.getWeight())
+                        .divide(w, 10, RoundingMode.HALF_UP)
+                        .multiply(map.get(warningLevelVO.getWarningLevel()));
+                sum = sum.add(multiply);
+            }
+//            BigDecimal multiply = BigDecimal.valueOf(batchResultItemDTO.getWeight())
+//                    .divide(w, 10, RoundingMode.HALF_UP)
+//                    .multiply(map.get(batchResultItemDTO.getWarningLevel()));
+//            sum = sum.add(multiply);
         }
         batchResult.setMark(sum.multiply(BigDecimal.valueOf(100)));
         batchResult.setPlanStatus(PlanConstant.PlanStatus.SUCCESS);

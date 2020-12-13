@@ -74,7 +74,7 @@ public class DataStandardRepositoryImpl extends BaseRepositoryImpl<DataStandard,
                     StandardGroupDTO standardGroupDTO = StandardGroupDTO.builder()
                             .groupCode(dataStandardDTO.getGroupCode())
                             .groupName(dataStandardDTO.getGroupName())
-                            .groupDesc(dataStandardDTO.getStandardDesc())
+                            .groupDesc(dataStandardDTO.getGroupDesc())
                             .standardType(StandardConstant.StandardType.DATA)
                             .tenantId(dataStandardDTO.getTenantId())
                             .build();

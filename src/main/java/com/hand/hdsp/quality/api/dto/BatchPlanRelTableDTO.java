@@ -1,5 +1,10 @@
 package com.hand.hdsp.quality.api.dto;
 
+import java.util.List;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
@@ -7,11 +12,6 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.List;
 
 /**
  * <p>批数据方案-表间规则表 数据传输对象</p>
@@ -58,6 +58,9 @@ public class BatchPlanRelTableDTO extends AuditDomain {
 
     @ApiModelProperty(value = "权重")
     private Long weight;
+
+    @ApiModelProperty(value = "校验项")
+    private String checkItem;
 
     @ApiModelProperty(value = "关联数据源类型(快码：HDSP.DATASOURCE_TYPE)")
     private String relDatasourceType;

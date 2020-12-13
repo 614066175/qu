@@ -119,4 +119,13 @@
             login_name=#{chargeName}
     </select>
 
+    <select id="selectTenantIdByChargeName" resultType="java.lang.Long">
+        SELECT
+            organization_id
+        FROM
+            hzero_platform.iam_user
+        WHERE
+            login_name=#{chargeName}
+    </select>
+
 </mapper>
