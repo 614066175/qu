@@ -4,6 +4,7 @@ import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.CREAT
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
@@ -65,13 +66,24 @@ public class DataStandardImportServiceImpl implements IDoImportService {
         if (tenantId != 0) {
             dataStandardDTO.setTenantId(tenantId);
         }
-        List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
+        Long chargeTenantId = dataStandardMapper.selectTenantIdByChargeName(dataStandardDTO.getChargeName());
+        if(tenantId.compareTo(chargeTenantId)!=0){
+            return false;
+        }
+        Long chargeId = dataStandardMapper.selectIdByChargeName(dataStandardDTO.getChargeName());
+        Long chargeDeptId = dataStandardMapper.selectIdByChargeDeptName(dataStandardDTO.getChargeDeptName());
+        if(Objects.isNull(chargeId)||Objects.isNull(chargeDeptId)){
+            return false;
+        }
+        dataStandardDTO.setChargeId(chargeId);
+        dataStandardDTO.setChargeDeptId(chargeDeptId);
+        List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardGroup.FIELD_GROUP_CODE, dataStandardDTO.getGroupCode())
                         .andEqualTo(StandardGroup.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                 .build());
-        if(CollectionUtils.isNotEmpty(standardGroupDTOS)){
-            dataStandardDTO.setGroupId(standardGroupDTOS.get(0).getGroupId());
+        if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
+            dataStandardDTO.setGroupId(standardGroupDTOList.get(0).getGroupId());
         }else{
             //创建分组
             StandardGroupDTO standardGroupDTO = StandardGroupDTO.builder()

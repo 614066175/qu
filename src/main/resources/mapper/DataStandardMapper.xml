@@ -102,7 +102,7 @@
         </where>
         order by ds.last_update_date desc
     </select>
-    <select id="selectIdByChargeDeptName" resultType="java.lang.Integer">
+    <select id="selectIdByChargeDeptName" resultType="java.lang.Long">
         SELECT
             unit_id
         FROM
@@ -110,7 +110,7 @@
         WHERE
             unit_name=#{chargeDeptName}
     </select>
-    <select id="selectIdByChargeName" resultType="java.lang.Integer">
+    <select id="selectIdByChargeName" resultType="java.lang.Long">
         SELECT
             id
         FROM

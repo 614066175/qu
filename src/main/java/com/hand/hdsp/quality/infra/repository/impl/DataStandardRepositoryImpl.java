@@ -4,6 +4,7 @@ import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.CREAT
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
@@ -62,6 +63,18 @@ public class DataStandardRepositoryImpl extends BaseRepositoryImpl<DataStandard,
                 if (CollectionUtils.isNotEmpty(dataStandards)) {
                     return;
                 }
+                Long chargeTenantId = dataStandardMapper.selectTenantIdByChargeName(dataStandardDTO.getChargeName());
+                if(dataStandardDTO.getTenantId().compareTo(chargeTenantId)!=0){
+                    return ;
+                }
+                Long chargeId = dataStandardMapper.selectIdByChargeName(dataStandardDTO.getChargeName());
+                Long chargeDeptId = dataStandardMapper.selectIdByChargeDeptName(dataStandardDTO.getChargeDeptName());
+                if(Objects.isNull(chargeId)||Objects.isNull(chargeDeptId)){
+                    return ;
+                }
+                dataStandardDTO.setChargeId(chargeId);
+                dataStandardDTO.setChargeDeptId(chargeDeptId);
+
                 List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                         .andWhere(Sqls.custom()
                                 .andEqualTo(StandardGroup.FIELD_GROUP_CODE, dataStandardDTO.getGroupCode())
