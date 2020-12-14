@@ -5,12 +5,12 @@ import com.hand.hdsp.quality.infra.dataobject.NameStandardDO;
 import com.hand.hdsp.quality.api.dto.NameStandardDTO;
 
 import io.choerodon.core.convertor.ConvertorI;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -40,5 +40,11 @@ public class NameStandardConverter implements ConvertorI<NameStandard, NameStand
                     BeanUtils.copyProperties(entity,dto);
                     return dto;
                 }).orElseThrow(IllegalArgumentException::new);
+    }
+
+    public List<NameStandard> dtoListToEntityList(List<NameStandardDTO> nameStandardDTOList){
+        List<NameStandard> nameStandards = new ArrayList<>(nameStandardDTOList.size());
+        nameStandardDTOList.forEach(x->nameStandards.add(this.dtoToEntity(x)));
+        return nameStandards;
     }
 }

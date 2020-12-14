@@ -23,7 +23,6 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.driver.app.service.DriverSessionService;
-import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.stereotype.Service;
@@ -137,10 +136,10 @@ public class NameStandardServiceImpl implements NameStandardService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void executeStandard(Long standardId) {
-        NameStandardDTO nameStandardDTO = Optional
-                .ofNullable(nameStandardRepository.selectDTOByPrimaryKey(standardId))
-                .orElseThrow(() -> new CommonException(ErrorCode.NAME_STANDARD_NOT_EXIST));
+    public void executeStandard(NameStandardDTO nameStandardDTO) {
+        if (Objects.isNull(nameStandardDTO)){
+            throw new CommonException(ErrorCode.NAME_STANDARD_NOT_EXIST);
+        }
         List<NameAimDTO> nameAimDTOList = nameAimRepository.list(nameStandardDTO.getStandardId());
         NameExecHistoryDTO nameExecHistoryDTO = new NameExecHistoryDTO();
         nameExecHistoryDTO.setExecStartTime(new Date());
@@ -186,7 +185,15 @@ public class NameStandardServiceImpl implements NameStandardService {
         if (CollectionUtils.isEmpty(standardIdList)){
             throw new CommonException(ErrorCode.NAME_STANDARD_PARAMS_EMPTY);
         }
-        standardIdList.forEach(this::executeStandard);
+        List<NameStandardDTO> nameStandardDTOList = nameStandardRepository.selectDTOByIds(standardIdList);
+        nameStandardDTOList.forEach(x->{
+            x.setLatestCheckedStatus(NameStandardStatusEnum.RUNNING.getStatusCode());
+            x.setLatestAbnormalNum(-1L);
+        });
+        List<NameStandard> nameStandards = nameStandardConverter.dtoListToEntityList(nameStandardDTOList);
+        nameStandardRepository.batchUpdateOptional(nameStandards,NameStandard.FIELD_LATEST_ABNORMAL_NUM,
+                NameStandard.FIELD_LATEST_CHECKED_STATUS);
+        nameStandardDTOList.forEach(this::executeStandard);
     }
 
     @Override
