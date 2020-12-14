@@ -70,7 +70,4 @@ public class StandardGroupDTO extends AuditDomain {
     @ExcelColumn(zh = "数据标准列表", en = "dataStandardDTOList", child = true)
     private List<DataStandardDTO> dataStandardDTOList;
 
-    @Transient
-    @ExcelColumn(zh = "标准文档列表", en = "standardDocDTOList", child = true)
-    private List<StandardDocDTO> standardDocDTOList;
 }

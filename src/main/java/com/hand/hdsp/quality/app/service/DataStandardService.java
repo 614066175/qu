@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.app.service;
 
 import java.util.List;
 
+import com.hand.hdsp.quality.api.dto.AssetFieldDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
@@ -95,4 +96,10 @@ public interface DataStandardService {
      * @return
      */
     BatchPlanFieldDTO standardToRule(Long standardId);
+
+    /**
+     * 字段元数据关联标准
+     * @param assetFieldDTO
+     */
+    void fieldAimStandard(AssetFieldDTO assetFieldDTO);
 }

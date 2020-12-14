@@ -3,17 +3,16 @@ package com.hand.hdsp.quality.app.service.impl;
 import java.util.List;
 
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
-import com.hand.hdsp.quality.api.dto.StandardDocDTO;
 import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.app.service.StandardGroupService;
 import com.hand.hdsp.quality.domain.entity.DataStandard;
-import com.hand.hdsp.quality.domain.entity.StandardDoc;
 import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.domain.repository.StandardDocRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardConstant;
+import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import com.hand.hdsp.quality.infra.mapper.StandardGroupMapper;
 import com.hand.hdsp.quality.infra.vo.StandardGroupVO;
 import io.choerodon.core.domain.Page;
@@ -46,12 +45,15 @@ public class StandardGroupServiceImpl implements StandardGroupService {
 
     private final StandardDocRepository standardDocRepository;
 
+    private final DataStandardMapper dataStandardMapper;
 
-    public StandardGroupServiceImpl(StandardGroupRepository standardGroupRepository, StandardGroupMapper standardGroupMapper, DataStandardRepository dataStandardRepository, StandardDocRepository standardDocRepository) {
+
+    public StandardGroupServiceImpl(StandardGroupRepository standardGroupRepository, StandardGroupMapper standardGroupMapper, DataStandardRepository dataStandardRepository, StandardDocRepository standardDocRepository, DataStandardMapper dataStandardMapper) {
         this.standardGroupRepository = standardGroupRepository;
         this.standardGroupMapper = standardGroupMapper;
         this.dataStandardRepository = dataStandardRepository;
         this.standardDocRepository = standardDocRepository;
+        this.dataStandardMapper = dataStandardMapper;
     }
 
     @Override
@@ -109,24 +111,13 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                             .andWhere(Sqls.custom()
                                     .andEqualTo(DataStandard.FIELD_GROUP_ID, standardGroupDTO.getGroupId()))
                             .build());
+                    //查询负责人名称和负责部门
+                    dataStandardDTOList.forEach(dataStandardDTO -> {
+                        dataStandardDTO.setChargeName(dataStandardMapper.selectChargeNameById(dataStandardDTO.getChargeId()));
+                        dataStandardDTO.setChargeName(dataStandardMapper.selectChargeDeptNameById(dataStandardDTO.getChargeDeptId()));
+                    });
                     standardGroupDTO.setDataStandardDTOList(dataStandardDTOList);
                     //是否排除没有内容的分组导出
-                });
-            }
-        }
-        if (StandardConstant.StandardType.DOC.equals(dto.getStandardType())) {
-            //获取DATA所有的分组已经分组下的标准
-            standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
-                    .andWhere(Sqls.custom()
-                            .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, StandardConstant.StandardType.DOC))
-                    .build());
-            if (CollectionUtils.isNotEmpty(standardGroupDTOS)) {
-                standardGroupDTOS.forEach(standardGroupDTO -> {
-                    List<StandardDocDTO> standardDocDTOList = standardDocRepository.selectDTOByCondition(Condition.builder(StandardDoc.class)
-                            .andWhere(Sqls.custom()
-                                    .andEqualTo(StandardDoc.FIELD_GROUP_ID, standardGroupDTO.getGroupId()))
-                            .build());
-                    standardGroupDTO.setStandardDocDTOList(standardDocDTOList);
                 });
             }
         }

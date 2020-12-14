@@ -28,12 +28,14 @@ import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
+import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.starter.driver.core.infra.meta.Table;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
+import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,12 +80,13 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     private final StandardAimService standardAimService;
 
-    @Autowired
-    private DataPatternHandler dataPatternHandler;
-    @Autowired
-    private DataLengthHandler dataLengthHandler;
-    @Autowired
-    private ValueRangeHandler valueRangeHandler;
+    private final DataPatternHandler dataPatternHandler;
+
+    private final DataLengthHandler dataLengthHandler;
+
+    private final ValueRangeHandler valueRangeHandler;
+
+    private final DriverSessionService driverSessionService;
 
     public DataStandardServiceImpl(DataStandardRepository dataStandardRepository,
                                    DataStandardVersionRepository dataStandardVersionRepository,
@@ -96,7 +99,11 @@ public class DataStandardServiceImpl implements DataStandardService {
                                    BatchPlanFieldRepository batchPlanFieldRepository,
                                    BatchPlanFieldLineRepository batchPlanFieldLineRepository,
                                    BatchPlanFieldConRepository batchPlanFieldConRepository,
-                                   StandardAimService standardAimService) {
+                                   StandardAimService standardAimService,
+                                   DataPatternHandler dataPatternHandler,
+                                   DataLengthHandler dataLengthHandler,
+                                   ValueRangeHandler valueRangeHandler,
+                                   DriverSessionService driverSessionService) {
         this.dataStandardRepository = dataStandardRepository;
         this.dataStandardVersionRepository = dataStandardVersionRepository;
         this.standardExtraRepository = standardExtraRepository;
@@ -109,6 +116,10 @@ public class DataStandardServiceImpl implements DataStandardService {
         this.batchPlanFieldLineRepository = batchPlanFieldLineRepository;
         this.batchPlanFieldConRepository = batchPlanFieldConRepository;
         this.standardAimService = standardAimService;
+        this.dataPatternHandler = dataPatternHandler;
+        this.dataLengthHandler = dataLengthHandler;
+        this.valueRangeHandler = valueRangeHandler;
+        this.driverSessionService = driverSessionService;
     }
 
 
@@ -485,6 +496,59 @@ public class DataStandardServiceImpl implements DataStandardService {
         }
         batchPlanFieldDTO.setBatchPlanFieldLineDTOList(batchPlanFieldLineDTOList);
         return batchPlanFieldDTO;
+    }
+
+    @Override
+    public void fieldAimStandard(AssetFieldDTO assetFieldDTO) {
+        DataStandardDTO dataStandardDTO = dataStandardRepository.selectDTOByPrimaryKey(assetFieldDTO.getStandardId());
+        if (Objects.isNull(dataStandardDTO)) {
+            throw new CommonException(ErrorCode.DATA_STANDARD_NOT_EXIST);
+        }
+        if ("AIM".equals(assetFieldDTO.getAimType())) {
+            doAim(assetFieldDTO);
+        }
+        if ("UNAIM".equals(assetFieldDTO.getAimType())) {
+            doUnAim(assetFieldDTO);
+        }
+        if ("UPDATE".equals(assetFieldDTO.getAimType())) {
+
+        }
+    }
+
+    private void doUnAim(AssetFieldDTO assetFieldDTO) {
+        StandardAimDTO standardAimDTO = StandardAimDTO.builder()
+                .standardId(assetFieldDTO.getStandardId())
+                .standardType(DATA)
+                .fieldName(assetFieldDTO.getFieldName())
+                .fieldDesc(assetFieldDTO.getFieldDesc())
+                .datasourceId(assetFieldDTO.getDatasourceId())
+                .datasourceCode(assetFieldDTO.getDatasourceCode())
+                .datasourceType(assetFieldDTO.getDatasourceType())
+                .schemaName(assetFieldDTO.getDatasourceSchema())
+                .tableName(assetFieldDTO.getTableName())
+                .build();
+        DriverSession driverSession = driverSessionService.getDriverSession(assetFieldDTO.getTenantId(), assetFieldDTO.getDatasourceCode());
+        List<Table> tables = driverSession.tablesNameAndDesc(assetFieldDTO.getDatasourceSchema());
+        tables.forEach(table -> {
+            if(assetFieldDTO.getTableName().equals(table.getTableName())){
+                standardAimDTO.setTableDesc(table.getRemarks());
+            }
+        });
+        standardAimRepository.insertDTOSelective(standardAimDTO);
+    }
+
+    private void doAim(AssetFieldDTO assetFieldDTO) {
+        StandardAim standardAim = StandardAim.builder()
+                .standardId(assetFieldDTO.getStandardId())
+                .standardType(DATA)
+                .fieldName(assetFieldDTO.getFieldName())
+                .fieldDesc(assetFieldDTO.getFieldDesc())
+                .datasourceId(assetFieldDTO.getDatasourceId())
+                .schemaName(assetFieldDTO.getDatasourceSchema())
+                .tableName(assetFieldDTO.getTableName())
+                .build();
+        StandardAim standardAim1 = standardAimRepository.selectOne(standardAim);
+        if(Objects.isNull(standardAim1)){}
     }
 
     /**

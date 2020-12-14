@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.api.controller.v1;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
+import com.hand.hdsp.quality.api.dto.AssetFieldDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
@@ -238,9 +239,20 @@ public class DataStandardController {
     @ApiOperation(value = "数据标准转换标准规则")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/standard-to-rule")
-    public ResponseEntity<?> standardToRule(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<BatchPlanFieldDTO> standardToRule(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                             Long standardId) {
         BatchPlanFieldDTO batchPlanFieldDTO =dataStandardService.standardToRule(standardId);
         return Results.success(batchPlanFieldDTO);
+    }
+
+
+    @ApiOperation(value = "字段元数据关联数据标准")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/field-aim-standard")
+    public ResponseEntity<Void> fieldAimStandard(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                            AssetFieldDTO assetFieldDTO) {
+        assetFieldDTO.setTenantId(tenantId);
+        dataStandardService.fieldAimStandard(assetFieldDTO);
+        return Results.success();
     }
 }

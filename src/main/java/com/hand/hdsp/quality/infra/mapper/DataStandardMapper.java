@@ -41,4 +41,16 @@ public interface DataStandardMapper extends BaseMapper<DataStandard> {
      * @return
      */
     Long selectTenantIdByChargeName(@Param("chargeName") String chargeName);
+
+    /**
+     * @param chargeId
+     * @return
+     */
+    String selectChargeNameById(@Param("chargeId") Long chargeId);
+
+    /**
+     * @param chargeDeptId
+     * @return
+     */
+    String selectChargeDeptNameById(@Param("chargeDeptId") Long chargeDeptId);
 }

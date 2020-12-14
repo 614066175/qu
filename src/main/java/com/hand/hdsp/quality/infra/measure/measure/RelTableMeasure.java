@@ -144,15 +144,15 @@ public class RelTableMeasure implements Measure {
                     relList.add(String.format("%s(%s) as %s",
                             tableRelCheckDTOList.get(i).getRelFunction(),
                             tableRelCheckDTOList.get(i).getRelFieldName(),
-                            String.format("function%d", i++)));
+                            String.format("function%d", i)));
                     baseList.add(String.format("%s(%s) as %s",
                             tableRelCheckDTOList.get(i).getBaseFunction(),
                             tableRelCheckDTOList.get(i).getBaseFieldName(),
-                            String.format("function%d", i++)));
+                            String.format("function%d", i)));
                     onCondition.append(String.format(" and rel.%s %s base.%s",
-                            String.format("function%d", i++),
+                            String.format("function%d", i),
                             tableRelCheckDTOList.get(i).getRelCode(),
-                            String.format("function%d", i++)));
+                            String.format("function%d", i)));
                 }
                 DriverSession driverSession = driverSessionService.getDriverSession(tenantId, param.getPluginDatasourceDTO().getDatasourceCode());
                 String sql = String.format(CALCULATED_VALUE_SQL,
@@ -168,10 +168,9 @@ public class RelTableMeasure implements Measure {
                 if(CollectionUtils.isNotEmpty(result)&&(long)result.get(0).get(COUNT)!=0){
                     WarningLevelVO warningLevelVO = WarningLevelVO.builder()
                             .warningLevel(batchPlanRelTable.getWarningLevel())
-                            .levelCount((long) result.get(0).get(COUNT))
                             .build();
                     batchResultItem.setWarningLevel(JsonUtils.object2Json(warningLevelVO));
-                    batchResultItem.setExceptionInfo(String.format("存在%d条数据满足计算值比较告警",warningLevelVO.getLevelCount()));
+                    batchResultItem.setExceptionInfo("数据满足计算值比较告警");
                 }
             }
         }

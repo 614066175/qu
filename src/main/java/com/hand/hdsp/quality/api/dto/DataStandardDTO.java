@@ -39,51 +39,51 @@ public class DataStandardDTO extends AuditDomain{
     @ApiModelProperty(value = "数据标准编码")
     @NotBlank
     @Size(max = 50)
-    @ExcelColumn(zh = "标准编码", en = "standardCode" ,groups = {Group1.class})
+    @ExcelColumn(zh = "标准编码", en = "standardCode" )
     private String standardCode;
 
     @ApiModelProperty(value = "数据标准名称")
     @NotBlank
     @Size(max = 120)
-    @ExcelColumn(zh = "标准名称", en = "standardName",groups = {Group1.class} )
+    @ExcelColumn(zh = "标准名称", en = "standardName")
     private String standardName;
 
     @ApiModelProperty(value = "数据标准描述")
-    @ExcelColumn(zh = "标准描述",en = "standardDesc",groups = {Group1.class})
+    @ExcelColumn(zh = "标准描述",en = "standardDesc")
     private String standardDesc;
 
     @ApiModelProperty(value = "数据类型 (HDSP.XDMP.LABEL_DATA_TYPE)")
     @NotBlank
     @Size(max = 30)
-    @ExcelColumn(zh = "数据类型",en="dataType",groups = {Group1.class})
+    @ExcelColumn(zh = "数据类型",en="dataType")
     private String dataType;
 
     @ApiModelProperty(value = "数据格式")
-    @ExcelColumn(zh = "数据格式",en = "dataPattern",groups = {Group1.class})
+    @ExcelColumn(zh = "数据格式",en = "dataPattern")
     private String dataPattern;
 
     @ApiModelProperty(value = "长度类型（快码HSDP.XSTA.LENGTH_TYPE）")
-    @ExcelColumn(zh = "数据长度-类型",en ="lengthType",groups = {Group1.class})
+    @ExcelColumn(zh = "数据长度-类型",en ="lengthType")
     private String lengthType;
 
     @ApiModelProperty(value = "数据长度")
-    @ExcelColumn(zh = "数据长度",en = "dataLength",groups = {Group1.class})
+    @ExcelColumn(zh = "数据长度",en = "dataLength")
     private String dataLength;
 
     @ApiModelProperty(value = "值域类型（快码HDSP.XSTA.VALUE_TYPE）")
-    @ExcelColumn(zh = "值域类型",en="valueType",groups = {Group1.class})
+    @ExcelColumn(zh = "值域类型",en="valueType")
     private String valueType;
 
     @ApiModelProperty(value = "值域")
-    @ExcelColumn(zh = "值域范围",en = "valueRange",groups = {Group1.class})
+    @ExcelColumn(zh = "值域范围",en = "valueRange")
     private String valueRange;
 
     @ApiModelProperty(value = "标准依据（快码HDSP.XSTA.STANDARD_ACCORD）")
-    @ExcelColumn(zh = "标准依据" ,en="standardAccord",groups = {Group1.class})
+    @ExcelColumn(zh = "标准依据" ,en="standardAccord")
     private String standardAccord;
 
     @ApiModelProperty(value = "依据内容")
-    @ExcelColumn(zh = "依据内容",en = "accordContent",groups = {Group1.class})
+    @ExcelColumn(zh = "依据内容",en = "accordContent")
     private String accordContent;
 
     @ApiModelProperty(value = "责任部门ID")
@@ -95,10 +95,10 @@ public class DataStandardDTO extends AuditDomain{
     private Long chargeId;
 
     @ApiModelProperty(value = "责任人电话")
-    @ExcelColumn(zh = "责任人电话",en = "chargeTel",groups = {Group2.class})
+    @ExcelColumn(zh = "责任人电话",en = "chargeTel")
     private String chargeTel;
 
-    @ExcelColumn(zh = "责任人邮箱",en = "chargeEmail",groups = {Group2.class})
+    @ExcelColumn(zh = "责任人邮箱",en = "chargeEmail")
     @ApiModelProperty(value = "责任人邮箱")
     private String chargeEmail;
 
@@ -121,11 +121,11 @@ public class DataStandardDTO extends AuditDomain{
     private String lastUpdateName;
 
     @Transient
-    @ExcelColumn(zh = "责任人",en = "chargeName",groups = {Group2.class})
+    @ExcelColumn(zh = "责任人",en = "chargeName")
     private String chargeName;
 
     @Transient
-    @ExcelColumn(zh = "责任部门", en = "chargeDeptName",groups = {Group2.class})
+    @ExcelColumn(zh = "责任部门", en = "chargeDeptName")
     private String chargeDeptName;
 
     @Transient
@@ -140,8 +140,4 @@ public class DataStandardDTO extends AuditDomain{
     @Transient
     private List<Long> dataLengthList;
 
-    public interface Group1 {
-
-    }
-    public interface Group2 {}
 }

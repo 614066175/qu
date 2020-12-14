@@ -127,5 +127,21 @@
         WHERE
             login_name=#{chargeName}
     </select>
+    <select id="selectChargeNameById" resultType="java.lang.String">
+        SELECT
+            login_name
+        FROM
+            hzero_platform.iam_user
+        WHERE
+            id=#{chargeId}
+    </select>
+    <select id="selectChargeDeptNameById" resultType="java.lang.String">
+       SELECT
+            unit_name
+        FROM
+            hzero_platform.hpfm_unit
+        WHERE
+            unit_id=#{chargeDeptId}
+    </select>
 
 </mapper>
