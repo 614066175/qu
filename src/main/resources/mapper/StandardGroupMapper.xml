@@ -44,7 +44,7 @@
                 and xsg.group_name=#{standardGroupVO.groupName}
             </if>
             <if test="standardGroupVO.tenantId!=null">
-                and xsg.tenantId=#{standardGroupVO.tenantId}
+                and xsg.tenant_id=#{standardGroupVO.tenantId}
             </if>
             and xsg.enabled_flag=1
         </where>
