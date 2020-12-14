@@ -7,6 +7,7 @@ import com.hand.hdsp.quality.domain.entity.NameExecHistory;
 import com.hand.hdsp.quality.api.dto.NameExecHistoryDTO;
 import com.hand.hdsp.quality.domain.repository.NameExecHistoryRepository;
 import com.hand.hdsp.quality.infra.mapper.NameExecHistoryMapper;
+import com.hand.hdsp.quality.infra.vo.NameStandardHisReportVO;
 import org.springframework.stereotype.Component;
 
 /**
@@ -29,12 +30,17 @@ public class NameExecHistoryRepositoryImpl extends BaseRepositoryImpl<NameExecHi
     }
 
     @Override
-    public List<NameExecHistoryDTO> getHistoryList(Long standardId) {
-        return nameExecHistoryMapper.getHistoryList(standardId);
+    public List<NameExecHistoryDTO> getHistoryList(NameExecHistoryDTO nameExecHistoryDTO) {
+        return nameExecHistoryMapper.getHistoryList(nameExecHistoryDTO);
     }
 
     @Override
     public NameExecHistoryDTO detail(Long historyId) {
         return nameExecHistoryMapper.detail(historyId);
+    }
+
+    @Override
+    public List<NameStandardHisReportVO> getReport(Long standardId) {
+        return nameExecHistoryMapper.getReport(standardId);
     }
 }

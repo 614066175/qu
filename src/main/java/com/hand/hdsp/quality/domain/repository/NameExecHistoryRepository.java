@@ -6,6 +6,7 @@ import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.domain.entity.NameExecHistory;
 import com.hand.hdsp.quality.api.dto.NameExecHistoryDTO;
 import com.hand.hdsp.core.base.ProxySelf;
+import com.hand.hdsp.quality.infra.vo.NameStandardHisReportVO;
 
 /**
  * <p>命名标准执行历史表资源库</p>
@@ -25,10 +26,10 @@ public interface NameExecHistoryRepository extends BaseRepository<NameExecHistor
     /**
      * 查看执行结果（最新的执行历史）
      *
-     * @param standardId 标准ID
+     * @param nameExecHistoryDTO 标准ID
      * @return List<NameExecHistoryDTO>
      */
-    List<NameExecHistoryDTO> getHistoryList(Long standardId);
+    List<NameExecHistoryDTO> getHistoryList(NameExecHistoryDTO nameExecHistoryDTO);
 
     /**
      * 执行历史明细
@@ -37,4 +38,12 @@ public interface NameExecHistoryRepository extends BaseRepository<NameExecHistor
      * @return NameExecHistoryDTO
      */
     NameExecHistoryDTO detail(Long historyId);
+
+    /**
+     * 获取校验报表
+     *
+     * @param standardId 标准ID
+     * @return List<NameStandardHisReportVO>
+     */
+    List<NameStandardHisReportVO> getReport(Long standardId);
 }

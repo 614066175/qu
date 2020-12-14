@@ -170,4 +170,5 @@
         LEFT JOIN xsta_standard_group xsg ON (xsg.group_id=xns.group_id)
         WHERE xns.standard_id=#{standardId}
     </select>
+
 </mapper>

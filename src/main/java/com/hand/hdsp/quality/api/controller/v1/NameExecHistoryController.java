@@ -2,6 +2,10 @@ package com.hand.hdsp.quality.api.controller.v1;
 
 import java.util.List;
 
+import com.hand.hdsp.quality.infra.vo.NameStandardHisReportVO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.core.util.Results;
 import org.hzero.core.base.BaseController;
 import com.hand.hdsp.quality.api.dto.NameExecHistoryDTO;
@@ -36,16 +40,13 @@ public class NameExecHistoryController extends BaseController {
             value = "租户",
             paramType = "path",
             required = true
-    ), @ApiImplicitParam(
-            name = "standardId",
-            value = "命名标准主键",
-            paramType = "path",
-            required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/list/{standardId}")
-    public ResponseEntity<List<NameExecHistoryDTO>> list(@PathVariable Long standardId) {
-        return Results.success(nameExecHistoryRepository.getHistoryList(standardId));
+    @GetMapping("/list")
+    public ResponseEntity<Page<NameExecHistoryDTO>> list(NameExecHistoryDTO nameExecHistoryDTO, PageRequest pageRequest) {
+        Page<NameExecHistoryDTO> list = PageHelper.doPage(pageRequest,
+                ()->nameExecHistoryRepository.getHistoryList(nameExecHistoryDTO));
+        return Results.success(list);
     }
     @ApiOperation(value = "命名标准执行历史表明细")
     @ApiImplicitParams({@ApiImplicitParam(
@@ -83,5 +84,24 @@ public class NameExecHistoryController extends BaseController {
     public ResponseEntity<NameExecHistoryDTO> latest(@PathVariable Long standardId) {
         NameExecHistoryDTO nameExecHistoryDTO = nameExecHistoryRepository.getLatestHistory(standardId);
         return Results.success(nameExecHistoryDTO);
+    }
+
+    @ApiOperation(value = "获取标准执行报表信息")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    ), @ApiImplicitParam(
+            name = "standardId",
+            value = "命名标准主键",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/report/{standardId}")
+    public ResponseEntity<List<NameStandardHisReportVO>> report(@PathVariable Long standardId) {
+        List<NameStandardHisReportVO> nameStandardHisReportVOList = nameExecHistoryRepository.getReport(standardId);
+        return Results.success(nameStandardHisReportVOList);
     }
 }

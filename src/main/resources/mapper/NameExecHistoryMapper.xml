@@ -9,7 +9,7 @@
         <result column="abnormal_num" property="abnormalNum" jdbcType="DECIMAL"/>
         <result column="exec_start_time" property="execStartTime" jdbcType="TIMESTAMP"/>
         <result column="exec_end_time" property="execEndTime" jdbcType="TIMESTAMP"/>
-        <result column="exec_rulr" property="execRule" jdbcType="VARCHAR"/>
+        <result column="exec_rule" property="execRule" jdbcType="VARCHAR"/>
         <result column="exec_status" property="execStatus" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
@@ -54,6 +54,16 @@
         </include>
         FROM xsta_name_exec_history xneh
         WHERE xneh.standard_id=#{standardId}
+        <if test="execStatus != null">
+            AND xneh.exec_status = #{execStatus}
+        </if>
+        <if test="execStartTime !=null">
+            AND xneh.exec_start_time &gt;= #{execStartTime}
+        </if>
+        <if test="execEndTime !=null">
+            AND xneh.exec_end_time &lt;= #{execEndTime}
+        </if>
+        ORDER BY xneh.history_id DESC
     </select>
 
     <select id="detail" resultMap="DtoResultMap">
@@ -63,6 +73,13 @@
         </include>
         FROM xsta_name_exec_history xneh
         WHERE xneh.history_id=#{historyId}
+    </select>
+
+    <select id="getReport" resultType="com.hand.hdsp.quality.infra.vo.NameStandardHisReportVO">
+        SELECT DATE_FORMAT(creation_date,'%Y-%m-%d') as date, AVG(abnormal_num) as averageAbnormalNum
+        FROM xsta_name_exec_history xneh
+        WHERE xneh.exec_status='SUCCESS'AND xneh.standard_id=#{standardId}
+        GROUP BY DATE_FORMAT(creation_date,'%Y-%m-%d')
     </select>
 
 </mapper>
