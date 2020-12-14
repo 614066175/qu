@@ -41,9 +41,9 @@ public interface NameStandardService {
     /**
      * 执行标准
      *
-     * @param standardId 标准ID
+     * @param nameStandardDTO 命名标准
      */
-    void executeStandard(Long standardId);
+    void executeStandard(NameStandardDTO nameStandardDTO);
 
     /**
      * 批量执行标准
