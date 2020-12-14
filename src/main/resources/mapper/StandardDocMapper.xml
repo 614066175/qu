@@ -41,6 +41,12 @@
         from xsta_standard_doc sd
         left join xsta_standard_group xsg on xsg.group_id=sd.group_id
         <where>
+            <if test="standardDocDTO.docId!=null">
+                sd.doc_id=#{standardDocDTO.docId}
+            </if>
+            <if test="standardDocDTO.groupId!=null">
+                and sd.group_id=#{standardDocDTO.groupId}
+            </if>
             <if test="standardDocDTO.standardCode!=null">
                 <bind name="standardCode" value="'%'+ standardDocDTO.standardCode +'%'"/>
                 and sd.standard_code like #{standardCode}
