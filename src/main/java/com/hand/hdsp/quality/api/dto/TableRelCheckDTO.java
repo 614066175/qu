@@ -25,16 +25,16 @@ import lombok.*;
 public class TableRelCheckDTO {
 
 
-    private String sourceFunction;
+    private String relFunction;
 
-    private String sourceFieldName;
+    private String relFieldName;
 
     @ApiModelProperty(value = "关联关系 HDSP.XQUA.REL_CODE")
     @NotBlank
     private String relCode;
 
-    private String relFunction;
+    private String baseFunction;
 
-    private String relFieldName;
+    private String baseFieldName;
 
 }

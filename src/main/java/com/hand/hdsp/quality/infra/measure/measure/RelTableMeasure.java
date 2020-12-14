@@ -36,10 +36,11 @@ import org.hzero.starter.driver.core.session.DriverSession;
 @CheckItem(PlanConstant.RuleType.TABLE_RELATION)
 public class RelTableMeasure implements Measure {
 
+    private static final String COUNT = "COUNT";
     private final ItemTemplateSqlRepository templateSqlRepository;
     private final DriverSessionService driverSessionService;
-    private static final String ACCURACY_RATE_SQL = "SELECT count(*) count FROM %s source WHERE EXISTS (SELECT 1 FROM %s.%s rel WHERE %s) and %s";
-    private static final String CALCULATED_VALUE_SQL = "select count(*) COUNT from (select %s from %s) source inner join (select %s from %s.%s where %s) rel on %s";
+    private static final String ACCURACY_RATE_SQL = "SELECT count(*) count FROM %s base WHERE EXISTS (SELECT 1 FROM %s.%s rel WHERE %s) and %s";
+    private static final String CALCULATED_VALUE_SQL = "select count(*) COUNT from (select %s from %s.%s where %s) rel  inner join (select %s from %s) base on %s";
 
     public RelTableMeasure(ItemTemplateSqlRepository templateSqlRepository, DriverSessionService driverSessionService) {
         this.templateSqlRepository = templateSqlRepository;
@@ -59,7 +60,7 @@ public class RelTableMeasure implements Measure {
             where.append(" 1 = 1 ");
             if (CollectionUtils.isNotEmpty(relationshipDTOList)) {
                 for (RelationshipDTO relationshipDTO : relationshipDTOList) {
-                    where.append(" and source.").append(relationshipDTO.getSourceFieldName())
+                    where.append(" and base.").append(relationshipDTO.getBaseFieldName())
                             .append(relationshipDTO.getRelCode())
                             .append(" rel.").append(relationshipDTO.getRelFieldName());
                 }
@@ -126,41 +127,54 @@ public class RelTableMeasure implements Measure {
         else if (PlanConstant.CheckItem.CALCULATED_VALUE.equals(param.getCheckItem())) {
             String tableRelCheck = batchPlanRelTable.getTableRelCheck();
             if (Strings.isNotEmpty(tableRelCheck)) {
+                StringBuilder onCondition = new StringBuilder();
+                onCondition.append("1=1");
                 List<TableRelCheckDTO> tableRelCheckDTOList = JsonUtils.json2TableRelCheck(tableRelCheck);
-                List<String> sourceList = new ArrayList<>();
-                StringBuilder sourceRelationShip = new StringBuilder();
-                relationshipDTOList.forEach(relationshipDTO -> sourceList.add(relationshipDTO.getSourceFieldName()));
-                for (int i=0;i<tableRelCheckDTOList.size();i++ ) {
-                    sourceList.add(String.format("%s(%s) as %s",
-                            tableRelCheckDTOList.get(i).getSourceFunction(),
-                            tableRelCheckDTOList.get(i).getSourceFieldName(),
-                            "function" + i++));
-                }
-                String sourceColumns = Strings.join(sourceList, ',');
                 List<String> relList = new ArrayList<>();
-                relationshipDTOList.forEach(relationshipDTO -> relList.add(relationshipDTO.getRelFieldName()));
-                for (int i=0;i<tableRelCheckDTOList.size();i++ ) {
-                    sourceList.add(String.format("%s(%s) as %s",
+                List<String> baseList = new ArrayList<>();
+                relationshipDTOList.forEach(relationshipDTO -> {
+                    relList.add(relationshipDTO.getRelFieldName());
+                    baseList.add(relationshipDTO.getBaseFieldName());
+                    onCondition.append(String.format(" and %s%s%s",
+                            relationshipDTO.getRelFieldName(),
+                            relationshipDTO.getRelCode(),
+                            relationshipDTO.getBaseFieldName()));
+                });
+                for (int i = 0; i < tableRelCheckDTOList.size(); i++) {
+                    relList.add(String.format("%s(%s) as %s",
                             tableRelCheckDTOList.get(i).getRelFunction(),
                             tableRelCheckDTOList.get(i).getRelFieldName(),
-                            "function" + i++));
+                            String.format("function%d", i++)));
+                    baseList.add(String.format("%s(%s) as %s",
+                            tableRelCheckDTOList.get(i).getBaseFunction(),
+                            tableRelCheckDTOList.get(i).getBaseFieldName(),
+                            String.format("function%d", i++)));
+                    onCondition.append(String.format(" and rel.%s %s base.%s",
+                            String.format("function%d", i++),
+                            tableRelCheckDTOList.get(i).getRelCode(),
+                            String.format("function%d", i++)));
                 }
-                String relColumns = Strings.join(relList, ',');
-
-                StringBuilder where = new StringBuilder();
-                where.append(" 1 = 1 ");
-
                 DriverSession driverSession = driverSessionService.getDriverSession(tenantId, param.getPluginDatasourceDTO().getDatasourceCode());
                 String sql = String.format(CALCULATED_VALUE_SQL,
-                        sourceColumns,
+                        Strings.join(relList, ','),
+                        batchPlanRelTable.getRelSchema(),
                         batchPlanRelTable.getRelTableName(),
-                        batchPlanRelTable.getRelTableName(),
-                        where.toString(),
-                        Objects.isNull(batchResultBase.getWhereCondition()) ? "1=1" : batchPlanRelTable.getWhereCondition());
+                        batchPlanRelTable.getWhereCondition(),
+                        Strings.join(baseList, ','),
+                        batchResultBase.getPackageObjectName(),
+                        onCondition
+                        );
                 List<Map<String, Object>> result = driverSession.executeOneQuery(param.getSchema(), sql);
+                if(CollectionUtils.isNotEmpty(result)&&(long)result.get(0).get(COUNT)!=0){
+                    WarningLevelVO warningLevelVO = WarningLevelVO.builder()
+                            .warningLevel(batchPlanRelTable.getWarningLevel())
+                            .levelCount((long) result.get(0).get(COUNT))
+                            .build();
+                    batchResultItem.setWarningLevel(JsonUtils.object2Json(warningLevelVO));
+                    batchResultItem.setExceptionInfo(String.format("存在%d条数据满足计算值比较告警",warningLevelVO.getLevelCount()));
+                }
             }
         }
-
         return batchResultItem;
     }
 }

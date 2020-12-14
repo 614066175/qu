@@ -23,10 +23,10 @@ import lombok.*;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RelationshipDTO extends AuditDomain {
 
-    @ApiModelProperty(value = "源表字段名")
+    @ApiModelProperty(value = "来源表字段名")
     @NotBlank
     @Size(max = 50)
-    private String sourceFieldName;
+    private String relFieldName;
 
     @ApiModelProperty(value = "关联关系 HDSP.XQUA.REL_CODE")
     @NotBlank
@@ -35,7 +35,7 @@ public class RelationshipDTO extends AuditDomain {
     @ApiModelProperty(value = "目标表字段名")
     @NotBlank
     @Size(max = 50)
-    private String relFieldName;
+    private String baseFieldName;
 
 
 }
