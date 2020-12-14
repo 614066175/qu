@@ -25,6 +25,14 @@ spring:
     chain.gzipped: true
     # 启用缓存
     chain.cache: true
+  servlet:
+    multipart:
+      # 是否支持多部分上传
+      enabled: true
+      # 最大支持文件上传的大小
+      max-file-size: 300MB
+      # 支持请求最大文件上传的大小
+      max-request-size: 300MB
 
 server:
   undertow:

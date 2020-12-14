@@ -11,7 +11,6 @@ import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.StandardDocRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
-import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -33,7 +32,7 @@ public class StandardDocValidator extends ValidatorHandler {
     private final StandardGroupRepository standardGroupRepository;
 
     public StandardDocValidator(ObjectMapper objectMapper, StandardDocRepository standardDocRepository,
-                                StandardGroupRepository standardGroupRepository, StandardDocMapper standardDocMapper) {
+                                StandardGroupRepository standardGroupRepository) {
         this.objectMapper = objectMapper;
         this.standardDocRepository = standardDocRepository;
         this.standardGroupRepository = standardGroupRepository;
@@ -73,10 +72,7 @@ public class StandardDocValidator extends ValidatorHandler {
                                 .andEqualTo(StandardDoc.FIELD_TENANT_ID, tenantId))
                         .build());
                 //标准名称存在
-                if (CollectionUtils.isNotEmpty(standardDocDTOList)) {
-                    return false;
-                }
-                return true;
+                return !CollectionUtils.isNotEmpty(standardDocDTOList);
             } catch (IOException e) {
                 return false;
             }
