@@ -114,7 +114,7 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                     //查询负责人名称和负责部门
                     dataStandardDTOList.forEach(dataStandardDTO -> {
                         dataStandardDTO.setChargeName(dataStandardMapper.selectChargeNameById(dataStandardDTO.getChargeId()));
-                        dataStandardDTO.setChargeName(dataStandardMapper.selectChargeDeptNameById(dataStandardDTO.getChargeDeptId()));
+                        dataStandardDTO.setChargeDeptName(dataStandardMapper.selectChargeDeptNameById(dataStandardDTO.getChargeDeptId()));
                     });
                     standardGroupDTO.setDataStandardDTOList(dataStandardDTOList);
                     //是否排除没有内容的分组导出
