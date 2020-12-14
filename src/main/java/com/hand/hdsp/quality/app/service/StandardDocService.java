@@ -4,6 +4,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.hand.hdsp.quality.api.dto.StandardDocDTO;
+import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.export.vo.ExportParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,6 +15,16 @@ import org.springframework.web.multipart.MultipartFile;
  * @author hua.shi@hand-china.com 2020-11-24 17:50:14
  */
 public interface StandardDocService {
+
+    /**
+     * 查询标准文档列表
+     *
+     * @param pageRequest    PageRequest
+     * @param standardDocDTO StandardDocDTO
+     * @return List<StandardDocDTO>
+     */
+    Page<StandardDocDTO> list(PageRequest pageRequest, StandardDocDTO standardDocDTO);
+
     /**
      * 创建标准文档
      *

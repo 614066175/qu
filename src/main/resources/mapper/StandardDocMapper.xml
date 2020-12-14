@@ -17,4 +17,46 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+
+    <sql id="baseColumn">
+        ${sd}.doc_id,
+        ${sd}.group_id,
+        ${sd}.standard_code,
+        ${sd}.standard_name,
+        ${sd}.standard_desc,
+        ${sd}.doc_name,
+        ${sd}.doc_path,
+        ${sd}.tenant_id,
+        ${sd}.object_version_number
+    </sql>
+
+    <select id="list" resultType="com.hand.hdsp.quality.api.dto.StandardDocDTO">
+        select
+        xsg.group_name,
+        xsg.group_code,
+        xsg.group_desc,
+        <include refid="baseColumn">
+            <property name="sd" value="sd"/>
+        </include>
+        from xsta_standard_doc sd
+        left join xsta_standard_group xsg on xsg.group_id=sd.group_id
+        <where>
+            <if test="standardDocDTO.standardCode!=null">
+                <bind name="standardCode" value="'%'+ standardDocDTO.standardCode +'%'"/>
+                and sd.standard_code like #{standardCode}
+            </if>
+            <if test="standardDocDTO.standardName!=null">
+                <bind name="standardName" value="'%'+ standardDocDTO.standardName +'%'"/>
+                and sd.standard_name like #{standardName}
+            </if>
+            <if test="standardDocDTO.standardDesc!=null">
+                <bind name="standardDesc" value="'%'+ standardDocDTO.standardDesc +'%'"/>
+                and sd.standard_desc like #{standardDesc}
+            </if>
+            <if test="standardDocDTO.docName!=null">
+                <bind name="docName" value="'%'+ standardDocDTO.docName +'%'"/>
+                and sd.doc_name like #{docName}
+            </if>
+        </where>
+    </select>
 </mapper>

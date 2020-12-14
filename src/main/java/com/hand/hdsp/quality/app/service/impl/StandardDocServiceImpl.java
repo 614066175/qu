@@ -13,7 +13,10 @@ import com.hand.hdsp.quality.app.service.StandardDocService;
 import com.hand.hdsp.quality.domain.entity.StandardDoc;
 import com.hand.hdsp.quality.domain.repository.StandardDocRepository;
 import com.hand.hdsp.quality.infra.constant.StandardDocConstant;
+import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections.CollectionUtils;
 import org.hzero.export.vo.ExportParam;
@@ -31,13 +34,21 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class StandardDocServiceImpl implements StandardDocService {
 
+    private final StandardDocMapper standardDocMapper;
     private final StandardDocRepository standardDocRepository;
     private final MinioStorageService minioStorageService;
 
-    public StandardDocServiceImpl(StandardDocRepository standardDocRepository,
+    public StandardDocServiceImpl(StandardDocMapper standardDocMapper,
+                                  StandardDocRepository standardDocRepository,
                                   MinioStorageService minioStorageService) {
+        this.standardDocMapper = standardDocMapper;
         this.standardDocRepository = standardDocRepository;
         this.minioStorageService = minioStorageService;
+    }
+
+    @Override
+    public Page<StandardDocDTO> list(PageRequest pageRequest, StandardDocDTO standardDocDTO) {
+        return PageHelper.doPageAndSort(pageRequest, () -> standardDocMapper.list(standardDocDTO));
     }
 
     @Override

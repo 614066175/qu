@@ -1,7 +1,11 @@
 package com.hand.hdsp.quality.infra.mapper;
 
+import java.util.List;
+
+import com.hand.hdsp.quality.api.dto.StandardDocDTO;
 import com.hand.hdsp.quality.domain.entity.StandardDoc;
 import io.choerodon.mybatis.common.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>标准文档管理表Mapper</p>
@@ -10,4 +14,12 @@ import io.choerodon.mybatis.common.BaseMapper;
  */
 public interface StandardDocMapper extends BaseMapper<StandardDoc> {
 
+
+    /**
+     * 查询标准文档列表
+     *
+     * @param standardDocDTO StandardDocDTO
+     * @return List<StandardDocDTO>
+     */
+    List<StandardDocDTO> list(@Param("standardDocDTO") StandardDocDTO standardDocDTO);
 }

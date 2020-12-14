@@ -70,4 +70,7 @@ public class StandardDocDTO extends AuditDomain {
 
     @Transient
     private String groupCode;
+
+    @Transient
+    private String groupDesc;
 }

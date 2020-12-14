@@ -55,8 +55,7 @@ public class StandardDocController extends BaseController {
                                                      @ApiIgnore @SortDefault(value = StandardDoc.FIELD_DOC_ID,
                                                              direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardDocDTO.setTenantId(tenantId);
-        Page<StandardDocDTO> list = standardDocRepository.pageAndSortDTO(pageRequest, standardDocDTO);
-        return Results.success(list);
+        return Results.success(standardDocService.list(pageRequest, standardDocDTO));
     }
 
     @ApiOperation(value = "标准文档管理表明细")
@@ -152,6 +151,7 @@ public class StandardDocController extends BaseController {
                                                        HttpServletResponse response,
                                                        @ApiIgnore @SortDefault(value = StandardDoc.FIELD_DOC_ID,
                                                                direction = Sort.Direction.DESC) PageRequest pageRequest) {
+        response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
         dto.setTenantId(tenantId);
         List<StandardDocDTO> dtoList =
                 standardDocService.export(dto, exportParam, pageRequest);
