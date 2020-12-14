@@ -136,26 +136,26 @@ public class NameStandardServiceImpl implements NameStandardService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void executeStandard(NameStandardDTO nameStandardDTO) {
-        if (Objects.isNull(nameStandardDTO)){
+    public void executeStandard(NameStandard nameStandard) {
+        if (Objects.isNull(nameStandard)){
             throw new CommonException(ErrorCode.NAME_STANDARD_NOT_EXIST);
         }
-        List<NameAimDTO> nameAimDTOList = nameAimRepository.list(nameStandardDTO.getStandardId());
+        List<NameAimDTO> nameAimDTOList = nameAimRepository.list(nameStandard.getStandardId());
         NameExecHistoryDTO nameExecHistoryDTO = new NameExecHistoryDTO();
         nameExecHistoryDTO.setExecStartTime(new Date());
-        nameExecHistoryDTO.setExecRule(nameStandardDTO.getStandardRule());
-        nameExecHistoryDTO.setStandardId(nameStandardDTO.getStandardId());
+        nameExecHistoryDTO.setExecRule(nameStandard.getStandardRule());
+        nameExecHistoryDTO.setStandardId(nameStandard.getStandardId());
         try {
-            nameStandardDTO.setLatestCheckedStatus(NameStandardStatusEnum.RUNNING.getStatusCode());
-            nameStandardDTO.setLatestAbnormalNum(-1L);
-            nameStandardRepository.updateDTOOptional(nameStandardDTO,NameStandard.FIELD_LATEST_CHECKED_STATUS,
-                    NameStandard.FIELD_LATEST_ABNORMAL_NUM);
+//            nameStandard.setLatestCheckedStatus(NameStandardStatusEnum.RUNNING.getStatusCode());
+//            nameStandard.setLatestAbnormalNum(-1L);
+//            nameStandardRepository.updateOptional(nameStandard,NameStandard.FIELD_LATEST_CHECKED_STATUS,
+//                    NameStandard.FIELD_LATEST_ABNORMAL_NUM);
             List<NameExecHisDetailDTO> nameExecHisDetailDTOList = this.getAimTable(nameAimDTOList);
             nameExecHistoryDTO.setCheckedNum((long) nameExecHisDetailDTOList.size());
             List<NameExecHisDetailDTO> abnormalList = new ArrayList<>();
             nameExecHisDetailDTOList.forEach(x -> {
-                if (!Pattern.matches(nameStandardDTO.getStandardRule(), x.getTableName())) {
-                    x.setErrorMessage(String.format(ERROR_MESSAGE,nameStandardDTO.getStandardRule()));
+                if (!Pattern.matches(nameStandard.getStandardRule(), x.getTableName())) {
+                    x.setErrorMessage(String.format(ERROR_MESSAGE,nameStandard.getStandardRule()));
                     abnormalList.add(x);
                 }
             });
@@ -166,25 +166,27 @@ public class NameStandardServiceImpl implements NameStandardService {
             abnormalList.forEach(x->x.setHistoryId(nameExecHistoryDTO.getHistoryId()));
             nameExecHisDetailRepository.batchInsertDTOSelective(abnormalList);
 
-            nameStandardDTO.setLatestCheckedStatus(NameStandardStatusEnum.SUCCESS.getStatusCode());
-            nameStandardDTO.setLatestAbnormalNum((long)abnormalList.size());
-            nameStandardRepository.updateDTOOptional(nameStandardDTO,NameStandard.FIELD_LATEST_CHECKED_STATUS,
+            nameStandard.setLatestCheckedStatus(NameStandardStatusEnum.SUCCESS.getStatusCode());
+            nameStandard.setLatestAbnormalNum((long)abnormalList.size());
+            nameStandardRepository.updateOptional(nameStandard,NameStandard.FIELD_LATEST_CHECKED_STATUS,
                     NameStandard.FIELD_LATEST_ABNORMAL_NUM);
 
         }catch (Exception e){
-            nameStandardDTO.setLatestCheckedStatus(NameStandardStatusEnum.FAILED.getStatusCode());
-            nameStandardRepository.updateDTOOptional(nameStandardDTO,NameStandard.FIELD_LATEST_CHECKED_STATUS);
+            nameStandard.setLatestCheckedStatus(NameStandardStatusEnum.FAILED.getStatusCode());
+            nameStandardRepository.updateOptional(nameStandard,NameStandard.FIELD_LATEST_CHECKED_STATUS);
             nameExecHistoryDTO.setExecStatus(NameStandardStatusEnum.FAILED.getStatusCode());
             nameExecHistoryRepository.insertDTOSelective(nameExecHistoryDTO);
             e.printStackTrace();
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void batchExecuteStandard(List<Long> standardIdList) {
         if (CollectionUtils.isEmpty(standardIdList)){
             throw new CommonException(ErrorCode.NAME_STANDARD_PARAMS_EMPTY);
         }
+        //将所有标准都改为运行中状态，不符合标准数量设置为-1
         List<NameStandardDTO> nameStandardDTOList = nameStandardRepository.selectDTOByIds(standardIdList);
         nameStandardDTOList.forEach(x->{
             x.setLatestCheckedStatus(NameStandardStatusEnum.RUNNING.getStatusCode());
@@ -193,7 +195,7 @@ public class NameStandardServiceImpl implements NameStandardService {
         List<NameStandard> nameStandards = nameStandardConverter.dtoListToEntityList(nameStandardDTOList);
         nameStandardRepository.batchUpdateOptional(nameStandards,NameStandard.FIELD_LATEST_ABNORMAL_NUM,
                 NameStandard.FIELD_LATEST_CHECKED_STATUS);
-        nameStandardDTOList.forEach(this::executeStandard);
+        nameStandards.forEach(this::executeStandard);
     }
 
     @Override

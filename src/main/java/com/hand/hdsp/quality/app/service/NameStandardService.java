@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.app.service;
 import java.util.List;
 
 import com.hand.hdsp.quality.api.dto.NameStandardDTO;
+import com.hand.hdsp.quality.domain.entity.NameStandard;
 import com.hand.hdsp.quality.infra.vo.NameStandardDatasourceVO;
 import com.hand.hdsp.quality.infra.vo.NameStandardTableVO;
 import io.choerodon.core.domain.Page;
@@ -41,9 +42,9 @@ public interface NameStandardService {
     /**
      * 执行标准
      *
-     * @param nameStandardDTO 命名标准
+     * @param nameStandard 命名标准
      */
-    void executeStandard(NameStandardDTO nameStandardDTO);
+    void executeStandard(NameStandard nameStandard);
 
     /**
      * 批量执行标准
