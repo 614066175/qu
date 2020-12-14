@@ -64,6 +64,7 @@ public class StandardGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/group")
     public ResponseEntity<?> group(@PathVariable(name = "organizationId") Long tenantId, StandardGroupVO standardGroupVO) {
+        standardGroupVO.setTenantId(tenantId);
         return Results.success(standardGroupService.listByGroup(standardGroupVO));
     }
 
