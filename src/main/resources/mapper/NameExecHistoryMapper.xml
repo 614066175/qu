@@ -63,6 +63,9 @@
         <if test="execEndTime !=null">
             AND xneh.exec_end_time &lt;= #{execEndTime}
         </if>
+        <if test="startDay != null">
+            AND ( datediff ( xneh.exec_start_time , #{startDay} ) = 0 )
+        </if>
         ORDER BY xneh.history_id DESC
     </select>
 

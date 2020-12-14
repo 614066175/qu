@@ -85,4 +85,7 @@ public class NameExecHistoryDTO extends AuditDomain {
     @Transient
     private List<NameExecHisDetailDTO> execDetails;
 
+    @Transient
+    private Date startDay;
+
 }
