@@ -146,10 +146,6 @@ public class NameStandardServiceImpl implements NameStandardService {
         nameExecHistoryDTO.setExecRule(nameStandard.getStandardRule());
         nameExecHistoryDTO.setStandardId(nameStandard.getStandardId());
         try {
-//            nameStandard.setLatestCheckedStatus(NameStandardStatusEnum.RUNNING.getStatusCode());
-//            nameStandard.setLatestAbnormalNum(-1L);
-//            nameStandardRepository.updateOptional(nameStandard,NameStandard.FIELD_LATEST_CHECKED_STATUS,
-//                    NameStandard.FIELD_LATEST_ABNORMAL_NUM);
             List<NameExecHisDetailDTO> nameExecHisDetailDTOList = this.getAimTable(nameAimDTOList);
             nameExecHistoryDTO.setCheckedNum((long) nameExecHisDetailDTOList.size());
             List<NameExecHisDetailDTO> abnormalList = new ArrayList<>();

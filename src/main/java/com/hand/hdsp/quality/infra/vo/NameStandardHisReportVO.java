@@ -25,7 +25,7 @@ public class NameStandardHisReportVO {
     /**
      * 横轴
      */
-    private Date date;
+    private String date;
 
     /**
      * 平均异常数量
