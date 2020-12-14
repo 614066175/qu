@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.util.*;
 
 import com.hand.hdsp.quality.api.dto.RelationshipDTO;
+import com.hand.hdsp.quality.api.dto.TableRelCheckDTO;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanRelTable;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
@@ -22,6 +23,7 @@ import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.starter.driver.core.session.DriverSession;
@@ -37,7 +39,7 @@ public class RelTableMeasure implements Measure {
     private final ItemTemplateSqlRepository templateSqlRepository;
     private final DriverSessionService driverSessionService;
     private static final String ACCURACY_RATE_SQL = "SELECT count(*) count FROM %s source WHERE EXISTS (SELECT 1 FROM %s.%s rel WHERE %s) and %s";
-    private static final String CALCULATED_VALUE_SQL = "select count(*) COUNT from (select %s,%s as value1 from %s) source inner join (select %s ,%s from %s.%s ) rel on %s";
+    private static final String CALCULATED_VALUE_SQL = "select count(*) COUNT from (select %s from %s) source inner join (select %s from %s.%s where %s) rel on %s";
 
     public RelTableMeasure(ItemTemplateSqlRepository templateSqlRepository, DriverSessionService driverSessionService) {
         this.templateSqlRepository = templateSqlRepository;
@@ -122,23 +124,41 @@ public class RelTableMeasure implements Measure {
         }
         //计算值比较
         else if (PlanConstant.CheckItem.CALCULATED_VALUE.equals(param.getCheckItem())) {
-            StringBuilder where = new StringBuilder();
-            where.append(" 1 = 1 ");
-            if (CollectionUtils.isNotEmpty(relationshipDTOList)) {
-                for (RelationshipDTO relationshipDTO : relationshipDTOList) {
-                    where.append(" and source.").append(relationshipDTO.getSourceFieldName())
-                            .append(relationshipDTO.getRelCode())
-                            .append(" rel.").append(relationshipDTO.getRelFieldName());
+            String tableRelCheck = batchPlanRelTable.getTableRelCheck();
+            if (Strings.isNotEmpty(tableRelCheck)) {
+                List<TableRelCheckDTO> tableRelCheckDTOList = JsonUtils.json2TableRelCheck(tableRelCheck);
+                List<String> sourceList = new ArrayList<>();
+                StringBuilder sourceRelationShip = new StringBuilder();
+                relationshipDTOList.forEach(relationshipDTO -> sourceList.add(relationshipDTO.getSourceFieldName()));
+                for (int i=0;i<tableRelCheckDTOList.size();i++ ) {
+                    sourceList.add(String.format("%s(%s) as %s",
+                            tableRelCheckDTOList.get(i).getSourceFunction(),
+                            tableRelCheckDTOList.get(i).getSourceFieldName(),
+                            "function" + i++));
                 }
+                String sourceColumns = Strings.join(sourceList, ',');
+                List<String> relList = new ArrayList<>();
+                relationshipDTOList.forEach(relationshipDTO -> relList.add(relationshipDTO.getRelFieldName()));
+                for (int i=0;i<tableRelCheckDTOList.size();i++ ) {
+                    sourceList.add(String.format("%s(%s) as %s",
+                            tableRelCheckDTOList.get(i).getRelFunction(),
+                            tableRelCheckDTOList.get(i).getRelFieldName(),
+                            "function" + i++));
+                }
+                String relColumns = Strings.join(relList, ',');
+
+                StringBuilder where = new StringBuilder();
+                where.append(" 1 = 1 ");
+
+                DriverSession driverSession = driverSessionService.getDriverSession(tenantId, param.getPluginDatasourceDTO().getDatasourceCode());
+                String sql = String.format(CALCULATED_VALUE_SQL,
+                        sourceColumns,
+                        batchPlanRelTable.getRelTableName(),
+                        batchPlanRelTable.getRelTableName(),
+                        where.toString(),
+                        Objects.isNull(batchResultBase.getWhereCondition()) ? "1=1" : batchPlanRelTable.getWhereCondition());
+                List<Map<String, Object>> result = driverSession.executeOneQuery(param.getSchema(), sql);
             }
-            DriverSession driverSession = driverSessionService.getDriverSession(tenantId, param.getPluginDatasourceDTO().getDatasourceCode());
-            String sql = String.format(CALCULATED_VALUE_SQL,
-                    batchResultBase.getPackageObjectName(),
-                    batchPlanRelTable.getRelSchema(),
-                    batchPlanRelTable.getRelTableName(),
-                    where.toString(),
-                    Objects.isNull(batchResultBase.getWhereCondition()) ? "1=1" : batchPlanRelTable.getWhereCondition());
-            List<Map<String, Object>> result = driverSession.executeOneQuery(param.getSchema(), sql);
         }
 
         return batchResultItem;

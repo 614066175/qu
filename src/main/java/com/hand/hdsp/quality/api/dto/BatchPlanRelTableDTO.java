@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.api.dto;
 
 import java.util.List;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -80,6 +81,9 @@ public class BatchPlanRelTableDTO extends AuditDomain {
     @ApiModelProperty(value = "关联关系json")
     private String relationship;
 
+    @ApiModelProperty(value = "表间校验json")
+    private String tableRelCheck;
+
     @ApiModelProperty(value = "告警等级json")
     private String warningLevel;
 
@@ -89,9 +93,13 @@ public class BatchPlanRelTableDTO extends AuditDomain {
     @ApiModelProperty(value = "告警等级list")
     private List<WarningLevelDTO> warningLevelList;
 
+    @ApiModelProperty(value = "表间校验list")
+    @Transient
+    private List<TableRelCheckDTO> tableRelCheckDTOList;
+
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;
 
-    private String datasourceName;
+    private String datasourceCode;
 }

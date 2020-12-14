@@ -34,7 +34,7 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
         BatchPlanRelTableDTO dto = batchPlanRelTableRepository.selectDTOByPrimaryKey(planRuleId);
         BatchPlanBase batchPlanBase = batchPlanBaseRepository.selectByPrimaryKey(dto.getPlanBaseId());
         if (batchPlanBase != null) {
-            dto.setDatasourceName(batchPlanBase.getDatasourceCode());
+            dto.setDatasourceCode(batchPlanBase.getDatasourceCode());
         }
         dto.setWarningLevelList(JsonUtils.json2WarningLevel(dto.getWarningLevel()));
         dto.setRelationshipList(JsonUtils.json2Relationship(dto.getRelationship()));

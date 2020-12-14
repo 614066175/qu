@@ -18,6 +18,7 @@
         <result column="rel_table_name" property="relTableName" jdbcType="VARCHAR"/>
         <result column="where_condition" property="whereCondition" jdbcType="VARCHAR"/>
         <result column="relationship" property="relationship" jdbcType="VARCHAR"/>
+        <result column="tableRelCheck" property="tableRelCheck" jdbcType="VARCHAR"/>
         <result column="warning_level" property="warningLevel" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>

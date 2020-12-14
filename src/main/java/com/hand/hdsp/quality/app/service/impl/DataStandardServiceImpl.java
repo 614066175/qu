@@ -174,7 +174,7 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     private void convertToDataLengthList(DataStandardDTO dataStandardDTO) {
         //对数据长度进行处理
-        if (dataStandardDTO.getDataLength() != null) {
+        if (Objects.nonNull(dataStandardDTO.getDataLength())) {
             List<String> dataLength = Arrays.asList(dataStandardDTO.getDataLength().split(","));
             List<Long> dataLengthList = dataLength.stream().map(Long::parseLong).collect(Collectors.toList());
             dataStandardDTO.setDataLengthList(dataLengthList);
@@ -473,14 +473,14 @@ public class DataStandardServiceImpl implements DataStandardService {
                 .checkType(STANDARD)
                 .weight(DEFAULT_WEIGHT)
                 .build();
-        List<BatchPlanFieldLineDTO> batchPlanFieldLineDTOList=new ArrayList<>();
-        if(Strings.isNotEmpty(dataStandardDTO.getDataPattern())){
-           batchPlanFieldLineDTOList.add(dataPatternHandler.handle(dataStandardDTO));
+        List<BatchPlanFieldLineDTO> batchPlanFieldLineDTOList = new ArrayList<>();
+        if (Strings.isNotEmpty(dataStandardDTO.getDataPattern())) {
+            batchPlanFieldLineDTOList.add(dataPatternHandler.handle(dataStandardDTO));
         }
-        if(Strings.isNotEmpty(dataStandardDTO.getDataLength())){
+        if (Strings.isNotEmpty(dataStandardDTO.getDataLength())) {
             batchPlanFieldLineDTOList.add(dataLengthHandler.handle(dataStandardDTO));
         }
-        if(Strings.isNotEmpty(dataStandardDTO.getValueRange())){
+        if (Strings.isNotEmpty(dataStandardDTO.getValueRange())) {
             batchPlanFieldLineDTOList.add(valueRangeHandler.handle(dataStandardDTO));
         }
         batchPlanFieldDTO.setBatchPlanFieldLineDTOList(batchPlanFieldLineDTOList);

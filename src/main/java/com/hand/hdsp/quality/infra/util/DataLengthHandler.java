@@ -6,6 +6,7 @@ import static com.hand.hdsp.quality.infra.constant.StandardConstant.LengthType.R
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldConDTO;
@@ -91,7 +92,7 @@ public class DataLengthHandler implements StandardHandler {
 
     private void convertToDataLengthList(DataStandardDTO dataStandardDTO) {
         //对数据长度进行处理
-        if (dataStandardDTO.getDataLength() != null) {
+        if (Objects.nonNull(dataStandardDTO.getDataLength())) {
             List<String> dataLength = Arrays.asList(dataStandardDTO.getDataLength().split(","));
             List<Long> dataLengthList = dataLength.stream().map(Long::parseLong).collect(Collectors.toList());
             dataStandardDTO.setDataLengthList(dataLengthList);

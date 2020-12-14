@@ -66,6 +66,8 @@ public class BatchPlanRelTable extends AuditDomain {
 
     private String relationship;
 
+    private String tableRelCheck;
+
     private String warningLevel;
 
     private Long tenantId;

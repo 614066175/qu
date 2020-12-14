@@ -32,11 +32,10 @@ public class RelationshipDTO extends AuditDomain {
     @NotBlank
     private String relCode;
 
-    @ApiModelProperty(value = "关联表字段名")
+    @ApiModelProperty(value = "目标表字段名")
     @NotBlank
     @Size(max = 50)
     private String relFieldName;
 
 
-    private TableRelCheckDTO tableRelCheckDTO;
 }

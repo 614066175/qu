@@ -8,6 +8,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.quality.api.dto.RelationshipDTO;
+import com.hand.hdsp.quality.api.dto.TableRelCheckDTO;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
@@ -89,6 +90,24 @@ public class JsonUtils {
         }
         try {
             return ResponseUtils.getObjectMapper().readValue(content, new TypeReference<List<RelationshipDTO>>() {
+            });
+        } catch (IOException e) {
+            throw new CommonException(ErrorCode.JSON_PROCESS);
+        }
+    }
+
+    /**
+     * json 转表间校验关系list
+     *
+     * @param content
+     * @return
+     */
+    public static List<TableRelCheckDTO> json2TableRelCheck(String content) {
+        if (StringUtils.isBlank(content)) {
+            return Collections.emptyList();
+        }
+        try {
+            return ResponseUtils.getObjectMapper().readValue(content, new TypeReference<List<TableRelCheckDTO>>() {
             });
         } catch (IOException e) {
             throw new CommonException(ErrorCode.JSON_PROCESS);
