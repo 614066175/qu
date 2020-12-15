@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.app.service.impl;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -102,7 +103,8 @@ public class StandardDocServiceImpl implements StandardDocService {
             throw new CommonException("hdsp.xqua.error.no-permission");
         }
         try {
-            response.setHeader("content-disposition", "attachment;filename=" + standardDocDTO.getDocName());
+            String docName = URLEncoder.encode(standardDocDTO.getDocName(), "UTF-8");
+            response.setHeader("content-disposition", "attachment;filename=" + docName);
             InputStream in = minioStorageService.downloadByUrl(
                     standardDocDTO.getTenantId(),
                     StandardDocConstant.STANDARD_DOC_MINIO_BUCKET,
