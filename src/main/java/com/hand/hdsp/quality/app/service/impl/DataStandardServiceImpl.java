@@ -91,7 +91,7 @@ public class DataStandardServiceImpl implements DataStandardService {
     private final DriverSessionService driverSessionService;
 
     @Resource
-    private  AssetFeign assetFeign;
+    private AssetFeign assetFeign;
 
     public DataStandardServiceImpl(DataStandardRepository dataStandardRepository,
                                    DataStandardVersionRepository dataStandardVersionRepository,
@@ -342,7 +342,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .collect(Collectors.toList());
                 publishRelatePlan(aimDTOS);
             }
-            assetFeign.saveStandardToEs(dataStandardDTO.getTenantId(),dataStandardDTO);
+            assetFeign.saveStandardToEs(dataStandardDTO.getTenantId(), dataStandardDTO);
         }
     }
 
@@ -423,7 +423,7 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void aim(Long tenantId,List<StandardAimDTO> standardAimDTOList) {
+    public void aim(Long tenantId, List<StandardAimDTO> standardAimDTOList) {
         if (CollectionUtils.isNotEmpty(standardAimDTOList)) {
             standardAimDTOList.forEach(standardAimDTO -> {
                 standardAimDTO.setTenantId(tenantId);
@@ -507,18 +507,25 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     @Override
     public void fieldAimStandard(AssetFieldDTO assetFieldDTO) {
-        DataStandardDTO dataStandardDTO = dataStandardRepository.selectDTOByPrimaryKey(assetFieldDTO.getStandardId());
-        if (Objects.isNull(dataStandardDTO)) {
-            throw new CommonException(ErrorCode.DATA_STANDARD_NOT_EXIST);
-        }
-        if ("AIM".equals(assetFieldDTO.getAimType())) {
-            doAim(assetFieldDTO);
-        }
-        if ("UNAIM".equals(assetFieldDTO.getAimType())) {
-            doUnAim(assetFieldDTO);
-        }
-        if ("UPDATE".equals(assetFieldDTO.getAimType())) {
-
+        //根据字段删除落标
+        List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, assetFieldDTO.getDatasourceCode())
+                        .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, assetFieldDTO.getDatasourceSchema())
+                        .andEqualTo(StandardAim.FIELD_TABLE_NAME, assetFieldDTO.getTableName())
+                        .andEqualTo(StandardAim.FIELD_FIELD_NAME, assetFieldDTO.getFieldName()))
+                .build());
+        standardAimRepository.batchDTODelete(standardAimDTOS);
+        //创建新的字段落标
+        if (CollectionUtils.isNotEmpty(assetFieldDTO.getStandardIdList())) {
+            assetFieldDTO.getStandardIdList().forEach(standardId -> {
+                DataStandardDTO dataStandardDTO = dataStandardRepository.selectDTOByPrimaryKey(standardId);
+                if (Objects.isNull(dataStandardDTO)) {
+                    throw new CommonException(ErrorCode.DATA_STANDARD_NOT_EXIST);
+                }
+                assetFieldDTO.setStandardId(standardId);
+                doAim(assetFieldDTO);
+            });
         }
     }
 
@@ -537,30 +544,13 @@ public class DataStandardServiceImpl implements DataStandardService {
         DriverSession driverSession = driverSessionService.getDriverSession(assetFieldDTO.getTenantId(), assetFieldDTO.getDatasourceCode());
         List<Table> tables = driverSession.tablesNameAndDesc(assetFieldDTO.getDatasourceSchema());
         tables.forEach(table -> {
-            if(assetFieldDTO.getTableName().equals(table.getTableName())){
+            if (assetFieldDTO.getTableName().equals(table.getTableName())) {
                 standardAimDTO.setTableDesc(table.getRemarks());
             }
         });
         standardAimRepository.insertDTOSelective(standardAimDTO);
     }
 
-    private void doUnAim(AssetFieldDTO assetFieldDTO) {
-        StandardAim standardAim = StandardAim.builder()
-                .standardId(assetFieldDTO.getStandardId())
-                .standardType(DATA)
-                .fieldName(assetFieldDTO.getFieldName())
-                .fieldDesc(assetFieldDTO.getFieldDesc())
-                .datasourceId(assetFieldDTO.getDatasourceId())
-                .schemaName(assetFieldDTO.getDatasourceSchema())
-                .tableName(assetFieldDTO.getTableName())
-                .build();
-        StandardAim aim = standardAimRepository.selectOne(standardAim);
-        if(Objects.isNull(aim)){
-            throw new CommonException(ErrorCode.STANDARD_AIM_NOT_EXIST);
-        }else{
-            standardAimRepository.delete(aim);
-        }
-    }
 
     /**
      * 关联评估方案

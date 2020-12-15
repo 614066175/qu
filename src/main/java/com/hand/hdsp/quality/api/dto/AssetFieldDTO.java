@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.api.dto;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -206,6 +207,9 @@ public class AssetFieldDTO extends AuditDomain {
 
     @Transient
     private String aimType;
+
+    @Transient
+    private List<Long> standardIdList;
 
     /**
      * 数据源租户id
