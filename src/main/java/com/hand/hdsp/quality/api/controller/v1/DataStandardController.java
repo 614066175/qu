@@ -248,9 +248,9 @@ public class DataStandardController {
 
     @ApiOperation(value = "字段元数据关联数据标准")
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/field-aim-standard")
+    @PostMapping("/field-aim-standard")
     public ResponseEntity<Void> fieldAimStandard(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                            AssetFieldDTO assetFieldDTO) {
+                                           @RequestBody AssetFieldDTO assetFieldDTO) {
         assetFieldDTO.setTenantId(tenantId);
         dataStandardService.fieldAimStandard(assetFieldDTO);
         return Results.success();
