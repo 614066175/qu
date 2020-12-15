@@ -52,7 +52,7 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
             batchPlanRelTableDTO.setRelationship(JsonUtils.object2Json(batchPlanRelTableDTO.getRelationshipList()));
         }
         if (CollectionUtils.isNotEmpty(batchPlanRelTableDTO.getTableRelCheckList())) {
-            batchPlanRelTableDTO.setTableRelCheck(JsonUtils.object2Json(batchPlanRelTableDTO.getTableRelCheck()));
+            batchPlanRelTableDTO.setTableRelCheck(JsonUtils.object2Json(batchPlanRelTableDTO.getTableRelCheckList()));
         }
         batchPlanRelTableRepository.insertDTOSelective(batchPlanRelTableDTO);
     }
@@ -68,7 +68,7 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
             batchPlanRelTableDTO.setRelationship(JsonUtils.object2Json(batchPlanRelTableDTO.getRelationshipList()));
         }
         if (CollectionUtils.isNotEmpty(batchPlanRelTableDTO.getTableRelCheckList())) {
-            batchPlanRelTableDTO.setTableRelCheck(JsonUtils.object2Json(batchPlanRelTableDTO.getTableRelCheck()));
+            batchPlanRelTableDTO.setTableRelCheck(JsonUtils.object2Json(batchPlanRelTableDTO.getTableRelCheckList()));
         }
         batchPlanRelTableRepository.updateDTOAllColumnWhereTenant(batchPlanRelTableDTO, tenantId);
 
