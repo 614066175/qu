@@ -65,7 +65,7 @@ public class StandardDocImportServiceImpl implements IDoImportService {
                     .groupCode(standardDocDTO.getGroupCode())
                     .groupName(standardDocDTO.getGroupName())
                     .groupDesc(standardDocDTO.getGroupDesc())
-                    .standardType(StandardConstant.StandardType.DATA)
+                    .standardType(StandardConstant.StandardType.DOC)
                     .tenantId(standardDocDTO.getTenantId())
                     .build();
             standardGroupRepository.insertDTOSelective(standardGroupDTO);
