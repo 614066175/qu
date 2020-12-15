@@ -9,6 +9,7 @@ import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.annotation.Resource;
 
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.DataStandardService;
@@ -18,6 +19,7 @@ import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardConstant.AimType;
 import com.hand.hdsp.quality.infra.constant.WarningLevel;
+import com.hand.hdsp.quality.infra.feign.AssetFeign;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import com.hand.hdsp.quality.infra.util.DataLengthHandler;
 import com.hand.hdsp.quality.infra.util.DataPatternHandler;
@@ -87,6 +89,9 @@ public class DataStandardServiceImpl implements DataStandardService {
     private final ValueRangeHandler valueRangeHandler;
 
     private final DriverSessionService driverSessionService;
+
+    @Resource
+    private  AssetFeign assetFeign;
 
     public DataStandardServiceImpl(DataStandardRepository dataStandardRepository,
                                    DataStandardVersionRepository dataStandardVersionRepository,
@@ -337,6 +342,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .collect(Collectors.toList());
                 publishRelatePlan(aimDTOS);
             }
+            assetFeign.saveStandardToEs(dataStandardDTO.getTenantId(),dataStandardDTO);
         }
     }
 
@@ -515,7 +521,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         }
     }
 
-    private void doUnAim(AssetFieldDTO assetFieldDTO) {
+    private void doAim(AssetFieldDTO assetFieldDTO) {
         StandardAimDTO standardAimDTO = StandardAimDTO.builder()
                 .standardId(assetFieldDTO.getStandardId())
                 .standardType(DATA)
@@ -537,7 +543,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         standardAimRepository.insertDTOSelective(standardAimDTO);
     }
 
-    private void doAim(AssetFieldDTO assetFieldDTO) {
+    private void doUnAim(AssetFieldDTO assetFieldDTO) {
         StandardAim standardAim = StandardAim.builder()
                 .standardId(assetFieldDTO.getStandardId())
                 .standardType(DATA)
@@ -547,8 +553,12 @@ public class DataStandardServiceImpl implements DataStandardService {
                 .schemaName(assetFieldDTO.getDatasourceSchema())
                 .tableName(assetFieldDTO.getTableName())
                 .build();
-        StandardAim standardAim1 = standardAimRepository.selectOne(standardAim);
-        if(Objects.isNull(standardAim1)){}
+        StandardAim aim = standardAimRepository.selectOne(standardAim);
+        if(Objects.isNull(aim)){
+            throw new CommonException(ErrorCode.STANDARD_AIM_NOT_EXIST);
+        }else{
+            standardAimRepository.delete(aim);
+        }
     }
 
     /**

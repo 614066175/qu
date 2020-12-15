@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.infra.feign;
 
 import com.hand.hdsp.quality.api.dto.ApprovalHeaderDTO;
 import com.hand.hdsp.quality.api.dto.ApprovalLineDTO;
+import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.infra.feign.fallback.AssetFeignFallBack;
 import io.swagger.annotations.ApiParam;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -99,4 +100,12 @@ public interface AssetFeign {
     @DeleteMapping("/v1/{organizationId}/approval-lines")
     ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                              @RequestBody ApprovalLineDTO approvalLineDTO);
+
+    /**
+     * 数据标准存es
+     * @param tenantId
+     * @param dataStandardDTO
+     */
+    @PostMapping("/v1/{organizationId}/asset-fields/save-standard-to-es")
+    ResponseEntity<?> saveStandardToEs(@PathVariable("organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO);
 }

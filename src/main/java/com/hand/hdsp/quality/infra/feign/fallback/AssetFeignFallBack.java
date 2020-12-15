@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.infra.feign.fallback;
 
 import com.hand.hdsp.quality.api.dto.ApprovalHeaderDTO;
 import com.hand.hdsp.quality.api.dto.ApprovalLineDTO;
+import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.infra.feign.AssetFeign;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +52,11 @@ public class AssetFeignFallBack implements AssetFeign {
 
     @Override
     public ResponseEntity<?> remove(Long tenantId, ApprovalLineDTO approvalLineDTO) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<?> saveStandardToEs(Long tenantId, DataStandardDTO dataStandardDTO) {
         return null;
     }
 }

@@ -121,4 +121,6 @@ public interface ErrorCode {
 
     String NAME_STANDARD_PARAMS_EMPTY = "hdsp.xsta.err.is_empty";
     String NAME_STANDARD_NOT_EXIST = "hdsp.xsta.err.not_exist";
+    String STANDARD_AIM_NOT_EXIST = "hdsp.xsta.err.standard_aim_not_exist";
+
 }

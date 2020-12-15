@@ -95,7 +95,7 @@ public class BatchPlanRelTableDTO extends AuditDomain {
 
     @ApiModelProperty(value = "表间校验list")
     @Transient
-    private List<TableRelCheckDTO> tableRelCheckDTOList;
+    private List<TableRelCheckDTO> tableRelCheckList;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull
