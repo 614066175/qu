@@ -42,17 +42,17 @@ public class StandardDocDTO extends AuditDomain {
     @ApiModelProperty(value = "数据标准编码")
     @NotBlank
     @Size(max = 50)
-    @ExcelColumn(zh = "标准编码", en = "标准编码")
+    @ExcelColumn(zh = "标准编码", en = "标准编码", groups = {Group1.class})
     private String standardCode;
 
     @ApiModelProperty(value = "数据标准名称")
     @NotBlank
     @Size(max = 120)
-    @ExcelColumn(zh = "标准名称", en = "标准名称")
+    @ExcelColumn(zh = "标准名称", en = "标准名称", groups = {Group1.class})
     private String standardName;
 
     @ApiModelProperty(value = "数据标准描述")
-    @ExcelColumn(zh = "标准描述", en = "标准描述")
+    @ExcelColumn(zh = "标准描述", en = "标准描述", groups = {Group1.class})
     private String standardDesc;
 
     @ApiModelProperty(value = "数据标准文档名称")
@@ -66,11 +66,20 @@ public class StandardDocDTO extends AuditDomain {
     private Long tenantId;
 
     @Transient
+    @ExcelColumn(zh = "分组名称", en = "groupName", groups = {Group1.class})
     private String groupName;
 
     @Transient
+    @ExcelColumn(zh = "分组编码", en = "groupCode", groups = {Group1.class})
     private String groupCode;
 
     @Transient
+    @ExcelColumn(zh = "分组描述", en = "groupDesc", groups = {Group1.class})
     private String groupDesc;
+
+    public interface Group1 {
+    }
+
+    public interface Group2 {
+    }
 }

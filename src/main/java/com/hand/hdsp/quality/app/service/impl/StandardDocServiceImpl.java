@@ -125,20 +125,12 @@ public class StandardDocServiceImpl implements StandardDocService {
 
     @Override
     public List<StandardDocDTO> export(StandardDocDTO dto, ExportParam exportParam, PageRequest pageRequest) {
-        return standardDocRepository.pageAndSortDTO(pageRequest, dto);
+        return list(pageRequest, dto);
     }
 
 
     private void handleStandardDocUpload(StandardDocDTO standardDocDTO, MultipartFile multipartFile) {
-        // 如果已经有文件，先删除
-        if (Objects.nonNull(standardDocDTO.getDocPath()) && !"".equals(standardDocDTO.getDocPath())) {
-            minioStorageService.deleteFileByUrl(
-                    standardDocDTO.getTenantId(),
-                    StandardDocConstant.STANDARD_DOC_MINIO_BUCKET,
-                    null,
-                    Collections.singletonList(standardDocDTO.getDocPath())
-            );
-        }
+        String oldDocPath = standardDocDTO.getDocPath();
         String originalFilename = multipartFile.getOriginalFilename();
         // 上传到remote hzero-file
         String standardDocPath = minioStorageService.uploadFile(
@@ -152,6 +144,15 @@ public class StandardDocServiceImpl implements StandardDocService {
         );
         standardDocDTO.setDocName(originalFilename);
         standardDocDTO.setDocPath(standardDocPath);
+        // 删除原有文件
+        if (Objects.nonNull(oldDocPath) && !"".equals(oldDocPath)) {
+            minioStorageService.deleteFileByUrl(
+                    standardDocDTO.getTenantId(),
+                    StandardDocConstant.STANDARD_DOC_MINIO_BUCKET,
+                    null,
+                    Collections.singletonList(oldDocPath)
+            );
+        }
     }
 
 }
