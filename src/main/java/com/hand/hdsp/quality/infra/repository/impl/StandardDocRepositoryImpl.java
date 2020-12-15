@@ -5,8 +5,12 @@ import java.util.List;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.StandardDocDTO;
+import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.domain.entity.StandardDoc;
+import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.StandardDocRepository;
+import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
+import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
@@ -19,6 +23,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class StandardDocRepositoryImpl extends BaseRepositoryImpl<StandardDoc, StandardDocDTO> implements StandardDocRepository {
+
+    private final StandardGroupRepository standardGroupRepository;
+
+    public StandardDocRepositoryImpl(StandardGroupRepository standardGroupRepository) {
+        this.standardGroupRepository = standardGroupRepository;
+    }
 
     @Override
     public void batchImport(List<StandardDocDTO> standardDocDTOList) {
@@ -41,6 +51,25 @@ public class StandardDocRepositoryImpl extends BaseRepositoryImpl<StandardDoc, S
                         ).build());
                 if (CollectionUtils.isNotEmpty(standardDocs)) {
                     return;
+                }
+                List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
+                        .andWhere(Sqls.custom()
+                                .andEqualTo(StandardGroup.FIELD_GROUP_CODE, standardDocDTO.getGroupCode())
+                                .andEqualTo(StandardGroup.FIELD_TENANT_ID, standardDocDTO.getTenantId()))
+                        .build());
+                if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
+                    standardDocDTO.setGroupId(standardGroupDTOList.get(0).getGroupId());
+                } else {
+                    //创建分组
+                    StandardGroupDTO standardGroupDTO = StandardGroupDTO.builder()
+                            .groupCode(standardDocDTO.getGroupCode())
+                            .groupName(standardDocDTO.getGroupName())
+                            .groupDesc(standardDocDTO.getGroupDesc())
+                            .standardType(StandardConstant.StandardType.DATA)
+                            .tenantId(standardDocDTO.getTenantId())
+                            .build();
+                    standardGroupRepository.insertDTOSelective(standardGroupDTO);
+                    standardDocDTO.setGroupId(standardGroupDTO.getGroupId());
                 }
                 importStandardDocDTOList.add(standardDocDTO);
             });
