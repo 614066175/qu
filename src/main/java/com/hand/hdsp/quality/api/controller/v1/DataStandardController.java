@@ -200,7 +200,7 @@ public class DataStandardController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/standard-aim")
     public ResponseEntity<Void> standardAim(@PathVariable(name = "organizationId") Long tenantId, @RequestBody List<StandardAimDTO> standardAimDTOList) {
-        dataStandardService.aim(standardAimDTOList);
+        dataStandardService.aim(tenantId,standardAimDTOList);
         return Results.success();
     }
 

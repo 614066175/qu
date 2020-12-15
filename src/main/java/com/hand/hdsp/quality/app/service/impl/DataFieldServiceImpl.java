@@ -1,7 +1,7 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.*;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
 import java.util.List;
@@ -12,18 +12,14 @@ import com.hand.hdsp.quality.app.service.DataFieldService;
 import com.hand.hdsp.quality.app.service.DataStandardService;
 import com.hand.hdsp.quality.domain.entity.DataField;
 import com.hand.hdsp.quality.domain.entity.DataFieldVersion;
-import com.hand.hdsp.quality.domain.entity.StandardApprove;
 import com.hand.hdsp.quality.domain.entity.StandardExtra;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
-import com.hand.hdsp.quality.infra.constant.StandardConstant;
-import com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import lombok.val;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
@@ -181,8 +177,8 @@ public class DataFieldServiceImpl implements DataFieldService {
     }
 
     @Override
-    public void aim(List<StandardAimDTO> standardAimDTOList) {
-        dataStandardService.aim(standardAimDTOList);
+    public void aim(Long tenantId,List<StandardAimDTO> standardAimDTOList) {
+        dataStandardService.aim(tenantId,standardAimDTOList);
     }
 
     @Override

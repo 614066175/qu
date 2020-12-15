@@ -1,5 +1,8 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import java.util.List;
+import javax.servlet.http.HttpServletResponse;
+
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import com.hand.hdsp.quality.app.service.DataFieldService;
@@ -18,9 +21,6 @@ import org.hzero.export.annotation.ExcelExport;
 import org.hzero.export.vo.ExportParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 
 /**
  * <p>字段标准表 管理 API</p>
@@ -144,7 +144,7 @@ public class DataFieldController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/field-standard-aim")
     public ResponseEntity<Void> standardAim(@PathVariable(name = "organizationId") Long tenantId, @RequestBody List<StandardAimDTO> standardAimDTOList) {
-        dataFieldService.aim(standardAimDTOList);
+        dataFieldService.aim(tenantId,standardAimDTOList);
         return Results.success();
     }
 
