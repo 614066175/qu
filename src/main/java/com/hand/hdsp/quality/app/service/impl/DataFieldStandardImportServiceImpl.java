@@ -58,9 +58,7 @@ public class DataFieldStandardImportServiceImpl implements IDoImportService {
         }
         // 设置租户Id
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
-        if (tenantId != 0) {
-            dataFieldDTO.setTenantId(tenantId);
-        }
+        dataFieldDTO.setTenantId(tenantId);
         List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardGroup.FIELD_GROUP_CODE, dataFieldDTO.getGroupCode())
@@ -68,7 +66,7 @@ public class DataFieldStandardImportServiceImpl implements IDoImportService {
                 .build());
         if (CollectionUtils.isNotEmpty(standardGroupDTOS)) {
             dataFieldDTO.setGroupId(standardGroupDTOS.get(0).getGroupId());
-        }else{
+        } else {
             //创建分组
             StandardGroupDTO standardGroupDTO = StandardGroupDTO.builder()
                     .groupCode(dataFieldDTO.getGroupCode())

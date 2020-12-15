@@ -39,9 +39,7 @@ public class RuleBatchImportServiceImpl implements IBatchImportService {
         try {
             for (String json : data) {
                 RuleDTO ruleDTO = objectMapper.readValue(json, RuleDTO.class);
-                if (tenantId != 0) {
-                    ruleDTO.setTenantId(tenantId);
-                }
+                ruleDTO.setTenantId(tenantId);
                 ruleDTOList.add(ruleDTO);
             }
         } catch (IOException e) {

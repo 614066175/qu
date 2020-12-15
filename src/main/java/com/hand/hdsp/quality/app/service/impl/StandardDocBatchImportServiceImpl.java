@@ -36,9 +36,7 @@ public class StandardDocBatchImportServiceImpl implements IBatchImportService {
         try {
             for (String json : data) {
                 StandardDocDTO standardDocDTO = objectMapper.readValue(json, StandardDocDTO.class);
-                if (tenantId != 0) {
-                    standardDocDTO.setTenantId(tenantId);
-                }
+                standardDocDTO.setTenantId(tenantId);
                 standardDocDTOList.add(standardDocDTO);
             }
         } catch (IOException e) {

@@ -51,9 +51,7 @@ public class RuleImportServiceImpl implements IDoImportService {
         }
         // 设置租户Id
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
-        if (tenantId != 0) {
-            ruleDTO.setTenantId(tenantId);
-        }
+        ruleDTO.setTenantId(tenantId);
         List<RuleGroupDTO> ruleGroupDTOS = ruleGroupRepository.selectDTOByCondition(Condition.builder(RuleGroup.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(RuleGroup.FIELD_GROUP_CODE, ruleDTO.getGroupCode())

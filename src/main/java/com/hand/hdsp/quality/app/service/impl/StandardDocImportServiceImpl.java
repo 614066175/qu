@@ -49,9 +49,7 @@ public class StandardDocImportServiceImpl implements IDoImportService {
         }
         // 设置租户Id
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
-        if (tenantId != 0) {
-            standardDocDTO.setTenantId(tenantId);
-        }
+        standardDocDTO.setTenantId(tenantId);
         List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardGroup.FIELD_GROUP_CODE, standardDocDTO.getGroupCode())

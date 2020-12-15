@@ -36,9 +36,7 @@ public class DataFieldStandardBatchImportServiceImpl implements IBatchImportServ
         try {
             for (String json : data) {
                 DataFieldDTO dataFieldDTO = objectMapper.readValue(json, DataFieldDTO.class);
-                if (tenantId != 0) {
-                    dataFieldDTO.setTenantId(tenantId);
-                }
+                dataFieldDTO.setTenantId(tenantId);
                 dataFieldDTOList.add(dataFieldDTO);
             }
         } catch (IOException e) {

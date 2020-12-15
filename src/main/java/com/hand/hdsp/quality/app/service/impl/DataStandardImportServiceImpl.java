@@ -53,9 +53,9 @@ public class DataStandardImportServiceImpl implements IDoImportService {
     @Override
     public Boolean doImport(String data) {
         DataStandardDTO dataStandardDTO;
-        try{
-            dataStandardDTO=objectMapper.readValue(data,DataStandardDTO.class);
-        }catch (IOException e) {
+        try {
+            dataStandardDTO = objectMapper.readValue(data, DataStandardDTO.class);
+        } catch (IOException e) {
             log.error("data:{}", data);
             log.error("Read Json Error", e);
             // 失败
@@ -63,16 +63,14 @@ public class DataStandardImportServiceImpl implements IDoImportService {
         }
         // 设置租户Id
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
-        if (tenantId != 0) {
-            dataStandardDTO.setTenantId(tenantId);
-        }
+        dataStandardDTO.setTenantId(tenantId);
         Long chargeTenantId = dataStandardMapper.selectTenantIdByChargeName(dataStandardDTO.getChargeName());
-        if(tenantId.compareTo(chargeTenantId)!=0){
+        if (tenantId.compareTo(chargeTenantId) != 0) {
             return false;
         }
         Long chargeId = dataStandardMapper.selectIdByChargeName(dataStandardDTO.getChargeName());
         Long chargeDeptId = dataStandardMapper.selectIdByChargeDeptName(dataStandardDTO.getChargeDeptName());
-        if(Objects.isNull(chargeId)||Objects.isNull(chargeDeptId)){
+        if (Objects.isNull(chargeId) || Objects.isNull(chargeDeptId)) {
             return false;
         }
         dataStandardDTO.setChargeId(chargeId);
@@ -82,9 +80,9 @@ public class DataStandardImportServiceImpl implements IDoImportService {
                         .andEqualTo(StandardGroup.FIELD_GROUP_CODE, dataStandardDTO.getGroupCode())
                         .andEqualTo(StandardGroup.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                 .build());
-        if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
+        if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
             dataStandardDTO.setGroupId(standardGroupDTOList.get(0).getGroupId());
-        }else{
+        } else {
             //创建分组
             StandardGroupDTO standardGroupDTO = StandardGroupDTO.builder()
                     .groupCode(dataStandardDTO.getGroupCode())
