@@ -1,12 +1,12 @@
 package com.hand.hdsp.quality.app.service;
 
+import java.util.List;
+
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.export.vo.ExportParam;
-
-import java.util.List;
 
 /**
  * <p>字段标准表应用服务</p>
@@ -55,9 +55,10 @@ public interface DataFieldService {
 
     /**
      * 字段标准落标
+     * @param tenantId
      * @param standardAimDTOList List<StandardAimDTO>
      */
-    void aim(List<StandardAimDTO> standardAimDTOList);
+    void aim(Long tenantId,List<StandardAimDTO> standardAimDTOList);
 
     /**
      * 发布数字段标准

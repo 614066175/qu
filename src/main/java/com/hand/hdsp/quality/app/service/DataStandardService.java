@@ -22,12 +22,14 @@ public interface DataStandardService {
 
     /**
      * 创建数据标准
+     *
      * @param dataStandardDTO
      */
     void create(DataStandardDTO dataStandardDTO);
 
     /**
      * 数据标准详情
+     *
      * @param tenantId
      * @param standardId
      * @return
@@ -35,21 +37,23 @@ public interface DataStandardService {
     DataStandardDTO detail(Long tenantId, Long standardId);
 
 
-
     /**
      * 删除数据标准
+     *
      * @param dataStandardDTO
      */
     void delete(DataStandardDTO dataStandardDTO);
 
     /**
      * 数据标准修改状态
+     *
      * @param dataStandardDTO
      */
     void updateStatus(DataStandardDTO dataStandardDTO);
 
     /**
      * 分页查询列表
+     *
      * @param pageRequest
      * @param dataStandardDTO
      * @return
@@ -58,30 +62,35 @@ public interface DataStandardService {
 
     /**
      * 修改数据标准
+     *
      * @param dataStandardDTO
      */
     void update(DataStandardDTO dataStandardDTO);
 
     /**
      * 发布数据标准
+     *
      * @param dataStandardDTO
      */
     void publishOrOff(DataStandardDTO dataStandardDTO);
 
     /**
      * 数据标准落标
+     *
      * @param standardAimDTOList List<StandardAimDTO>
      */
-    void aim(List<StandardAimDTO> standardAimDTOList);
+    void aim(Long tenantId, List<StandardAimDTO> standardAimDTOList);
 
     /**
      * 数据标准批量关联评估方案
+     *
      * @param standardAimDTOList
      */
     void batchRelatePlan(List<StandardAimDTO> standardAimDTOList);
 
     /**
      * 数据标准导出
+     *
      * @param dto
      * @param exportParam
      * @param pageRequest
@@ -90,8 +99,8 @@ public interface DataStandardService {
     List<DataStandardDTO> export(DataStandardDTO dto, ExportParam exportParam, PageRequest pageRequest);
 
     /**
-     *
      * 标准转换为规则
+     *
      * @param standardId
      * @return
      */
@@ -99,6 +108,7 @@ public interface DataStandardService {
 
     /**
      * 字段元数据关联标准
+     *
      * @param assetFieldDTO
      */
     void fieldAimStandard(AssetFieldDTO assetFieldDTO);

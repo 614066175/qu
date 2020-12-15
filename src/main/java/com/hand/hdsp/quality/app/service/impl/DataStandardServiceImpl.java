@@ -423,9 +423,10 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void aim(List<StandardAimDTO> standardAimDTOList) {
+    public void aim(Long tenantId,List<StandardAimDTO> standardAimDTOList) {
         if (CollectionUtils.isNotEmpty(standardAimDTOList)) {
             standardAimDTOList.forEach(standardAimDTO -> {
+                standardAimDTO.setTenantId(tenantId);
                 List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
                         .andWhere(Sqls.custom()
                                 .andEqualTo(StandardAim.FIELD_STANDARD_ID, standardAimDTO.getStandardId())
