@@ -510,6 +510,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         //根据字段删除落标
         List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
                 .andWhere(Sqls.custom()
+                        .andEqualTo(StandardAim.FIELD_STANDARD_TYPE,DATA)
                         .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, assetFieldDTO.getDatasourceCode())
                         .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, assetFieldDTO.getDatasourceSchema())
                         .andEqualTo(StandardAim.FIELD_TABLE_NAME, assetFieldDTO.getTableName())
@@ -527,6 +528,26 @@ public class DataStandardServiceImpl implements DataStandardService {
                 doAim(assetFieldDTO);
             });
         }
+    }
+
+    @Override
+    public List<DataStandardDTO> standardByField(AssetFieldDTO assetFieldDTO) {
+        List<DataStandardDTO> dataStandardDTOList=new ArrayList<>();
+        List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardAim.FIELD_STANDARD_TYPE,DATA)
+                        .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, assetFieldDTO.getDatasourceCode())
+                        .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, assetFieldDTO.getDatasourceSchema())
+                        .andEqualTo(StandardAim.FIELD_TABLE_NAME, assetFieldDTO.getTableName())
+                        .andEqualTo(StandardAim.FIELD_FIELD_NAME, assetFieldDTO.getFieldName()))
+                .build());
+        if(CollectionUtils.isNotEmpty(standardAimDTOS)){
+            standardAimDTOS.forEach(standardAimDTO -> {
+                DataStandardDTO dataStandardDTO = dataStandardRepository.selectDTOByPrimaryKey(standardAimDTO.getStandardId());
+                dataStandardDTOList.add(dataStandardDTO);
+            });
+        }
+        return dataStandardDTOList;
     }
 
     private void doAim(AssetFieldDTO assetFieldDTO) {

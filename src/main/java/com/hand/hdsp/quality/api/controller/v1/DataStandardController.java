@@ -255,4 +255,14 @@ public class DataStandardController {
         dataStandardService.fieldAimStandard(assetFieldDTO);
         return Results.success();
     }
+
+    @ApiOperation(value = "根据字段查询数据标准")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/standard-by-field")
+    public ResponseEntity<List<DataStandardDTO>> standardByField(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                                 @RequestBody AssetFieldDTO assetFieldDTO) {
+        assetFieldDTO.setTenantId(tenantId);
+        List<DataStandardDTO> dataStandardDTOList=dataStandardService.standardByField(assetFieldDTO);
+        return Results.success(dataStandardDTOList);
+    }
 }

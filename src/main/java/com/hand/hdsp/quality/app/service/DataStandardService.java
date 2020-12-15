@@ -112,4 +112,10 @@ public interface DataStandardService {
      * @param assetFieldDTO
      */
     void fieldAimStandard(AssetFieldDTO assetFieldDTO);
+
+    /**
+     * @param assetFieldDTO
+     * @return
+     */
+    List<DataStandardDTO> standardByField(AssetFieldDTO assetFieldDTO);
 }
