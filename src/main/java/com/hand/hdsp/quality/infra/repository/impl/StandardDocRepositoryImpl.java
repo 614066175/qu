@@ -46,7 +46,7 @@ public class StandardDocRepositoryImpl extends BaseRepositoryImpl<StandardDoc, S
                 }
                 standardDocs = selectByCondition(Condition.builder(StandardDoc.class)
                         .andWhere(Sqls.custom()
-                                .andEqualTo(StandardDoc.FIELD_STANDARD_NAME, standardDocDTO.getStandardCode())
+                                .andEqualTo(StandardDoc.FIELD_STANDARD_NAME, standardDocDTO.getStandardName())
                                 .andEqualTo(StandardDoc.FIELD_TENANT_ID, standardDocDTO.getTenantId())
                         ).build());
                 if (CollectionUtils.isNotEmpty(standardDocs)) {

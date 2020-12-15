@@ -53,7 +53,7 @@ public class StandardDocValidator extends BatchValidatorHandler {
                     }
                     standardDocDTOList = standardDocRepository.selectDTOByCondition(Condition.builder(StandardDoc.class)
                             .andWhere(Sqls.custom()
-                                    .andEqualTo(StandardDoc.FIELD_STANDARD_NAME, standardDocDTO.getStandardCode())
+                                    .andEqualTo(StandardDoc.FIELD_STANDARD_NAME, standardDocDTO.getStandardName())
                                     .andEqualTo(StandardDoc.FIELD_TENANT_ID, tenantId))
                             .build());
                     //标准名称存在
