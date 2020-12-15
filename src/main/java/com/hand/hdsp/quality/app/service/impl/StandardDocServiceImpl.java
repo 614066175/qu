@@ -102,6 +102,7 @@ public class StandardDocServiceImpl implements StandardDocService {
             throw new CommonException("hdsp.xqua.error.no-permission");
         }
         try {
+            response.setHeader("content-disposition", "attachment;filename=" + standardDocDTO.getDocName());
             InputStream in = minioStorageService.downloadByUrl(
                     standardDocDTO.getTenantId(),
                     StandardDocConstant.STANDARD_DOC_MINIO_BUCKET,
