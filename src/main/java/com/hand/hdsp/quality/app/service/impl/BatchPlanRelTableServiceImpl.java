@@ -38,6 +38,7 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
         }
         dto.setWarningLevelList(JsonUtils.json2WarningLevel(dto.getWarningLevel()));
         dto.setRelationshipList(JsonUtils.json2Relationship(dto.getRelationship()));
+        dto.setTableRelCheckList(JsonUtils.json2TableRelCheck(dto.getTableRelCheck()));
         return dto;
     }
 
@@ -49,6 +50,9 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
         }
         if (CollectionUtils.isNotEmpty(batchPlanRelTableDTO.getRelationshipList())) {
             batchPlanRelTableDTO.setRelationship(JsonUtils.object2Json(batchPlanRelTableDTO.getRelationshipList()));
+        }
+        if (CollectionUtils.isNotEmpty(batchPlanRelTableDTO.getTableRelCheckList())) {
+            batchPlanRelTableDTO.setTableRelCheck(JsonUtils.object2Json(batchPlanRelTableDTO.getTableRelCheck()));
         }
         batchPlanRelTableRepository.insertDTOSelective(batchPlanRelTableDTO);
     }
@@ -62,6 +66,9 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
         }
         if (CollectionUtils.isNotEmpty(batchPlanRelTableDTO.getRelationshipList())) {
             batchPlanRelTableDTO.setRelationship(JsonUtils.object2Json(batchPlanRelTableDTO.getRelationshipList()));
+        }
+        if (CollectionUtils.isNotEmpty(batchPlanRelTableDTO.getTableRelCheckList())) {
+            batchPlanRelTableDTO.setTableRelCheck(JsonUtils.object2Json(batchPlanRelTableDTO.getTableRelCheck()));
         }
         batchPlanRelTableRepository.updateDTOAllColumnWhereTenant(batchPlanRelTableDTO, tenantId);
 
@@ -78,6 +85,7 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
         for (BatchPlanRelTableDTO dto : pages.getContent()) {
             dto.setWarningLevelList(JsonUtils.json2WarningLevel(dto.getWarningLevel()));
             dto.setRelationshipList(JsonUtils.json2Relationship(dto.getRelationship()));
+            dto.setTableRelCheckList(JsonUtils.json2TableRelCheck(dto.getTableRelCheck()));
         }
         return pages;
     }
