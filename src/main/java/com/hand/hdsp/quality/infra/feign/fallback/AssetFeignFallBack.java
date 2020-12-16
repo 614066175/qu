@@ -59,4 +59,9 @@ public class AssetFeignFallBack implements AssetFeign {
     public ResponseEntity<?> saveStandardToEs(Long tenantId, DataStandardDTO dataStandardDTO) {
         return null;
     }
+
+    @Override
+    public ResponseEntity<?> deleteStandardToEs(Long tenantId, DataStandardDTO dataStandardDTO) {
+        return null;
+    }
 }

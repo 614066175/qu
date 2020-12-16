@@ -91,7 +91,7 @@ public class DataStandardServiceImpl implements DataStandardService {
     private final DriverSessionService driverSessionService;
 
     @Resource
-    private AssetFeign assetFeign;
+    private  AssetFeign assetFeign;
 
     public DataStandardServiceImpl(DataStandardRepository dataStandardRepository,
                                    DataStandardVersionRepository dataStandardVersionRepository,
@@ -342,7 +342,10 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .collect(Collectors.toList());
                 publishRelatePlan(aimDTOS);
             }
-            assetFeign.saveStandardToEs(dataStandardDTO.getTenantId(), dataStandardDTO);
+            assetFeign.saveStandardToEs(dataStandardDTO.getTenantId(),dataStandardDTO);
+        }
+        if(OFFLINE.equals(dataStandardDTO.getStandardStatus())){
+            assetFeign.deleteStandardToEs(dataStandardDTO.getTenantId(), dataStandardDTO);
         }
     }
 
@@ -423,7 +426,7 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void aim(Long tenantId, List<StandardAimDTO> standardAimDTOList) {
+    public void aim(Long tenantId,List<StandardAimDTO> standardAimDTOList) {
         if (CollectionUtils.isNotEmpty(standardAimDTOList)) {
             standardAimDTOList.forEach(standardAimDTO -> {
                 standardAimDTO.setTenantId(tenantId);

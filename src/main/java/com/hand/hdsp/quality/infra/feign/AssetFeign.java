@@ -105,7 +105,18 @@ public interface AssetFeign {
      * 数据标准存es
      * @param tenantId
      * @param dataStandardDTO
+     * @return
      */
     @PostMapping("/v1/{organizationId}/asset-fields/save-standard-to-es")
     ResponseEntity<?> saveStandardToEs(@PathVariable("organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO);
+
+
+    /**
+     * 将数据标准从es删除
+     * @param tenantId
+     * @param dataStandardDTO
+     * @return
+     */
+    @PostMapping("/v1/{organizationId}/asset-fields/delete-Standard-to-es")
+    ResponseEntity<?> deleteStandardToEs(@PathVariable("organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO);
 }
