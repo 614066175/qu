@@ -118,4 +118,12 @@ public interface DataStandardService {
      * @return
      */
     List<DataStandardDTO> standardByField(AssetFieldDTO assetFieldDTO);
+
+    /**
+     * 元数据数据标准详情
+     * @param tenantId
+     * @param standardId
+     * @return
+     */
+    DataStandardDTO assetDetail(Long tenantId, Long standardId);
 }
