@@ -1,8 +1,5 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
-
 import com.hand.hdsp.quality.api.dto.StandardDocDTO;
 import com.hand.hdsp.quality.app.service.StandardDocService;
 import com.hand.hdsp.quality.config.SwaggerTags;
@@ -23,6 +20,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * <p>标准文档管理表 管理 API</p>
@@ -156,6 +156,13 @@ public class StandardDocController extends BaseController {
         List<StandardDocDTO> dtoList =
                 standardDocService.export(dto, exportParam, pageRequest);
         return Results.success(dtoList);
+    }
+
+    @ApiOperation(value = "预览接口url")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/preview-url")
+    public ResponseEntity<?> previewUrl(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId) {
+        return Results.success(standardDocService.previewUrl());
     }
 
 }

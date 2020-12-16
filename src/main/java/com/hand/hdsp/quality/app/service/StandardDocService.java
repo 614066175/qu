@@ -68,4 +68,10 @@ public interface StandardDocService {
      * @return List<StandardDocDTO>
      */
     List<StandardDocDTO> export(StandardDocDTO dto, ExportParam exportParam, PageRequest pageRequest);
+
+    /**
+     * 获取预览接口url
+     * @return url
+     */
+    String previewUrl();
 }
