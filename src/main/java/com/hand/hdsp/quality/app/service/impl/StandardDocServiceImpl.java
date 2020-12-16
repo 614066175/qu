@@ -1,13 +1,5 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URLEncoder;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import javax.servlet.http.HttpServletResponse;
-
 import com.hand.hdsp.quality.api.dto.StandardDocDTO;
 import com.hand.hdsp.quality.app.service.MinioStorageService;
 import com.hand.hdsp.quality.app.service.StandardDocService;
@@ -15,6 +7,7 @@ import com.hand.hdsp.quality.domain.entity.StandardDoc;
 import com.hand.hdsp.quality.domain.repository.StandardDocRepository;
 import com.hand.hdsp.quality.infra.constant.StandardDocConstant;
 import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
+import com.hand.hdsp.quality.infra.util.EurekaUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -23,9 +16,18 @@ import org.apache.commons.collections.CollectionUtils;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>标准文档管理表应用服务默认实现</p>
@@ -38,13 +40,18 @@ public class StandardDocServiceImpl implements StandardDocService {
     private final StandardDocMapper standardDocMapper;
     private final StandardDocRepository standardDocRepository;
     private final MinioStorageService minioStorageService;
+    private final EurekaUtil eurekaUtil;
+    @Value("${HDSP_PREVIEW_FILE_SERVICE:hdsp-file-preview}")
+    private String url;
 
     public StandardDocServiceImpl(StandardDocMapper standardDocMapper,
                                   StandardDocRepository standardDocRepository,
-                                  MinioStorageService minioStorageService) {
+                                  MinioStorageService minioStorageService,
+                                  EurekaUtil eurekaUtil) {
         this.standardDocMapper = standardDocMapper;
         this.standardDocRepository = standardDocRepository;
         this.minioStorageService = minioStorageService;
+        this.eurekaUtil = eurekaUtil;
     }
 
     @Override
@@ -129,6 +136,20 @@ public class StandardDocServiceImpl implements StandardDocService {
     @Override
     public List<StandardDocDTO> export(StandardDocDTO dto, ExportParam exportParam, PageRequest pageRequest) {
         return list(pageRequest, dto);
+    }
+
+    /**
+     * 获取预览接口url
+     *
+     * @return url
+     */
+    @Override
+    public String previewUrl() {
+        try {
+            return eurekaUtil.getAppByName(url).getHomePageUrl();
+        } catch (Exception e) {
+            throw new CommonException("hdsp.xsta.err.file_preview_not_exist");
+        }
     }
 
 
