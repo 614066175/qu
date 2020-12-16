@@ -90,6 +90,8 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     private final DriverSessionService driverSessionService;
 
+    private final StandardGroupRepository standardGroupRepository;
+
     @Resource
     private  AssetFeign assetFeign;
 
@@ -108,7 +110,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                                    DataPatternHandler dataPatternHandler,
                                    DataLengthHandler dataLengthHandler,
                                    ValueRangeHandler valueRangeHandler,
-                                   DriverSessionService driverSessionService) {
+                                   DriverSessionService driverSessionService, StandardGroupRepository standardGroupRepository) {
         this.dataStandardRepository = dataStandardRepository;
         this.dataStandardVersionRepository = dataStandardVersionRepository;
         this.standardExtraRepository = standardExtraRepository;
@@ -125,6 +127,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         this.dataLengthHandler = dataLengthHandler;
         this.valueRangeHandler = valueRangeHandler;
         this.driverSessionService = driverSessionService;
+        this.standardGroupRepository = standardGroupRepository;
     }
 
 
@@ -185,6 +188,25 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .andEqualTo(StandardExtra.FIELD_TENANT_ID, tenantId))
                 .build());
         dataStandardDTO.setStandardExtraDTOList(standardExtraDTOS);
+        //查询资源路径
+        dataStandardDTO.setNameLevelPath(dataStandardDTO.getGroupCode());
+        if(Objects.nonNull(dataStandardDTO.getParentGroupId())){
+            while(Objects.nonNull(dataStandardDTO.getParentGroupId())){
+                List<StandardGroup> standardGroups = standardGroupRepository
+                        .selectByCondition(Condition.builder(StandardGroup.class)
+                                .andWhere(Sqls.custom()
+                                        .andEqualTo(StandardGroup.FIELD_GROUP_ID, dataStandardDTO.getParentGroupId())
+                                        .andEqualTo(StandardGroup.FIELD_TENANT_ID, tenantId))
+                                .build());
+                dataStandardDTO.setParentGroupId(standardGroups.get(0).getParentGroupId());
+                dataStandardDTO.setNameLevelPath(String.format("%s/%s",
+                        standardGroups.get(0).getGroupCode(),
+                        dataStandardDTO.getNameLevelPath()));
+            }
+        }
+        dataStandardDTO.setNameLevelPath(String.format("%s/%s",
+                dataStandardDTO.getNameLevelPath(),
+                dataStandardDTO.getStandardCode()));
         return dataStandardDTO;
     }
 

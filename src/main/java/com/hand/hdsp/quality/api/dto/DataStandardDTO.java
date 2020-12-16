@@ -135,7 +135,13 @@ public class DataStandardDTO extends AuditDomain{
     private String groupCode;
 
     @Transient
+    private Long parentGroupId;
+
+    @Transient
     private String groupDesc;
+
+    @Transient
+    private String nameLevelPath;
 
     @Transient
     private List<Long> dataLengthList;
