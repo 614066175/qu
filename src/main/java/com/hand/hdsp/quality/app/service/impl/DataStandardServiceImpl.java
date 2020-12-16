@@ -572,7 +572,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         dataStandardDTO.setMetadataName(dataStandardDTO.getStandardName());
         dataStandardDTO.setMetadataType(DATA_STANDARD);
         //查询资源路径
-        dataStandardDTO.setNameLevelPath(dataStandardDTO.getGroupCode());
+        dataStandardDTO.setNameLevelPath(dataStandardDTO.getGroupName());
         if (Objects.nonNull(dataStandardDTO.getParentGroupId())) {
             while (Objects.nonNull(dataStandardDTO.getParentGroupId())) {
                 List<StandardGroup> standardGroups = standardGroupRepository
@@ -583,13 +583,10 @@ public class DataStandardServiceImpl implements DataStandardService {
                                 .build());
                 dataStandardDTO.setParentGroupId(standardGroups.get(0).getParentGroupId());
                 dataStandardDTO.setNameLevelPath(String.format("%s/%s",
-                        standardGroups.get(0).getGroupCode(),
+                        standardGroups.get(0).getGroupName(),
                         dataStandardDTO.getNameLevelPath()));
             }
         }
-        dataStandardDTO.setNameLevelPath(String.format("%s/%s",
-                dataStandardDTO.getNameLevelPath(),
-                dataStandardDTO.getStandardCode()));
         return dataStandardDTO;
     }
 
