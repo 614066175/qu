@@ -569,6 +569,13 @@ public class DataStandardServiceImpl implements DataStandardService {
         }
         DataStandardDTO dataStandardDTO = dataStandardDTOList.get(0);
         convertToDataLengthList(dataStandardDTO);
+        List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardExtra.FIELD_STANDARD_ID, standardId)
+                        .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, DATA)
+                        .andEqualTo(StandardExtra.FIELD_TENANT_ID, tenantId))
+                .build());
+        dataStandardDTO.setStandardExtraDTOList(standardExtraDTOS);
         dataStandardDTO.setMetadataName(dataStandardDTO.getStandardName());
         dataStandardDTO.setMetadataType(DATA_STANDARD);
         //查询资源路径
