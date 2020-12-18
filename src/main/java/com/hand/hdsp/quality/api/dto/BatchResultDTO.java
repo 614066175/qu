@@ -2,9 +2,12 @@ package com.hand.hdsp.quality.api.dto;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -77,5 +80,21 @@ public class BatchResultDTO extends AuditDomain {
     private Long exceptionRuleCount;
 
     private String warningCode;
+
+
+    @Transient
+    private List<BatchResultMarkDTO> batchResultMarkDTOList;
+
+    /**
+     * 方案总的告警情况
+     */
+    private List<ResultWaringVO> resultWaringVOList;
+
+
+    @ApiModelProperty(value = "校验项总数")
+    private Long checkItemCount;
+
+    @ApiModelProperty(value = "异常校验项数")
+    private Long exceptionCheckItemCount;
 
 }

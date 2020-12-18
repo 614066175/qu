@@ -374,4 +374,19 @@ public class BatchResultController extends BaseController {
         batchResultRepository.deleteByPrimaryKey(batchResultDTO);
         return Results.success();
     }
+
+    @ApiOperation(value = "查看评估方案评估信息")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/result-detail")
+    public ResponseEntity<?> resultDetail(@PathVariable(name = "organizationId") Long tenantId,
+                                        BatchResultDTO batchResultDTO) {
+        batchResultDTO.setTenantId(tenantId);
+        return Results.success(batchResultService.listResultDetail(batchResultDTO));
+    }
 }

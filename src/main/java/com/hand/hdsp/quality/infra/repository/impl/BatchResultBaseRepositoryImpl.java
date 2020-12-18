@@ -39,25 +39,23 @@ public class BatchResultBaseRepositoryImpl extends BaseRepositoryImpl<BatchResul
             List<String> warningLevelJsonList = batchResultItemMapper.selectWaringLevelJson(dto);
             //将所有告警等级Json转换合并成集合
             List<WarningLevelVO> warningLevelVOList = new ArrayList<>();
-            warningLevelJsonList.forEach(warningLevelJson -> {
-                warningLevelVOList.addAll(JsonUtils.json2WarningLevelVO(warningLevelJson));
-            });
+            warningLevelJsonList.forEach(warningLevelJson -> warningLevelVOList.addAll(JsonUtils.json2WarningLevelVO(warningLevelJson)));
             //合并处理每个检验项的告警等级
             Map<String, Long> collect = warningLevelVOList.stream()
                     .collect(
                             Collectors.toMap(WarningLevelVO::getWarningLevel,
                                     WarningLevelVO::getLevelCount,
                                     Long::sum));
-            List<ResultWaringVO> resultWaringVOS = new ArrayList<>();
+            List<ResultWaringVO> resultWaringVOList = new ArrayList<>();
             //返回base下的所有告警等级以及对应的数量
             collect.forEach((k, v) -> {
                 ResultWaringVO resultWaringVO = ResultWaringVO.builder()
                         .warningLevel(k)
                         .countSum(v)
                         .build();
-                resultWaringVOS.add(resultWaringVO);
+                resultWaringVOList.add(resultWaringVO);
             });
-            dto.setResultWaringVOList(resultWaringVOS);
+            dto.setResultWaringVOList(resultWaringVOList);
         }
         return page;
     }
