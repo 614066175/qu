@@ -17,6 +17,7 @@ import com.hand.hdsp.quality.domain.repository.NameAimIncludeRepository;
 import com.hand.hdsp.quality.domain.repository.NameAimRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +48,7 @@ public class NameAimServiceImpl implements NameAimService {
         if(CollectionUtils.isEmpty(nameAimDtoList)){
             throw new CommonException(ErrorCode.NAME_STANDARD_PARAMS_EMPTY);
         }
+        nameAimDtoList.forEach(x->x.setTenantId(DetailsHelper.getUserDetails().getTenantId()));
         //批量插入主键无法回写，这里选择单个插入
         nameAimDtoList.forEach(nameAimRepository::insertDTOSelective);
         nameAimDtoList.forEach(x->{
