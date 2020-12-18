@@ -1,18 +1,19 @@
 package com.hand.hdsp.quality.api.dto;
 
+import java.util.List;
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
-
-import javax.persistence.Transient;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.List;
 
 /**
  * <p>批数据方案结果表-校验项信息 数据传输对象</p>
@@ -89,7 +90,7 @@ public class BatchResultItemDTO extends AuditDomain {
     @ApiModelProperty(value = "关联关系json")
     private String relationship;
 
-    @ApiModelProperty(value = "告警等级json")
+    @ApiModelProperty(value = "告警等级配置json")
     private String warningLevelJson;
 
     @ApiModelProperty(value = "实际值")
@@ -135,8 +136,11 @@ public class BatchResultItemDTO extends AuditDomain {
     @ApiModelProperty(value = "XQUA_BATCH_RESULT_BASE.RESULT_BASE_ID")
     private Long resultBaseId;
 
-    @ApiModelProperty(value = "方案告警等级List")
+    @ApiModelProperty(value = "方案告警等级配置List")
     private List<WarningLevelDTO> warningLevelList;
+
+    @ApiModelProperty(value = "方案告警等级结果")
+    private List<WarningLevelVO> warningLevelResult;
 
     @ApiModelProperty(value = "表名/视图名/自定义SQL")
     private String objectName;

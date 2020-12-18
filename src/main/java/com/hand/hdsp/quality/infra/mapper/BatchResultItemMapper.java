@@ -72,4 +72,12 @@ public interface BatchResultItemMapper extends BaseMapper<BatchResultItem> {
      * @return
      */
     List<ResultWaringVO> selectWarningLevelByResultId(@Param("resultId") Long resultId);
+
+    /**
+     * 查询每个校验项的告警等级json
+     *
+     * @param batchResultBaseDTO
+     * @return
+     */
+    List<String> selectWaringLevelJson(BatchResultBaseDTO batchResultBaseDTO);
 }

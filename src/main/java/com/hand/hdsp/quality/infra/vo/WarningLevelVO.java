@@ -3,10 +3,8 @@ package com.hand.hdsp.quality.infra.vo;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
-import java.util.Date;
-
 /**
- * description
+ * 告警结果
  *
  * @author rui.jia01@hand-china.com 2020/04/01 17:55
  */
@@ -17,8 +15,6 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = false)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class WarningLevelVO {
-
-    private Date date;
 
     private String warningLevel;
 
