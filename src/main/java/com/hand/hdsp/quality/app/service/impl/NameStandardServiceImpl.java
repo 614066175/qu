@@ -171,6 +171,7 @@ public class NameStandardServiceImpl implements NameStandardService {
             nameStandard.setLatestCheckedStatus(NameStandardStatusEnum.FAILED.getStatusCode());
             nameStandardRepository.updateOptional(nameStandard,NameStandard.FIELD_LATEST_CHECKED_STATUS);
             nameExecHistoryDTO.setExecStatus(NameStandardStatusEnum.FAILED.getStatusCode());
+            nameExecHistoryDTO.setErrorMessage(e.getMessage());
             nameExecHistoryRepository.insertDTOSelective(nameExecHistoryDTO);
             e.printStackTrace();
         }

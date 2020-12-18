@@ -68,6 +68,9 @@ public class NameExecHistoryDTO extends AuditDomain {
     @Size(max = 30)
     private String execStatus;
 
+    @ApiModelProperty(value = "错误详情")
+    private String errorMessage;
+
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;
