@@ -102,7 +102,7 @@
         order by fs.last_update_date desc
     </select>
 
-    <select id="selectIdByChargeDeptName" resultType="java.lang.Integer">
+    <select id="selectIdByChargeDeptName" resultType="java.lang.Long">
         SELECT
             unit_id
         FROM
@@ -111,12 +111,36 @@
             unit_name=#{chargeDeptName}
     </select>
 
-    <select id="selectIdByChargeName" resultType="java.lang.Integer">
+    <select id="selectIdByChargeName" resultType="java.lang.Long">
         SELECT
             id
         FROM
             hzero_platform.iam_user
         WHERE
             login_name=#{chargeName}
+    </select>
+    <select id="selectTenantIdByChargeName" resultType="java.lang.Long">
+        SELECT
+            organization_id
+        FROM
+            hzero_platform.iam_user
+        WHERE
+            login_name=#{chargeName}
+    </select>
+    <select id="selectChargeNameById" resultType="java.lang.String">
+        SELECT
+            login_name
+        FROM
+            hzero_platform.iam_user
+        WHERE
+            id=#{chargeId}
+    </select>
+    <select id="selectChargeDeptNameById" resultType="java.lang.String">
+       SELECT
+            unit_name
+        FROM
+            hzero_platform.hpfm_unit
+        WHERE
+            unit_id=#{chargeDeptId}
     </select>
 </mapper>
