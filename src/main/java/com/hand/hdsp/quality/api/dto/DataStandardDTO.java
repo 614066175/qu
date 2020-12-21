@@ -2,7 +2,7 @@ package com.hand.hdsp.quality.api.dto;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -15,7 +15,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
-import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  * <p>数据标准表 数据传输对象</p>
