@@ -699,4 +699,15 @@
 	            SELECT max( result_id ) FROM xqua_batch_result WHERE plan_id = #{planId}
 	        )
     </select>
+    <select id="listResultDetail" resultType="com.hand.hdsp.quality.api.dto.BatchResultMarkDTO">
+        SELECT avg(mark) avgMark,
+        DATE_FORMAT(end_date,'%Y-%m-%d') day
+        FROM xqua_batch_result
+        <where>
+            <if test="planId!=null and planId != ''">
+                plan_id=#{planId}
+            </if>
+        </where>
+        group by day
+    </select>
 </mapper>

@@ -145,7 +145,9 @@ public class NameStandardServiceImpl implements NameStandardService {
         nameExecHistoryDTO.setExecStartTime(new Date());
         nameExecHistoryDTO.setExecRule(nameStandard.getStandardRule());
         nameExecHistoryDTO.setStandardId(nameStandard.getStandardId());
+        nameExecHistoryDTO.setTenantId(nameStandard.getTenantId());
         try {
+            //获取目标表
             List<NameExecHisDetailDTO> nameExecHisDetailDTOList = this.getAimTable(nameAimDTOList);
             nameExecHistoryDTO.setCheckedNum((long) nameExecHisDetailDTOList.size());
             List<NameExecHisDetailDTO> abnormalList = new ArrayList<>();
@@ -171,6 +173,7 @@ public class NameStandardServiceImpl implements NameStandardService {
             nameStandard.setLatestCheckedStatus(NameStandardStatusEnum.FAILED.getStatusCode());
             nameStandardRepository.updateOptional(nameStandard,NameStandard.FIELD_LATEST_CHECKED_STATUS);
             nameExecHistoryDTO.setExecStatus(NameStandardStatusEnum.FAILED.getStatusCode());
+            nameExecHistoryDTO.setErrorMessage(e.toString());
             nameExecHistoryRepository.insertDTOSelective(nameExecHistoryDTO);
             e.printStackTrace();
         }
@@ -264,4 +267,5 @@ public class NameStandardServiceImpl implements NameStandardService {
         nameAimDTOList.forEach(x -> this.getAimTableFromNameAimDTO(x, aimTableList));
         return aimTableList;
     }
+
 }

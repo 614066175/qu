@@ -220,4 +220,19 @@
 	            result_id = #{resultId}
 	            AND warning_level IS NOT NULL
     </select>
+    <select id="selectWaringLevelJson" resultType="java.lang.String">
+        select
+        xbri.warning_level warningLevel
+        from xqua_batch_result_item xbri
+        join xqua_batch_result_rule xbrr on xbri.result_rule_id = xbrr.result_rule_id
+        <where>
+            xbri.warning_level is not null
+            <if test="tenantId != null ">
+                and xbri.tenant_id = #{tenantId}
+            </if>
+            <if test="resultBaseId != null ">
+                and xbrr.result_base_id = #{resultBaseId}
+            </if>
+        </where>
+    </select>
 </mapper>

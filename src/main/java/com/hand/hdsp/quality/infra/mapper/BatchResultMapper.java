@@ -2,10 +2,7 @@ package com.hand.hdsp.quality.infra.mapper;
 
 import java.util.List;
 
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
-import com.hand.hdsp.quality.api.dto.BatchResultDTO;
-import com.hand.hdsp.quality.api.dto.BatchResultItemDTO;
-import com.hand.hdsp.quality.api.dto.TimeRangeDTO;
+import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.infra.vo.*;
 import io.choerodon.mybatis.common.BaseMapper;
@@ -165,8 +162,15 @@ public interface BatchResultMapper extends BaseMapper<BatchResult> {
 
     /**
      * 根据planId查询最新的执行结果
+     *
      * @param planId
      * @return
      */
     BatchResultDTO selectByPlanId(@Param("planId") Long planId);
+
+    /**
+     * @param batchResultDTO
+     * @return
+     */
+    List<BatchResultMarkDTO> listResultDetail(BatchResultDTO batchResultDTO);
 }

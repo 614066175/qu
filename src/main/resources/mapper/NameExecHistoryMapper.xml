@@ -11,6 +11,7 @@
         <result column="exec_end_time" property="execEndTime" jdbcType="TIMESTAMP"/>
         <result column="exec_rule" property="execRule" jdbcType="VARCHAR"/>
         <result column="exec_status" property="execStatus" jdbcType="VARCHAR"/>
+        <result column="error_message" property="errorMessage" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
         <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
@@ -33,6 +34,7 @@
         ${prefix}.exec_end_time,
         ${prefix}.exec_rule,
         ${prefix}.exec_status,
+        ${prefix}.error_message,
         ${prefix}.tenant_id,
         ${prefix}.object_version_number
     </sql>

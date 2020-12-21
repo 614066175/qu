@@ -47,6 +47,9 @@
             <if test="standardDocDTO.groupId!=null">
                 and sd.group_id=#{standardDocDTO.groupId}
             </if>
+            <if test="standardDocDTO.tenantId!=null">
+                and sd.tenant_id=#{standardDocDTO.tenantId}
+            </if>
             <if test="standardDocDTO.standardCode!=null">
                 <bind name="standardCode" value="'%'+ standardDocDTO.standardCode +'%'"/>
                 and sd.standard_code like #{standardCode}

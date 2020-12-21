@@ -64,7 +64,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     private static final String JOB_HEADER = "{\"content-type\": \"application/json\"}";
     private static final String JOB_SETTING_INFO = "{\"authSettingInfo\":{\"auth\":\"OAUTH2\",\"grantType\":\"PASSWORD\"},\"apiSettingInfo\":{\"retryEnabled\":false},\"callbackApiSettingInfo\":{\"enabled\":false}}";
     private static final String SQL_PACK = " (%s) sql_pack";
-    private static final String ALERT_CODE="%s-%s";
+    private static final String ALERT_CODE = "%s-%s";
     @Value("${hdsp.route-data.service-short}")
     private String serviceShort;
     @Value("${hdsp.route-data.service-id}")
@@ -197,15 +197,15 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         if (CollectionUtils.isEmpty(resultWaringVOS)) {
             return;
         }
-        List<String> warningLevels=new ArrayList<>();
+        List<String> warningLevels = new ArrayList<>();
         for (ResultWaringVO resultWaringVO : resultWaringVOS) {
             List<WarningLevelVO> warningLevelVOS = JsonUtils.json2WarningLevelVO(resultWaringVO.getWarningLevel());
             resultWaringVO.setWarningLevelVOList(warningLevelVOS);
             warningLevels.addAll(warningLevelVOS.stream().map(WarningLevelVO::getWarningLevel).distinct().collect(Collectors.toList()));
         }
-        warningLevels=warningLevels.stream().distinct().collect(Collectors.toList());
+        warningLevels = warningLevels.stream().distinct().collect(Collectors.toList());
         BatchResultDTO batchResultDTO = batchResultMapper.selectByPlanId(planId);
-        warningLevels.forEach(warningLevel->doSendMessage(planId,resultWaringVOS,batchResultDTO,warningLevel));
+        warningLevels.forEach(warningLevel -> doSendMessage(planId, resultWaringVOS, batchResultDTO, warningLevel));
     }
 
     private void doSendMessage(Long planId, List<ResultWaringVO> resultWaringVOS, BatchResultDTO batchResultDTO, String warningLevel) {
@@ -225,6 +225,17 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             labels.put(AlertTemplate.STATUS, batchResultDTO.getPlanStatus());
             labels.put(AlertTemplate.EXCEPTION_INFO, String.valueOf(exceptionInfos));
             labels.put(AlertTemplate.WARNING_LEVEL, warningLevel);
+            List<BatchResultBaseDTO> batchResultBaseDTOList = batchResultBaseRepository.selectDTOByCondition(
+                    Condition.builder(BatchResultBase.class)
+                            .andWhere(Sqls.custom()
+                                    .andEqualTo(BatchResultBase.FIELD_RESULT_ID, batchResultDTO.getResultId())
+                                    .andEqualTo(BatchResultBase.FIELD_TENANT_ID, batchResultDTO.getTenantId()))
+                            .build());
+            //根据每个base去查询具体的校验情况
+            if(CollectionUtils.isNotEmpty(batchResultBaseDTOList)){
+
+            }
+//            labels.put(AlertTemplate.RESULT_BASE_LIST, batchResultBaseDTOList);
             inboundMessage.setLabels(labels);
             alertMessageHandler.sendMessage(inboundMessage);
         }
@@ -277,9 +288,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     /**
      * 更新增量参数
      *
-     * @param tenantId Long
+     * @param tenantId      Long
      * @param timestampList List<TimestampControlDTO>
-     * @param success  boolean
+     * @param success       boolean
      */
     private void updateTimestamp(Long tenantId, List<TimestampControlDTO> timestampList, boolean success) {
         if (success) {
@@ -357,11 +368,11 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     /**
      * 获取增量参数，并更新 where 条件
      *
-     * @param tenantId Long
-     * @param planId Long
-     * @param batchPlanBase BatchPlanBase
+     * @param tenantId        Long
+     * @param planId          Long
+     * @param batchPlanBase   BatchPlanBase
      * @param batchResultBase BatchResultBase
-     * @param timestampList List<TimestampControlDTO>
+     * @param timestampList   List<TimestampControlDTO>
      */
     private void updateWhereCondition(Long tenantId, Long planId, BatchPlanBase batchPlanBase, BatchResultBase batchResultBase, List<TimestampControlDTO> timestampList) {
         // 获取增量参数
@@ -388,9 +399,10 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
     /**
      * 处理表级规则
-     * @param tenantId  Long
-     * @param batchResultBase BatchResultBase
-     * @param schema String
+     *
+     * @param tenantId            Long
+     * @param batchResultBase     BatchResultBase
+     * @param schema              String
      * @param pluginDatasourceDTO PluginDatasourceDTO
      */
     private void handleTableRule(Long tenantId, BatchResultBase batchResultBase, String schema, PluginDatasourceDTO pluginDatasourceDTO) {
@@ -488,9 +500,10 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
     /**
      * 处理字段规则
-     * @param tenantId Long
-     * @param batchResultBase BatchResultBase
-     * @param schema String
+     *
+     * @param tenantId            Long
+     * @param batchResultBase     BatchResultBase
+     * @param schema              String
      * @param pluginDatasourceDTO PluginDatasourceDTO
      */
     private void handleFieldRule(Long tenantId, BatchResultBase batchResultBase, String schema, PluginDatasourceDTO pluginDatasourceDTO) {
@@ -688,17 +701,20 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         BigDecimal sum = BigDecimal.ZERO;
         for (BatchResultItemDTO batchResultItemDTO : itemDTOList) {
             //一个校验项满足多个告警
-            List<WarningLevelVO> warningLevelVOS = JsonUtils.json2WarningLevelVO(batchResultItemDTO.getWarningLevel());
-            for (WarningLevelVO warningLevelVO : warningLevelVOS) {
+            if(!PlanConstant.WARNING_LEVEL_NORMAL.equals(batchResultItemDTO.getWarningLevel())){
+                List<WarningLevelVO> warningLevelVOS = JsonUtils.json2WarningLevelVO(batchResultItemDTO.getWarningLevel());
+                for (WarningLevelVO warningLevelVO : warningLevelVOS) {
+                    BigDecimal multiply = BigDecimal.valueOf(batchResultItemDTO.getWeight())
+                            .divide(w, 10, RoundingMode.HALF_UP)
+                            .multiply(map.get(warningLevelVO.getWarningLevel()));
+                    sum = sum.add(multiply);
+                }
+            }else{
                 BigDecimal multiply = BigDecimal.valueOf(batchResultItemDTO.getWeight())
                         .divide(w, 10, RoundingMode.HALF_UP)
-                        .multiply(map.get(warningLevelVO.getWarningLevel()));
+                        .multiply(map.get(PlanConstant.WARNING_LEVEL_NORMAL));
                 sum = sum.add(multiply);
             }
-//            BigDecimal multiply = BigDecimal.valueOf(batchResultItemDTO.getWeight())
-//                    .divide(w, 10, RoundingMode.HALF_UP)
-//                    .multiply(map.get(batchResultItemDTO.getWarningLevel()));
-//            sum = sum.add(multiply);
         }
         batchResult.setMark(sum.multiply(BigDecimal.valueOf(100)));
         batchResult.setPlanStatus(PlanConstant.PlanStatus.SUCCESS);
@@ -709,6 +725,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
     /**
      * 拼接where条件
+     *
      * @param where1 String
      * @param where2 String
      * @return String
