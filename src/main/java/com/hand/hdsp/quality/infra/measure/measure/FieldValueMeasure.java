@@ -184,10 +184,10 @@ public class FieldValueMeasure implements Measure {
                 //逻辑值范围比较
                 if (RANGE.equals(param.getCompareWay())) {
                     if (Strings.isNotEmpty(warningLevelDTO.getStartValue())) {
-                        condition.append(String.format(START_SQL, warningLevelDTO.getExpectedValue()));
+                        condition.append(String.format(START_SQL, warningLevelDTO.getStartValue()));
                     }
                     if (Strings.isNotEmpty(warningLevelDTO.getEndValue())) {
-                        condition.append(String.format(END_SQL, warningLevelDTO.getExpectedValue()));
+                        condition.append(String.format(END_SQL, warningLevelDTO.getEndValue()));
                     }
                 }
                 //逻辑值值比较

@@ -126,4 +126,6 @@ public interface ErrorCode {
 
     String BATCH_PLAN_FIELD_NOT_EXIST="hdsp.xqua.err.batch_plan_field_not_exist";
     String BATCH_PLAN_BASE_NOT_EXIST="hdsp.xqua.err.batch_plan_base_not_exist";
+
+    String LOV_CODE_NOT_EXIST="hdsp.xqua.err.lov_code_not_exist";
 }
