@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.infra.vo;
 
+import java.util.Date;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
@@ -15,6 +17,8 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = false)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class WarningLevelVO {
+
+    private Date date;
 
     private String warningLevel;
 
