@@ -135,7 +135,7 @@ public class RelTableMeasure implements Measure {
                 relationshipDTOList.forEach(relationshipDTO -> {
                     relList.add(relationshipDTO.getRelFieldName());
                     baseList.add(relationshipDTO.getBaseFieldName());
-                    onCondition.append(String.format(" and %s%s%s",
+                    onCondition.append(String.format(" and rel.%s %s base.%s",
                             relationshipDTO.getRelFieldName(),
                             relationshipDTO.getRelCode(),
                             relationshipDTO.getBaseFieldName()));

@@ -707,6 +707,9 @@
             <if test="planId!=null and planId != ''">
                 plan_id=#{planId}
             </if>
+            <if test="tenantId !=null and tenantId !=''">
+                and tenant_id=#{tenantId}
+            </if>
         </where>
         group by day
     </select>

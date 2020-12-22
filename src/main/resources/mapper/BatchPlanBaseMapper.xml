@@ -4,6 +4,7 @@
     <!-- 可根据自己的需求，是否要使用 -->
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.BatchPlanBase">
         <result column="plan_base_id" property="planBaseId" jdbcType="DECIMAL"/>
+        <result column="plan_base_code" property="planBaseCode" jdbcType="VARCHAR"/>
         <result column="plan_id" property="planId" jdbcType="DECIMAL"/>
         <result column="datasource_type" property="datasourceType" jdbcType="VARCHAR"/>
         <result column="datasource_id" property="datasourceId" jdbcType="DECIMAL"/>
@@ -31,6 +32,7 @@
         IFNULL(t_field_num.field_num, 0) field_num,
         IFNULL(t_rel_table_num.rel_table_num,0) rel_table_num,
         xbpb.plan_base_id,
+        xbpb.plan_base_code,
         xbpb.plan_id,
         xbpb.datasource_type,
         xbpb.datasource_id,
@@ -87,6 +89,7 @@
     </select>
     <select id="detail" resultType="com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO">
         select xbpb.plan_base_id,
+               xbpb.plan_base_code,
                xbpb.plan_id,
                xbpb.datasource_type,
                xbpb.datasource_id,

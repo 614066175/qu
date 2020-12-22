@@ -1,11 +1,15 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import java.util.List;
+import javax.servlet.http.HttpServletResponse;
+
 import com.hand.hdsp.quality.api.dto.PlanGroupDTO;
 import com.hand.hdsp.quality.app.service.PlanGroupService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.domain.repository.PlanGroupRepository;
 import com.hand.hdsp.quality.infra.vo.PlanGroupTreeVO;
+import com.hand.hdsp.quality.infra.vo.PlanGroupVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
@@ -15,11 +19,11 @@ import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.*;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
+import org.hzero.export.annotation.ExcelExport;
+import org.hzero.export.vo.ExportParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
-
-import java.util.List;
 
 /**
  * <p>评估方案分组表 管理 API</p>
@@ -151,5 +155,20 @@ public class PlanGroupController extends BaseController {
         planGroupDTO.setTenantId(tenantId);
         planGroupService.delete(planGroupDTO);
         return Results.success();
+    }
+
+    @ApiOperation(value = "从分组开始导出评估方案")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/export")
+    @ExcelExport(value = PlanGroupDTO.class)
+    public ResponseEntity<?> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                    PlanGroupVO dto,
+                                    ExportParam exportParam,
+                                    HttpServletResponse response) {
+        dto.setTenantId(tenantId);
+        List<PlanGroupDTO> dtoList =
+                planGroupService.export(dto, exportParam);
+        response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        return Results.success(dtoList);
     }
 }

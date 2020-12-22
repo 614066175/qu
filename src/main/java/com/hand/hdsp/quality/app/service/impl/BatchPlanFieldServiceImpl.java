@@ -1,27 +1,34 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldConDTO;
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.AimType.REFERENCE;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanFieldService;
-import com.hand.hdsp.quality.domain.entity.BatchPlanFieldCon;
-import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
-import com.hand.hdsp.quality.domain.entity.Rule;
-import com.hand.hdsp.quality.domain.entity.RuleLine;
+import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
+import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.core.base.BaseConstants;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
+import org.hzero.starter.driver.core.infra.meta.Column;
+import org.hzero.starter.driver.core.infra.meta.Table;
+import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * <p>批数据方案-字段规则表应用服务默认实现</p>
@@ -36,28 +43,92 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
     private final BatchPlanFieldConRepository batchPlanFieldConRepository;
     private final RuleRepository ruleRepository;
     private final RuleLineRepository ruleLineRepository;
+    private final DataStandardRepository dataStandardRepository;
+    private final BatchPlanBaseRepository batchPlanBaseRepository;
+    private final DriverSessionService driverSessionService;
+    private final StandardAimRepository standardAimRepository;
+    private final StandardAimRelationRepository standardAimRelationRepository;
 
     public BatchPlanFieldServiceImpl(BatchPlanFieldRepository batchPlanFieldRepository,
                                      BatchPlanFieldLineRepository batchPlanFieldLineRepository,
                                      RuleRepository ruleRepository,
-                                     BatchPlanFieldConRepository batchPlanFieldConRepository, RuleLineRepository ruleLineRepository) {
+                                     BatchPlanFieldConRepository batchPlanFieldConRepository,
+                                     RuleLineRepository ruleLineRepository,
+                                     DataStandardRepository dataStandardRepository,
+                                     BatchPlanBaseRepository batchPlanBaseRepository,
+                                     DriverSessionService driverSessionService,
+                                     StandardAimRepository standardAimRepository,
+                                     StandardAimRelationRepository standardAimRelationRepository) {
         this.batchPlanFieldRepository = batchPlanFieldRepository;
         this.batchPlanFieldLineRepository = batchPlanFieldLineRepository;
         this.ruleRepository = ruleRepository;
         this.batchPlanFieldConRepository = batchPlanFieldConRepository;
         this.ruleLineRepository = ruleLineRepository;
+        this.dataStandardRepository = dataStandardRepository;
+        this.batchPlanBaseRepository = batchPlanBaseRepository;
+        this.driverSessionService = driverSessionService;
+        this.standardAimRepository = standardAimRepository;
+        this.standardAimRelationRepository = standardAimRelationRepository;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int delete(BatchPlanFieldDTO batchPlanFieldDTO) {
+    public void delete(BatchPlanFieldDTO batchPlanFieldDTO) {
+        batchPlanFieldDTO = batchPlanFieldRepository.selectDTOByPrimaryKey(batchPlanFieldDTO.getPlanRuleId());
+        if (Objects.isNull(batchPlanFieldDTO)) {
+            throw new CommonException(ErrorCode.BATCH_PLAN_FIELD_NOT_EXIST);
+        }
+        BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseRepository.selectDTOByPrimaryKey(batchPlanFieldDTO.getPlanBaseId());
+        if (Objects.isNull(batchPlanBaseDTO)) {
+            throw new CommonException(ErrorCode.BATCH_PLAN_BASE_NOT_EXIST);
+        }
         List<BatchPlanFieldLineDTO> batchPlanFieldLineDTOList =
                 batchPlanFieldLineRepository.selectDTO(
                         BatchPlanFieldLine.FIELD_PLAN_RULE_ID, batchPlanFieldDTO.getPlanRuleId());
+        //删除行表
         if (CollectionUtils.isNotEmpty(batchPlanFieldLineDTOList)) {
             batchPlanFieldLineRepository.deleteByParentId(batchPlanFieldDTO.getPlanRuleId());
         }
-        return batchPlanFieldRepository.deleteByPrimaryKey(batchPlanFieldDTO);
+        //删除字段规则表
+        batchPlanFieldRepository.deleteByPrimaryKey(batchPlanFieldDTO);
+        //判断字段规则是不是数据标准，是的话，就从数据标准中移除落标
+        if (STANDARD.equals(batchPlanFieldDTO.getCheckType())) {
+            //查询数据标准中是否有此规则
+            List<DataStandardDTO> dataStandardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
+                    .andWhere(Sqls.custom()
+                            .andEqualTo(DataStandard.FIELD_STANDARD_CODE, batchPlanFieldDTO.getRuleCode())
+                            .andEqualTo(DataStandard.FIELD_TENANT_ID, batchPlanFieldDTO.getTenantId()))
+                    .build());
+            if (CollectionUtils.isNotEmpty(dataStandardDTOList)
+                    && CollectionUtils.isNotEmpty(batchPlanFieldLineDTOList)) {
+                DataStandardDTO dataStandardDTO = dataStandardDTOList.get(0);
+                List<StandardAimDTO> standardAimDTOList = new ArrayList<>();
+                List<StandardAimRelationDTO> standardAimRelationDTOList = new ArrayList<>();
+                batchPlanFieldLineDTOList.forEach(batchPlanFieldLineDTO -> {
+                    List<StandardAimDTO> aimList = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
+                            .andWhere(Sqls.custom()
+                                    .andEqualTo(StandardAim.FIELD_STANDARD_ID, dataStandardDTO.getStandardId())
+                                    .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, DATA)
+                                    .andEqualTo(StandardAim.FIELD_FIELD_NAME, batchPlanFieldLineDTO.getFieldName())
+                                    .andEqualTo(StandardAim.FIELD_DATASOURCE_ID, batchPlanBaseDTO.getDatasourceId())
+                                    .andEqualTo(StandardAim.FIELD_TABLE_NAME, batchPlanBaseDTO.getObjectName())
+                                    .andEqualTo(StandardAim.FIELD_TENANT_ID, batchPlanBaseDTO.getTenantId()))
+                            .build());
+                    standardAimDTOList.addAll(aimList);
+                    aimList.forEach(standardAimDTO -> {
+                        List<StandardAimRelationDTO> relationList = standardAimRelationRepository.selectDTOByCondition(Condition.builder(StandardAimRelation.class)
+                                .andWhere(Sqls.custom()
+                                        .andEqualTo(StandardAimRelation.FIELD_AIM_ID, standardAimDTO.getAimId())
+                                        .andEqualTo(StandardAimRelation.FIELD_TENANT_ID, standardAimDTO.getTenantId()))
+                                .build());
+                        standardAimRelationDTOList.addAll(relationList);
+                    });
+                });
+                //批量删除落标表和落标关系表
+                standardAimRepository.batchDTODelete(standardAimDTOList);
+                standardAimRelationRepository.batchDTODelete(standardAimRelationDTOList);
+            }
+        }
     }
 
     @Override
@@ -65,9 +136,10 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
     public void insert(BatchPlanFieldDTO batchPlanFieldDTO) {
         Long tenantId = batchPlanFieldDTO.getTenantId();
         batchPlanFieldRepository.insertDTOSelective(batchPlanFieldDTO);
-        if (batchPlanFieldDTO.getBatchPlanFieldLineDTOList() != null) {
+        List<BatchPlanFieldLineDTO> batchPlanFieldLineDTOList = batchPlanFieldDTO.getBatchPlanFieldLineDTOList();
+        if (CollectionUtils.isNotEmpty(batchPlanFieldLineDTOList)) {
 
-            for (BatchPlanFieldLineDTO batchPlanFieldLineDTO : batchPlanFieldDTO.getBatchPlanFieldLineDTOList()) {
+            for (BatchPlanFieldLineDTO batchPlanFieldLineDTO : batchPlanFieldLineDTOList) {
                 batchPlanFieldLineDTO.setPlanRuleId(batchPlanFieldDTO.getPlanRuleId());
                 batchPlanFieldLineDTO.setTenantId(tenantId);
                 batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
@@ -80,6 +152,61 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
                         batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
                     }
                 }
+            }
+        }
+        //如果标准为规范性
+        if (STANDARD.equals(batchPlanFieldDTO.getCheckType())) {
+            //查询数据标准中是否有此规则
+            List<DataStandardDTO> dataStandardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
+                    .andWhere(Sqls.custom()
+                            .andEqualTo(DataStandard.FIELD_STANDARD_CODE, batchPlanFieldDTO.getRuleCode())
+                            .andEqualTo(DataStandard.FIELD_TENANT_ID, batchPlanFieldDTO.getTenantId()))
+                    .build());
+            //规则为数据标准且规则校验项不为空
+            if (CollectionUtils.isNotEmpty(dataStandardDTOList) && CollectionUtils.isNotEmpty(batchPlanFieldLineDTOList)) {
+                //查询基础配置
+                BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseRepository.selectDTOByPrimaryKey(batchPlanFieldDTO.getPlanBaseId());
+                DataStandardDTO dataStandardDTO = dataStandardDTOList.get(0);
+                batchPlanFieldLineDTOList.forEach(batchPlanFieldLineDTO -> {
+                    //在数据标准中落标此字段
+                    StandardAimDTO standardAimDTO = StandardAimDTO.builder()
+                            .standardId(dataStandardDTO.getStandardId())
+                            .standardType(DATA)
+                            .fieldName(batchPlanFieldLineDTO.getFieldName())
+                            .datasourceId(batchPlanBaseDTO.getDatasourceId())
+                            .datasourceType(batchPlanBaseDTO.getDatasourceType())
+                            .datasourceCode(batchPlanBaseDTO.getDatasourceCode())
+                            .schemaName(batchPlanBaseDTO.getDatasourceSchema())
+                            .tableName(batchPlanBaseDTO.getObjectName())
+                            .planId(batchPlanBaseDTO.getPlanId())
+                            .tenantId(batchPlanFieldDTO.getTenantId())
+                            .build();
+                    //查询表注释，字段注释
+                    DriverSession driverSession = driverSessionService.getDriverSession(batchPlanBaseDTO.getTenantId(), batchPlanBaseDTO.getDatasourceCode());
+                    List<Table> tables = driverSession.tablesNameAndDesc(batchPlanBaseDTO.getDatasourceSchema());
+                    tables.forEach(table -> {
+                        if (batchPlanBaseDTO.getObjectName().equals(table.getTableName())) {
+                            standardAimDTO.setTableDesc(table.getRemarks());
+                        }
+                    });
+                    List<Column> columns = driverSession.columnMetaData(batchPlanBaseDTO.getDatasourceSchema(), batchPlanBaseDTO.getObjectName());
+                    columns.forEach(column -> {
+                        if (standardAimDTO.getFieldName().equals(column.getColumnName())) {
+                            standardAimDTO.setFieldDesc(column.getRemarks());
+                        }
+                    });
+                    standardAimRepository.insertDTOSelective(standardAimDTO);
+                    //存落标关系表
+                    StandardAimRelationDTO standardAimRelationDTO = StandardAimRelationDTO.builder()
+                            .aimId(standardAimDTO.getAimId())
+                            .aimType(REFERENCE)
+                            .planId(batchPlanBaseDTO.getPlanId())
+                            .planBaseId(batchPlanBaseDTO.getPlanBaseId())
+                            .planRuleId(batchPlanFieldDTO.getPlanRuleId())
+                            .tenantId(batchPlanFieldDTO.getTenantId())
+                            .build();
+                    standardAimRelationRepository.insertDTOSelective(standardAimRelationDTO);
+                });
             }
         }
     }

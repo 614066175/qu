@@ -94,7 +94,9 @@ public class StandardAimServiceImpl implements StandardAimService {
                         dto.getFieldName()));
                 if(Objects.nonNull(dto.getPlanId())){
                     BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(dto.getPlanId());
-                    dto.setPlanName(batchPlan.getPlanName());
+                    if(Objects.nonNull(batchPlan)){
+                        dto.setPlanName(batchPlan.getPlanName());
+                    }
                 }
             });
         }

@@ -1,7 +1,5 @@
-package com.hand.hdsp.quality.api.dto;
+package com.hand.hdsp.quality.infra.vo;
 
-import java.util.List;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -9,29 +7,27 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
-import io.choerodon.mybatis.domain.AuditDomain;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.hzero.export.annotation.ExcelColumn;
-import org.hzero.export.annotation.ExcelSheet;
 
 /**
- * <p>评估方案分组表 数据传输对象</p>
+ * <p>
+ * description
+ * </p>
  *
- * @author feng.liu01@hand-china.com 2020-03-24 16:19:51
+ * @author lgl 2020/12/21 17:26
+ * @since 1.0
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@ApiModel("评估方案分组表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @VersionAudit
 @ModifyAudit
-@ExcelSheet(zh = "评估方案分组",en = "plan group")
-public class PlanGroupDTO extends AuditDomain {
+public class PlanGroupVO {
 
     @ApiModelProperty("表ID，主键，供其他表做外键")
     private Long groupId;
@@ -66,9 +62,4 @@ public class PlanGroupDTO extends AuditDomain {
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;
-
-    @Transient
-    @ExcelColumn(zh = "评估方案列表", en = "batchPlanDTOList", child = true)
-    private List<BatchPlanDTO> batchPlanDTOList;
-
 }

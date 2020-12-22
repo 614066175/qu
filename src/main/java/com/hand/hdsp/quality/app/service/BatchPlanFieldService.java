@@ -1,11 +1,11 @@
 package com.hand.hdsp.quality.app.service;
 
+import java.util.List;
+import java.util.Map;
+
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * <p>批数据方案-字段规则表应用服务</p>
@@ -18,9 +18,8 @@ public interface BatchPlanFieldService {
      * 删除（所有相关项）
      *
      * @param batchPlanFieldDTO 删除条件
-     * @return 删除结果
      */
-    int delete(BatchPlanFieldDTO batchPlanFieldDTO);
+    void delete(BatchPlanFieldDTO batchPlanFieldDTO);
 
     /**
      * 创建
