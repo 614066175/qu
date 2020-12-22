@@ -92,9 +92,9 @@ public class FieldValueMeasure implements Measure {
             List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(),
                     MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
             if (CollectionUtils.isNotEmpty(response)) {
-                batchResultItem.setWarningLevel(JsonUtils.object2Json(WarningLevelVO.builder()
+                batchResultItem.setWarningLevel(JsonUtils.object2Json(Collections.singletonList(WarningLevelVO.builder()
                         .warningLevel(warningLevelDTO.getWarningLevel())
-                        .build()));
+                        .build())));
                 batchResultItem.setExceptionInfo("存在字段值满足值集校验配置");
             }
 

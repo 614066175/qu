@@ -18,6 +18,6 @@ public class WarningLevelVO {
 
     private String warningLevel;
 
-
+    @Builder.Default
     private Long levelCount=1L;
 }

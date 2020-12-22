@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,9 +60,9 @@ public class ConsistencyMeasure implements Measure {
                 MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
 
         if (CollectionUtils.isNotEmpty(response)) {
-            batchResultItem.setWarningLevel(JsonUtils.object2Json(WarningLevelVO.builder()
+            batchResultItem.setWarningLevel(JsonUtils.object2Json(Collections.singleton(WarningLevelVO.builder()
                     .warningLevel(warningLevelDTO.getWarningLevel())
-                    .build()));
+                    .build())));
             batchResultItem.setExceptionInfo("不满足一致性（规则字段组合相同时，校验字段均相同）");
         }
 

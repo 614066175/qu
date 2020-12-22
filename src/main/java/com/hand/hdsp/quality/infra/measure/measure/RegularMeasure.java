@@ -1,10 +1,7 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
@@ -65,9 +62,12 @@ public class RegularMeasure implements Measure {
             String value = response.get(0).values().toArray(new String[0])[0];
             BigDecimal result = new BigDecimal(value);
             if (result.compareTo(BigDecimal.ONE) != 0) {
-                batchResultItem.setWarningLevel(JsonUtils.object2Json(WarningLevelVO.builder()
-                        .warningLevel(param.getWarningLevelList().get(0).getWarningLevel())
-                        .build()));
+                batchResultItem.setWarningLevel(JsonUtils.object2Json(
+                        Collections.singletonList(
+                                WarningLevelVO.builder()
+                                        .warningLevel(param.getWarningLevelList().get(0).getWarningLevel())
+                                        .build()
+                        )));
                 batchResultItem.setExceptionInfo("不满足正则表达式");
             }
         }
@@ -91,9 +91,13 @@ public class RegularMeasure implements Measure {
                 for (MeasureResultDO measureResultDO : list) {
                     if (!pattern.matcher(measureResultDO.getResult()).find()) {
                         batchResultItem.setActualValue(measureResultDO.getResult());
-                        batchResultItem.setWarningLevel(JsonUtils.object2Json(WarningLevelVO.builder()
-                                .warningLevel(param.getWarningLevelList().get(0).getWarningLevel())
-                                .build()));
+                        batchResultItem.setWarningLevel(JsonUtils.object2Json(
+                                Collections.singletonList(
+                                        WarningLevelVO.builder()
+                                                .warningLevel(param.getWarningLevelList().get(0).getWarningLevel())
+                                                .build()
+                                )
+                        ));
                         batchResultItem.setExceptionInfo("不满足正则表达式");
                         successFlag = false;
                         break;

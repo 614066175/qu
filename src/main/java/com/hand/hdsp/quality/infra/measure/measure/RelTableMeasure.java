@@ -121,9 +121,10 @@ public class RelTableMeasure implements Measure {
                     endResult = new BigDecimal(endValue).compareTo(rate) >= 0;
                 }
                 if (startResult && endResult) {
-                    batchResultItem.setWarningLevel(JsonUtils.object2Json(WarningLevelVO.builder()
-                            .warningLevel(warningLevel.getWarningLevel())
-                            .build()));
+                    batchResultItem.setWarningLevel(JsonUtils.object2Json(
+                            Collections.singletonList(WarningLevelVO.builder()
+                                    .warningLevel(warningLevel.getWarningLevel())
+                                    .build())));
                     batchResultItem.setExceptionInfo("准确率（目标表与源表匹配条数/源表总条数）在告警范围内");
                 }
             }
