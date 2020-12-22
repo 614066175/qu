@@ -190,7 +190,7 @@ public class RelTableMeasure implements Measure {
                                     .sorted(Comparator.comparing(LovValueDTO::getOrderSeq))
                                     .map(LovValueDTO::getValue)
                                     .collect(Collectors.toList());
-                            if(CollectionUtils.isEmpty(sortedWarningLevelList)){
+                            if (CollectionUtils.isEmpty(sortedWarningLevelList)) {
                                 throw new CommonException(ErrorCode.LOV_CODE_NOT_EXIST);
                             }
                             for (WarningLevelDTO warningLevelDTO : warningLevelDTOList) {
@@ -198,15 +198,16 @@ public class RelTableMeasure implements Measure {
                                     warningLevel = warningLevelDTO.getWarningLevel();
                                     continue;
                                 }
-                                if(sortedWarningLevelList.indexOf(warningLevelDTO.getWarningLevel())
-                                        <sortedWarningLevelList.indexOf(warningLevel)){
-                                    warningLevel=warningLevelDTO.getWarningLevel();
+                                if (sortedWarningLevelList.indexOf(warningLevelDTO.getWarningLevel())
+                                        < sortedWarningLevelList.indexOf(warningLevel)) {
+                                    warningLevel = warningLevelDTO.getWarningLevel();
                                 }
                             }
                         }
                     }
                     WarningLevelVO warningLevelVO = WarningLevelVO.builder()
                             .warningLevel(warningLevel)
+                            .levelCount((long) result.get(0).get(COUNT))
                             .build();
                     batchResultItem.setWarningLevel(JsonUtils.object2Json(Collections.singletonList(warningLevelVO)));
                     batchResultItem.setExceptionInfo("数据满足计算值比较告警");

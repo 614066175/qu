@@ -18,5 +18,6 @@ public class WarningLevelVO {
 
     private String warningLevel;
 
-    private Long levelCount;
+
+    private Long levelCount=1L;
 }
