@@ -38,7 +38,6 @@ import org.hzero.export.annotation.ExcelSheet;
 @ExcelSheet(zh = "标准规则", en = "Rule")
 public class RuleDTO extends AuditDomain {
 
-    @ExcelColumn(zh = "分组编码",en = "group code")
     private String groupCode;
 
     @ApiModelProperty("表ID，主键，供其他表做外键")
