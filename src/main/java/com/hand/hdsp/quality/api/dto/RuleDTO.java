@@ -2,7 +2,6 @@ package com.hand.hdsp.quality.api.dto;
 
 import java.util.List;
 import javax.persistence.Id;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -82,22 +81,41 @@ public class RuleDTO extends AuditDomain {
     private Long weight;
 
     @ApiModelProperty("是否启用 1-启用 0-不启用")
-    @ExcelColumn(zh = "是否启用",en = "enable flag",renderers = BooleanColumnRender.class)
     @NotNull
     private Integer enabledFlag;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull
-    @ExcelColumn(zh = "租户ID",en = "tenant id")
     private Long tenantId;
 
     @ApiModelProperty(value = "规则校验项List")
     private List<RuleLineDTO> ruleLineDTOList;
 
-    @Transient
-    private String groupDesc;
-
-    @Transient
     private String groupName;
 
+    private String groupDesc;
+
+    @ApiModelProperty("校验方式")
+    @ExcelColumn(zh = "校验方式",en = "check way")
+    private String checkWay;
+
+    @ApiModelProperty("校验项")
+    @ExcelColumn(zh = "校验项",en = "check item")
+    private String checkItem;
+
+    @ApiModelProperty("校验类型 HDSP.XQUA.COUNT_TYPE")
+    @ExcelColumn(zh = "校验类型",en = "count type")
+    private String countType;
+
+    @ApiModelProperty("比较方式")
+    @ExcelColumn(zh = "比较方式",en = "compare way")
+    private String compareWay;
+
+    @ApiModelProperty("正则表达式")
+    @ExcelColumn(zh = "正则表达式",en = "regular expression")
+    private String regularExpression;
+
+    @ApiModelProperty(value = "告警等级json")
+    @ExcelColumn(zh = "告警配置",en = "warning level")
+    private String warningLevel;
 }
