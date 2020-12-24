@@ -51,7 +51,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * <p>批数据评估方案表应用服务默认实现</p>
+ * <p>
+ * 批数据评估方案表应用服务默认实现
+ * </p>
  *
  * @author feng.liu01@hand-china.com 2020-03-24 16:19:52
  */
@@ -62,7 +64,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     private static final String JOB_URL = "/v2/%d/batch-plans/exec/%d";
     private static final String JOB_BODY = "{}";
     private static final String JOB_HEADER = "{\"content-type\": \"application/json\"}";
-    private static final String JOB_SETTING_INFO = "{\"authSettingInfo\":{\"auth\":\"OAUTH2\",\"grantType\":\"PASSWORD\"},\"apiSettingInfo\":{\"retryEnabled\":false},\"callbackApiSettingInfo\":{\"enabled\":false}}";
+    private static final String JOB_SETTING_INFO =
+                    "{\"authSettingInfo\":{\"auth\":\"OAUTH2\",\"grantType\":\"PASSWORD\"},\"apiSettingInfo\":{\"retryEnabled\":false},\"callbackApiSettingInfo\":{\"enabled\":false}}";
     private static final String SQL_PACK = " (%s) sql_pack";
     private static final String ALERT_CODE = "%s-%s";
     @Value("${hdsp.route-data.service-short}")
@@ -114,7 +117,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int delete(BatchPlanDTO batchPlanDTO) {
-        List<BatchPlanBaseDTO> batchPlanBaseDTOList = batchPlanBaseRepository.selectDTO(BatchPlanBase.FIELD_PLAN_ID, batchPlanDTO.getPlanId());
+        List<BatchPlanBaseDTO> batchPlanBaseDTOList =
+                        batchPlanBaseRepository.selectDTO(BatchPlanBase.FIELD_PLAN_ID, batchPlanDTO.getPlanId());
         if (!batchPlanBaseDTOList.isEmpty()) {
             throw new CommonException(ErrorCode.CAN_NOT_DELETE);
         }
@@ -129,20 +133,13 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         // 创建或更新job
         String jobName = String.format(PlanConstant.JOB_NAME, tenantId, batchPlanDTO.getPlanCode());
         ResponseEntity<String> jobResult = dispatchJobFeign.createOrUpdate(tenantId,
-                JobDTO.builder()
-                        .themeId(PlanConstant.DEFAULT_THEME_ID)
-                        .layerId(PlanConstant.DEFAULT_LAYER_ID)
-                        .jobName(jobName)
-                        .jobDescription(batchPlanDTO.getPlanName())
-                        .jobClass(PlanConstant.JOB_CLASS)
-                        .jobType(PlanConstant.JOB_TYPE)
-                        .jobLevel(PlanConstant.JOB_LEVEL)
-                        .enabledFlag(1)
-                        .tenantId(tenantId)
-                        .build());
+                        JobDTO.builder().themeId(PlanConstant.DEFAULT_THEME_ID).layerId(PlanConstant.DEFAULT_LAYER_ID)
+                                        .jobName(jobName).jobDescription(batchPlanDTO.getPlanName())
+                                        .jobClass(PlanConstant.JOB_CLASS).jobType(PlanConstant.JOB_TYPE)
+                                        .jobLevel(PlanConstant.JOB_LEVEL).enabledFlag(1).tenantId(tenantId).build());
         ResponseUtils.getResponse(jobResult, JobDTO.class);
 
-        //查询是否存在restJob
+        // 查询是否存在restJob
         ResponseEntity<String> findResult = restJobFeign.findName(tenantId, jobName);
         RestJobDTO restJobDTO = ResponseUtils.getResponse(findResult, RestJobDTO.class);
 
@@ -157,11 +154,11 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         restJobDTO.setHeader(JOB_HEADER);
         restJobDTO.setSettingInfo(JOB_SETTING_INFO);
 
-        //插入或更新
+        // 插入或更新
         ResponseEntity<String> restJobResult = restJobFeign.create(tenantId, restJobDTO);
         ResponseUtils.getResponse(restJobResult, RestJobDTO.class);
 
-        //保存jobName到BatchPlan中
+        // 保存jobName到BatchPlan中
         batchPlanDTO.setPlanJobName(jobName);
         batchPlanRepository.updateByDTOPrimaryKeySelective(batchPlanDTO);
 
@@ -171,18 +168,17 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             if (!PlanConstant.IncrementStrategy.NONE.equals(base.getIncrementStrategy())) {
 
                 ResponseEntity<String> timestampResult = timestampFeign.createOrUpdateTimestamp(tenantId,
-                        TimestampControlDTO.builder()
-                                .tenantId(tenantId)
-                                .timestampType(String.format(PlanConstant.TIMESTAMP_TYPE, tenantId, batchPlanDTO.getPlanCode(), base.getPlanBaseId()))
-                                .datasourceId(base.getDatasourceId())
-                                .datasourceCode(base.getDatasourceCode())
-                                .sourceTableName(base.getObjectName())
-                                .sourceSchema(base.getDatasourceSchema())
-                                .incrementStrategy(base.getIncrementStrategy())
-                                .incrementColumn(base.getIncrementColumn())
-                                .whereCondition(base.getWhereCondition())
-                                .syncType(PlanConstant.JOB_CLASS)
-                                .build());
+                                TimestampControlDTO.builder().tenantId(tenantId)
+                                                .timestampType(String.format(PlanConstant.TIMESTAMP_TYPE, tenantId,
+                                                                batchPlanDTO.getPlanCode(), base.getPlanBaseId()))
+                                                .datasourceId(base.getDatasourceId())
+                                                .datasourceCode(base.getDatasourceCode())
+                                                .sourceTableName(base.getObjectName())
+                                                .sourceSchema(base.getDatasourceSchema())
+                                                .incrementStrategy(base.getIncrementStrategy())
+                                                .incrementColumn(base.getIncrementColumn())
+                                                .whereCondition(base.getWhereCondition())
+                                                .syncType(PlanConstant.JOB_CLASS).build());
                 ResponseUtils.getResponse(timestampResult, TimestampControlDTO.class);
             }
 
@@ -201,41 +197,44 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         for (ResultWaringVO resultWaringVO : resultWaringVOS) {
             List<WarningLevelVO> warningLevelVOS = JsonUtils.json2WarningLevelVO(resultWaringVO.getWarningLevel());
             resultWaringVO.setWarningLevelVOList(warningLevelVOS);
-            warningLevels.addAll(warningLevelVOS.stream().map(WarningLevelVO::getWarningLevel).distinct().collect(Collectors.toList()));
+            warningLevels.addAll(warningLevelVOS.stream().map(WarningLevelVO::getWarningLevel).distinct()
+                            .collect(Collectors.toList()));
         }
         warningLevels = warningLevels.stream().distinct().collect(Collectors.toList());
         BatchResultDTO batchResultDTO = batchResultMapper.selectByPlanId(planId);
         warningLevels.forEach(warningLevel -> doSendMessage(planId, resultWaringVOS, batchResultDTO, warningLevel));
     }
 
-    private void doSendMessage(Long planId, List<ResultWaringVO> resultWaringVOS, BatchResultDTO batchResultDTO, String warningLevel) {
+    private void doSendMessage(Long planId, List<ResultWaringVO> resultWaringVOS, BatchResultDTO batchResultDTO,
+                    String warningLevel) {
         HashMap<String, String> labels = new HashMap<>();
         BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(planId);
         if (Objects.nonNull(batchPlan) && Strings.isNotEmpty(batchPlan.getWarningCode())) {
-            List<String> exceptionInfos = resultWaringVOS.stream()
-                    .filter(vo -> warningLevel.equals(vo.getWarningLevel()))
-                    .map(ResultWaringVO::getExceptionInfo)
-                    .collect(Collectors.toList());
+            List<String> exceptionInfos =
+                            resultWaringVOS.stream().filter(vo -> warningLevel.equals(vo.getWarningLevel()))
+                                            .map(ResultWaringVO::getExceptionInfo).collect(Collectors.toList());
             InboundMessage inboundMessage = new InboundMessage();
-            inboundMessage.setAlertCode(String.format(ALERT_CODE, batchPlan.getWarningCode(), warningLevel.toLowerCase()));
+            inboundMessage.setAlertCode(
+                            String.format(ALERT_CODE, batchPlan.getWarningCode(), warningLevel.toLowerCase()));
             inboundMessage.setTenantId(batchResultDTO.getTenantId());
             labels.put(AlertTemplate.PLAN_NAME, batchResultDTO.getPlanName());
             labels.put(AlertTemplate.MARK, batchResultDTO.getMark() != null ? batchResultDTO.getMark().toString() : "");
-            labels.put(AlertTemplate.START_DATE, DateFormatUtils.format(batchResultDTO.getStartDate(), BaseConstants.Pattern.DATETIME));
+            labels.put(AlertTemplate.START_DATE,
+                            DateFormatUtils.format(batchResultDTO.getStartDate(), BaseConstants.Pattern.DATETIME));
             labels.put(AlertTemplate.STATUS, batchResultDTO.getPlanStatus());
             labels.put(AlertTemplate.EXCEPTION_INFO, String.valueOf(exceptionInfos));
             labels.put(AlertTemplate.WARNING_LEVEL, warningLevel);
-            List<BatchResultBaseDTO> batchResultBaseDTOList = batchResultBaseRepository.selectDTOByCondition(
-                    Condition.builder(BatchResultBase.class)
+            List<BatchResultBaseDTO> batchResultBaseDTOList = batchResultBaseRepository.selectDTOByCondition(Condition
+                            .builder(BatchResultBase.class)
                             .andWhere(Sqls.custom()
-                                    .andEqualTo(BatchResultBase.FIELD_RESULT_ID, batchResultDTO.getResultId())
-                                    .andEqualTo(BatchResultBase.FIELD_TENANT_ID, batchResultDTO.getTenantId()))
+                                            .andEqualTo(BatchResultBase.FIELD_RESULT_ID, batchResultDTO.getResultId())
+                                            .andEqualTo(BatchResultBase.FIELD_TENANT_ID, batchResultDTO.getTenantId()))
                             .build());
-            //根据每个base去查询具体的校验情况
-            if(CollectionUtils.isNotEmpty(batchResultBaseDTOList)){
+            // 根据每个base去查询具体的校验情况
+            if (CollectionUtils.isNotEmpty(batchResultBaseDTOList)) {
 
             }
-//            labels.put(AlertTemplate.RESULT_BASE_LIST, batchResultBaseDTOList);
+            // labels.put(AlertTemplate.RESULT_BASE_LIST, batchResultBaseDTOList);
             inboundMessage.setLabels(labels);
             alertMessageHandler.sendMessage(inboundMessage);
         }
@@ -244,29 +243,25 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     @Override
     public Long exec(Long tenantId, Long planId) {
 
-        //插入批数据方案结果表
-        BatchResult batchResult = BatchResult.builder()
-                .planId(planId)
-                .startDate(new Date())
-                .planStatus(PlanConstant.PlanStatus.RUNNING)
-                .tenantId(tenantId)
-                .build();
+        // 插入批数据方案结果表
+        BatchResult batchResult = BatchResult.builder().planId(planId).startDate(new Date())
+                        .planStatus(PlanConstant.PlanStatus.RUNNING).tenantId(tenantId).build();
         batchResultRepository.insertSelective(batchResult);
 
-        //时间戳对象list
+        // 时间戳对象list
         List<TimestampControlDTO> timestampList = new ArrayList<>();
 
         try {
-            //规则计算
+            // 规则计算
             ruleJudge(tenantId, planId, batchResult, timestampList);
 
-            //分数计算
+            // 分数计算
             countScore(tenantId, batchResult);
 
-            //更新增量参数
+            // 更新增量参数
             updateTimestamp(tenantId, timestampList, true);
         } catch (CommonException e) {
-            //更新增量参数
+            // 更新增量参数
             updateTimestamp(tenantId, timestampList, false);
             batchResult.setPlanStatus(PlanConstant.PlanStatus.FAILED);
             batchResult.setExceptionInfo(MessageAccessor.getMessage(e.getMessage(), e.getParameters()).getDesc());
@@ -274,7 +269,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             log.error("exec plan error!", e);
             throw e;
         } catch (Exception e) {
-            //更新增量参数
+            // 更新增量参数
             updateTimestamp(tenantId, timestampList, false);
             batchResult.setPlanStatus(PlanConstant.PlanStatus.FAILED);
             batchResult.setExceptionInfo(ExceptionUtils.getMessage(e));
@@ -288,24 +283,20 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     /**
      * 更新增量参数
      *
-     * @param tenantId      Long
+     * @param tenantId Long
      * @param timestampList List<TimestampControlDTO>
-     * @param success       boolean
+     * @param success boolean
      */
     private void updateTimestamp(Long tenantId, List<TimestampControlDTO> timestampList, boolean success) {
         if (success) {
             for (TimestampControlDTO timestampControlDTO : timestampList) {
-                ResponseEntity<String> response = timestampFeign.updateIncrement(tenantId,
-                        timestampControlDTO);
+                ResponseEntity<String> response = timestampFeign.updateIncrement(tenantId, timestampControlDTO);
                 ResponseUtils.getResponse(response, TimestampControlDTO.class);
             }
         } else {
             for (TimestampControlDTO timestampControlDTO : timestampList) {
-                ResponseEntity<String> response = timestampFeign.updateIncrement(tenantId,
-                        TimestampControlDTO.builder()
-                                .timestampType(timestampControlDTO.getTimestampType())
-                                .success(false)
-                                .build());
+                ResponseEntity<String> response = timestampFeign.updateIncrement(tenantId, TimestampControlDTO.builder()
+                                .timestampType(timestampControlDTO.getTimestampType()).success(false).build());
                 ResponseUtils.getResponse(response, TimestampControlDTO.class);
             }
         }
@@ -315,11 +306,12 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     /**
      * 对每个规则进行计算
      *
-     * @param tenantId    tenantId
-     * @param planId      planId
+     * @param tenantId tenantId
+     * @param planId planId
      * @param batchResult batchResult
      */
-    private void ruleJudge(Long tenantId, Long planId, BatchResult batchResult, List<TimestampControlDTO> timestampList) {
+    private void ruleJudge(Long tenantId, Long planId, BatchResult batchResult,
+                    List<TimestampControlDTO> timestampList) {
 
         List<BatchPlanBase> baseList = batchPlanBaseRepository.select(BatchPlanBase.FIELD_PLAN_ID, planId);
         for (BatchPlanBase batchPlanBase : baseList) {
@@ -327,10 +319,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
 
             PluginDatasourceDTO pluginDatasourceDTO = PluginDatasourceDTO.builder()
-                    .datasourceId(batchPlanBase.getDatasourceId())
-                    .tenantId(tenantId)
-                    .datasourceCode(batchPlanBase.getDatasourceCode())
-                    .build();
+                            .datasourceId(batchPlanBase.getDatasourceId()).tenantId(tenantId)
+                            .datasourceCode(batchPlanBase.getDatasourceCode()).build();
 
 
             String packageObjectName = objectName;
@@ -338,21 +328,14 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 packageObjectName = String.format(SQL_PACK, objectName);
             }
 
-            //插入批数据方案结果表-表信息
-            BatchResultBase batchResultBase = BatchResultBase.builder()
-                    .resultId(batchResult.getResultId())
-                    .planBaseId(batchPlanBase.getPlanBaseId())
-                    .objectName(objectName)
-                    .packageObjectName(packageObjectName)
-                    .datasourceType(batchPlanBase.getDatasourceType())
-                    .ruleCount(0L)
-                    .exceptionRuleCount(0L)
-                    .checkItemCount(0L)
-                    .exceptionCheckItemCount(0L)
-                    .tenantId(tenantId)
-                    .build();
+            // 插入批数据方案结果表-表信息
+            BatchResultBase batchResultBase = BatchResultBase.builder().resultId(batchResult.getResultId())
+                            .planBaseId(batchPlanBase.getPlanBaseId()).objectName(objectName)
+                            .packageObjectName(packageObjectName).datasourceType(batchPlanBase.getDatasourceType())
+                            .ruleCount(0L).exceptionRuleCount(0L).checkItemCount(0L).exceptionCheckItemCount(0L)
+                            .tenantId(tenantId).build();
 
-            //获取增量参数，并更新 where 条件
+            // 获取增量参数，并更新 where 条件
             updateWhereCondition(tenantId, planId, batchPlanBase, batchResultBase, timestampList);
 
             batchResultBaseRepository.insertSelective(batchResultBase);
@@ -368,31 +351,32 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     /**
      * 获取增量参数，并更新 where 条件
      *
-     * @param tenantId        Long
-     * @param planId          Long
-     * @param batchPlanBase   BatchPlanBase
+     * @param tenantId Long
+     * @param planId Long
+     * @param batchPlanBase BatchPlanBase
      * @param batchResultBase BatchResultBase
-     * @param timestampList   List<TimestampControlDTO>
+     * @param timestampList List<TimestampControlDTO>
      */
-    private void updateWhereCondition(Long tenantId, Long planId, BatchPlanBase batchPlanBase, BatchResultBase batchResultBase, List<TimestampControlDTO> timestampList) {
+    private void updateWhereCondition(Long tenantId, Long planId, BatchPlanBase batchPlanBase,
+                    BatchResultBase batchResultBase, List<TimestampControlDTO> timestampList) {
         // 获取增量参数
         if (!PlanConstant.IncrementStrategy.NONE.equals(batchPlanBase.getIncrementStrategy())) {
             // 查询方案
             BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(planId);
-            String timestampType = String.format(PlanConstant.TIMESTAMP_TYPE, tenantId, batchPlan.getPlanCode(), batchPlanBase.getPlanBaseId());
+            String timestampType = String.format(PlanConstant.TIMESTAMP_TYPE, tenantId, batchPlan.getPlanCode(),
+                            batchPlanBase.getPlanBaseId());
             ResponseEntity<String> incrementParam = timestampFeign.getIncrementParam(tenantId, timestampType);
-            SpecifiedParamsResponseDO specifiedParamsResponseDO = ResponseUtils.getResponse(incrementParam, SpecifiedParamsResponseDO.class);
-            batchResultBase.setWhereCondition(ParamsUtil.handlePredefinedParams(batchPlanBase.getWhereCondition(), specifiedParamsResponseDO));
+            SpecifiedParamsResponseDO specifiedParamsResponseDO =
+                            ResponseUtils.getResponse(incrementParam, SpecifiedParamsResponseDO.class);
+            batchResultBase.setWhereCondition(ParamsUtil.handlePredefinedParams(batchPlanBase.getWhereCondition(),
+                            specifiedParamsResponseDO));
 
-            //将增量参数添加到list中  全部处理完一起更新
-            timestampList.add(TimestampControlDTO.builder()
-                    .timestampType(timestampType)
-                    .currentDateTime(specifiedParamsResponseDO.getCurrentDataTime())
-                    .lastDateTime(specifiedParamsResponseDO.getLastDateTime())
-                    .currentMaxId(specifiedParamsResponseDO.getCurrentMaxId())
-                    .lastMaxId(specifiedParamsResponseDO.getLastMaxId())
-                    .success(true)
-                    .build());
+            // 将增量参数添加到list中 全部处理完一起更新
+            timestampList.add(TimestampControlDTO.builder().timestampType(timestampType)
+                            .currentDateTime(specifiedParamsResponseDO.getCurrentDataTime())
+                            .lastDateTime(specifiedParamsResponseDO.getLastDateTime())
+                            .currentMaxId(specifiedParamsResponseDO.getCurrentMaxId())
+                            .lastMaxId(specifiedParamsResponseDO.getLastMaxId()).success(true).build());
         }
     }
 
@@ -400,62 +384,57 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     /**
      * 处理表级规则
      *
-     * @param tenantId            Long
-     * @param batchResultBase     BatchResultBase
-     * @param schema              String
+     * @param tenantId Long
+     * @param batchResultBase BatchResultBase
+     * @param schema String
      * @param pluginDatasourceDTO PluginDatasourceDTO
      */
-    private void handleTableRule(Long tenantId, BatchResultBase batchResultBase, String schema, PluginDatasourceDTO pluginDatasourceDTO) {
-        List<BatchPlanTable> tableList = batchPlanTableRepository.select(BatchPlanTable.FIELD_PLAN_BASE_ID, batchResultBase.getPlanBaseId());
+    private void handleTableRule(Long tenantId, BatchResultBase batchResultBase, String schema,
+                    PluginDatasourceDTO pluginDatasourceDTO) {
+        List<BatchPlanTable> tableList = batchPlanTableRepository.select(BatchPlanTable.FIELD_PLAN_BASE_ID,
+                        batchResultBase.getPlanBaseId());
         batchResultBase.setRuleCount(batchResultBase.getRuleCount() + tableList.size());
 
         for (BatchPlanTable batchPlanTable : tableList) {
-            List<BatchPlanTableConDO> conList = batchPlanTableConRepository.selectJoinItem(BatchPlanTableConDO.builder().planRuleId(batchPlanTable.getPlanRuleId()).build());
+            List<BatchPlanTableConDO> conList = batchPlanTableConRepository.selectJoinItem(
+                            BatchPlanTableConDO.builder().planRuleId(batchPlanTable.getPlanRuleId()).build());
             batchResultBase.setCheckItemCount(batchResultBase.getCheckItemCount() + conList.size());
 
-            //异常标记
+            // 异常标记
             boolean exceptionFlag = false;
 
             BatchResultRuleDTO batchResultRuleDTO = BatchResultRuleDTO.builder()
-                    .resultBaseId(batchResultBase.getResultBaseId())
-                    .ruleType(PlanConstant.ResultRuleType.TABLE)
-                    .planRuleId(batchPlanTable.getPlanRuleId())
-                    .ruleCode(batchPlanTable.getRuleCode())
-                    .ruleName(batchPlanTable.getRuleName())
-                    .ruleDesc(batchPlanTable.getRuleDesc())
-                    .checkType(batchPlanTable.getCheckType())
-                    .weight(batchPlanTable.getWeight())
-                    .resultFlag(1)
-                    .tenantId(tenantId)
-                    .build();
+                            .resultBaseId(batchResultBase.getResultBaseId()).ruleType(PlanConstant.ResultRuleType.TABLE)
+                            .planRuleId(batchPlanTable.getPlanRuleId()).ruleCode(batchPlanTable.getRuleCode())
+                            .ruleName(batchPlanTable.getRuleName()).ruleDesc(batchPlanTable.getRuleDesc())
+                            .checkType(batchPlanTable.getCheckType()).weight(batchPlanTable.getWeight()).resultFlag(1)
+                            .tenantId(tenantId).build();
             batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
 
             List<BatchPlanTableLine> batchPlanTableLines = null;
             for (BatchPlanTableConDO batchPlanTableConDO : conList) {
-                //自定义SQL特殊转换
+                // 自定义SQL特殊转换
                 if (PlanConstant.RuleType.SQL_CUSTOM.equals(batchPlanTable.getRuleType())) {
                     batchPlanTableConDO.setCheckItem(PlanConstant.RuleType.SQL_CUSTOM);
-                    batchPlanTableLines = batchPlanTableLineRepository.selectByCondition(Condition.builder(BatchPlanTableLine.class)
-                            .where(Sqls.custom().andEqualTo(BatchPlanTableLine.FIELD_PLAN_RULE_ID, batchPlanTable.getPlanRuleId()))
-                            .build()
-                    );
+                    batchPlanTableLines = batchPlanTableLineRepository
+                                    .selectByCondition(Condition.builder(BatchPlanTableLine.class)
+                                                    .where(Sqls.custom().andEqualTo(
+                                                                    BatchPlanTableLine.FIELD_PLAN_RULE_ID,
+                                                                    batchPlanTable.getPlanRuleId()))
+                                                    .build());
                 }
                 Measure measure = measureCollector.getMeasure(batchPlanTableConDO.getCheckItem().toUpperCase());
 
-                MeasureParamDO param = MeasureParamDO.builder()
-                        .conditionId(batchPlanTableConDO.getConditionId())
-                        .tenantId(tenantId)
-                        .checkItem(batchPlanTableConDO.getCheckItem())
-                        .countType(batchPlanTableConDO.getCountType())
-                        .compareWay(batchPlanTableConDO.getCompareWay())
-                        .whereCondition(joinWhereCondition(batchPlanTableConDO.getWhereCondition(), batchResultBase.getWhereCondition()))
-                        .warningLevelList(JsonUtils.json2WarningLevel(batchPlanTableConDO.getWarningLevel()))
-                        .schema(schema)
-                        .pluginDatasourceDTO(pluginDatasourceDTO)
-                        .batchResultBase(batchResultBase)
-                        .batchResultRuleDTO(batchResultRuleDTO)
-                        .batchResultItem(BatchResultItem.builder().build())
-                        .build();
+                MeasureParamDO param = MeasureParamDO.builder().conditionId(batchPlanTableConDO.getConditionId())
+                                .tenantId(tenantId).checkItem(batchPlanTableConDO.getCheckItem())
+                                .countType(batchPlanTableConDO.getCountType())
+                                .compareWay(batchPlanTableConDO.getCompareWay())
+                                .whereCondition(joinWhereCondition(batchPlanTableConDO.getWhereCondition(),
+                                                batchResultBase.getWhereCondition()))
+                                .warningLevelList(JsonUtils.json2WarningLevel(batchPlanTableConDO.getWarningLevel()))
+                                .schema(schema).pluginDatasourceDTO(pluginDatasourceDTO)
+                                .batchResultBase(batchResultBase).batchResultRuleDTO(batchResultRuleDTO)
+                                .batchResultItem(BatchResultItem.builder().build()).build();
                 if (batchPlanTableLines != null) {
                     param.setSql(batchPlanTableLines.get(0).getCustomSql());
                 }
@@ -478,7 +457,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     batchResultBase.setExceptionCheckItemCount(batchResultBase.getExceptionCheckItemCount() + 1);
                     exceptionFlag = true;
 
-                    //异常阻断
+                    // 异常阻断
                     if (batchPlanTable.getExceptionBlock() == 1) {
                         batchResultBase.setExceptionRuleCount(batchResultBase.getExceptionRuleCount() + 1);
                         batchResultBaseRepository.updateByPrimaryKeySelective(batchResultBase);
@@ -501,33 +480,30 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     /**
      * 处理字段规则
      *
-     * @param tenantId            Long
-     * @param batchResultBase     BatchResultBase
-     * @param schema              String
+     * @param tenantId Long
+     * @param batchResultBase BatchResultBase
+     * @param schema String
      * @param pluginDatasourceDTO PluginDatasourceDTO
      */
-    private void handleFieldRule(Long tenantId, BatchResultBase batchResultBase, String schema, PluginDatasourceDTO pluginDatasourceDTO) {
-        List<BatchPlanField> fieldList = batchPlanFieldRepository.select(BatchPlanTable.FIELD_PLAN_BASE_ID, batchResultBase.getPlanBaseId());
+    private void handleFieldRule(Long tenantId, BatchResultBase batchResultBase, String schema,
+                    PluginDatasourceDTO pluginDatasourceDTO) {
+        List<BatchPlanField> fieldList = batchPlanFieldRepository.select(BatchPlanTable.FIELD_PLAN_BASE_ID,
+                        batchResultBase.getPlanBaseId());
         batchResultBase.setRuleCount(batchResultBase.getRuleCount() + fieldList.size());
 
         for (BatchPlanField batchPlanField : fieldList) {
-            List<BatchPlanFieldConDO> conList = batchPlanFieldConRepository.selectJoinItem(BatchPlanFieldConDO.builder().planRuleId(batchPlanField.getPlanRuleId()).build());
+            List<BatchPlanFieldConDO> conList = batchPlanFieldConRepository.selectJoinItem(
+                            BatchPlanFieldConDO.builder().planRuleId(batchPlanField.getPlanRuleId()).build());
             batchResultBase.setCheckItemCount(batchResultBase.getCheckItemCount() + conList.size());
 
-            //异常标记
+            // 异常标记
             boolean exceptionFlag = false;
             BatchResultRuleDTO batchResultRuleDTO = BatchResultRuleDTO.builder()
-                    .resultBaseId(batchResultBase.getResultBaseId())
-                    .ruleType(PlanConstant.ResultRuleType.FIELD)
-                    .planRuleId(batchPlanField.getPlanRuleId())
-                    .ruleCode(batchPlanField.getRuleCode())
-                    .ruleName(batchPlanField.getRuleName())
-                    .ruleDesc(batchPlanField.getRuleDesc())
-                    .checkType(batchPlanField.getCheckType())
-                    .weight(batchPlanField.getWeight())
-                    .resultFlag(1)
-                    .tenantId(tenantId)
-                    .build();
+                            .resultBaseId(batchResultBase.getResultBaseId()).ruleType(PlanConstant.ResultRuleType.FIELD)
+                            .planRuleId(batchPlanField.getPlanRuleId()).ruleCode(batchPlanField.getRuleCode())
+                            .ruleName(batchPlanField.getRuleName()).ruleDesc(batchPlanField.getRuleDesc())
+                            .checkType(batchPlanField.getCheckType()).weight(batchPlanField.getWeight()).resultFlag(1)
+                            .tenantId(tenantId).build();
             batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
 
             for (BatchPlanFieldConDO batchPlanFieldConDO : conList) {
@@ -539,23 +515,20 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     measure = measureCollector.getMeasure(PlanConstant.CheckWay.REGULAR);
                 }
 
-                MeasureParamDO param = MeasureParamDO.builder()
-                        .tenantId(tenantId)
-                        .conditionId(batchPlanFieldConDO.getConditionId())
-                        .checkItem(batchPlanFieldConDO.getCheckItem())
-                        .countType(batchPlanFieldConDO.getCountType())
-                        .compareWay(batchPlanFieldConDO.getCompareWay())
-                        .whereCondition(joinWhereCondition(batchPlanFieldConDO.getWhereCondition(), batchResultBase.getWhereCondition()))
-                        .warningLevelList(JsonUtils.json2WarningLevel(batchPlanFieldConDO.getWarningLevel()))
-                        .schema(schema)
-                        .pluginDatasourceDTO(pluginDatasourceDTO)
-                        .fieldName(batchPlanFieldConDO.getFieldName())
-                        .checkFieldName(batchPlanFieldConDO.getCheckFieldName())
-                        .regularExpression(batchPlanFieldConDO.getRegularExpression())
-                        .batchResultBase(batchResultBase)
-                        .batchResultRuleDTO(batchResultRuleDTO)
-                        .batchResultItem(BatchResultItem.builder().build())
-                        .build();
+                MeasureParamDO param = MeasureParamDO.builder().tenantId(tenantId)
+                                .conditionId(batchPlanFieldConDO.getConditionId())
+                                .checkItem(batchPlanFieldConDO.getCheckItem())
+                                .countType(batchPlanFieldConDO.getCountType())
+                                .compareWay(batchPlanFieldConDO.getCompareWay())
+                                .whereCondition(joinWhereCondition(batchPlanFieldConDO.getWhereCondition(),
+                                                batchResultBase.getWhereCondition()))
+                                .warningLevelList(JsonUtils.json2WarningLevel(batchPlanFieldConDO.getWarningLevel()))
+                                .schema(schema).pluginDatasourceDTO(pluginDatasourceDTO)
+                                .fieldName(batchPlanFieldConDO.getFieldName())
+                                .checkFieldName(batchPlanFieldConDO.getCheckFieldName())
+                                .regularExpression(batchPlanFieldConDO.getRegularExpression())
+                                .batchResultBase(batchResultBase).batchResultRuleDTO(batchResultRuleDTO)
+                                .batchResultItem(BatchResultItem.builder().build()).build();
                 measure.check(param);
 
                 BatchResultItem batchResultItem = param.getBatchResultItem();
@@ -585,7 +558,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     batchResultBase.setExceptionCheckItemCount(batchResultBase.getExceptionCheckItemCount() + 1);
                     exceptionFlag = true;
 
-                    //异常阻断
+                    // 异常阻断
                     if (batchPlanField.getExceptionBlock() == 1) {
                         batchResultBase.setExceptionRuleCount(batchResultBase.getExceptionRuleCount() + 1);
                         batchResultBaseRepository.updateByPrimaryKeySelective(batchResultBase);
@@ -608,42 +581,35 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     /**
      * 处理表间规则
      *
-     * @param tenantId        tenantId
+     * @param tenantId tenantId
      * @param batchResultBase batchResultBase
-     * @param schema          String
+     * @param schema String
      */
-    private void handleRelTableRule(Long tenantId, BatchResultBase batchResultBase, String schema, PluginDatasourceDTO pluginDatasourceDTO) {
+    private void handleRelTableRule(Long tenantId, BatchResultBase batchResultBase, String schema,
+                    PluginDatasourceDTO pluginDatasourceDTO) {
 
-        List<BatchPlanRelTable> relTableList = batchPlanRelTableRepository.select(BatchPlanTable.FIELD_PLAN_BASE_ID, batchResultBase.getPlanBaseId());
+        List<BatchPlanRelTable> relTableList = batchPlanRelTableRepository.select(BatchPlanTable.FIELD_PLAN_BASE_ID,
+                        batchResultBase.getPlanBaseId());
         batchResultBase.setRuleCount(batchResultBase.getRuleCount() + relTableList.size());
         batchResultBase.setCheckItemCount(batchResultBase.getCheckItemCount() + relTableList.size());
 
         for (BatchPlanRelTable batchPlanRelTable : relTableList) {
             Measure measure = measureCollector.getMeasure(PlanConstant.RuleType.TABLE_RELATION);
 
-            MeasureParamDO param = MeasureParamDO.builder()
-                    .checkItem(batchPlanRelTable.getCheckItem())
-                    .tenantId(tenantId)
-                    .schema(schema)
-                    .pluginDatasourceDTO(pluginDatasourceDTO)
-                    .batchPlanRelTable(batchPlanRelTable)
-                    .batchResultBase(batchResultBase)
-                    .batchResultItem(BatchResultItem.builder().build())
-                    .build();
+            MeasureParamDO param = MeasureParamDO.builder().checkItem(batchPlanRelTable.getCheckItem())
+                            .tenantId(tenantId).schema(schema).pluginDatasourceDTO(pluginDatasourceDTO)
+                            .batchPlanRelTable(batchPlanRelTable).batchResultBase(batchResultBase)
+                            .batchResultItem(BatchResultItem.builder().build()).build();
             measure.check(param);
 
             BatchResultRuleDTO batchResultRuleDTO = BatchResultRuleDTO.builder()
-                    .resultBaseId(batchResultBase.getResultBaseId())
-                    .ruleType(PlanConstant.ResultRuleType.REL_TABLE)
-                    .planRuleId(batchPlanRelTable.getPlanRuleId())
-                    .ruleCode(batchPlanRelTable.getRuleCode())
-                    .ruleName(batchPlanRelTable.getRuleName())
-                    .ruleDesc(batchPlanRelTable.getRuleDesc())
-                    .checkType(batchPlanRelTable.getCheckType())
-                    .weight(batchPlanRelTable.getWeight())
-                    .resultFlag(1)
-                    .tenantId(tenantId)
-                    .build();
+                            .resultBaseId(batchResultBase.getResultBaseId())
+                            .ruleType(PlanConstant.ResultRuleType.REL_TABLE)
+                            .planRuleId(batchPlanRelTable.getPlanRuleId()).ruleCode(batchPlanRelTable.getRuleCode())
+                            .ruleName(batchPlanRelTable.getRuleName()).ruleDesc(batchPlanRelTable.getRuleDesc())
+                            .checkType(batchPlanRelTable.getCheckType()).weight(batchPlanRelTable.getWeight())
+                            .resultFlag(1).tenantId(tenantId).build();
+
             batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
 
             BatchResultItem batchResultItem = param.getBatchResultItem();
@@ -656,6 +622,21 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             batchResultItem.setRelationship(batchPlanRelTable.getRelationship());
             batchResultItem.setWarningLevelJson(batchPlanRelTable.getWarningLevel());
             batchResultItem.setTenantId(tenantId);
+            List<TableRelCheckDTO> tableRelCheckDTOS =
+                            JsonUtils.json2TableRelCheck(batchPlanRelTable.getTableRelCheck());
+            List<String> resultList = new ArrayList<>();
+            for (TableRelCheckDTO tableRelCheckDTO : tableRelCheckDTOS) {
+                String result = String.format("%s%s=%s%s", tableRelCheckDTO.getRelFunction(),
+                                Objects.nonNull(tableRelCheckDTO.getRelFunction())
+                                                ? String.format("(%s)", tableRelCheckDTO.getRelFieldName())
+                                                : tableRelCheckDTO.getRelFieldName(),
+                                tableRelCheckDTO.getBaseFunction(),
+                                Objects.nonNull(tableRelCheckDTO.getBaseFunction())
+                                                ? String.format("(%s)", tableRelCheckDTO.getBaseFieldName())
+                                                : tableRelCheckDTO.getBaseFieldName());
+                resultList.add(result);
+            }
+            batchResultItem.setActualValue(Strings.join(resultList, ','));
             batchResultItemRepository.insertSelective(batchResultItem);
 
             if (StringUtils.isNotBlank(batchResultItem.getWarningLevel())) {
@@ -665,7 +646,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 batchResultBase.setExceptionRuleCount(batchResultBase.getExceptionRuleCount() + 1);
                 batchResultBase.setExceptionCheckItemCount(batchResultBase.getExceptionCheckItemCount() + 1);
 
-                //异常阻断
+                // 异常阻断
                 if (batchPlanRelTable.getExceptionBlock() == 1) {
                     batchResultBaseRepository.updateByPrimaryKeySelective(batchResultBase);
                     throw new CommonException(ErrorCode.EXCEPTION_BLOCK);
@@ -677,12 +658,12 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     /**
      * 分数计算
      *
-     * @param tenantId    tenantId
+     * @param tenantId tenantId
      * @param batchResult 结果表对象
      */
     private void countScore(Long tenantId, BatchResult batchResult) {
 
-        //获取所有告警等级，计算 F 值
+        // 获取所有告警等级，计算 F 值
         List<LovValueDTO> list = lovAdapter.queryLovValue(PlanConstant.LOV_WARNING_LEVEL, tenantId);
         Map<String, BigDecimal> map = new HashMap<>(8);
         BigDecimal n = BigDecimal.valueOf(list.size());
@@ -692,7 +673,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             map.put(lovValueDTO.getValue(), f);
             f = f.add(BigDecimal.ONE.divide(n, 10, RoundingMode.HALF_UP));
         }
-        //正常规则F 为1
+        // 正常规则F 为1
         map.put(PlanConstant.WARNING_LEVEL_NORMAL, BigDecimal.ONE);
 
         // 查询规则
@@ -700,19 +681,20 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         BigDecimal w = BigDecimal.valueOf(itemDTOList.stream().mapToLong(BatchResultItemDTO::getWeight).sum());
         BigDecimal sum = BigDecimal.ZERO;
         for (BatchResultItemDTO batchResultItemDTO : itemDTOList) {
-            //一个校验项满足多个告警
-            if(!PlanConstant.WARNING_LEVEL_NORMAL.equals(batchResultItemDTO.getWarningLevel())){
-                List<WarningLevelVO> warningLevelVOS = JsonUtils.json2WarningLevelVO(batchResultItemDTO.getWarningLevel());
+            // 一个校验项满足多个告警
+            if (!PlanConstant.WARNING_LEVEL_NORMAL.equals(batchResultItemDTO.getWarningLevel())) {
+                List<WarningLevelVO> warningLevelVOS =
+                                JsonUtils.json2WarningLevelVO(batchResultItemDTO.getWarningLevel());
                 for (WarningLevelVO warningLevelVO : warningLevelVOS) {
                     BigDecimal multiply = BigDecimal.valueOf(batchResultItemDTO.getWeight())
-                            .divide(w, 10, RoundingMode.HALF_UP)
-                            .multiply(map.get(warningLevelVO.getWarningLevel()));
+                                    .divide(w, 10, RoundingMode.HALF_UP)
+                                    .multiply(map.get(warningLevelVO.getWarningLevel()));
                     sum = sum.add(multiply);
                 }
-            }else{
-                BigDecimal multiply = BigDecimal.valueOf(batchResultItemDTO.getWeight())
-                        .divide(w, 10, RoundingMode.HALF_UP)
-                        .multiply(map.get(PlanConstant.WARNING_LEVEL_NORMAL));
+            } else {
+                BigDecimal multiply =
+                                BigDecimal.valueOf(batchResultItemDTO.getWeight()).divide(w, 10, RoundingMode.HALF_UP)
+                                                .multiply(map.get(PlanConstant.WARNING_LEVEL_NORMAL));
                 sum = sum.add(multiply);
             }
         }
