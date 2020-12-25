@@ -47,6 +47,8 @@ public class DataFieldDO extends AuditDomain {
 
     private String standardStatus;
 
+    private Integer fieldAccuracy;
+
     private Long tenantId;
 
 }

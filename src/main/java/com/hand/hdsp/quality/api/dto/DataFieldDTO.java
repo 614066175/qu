@@ -98,6 +98,9 @@ public class DataFieldDTO extends AuditDomain {
     @Size(max = 50)
     private String standardStatus;
 
+    @ApiModelProperty(value = "字段精度")
+    private Integer fieldAccuracy;
+
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;

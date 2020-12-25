@@ -20,6 +20,7 @@
         <result column="charge_email" property="chargeEmail" jdbcType="VARCHAR"/>
         <result column="standard_status" property="standardStatus" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
+        <result column="field_accuracy" property="fieldAccuracy" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
         <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
@@ -45,6 +46,7 @@
           ${fs}.charge_email,
           ${fs}.standard_status,
           ${fs}.tenant_id,
+          ${fs}.field_accuracy,
           ${fs}.object_version_number,
           ${fs}.last_update_date
     </sql>

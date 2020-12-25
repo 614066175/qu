@@ -237,9 +237,11 @@ public class NameStandardServiceImpl implements NameStandardService {
                 throw new CommonException("invalid schema:{0}/{1}",nameAimDTO.getDatasourceCode(),x.getSchemaName());
             }
             if(!Objects.isNull(nameAimDTO.getExcludeRule())) {
+                //获取满足排除规则的表
                 List<String> excludeRuleTable = tables.stream().filter(o -> Pattern.matches(nameAimDTO.getExcludeRule(), o))
                         .collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(excludeRuleTable)){
+                    //去除满足排除规则的表
                     tables.removeAll(excludeRuleTable);
                 }
             }
