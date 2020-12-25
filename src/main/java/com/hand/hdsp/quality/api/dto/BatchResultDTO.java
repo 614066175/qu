@@ -101,11 +101,12 @@ public class BatchResultDTO extends AuditDomain {
 
     @Transient
     @ApiModelProperty(value = "数据标准总数")
-    private Long dataStandardCount;
+    @Builder.Default
+    private Long dataStandardCount = 0L;
 
     @Transient
     @ApiModelProperty(value = "异常数据标准数")
     @Builder.Default
-    private Long exceptionDataStandardCount=0L;
+    private Long exceptionDataStandardCount = 0L;
 
 }
