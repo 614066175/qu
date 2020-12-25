@@ -3,6 +3,13 @@ package com.hand.hdsp.quality.app.service.impl;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.hzero.core.util.ResponseUtils;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
 import com.hand.hdsp.quality.api.dto.BatchResultBaseDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultMarkDTO;
@@ -16,13 +23,9 @@ import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
+
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.exception.ExceptionResponse;
-import org.hzero.core.util.ResponseUtils;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 
 /**
  * <p>批数据方案结果表应用服务默认实现</p>
@@ -80,6 +83,17 @@ public class BatchResultServiceImpl implements BatchResultService {
             //将所有告警等级Json转换合并成集合
             warningLevelJsonList.forEach(warningLevelJson -> warningLevelVOList.addAll(JsonUtils.json2WarningLevelVO(warningLevelJson)));
 
+            //数据标准告警JSON集合
+            List<String> standardJsonList= batchResultItemMapper.dataStandardWaringLevelVO(dto);
+            if(CollectionUtils.isNotEmpty(standardJsonList)){
+                batchResultDTO.setDataStandardCount(standardJsonList.size() + Optional.ofNullable(batchResultDTO.getDataStandardCount()).orElse(0L));
+                standardJsonList.forEach(standardWarningLevel->{
+                    List<WarningLevelVO> warningLevelVOS = JsonUtils.json2WarningLevelVO(standardWarningLevel);
+                    if(CollectionUtils.isNotEmpty(warningLevelVOS)){
+                        batchResultDTO.setExceptionDataStandardCount(Optional.ofNullable(batchResultDTO.getExceptionDataStandardCount()).orElse(0L)+1L);
+                    }
+                });
+            }
             batchResultDTO.setRuleCount(dto.getRuleCount() +
                     Optional.ofNullable(batchResultDTO.getRuleCount()).orElse(0L));
             batchResultDTO.setExceptionRuleCount(dto.getExceptionRuleCount() +
