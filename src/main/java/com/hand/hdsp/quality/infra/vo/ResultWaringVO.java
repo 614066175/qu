@@ -18,11 +18,17 @@ import lombok.*;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class ResultWaringVO {
 
+    /**
+     * 告警等级json
+     */
     private String warningLevel;
 
     private Long countSum;
 
     private String exceptionInfo;
 
+    /**
+     * 告警等级json转换的对象
+     */
     private List<WarningLevelVO> warningLevelVOList;
 }

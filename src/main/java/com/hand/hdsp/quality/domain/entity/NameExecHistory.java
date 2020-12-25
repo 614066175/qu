@@ -38,6 +38,7 @@ public class NameExecHistory extends AuditDomain {
     public static final String FIELD_EXEC_STATUS = "execStatus";
     public static final String FIELD_TENANT_ID = "tenantId";
     public static final String FIELD_EXEC_RULE = "execRule";
+    public static final String FIELD_ERROR_MESSAGE = "errorMessage";
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -64,6 +65,8 @@ public class NameExecHistory extends AuditDomain {
     private String execRule;
 
     private String execStatus;
+
+    private String errorMessage;
 
     private Long tenantId;
 

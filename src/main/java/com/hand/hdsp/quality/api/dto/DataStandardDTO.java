@@ -1,6 +1,8 @@
 package com.hand.hdsp.quality.api.dto;
 
 import java.util.List;
+
+
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -135,9 +137,26 @@ public class DataStandardDTO extends AuditDomain{
     private String groupCode;
 
     @Transient
+    private Long parentGroupId;
+
+    @Transient
     private String groupDesc;
 
     @Transient
+    private String nameLevelPath;
+
+    @Transient
     private List<Long> dataLengthList;
+
+    @ApiModelProperty("查询条件，最后修订时间从")
+    private String lastUpdateDateFrom;
+
+    @ApiModelProperty("查询条件，最后修订时间至")
+    private String lastUpdateDateTo;
+    @Transient
+    private String metadataName;
+
+    @Transient
+    private String metadataType;
 
 }

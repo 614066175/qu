@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.app.service;
 
+import com.hand.hdsp.quality.api.dto.BatchResultDTO;
 import com.hand.hdsp.quality.api.dto.ResultObjDTO;
 
 /**
@@ -18,4 +19,11 @@ public interface BatchResultService {
      * @return
      */
     ResultObjDTO showLog(Long tenantId, int execId, String jobId);
+
+    /**
+     * 评估方案的评估信息
+     * @param batchResultDTO
+     * @return
+     */
+    BatchResultDTO listResultDetail(BatchResultDTO batchResultDTO);
 }

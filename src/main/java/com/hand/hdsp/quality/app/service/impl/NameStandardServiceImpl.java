@@ -145,7 +145,9 @@ public class NameStandardServiceImpl implements NameStandardService {
         nameExecHistoryDTO.setExecStartTime(new Date());
         nameExecHistoryDTO.setExecRule(nameStandard.getStandardRule());
         nameExecHistoryDTO.setStandardId(nameStandard.getStandardId());
+        nameExecHistoryDTO.setTenantId(nameStandard.getTenantId());
         try {
+            //获取目标表
             List<NameExecHisDetailDTO> nameExecHisDetailDTOList = this.getAimTable(nameAimDTOList);
             nameExecHistoryDTO.setCheckedNum((long) nameExecHisDetailDTOList.size());
             List<NameExecHisDetailDTO> abnormalList = new ArrayList<>();
@@ -171,6 +173,7 @@ public class NameStandardServiceImpl implements NameStandardService {
             nameStandard.setLatestCheckedStatus(NameStandardStatusEnum.FAILED.getStatusCode());
             nameStandardRepository.updateOptional(nameStandard,NameStandard.FIELD_LATEST_CHECKED_STATUS);
             nameExecHistoryDTO.setExecStatus(NameStandardStatusEnum.FAILED.getStatusCode());
+            nameExecHistoryDTO.setErrorMessage(e.toString());
             nameExecHistoryRepository.insertDTOSelective(nameExecHistoryDTO);
             e.printStackTrace();
         }
@@ -234,9 +237,11 @@ public class NameStandardServiceImpl implements NameStandardService {
                 throw new CommonException("invalid schema:{0}/{1}",nameAimDTO.getDatasourceCode(),x.getSchemaName());
             }
             if(!Objects.isNull(nameAimDTO.getExcludeRule())) {
+                //获取满足排除规则的表
                 List<String> excludeRuleTable = tables.stream().filter(o -> Pattern.matches(nameAimDTO.getExcludeRule(), o))
                         .collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(excludeRuleTable)){
+                    //去除满足排除规则的表
                     tables.removeAll(excludeRuleTable);
                 }
             }
@@ -264,4 +269,5 @@ public class NameStandardServiceImpl implements NameStandardService {
         nameAimDTOList.forEach(x -> this.getAimTableFromNameAimDTO(x, aimTableList));
         return aimTableList;
     }
+
 }

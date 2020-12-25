@@ -220,4 +220,36 @@
 	            result_id = #{resultId}
 	            AND warning_level IS NOT NULL
     </select>
+    <select id="selectWaringLevelJson" resultType="java.lang.String">
+        select
+        xbri.warning_level warningLevel
+        from xqua_batch_result_item xbri
+        join xqua_batch_result_rule xbrr on xbri.result_rule_id = xbrr.result_rule_id
+        <where>
+            xbri.warning_level is not null
+            <if test="tenantId != null ">
+                and xbri.tenant_id = #{tenantId}
+            </if>
+            <if test="resultBaseId != null ">
+                and xbrr.result_base_id = #{resultBaseId}
+            </if>
+        </where>
+    </select>
+    <select id="dataStandardWaringLevelVO" resultType="java.lang.String">
+        SELECT
+        xbri.warning_level
+        FROM
+        xqua_batch_result_rule xbrr
+        JOIN xsta_data_standard xds ON xbrr.rule_code=xds.standard_code
+        left JOIN xqua_batch_result_item xbri ON xbri.result_rule_id = xbrr.result_rule_id
+        <where>
+            xbrr.check_type="STANDARD"
+            <if test="tenantId != null ">
+                AND xbri.tenant_id = #{tenantId}
+            </if>
+            <if test="resultBaseId != null ">
+                AND xbrr.result_base_id = #{resultBaseId}
+            </if>
+        </where>
+    </select>
 </mapper>

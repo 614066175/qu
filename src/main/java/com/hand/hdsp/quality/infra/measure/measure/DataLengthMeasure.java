@@ -66,7 +66,7 @@ public class DataLengthMeasure implements Measure {
             warningLevelList.forEach(warningLevelDTO -> {
                 // 查询要执行的SQL
                 ItemTemplateSql itemTemplateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
-                        .checkItem(param.getCountType())
+                        .checkItem(String.format("%s_%s",param.getCheckItem(),param.getCompareWay()))
                         .datasourceType(batchResultBase.getDatasourceType())
                         .build());
 

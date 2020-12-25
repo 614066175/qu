@@ -1,12 +1,12 @@
 package com.hand.hdsp.quality.infra.vo;
 
+import java.util.Date;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
-import java.util.Date;
-
 /**
- * description
+ * 告警结果
  *
  * @author rui.jia01@hand-china.com 2020/04/01 17:55
  */
@@ -22,5 +22,6 @@ public class WarningLevelVO {
 
     private String warningLevel;
 
-    private Long levelCount;
+    @Builder.Default
+    private Long levelCount=1L;
 }

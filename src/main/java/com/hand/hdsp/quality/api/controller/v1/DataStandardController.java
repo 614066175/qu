@@ -265,4 +265,18 @@ public class DataStandardController {
         List<DataStandardDTO> dataStandardDTOList=dataStandardService.standardByField(assetFieldDTO);
         return Results.success(dataStandardDTOList);
     }
+
+    @ApiOperation(value = "元数据数据标准详情")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/asset-detail/{standardId}")
+    public ResponseEntity<DataStandardDTO> assetDetail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable(name = "standardId") Long standardId) {
+        return Results.success(dataStandardService.assetDetail(tenantId, standardId));
+    }
+
 }

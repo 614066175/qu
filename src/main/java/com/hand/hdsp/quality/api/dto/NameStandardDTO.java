@@ -82,7 +82,6 @@ public class NameStandardDTO extends AuditDomain {
     private Long chargeId;
 
     @ApiModelProperty(value = "责任部门ID")
-    @NotNull
     private Long chargeDeptId;
 
     @ExcelColumn(zh = "责任人电话",en="chargeTel",order = 9)

@@ -3,10 +3,7 @@ package com.hand.hdsp.quality.infra.measure;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,6 +11,8 @@ import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
+import com.hand.hdsp.quality.infra.util.JsonUtils;
+import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -213,14 +212,24 @@ public class MeasureUtil {
             if (PlanConstant.CompareSymbol.EQUAL.equals(warningLevelDTO.getCompareSymbol())) {
                 // 字符串
                 if (warningLevelDTO.getExpectedValue().equals(value)) {
-                    batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
+                    batchResultItem.setWarningLevel(
+                            JsonUtils.object2Json(
+                                    Collections.singletonList(WarningLevelVO.builder()
+                                            .warningLevel(warningLevelDTO.getWarningLevel())
+                                            .build()))
+                    );
                     batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
                     break;
                 }
                 // 如果是数字，则用 BigDecimal.compareTo 比较
                 if (NumberUtils.isParsable(value) && NumberUtils.isParsable(warningLevelDTO.getExpectedValue())
                         && new BigDecimal(value).compareTo(new BigDecimal(warningLevelDTO.getExpectedValue())) == 0) {
-                    batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
+                    batchResultItem.setWarningLevel(
+                            JsonUtils.object2Json(
+                                    Collections.singletonList(WarningLevelVO.builder()
+                                            .warningLevel(warningLevelDTO.getWarningLevel())
+                                            .build()))
+                    );
                     batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
                     break;
                 }
@@ -231,7 +240,12 @@ public class MeasureUtil {
                     Date expectedDate = parseDate(warningLevelDTO.getExpectedValue());
                     Assert.notNull(expectedDate, ErrorCode.EXPECTED_VALUE_IS_NOT_DATE);
                     if (DateUtils.isSameInstant(valueDate, expectedDate)) {
-                        batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
+                        batchResultItem.setWarningLevel(
+                                JsonUtils.object2Json(
+                                        Collections.singletonList(WarningLevelVO.builder()
+                                                .warningLevel(warningLevelDTO.getWarningLevel())
+                                                .build()))
+                        );
                         batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
                         break;
                     }
@@ -241,14 +255,24 @@ public class MeasureUtil {
             } else if (PlanConstant.CompareSymbol.NOT_EQUAL.equals(warningLevelDTO.getCompareSymbol())) {
                 // 字符串
                 if (!warningLevelDTO.getExpectedValue().equals(value)) {
-                    batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
+                    batchResultItem.setWarningLevel(
+                            JsonUtils.object2Json(
+                                    Collections.singletonList(WarningLevelVO.builder()
+                                            .warningLevel(warningLevelDTO.getWarningLevel())
+                                            .build()))
+                    );
                     batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
                     break;
                 }
                 // 如果是数字，则用 BigDecimal.compareTo 比较
                 if (NumberUtils.isParsable(value)
                         && new BigDecimal(value).compareTo(new BigDecimal(warningLevelDTO.getExpectedValue())) != 0) {
-                    batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
+                    batchResultItem.setWarningLevel(
+                            JsonUtils.object2Json(
+                                    Collections.singletonList(WarningLevelVO.builder()
+                                            .warningLevel(warningLevelDTO.getWarningLevel())
+                                            .build()))
+                    );
                     batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
                     break;
                 }
@@ -259,7 +283,12 @@ public class MeasureUtil {
                     Date expectedDate = parseDate(warningLevelDTO.getExpectedValue());
                     Assert.notNull(expectedDate, ErrorCode.EXPECTED_VALUE_IS_NOT_DATE);
                     if (!DateUtils.isSameInstant(valueDate, expectedDate)) {
-                        batchResultItem.setWarningLevel(warningLevelDTO.getWarningLevel());
+                        batchResultItem.setWarningLevel(
+                                JsonUtils.object2Json(
+                                        Collections.singletonList(WarningLevelVO.builder()
+                                                .warningLevel(warningLevelDTO.getWarningLevel())
+                                                .build()))
+                        );
                         batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
                         break;
                     }
@@ -295,7 +324,10 @@ public class MeasureUtil {
                     endResult = new BigDecimal(endValue).compareTo(actualValue) >= 0;
                 }
                 if (startResult && endResult) {
-                    batchResultItem.setWarningLevel(warningLevel.getWarningLevel());
+                    batchResultItem.setWarningLevel(JsonUtils.object2Json(
+                            Collections.singletonList(WarningLevelVO.builder()
+                                    .warningLevel(warningLevel.getWarningLevel())
+                                    .build())));
                     batchResultItem.setExceptionInfo(FIXED_RANGE_WARNING_INFO);
                     break;
                 }
@@ -325,7 +357,10 @@ public class MeasureUtil {
                 }
 
                 if (startResult && endResult) {
-                    batchResultItem.setWarningLevel(warningLevel.getWarningLevel());
+                    batchResultItem.setWarningLevel(JsonUtils.object2Json(
+                            Collections.singletonList(WarningLevelVO.builder()
+                                    .warningLevel(warningLevel.getWarningLevel())
+                                    .build())));
                     batchResultItem.setExceptionInfo(FIXED_RANGE_WARNING_INFO);
                     break;
                 }
@@ -363,7 +398,10 @@ public class MeasureUtil {
                     endResult = new BigDecimal(endValue).compareTo(actualValue) >= 0;
                 }
                 if (startResult && endResult) {
-                    batchResultItem.setWarningLevel(warningLevel.getWarningLevel());
+                    batchResultItem.setWarningLevel(JsonUtils.object2Json(
+                            Collections.singletonList(WarningLevelVO.builder()
+                                    .warningLevel(warningLevel.getWarningLevel())
+                                    .build())));
                     batchResultItem.setExceptionInfo(VOLATILITY_WARNING_INFO);
                 }
             }

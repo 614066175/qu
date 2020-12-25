@@ -1,5 +1,14 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
@@ -15,16 +24,8 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * <p>批数据方案结果表资源库实现</p>
@@ -58,7 +59,11 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
 
     @Override
     public Map<String, Object> numberView(TimeRangeDTO timeRangeDTO) {
-        TimeToString.timeToString(timeRangeDTO);
+        //没有选择高级时间查询条件的话就处理外层时间
+        if(StringUtils.isEmpty(timeRangeDTO.getStartDate())
+                &&StringUtils.isEmpty(timeRangeDTO.getEndDate())){
+            TimeToString.timeToString(timeRangeDTO);
+        }
         Map<String, Object> map = new HashMap<>(8);
         map.put("mark", batchResultMapper.selectScore(timeRangeDTO));
         map.put("ruleCount", batchResultMapper.selectRuleCount(timeRangeDTO));

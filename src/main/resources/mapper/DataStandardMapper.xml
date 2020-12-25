@@ -59,6 +59,9 @@
         iu2.login_name chargeName,
         hu.unit_name chargeDeptName,
         xsg.group_name,
+        xsg.group_code,
+        xsg.group_id,
+        xsg.parent_group_id,
         <include refid="baseColumn">
             <property name="ds" value="ds"/>
         </include>
@@ -98,6 +101,12 @@
             </if>
             <if test="dataStandardDTO.tenantId!=null">
                 and ds.tenant_id=#{dataStandardDTO.tenantId}
+            </if>
+            <if test="dataStandardDTO.lastUpdateDateFrom!=null">
+                and date(ds.last_update_date)>=date(#{dataStandardDTO.lastUpdateDateFrom})
+            </if>
+            <if test="dataStandardDTO.lastUpdateDateTo!=null">
+                and date(ds.last_update_date)&lt;=date(#{dataStandardDTO.lastUpdateDateTo})
             </if>
         </where>
         order by ds.last_update_date desc

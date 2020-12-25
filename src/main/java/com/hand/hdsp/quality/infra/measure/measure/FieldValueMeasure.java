@@ -47,7 +47,7 @@ public class FieldValueMeasure implements Measure {
     private static final String COUNT = "COUNT";
     private static final String VALUE_SQL = " and ${field} = (%s)";
     private static final String START_SQL = " and ${field} > %s";
-    private static final String END_SQL=" and ${field} < %s";
+    private static final String END_SQL = " and ${field} < %s";
     private final ItemTemplateSqlRepository templateSqlRepository;
     private final LovAdapter lovAdapter;
     private final DriverSessionService driverSessionService;
@@ -92,9 +92,9 @@ public class FieldValueMeasure implements Measure {
             List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(),
                     MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
             if (CollectionUtils.isNotEmpty(response)) {
-                batchResultItem.setWarningLevel(JsonUtils.object2Json(WarningLevelVO.builder()
+                batchResultItem.setWarningLevel(JsonUtils.object2Json(Collections.singletonList(WarningLevelVO.builder()
                         .warningLevel(warningLevelDTO.getWarningLevel())
-                        .build()));
+                        .build())));
                 batchResultItem.setExceptionInfo("存在字段值满足值集校验配置");
             }
 
@@ -125,7 +125,6 @@ public class FieldValueMeasure implements Measure {
                         break;
                     }
                 }
-
                 //当成功标记为false 或者 查询出来的数据量小于每页大小时（即已到最后一页了）退出
                 if (!successFlag || list.size() < PlanConstant.DEFAULT_SIZE) {
                     break;
@@ -139,8 +138,8 @@ public class FieldValueMeasure implements Measure {
             warningLevelList.forEach(warningLevelDTO -> {
                 String enumValue = warningLevelDTO.getEnumValue();
                 List<String> enumValueList = new ArrayList<>();
-                if(Strings.isNotEmpty(enumValue)){
-                    enumValueList= Arrays.asList(enumValue.split(","));
+                if (Strings.isNotEmpty(enumValue)) {
+                    enumValueList = Arrays.asList(enumValue.split(","));
                 }
                 // 查询要执行的SQL
                 ItemTemplateSql itemTemplateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
@@ -152,12 +151,12 @@ public class FieldValueMeasure implements Measure {
                 variables.put("table", batchResultBase.getPackageObjectName());
                 variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
                 variables.put("listValue", enumValueList.stream()
-                        .map(e -> "'" +e+ "'")
+                        .map(e -> "'" + e + "'")
                         .collect(Collectors.joining(BaseConstants.Symbol.COMMA))
                 );
                 List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(),
                         MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
-                if(Integer.parseInt(String.valueOf(response.get(0).get(COUNT)))!=0){
+                if (Integer.parseInt(String.valueOf(response.get(0).get(COUNT))) != 0) {
                     warningLevelVOList.add(
                             WarningLevelVO.builder()
                                     .warningLevel(warningLevelDTO.getWarningLevel())
@@ -165,10 +164,12 @@ public class FieldValueMeasure implements Measure {
                                     .build());
                 }
             });
-            AtomicLong count = new AtomicLong();
-            warningLevelVOList.forEach(warningLevelVO -> count.set(count.get() + warningLevelVO.getLevelCount()));
-            batchResultItem.setExceptionInfo(String.format("存在%d条数据满足告警要求", count.get()));
-            batchResultItem.setWarningLevel(JsonUtil.toJson(warningLevelVOList));
+            if (CollectionUtils.isNotEmpty(warningLevelVOList)) {
+                AtomicLong count = new AtomicLong();
+                warningLevelVOList.forEach(warningLevelVO -> count.set(count.get() + warningLevelVO.getLevelCount()));
+                batchResultItem.setExceptionInfo(String.format("存在%d条数据满足告警要求", count.get()));
+                batchResultItem.setWarningLevel(JsonUtil.toJson(warningLevelVOList));
+            }
         }
         //逻辑值
         else if (PlanConstant.CountType.LOGIC_VALUE.equals(countType)) {
@@ -181,16 +182,16 @@ public class FieldValueMeasure implements Measure {
                         .build());
                 StringBuilder condition = new StringBuilder();
                 //逻辑值范围比较
-                if(RANGE.equals(param.getCompareWay())){
-                    if(Strings.isNotEmpty(warningLevelDTO.getStartValue())){
-                        condition.append(String.format(START_SQL, warningLevelDTO.getExpectedValue()));
+                if (RANGE.equals(param.getCompareWay())) {
+                    if (Strings.isNotEmpty(warningLevelDTO.getStartValue())) {
+                        condition.append(String.format(START_SQL, warningLevelDTO.getStartValue()));
                     }
-                    if(Strings.isNotEmpty(warningLevelDTO.getEndValue())){
-                        condition.append(String.format(END_SQL, warningLevelDTO.getExpectedValue()));
+                    if (Strings.isNotEmpty(warningLevelDTO.getEndValue())) {
+                        condition.append(String.format(END_SQL, warningLevelDTO.getEndValue()));
                     }
                 }
                 //逻辑值值比较
-                if(VALUE.equals(param.getCompareWay())){
+                if (VALUE.equals(param.getCompareWay())) {
                     condition.append(String.format(VALUE_SQL, warningLevelDTO.getExpectedValue()));
                 }
                 itemTemplateSql.setSqlContent(itemTemplateSql.getSqlContent() + condition);
@@ -199,7 +200,7 @@ public class FieldValueMeasure implements Measure {
                 variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
                 List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(),
                         MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
-                if(Integer.parseInt(String.valueOf(response.get(0).get(COUNT)))!=0){
+                if (Integer.parseInt(String.valueOf(response.get(0).get(COUNT))) != 0) {
                     warningLevelVOList.add(
                             WarningLevelVO.builder()
                                     .warningLevel(warningLevelDTO.getWarningLevel())
@@ -207,14 +208,15 @@ public class FieldValueMeasure implements Measure {
                                     .build());
                 }
             });
-            AtomicLong count = new AtomicLong();
-            warningLevelVOList.forEach(warningLevelVO -> count.set(count.get() + warningLevelVO.getLevelCount()));
-            batchResultItem.setExceptionInfo(String.format("存在%d条数据满足告警要求", count.get()));
-            batchResultItem.setWarningLevel(JsonUtil.toJson(warningLevelVOList));
+            if (CollectionUtils.isNotEmpty(warningLevelVOList)) {
+                AtomicLong count = new AtomicLong();
+                warningLevelVOList.forEach(warningLevelVO -> count.set(count.get() + warningLevelVO.getLevelCount()));
+                batchResultItem.setExceptionInfo(String.format("存在%d条数据满足告警要求", count.get()));
+                batchResultItem.setWarningLevel(JsonUtil.toJson(warningLevelVOList));
+            }
         } else {
             throw new CommonException(ErrorCode.FIELD_NO_SUPPORT_CHECK_TYPE);
         }
-
         return batchResultItem;
     }
 }

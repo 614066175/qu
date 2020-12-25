@@ -1,5 +1,9 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import java.util.List;
+import javax.servlet.http.HttpServletResponse;
+
+import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
 import com.hand.hdsp.quality.app.service.RuleGroupService;
 import com.hand.hdsp.quality.config.SwaggerTags;
@@ -15,6 +19,8 @@ import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
+import org.hzero.export.annotation.ExcelExport;
+import org.hzero.export.vo.ExportParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -39,6 +45,7 @@ public class RuleGroupController extends BaseController {
         this.ruleGroupService = ruleGroupService;
         this.ruleGroupRepository = ruleGroupRepository;
     }
+
 
     @ApiOperation(value = "规则分组表列表")
     @ApiImplicitParams({@ApiImplicitParam(
@@ -135,5 +142,20 @@ public class RuleGroupController extends BaseController {
         ruleGroupDTO.setTenantId(tenantId);
         ruleGroupService.delete(ruleGroupDTO);
         return Results.success();
+    }
+
+    @ApiOperation(value = "从分组开始导出标准规则")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/export")
+    @ExcelExport(value = RuleGroupDTO.class)
+    public ResponseEntity<?> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                    RuleDTO dto,
+                                    ExportParam exportParam,
+                                    HttpServletResponse response) {
+        dto.setTenantId(tenantId);
+        List<RuleGroupDTO> dtoList =
+                ruleGroupService.export(dto, exportParam);
+        response.addHeader("Access-Control-Expose-Headers","Content-Disposition");
+        return Results.success(dtoList);
     }
 }

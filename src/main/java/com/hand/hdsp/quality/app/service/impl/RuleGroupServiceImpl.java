@@ -1,19 +1,26 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import java.util.List;
+
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
+import com.hand.hdsp.quality.api.dto.RuleLineDTO;
 import com.hand.hdsp.quality.app.service.RuleGroupService;
 import com.hand.hdsp.quality.domain.entity.Rule;
 import com.hand.hdsp.quality.domain.entity.RuleGroup;
+import com.hand.hdsp.quality.domain.entity.RuleLine;
 import com.hand.hdsp.quality.domain.repository.RuleGroupRepository;
+import com.hand.hdsp.quality.domain.repository.RuleLineRepository;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
+import org.hzero.export.vo.ExportParam;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * 规则分组表应用服务默认实现
@@ -28,10 +35,14 @@ public class RuleGroupServiceImpl implements RuleGroupService {
 
     private final RuleGroupRepository ruleGroupRepository;
     private final RuleRepository ruleRepository;
+    private final RuleLineRepository ruleLineRepository;
 
-    public RuleGroupServiceImpl(RuleGroupRepository ruleGroupRepository, RuleRepository ruleRepository) {
+    public RuleGroupServiceImpl(RuleGroupRepository ruleGroupRepository,
+                                RuleRepository ruleRepository,
+                                RuleLineRepository ruleLineRepository) {
         this.ruleGroupRepository = ruleGroupRepository;
         this.ruleRepository = ruleRepository;
+        this.ruleLineRepository = ruleLineRepository;
     }
 
     @Override
@@ -57,5 +68,35 @@ public class RuleGroupServiceImpl implements RuleGroupService {
         List<RuleGroup> list = ruleGroupRepository.list(ruleGroup);
         list.add(RuleGroup.ROOT_RULE_GROUP);
         return list;
+    }
+
+    @Override
+    public List<RuleGroupDTO> export(RuleDTO dto, ExportParam exportParam) {
+        List<RuleGroupDTO> ruleGroupDTOList = ruleGroupRepository.selectDTOByCondition(Condition.builder(RuleGroup.class).build());
+        ruleGroupDTOList.forEach(ruleGroupDTO -> {
+            //查询某一分组下的，筛选后的标准规则
+            List<RuleDTO> ruleDTOList = ruleRepository.selectDTOByCondition(Condition.builder(Rule.class)
+                    .andWhere(Sqls.custom()
+                            .andEqualTo(Rule.FIELD_GROUP_ID, ruleGroupDTO.getGroupId())
+                            .andEqualTo(Rule.FIELD_TENANT_ID, ruleGroupDTO.getTenantId()))
+                    .andWhere(Sqls.custom()
+                            .andEqualTo(Rule.FIELD_RULE_CODE, dto.getRuleCode(), true)
+                            .andEqualTo(Rule.FIELD_RULE_NAME, dto.getRuleName(), true)
+                            .andEqualTo(Rule.FIELD_RULE_DESC, dto.getRuleDesc(),true)
+                            .andEqualTo(Rule.FIELD_CHECK_TYPE, dto.getCheckType(), true)
+                            .andEqualTo(Rule.FIELD_EXCEPTION_BLOCK, dto.getExceptionBlock(), true)
+                            .andEqualTo(Rule.FIELD_WEIGHT, dto.getWeight(), true))
+                    .build());
+            //查询标准规则的告警配置
+            ruleDTOList.forEach(ruleDTO -> {
+                List<RuleLineDTO> ruleLineDTOList = ruleLineRepository.selectDTOByCondition(Condition.builder(RuleLine.class)
+                        .andWhere(Sqls.custom()
+                                .andEqualTo(RuleLine.FIELD_RULE_ID, ruleDTO.getRuleId()))
+                        .build());
+                ruleLineDTOList.forEach(ruleLineDTO -> BeanUtils.copyProperties(ruleLineDTO,ruleDTO));
+            });
+            ruleGroupDTO.setRuleDTOList(ruleDTOList);
+        });
+        return ruleGroupDTOList;
     }
 }

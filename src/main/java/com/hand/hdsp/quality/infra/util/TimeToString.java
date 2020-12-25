@@ -1,11 +1,11 @@
 package com.hand.hdsp.quality.infra.util;
 
+import java.text.SimpleDateFormat;
+
 import com.hand.hdsp.quality.api.dto.TimeRangeDTO;
 import com.hand.hdsp.quality.infra.vo.TimeRangeVO;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
-
-import java.text.SimpleDateFormat;
 
 /**
  * description
@@ -20,10 +20,11 @@ public class TimeToString {
     public static void timeToString(TimeRangeDTO timeRangeDTO) {
         String timeRange = timeRangeDTO.getTimeRange();
         TimeRangeVO range;
-        if (StringUtils.isNotBlank(timeRange)) {
-            range = TimeRange.getTimeRange(timeRange);
-        } else {
+        if (StringUtils.isNotBlank(timeRangeDTO.getStartDate())
+                ||StringUtils.isNotBlank(timeRangeDTO.getEndDate())) {
             range = TimeRangeVO.builder().startDate(timeRangeDTO.getStart()).endDate(timeRangeDTO.getEnd()).build();
+        } else {
+            range = TimeRange.getTimeRange(timeRange);
         }
         SimpleDateFormat sf = new SimpleDateFormat(BaseConstants.Pattern.DATETIME);
         if (range != null) {

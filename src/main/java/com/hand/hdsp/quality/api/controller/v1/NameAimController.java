@@ -83,7 +83,6 @@ public class NameAimController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<List<NameAimDTO>> create(@PathVariable("organizationId") Long tenantId, @RequestBody List<NameAimDTO> nameAimDTOList) {
-        nameAimDTOList.forEach(x->x.setTenantId(tenantId));
         this.validObject(nameAimDTOList);
         return Results.success(nameAimService.batchCreate(nameAimDTOList));
     }

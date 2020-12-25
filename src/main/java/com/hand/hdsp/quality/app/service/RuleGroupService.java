@@ -1,9 +1,11 @@
 package com.hand.hdsp.quality.app.service;
 
+import java.util.List;
+
+import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
 import com.hand.hdsp.quality.domain.entity.RuleGroup;
-
-import java.util.List;
+import org.hzero.export.vo.ExportParam;
 
 /**
  * 规则分组表应用服务
@@ -37,4 +39,6 @@ public interface RuleGroupService {
      * @return
      */
     List<RuleGroup> listNoPage(RuleGroup ruleGroup);
+
+    List<RuleGroupDTO> export(RuleDTO dto, ExportParam exportParam);
 }

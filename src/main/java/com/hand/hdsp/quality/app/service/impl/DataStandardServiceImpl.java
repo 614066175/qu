@@ -57,6 +57,8 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     public static final Long DEFAULT_VERSION = 1L;
 
+    private static final String DATA_STANDARD = "DATA_STANDARD";
+
     private final DataStandardRepository dataStandardRepository;
 
     private final DataStandardVersionRepository dataStandardVersionRepository;
@@ -90,8 +92,10 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     private final DriverSessionService driverSessionService;
 
+    private final StandardGroupRepository standardGroupRepository;
+
     @Resource
-    private  AssetFeign assetFeign;
+    private AssetFeign assetFeign;
 
     public DataStandardServiceImpl(DataStandardRepository dataStandardRepository,
                                    DataStandardVersionRepository dataStandardVersionRepository,
@@ -108,7 +112,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                                    DataPatternHandler dataPatternHandler,
                                    DataLengthHandler dataLengthHandler,
                                    ValueRangeHandler valueRangeHandler,
-                                   DriverSessionService driverSessionService) {
+                                   DriverSessionService driverSessionService, StandardGroupRepository standardGroupRepository) {
         this.dataStandardRepository = dataStandardRepository;
         this.dataStandardVersionRepository = dataStandardVersionRepository;
         this.standardExtraRepository = standardExtraRepository;
@@ -125,6 +129,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         this.dataLengthHandler = dataLengthHandler;
         this.valueRangeHandler = valueRangeHandler;
         this.driverSessionService = driverSessionService;
+        this.standardGroupRepository = standardGroupRepository;
     }
 
 
@@ -342,9 +347,9 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .collect(Collectors.toList());
                 publishRelatePlan(aimDTOS);
             }
-            assetFeign.saveStandardToEs(dataStandardDTO.getTenantId(),dataStandardDTO);
+            assetFeign.saveStandardToEs(dataStandardDTO.getTenantId(), dataStandardDTO);
         }
-        if(OFFLINE.equals(dataStandardDTO.getStandardStatus())){
+        if (OFFLINE.equals(dataStandardDTO.getStandardStatus())) {
             assetFeign.deleteStandardToEs(dataStandardDTO.getTenantId(), dataStandardDTO);
         }
     }
@@ -426,7 +431,7 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void aim(Long tenantId,List<StandardAimDTO> standardAimDTOList) {
+    public void aim(Long tenantId, List<StandardAimDTO> standardAimDTOList) {
         if (CollectionUtils.isNotEmpty(standardAimDTOList)) {
             standardAimDTOList.forEach(standardAimDTO -> {
                 standardAimDTO.setTenantId(tenantId);
@@ -513,7 +518,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         //根据字段删除落标
         List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
                 .andWhere(Sqls.custom()
-                        .andEqualTo(StandardAim.FIELD_STANDARD_TYPE,DATA)
+                        .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, DATA)
                         .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, assetFieldDTO.getDatasourceCode())
                         .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, assetFieldDTO.getDatasourceSchema())
                         .andEqualTo(StandardAim.FIELD_TABLE_NAME, assetFieldDTO.getTableName())
@@ -535,22 +540,61 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     @Override
     public List<DataStandardDTO> standardByField(AssetFieldDTO assetFieldDTO) {
-        List<DataStandardDTO> dataStandardDTOList=new ArrayList<>();
+        List<DataStandardDTO> dataStandardDTOList = new ArrayList<>();
         List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
                 .andWhere(Sqls.custom()
-                        .andEqualTo(StandardAim.FIELD_STANDARD_TYPE,DATA)
+                        .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, DATA)
                         .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, assetFieldDTO.getDatasourceCode())
                         .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, assetFieldDTO.getDatasourceSchema())
                         .andEqualTo(StandardAim.FIELD_TABLE_NAME, assetFieldDTO.getTableName())
                         .andEqualTo(StandardAim.FIELD_FIELD_NAME, assetFieldDTO.getFieldName()))
                 .build());
-        if(CollectionUtils.isNotEmpty(standardAimDTOS)){
+        if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
             standardAimDTOS.forEach(standardAimDTO -> {
                 DataStandardDTO dataStandardDTO = dataStandardRepository.selectDTOByPrimaryKey(standardAimDTO.getStandardId());
                 dataStandardDTOList.add(dataStandardDTO);
             });
         }
         return dataStandardDTOList;
+    }
+
+    @Override
+    public DataStandardDTO assetDetail(Long tenantId, Long standardId) {
+        List<DataStandardDTO> dataStandardDTOList = dataStandardMapper.list(DataStandardDTO
+                .builder()
+                .standardId(standardId)
+                .build());
+        if (CollectionUtils.isEmpty(dataStandardDTOList)) {
+            throw new CommonException(ErrorCode.DATA_STANDARD_NOT_EXIST);
+        }
+        DataStandardDTO dataStandardDTO = dataStandardDTOList.get(0);
+        convertToDataLengthList(dataStandardDTO);
+        List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardExtra.FIELD_STANDARD_ID, standardId)
+                        .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, DATA)
+                        .andEqualTo(StandardExtra.FIELD_TENANT_ID, tenantId))
+                .build());
+        dataStandardDTO.setStandardExtraDTOList(standardExtraDTOS);
+        dataStandardDTO.setMetadataName(dataStandardDTO.getStandardName());
+        dataStandardDTO.setMetadataType(DATA_STANDARD);
+        //查询资源路径
+        dataStandardDTO.setNameLevelPath(dataStandardDTO.getGroupName());
+        if (Objects.nonNull(dataStandardDTO.getParentGroupId())) {
+            while (Objects.nonNull(dataStandardDTO.getParentGroupId())) {
+                List<StandardGroup> standardGroups = standardGroupRepository
+                        .selectByCondition(Condition.builder(StandardGroup.class)
+                                .andWhere(Sqls.custom()
+                                        .andEqualTo(StandardGroup.FIELD_GROUP_ID, dataStandardDTO.getParentGroupId())
+                                        .andEqualTo(StandardGroup.FIELD_TENANT_ID, tenantId))
+                                .build());
+                dataStandardDTO.setParentGroupId(standardGroups.get(0).getParentGroupId());
+                dataStandardDTO.setNameLevelPath(String.format("%s/%s",
+                        standardGroups.get(0).getGroupName(),
+                        dataStandardDTO.getNameLevelPath()));
+            }
+        }
+        return dataStandardDTO;
     }
 
     private void doAim(AssetFieldDTO assetFieldDTO) {
@@ -809,5 +853,6 @@ public class DataStandardServiceImpl implements DataStandardService {
                 .build();
         standardAimRelationRepository.insertDTOSelective(standardAimRelationDTO);
     }
+
 
 }

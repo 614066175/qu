@@ -68,6 +68,8 @@ public class DataField extends AuditDomain {
 
     private String standardStatus;
 
+    private Integer fieldAccuracy;
+
     private Long tenantId;
 
 

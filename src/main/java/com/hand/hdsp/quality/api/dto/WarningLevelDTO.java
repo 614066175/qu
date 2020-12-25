@@ -42,7 +42,8 @@ public class WarningLevelDTO extends AuditDomain {
     private String expectedValue;
 
     @ApiModelProperty(value = "值集编码")
-    private String lovCode;
+    @Builder.Default
+    private String lovCode="HDSP.XQUA.WARNING_LEVEL";
 
     @ApiModelProperty(value = "枚举值")
     private String enumValue;

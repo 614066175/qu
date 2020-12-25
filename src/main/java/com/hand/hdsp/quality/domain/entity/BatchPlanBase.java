@@ -1,14 +1,14 @@
 package com.hand.hdsp.quality.domain.entity;
 
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 import lombok.*;
 import lombok.experimental.FieldNameConstants;
-
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
 
 /**
  * <p>批数据方案-基础配置表实体</p>
@@ -37,6 +37,8 @@ public class BatchPlanBase extends AuditDomain {
     @Id
     @GeneratedValue
     private Long planBaseId;
+
+    private String planBaseCode;
 
     private Long planId;
 

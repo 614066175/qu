@@ -36,6 +36,8 @@ public class NameExecHistoryDO extends AuditDomain {
 
     private String execStatus;
 
+    private String errorMessage;
+
     private Long tenantId;
 
 }
