@@ -235,4 +235,21 @@
             </if>
         </where>
     </select>
+    <select id="dataStandardWaringLevelVO" resultType="java.lang.String">
+        SELECT
+        xbri.warning_level
+        FROM
+        xqua_batch_result_rule xbrr
+        JOIN xsta_data_standard xds ON xbrr.rule_code=xds.standard_code
+        left JOIN xqua_batch_result_item xbri ON xbri.result_rule_id = xbrr.result_rule_id
+        <where>
+            xbrr.check_type="STANDARD"
+            <if test="tenantId != null ">
+                AND xbri.tenant_id = #{tenantId}
+            </if>
+            <if test="resultBaseId != null ">
+                AND xbrr.result_base_id = #{resultBaseId}
+            </if>
+        </where>
+    </select>
 </mapper>
