@@ -1,11 +1,11 @@
 package com.hand.hdsp.quality.domain.repository;
 
+import java.util.List;
+
 import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
 import com.hand.hdsp.quality.domain.entity.RuleGroup;
-
-import java.util.List;
 
 /**
  * 规则分组表资源库
@@ -23,4 +23,10 @@ public interface RuleGroupRepository extends BaseRepository<RuleGroup, RuleGroup
      * @return List<RuleGroup>
      */
     List<RuleGroup> list(RuleGroup ruleGroup);
+
+    /**
+     * 批量导入
+     * @param ruleGroupDTOList
+     */
+    void batchImport(List<RuleGroupDTO> ruleGroupDTOList);
 }

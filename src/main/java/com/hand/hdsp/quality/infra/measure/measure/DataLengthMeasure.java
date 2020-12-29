@@ -16,6 +16,7 @@ import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
+import com.hand.hdsp.quality.infra.util.PlanExceptionUtil;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
@@ -41,7 +42,6 @@ public class DataLengthMeasure implements Measure {
     public static final String COUNT = "COUNT";
     public static final String START_VALUE = " and length(${field}) > %s";
     public static final String END_VALUE = " and length(${field}) < %s";
-
 
     public DataLengthMeasure(ItemTemplateSqlRepository templateSqlRepository, DriverSessionService driverSessionService, LovAdapter lovAdapter) {
         this.templateSqlRepository = templateSqlRepository;
@@ -74,13 +74,15 @@ public class DataLengthMeasure implements Measure {
                 variables.put("table", batchResultBase.getPackageObjectName());
                 variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
                 variables.put("num",warningLevelDTO.getExpectedValue());
-                List<Map<String, Object>> maps = driverSession.executeOneQuery(param.getSchema(), MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
+                String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
+                List<Map<String, Object>> maps = driverSession.executeOneQuery(param.getSchema(),sql);
                 if (Integer.parseInt(String.valueOf(maps.get(0).get(COUNT))) != 0) {
                     warningLevelVOList.add(
                             WarningLevelVO.builder()
                                     .warningLevel(warningLevelDTO.getWarningLevel())
                                     .levelCount((Long) maps.get(0).get(COUNT))
                                     .build());
+                    PlanExceptionUtil.getPlanException(param,batchResultBase.getPackageObjectName(),sql,driverSession, warningLevelDTO);
                 }
             });
             AtomicLong count = new AtomicLong();
@@ -109,13 +111,16 @@ public class DataLengthMeasure implements Measure {
                 Map<String, String> variables = new HashMap<>(8);
                 variables.put("table", batchResultBase.getPackageObjectName());
                 variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
-                List<Map<String, Object>> maps = driverSession.executeOneQuery(param.getSchema(), MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
+                String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
+                List<Map<String, Object>> maps = driverSession.executeOneQuery(param.getSchema(),sql);
                 if (Integer.parseInt(String.valueOf(maps.get(0).get(COUNT))) != 0) {
                     warningLevelVOList.add(
                             WarningLevelVO.builder()
                                     .warningLevel(warningLevelDTO.getWarningLevel())
                                     .levelCount((Long) maps.get(0).get(COUNT))
                                     .build());
+                    //有异常，查询异常数据
+                    PlanExceptionUtil.getPlanException(param,batchResultBase.getPackageObjectName(),sql,driverSession, warningLevelDTO);
                 }
             });
             AtomicLong count = new AtomicLong();

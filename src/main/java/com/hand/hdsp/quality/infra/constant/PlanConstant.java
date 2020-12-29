@@ -8,6 +8,11 @@ package com.hand.hdsp.quality.infra.constant;
 public interface PlanConstant {
 
     /**
+     * redis key
+     */
+    String CACHE_BUCKET_EXCEPTION = "hdsp:quality:exception";
+
+    /**
      * 数据质量任务类型
      */
     String JOB_TYPE = "REST";

@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.infra.dataobject;
 
 
 import java.util.List;
+import java.util.Map;
 
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
@@ -72,5 +73,9 @@ public class MeasureParamDO {
     private BatchResultItem batchResultItem;
 
     private BatchPlanRelTable batchPlanRelTable;
+
+    private List<Map<String, Object>> exceptionMapList;
+
+    private String ruleName;
 
 }

@@ -76,6 +76,7 @@ public class RuleRepositoryImpl extends BaseRepositoryImpl<Rule, RuleDTO> implem
                             .groupCode(ruleDTO.getGroupCode())
                             .groupDesc(ruleDTO.getGroupDesc())
                             .groupName(ruleDTO.getGroupName())
+                            .parentGroupId(0L)
                             .tenantId(ruleDTO.getTenantId())
                             .build();
                     ruleGroupRepository.insertDTOSelective(ruleGroupDTO);

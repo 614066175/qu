@@ -20,6 +20,7 @@ import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
+import com.hand.hdsp.quality.infra.util.PlanExceptionUtil;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
@@ -89,12 +90,13 @@ public class FieldValueMeasure implements Measure {
                     .map(lovValueDTO -> "'" + lovValueDTO.getValue() + "'")
                     .collect(Collectors.joining(BaseConstants.Symbol.COMMA))
             );
-            List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(),
-                    MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
+            String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
+            List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(), sql);
             if (CollectionUtils.isNotEmpty(response)) {
                 batchResultItem.setWarningLevel(JsonUtils.object2Json(Collections.singletonList(WarningLevelVO.builder()
                         .warningLevel(warningLevelDTO.getWarningLevel())
                         .build())));
+                PlanExceptionUtil.getPlanException(param, batchResultBase.getPackageObjectName(), sql, driverSession, warningLevelDTO);
                 batchResultItem.setExceptionInfo("存在字段值满足值集校验配置");
             }
 
@@ -154,14 +156,15 @@ public class FieldValueMeasure implements Measure {
                         .map(e -> "'" + e + "'")
                         .collect(Collectors.joining(BaseConstants.Symbol.COMMA))
                 );
-                List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(),
-                        MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
+                String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
+                List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(), sql);
                 if (Integer.parseInt(String.valueOf(response.get(0).get(COUNT))) != 0) {
                     warningLevelVOList.add(
                             WarningLevelVO.builder()
                                     .warningLevel(warningLevelDTO.getWarningLevel())
                                     .levelCount((Long) response.get(0).get(COUNT))
                                     .build());
+                    PlanExceptionUtil.getPlanException(param, batchResultBase.getPackageObjectName(), sql, driverSession, warningLevelDTO);
                 }
             });
             if (CollectionUtils.isNotEmpty(warningLevelVOList)) {
@@ -198,14 +201,15 @@ public class FieldValueMeasure implements Measure {
                 Map<String, String> variables = new HashMap<>(8);
                 variables.put("table", batchResultBase.getPackageObjectName());
                 variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
-                List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(),
-                        MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
+                String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
+                List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(), sql);
                 if (Integer.parseInt(String.valueOf(response.get(0).get(COUNT))) != 0) {
                     warningLevelVOList.add(
                             WarningLevelVO.builder()
                                     .warningLevel(warningLevelDTO.getWarningLevel())
                                     .levelCount((Long) response.get(0).get(COUNT))
                                     .build());
+                    PlanExceptionUtil.getPlanException(param, batchResultBase.getPackageObjectName(), sql, driverSession, warningLevelDTO);
                 }
             });
             if (CollectionUtils.isNotEmpty(warningLevelVOList)) {

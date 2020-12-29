@@ -45,7 +45,6 @@ public class ValueRangeHandler implements StandardHandler {
                         && valueRangeList.size() == 2) {
                     WarningLevelDTO firstWarningLevelDTO = WarningLevelDTO.builder()
                             .warningLevel(WarningLevel.ORANGE)
-                            .startValue("0")
                             .endValue(valueRangeList.get(0))
                             .compareSymbol(PlanConstant.CompareSymbol.EQUAL)
                             .build();

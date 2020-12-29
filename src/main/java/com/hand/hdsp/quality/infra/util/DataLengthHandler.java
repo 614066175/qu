@@ -65,7 +65,6 @@ public class DataLengthHandler implements StandardHandler {
                     && dataLengthList.size() == 2) {
                 WarningLevelDTO firstWarningLevelDTO = WarningLevelDTO.builder()
                         .warningLevel(WarningLevel.ORANGE)
-                        .startValue("0")
                         .endValue(String.valueOf(dataLengthList.get(0) - 1))
                         .compareSymbol(PlanConstant.CompareSymbol.EQUAL)
                         .build();
