@@ -37,7 +37,7 @@ public class DataLengthHandler implements StandardHandler {
                 .checkItem(PlanConstant.CheckItem.DATA_LENGTH)
                 .build();
         BatchPlanFieldConDTO batchPlanFieldConDTO = null;
-        List<WarningLevelDTO> warningLevelDTOList=null;
+        List<WarningLevelDTO> warningLevelDTOList = null;
         if (FIXED.equals(dataStandardDTO.getLengthType())) {
             batchPlanFieldLineDTO.setCountType(PlanConstant.CountType.FIXED_VALUE);
             //生成每个校验项的配置项
@@ -63,18 +63,26 @@ public class DataLengthHandler implements StandardHandler {
             String warningLevel = "";
             if (CollectionUtils.isNotEmpty(dataLengthList)
                     && dataLengthList.size() == 2) {
-                WarningLevelDTO firstWarningLevelDTO = WarningLevelDTO.builder()
-                        .warningLevel(WarningLevel.ORANGE)
-                        .endValue(String.valueOf(dataLengthList.get(0) - 1))
-                        .compareSymbol(PlanConstant.CompareSymbol.EQUAL)
-                        .build();
+                WarningLevelDTO firstWarningLevelDTO = null;
+                if (dataLengthList.get(0) > 0) {
+                    firstWarningLevelDTO = WarningLevelDTO.builder()
+                            .warningLevel(WarningLevel.ORANGE)
+                            .startValue("0")
+                            .endValue(String.valueOf(dataLengthList.get(0)))
+                            .compareSymbol(PlanConstant.CompareSymbol.EQUAL)
+                            .build();
+                }
                 WarningLevelDTO secondWarningLevelDTO = WarningLevelDTO.builder()
                         .warningLevel(WarningLevel.ORANGE)
-                        .startValue(String.valueOf(dataLengthList.get(1) + 1))
+                        .startValue(String.valueOf(dataLengthList.get(1)))
                         .compareSymbol(PlanConstant.CompareSymbol.EQUAL)
                         .build();
-                warningLevelDTOList = Arrays.asList(firstWarningLevelDTO
-                        , secondWarningLevelDTO);
+                if(Objects.isNull(firstWarningLevelDTO)){
+                    warningLevelDTOList=Collections.singletonList(secondWarningLevelDTO);
+                }else{
+                    warningLevelDTOList = Arrays.asList(firstWarningLevelDTO
+                            , secondWarningLevelDTO);
+                }
                 warningLevel = JsonUtil.toJson(warningLevelDTOList);
             }
             batchPlanFieldConDTO = BatchPlanFieldConDTO.builder()
@@ -85,7 +93,7 @@ public class DataLengthHandler implements StandardHandler {
                     .build();
         }
         batchPlanFieldLineDTO.setBatchPlanFieldConDTOList(Collections.singletonList(batchPlanFieldConDTO));
-        return  batchPlanFieldLineDTO;
+        return batchPlanFieldLineDTO;
 
     }
 
