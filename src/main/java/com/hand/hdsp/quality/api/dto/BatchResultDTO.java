@@ -3,13 +3,12 @@ package com.hand.hdsp.quality.api.dto;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-
+import java.util.Map;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
-
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -108,5 +107,11 @@ public class BatchResultDTO extends AuditDomain {
     @ApiModelProperty(value = "异常数据标准数")
     @Builder.Default
     private Long exceptionDataStandardCount = 0L;
+
+    @Transient
+    private List<BatchResultBaseDTO> batchResultBaseDTOList;
+
+    @Transient
+    private List<Map<String,Object>> exceptionMapList;
 
 }

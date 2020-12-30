@@ -130,4 +130,6 @@ public interface ErrorCode {
     String LOV_CODE_NOT_EXIST="hdsp.xqua.err.lov_code_not_exist";
 
     String SQL_IS_EMPTY="hdsp.xqua.err.sql_is_empty";
+
+    String BATCH_RESULT_NOT_EXIST="hdsp.xqua.err.batch_result_not_exist";
 }

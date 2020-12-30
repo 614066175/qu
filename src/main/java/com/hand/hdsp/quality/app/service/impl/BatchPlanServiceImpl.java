@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.SqlType.TABLE;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -38,6 +40,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.alert.service.AlertMessageHandler;
 import org.hzero.boot.alert.vo.InboundMessage;
 import org.hzero.boot.driver.api.dto.PluginDatasourceDTO;
+import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.boot.platform.lov.dto.LovValueDTO;
 import org.hzero.core.base.BaseConstants;
@@ -45,6 +48,7 @@ import org.hzero.core.message.MessageAccessor;
 import org.hzero.core.util.ResponseUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -117,7 +121,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     private AlertMessageHandler alertMessageHandler;
     @Autowired
     private StringRedisTemplate redisTemplate;
-
+    @Resource
+    private DriverSessionService driverSessionService;
 
 
     @Override
@@ -341,7 +346,16 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                             .packageObjectName(packageObjectName).datasourceType(batchPlanBase.getDatasourceType())
                             .ruleCount(0L).exceptionRuleCount(0L).checkItemCount(0L).exceptionCheckItemCount(0L)
                             .tenantId(tenantId).build();
-
+           if(TABLE.equals(batchPlanBase.getSqlType())){
+               //保存表的数据量
+               DriverSession driverSession = driverSessionService.getDriverSession(tenantId, batchPlanBase.getDatasourceCode());
+               List<Map<String, Object>> maps = driverSession.executeOneQuery(batchPlanBase.getDatasourceSchema(),
+                       String.format("select count(*) as COUNT from %s", batchPlanBase.getObjectName()));
+               if(CollectionUtils.isNotEmpty(maps)){
+                   Long count = Long.parseLong(String.valueOf(maps.get(0).get("COUNT")));
+                   batchResultBase.setDataCount(count);
+               }
+           }
             // 获取增量参数，并更新 where 条件
             updateWhereCondition(tenantId, planId, batchPlanBase, batchResultBase, timestampList);
 
@@ -486,7 +500,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             batchResultRuleRepository.updateByDTOPrimaryKeySelective(batchResultRuleDTO);
         }
 
-//        //将所有字段级检验项异常数据存入es
+//        //将所有表段级检验项异常数据存入es
 //        String key=String.format("%s:%d",PlanConstant.CACHE_BUCKET_EXCEPTION,batchResultBase.getPlanBaseId());
 //        redisTemplate.opsForHash().put(key, PlanConstant.ResultRuleType.TABLE,JsonUtils.object2Json(tableExceptionList));
     }
@@ -688,7 +702,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             }
         }
 
-        //将所有字段级检验项异常数据存入es
+        //将所有表间段级检验项异常数据存入es
 //        String key=String.format("%s:%d",PlanConstant.CACHE_BUCKET_EXCEPTION,batchResultBase.getPlanBaseId());
 //        redisTemplate.opsForHash().put(key, PlanConstant.ResultRuleType.REL_TABLE,JsonUtils.object2Json(relExceptionList));
     }

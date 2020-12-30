@@ -384,9 +384,26 @@ public class BatchResultController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/result-detail")
-    public ResponseEntity<?> resultDetail(@PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<BatchResultDTO> resultDetail(@PathVariable(name = "organizationId") Long tenantId,
                                         BatchResultDTO batchResultDTO) {
         batchResultDTO.setTenantId(tenantId);
         return Results.success(batchResultService.listResultDetail(batchResultDTO));
+    }
+
+
+
+    @ApiOperation(value = "评估详情-异常数据")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/exception-detail")
+    public ResponseEntity<BatchResultDTO> exceptionDetail(@PathVariable(name = "organizationId") Long tenantId,
+                                             BatchResultDTO batchResultDTO) {
+        batchResultDTO.setTenantId(tenantId);
+        return Results.success(batchResultService.listExceptionDetail(batchResultDTO));
     }
 }

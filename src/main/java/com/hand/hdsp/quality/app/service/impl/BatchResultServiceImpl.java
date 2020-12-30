@@ -3,13 +3,7 @@ package com.hand.hdsp.quality.app.service.impl;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.hzero.core.util.ResponseUtils;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
+import com.alibaba.fastjson.JSONArray;
 import com.hand.hdsp.quality.api.dto.BatchResultBaseDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultMarkDTO;
@@ -17,15 +11,25 @@ import com.hand.hdsp.quality.api.dto.ResultObjDTO;
 import com.hand.hdsp.quality.app.service.BatchResultService;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.repository.BatchResultBaseRepository;
+import com.hand.hdsp.quality.domain.repository.BatchResultRepository;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.feign.ExecutionFlowFeign;
 import com.hand.hdsp.quality.infra.mapper.BatchResultItemMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
-
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.exception.ExceptionResponse;
+import org.apache.commons.collections4.CollectionUtils;
+import org.hzero.core.util.ResponseUtils;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
 /**
  * <p>批数据方案结果表应用服务默认实现</p>
@@ -39,15 +43,20 @@ public class BatchResultServiceImpl implements BatchResultService {
     private final BatchResultMapper batchResultMapper;
     private final BatchResultItemMapper batchResultItemMapper;
     private final BatchResultBaseRepository batchResultBaseRepository;
+    private final BatchResultRepository batchResultRepository;
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     public BatchResultServiceImpl(ExecutionFlowFeign executionFlowFeign,
                                   BatchResultMapper batchResultMapper,
                                   BatchResultItemMapper batchResultItemMapper,
-                                  BatchResultBaseRepository batchResultBaseRepository) {
+                                  BatchResultBaseRepository batchResultBaseRepository, BatchResultRepository batchResultRepository) {
         this.executionFlowFeign = executionFlowFeign;
         this.batchResultMapper = batchResultMapper;
         this.batchResultItemMapper = batchResultItemMapper;
         this.batchResultBaseRepository = batchResultBaseRepository;
+        this.batchResultRepository = batchResultRepository;
     }
 
 
@@ -84,13 +93,13 @@ public class BatchResultServiceImpl implements BatchResultService {
             warningLevelJsonList.forEach(warningLevelJson -> warningLevelVOList.addAll(JsonUtils.json2WarningLevelVO(warningLevelJson)));
 
             //数据标准告警JSON集合
-            List<String> standardJsonList= batchResultItemMapper.dataStandardWaringLevelVO(dto);
-            if(CollectionUtils.isNotEmpty(standardJsonList)){
+            List<String> standardJsonList = batchResultItemMapper.dataStandardWaringLevelVO(dto);
+            if (CollectionUtils.isNotEmpty(standardJsonList)) {
                 batchResultDTO.setDataStandardCount(standardJsonList.size() + Optional.ofNullable(batchResultDTO.getDataStandardCount()).orElse(0L));
-                standardJsonList.forEach(standardWarningLevel->{
+                standardJsonList.forEach(standardWarningLevel -> {
                     List<WarningLevelVO> warningLevelVOS = JsonUtils.json2WarningLevelVO(standardWarningLevel);
-                    if(CollectionUtils.isNotEmpty(warningLevelVOS)){
-                        batchResultDTO.setExceptionDataStandardCount(Optional.ofNullable(batchResultDTO.getExceptionDataStandardCount()).orElse(0L)+1L);
+                    if (CollectionUtils.isNotEmpty(warningLevelVOS)) {
+                        batchResultDTO.setExceptionDataStandardCount(Optional.ofNullable(batchResultDTO.getExceptionDataStandardCount()).orElse(0L) + 1L);
                     }
                 });
             }
@@ -109,7 +118,7 @@ public class BatchResultServiceImpl implements BatchResultService {
                         Collectors.toMap(WarningLevelVO::getWarningLevel,
                                 WarningLevelVO::getLevelCount,
                                 Long::sum));
-        //返回base下的所有告警等级以及对应的数量
+        //返回方案下的所有告警等级以及对应的数量
         collect.forEach((k, v) -> {
             ResultWaringVO resultWaringVO = ResultWaringVO.builder()
                     .warningLevel(k)
@@ -118,6 +127,59 @@ public class BatchResultServiceImpl implements BatchResultService {
             resultWaringVOList.add(resultWaringVO);
         });
         batchResultDTO.setResultWaringVOList(resultWaringVOList);
+        return batchResultDTO;
+    }
+
+    @Override
+    public BatchResultDTO listExceptionDetail(BatchResultDTO batchResultDTO) {
+        //根据resultId查询方案Id
+        BatchResultDTO dto = batchResultRepository.selectDTOByPrimaryKey(batchResultDTO.getResultId());
+        //查询方案下所有resultBase
+        if (Objects.isNull(dto)) {
+            throw new CommonException(ErrorCode.BATCH_RESULT_NOT_EXIST);
+        }
+        List<BatchResultBaseDTO> batchResultBaseDTOList = batchResultBaseRepository.selectDTOByCondition(Condition.builder(BatchResultBase.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(BatchResultBase.FIELD_RESULT_ID, batchResultDTO.getResultId())
+                        .andEqualTo(BatchResultBase.FIELD_TENANT_ID, batchResultDTO.getTenantId()))
+                .build());
+        if (CollectionUtils.isNotEmpty(batchResultBaseDTOList)) {
+            List<Map<String,Object>> exceptionMapList=new ArrayList<>();
+            for (BatchResultBaseDTO batchResultBaseDTO : batchResultBaseDTOList) {
+                //获取base下所有校验项的告警等级Json
+                List<String> warningLevelJsonList = batchResultItemMapper.selectWaringLevelJson(batchResultBaseDTO);
+                //将所有告警等级Json转换合并成集合
+                List<WarningLevelVO> warningLevelVOList = new ArrayList<>();
+                warningLevelJsonList.forEach(warningLevelJson -> warningLevelVOList.addAll(JsonUtils.json2WarningLevelVO(warningLevelJson)));
+                //合并处理每个检验项的告警等级
+                Map<String, Long> collect = warningLevelVOList.stream()
+                        .collect(
+                                Collectors.toMap(WarningLevelVO::getWarningLevel,
+                                        WarningLevelVO::getLevelCount,
+                                        Long::sum));
+                //定义告警结果对象集合
+                List<ResultWaringVO> resultWaringVOList = new ArrayList<>();
+                collect.forEach((k, v) -> {
+                    ResultWaringVO resultWaringVO = ResultWaringVO.builder()
+                            .warningLevel(k)
+                            .countSum(v)
+                            .build();
+                    resultWaringVOList.add(resultWaringVO);
+                });
+                //设置到每个base中
+                batchResultBaseDTO.setResultWaringVOList(resultWaringVOList);
+
+                //查看每个base的异常数据 目前只有字段级有异常数据
+                Object json = redisTemplate.opsForHash().get(String.format("%s:%d",
+                        PlanConstant.CACHE_BUCKET_EXCEPTION,
+                        batchResultBaseDTO.getPlanBaseId()
+                ), PlanConstant.ResultRuleType.FIELD);
+                List<Map<String, Object>> baseExceptionMapList = (List<Map<String, Object>>)JSONArray.parse(String.valueOf(json));
+                CollectionUtils.addAll(exceptionMapList, baseExceptionMapList);
+            }
+            batchResultDTO.setExceptionMapList(exceptionMapList);
+            batchResultDTO.setBatchResultBaseDTOList(batchResultBaseDTOList);
+        }
         return batchResultDTO;
     }
 }

@@ -26,4 +26,11 @@ public interface BatchResultService {
      * @return
      */
     BatchResultDTO listResultDetail(BatchResultDTO batchResultDTO);
+
+    /**
+     * 评估方案评估详情-异常数据
+     * @param batchResultDTO
+     * @return
+     */
+    BatchResultDTO listExceptionDetail(BatchResultDTO batchResultDTO);
 }
