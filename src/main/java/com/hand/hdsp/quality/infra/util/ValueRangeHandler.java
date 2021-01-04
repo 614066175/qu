@@ -43,11 +43,15 @@ public class ValueRangeHandler implements StandardHandler {
                 List<String> valueRangeList = Arrays.asList(dataStandardDTO.getValueRange().split(","));
                 if (CollectionUtils.isNotEmpty(valueRangeList)
                         && valueRangeList.size() == 2) {
-                    WarningLevelDTO firstWarningLevelDTO = WarningLevelDTO.builder()
-                            .warningLevel(WarningLevel.ORANGE)
-                            .endValue(valueRangeList.get(0))
-                            .compareSymbol(PlanConstant.CompareSymbol.EQUAL)
-                            .build();
+                    WarningLevelDTO firstWarningLevelDTO = null;
+                    if (Integer.parseInt(valueRangeList.get(0)) > 0) {
+                        firstWarningLevelDTO = WarningLevelDTO.builder()
+                                .warningLevel(WarningLevel.ORANGE)
+                                .startValue("0")
+                                .endValue(valueRangeList.get(0))
+                                .compareSymbol(PlanConstant.CompareSymbol.EQUAL)
+                                .build();
+                    }
                     WarningLevelDTO secondWarningLevelDTO = WarningLevelDTO.builder()
                             .warningLevel(WarningLevel.ORANGE)
                             .startValue(valueRangeList.get(1))
