@@ -5,6 +5,7 @@ import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.RANGE
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldConDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
@@ -57,8 +58,12 @@ public class ValueRangeHandler implements StandardHandler {
                             .startValue(valueRangeList.get(1))
                             .compareSymbol(PlanConstant.CompareSymbol.EQUAL)
                             .build();
-                    warningLevelDTOList = Arrays.
-                            asList(firstWarningLevelDTO, secondWarningLevelDTO);
+                    if(Objects.isNull(firstWarningLevelDTO)){
+                        warningLevelDTOList=Collections.singletonList(secondWarningLevelDTO);
+                    }else{
+                        warningLevelDTOList = Arrays.asList(firstWarningLevelDTO
+                                , secondWarningLevelDTO);
+                    }
                     warningLevel = JsonUtil.toJson(warningLevelDTOList);
                 }
                 break;
