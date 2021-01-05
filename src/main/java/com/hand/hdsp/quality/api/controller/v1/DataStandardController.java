@@ -279,4 +279,21 @@ public class DataStandardController {
         return Results.success(dataStandardService.assetDetail(tenantId, standardId));
     }
 
+    @ApiOperation(value = "修改数据标准属性")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/update-standard-property")
+    public ResponseEntity<DataStandardDTO> updateStandardProperty(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
+        dataStandardDTO.setTenantId(tenantId);
+        DataStandardDTO dto = dataStandardRepository.selectDTOByPrimaryKey(dataStandardDTO.getStandardId());
+        dataStandardDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
+        dataStandardRepository.updateByDTOPrimaryKeySelective(dataStandardDTO);
+        return Results.success(dataStandardDTO);
+    }
+
 }
