@@ -1,7 +1,11 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 
+import java.util.List;
+import java.util.Map;
+
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
+import com.hand.hdsp.quality.api.dto.ExceptionDataDTO;
 import com.hand.hdsp.quality.api.dto.TimeRangeDTO;
 import com.hand.hdsp.quality.app.service.BatchResultService;
 import com.hand.hdsp.quality.config.SwaggerTags;
@@ -392,6 +396,22 @@ public class BatchResultController extends BaseController {
 
 
 
+    @ApiOperation(value = "评估详情-异常数据头查询")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/exception-detail-head/{resultId}")
+    public ResponseEntity<?> exceptionDetailHead(@PathVariable(name = "organizationId") Long tenantId,
+                                                 @PathVariable Long resultId,
+                                                 PageRequest pageRequest) {
+        return Results.success(batchResultService.listExceptionDetailHead(resultId,tenantId,pageRequest));
+    }
+
+
     @ApiOperation(value = "评估详情-异常数据")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
@@ -401,9 +421,9 @@ public class BatchResultController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/exception-detail")
-    public ResponseEntity<BatchResultDTO> exceptionDetail(@PathVariable(name = "organizationId") Long tenantId,
-                                             BatchResultDTO batchResultDTO) {
-        batchResultDTO.setTenantId(tenantId);
-        return Results.success(batchResultService.listExceptionDetail(batchResultDTO));
+    public ResponseEntity<List<Map<String, Object>>> exceptionDetail(@PathVariable(name = "organizationId") Long tenantId,
+                                                                     ExceptionDataDTO exceptionDataDTO) {
+        exceptionDataDTO.setTenantId(tenantId);
+        return Results.success(batchResultService.listExceptionDetail(exceptionDataDTO));
     }
 }

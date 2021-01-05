@@ -129,11 +129,12 @@ public class RegularMeasure implements Measure {
                     List<Map<String, Object>> exceptionMapList = driverSession.executeOneQuery(param.getSchema(), newSql);
                     if(CollectionUtils.isNotEmpty(exceptionMapList)){
                         exceptionMapList.forEach(map -> {
-                            map.put("ruleName",param.getBatchResultRuleDTO().getRuleName());
+                            map.put("$ruleName",param.getBatchResultRuleDTO().getRuleName());
+                            map.put("$warningLevel",param.getWarningLevelList().get(0).getWarningLevel());
                             map.put("checkItem",param.getCheckItem());
                             map.put("countType",param.getCountType());
                             map.put("compareWay",param.getCompareWay());
-                            map.put("exceptionInfo",String.format("【%s】 不满足正则表达式【%s】",
+                            map.put("$exceptionInfo",String.format("【%s】 不满足正则表达式【%s】",
                                     param.getFieldName(),
                                     param.getRegularExpression()));
                         });

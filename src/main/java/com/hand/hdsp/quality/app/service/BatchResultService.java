@@ -1,7 +1,14 @@
 package com.hand.hdsp.quality.app.service;
 
+import java.util.List;
+import java.util.Map;
+
+import com.hand.hdsp.quality.api.dto.BatchResultBaseDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
+import com.hand.hdsp.quality.api.dto.ExceptionDataDTO;
 import com.hand.hdsp.quality.api.dto.ResultObjDTO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * <p>批数据方案结果表应用服务</p>
@@ -22,6 +29,7 @@ public interface BatchResultService {
 
     /**
      * 评估方案的评估信息
+     *
      * @param batchResultDTO
      * @return
      */
@@ -29,8 +37,18 @@ public interface BatchResultService {
 
     /**
      * 评估方案评估详情-异常数据
-     * @param batchResultDTO
+     *
+     * @param resultId Long
+     * @param tenantId Long
+     * @param pageRequest PageRequest
      * @return
      */
-    BatchResultDTO listExceptionDetail(BatchResultDTO batchResultDTO);
+    Page<BatchResultBaseDTO> listExceptionDetailHead(Long resultId, Long tenantId, PageRequest pageRequest);
+
+    /**
+     *
+     * @param exceptionDataDTO
+     * @return List<Map<String, Object>>
+     */
+    List<Map<String, Object>> listExceptionDetail(ExceptionDataDTO exceptionDataDTO);
 }

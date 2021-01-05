@@ -38,16 +38,17 @@ public class PlanExceptionUtil {
         if(CollectionUtils.isNotEmpty(exceptionMapList)){
             //每一条异常数据存上规则名和异常信息
             exceptionMapList.forEach(map -> {
-                map.put("ruleName",param.getBatchResultRuleDTO().getRuleName());
+                map.put("$ruleName",param.getBatchResultRuleDTO().getRuleName());
+                map.put("$warningLevel",warningLevelDTO.getWarningLevel());
                 map.put("checkItem",param.getCheckItem());
                 map.put("countType",param.getCountType());
                 map.put("compareWay",param.getCompareWay());
                 //异常信息 name 数据长度 满足告警等级【大于5小于10】
-//                map.put("exceptionInfo",String.format("【%s】 %s 满足告警条件【%s】",
-//                        param.getFieldName(),
-//                        String.format("%s %s",param.getCheckItem(),param.getCountType()),
-//                        warningLevelDTO.getExpectedValue()
-//                ));
+                map.put("$exceptionInfo",String.format("【%s】 %s 满足告警条件【%s】",
+                        param.getFieldName(),
+                        String.format("%s %s",param.getCheckItem(),param.getCountType()),
+                        warningLevelDTO.getExpectedValue()
+                ));
             });
         }
         param.setExceptionMapList(exceptionMapList);

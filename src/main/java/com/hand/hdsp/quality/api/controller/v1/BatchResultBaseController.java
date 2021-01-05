@@ -50,7 +50,7 @@ public class BatchResultBaseController extends BaseController {
         return Results.success(list);
     }
 
-    @ApiOperation(value = "查看评估报告各级规则错误信息")
+    @ApiOperation(value = "分页查看评估报告各级规则错误信息")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -64,6 +64,21 @@ public class BatchResultBaseController extends BaseController {
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchResultBaseDTO.setTenantId(tenantId);
         return Results.success(batchResultBaseRepository.listResultBase(pageRequest, batchResultBaseDTO));
+    }
+
+    @ApiOperation(value = "查看所有评估报告各级规则错误信息")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/result-base-list")
+    public ResponseEntity<?> resultBaseAll(@PathVariable(name = "organizationId") Long tenantId,
+                                        BatchResultBaseDTO batchResultBaseDTO) {
+        batchResultBaseDTO.setTenantId(tenantId);
+        return Results.success(batchResultBaseRepository.listResultBaseAll(batchResultBaseDTO));
     }
 
     @ApiOperation(value = "批数据方案结果表-表信息明细")

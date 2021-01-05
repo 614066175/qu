@@ -4,10 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSONArray;
-import com.hand.hdsp.quality.api.dto.BatchResultBaseDTO;
-import com.hand.hdsp.quality.api.dto.BatchResultDTO;
-import com.hand.hdsp.quality.api.dto.BatchResultMarkDTO;
-import com.hand.hdsp.quality.api.dto.ResultObjDTO;
+import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchResultService;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.repository.BatchResultBaseRepository;
@@ -20,8 +17,10 @@ import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.exception.ExceptionResponse;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.core.util.ResponseUtils;
 import org.hzero.mybatis.domian.Condition;
@@ -131,20 +130,16 @@ public class BatchResultServiceImpl implements BatchResultService {
     }
 
     @Override
-    public BatchResultDTO listExceptionDetail(BatchResultDTO batchResultDTO) {
+    public Page<BatchResultBaseDTO> listExceptionDetailHead(Long resultId, Long tenantId, PageRequest pageRequest) {
         //根据resultId查询方案Id
-        BatchResultDTO dto = batchResultRepository.selectDTOByPrimaryKey(batchResultDTO.getResultId());
+        BatchResultDTO dto = batchResultRepository.selectDTOByPrimaryKey(resultId);
         //查询方案下所有resultBase
         if (Objects.isNull(dto)) {
             throw new CommonException(ErrorCode.BATCH_RESULT_NOT_EXIST);
         }
-        List<BatchResultBaseDTO> batchResultBaseDTOList = batchResultBaseRepository.selectDTOByCondition(Condition.builder(BatchResultBase.class)
-                .andWhere(Sqls.custom()
-                        .andEqualTo(BatchResultBase.FIELD_RESULT_ID, batchResultDTO.getResultId())
-                        .andEqualTo(BatchResultBase.FIELD_TENANT_ID, batchResultDTO.getTenantId()))
-                .build());
+        Page<BatchResultBaseDTO> page = batchResultBaseRepository.pageAndSortDTO(pageRequest, BatchResultBaseDTO.builder().resultId(resultId).tenantId(tenantId).build());
+        List<BatchResultBaseDTO> batchResultBaseDTOList = page.getContent();
         if (CollectionUtils.isNotEmpty(batchResultBaseDTOList)) {
-            List<Map<String,Object>> exceptionMapList=new ArrayList<>();
             for (BatchResultBaseDTO batchResultBaseDTO : batchResultBaseDTOList) {
                 //获取base下所有校验项的告警等级Json
                 List<String> warningLevelJsonList = batchResultItemMapper.selectWaringLevelJson(batchResultBaseDTO);
@@ -168,18 +163,21 @@ public class BatchResultServiceImpl implements BatchResultService {
                 });
                 //设置到每个base中
                 batchResultBaseDTO.setResultWaringVOList(resultWaringVOList);
-
-                //查看每个base的异常数据 目前只有字段级有异常数据
-                Object json = redisTemplate.opsForHash().get(String.format("%s:%d",
-                        PlanConstant.CACHE_BUCKET_EXCEPTION,
-                        batchResultBaseDTO.getPlanBaseId()
-                ), PlanConstant.ResultRuleType.FIELD);
-                List<Map<String, Object>> baseExceptionMapList = (List<Map<String, Object>>)JSONArray.parse(String.valueOf(json));
-                CollectionUtils.addAll(exceptionMapList, baseExceptionMapList);
+                page.setContent(batchResultBaseDTOList);
             }
-            batchResultDTO.setExceptionMapList(exceptionMapList);
-            batchResultDTO.setBatchResultBaseDTOList(batchResultBaseDTOList);
         }
-        return batchResultDTO;
+        return page;
     }
+
+    @Override
+    public List<Map<String, Object>> listExceptionDetail(ExceptionDataDTO exceptionDataDTO) {
+        if (Objects.isNull(exceptionDataDTO.getPlanBaseId())) {
+            throw new CommonException(ErrorCode.PLAN_BASE_ID_IS_EMPTY);
+        }
+        //查看base的异常数据 目前只有字段级有异常数据
+        Object json = redisTemplate.opsForHash().get(String.format("%s:%d", PlanConstant.CACHE_BUCKET_EXCEPTION,
+                exceptionDataDTO.getPlanBaseId()), PlanConstant.ResultRuleType.FIELD);
+        return (List<Map<String, Object>>) JSONArray.parse(String.valueOf(json));
+    }
+
 }

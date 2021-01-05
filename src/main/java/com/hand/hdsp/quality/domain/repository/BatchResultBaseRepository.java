@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.domain.repository;
 
+import java.util.List;
+
 import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.BatchResultBaseDTO;
@@ -15,10 +17,17 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 public interface BatchResultBaseRepository extends BaseRepository<BatchResultBase, BatchResultBaseDTO>, ProxySelf<BatchResultBaseRepository> {
 
     /**
-     * 查看评估报告结果base表信息
+     * 分页查看评估报告结果base表信息
      *
      * @param batchResultBaseDTO
      * @return
      */
     Page<BatchResultBaseDTO> listResultBase(PageRequest pageRequest, BatchResultBaseDTO batchResultBaseDTO);
+
+    /**
+     * 查看所有
+     * @param batchResultBaseDTO
+     * @return
+     */
+    List<BatchResultBaseDTO> listResultBaseAll(BatchResultBaseDTO batchResultBaseDTO);
 }
