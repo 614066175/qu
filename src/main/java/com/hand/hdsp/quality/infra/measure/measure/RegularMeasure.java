@@ -131,9 +131,6 @@ public class RegularMeasure implements Measure {
                         exceptionMapList.forEach(map -> {
                             map.put("$ruleName",param.getBatchResultRuleDTO().getRuleName());
                             map.put("$warningLevel",param.getWarningLevelList().get(0).getWarningLevel());
-                            map.put("checkItem",param.getCheckItem());
-                            map.put("countType",param.getCountType());
-                            map.put("compareWay",param.getCompareWay());
                             map.put("$exceptionInfo",String.format("【%s】 不满足正则表达式【%s】",
                                     param.getFieldName(),
                                     param.getRegularExpression()));

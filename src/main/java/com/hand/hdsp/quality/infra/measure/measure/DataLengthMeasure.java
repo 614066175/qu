@@ -52,8 +52,6 @@ public class DataLengthMeasure implements Measure {
 
     @Override
     public BatchResultItem check(MeasureParamDO param) {
-        //是否需要按告警等级排序
-//        List<LovValueDTO> lovList = lovAdapter.queryLovValue(PlanConstant.LOV_WARNING_LEVEL, param.getTenantId());
         Long tenantId = param.getTenantId();
         BatchResultBase batchResultBase = param.getBatchResultBase();
         BatchResultItem batchResultItem = param.getBatchResultItem();

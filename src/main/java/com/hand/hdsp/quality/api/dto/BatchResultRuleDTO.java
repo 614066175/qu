@@ -1,5 +1,9 @@
 package com.hand.hdsp.quality.api.dto;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
@@ -7,10 +11,6 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 /**
  * <p>批数据方案结果表-规则信息 数据传输对象</p>
@@ -65,5 +65,6 @@ public class BatchResultRuleDTO extends AuditDomain {
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;
+
 
 }

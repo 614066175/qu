@@ -40,14 +40,21 @@ public class PlanExceptionUtil {
             exceptionMapList.forEach(map -> {
                 map.put("$ruleName",param.getBatchResultRuleDTO().getRuleName());
                 map.put("$warningLevel",warningLevelDTO.getWarningLevel());
-                map.put("checkItem",param.getCheckItem());
-                map.put("countType",param.getCountType());
-                map.put("compareWay",param.getCompareWay());
                 //异常信息 name 数据长度 满足告警等级【大于5小于10】
+                StringBuilder warningCondition=new StringBuilder();
+                if(Strings.isNotEmpty(warningLevelDTO.getStartValue())){
+                    warningCondition.append(String.format("大于%s",warningLevelDTO.getStartValue()));
+                }
+                if(Strings.isNotEmpty(warningLevelDTO.getEndValue())){
+                    warningCondition.append(String.format("小于%s",warningLevelDTO.getEndValue()));
+                }
+                if(Strings.isNotEmpty(warningLevelDTO.getExpectedValue())){
+                    warningCondition.append(String.format("等于%s",warningLevelDTO.getExpectedValue()));
+                }
                 map.put("$exceptionInfo",String.format("【%s】 %s 满足告警条件【%s】",
                         param.getFieldName(),
                         String.format("%s %s",param.getCheckItem(),param.getCountType()),
-                        warningLevelDTO.getExpectedValue()
+                        warningCondition
                 ));
             });
         }

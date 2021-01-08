@@ -290,9 +290,7 @@ public class DataStandardController {
     @PutMapping("/update-standard-property")
     public ResponseEntity<DataStandardDTO> updateStandardProperty(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
-        DataStandardDTO dto = dataStandardRepository.selectDTOByPrimaryKey(dataStandardDTO.getStandardId());
-        dataStandardDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
-        dataStandardRepository.updateByDTOPrimaryKeySelective(dataStandardDTO);
+        dataStandardRepository.updateDTOAllColumnWhereTenant(dataStandardDTO,tenantId);
         return Results.success(dataStandardDTO);
     }
 

@@ -1,8 +1,6 @@
 package com.hand.hdsp.quality.api.dto;
 
 import java.util.List;
-
-
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -89,11 +87,9 @@ public class DataStandardDTO extends AuditDomain{
     private String accordContent;
 
     @ApiModelProperty(value = "责任部门ID")
-    @NotNull
     private Long chargeDeptId;
 
     @ApiModelProperty(value = "责任人ID")
-    @NotNull
     private Long chargeId;
 
     @ApiModelProperty(value = "责任人电话")
