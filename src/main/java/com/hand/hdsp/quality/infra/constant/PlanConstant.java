@@ -64,6 +64,16 @@ public interface PlanConstant {
     String LOV_COUNT_TYPE = "HDSP.XQUA.COUNT_TYPE";
 
     /**
+     *比较方式 LOV
+     */
+    String LOV_COMPARE_WAY="HDSP.XQUA.COMPARE_WAY";
+
+    /**
+     * 比较符
+     */
+    String LOV_COMPARE_SYMBOL="HDSP.XQUA.COMPARE_SYMBOL";
+
+    /**
      * 告警等级-正常
      */
     String WARNING_LEVEL_NORMAL = "NORMAL";

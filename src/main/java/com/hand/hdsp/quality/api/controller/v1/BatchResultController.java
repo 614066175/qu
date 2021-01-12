@@ -389,11 +389,10 @@ public class BatchResultController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/result-detail")
     public ResponseEntity<BatchResultDTO> resultDetail(@PathVariable(name = "organizationId") Long tenantId,
-                                        BatchResultDTO batchResultDTO) {
+                                                       BatchResultDTO batchResultDTO) {
         batchResultDTO.setTenantId(tenantId);
         return Results.success(batchResultService.listResultDetail(batchResultDTO));
     }
-
 
 
     @ApiOperation(value = "评估详情-异常数据头查询")
@@ -408,7 +407,7 @@ public class BatchResultController extends BaseController {
     public ResponseEntity<?> exceptionDetailHead(@PathVariable(name = "organizationId") Long tenantId,
                                                  @PathVariable Long resultId,
                                                  PageRequest pageRequest) {
-        return Results.success(batchResultService.listExceptionDetailHead(resultId,tenantId,pageRequest));
+        return Results.success(batchResultService.listExceptionDetailHead(resultId, tenantId, pageRequest));
     }
 
 

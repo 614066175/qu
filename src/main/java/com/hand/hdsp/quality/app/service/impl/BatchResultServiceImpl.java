@@ -164,7 +164,7 @@ public class BatchResultServiceImpl implements BatchResultService {
                 });
                 //设置到每个base中
                 batchResultBaseDTO.setResultWaringVOList(resultWaringVOList);
-                if(Objects.isNull(batchResultBaseDTO.getDataCount())){
+                if (Objects.isNull(batchResultBaseDTO.getDataCount())) {
                     batchResultBaseDTO.setDataCount(0L);
                 }
                 page.setContent(batchResultBaseDTOList);
@@ -182,13 +182,13 @@ public class BatchResultServiceImpl implements BatchResultService {
         Object json = redisTemplate.opsForHash().get(String.format("%s:%d", PlanConstant.CACHE_BUCKET_EXCEPTION,
                 exceptionDataDTO.getPlanBaseId()), PlanConstant.ResultRuleType.FIELD);
         List<Map<String, Object>> result = (List<Map<String, Object>>) JSONArray.parse(String.valueOf(json));
-        if(Strings.isNotEmpty(exceptionDataDTO.getRuleName())){
+        if (Strings.isNotEmpty(exceptionDataDTO.getRuleName())) {
             result = result.stream().filter(map -> {
                 String ruleName = String.valueOf(map.get("$ruleName"));
                 return ruleName.contains(exceptionDataDTO.getRuleName());
             }).collect(Collectors.toList());
         }
-        if(Strings.isNotEmpty(exceptionDataDTO.getWarningLevel())){
+        if (Strings.isNotEmpty(exceptionDataDTO.getWarningLevel())) {
             result = result.stream().filter(map -> {
                 String warningLevel = String.valueOf(map.get("$warningLevel"));
                 return exceptionDataDTO.getWarningLevel().equals(warningLevel);

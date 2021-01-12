@@ -15,6 +15,7 @@ import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.AlertTemplate;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
+import com.hand.hdsp.quality.infra.constant.PlanConstant.CompareSymbol;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanFieldConDO;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanTableConDO;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
@@ -275,9 +276,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 .collect(Collectors.toList());
         List<BatchResultItemDTO> tableItemList = getItemList(tableList);
         //内置表级规则表格头
-        List<BatchResultItemDTO> tableResult=new ArrayList<>();
-        if(CollectionUtils.isNotEmpty(tableItemList)){
-            tableResult.add(0,BatchResultItemDTO.builder()
+        List<BatchResultItemDTO> tableResult = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(tableItemList)) {
+            tableResult.add(0, BatchResultItemDTO.builder()
                     .ruleName("规则名称")
                     .warningLevel("告警结果等级")
                     .checkItem("检验项")
@@ -288,7 +289,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     .actualValue("实际值")
                     .exceptionInfo("错误信息")
                     .build());
-            CollectionUtils.addAll(tableResult,tableItemList);
+            CollectionUtils.addAll(tableResult, tableItemList);
         }
         batchResultBaseDTO.setTableResult(tableResult);
         //获取字段规则
@@ -296,9 +297,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 .filter(batchResultRuleDTO -> PlanConstant.ResultRuleType.FIELD.equals(batchResultRuleDTO.getRuleType()))
                 .collect(Collectors.toList());
         List<BatchResultItemDTO> fieldItemList = getItemList(fieldList);
-        List<BatchResultItemDTO> fieldResult=new ArrayList<>();
-        if(CollectionUtils.isNotEmpty(fieldItemList)){
-            fieldResult.add(0,BatchResultItemDTO.builder()
+        List<BatchResultItemDTO> fieldResult = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(fieldItemList)) {
+            fieldResult.add(0, BatchResultItemDTO.builder()
                     .ruleName("规则名称")
                     .warningLevel("告警结果等级")
                     .checkItem("检验项")
@@ -310,7 +311,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     .actualValue("实际值")
                     .exceptionInfo("错误信息")
                     .build());
-            CollectionUtils.addAll(fieldResult,fieldItemList);
+            CollectionUtils.addAll(fieldResult, fieldItemList);
         }
         batchResultBaseDTO.setFieldResult(fieldResult);
         //获取表间
@@ -318,9 +319,10 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 .filter(batchResultRuleDTO -> PlanConstant.ResultRuleType.REL_TABLE.equals(batchResultRuleDTO.getRuleType()))
                 .collect(Collectors.toList());
         List<BatchResultItemDTO> tableRelItemList = getItemList(tableRelList);
-        List<BatchResultItemDTO> tableRelResult=new ArrayList<>();
-        if(CollectionUtils.isNotEmpty(tableRelItemList)){
-            tableRelResult.add(0,BatchResultItemDTO.builder()
+        tableRelItemList.forEach(batchResultItemDTO -> batchResultItemDTO.setObjectName(batchResultBaseDTO.getObjectName()));
+        List<BatchResultItemDTO> tableRelResult = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(tableRelItemList)) {
+            tableRelResult.add(0, BatchResultItemDTO.builder()
                     .ruleName("规则名称")
                     .warningLevel("告警结果等级")
                     .warningLevelJson("告警规则")
@@ -330,31 +332,90 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     .actualValue("实际值")
                     .exceptionInfo("错误信息")
                     .build());
-            CollectionUtils.addAll(tableRelResult,tableItemList);
+            CollectionUtils.addAll(tableRelResult, tableRelItemList);
         }
         batchResultBaseDTO.setTableRelResult(tableRelResult);
     }
 
     private List<BatchResultItemDTO> getItemList(List<BatchResultRuleDTO> list) {
-        List<BatchResultItemDTO> itemDTOList=new ArrayList<>();
-        if(CollectionUtils.isNotEmpty(list)){
+        List<LovValueDTO> warningLevels = lovAdapter.queryLovValue(PlanConstant.LOV_WARNING_LEVEL, BaseConstants.DEFAULT_TENANT_ID);
+        List<LovValueDTO> checkItems = lovAdapter.queryLovValue(PlanConstant.LOV_CHECK_ITEM, BaseConstants.DEFAULT_TENANT_ID);
+        List<LovValueDTO> countTypes = lovAdapter.queryLovValue(PlanConstant.LOV_COUNT_TYPE, BaseConstants.DEFAULT_TENANT_ID);
+        List<LovValueDTO> compareWays = lovAdapter.queryLovValue(PlanConstant.LOV_COMPARE_WAY, BaseConstants.DEFAULT_TENANT_ID);
+        List<LovValueDTO> compareSymbols = lovAdapter.queryLovValue(PlanConstant.LOV_COMPARE_SYMBOL, BaseConstants.DEFAULT_TENANT_ID);
+        List<BatchResultItemDTO> itemDTOList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(list)) {
             for (BatchResultRuleDTO dto : list) {
                 List<BatchResultItemDTO> batchResultItemDTOList = batchResultItemRepository.selectDTOByCondition(Condition.builder(BatchResultItem.class)
                         .andWhere(Sqls.custom()
                                 .andEqualTo(BatchResultItem.FIELD_RESULT_RULE_ID, dto.getResultRuleId())
                                 .andEqualTo(BatchResultItem.FIELD_TENANT_ID, dto.getTenantId()))
                         .build());
-                //给每个item设置规则名称
-                List<BatchResultItemDTO> collect = batchResultItemDTOList
-                        .stream()
-                        .peek(batchResultItemDTO -> {
-                            batchResultItemDTO.setCountType(Optional.ofNullable(batchResultItemDTO.getCountType()).orElse(""));
-                            batchResultItemDTO.setWhereCondition(Optional.ofNullable(batchResultItemDTO.getWhereCondition()).orElse(""));
-                            batchResultItemDTO.setActualValue(Optional.ofNullable(batchResultItemDTO.getActualValue()).orElse(""));
-                            batchResultItemDTO.setRuleName(dto.getRuleName());
-                        })
-                        .collect(Collectors.toList());
-                CollectionUtils.addAll(itemDTOList,collect);
+                batchResultItemDTOList.forEach(batchResultItemDTO -> {
+                    batchResultItemDTO.setCountType(Optional.ofNullable(batchResultItemDTO.getCountType()).orElse(""));
+                    batchResultItemDTO.setWhereCondition(Optional.ofNullable(batchResultItemDTO.getWhereCondition()).orElse(""));
+                    batchResultItemDTO.setActualValue(Optional.ofNullable(batchResultItemDTO.getActualValue()).orElse(""));
+                    batchResultItemDTO.setRuleName(dto.getRuleName());
+                    //将告警等级装转换成中文
+                    StringBuilder warningLevel = new StringBuilder();
+                    List<WarningLevelVO> warningLevelVOList = JsonUtils.json2WarningLevelVO(batchResultItemDTO.getWarningLevel());
+                    for (int i = 0; i < warningLevelVOList.size(); i++) {
+                        for (LovValueDTO lovValueDTO : warningLevels) {
+                            if (lovValueDTO.getValue().equals(warningLevelVOList.get(i).getWarningLevel())) {
+                                warningLevel.append(String.format("告警配置项-%d:%s:%d个 ", i + 1, lovValueDTO.getMeaning(), warningLevelVOList.get(i).getLevelCount()))
+                                        .append("<br>");
+                            }
+                        }
+                    }
+                    batchResultItemDTO.setWarningLevel(warningLevel.toString());
+                    //将校验项转中文
+                    checkItems.forEach(lovValueDTO -> {
+                        if (lovValueDTO.getValue().equals(batchResultItemDTO.getCheckItem())) {
+                            batchResultItemDTO.setCheckItem(lovValueDTO.getMeaning());
+                        }
+                    });
+                    countTypes.forEach(lovValueDTO -> {
+                        if (lovValueDTO.getValue().equals(batchResultItemDTO.getCountType())) {
+                            batchResultItemDTO.setCountType(lovValueDTO.getMeaning());
+                        }
+                    });
+                    compareWays.forEach(lovValueDTO -> {
+                        if (lovValueDTO.getValue().equals(batchResultItemDTO.getCompareWay())) {
+                            batchResultItemDTO.setCompareWay(lovValueDTO.getMeaning());
+                        }
+                    });
+                    //将告警规则配置转为中文
+                    StringBuilder warningLevelJson = new StringBuilder();
+                    List<WarningLevelDTO> warningLevelDTOList = JsonUtils.json2WarningLevel(batchResultItemDTO.getWarningLevelJson());
+                    for (int i = 0; i < warningLevelDTOList.size(); i++) {
+                        WarningLevelDTO warningLevelDTO = warningLevelDTOList.get(i);
+                        for (LovValueDTO lovValueDTO : warningLevels) {
+                            if (lovValueDTO.getValue().equals(warningLevelDTO.getWarningLevel())) {
+                                warningLevelJson.append(String.format("告警配置项-%d: %s: ", i + 1, lovValueDTO.getMeaning()));
+                            }
+                        }
+                        //比较符转中文
+                        for (LovValueDTO lovValueDTO : compareSymbols) {
+                            if (lovValueDTO.getValue().equals(warningLevelDTO.getCompareSymbol())) {
+                                warningLevelJson.append(lovValueDTO.getMeaning());
+                            }
+                        }
+                        if (CompareSymbol.EQUAL.equals(warningLevelDTO.getCompareSymbol())
+                                || CompareSymbol.NOT_EQUAL.equals(warningLevelDTO.getCompareSymbol())) {
+                            warningLevelJson.append("( ");
+                            if (StringUtils.isNotEmpty(warningLevelDTO.getExpectedValue())) {
+                                warningLevelJson.append(warningLevelDTO.getExpectedValue());
+                            } else {
+                                warningLevelJson.append(Optional.ofNullable(warningLevelDTO.getStartValue()).orElse(""))
+                                        .append("-")
+                                        .append(Optional.ofNullable(warningLevelDTO.getEndValue()).orElse(""));
+                            }
+                            warningLevelJson.append(" )").append("<br>");
+                        }
+                        batchResultItemDTO.setWarningLevelJson(warningLevelJson.toString());
+                    }
+                });
+                CollectionUtils.addAll(itemDTOList, batchResultItemDTOList);
             }
         }
         return itemDTOList;
@@ -362,6 +423,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
 
     private void getResultWarningVOList(BatchResultBaseDTO batchResultBaseDTO) {
+        List<LovValueDTO> warningLevels = lovAdapter.queryLovValue(PlanConstant.LOV_WARNING_LEVEL, BaseConstants.DEFAULT_TENANT_ID);
         List<String> warningLevelJsonList = batchResultItemMapper.selectWaringLevelJson(batchResultBaseDTO);
         //将所有告警等级Json转换合并成集合
         List<WarningLevelVO> warningLevelVOList = new ArrayList<>();
@@ -375,8 +437,14 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         List<ResultWaringVO> resultWaringVOList = new ArrayList<>();
         //返回base下的所有告警等级以及对应的数量
         collect.forEach((k, v) -> {
+            String warningLevelMeaning = "";
+            for (LovValueDTO lovValueDTO : warningLevels) {
+                if (k.equals(lovValueDTO.getValue())) {
+                    warningLevelMeaning = lovValueDTO.getMeaning();
+                }
+            }
             ResultWaringVO resultWaringVO = ResultWaringVO.builder()
-                    .warningLevel(k)
+                    .warningLevel(warningLevelMeaning)
                     .countSum(v)
                     .build();
             resultWaringVOList.add(resultWaringVO);
