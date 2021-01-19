@@ -1,6 +1,5 @@
 package com.hand.hdsp.quality.app.service;
 
-import java.util.List;
 import java.util.Map;
 
 import com.hand.hdsp.quality.api.dto.BatchResultBaseDTO;
@@ -48,7 +47,8 @@ public interface BatchResultService {
     /**
      *
      * @param exceptionDataDTO
+     * @param pageRequest
      * @return List<Map<String, Object>>
      */
-    List<Map<String, Object>> listExceptionDetail(ExceptionDataDTO exceptionDataDTO);
+    Page<Map<String, Object>> listExceptionDetail(ExceptionDataDTO exceptionDataDTO, PageRequest pageRequest);
 }

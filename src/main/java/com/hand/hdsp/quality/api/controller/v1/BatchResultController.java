@@ -1,7 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 
-import java.util.List;
 import java.util.Map;
 
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
@@ -420,9 +419,10 @@ public class BatchResultController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/exception-detail")
-    public ResponseEntity<List<Map<String, Object>>> exceptionDetail(@PathVariable(name = "organizationId") Long tenantId,
-                                                                     ExceptionDataDTO exceptionDataDTO) {
+    public ResponseEntity<Page<Map<String, Object>>> exceptionDetail(@PathVariable(name = "organizationId") Long tenantId,
+                                                                     ExceptionDataDTO exceptionDataDTO,
+                                                                     PageRequest pageRequest) {
         exceptionDataDTO.setTenantId(tenantId);
-        return Results.success(batchResultService.listExceptionDetail(exceptionDataDTO));
+        return Results.success(batchResultService.listExceptionDetail(exceptionDataDTO,pageRequest));
     }
 }

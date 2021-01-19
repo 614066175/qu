@@ -18,6 +18,7 @@ import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import io.choerodon.core.domain.Page;
+import io.choerodon.core.domain.PageInfo;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.exception.ExceptionResponse;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -174,7 +175,7 @@ public class BatchResultServiceImpl implements BatchResultService {
     }
 
     @Override
-    public List<Map<String, Object>> listExceptionDetail(ExceptionDataDTO exceptionDataDTO) {
+    public Page<Map<String, Object>> listExceptionDetail(ExceptionDataDTO exceptionDataDTO, PageRequest pageRequest) {
         if (Objects.isNull(exceptionDataDTO.getPlanBaseId())) {
             throw new CommonException(ErrorCode.PLAN_BASE_ID_IS_EMPTY);
         }
@@ -194,7 +195,20 @@ public class BatchResultServiceImpl implements BatchResultService {
                 return exceptionDataDTO.getWarningLevel().equals(warningLevel);
             }).collect(Collectors.toList());
         }
-        return result;
+        int start = pageRequest.getPage() * pageRequest.getSize();
+        int end=start+pageRequest.getSize();
+        if(start>end){
+            throw new CommonException(ErrorCode.PAGE_ERROR);
+        }
+        List<Map<String,Object>> content=new ArrayList<>();
+        for (int i=start;i<end;i++){
+            if(result.size()-1>=i){
+                content.add(result.get(i));
+            }else{
+                break;
+            }
+        }
+        return new Page<>(content, new PageInfo(pageRequest.getPage(), pageRequest.getSize()), result.size());
     }
 
 }
