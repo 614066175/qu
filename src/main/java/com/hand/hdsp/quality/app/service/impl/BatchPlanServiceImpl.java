@@ -16,6 +16,7 @@ import com.hand.hdsp.quality.infra.constant.AlertTemplate;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.constant.PlanConstant.CompareSymbol;
+import com.hand.hdsp.quality.infra.constant.PlanConstant.ExceptionParam;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanFieldConDO;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanTableConDO;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
@@ -553,7 +554,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 List<Map<String, Object>> maps = driverSession.executeOneQuery(batchPlanBase.getDatasourceSchema(),
                         String.format("select count(*) as COUNT from %s", batchPlanBase.getObjectName()));
                 if (CollectionUtils.isNotEmpty(maps)) {
-                    Long count = Long.parseLong(String.valueOf(maps.get(0).get("COUNT")));
+                    String key = maps.get(0).keySet().iterator().next();
+                    Long count = Long.parseLong(String.valueOf(maps.get(0).get(key)));
                     batchResultBase.setDataCount(count);
                 }
             }
@@ -818,8 +820,41 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     }
 
     private void handleExceptionList(List<Map<String, Object>> fieldExceptionList, MeasureParamDO param) {
+        boolean flag;
         if (CollectionUtils.isNotEmpty(param.getExceptionMapList())) {
-            CollectionUtils.addAll(fieldExceptionList, param.getExceptionMapList());
+            if(CollectionUtils.isEmpty(fieldExceptionList)){
+                //为空直接合并
+                CollectionUtils.addAll(fieldExceptionList, param.getExceptionMapList());
+            }else{
+                //不为空
+                for (Map<String, Object> map : param.getExceptionMapList()) {
+                    flag=false;
+                    String pk = String.valueOf(map.get(ExceptionParam.PK));
+                    for (Map<String, Object> fieldMap : fieldExceptionList) {
+                        String fieldPk = String.valueOf(fieldMap.get(ExceptionParam.PK));
+                        //判断如果异常数据已存在，合并异常信息
+                        if (fieldPk.equals(pk)) {
+                            String newExceptionInfo = String.valueOf(map.get(ExceptionParam.EXCEPTION_INFO));
+                            String exceptionInfo = String.valueOf(fieldMap.get(ExceptionParam.EXCEPTION_INFO));
+
+                            String newWarningLevel = String.valueOf(map.get(ExceptionParam.WARNING_LEVEL));
+                            String warningLevel = String.valueOf(fieldMap.get(ExceptionParam.WARNING_LEVEL));
+                            fieldMap.put(ExceptionParam.EXCEPTION_INFO,String.format("%s,%s",exceptionInfo,newExceptionInfo));
+                            List<String> warningLevelList = Arrays.asList(warningLevel.split(","));
+                            //不包含这个异常等级
+                            if (CollectionUtils.isEmpty(warningLevelList)||!warningLevelList.contains(newWarningLevel)){
+                                fieldMap.put(ExceptionParam.WARNING_LEVEL,String.format("%s,%s",warningLevel,newWarningLevel));
+                            }
+                            flag=true;
+                            break;
+                        }
+                    }
+                    if(!flag){
+                        fieldExceptionList.add(map);
+                    }
+                }
+
+            }
         }
     }
 

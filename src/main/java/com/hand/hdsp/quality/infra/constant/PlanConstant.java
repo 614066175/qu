@@ -64,14 +64,14 @@ public interface PlanConstant {
     String LOV_COUNT_TYPE = "HDSP.XQUA.COUNT_TYPE";
 
     /**
-     *比较方式 LOV
+     * 比较方式 LOV
      */
-    String LOV_COMPARE_WAY="HDSP.XQUA.COMPARE_WAY";
+    String LOV_COMPARE_WAY = "HDSP.XQUA.COMPARE_WAY";
 
     /**
      * 比较符
      */
-    String LOV_COMPARE_SYMBOL="HDSP.XQUA.COMPARE_SYMBOL";
+    String LOV_COMPARE_SYMBOL = "HDSP.XQUA.COMPARE_SYMBOL";
 
     /**
      * 告警等级-正常
@@ -275,7 +275,7 @@ public interface PlanConstant {
         /**
          * 计算值比较 calculated value
          */
-        String CALCULATED_VALUE="CALCULATED_VALUE";
+        String CALCULATED_VALUE = "CALCULATED_VALUE";
     }
 
     /**
@@ -340,5 +340,12 @@ public interface PlanConstant {
         String ONLINE_APPROVING = "ONLINE_APPROVING";
         String OFFLINE = "OFFLINE_APPROVING";
         String OFFLINE_APPROVING = "OFFLINE_APPROVING";
+    }
+
+    interface ExceptionParam {
+        String EXCEPTION_INFO="$exceptionInfo";
+        String PK="pk";
+        String RULE_NAME="$ruleName";
+        String WARNING_LEVEL="$warningLevel";
     }
 }

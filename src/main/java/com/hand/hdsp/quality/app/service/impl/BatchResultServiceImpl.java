@@ -11,6 +11,7 @@ import com.hand.hdsp.quality.domain.repository.BatchResultBaseRepository;
 import com.hand.hdsp.quality.domain.repository.BatchResultRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
+import com.hand.hdsp.quality.infra.constant.PlanConstant.ExceptionParam;
 import com.hand.hdsp.quality.infra.feign.ExecutionFlowFeign;
 import com.hand.hdsp.quality.infra.mapper.BatchResultItemMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
@@ -191,8 +192,13 @@ public class BatchResultServiceImpl implements BatchResultService {
         }
         if (Strings.isNotEmpty(exceptionDataDTO.getWarningLevel())) {
             result = result.stream().filter(map -> {
-                String warningLevel = String.valueOf(map.get("$warningLevel"));
-                return exceptionDataDTO.getWarningLevel().equals(warningLevel);
+                String warningLevel =Optional.ofNullable(String.valueOf(map.get(ExceptionParam.WARNING_LEVEL)))
+                        .orElse("");
+                List<String> list = Arrays.asList(warningLevel.split(","));
+                if (CollectionUtils.isEmpty(list)){
+                    throw new CommonException(ErrorCode.EXCEPTION_PARAM_ERROR);
+                }
+                return list.contains(exceptionDataDTO.getWarningLevel());
             }).collect(Collectors.toList());
         }
         int start = pageRequest.getPage() * pageRequest.getSize();

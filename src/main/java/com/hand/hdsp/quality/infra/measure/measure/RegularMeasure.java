@@ -1,8 +1,11 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.ExceptionParam.*;
+
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
@@ -19,6 +22,7 @@ import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
+import org.hzero.starter.driver.core.infra.meta.PrimaryKey;
 import org.hzero.starter.driver.core.session.DriverSession;
 
 /**
@@ -126,14 +130,27 @@ public class RegularMeasure implements Measure {
                             batchResultBase.getPackageObjectName(),
                             noMacthSql.substring(noMacthSql.indexOf("from"))
                     );
+                    List<PrimaryKey> primaryKeys = driverSession.tablePk(param.getSchema(), batchResultBase.getPackageObjectName());
                     List<Map<String, Object>> exceptionMapList = driverSession.executeOneQuery(param.getSchema(), newSql);
                     if(CollectionUtils.isNotEmpty(exceptionMapList)){
                         exceptionMapList.forEach(map -> {
-                            map.put("$ruleName",param.getBatchResultRuleDTO().getRuleName());
-                            map.put("$warningLevel",param.getWarningLevelList().get(0).getWarningLevel());
-                            map.put("$exceptionInfo",String.format("【%s】 不满足正则表达式【%s】",
+                            if(CollectionUtils.isNotEmpty(primaryKeys)){
+                                Set<String> columns = map.keySet();
+                                List<String> columnPkList = primaryKeys.stream().map(PrimaryKey::getColumnName).collect(Collectors.toList());
+                                List<String> keys = columns.stream().filter(columnPkList::contains).collect(Collectors.toList());
+                                List<String> values = keys.stream().map(key -> String.valueOf(map.get(key))).collect(Collectors.toList());
+                                map.put(PK,String.join("-",values));
+                            }else{
+                                List<String> values = map.values().stream().map(String::valueOf).collect(Collectors.toList());
+                                //将所有的数据
+                                map.put(PK,String.join("-",values));
+                            }
+                            map.put(RULE_NAME,param.getBatchResultRuleDTO().getRuleName());
+                            map.put(WARNING_LEVEL,param.getWarningLevelList().get(0).getWarningLevel());
+                            String exceptionInfo = String.format("【%s】 不满足正则表达式【%s】",
                                     param.getFieldName(),
-                                    param.getRegularExpression()));
+                                    param.getRegularExpression());
+                            map.put(EXCEPTION_INFO, String.format("%s(%s)",param.getWarningLevelList().get(0).getWarningLevel(),exceptionInfo));
                         });
                     }
                     param.setExceptionMapList(exceptionMapList);

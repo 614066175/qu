@@ -134,4 +134,5 @@ public interface ErrorCode {
     String BATCH_RESULT_NOT_EXIST="hdsp.xqua.err.batch_result_not_exist";
     String PLAN_BASE_ID_IS_EMPTY = "hdsp.xqua.err.plan_base_id_is_empty";
     String PAGE_ERROR = "hdsp.xqua.err.page_error";
+    String EXCEPTION_PARAM_ERROR = "hdsp.xqua.err.exception_param_error";
 }
