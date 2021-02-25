@@ -45,8 +45,6 @@
           ${ds}.accord_content,
           ${ds}.charge_dept_id,
           ${ds}.charge_id,
-          ${ds}.charge_tel,
-          ${ds}.charge_email,
           ${ds}.standard_status,
           ${ds}.tenant_id,
           ${ds}.object_version_number,
@@ -57,6 +55,8 @@
         select
         iu.login_name lastUpdateName,
         iu2.login_name chargeName,
+        iu2.phone chargeTel,
+        iu2.email chargeEmail,
         hu.unit_name chargeDeptName,
         xsg.group_name,
         xsg.group_code,

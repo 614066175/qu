@@ -33,6 +33,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.infra.meta.Table;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
@@ -182,6 +183,13 @@ public class DataStandardServiceImpl implements DataStandardService {
             throw new CommonException(ErrorCode.DATA_STANDARD_NOT_EXIST);
         }
         DataStandardDTO dataStandardDTO = dataStandardDTOList.get(0);
+        //解密邮箱，电话
+        if (Strings.isNotEmpty(dataStandardDTO.getChargeTel())) {
+           dataStandardDTO.setChargeTel(DataSecurityHelper.decrypt(dataStandardDTO.getChargeTel()));
+        }
+        if (Strings.isNotEmpty(dataStandardDTO.getChargeEmail())) {
+            dataStandardDTO.setChargeEmail(DataSecurityHelper.decrypt(dataStandardDTO.getChargeEmail()));
+        }
         convertToDataLengthList(dataStandardDTO);
         List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
                 .andWhere(Sqls.custom()
