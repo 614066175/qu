@@ -16,6 +16,7 @@ import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
@@ -68,13 +69,14 @@ public class DataStandardRepositoryImpl extends BaseRepositoryImpl<DataStandard,
                     return ;
                 }
                 Long chargeId = dataStandardMapper.selectIdByChargeName(dataStandardDTO.getChargeName());
-                Long chargeDeptId = dataStandardMapper.selectIdByChargeDeptName(dataStandardDTO.getChargeDeptName());
-                if(Objects.isNull(chargeId)||Objects.isNull(chargeDeptId)){
-                    return ;
+                if(Strings.isNotEmpty(dataStandardDTO.getChargeDeptName())){
+                    Long chargeDeptId = dataStandardMapper.selectIdByChargeDeptName(dataStandardDTO.getChargeDeptName());
+                    if(Objects.isNull(chargeId)||Objects.isNull(chargeDeptId)){
+                        return ;
+                    }
+                    dataStandardDTO.setChargeDeptId(chargeDeptId);
                 }
                 dataStandardDTO.setChargeId(chargeId);
-                dataStandardDTO.setChargeDeptId(chargeDeptId);
-
                 List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                         .andWhere(Sqls.custom()
                                 .andEqualTo(StandardGroup.FIELD_GROUP_CODE, dataStandardDTO.getGroupCode())
