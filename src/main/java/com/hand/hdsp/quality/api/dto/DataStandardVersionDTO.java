@@ -50,7 +50,7 @@ public class DataStandardVersionDTO extends AuditDomain {
     @ApiModelProperty(value = "数据标准描述")
     private String standardDesc;
 
-    @ApiModelProperty(value = "数据类型(快码：HDSP.XDMP.LABEL_DATA_TYPE)")
+    @ApiModelProperty(value = "数据类型(快码：HDSP.XMOD.FIELD_TYPE)")
     @NotBlank
     @Size(max = 30)
     private String dataType;

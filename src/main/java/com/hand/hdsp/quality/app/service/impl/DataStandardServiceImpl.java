@@ -20,6 +20,7 @@ import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardConstant.AimType;
 import com.hand.hdsp.quality.infra.constant.WarningLevel;
 import com.hand.hdsp.quality.infra.feign.AssetFeign;
+import com.hand.hdsp.quality.infra.feign.WorkFlowFeign;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import com.hand.hdsp.quality.infra.util.DataLengthHandler;
 import com.hand.hdsp.quality.infra.util.DataPatternHandler;
@@ -31,6 +32,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
+import org.hzero.boot.workflow.WorkflowClient;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
@@ -39,6 +41,7 @@ import org.hzero.starter.driver.core.infra.meta.Table;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,6 +97,12 @@ public class DataStandardServiceImpl implements DataStandardService {
     private final DriverSessionService driverSessionService;
 
     private final StandardGroupRepository standardGroupRepository;
+
+    @Autowired
+    private WorkflowClient workflowClient;
+
+    @Autowired
+    private WorkFlowFeign workFlowFeign;
 
     @Resource
     private AssetFeign assetFeign;
@@ -185,7 +194,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         DataStandardDTO dataStandardDTO = dataStandardDTOList.get(0);
         //解密邮箱，电话
         if (Strings.isNotEmpty(dataStandardDTO.getChargeTel())) {
-           dataStandardDTO.setChargeTel(DataSecurityHelper.decrypt(dataStandardDTO.getChargeTel()));
+            dataStandardDTO.setChargeTel(DataSecurityHelper.decrypt(dataStandardDTO.getChargeTel()));
         }
         if (Strings.isNotEmpty(dataStandardDTO.getChargeEmail())) {
             dataStandardDTO.setChargeEmail(DataSecurityHelper.decrypt(dataStandardDTO.getChargeEmail()));
@@ -603,6 +612,108 @@ public class DataStandardServiceImpl implements DataStandardService {
             }
         }
         return dataStandardDTO;
+    }
+
+    @Override
+    public void publishByWorkflow(Long tenantId, DataStandardDTO dataStandardDTO) {
+        //发布流程Id
+        String publishFlowId = "FLOW1364824631562809345";
+        String bussinessKey=String.valueOf(System.currentTimeMillis());
+        Map<String, Object> var = new HashMap<>();
+        var.put("dataStandardCode", dataStandardDTO.getStandardCode());
+        workFlowFeign.startInstanceByFlowKey(tenantId, publishFlowId, "10001", "ygltl", var);
+    }
+
+    @Override
+    public List<String> findCharger(Long tenantId, String dataStandardCode) {
+        List<DataStandardDTO> standardDTOS = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(DataStandard.FIELD_TENANT_ID, tenantId)
+                        .andEqualTo(DataStandard.FIELD_STANDARD_CODE, dataStandardCode))
+                .build());
+        if (CollectionUtils.isNotEmpty(standardDTOS)) {
+            Long chargeId = standardDTOS.get(0).getChargeId();
+            //工作流只支持员工级，因此测试先获取用户下员工来进行审批,员工编码进行了加密需要解密
+            List<String> employeeNums = dataStandardMapper.selectEmployeeByChargeId(chargeId).stream()
+                    .map(str -> str = DataSecurityHelper.decrypt(str))
+                    .collect(Collectors.toList());
+            return employeeNums;
+        }
+        return null;
+    }
+
+    @Override
+    public void onlineWorkflowSuccess(Long tenantId, String dataStandardCode) {
+        List<DataStandardDTO> standardDTOS = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(DataStandard.FIELD_TENANT_ID, tenantId)
+                        .andEqualTo(DataStandard.FIELD_STANDARD_CODE, dataStandardCode))
+                .build());
+        if (CollectionUtils.isNotEmpty(standardDTOS)) {
+            DataStandardDTO dataStandardDTO = standardDTOS.get(0);
+            dataStandardDTO.setStandardStatus(ONLINE);
+            dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS);
+            //存版本表
+            doVersion(dataStandardDTO);
+            //1.数据标准没有关联评估方案，直接发布，不做处理
+            //2.数据标准关联了评估方案，第一次发布，则落标到数据质量生成规则
+            //3.数据标准关联了评估方案，不是第一发布，则更新落标到数据质量的规则
+            //查看此标准落标表的情况
+            List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
+                    .andWhere(Sqls.custom()
+                            .andEqualTo(StandardAim.FIELD_STANDARD_ID, dataStandardDTO.getStandardId())
+                            .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, DATA)
+                            .andEqualTo(StandardAim.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
+                    .build());
+            if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
+                //过滤出关联了评估方案的落标
+                List<StandardAimDTO> aimDTOS = standardAimDTOS.stream()
+                        .filter(s -> Objects.nonNull(s.getPlanId()))
+                        .collect(Collectors.toList());
+                publishRelatePlan(aimDTOS);
+            }
+            assetFeign.saveStandardToEs(dataStandardDTO.getTenantId(), dataStandardDTO);
+        }
+    }
+
+    @Override
+    public void offlineWorkflowSuccess(Long tenantId, String dataStandardCode) {
+        List<DataStandardDTO> standardDTOS = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(DataStandard.FIELD_TENANT_ID, tenantId)
+                        .andEqualTo(DataStandard.FIELD_STANDARD_CODE, dataStandardCode))
+                .build());
+        if (CollectionUtils.isNotEmpty(standardDTOS)) {
+            DataStandardDTO dataStandardDTO = standardDTOS.get(0);
+            dataStandardDTO.setStandardStatus(OFFLINE);
+            dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS);
+            assetFeign.deleteStandardToEs(dataStandardDTO.getTenantId(), dataStandardDTO);
+        }
+
+    }
+
+    @Override
+    public void offlineWorkflowing(Long tenantId, String dataStandardCode) {
+        workflowing(tenantId,dataStandardCode,OFFLINE_APPROVING);
+    }
+
+    @Override
+    public void onlineWorkflowing(Long tenantId, String dataStandardCode) {
+        workflowing(tenantId,dataStandardCode,ONLINE_APPROVING);
+    }
+
+
+    private void workflowing(Long tenantId, String dataStandardCode,String status) {
+        List<DataStandardDTO> standardDTOS = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(DataStandard.FIELD_TENANT_ID, tenantId)
+                        .andEqualTo(DataStandard.FIELD_STANDARD_CODE, dataStandardCode))
+                .build());
+        if (CollectionUtils.isNotEmpty(standardDTOS)) {
+            DataStandardDTO dataStandardDTO = standardDTOS.get(0);
+            dataStandardDTO.setStandardStatus(status);
+            dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS);
+        }
     }
 
     private void doAim(AssetFieldDTO assetFieldDTO) {

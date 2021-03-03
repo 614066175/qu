@@ -52,7 +52,7 @@ public class DataStandardDTO extends AuditDomain{
     @ExcelColumn(zh = "标准描述",en = "standardDesc")
     private String standardDesc;
 
-    @ApiModelProperty(value = "数据类型 (HDSP.XDMP.LABEL_DATA_TYPE)")
+    @ApiModelProperty(value = "数据类型 (HDSP.XMOD.FIELD_TYPE)")
     @NotBlank
     @Size(max = 30)
     @ExcelColumn(zh = "数据类型",en="dataType")

@@ -294,4 +294,89 @@ public class DataStandardController {
         return Results.success(dataStandardDTO);
     }
 
+
+    @ApiOperation(value = "根据数据标准编码查询责任人，用于审批规则")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/find-charger/{dataStandardCode}")
+    public ResponseEntity<List<String>> findCharger(@PathVariable(name = "organizationId") Long tenantId, @PathVariable String dataStandardCode) {
+        List<String> charger = dataStandardService.findCharger(tenantId, dataStandardCode);
+        return Results.success(charger);
+    }
+
+    @ApiOperation(value = "工作流发布接口")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/publish-by-workflow")
+    public ResponseEntity<DataStandardDTO> publishByWorkflow(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
+        dataStandardService.publishByWorkflow(tenantId,dataStandardDTO);
+        return Results.success(dataStandardDTO);
+    }
+
+
+    @ApiOperation(value = "上线工作流通过事件接口")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/online-workflow-success/{dataStandardCode}")
+    public ResponseEntity<DataStandardDTO> onlineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId, @PathVariable String dataStandardCode) {
+        dataStandardService.onlineWorkflowSuccess(tenantId,dataStandardCode);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "下线工作流发布通过事件接口")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/offline-workflow-success/{dataStandardCode}")
+    public ResponseEntity<DataStandardDTO> offLineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId, @PathVariable String dataStandardCode) {
+        dataStandardService.offlineWorkflowSuccess(tenantId,dataStandardCode);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "数据标准上线审批中事件")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/online-workflowing/{dataStandardCode}")
+    public ResponseEntity<DataStandardDTO> onlineWorkflowing(@PathVariable(name = "organizationId") Long tenantId, @PathVariable String dataStandardCode) {
+        dataStandardService.onlineWorkflowing(tenantId,dataStandardCode);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "数据标准下线审批中事件")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/offline-workflowing/{dataStandardCode}")
+    public ResponseEntity<DataStandardDTO> offlineWorkflowing(@PathVariable(name = "organizationId") Long tenantId, @PathVariable String dataStandardCode) {
+        dataStandardService.offlineWorkflowing(tenantId,dataStandardCode);
+        return Results.success();
+    }
 }

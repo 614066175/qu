@@ -19,6 +19,12 @@
     </properties>
 
     <dependencies>
+        <!-- 自研工作流-->
+        <dependency>
+            <groupId>org.hzero.boot</groupId>
+            <artifactId>hzero-boot-workflow</artifactId>
+        </dependency>
+
         <!-- hdsp starter -->
         <dependency>
             <groupId>com.hand.hdsp.starter</groupId>
@@ -56,6 +62,7 @@
             <groupId>org.hzero.boot</groupId>
             <artifactId>hzero-boot-message</artifactId>
         </dependency>
+
 
         <!-- 数据库驱动 -->
         <dependency>

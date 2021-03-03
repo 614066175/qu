@@ -126,4 +126,16 @@ public interface DataStandardService {
      * @return
      */
     DataStandardDTO assetDetail(Long tenantId, Long standardId);
+
+    void publishByWorkflow(Long tenantId, DataStandardDTO dataStandardDTO);
+
+    List<String> findCharger(Long tenantId, String dataStandardCode);
+
+    void onlineWorkflowSuccess(Long tenantId, String dataStandardCode);
+
+    void offlineWorkflowSuccess(Long tenantId, String dataStandardCode);
+
+    void onlineWorkflowing(Long tenantId, String dataStandardCode);
+
+    void offlineWorkflowing(Long tenantId, String dataStandardCode);
 }
