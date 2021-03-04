@@ -60,7 +60,6 @@
         hu.unit_name chargeDeptName,
         xsg.group_name,
         xsg.group_code,
-        xsg.group_id,
         xsg.parent_group_id,
         <include refid="baseColumn">
             <property name="ds" value="ds"/>
