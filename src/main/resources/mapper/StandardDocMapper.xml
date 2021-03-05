@@ -27,7 +27,11 @@
         ${sd}.doc_name,
         ${sd}.doc_path,
         ${sd}.tenant_id,
-        ${sd}.object_version_number
+        ${sd}.object_version_number,
+        ${sd}.creation_date,
+        ${sd}.created_by,
+        ${sd}.last_updated_by,
+        ${sd}.last_update_date
     </sql>
 
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.StandardDocDTO">
@@ -67,5 +71,11 @@
                 and sd.doc_name like #{docName}
             </if>
         </where>
+    </select>
+
+    <select id="selectUserNameById" resultType="java.lang.String">
+        select login_name
+        from iam_user
+        where id=#{userId}
     </select>
 </mapper>

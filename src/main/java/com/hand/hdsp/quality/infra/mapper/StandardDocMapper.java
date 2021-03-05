@@ -22,4 +22,12 @@ public interface StandardDocMapper extends BaseMapper<StandardDoc> {
      * @return List<StandardDocDTO>
      */
     List<StandardDocDTO> list(@Param("standardDocDTO") StandardDocDTO standardDocDTO);
+
+
+    /**
+     *
+     * @param userId
+     * @return
+     */
+    String selectUserNameById(Long userId);
 }

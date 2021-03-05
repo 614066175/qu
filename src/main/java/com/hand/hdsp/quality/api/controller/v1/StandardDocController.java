@@ -1,10 +1,15 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletResponse;
+
 import com.hand.hdsp.quality.api.dto.StandardDocDTO;
 import com.hand.hdsp.quality.app.service.StandardDocService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.StandardDoc;
 import com.hand.hdsp.quality.domain.repository.StandardDocRepository;
+import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
@@ -21,9 +26,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.HttpServletResponse;
-import java.util.List;
-
 /**
  * <p>标准文档管理表 管理 API</p>
  *
@@ -35,10 +37,12 @@ import java.util.List;
 public class StandardDocController extends BaseController {
     private final StandardDocRepository standardDocRepository;
     private final StandardDocService standardDocService;
+    private final StandardDocMapper standardDocMapper;
 
-    public StandardDocController(StandardDocRepository standardDocRepository, StandardDocService standardDocService) {
+    public StandardDocController(StandardDocRepository standardDocRepository, StandardDocService standardDocService, StandardDocMapper standardDocMapper) {
         this.standardDocRepository = standardDocRepository;
         this.standardDocService = standardDocService;
+        this.standardDocMapper = standardDocMapper;
     }
 
     @ApiOperation(value = "标准文档管理表列表")
@@ -55,7 +59,14 @@ public class StandardDocController extends BaseController {
                                                      @ApiIgnore @SortDefault(value = StandardDoc.FIELD_DOC_ID,
                                                              direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardDocDTO.setTenantId(tenantId);
-        return Results.success(standardDocService.list(pageRequest, standardDocDTO));
+        Page<StandardDocDTO> list = standardDocService.list(pageRequest, standardDocDTO);
+        list.getContent().stream()
+                .peek(dto -> {
+                    dto.setCreatedByName(standardDocMapper.selectUserNameById(dto.getCreatedBy()));
+                    dto.setLastUpdatedByName(standardDocMapper.selectUserNameById(dto.getLastUpdatedBy()));
+                })
+                .collect(Collectors.toList());
+        return Results.success(list);
     }
 
     @ApiOperation(value = "标准文档管理表明细")

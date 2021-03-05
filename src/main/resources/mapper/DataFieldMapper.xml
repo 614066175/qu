@@ -48,6 +48,9 @@
           ${fs}.tenant_id,
           ${fs}.field_accuracy,
           ${fs}.object_version_number,
+          ${fs}.creation_date,
+          ${fs}.created_by,
+          ${fs}.last_updated_by,
           ${fs}.last_update_date
     </sql>
 

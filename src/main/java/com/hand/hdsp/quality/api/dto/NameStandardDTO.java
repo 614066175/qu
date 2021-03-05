@@ -1,22 +1,16 @@
 package com.hand.hdsp.quality.api.dto;
 
+import java.util.Date;
 import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import io.choerodon.mybatis.domain.AuditDomain;
-import java.util.Date;
-import io.swagger.annotations.ApiModelProperty;
-import io.swagger.annotations.ApiModel;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.*;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.choerodon.mybatis.domain.AuditDomain;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.*;
 import org.hzero.boot.platform.lov.annotation.LovValue;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
@@ -158,5 +152,11 @@ public class NameStandardDTO extends AuditDomain {
 
     @Transient
     private Date lastUpdateDateTo;
+
+    @Transient
+    private String createdByName;
+
+    @Transient
+    private String lastUpdatedByName;
 
 }

@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
@@ -9,6 +10,7 @@ import com.hand.hdsp.quality.app.service.DataFieldService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.repository.DataFieldRepository;
 import com.hand.hdsp.quality.domain.repository.StandardExtraRepository;
+import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -38,10 +40,13 @@ public class DataFieldController extends BaseController {
 
     private final StandardExtraRepository standardExtraRepository;
 
-    public DataFieldController(DataFieldService dataFieldService, DataFieldRepository dataFieldRepository, StandardExtraRepository standardExtraRepository) {
+    private final StandardDocMapper standardDocMapper;
+
+    public DataFieldController(DataFieldService dataFieldService, DataFieldRepository dataFieldRepository, StandardExtraRepository standardExtraRepository, StandardDocMapper standardDocMapper) {
         this.dataFieldService = dataFieldService;
         this.dataFieldRepository = dataFieldRepository;
         this.standardExtraRepository = standardExtraRepository;
+        this.standardDocMapper = standardDocMapper;
     }
 
     @ApiOperation(value = "字段标准列表")
@@ -55,7 +60,14 @@ public class DataFieldController extends BaseController {
     @GetMapping("/list")
     public ResponseEntity<Page<DataFieldDTO>> list(@PathVariable(name = "organizationId") Long tenantId, DataFieldDTO dataFieldDTO, PageRequest pageRequest) {
         dataFieldDTO.setTenantId(tenantId);
-        return Results.success(dataFieldService.list(pageRequest, dataFieldDTO));
+        Page<DataFieldDTO> list = dataFieldService.list(pageRequest, dataFieldDTO);
+        list.getContent().stream()
+                .peek(dto -> {
+                    dto.setCreatedByName(standardDocMapper.selectUserNameById(dto.getCreatedBy()));
+                    dto.setLastUpdatedByName(standardDocMapper.selectUserNameById(dto.getLastUpdatedBy()));
+                })
+                .collect(Collectors.toList());
+        return Results.success(list);
     }
 
     @ApiOperation(value = "字段标准创建")

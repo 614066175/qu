@@ -144,6 +144,13 @@ public class DataFieldDTO extends AuditDomain {
     @Transient
     private String lastUpdateDateTo;
 
+
+    @Transient
+    private String createdByName;
+
+    @Transient
+    private String lastUpdatedByName;
+
     public interface Group1 {
     }
 

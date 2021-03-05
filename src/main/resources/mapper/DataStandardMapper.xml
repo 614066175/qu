@@ -48,6 +48,9 @@
           ${ds}.standard_status,
           ${ds}.tenant_id,
           ${ds}.object_version_number,
+          ${ds}.creation_date,
+          ${ds}.created_by,
+          ${ds}.last_updated_by,
           ${ds}.last_update_date
     </sql>
 

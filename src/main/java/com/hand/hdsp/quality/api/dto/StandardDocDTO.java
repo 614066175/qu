@@ -77,6 +77,12 @@ public class StandardDocDTO extends AuditDomain {
     @ExcelColumn(zh = "分组描述", en = "groupDesc", groups = {Group1.class})
     private String groupDesc;
 
+    @Transient
+    private String createdByName;
+
+    @Transient
+    private String lastUpdatedByName;
+
     public interface Group1 {
     }
 

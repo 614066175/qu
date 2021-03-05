@@ -155,4 +155,10 @@ public class DataStandardDTO extends AuditDomain{
     @Transient
     private String metadataType;
 
+    @Transient
+    private String createdByName;
+
+    @Transient
+    private String lastUpdatedByName;
+
 }

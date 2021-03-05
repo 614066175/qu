@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 import com.hand.hdsp.quality.api.dto.AssetFieldDTO;
@@ -11,6 +12,7 @@ import com.hand.hdsp.quality.app.service.DataStandardService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.DataStandard;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
+import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -42,9 +44,12 @@ public class DataStandardController {
 
     private final DataStandardRepository dataStandardRepository;
 
-    public DataStandardController(DataStandardService dataStandardService, DataStandardRepository dataStandardRepository) {
+    private final StandardDocMapper standardDocMapper;
+
+    public DataStandardController(DataStandardService dataStandardService, DataStandardRepository dataStandardRepository, StandardDocMapper standardDocMapper) {
         this.dataStandardService = dataStandardService;
         this.dataStandardRepository = dataStandardRepository;
+        this.standardDocMapper = standardDocMapper;
     }
 
 
@@ -59,7 +64,14 @@ public class DataStandardController {
     @GetMapping("/list")
     public ResponseEntity<Page<DataStandardDTO>> list(@PathVariable(name = "organizationId") Long tenantId, DataStandardDTO dataStandardDTO, PageRequest pageRequest) {
         dataStandardDTO.setTenantId(tenantId);
-        return Results.success(dataStandardService.list(pageRequest, dataStandardDTO));
+        Page<DataStandardDTO> list = dataStandardService.list(pageRequest, dataStandardDTO);
+        list.getContent().stream()
+                .peek(dto -> {
+                    dto.setCreatedByName(standardDocMapper.selectUserNameById(dto.getCreatedBy()));
+                    dto.setLastUpdatedByName(standardDocMapper.selectUserNameById(dto.getLastUpdatedBy()));
+                })
+                .collect(Collectors.toList());
+        return Results.success(list);
     }
 
     @ApiOperation(value = "数据标准详情")

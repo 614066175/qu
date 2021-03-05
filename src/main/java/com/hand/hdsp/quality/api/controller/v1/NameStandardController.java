@@ -1,30 +1,31 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import java.util.List;
-
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+
+import com.hand.hdsp.quality.api.dto.NameStandardDTO;
 import com.hand.hdsp.quality.app.service.NameStandardService;
 import com.hand.hdsp.quality.config.SwaggerTags;
+import com.hand.hdsp.quality.domain.entity.NameStandard;
+import com.hand.hdsp.quality.domain.repository.NameStandardRepository;
+import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
 import com.hand.hdsp.quality.infra.vo.NameStandardDatasourceVO;
 import com.hand.hdsp.quality.infra.vo.NameStandardTableVO;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.swagger.annotations.*;
-import org.hzero.core.util.Results;
-import org.hzero.core.base.BaseController;
-import com.hand.hdsp.quality.domain.entity.NameStandard;
-import com.hand.hdsp.quality.api.dto.NameStandardDTO;
-import com.hand.hdsp.quality.domain.repository.NameStandardRepository;
-import org.hzero.export.annotation.ExcelExport;
-import org.hzero.export.vo.ExportParam;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
+import io.swagger.annotations.*;
+import org.hzero.core.base.BaseController;
+import org.hzero.core.util.Results;
+import org.hzero.export.annotation.ExcelExport;
+import org.hzero.export.vo.ExportParam;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 /**
@@ -39,11 +40,13 @@ public class NameStandardController extends BaseController {
 
     private final NameStandardRepository nameStandardRepository;
     private final NameStandardService nameStandardService;
+    private final StandardDocMapper standardDocMapper;
 
     public NameStandardController(NameStandardRepository nameStandardRepository,
-                                  NameStandardService nameStandardService) {
+                                  NameStandardService nameStandardService, StandardDocMapper standardDocMapper) {
         this.nameStandardRepository = nameStandardRepository;
         this.nameStandardService = nameStandardService;
+        this.standardDocMapper = standardDocMapper;
     }
 
     @ApiOperation(value = "命名标准表列表")
@@ -60,6 +63,12 @@ public class NameStandardController extends BaseController {
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         nameStandardDTO.setTenantId(tenantId);
         Page<NameStandardDTO> list = PageHelper.doPage(pageRequest,()->nameStandardRepository.list(nameStandardDTO));
+        list.getContent().stream()
+                .peek(dto -> {
+                    dto.setCreatedByName(standardDocMapper.selectUserNameById(dto.getCreatedBy()));
+                    dto.setLastUpdatedByName(standardDocMapper.selectUserNameById(dto.getLastUpdatedBy()));
+                })
+                .collect(Collectors.toList());
         return Results.success(list);
     }
 
