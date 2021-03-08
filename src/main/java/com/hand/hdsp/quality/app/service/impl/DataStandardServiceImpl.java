@@ -192,13 +192,17 @@ public class DataStandardServiceImpl implements DataStandardService {
             throw new CommonException(ErrorCode.DATA_STANDARD_NOT_EXIST);
         }
         DataStandardDTO dataStandardDTO = dataStandardDTOList.get(0);
-        //解密邮箱，电话
-        if (Strings.isNotEmpty(dataStandardDTO.getChargeTel())) {
-            dataStandardDTO.setChargeTel(DataSecurityHelper.decrypt(dataStandardDTO.getChargeTel()));
+        //判断当前租户是否启用安全加密
+        if(dataStandardMapper.isEncrypt(tenantId)==1){
+            //解密邮箱，电话
+            if (Strings.isNotEmpty(dataStandardDTO.getChargeTel())) {
+                dataStandardDTO.setChargeTel(DataSecurityHelper.decrypt(dataStandardDTO.getChargeTel()));
+            }
+            if (Strings.isNotEmpty(dataStandardDTO.getChargeEmail())) {
+                dataStandardDTO.setChargeEmail(DataSecurityHelper.decrypt(dataStandardDTO.getChargeEmail()));
+            }
         }
-        if (Strings.isNotEmpty(dataStandardDTO.getChargeEmail())) {
-            dataStandardDTO.setChargeEmail(DataSecurityHelper.decrypt(dataStandardDTO.getChargeEmail()));
-        }
+
         convertToDataLengthList(dataStandardDTO);
         List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
                 .andWhere(Sqls.custom()

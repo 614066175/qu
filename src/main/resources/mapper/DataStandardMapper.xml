@@ -163,5 +163,10 @@
             join hzero_platform.`hpfm_employee` he on heu.employee_id=he.employee_id
             where iu.id=#{chargeId}
     </select>
+    <select id="isEncrypt" resultType="java.lang.Long">
+        select enable_data_security
+        from oauth_password_policy
+        where organization_id=#{tenantId}
+    </select>
 
 </mapper>

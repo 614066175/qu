@@ -55,4 +55,6 @@ public interface DataStandardMapper extends BaseMapper<DataStandard> {
     String selectChargeDeptNameById(@Param("chargeDeptId") Long chargeDeptId);
 
     List<String> selectEmployeeByChargeId(@Param("chargeId") Long chargeId);
+
+    Long isEncrypt(Long tenantId);
 }
