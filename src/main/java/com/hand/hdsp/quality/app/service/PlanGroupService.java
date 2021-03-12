@@ -3,7 +3,6 @@ package com.hand.hdsp.quality.app.service;
 import java.util.List;
 
 import com.hand.hdsp.quality.api.dto.PlanGroupDTO;
-import com.hand.hdsp.quality.infra.vo.PlanGroupVO;
 import org.hzero.export.vo.ExportParam;
 
 /**
@@ -27,5 +26,5 @@ public interface PlanGroupService {
      * @param exportParam
      * @return
      */
-    List<PlanGroupDTO> export(PlanGroupVO dto, ExportParam exportParam);
+    List<PlanGroupDTO> export(PlanGroupDTO dto, ExportParam exportParam);
 }

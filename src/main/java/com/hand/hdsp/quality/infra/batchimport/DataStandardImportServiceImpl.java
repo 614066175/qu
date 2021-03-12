@@ -1,4 +1,4 @@
-package com.hand.hdsp.quality.app.service.impl;
+package com.hand.hdsp.quality.infra.batchimport;
 
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.CREATE;
 

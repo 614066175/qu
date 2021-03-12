@@ -1,4 +1,4 @@
-package com.hand.hdsp.quality.app.service.impl;
+package com.hand.hdsp.quality.infra.batchimport;
 
 import java.io.IOException;
 

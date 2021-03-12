@@ -9,7 +9,6 @@ import com.hand.hdsp.quality.app.service.PlanGroupService;
 import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
-import com.hand.hdsp.quality.infra.vo.PlanGroupVO;
 import io.choerodon.core.exception.CommonException;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
@@ -59,7 +58,7 @@ public class PlanGroupServiceImpl implements PlanGroupService {
     }
 
     @Override
-    public List<PlanGroupDTO> export(PlanGroupVO dto, ExportParam exportParam) {
+    public List<PlanGroupDTO> export(PlanGroupDTO dto, ExportParam exportParam) {
         List<PlanGroupDTO> planGroupDTOList = planGroupRepository.selectDTOByCondition(Condition.builder(PlanGroup.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(PlanGroup.FIELD_GROUP_TYPE, BATCH))

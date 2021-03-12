@@ -24,6 +24,7 @@ import com.hand.hdsp.quality.infra.feign.WorkFlowFeign;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import com.hand.hdsp.quality.infra.util.DataLengthHandler;
 import com.hand.hdsp.quality.infra.util.DataPatternHandler;
+import com.hand.hdsp.quality.infra.util.StandardHandler;
 import com.hand.hdsp.quality.infra.util.ValueRangeHandler;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -94,6 +95,7 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     private final ValueRangeHandler valueRangeHandler;
 
+
     private final DriverSessionService driverSessionService;
 
     private final StandardGroupRepository standardGroupRepository;
@@ -103,6 +105,10 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     @Autowired
     private WorkFlowFeign workFlowFeign;
+
+
+    @Autowired
+    private List<StandardHandler> handlers;
 
     @Resource
     private AssetFeign assetFeign;
@@ -521,15 +527,12 @@ public class DataStandardServiceImpl implements DataStandardService {
                 .weight(DEFAULT_WEIGHT)
                 .build();
         List<BatchPlanFieldLineDTO> batchPlanFieldLineDTOList = new ArrayList<>();
-        if (Strings.isNotEmpty(dataStandardDTO.getDataPattern())) {
-            batchPlanFieldLineDTOList.add(dataPatternHandler.handle(dataStandardDTO));
-        }
-        if (Strings.isNotEmpty(dataStandardDTO.getDataLength())) {
-            batchPlanFieldLineDTOList.add(dataLengthHandler.handle(dataStandardDTO));
-        }
-        if (Strings.isNotEmpty(dataStandardDTO.getValueRange())) {
-            batchPlanFieldLineDTOList.add(valueRangeHandler.handle(dataStandardDTO));
-        }
+        handlers.forEach(standardHandler -> {
+            BatchPlanFieldLineDTO fieldLineDTO = standardHandler.handle(dataStandardDTO);
+            if(fieldLineDTO!=null){
+                batchPlanFieldLineDTOList.add(fieldLineDTO);
+            }
+        });
         batchPlanFieldDTO.setBatchPlanFieldLineDTOList(batchPlanFieldLineDTOList);
         return batchPlanFieldDTO;
     }

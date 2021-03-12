@@ -144,7 +144,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     public void generate(Long tenantId, Long planId) {
         BatchPlanDTO batchPlanDTO = batchPlanRepository.selectDTOByPrimaryKey(planId);
         // 创建或更新job
-        String jobName = String.format(PlanConstant.JOB_NAME, tenantId, batchPlanDTO.getPlanCode());
+        String jobName = String.format(PlanConstant.JOB_NAME,tenantId, batchPlanDTO.getPlanCode());
         ResponseEntity<String> jobResult = dispatchJobFeign.createOrUpdate(tenantId,
                 JobDTO.builder().themeId(PlanConstant.DEFAULT_THEME_ID).layerId(PlanConstant.DEFAULT_LAYER_ID)
                         .jobName(jobName).jobDescription(batchPlanDTO.getPlanName())

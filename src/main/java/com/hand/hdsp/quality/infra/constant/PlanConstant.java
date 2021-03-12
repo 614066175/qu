@@ -15,7 +15,7 @@ public interface PlanConstant {
     /**
      * 数据质量任务类型
      */
-    String JOB_TYPE = "REST";
+    String JOB_TYPE = "QUALITY";
 
     /**
      * 数据质量任务分类
@@ -81,7 +81,7 @@ public interface PlanConstant {
     /**
      * 数据质量任务名称
      */
-    String JOB_NAME = "QUA_%d_%s";
+    String JOB_NAME = "DQ%d_%s";
 
 
     /**

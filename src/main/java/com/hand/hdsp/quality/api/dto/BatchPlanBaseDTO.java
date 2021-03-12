@@ -106,4 +106,7 @@ public class BatchPlanBaseDTO extends AuditDomain {
 
     @Transient
     private String planName;
+
+    @Transient
+    private String planCode;
 }

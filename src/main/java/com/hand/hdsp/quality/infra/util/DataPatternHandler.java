@@ -9,6 +9,7 @@ import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.constant.WarningLevel;
+import org.apache.logging.log4j.util.Strings;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +28,9 @@ public class DataPatternHandler implements StandardHandler {
 
     @Override
     public BatchPlanFieldLineDTO handle(DataStandardDTO dataStandardDTO) {
-
+        if(Strings.isEmpty(dataStandardDTO.getDataPattern())){
+            return null;
+        }
         BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()
                 .checkWay(PlanConstant.CheckWay.REGULAR)
                 .checkItem(PlanConstant.CheckItem.REGULAR)

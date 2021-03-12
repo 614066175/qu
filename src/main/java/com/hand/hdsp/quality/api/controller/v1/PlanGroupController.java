@@ -9,7 +9,6 @@ import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.domain.repository.PlanGroupRepository;
 import com.hand.hdsp.quality.infra.vo.PlanGroupTreeVO;
-import com.hand.hdsp.quality.infra.vo.PlanGroupVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
@@ -162,7 +161,7 @@ public class PlanGroupController extends BaseController {
     @GetMapping("/export")
     @ExcelExport(value = PlanGroupDTO.class)
     public ResponseEntity<?> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    PlanGroupVO dto,
+                                    PlanGroupDTO dto,
                                     ExportParam exportParam,
                                     HttpServletResponse response) {
         dto.setTenantId(tenantId);

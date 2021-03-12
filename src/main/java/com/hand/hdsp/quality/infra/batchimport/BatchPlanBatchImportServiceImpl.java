@@ -1,12 +1,12 @@
-package com.hand.hdsp.quality.app.service.impl;
+package com.hand.hdsp.quality.infra.batchimport;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hand.hdsp.quality.api.dto.RuleDTO;
-import com.hand.hdsp.quality.domain.repository.RuleRepository;
+import com.hand.hdsp.quality.api.dto.BatchPlanDTO;
+import com.hand.hdsp.quality.domain.repository.BatchPlanRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -18,29 +18,32 @@ import org.hzero.boot.imported.infra.validator.annotation.ImportService;
  * description
  * </p>
  *
- * @author lgl 2020/12/09 16:41
+ * @author lgl 2020/12/21 19:37
  * @since 1.0
  */
 @Slf4j
-@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_RULE,sheetIndex = 2)
-public class RuleBatchImportServiceImpl implements IBatchImportService {
+@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_BATCH_PLAN)
+public class BatchPlanBatchImportServiceImpl implements IBatchImportService {
     private final ObjectMapper objectMapper;
-    private final RuleRepository ruleRepository;
 
-    public RuleBatchImportServiceImpl(ObjectMapper objectMapper, RuleRepository ruleRepository) {
+    private final BatchPlanRepository batchPlanRepository;
+
+    public BatchPlanBatchImportServiceImpl(ObjectMapper objectMapper, BatchPlanRepository batchPlanRepository) {
         this.objectMapper = objectMapper;
-        this.ruleRepository = ruleRepository;
+        this.batchPlanRepository = batchPlanRepository;
     }
+
 
     @Override
     public Boolean doImport(List<String> data) {
+        // 设置租户Id
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
-        List<RuleDTO> ruleDTOList = new ArrayList<>(data.size());
+        List<BatchPlanDTO> batchPlanDTOList = new ArrayList<>(data.size());
         try {
             for (String json : data) {
-                RuleDTO ruleDTO = objectMapper.readValue(json, RuleDTO.class);
-                ruleDTO.setTenantId(tenantId);
-                ruleDTOList.add(ruleDTO);
+                BatchPlanDTO batchPlanDTO = objectMapper.readValue(json, BatchPlanDTO.class);
+                batchPlanDTO.setTenantId(tenantId);
+                batchPlanDTOList.add(batchPlanDTO);
             }
         } catch (IOException e) {
             // 失败
@@ -48,7 +51,7 @@ public class RuleBatchImportServiceImpl implements IBatchImportService {
             log.error("Permission Object Read Json Error", e);
             return false;
         }
-        ruleRepository.batchImport(ruleDTOList);
+        batchPlanRepository.batchImport(batchPlanDTOList);
         return true;
     }
 }
