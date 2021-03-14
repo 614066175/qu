@@ -145,31 +145,35 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         BatchPlanDTO batchPlanDTO = batchPlanRepository.selectDTOByPrimaryKey(planId);
         // 创建或更新job
         String jobName = String.format(PlanConstant.JOB_NAME,tenantId, batchPlanDTO.getPlanCode());
+
+        //生成数据质量command
+        String jobCommand=generateCommand(batchPlanDTO);
+
         ResponseEntity<String> jobResult = dispatchJobFeign.createOrUpdate(tenantId,
                 JobDTO.builder().themeId(PlanConstant.DEFAULT_THEME_ID).layerId(PlanConstant.DEFAULT_LAYER_ID)
-                        .jobName(jobName).jobDescription(batchPlanDTO.getPlanName())
+                        .jobName(jobName).jobCommand(jobCommand).jobDescription(batchPlanDTO.getPlanName())
                         .jobClass(PlanConstant.JOB_CLASS).jobType(PlanConstant.JOB_TYPE)
                         .jobLevel(PlanConstant.JOB_LEVEL).enabledFlag(1).tenantId(tenantId).build());
         ResponseUtils.getResponse(jobResult, JobDTO.class);
 
         // 查询是否存在restJob
-        ResponseEntity<String> findResult = restJobFeign.findName(tenantId, jobName);
-        RestJobDTO restJobDTO = ResponseUtils.getResponse(findResult, RestJobDTO.class);
-
-        restJobDTO.setExternal(0);
-        restJobDTO.setMethod(PlanConstant.JOB_METHOD);
-        restJobDTO.setServiceCode(serviceId);
-        restJobDTO.setServiceName(serviceShort);
-        restJobDTO.setUseGateway(1);
-        restJobDTO.setUrl(String.format(JOB_URL, tenantId, planId));
-        restJobDTO.setJobName(jobName);
-        restJobDTO.setBody(JOB_BODY);
-        restJobDTO.setHeader(JOB_HEADER);
-        restJobDTO.setSettingInfo(JOB_SETTING_INFO);
-
-        // 插入或更新
-        ResponseEntity<String> restJobResult = restJobFeign.create(tenantId, restJobDTO);
-        ResponseUtils.getResponse(restJobResult, RestJobDTO.class);
+//        ResponseEntity<String> findResult = restJobFeign.findName(tenantId, jobName);
+//        RestJobDTO restJobDTO = ResponseUtils.getResponse(findResult, RestJobDTO.class);
+//
+//        restJobDTO.setExternal(0);
+//        restJobDTO.setMethod(PlanConstant.JOB_METHOD);
+//        restJobDTO.setServiceCode(serviceId);
+//        restJobDTO.setServiceName(serviceShort);
+//        restJobDTO.setUseGateway(1);
+//        restJobDTO.setUrl(String.format(JOB_URL, tenantId, planId));
+//        restJobDTO.setJobName(jobName);
+//        restJobDTO.setBody(JOB_BODY);
+//        restJobDTO.setHeader(JOB_HEADER);
+//        restJobDTO.setSettingInfo(JOB_SETTING_INFO);
+//
+//        // 插入或更新
+//        ResponseEntity<String> restJobResult = restJobFeign.create(tenantId, restJobDTO);
+//        ResponseUtils.getResponse(restJobResult, RestJobDTO.class);
 
         // 保存jobName到BatchPlan中
         batchPlanDTO.setPlanJobName(jobName);
@@ -197,6 +201,38 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
         }
 
+    }
+
+    /**
+     * 生成job命令
+     *
+     * @param batchPlanDTO BatchPlanDTO
+     * @return command
+     */
+    private String generateCommand(BatchPlanDTO batchPlanDTO) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("type=rest\n")
+                .append("rest.grantType=").append("PASSWORD").append("\n")
+                .append("rest.clientId=").append("client").append("\n")
+                .append("rest.clientSecret=").append("secret").append("\n")
+                .append("rest.tokenUri=").append("oauth/public/no-password-login").append("\n")
+                .append("rest.username=").append("admin").append("\n")
+                .append("rest.password=").append("NO PASSWORD").append("\n")
+                .append("rest.external=false\n")
+                .append("rest.app=hdsp-quality\n")
+                .append("rest.useGateway=true\n")
+                .append("rest.uri=/xqua/v2/")
+                .append(batchPlanDTO.getTenantId())
+                .append("/batch-plans/exec/")
+                .append(batchPlanDTO.getPlanId()+"\n")
+                .append("rest.method=GET\n")
+                .append("rest.contentType=application/json\n")
+                .append("rest.external=false\n")
+                .append("rest.body={}\n")
+                .append("rest.auth=OAUTH2\n")
+                .append("rest.retry.enabled=false\n")
+                .append("rest.callback.enabled=false\n");
+        return builder.toString();
     }
 
 
