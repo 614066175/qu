@@ -22,7 +22,7 @@ import org.hzero.boot.imported.infra.validator.annotation.ImportService;
  * @since 1.0
  */
 @Slf4j
-@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_RULE,sheetIndex = 2)
+@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_RULE,sheetIndex = 1)
 public class RuleBatchImportServiceImpl implements IBatchImportService {
     private final ObjectMapper objectMapper;
     private final RuleRepository ruleRepository;

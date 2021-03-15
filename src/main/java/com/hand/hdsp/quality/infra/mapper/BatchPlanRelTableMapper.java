@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.infra.mapper;
 
+import com.hand.hdsp.quality.api.dto.BatchPlanRelTableDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanRelTable;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Delete;
@@ -20,4 +21,6 @@ public interface BatchPlanRelTableMapper extends BaseMapper<BatchPlanRelTable> {
      */
     @Delete("delete from xqua_batch_plan_rel_table where plan_base_id = #{planBaseId}")
     int deleteByPlanBaseId(@Param("planBaseId") Long planBaseId);
+
+    BatchPlanRelTableDTO selectDatasourceIdAndType(@Param("batchPlanRelTableDTO") BatchPlanRelTableDTO batchPlanRelTableDTO);
 }

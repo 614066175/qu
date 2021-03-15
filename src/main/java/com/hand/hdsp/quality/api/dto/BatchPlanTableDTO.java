@@ -1,11 +1,13 @@
 package com.hand.hdsp.quality.api.dto;
 
 import java.util.List;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.hand.hdsp.quality.infra.render.BooleanColumnRender;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -61,7 +63,7 @@ public class BatchPlanTableDTO extends AuditDomain {
 
     @ApiModelProperty(value = "是否异常阻断")
     @NotNull
-    @ExcelColumn(zh = "是否异常阻断",en = "exception block")
+    @ExcelColumn(zh = "是否异常阻断",en = "exception block" , renderers = BooleanColumnRender.class)
     private Integer exceptionBlock;
 
     @ApiModelProperty(value = "权重")
@@ -99,4 +101,10 @@ public class BatchPlanTableDTO extends AuditDomain {
 
     @ApiModelProperty(value = "方案告警等级List")
     private List<WarningLevelDTO> warningLevelList;
+
+    @Transient
+    private String exceptionBlockFlag;
+
+    @Transient
+    private String planBaseCode;
 }

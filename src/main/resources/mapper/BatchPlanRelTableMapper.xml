@@ -27,4 +27,14 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+    <select id="selectDatasourceIdAndType" resultType="com.hand.hdsp.quality.api.dto.BatchPlanRelTableDTO">
+        SELECT
+            datasource_id relDatasourceId,
+            db_type relDatasourceType
+        FROM
+            hpfm_datasource
+        WHERE
+            datasource_code =  #{batchPlanRelTableDTO.datasourceCode}
+            AND tenant_id = #{batchPlanRelTableDTO.tenantId}
+    </select>
 </mapper>

@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.infra.batchimport;
 
+import static com.hand.hdsp.quality.infra.constant.GroupType.BATCH;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +24,7 @@ import org.hzero.boot.imported.infra.validator.annotation.ImportService;
  * @since 1.0
  */
 @Slf4j
-@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_BATCH_PLAN,sheetIndex = 1)
+@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_BATCH_PLAN, sheetName = "分组")
 public class PlanGroupBatchImportImpl implements IBatchImportService {
     private final ObjectMapper objectMapper;
 
@@ -43,6 +45,8 @@ public class PlanGroupBatchImportImpl implements IBatchImportService {
             for (String json : data) {
                 PlanGroup planGroup = objectMapper.readValue(json, PlanGroup.class);
                 planGroup.setTenantId(tenantId);
+                planGroup.setGroupType(BATCH);
+                planGroup.setParentGroupId(0L);
                 planGroups.add(planGroup);
             }
         } catch (IOException e) {

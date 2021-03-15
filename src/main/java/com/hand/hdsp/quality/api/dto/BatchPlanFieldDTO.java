@@ -1,17 +1,21 @@
 package com.hand.hdsp.quality.api.dto;
 
+import java.util.List;
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.hand.hdsp.quality.infra.render.BooleanColumnRender;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.List;
+import org.hzero.export.annotation.ExcelColumn;
+import org.hzero.export.annotation.ExcelSheet;
 
 /**
  * <p>批数据方案-字段规则表 数据传输对象</p>
@@ -27,6 +31,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @VersionAudit
 @ModifyAudit
+@ExcelSheet(zh = "字段级规则",en = "batch plan field")
 public class BatchPlanFieldDTO extends AuditDomain {
 
     @ApiModelProperty("表ID，主键，供其他表做外键")
@@ -39,24 +44,30 @@ public class BatchPlanFieldDTO extends AuditDomain {
     @ApiModelProperty(value = "规则编码")
     @NotBlank
     @Size(max = 50)
+    @ExcelColumn(zh = "规则编码",en = "rule code")
     private String ruleCode;
 
     @ApiModelProperty(value = "规则名称")
     @NotBlank
     @Size(max = 255)
+    @ExcelColumn(zh = "规则名称",en = "rule name")
     private String ruleName;
 
     @ApiModelProperty(value = "规则描述")
+    @ExcelColumn(zh = "规则描述",en = "rule desc")
     private String ruleDesc;
 
     @ApiModelProperty(value = "校验类别 HDSP.XQUA.CHECK_TYPE")
+    @ExcelColumn(zh = "校验类型",en = "check type")
     private String checkType;
 
     @ApiModelProperty(value = "是否异常阻断")
     @NotNull
+    @ExcelColumn(zh = "是否异常阻断",en = "exception block" , renderers = BooleanColumnRender.class)
     private Integer exceptionBlock;
 
     @ApiModelProperty(value = "权重")
+    @ExcelColumn(zh = "权重",en = "weight")
     private Long weight;
 
     @ApiModelProperty(value = "租户ID")
@@ -109,4 +120,10 @@ public class BatchPlanFieldDTO extends AuditDomain {
     private String ruleType;
 
     private String realName;
+
+    @Transient
+    private String exceptionBlockFlag;
+
+    @Transient
+    private String planBaseCode;
 }

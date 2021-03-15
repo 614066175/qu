@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.api.dto;
 
 import java.util.List;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -83,5 +84,7 @@ public class BatchPlanDTO extends AuditDomain {
     @ExcelColumn(zh = "评估方案基础配置",en = "batchPlanBaseDTOList",child = true)
     private List<BatchPlanBaseDTO> batchPlanBaseDTOList;
 
+    @Transient
+    private String groupCode;
 
 }

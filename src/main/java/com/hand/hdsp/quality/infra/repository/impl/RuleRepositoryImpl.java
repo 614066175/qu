@@ -6,9 +6,11 @@ import java.util.List;
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
+import com.hand.hdsp.quality.api.dto.RuleLineDTO;
 import com.hand.hdsp.quality.domain.entity.Rule;
 import com.hand.hdsp.quality.domain.entity.RuleGroup;
 import com.hand.hdsp.quality.domain.repository.RuleGroupRepository;
+import com.hand.hdsp.quality.domain.repository.RuleLineRepository;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
 import com.hand.hdsp.quality.infra.mapper.RuleMapper;
 import io.choerodon.core.domain.Page;
@@ -29,10 +31,12 @@ public class RuleRepositoryImpl extends BaseRepositoryImpl<Rule, RuleDTO> implem
 
     private final RuleMapper ruleMapper;
     private final RuleGroupRepository ruleGroupRepository;
+    private final RuleLineRepository ruleLineRepository;
 
-    public RuleRepositoryImpl(RuleMapper ruleMapper, RuleGroupRepository ruleGroupRepository) {
+    public RuleRepositoryImpl(RuleMapper ruleMapper, RuleGroupRepository ruleGroupRepository, RuleLineRepository ruleLineRepository) {
         this.ruleMapper = ruleMapper;
         this.ruleGroupRepository = ruleGroupRepository;
+        this.ruleLineRepository = ruleLineRepository;
     }
 
     @Override
@@ -53,16 +57,9 @@ public class RuleRepositoryImpl extends BaseRepositoryImpl<Rule, RuleDTO> implem
     @Override
     public void batchImport(List<RuleDTO> ruleDTOList) {
         List<RuleDTO> batchRuleDTOList=new ArrayList<>();
+        List<RuleLineDTO> ruleLineDTOList=new ArrayList<>();
         if(CollectionUtils.isNotEmpty(ruleDTOList)){
-            ruleDTOList.forEach(ruleDTO -> {
-                List<RuleDTO> list = selectDTOByCondition(Condition.builder(Rule.class)
-                        .andWhere(Sqls.custom()
-                                .andEqualTo(Rule.FIELD_RULE_CODE, ruleDTO.getRuleCode())
-                                .andEqualTo(Rule.FIELD_TENANT_ID, ruleDTO.getTenantId()))
-                        .build());
-                if(CollectionUtils.isNotEmpty(list)){
-                    return;
-                }
+            for (RuleDTO ruleDTO : ruleDTOList) {
                 List<RuleGroupDTO> ruleGroupDTOS = ruleGroupRepository.selectDTOByCondition(Condition.builder(RuleGroup.class)
                         .andWhere(Sqls.custom()
                                 .andEqualTo(RuleGroup.FIELD_GROUP_CODE, ruleDTO.getGroupCode())
@@ -71,21 +68,30 @@ public class RuleRepositoryImpl extends BaseRepositoryImpl<Rule, RuleDTO> implem
                 if (CollectionUtils.isNotEmpty(ruleGroupDTOS)) {
                     ruleDTO.setGroupId(ruleGroupDTOS.get(0).getGroupId());
                 } else {
-                    //创建分组
-                    RuleGroupDTO ruleGroupDTO = RuleGroupDTO.builder()
-                            .groupCode(ruleDTO.getGroupCode())
-                            .groupDesc(ruleDTO.getGroupDesc())
-                            .groupName(ruleDTO.getGroupName())
-                            .parentGroupId(0L)
-                            .tenantId(ruleDTO.getTenantId())
-                            .build();
-                    ruleGroupRepository.insertDTOSelective(ruleGroupDTO);
-                    ruleDTO.setGroupId(ruleGroupDTO.getGroupId());
+                    //跳过没有分组的规则
+                    continue;
                 }
                 batchRuleDTOList.add(ruleDTO);
-            });
+            }
         }
-        batchInsertDTOSelective(batchRuleDTOList);
+        //插入序列化返回业务属性字段拿不到
+        List<RuleDTO> list = batchInsertDTOSelective(batchRuleDTOList);
+        for (int i=0;i<batchRuleDTOList.size();i++) {
+            //获取规则行
+            RuleDTO ruleDTO = batchRuleDTOList.get(i);
+            RuleLineDTO ruleLineDTO = RuleLineDTO.builder()
+                    .ruleId(list.get(i).getRuleId())
+                    .checkWay(ruleDTO.getCheckWay())
+                    .checkItem(ruleDTO.getCheckItem())
+                    .compareWay(ruleDTO.getCompareWay())
+                    .countType(ruleDTO.getCountType())
+                    .regularExpression(ruleDTO.getRegularExpression())
+                    .warningLevel(ruleDTO.getWarningLevel())
+                    .tenantId(ruleDTO.getTenantId())
+                    .build();
+            ruleLineDTOList.add(ruleLineDTO);
+        }
+        ruleLineRepository.batchInsertDTOSelective(ruleLineDTOList);
     }
 
 }

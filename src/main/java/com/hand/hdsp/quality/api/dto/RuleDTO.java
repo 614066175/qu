@@ -73,7 +73,7 @@ public class RuleDTO extends AuditDomain {
 
     @ApiModelProperty("是否异常阻断")
     @NotNull
-    @ExcelColumn(zh = "是否异常阻断",en = "rule type" , renderers = BooleanColumnRender.class)
+    @ExcelColumn(zh = "是否异常阻断",en = "exception block" , renderers = BooleanColumnRender.class)
     private Integer exceptionBlock;
 
     @ApiModelProperty("权重")

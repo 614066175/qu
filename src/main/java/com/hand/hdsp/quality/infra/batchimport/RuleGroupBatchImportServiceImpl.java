@@ -22,7 +22,7 @@ import org.hzero.boot.imported.infra.validator.annotation.ImportService;
  * @since 1.0
  */
 @Slf4j
-@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_RULE,sheetIndex = 1)
+@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_RULE,sheetIndex = 0)
 public class RuleGroupBatchImportServiceImpl implements IBatchImportService {
     private final ObjectMapper objectMapper;
     private final RuleGroupRepository ruleGroupRepository;
@@ -40,6 +40,7 @@ public class RuleGroupBatchImportServiceImpl implements IBatchImportService {
         try {
             for (String json : data) {
                 RuleGroupDTO ruleGroupDTO = objectMapper.readValue(json, RuleGroupDTO.class);
+                ruleGroupDTO.setParentGroupId(0L);
                 ruleGroupDTO.setTenantId(tenantId);
                 ruleGroupDTOList.add(ruleGroupDTO);
             }
@@ -49,7 +50,7 @@ public class RuleGroupBatchImportServiceImpl implements IBatchImportService {
             log.error("Permission Object Read Json Error", e);
             return false;
         }
-        ruleGroupRepository.batchImport(ruleGroupDTOList);
+        ruleGroupRepository.batchInsertDTOSelective(ruleGroupDTOList);
         return true;
     }
 }
