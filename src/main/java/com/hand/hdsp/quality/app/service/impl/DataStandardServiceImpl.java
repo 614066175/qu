@@ -207,6 +207,9 @@ public class DataStandardServiceImpl implements DataStandardService {
             if (Strings.isNotEmpty(dataStandardDTO.getChargeEmail())) {
                 dataStandardDTO.setChargeEmail(DataSecurityHelper.decrypt(dataStandardDTO.getChargeEmail()));
             }
+            if (Strings.isNotEmpty(dataStandardDTO.getChargeDeptName())) {
+                dataStandardDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeDeptName()));
+            }
         }
 
         convertToDataLengthList(dataStandardDTO);

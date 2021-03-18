@@ -81,11 +81,11 @@ public class BatchPlanRelTableDTO extends AuditDomain {
     private Long relDatasourceId;
 
     @ApiModelProperty(value = "关联数据库")
-    @ExcelColumn(zh = "schema",en = "rel schema")
+    @ExcelColumn(zh = "源库名",en = "rel schema")
     private String relSchema;
 
     @ApiModelProperty(value = "关联表名")
-    @ExcelColumn(zh = "表名",en = "table name")
+    @ExcelColumn(zh = "源表名",en = "table name")
     private String relTableName;
 
     @ApiModelProperty(value = "关联表条件where")

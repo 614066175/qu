@@ -4,13 +4,16 @@ import java.util.List;
 import java.util.Objects;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
-import com.hand.hdsp.quality.domain.entity.NameStandard;
 import com.hand.hdsp.quality.api.dto.NameStandardDTO;
+import com.hand.hdsp.quality.domain.entity.NameStandard;
 import com.hand.hdsp.quality.domain.repository.NameStandardRepository;
+import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import com.hand.hdsp.quality.infra.mapper.NameStandardMapper;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
 
@@ -24,8 +27,11 @@ public class NameStandardRepositoryImpl extends BaseRepositoryImpl<NameStandard,
 
     private final NameStandardMapper nameStandardMapper;
 
-    public NameStandardRepositoryImpl(NameStandardMapper nameStandardMapper) {
+    private final DataStandardMapper dataStandardMapper;
+
+    public NameStandardRepositoryImpl(NameStandardMapper nameStandardMapper, DataStandardMapper dataStandardMapper) {
         this.nameStandardMapper = nameStandardMapper;
+        this.dataStandardMapper = dataStandardMapper;
     }
 
     @Override
@@ -61,6 +67,20 @@ public class NameStandardRepositoryImpl extends BaseRepositoryImpl<NameStandard,
 
     @Override
     public NameStandardDTO detail(Long standardId) {
-        return nameStandardMapper.detail(standardId);
+        NameStandardDTO nameStandardDTO = nameStandardMapper.detail(standardId);
+        //判断当前租户是否启用安全加密
+        if(dataStandardMapper.isEncrypt(nameStandardDTO.getTenantId())==1){
+            //解密邮箱，电话
+            if (Strings.isNotEmpty(nameStandardDTO.getChargeTel())) {
+                nameStandardDTO.setChargeTel(DataSecurityHelper.decrypt(nameStandardDTO.getChargeTel()));
+            }
+            if (Strings.isNotEmpty(nameStandardDTO.getChargeEmail())) {
+                nameStandardDTO.setChargeEmail(DataSecurityHelper.decrypt(nameStandardDTO.getChargeEmail()));
+            }
+            if (Strings.isNotEmpty(nameStandardDTO.getChargeDeptName())) {
+                nameStandardDTO.setChargeDeptName(DataSecurityHelper.decrypt(nameStandardDTO.getChargeDeptName()));
+            }
+        }
+        return nameStandardDTO;
     }
 }

@@ -45,8 +45,6 @@
         ${prefix}.ignore_case_flag,
         ${prefix}.charge_id,
         ${prefix}.charge_dept_id,
-        ${prefix}.charge_tel,
-        ${prefix}.charge_email,
         ${prefix}.enabled_flag,
         ${prefix}.latest_checked_status,
         ${prefix}.latest_abnormal_num,
@@ -123,6 +121,8 @@
         SELECT
         iu1.login_name AS lastUpdateName,
         iu2.login_name AS chargeName,
+        iu2.phone chargeTel,
+        iu2.email chargeEmail,
         hu.unit_name AS chargeDeptName,
         xsg.group_code AS groupCode,
         xsg.group_name AS groupName,
@@ -156,6 +156,8 @@
         SELECT
         iu1.login_name AS lastUpdateName,
         iu2.login_name AS chargeName,
+        iu2.phone chargeTel,
+        iu2.email chargeEmail,
         hu.unit_name AS chargeDeptName,
         xsg.group_code AS groupCode,
         xsg.group_name AS groupName,

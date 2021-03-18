@@ -16,13 +16,16 @@ import com.hand.hdsp.quality.domain.entity.StandardExtra;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
+import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -54,8 +57,10 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     private final ExtraVersionRepository extraVersionRepository;
 
+    private final DataStandardMapper dataStandardMapper;
 
-    public DataFieldServiceImpl(DataFieldRepository dataFieldRepository, StandardExtraRepository standardExtraRepository, StandardApproveRepository standardApproveRepository, DataFieldVersionRepository dataFieldVersionRepository, DataFieldMapper dataFieldMapper, DataStandardService dataStandardService, StandardAimRepository standardAimRepository, ExtraVersionRepository extraVersionRepository) {
+
+    public DataFieldServiceImpl(DataFieldRepository dataFieldRepository, StandardExtraRepository standardExtraRepository, StandardApproveRepository standardApproveRepository, DataFieldVersionRepository dataFieldVersionRepository, DataFieldMapper dataFieldMapper, DataStandardService dataStandardService, StandardAimRepository standardAimRepository, ExtraVersionRepository extraVersionRepository, DataStandardMapper dataStandardMapper) {
         this.dataFieldRepository = dataFieldRepository;
         this.standardExtraRepository = standardExtraRepository;
         this.standardApproveRepository = standardApproveRepository;
@@ -64,6 +69,7 @@ public class DataFieldServiceImpl implements DataFieldService {
         this.dataStandardService = dataStandardService;
         this.standardAimRepository = standardAimRepository;
         this.extraVersionRepository = extraVersionRepository;
+        this.dataStandardMapper = dataStandardMapper;
     }
 
     @Override
@@ -106,6 +112,19 @@ public class DataFieldServiceImpl implements DataFieldService {
             throw new CommonException(ErrorCode.DATA_FIELD_STANDARD_NOT_EXIST);
         }
         DataFieldDTO dataFieldDTO = dataFieldDTOList.get(0);
+        //判断当前租户是否启用安全加密
+        if(dataStandardMapper.isEncrypt(tenantId)==1){
+            //解密邮箱，电话
+            if (Strings.isNotEmpty(dataFieldDTO.getChargeTel())) {
+                dataFieldDTO.setChargeTel(DataSecurityHelper.decrypt(dataFieldDTO.getChargeTel()));
+            }
+            if (Strings.isNotEmpty(dataFieldDTO.getChargeEmail())) {
+                dataFieldDTO.setChargeEmail(DataSecurityHelper.decrypt(dataFieldDTO.getChargeEmail()));
+            }
+            if (Strings.isNotEmpty(dataFieldDTO.getChargeDeptName())) {
+                dataFieldDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeDeptName()));
+            }
+        }
         List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardExtra.FIELD_STANDARD_ID, fieldId)
