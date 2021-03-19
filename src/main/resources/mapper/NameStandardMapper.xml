@@ -32,6 +32,8 @@
         <result property="chargeDeptName" column="chargeDeptName"/>
         <result property="groupCode" column="groupCode"/>
         <result property="groupName" column="groupName"/>
+        <result column="chargeTel" property="chargeTel"/>
+        <result column="chargeEmail" property="chargeEmail"/>
     </resultMap>
 
     <sql id="BaseProperties">
