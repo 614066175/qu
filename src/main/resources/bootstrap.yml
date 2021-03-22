@@ -41,7 +41,7 @@ eureka:
     leaseExpirationDurationInSeconds: 30
     # 服务的一些元数据信息
     metadata-map:
-      VERSION: 1.5.0.RELEASE
+      VERSION: 1.6.0
       NODE_GROUP_ID: ${HZERO_NODE_GROUP_ID:0}
       PRODUCT_CODE: ${HZERO_PRODUCT_CODE:DEFAULT}
       PRODUCT_VERSION_CODE: ${HZERO_PRODUCT_VERSION_CODE:DEFAULT}
