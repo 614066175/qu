@@ -1,6 +1,9 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import java.util.Map;
+
 import com.hand.hdsp.quality.api.dto.BatchResultItemDTO;
+import com.hand.hdsp.quality.app.service.BatchResultItemService;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.domain.repository.BatchResultItemRepository;
 import io.choerodon.core.domain.Page;
@@ -31,8 +34,11 @@ public class BatchResultItemController extends BaseController {
 
     private final BatchResultItemRepository batchResultItemRepository;
 
-    public BatchResultItemController(BatchResultItemRepository batchResultItemRepository) {
+    private final BatchResultItemService batchResultItemService;
+
+    public BatchResultItemController(BatchResultItemRepository batchResultItemRepository, BatchResultItemService batchResultItemService) {
         this.batchResultItemRepository = batchResultItemRepository;
+        this.batchResultItemService = batchResultItemService;
     }
 
     @ApiOperation(value = "批数据方案结果表-校验项信息列表")
@@ -69,6 +75,26 @@ public class BatchResultItemController extends BaseController {
         Page<BatchResultItemDTO> list = batchResultItemRepository.assetTable(pageRequest, batchResultItemDTO);
         return Results.success(list);
     }
+
+    @ApiOperation(value = "数据地图数据质量热力分析")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/analysis-quality")
+    public ResponseEntity<Map<String, Map<String, Long>>> analysisQuality(@PathVariable(name = "organizationId") Long tenantId,
+                                        @RequestBody BatchResultItemDTO batchResultItemDTO) {
+        batchResultItemDTO.setTenantId(tenantId);
+        Map<String, Map<String, Long>> map = batchResultItemService.analysisQuality(batchResultItemDTO);
+        return Results.success(map);
+    }
+
+
+
+
 
     @ApiOperation(value = "评估结果各级规则错误信息")
     @ApiImplicitParams({@ApiImplicitParam(
