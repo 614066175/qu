@@ -1,5 +1,9 @@
 package com.hand.hdsp.quality.app.service;
 
+import java.util.Map;
+
+import com.hand.hdsp.quality.api.dto.BatchResultItemDTO;
+
 /**
  * <p>批数据方案结果表-校验项信息应用服务</p>
  *
@@ -7,4 +11,5 @@ package com.hand.hdsp.quality.app.service;
  */
 public interface BatchResultItemService {
 
+    Map<String, Map<String,Long>> analysisQuality(BatchResultItemDTO batchResultItemDTO);
 }
