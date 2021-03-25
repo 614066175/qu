@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: registry.cn-hangzhou.aliyuncs.com/hzero-hdip/hdsp-quality
+  repository: registry.choerodon.com.cn/hzero-hdip/hdsp-quality
   pullPolicy: Always
 
 preJob:
