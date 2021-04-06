@@ -202,8 +202,10 @@
 
     <select id="listResultMap" resultType="java.util.Map">
         select ROUND(IFNULL(avg(xsr.mark),0),1) mark,
-        IFNULL(sum(xsrb.rule_count),0) ruleCount,
-        IFNULL(sum(xsrb.exception_rule_count),0) exceptionRuleCount
+        (case when sum(xsrb.rule_count) is null then 0 else sum(xsrb.rule_count) end ) ruleCount,
+        (case when sum(xsrb.exception_rule_count) is null then 0 else sum(xsrb.exception_rule_count) end ) exceptionRuleCount
+--         IFNULL(sum(xsrb.rule_count),0) ruleCount,
+--         IFNULL(sum(xsrb.exception_rule_count),0) exceptionRuleCount
         from xqua_streaming_result xsr
         left join xqua_streaming_result_base xsrb
         on xsr.result_id=xsrb.result_id
@@ -221,45 +223,92 @@
     </select>
 
     <select id="listMarkTrend" resultType="com.hand.hdsp.quality.infra.vo.MarkTrendVO">
-        select date_format(xsr.end_date, '%Y-%m-%d') date,IFNULL(avg(xsr.mark),0) mark
-        from xqua_streaming_result xsr
-        <where>
-            <if test="tenantId != null">
-                xsr.tenant_id = #{tenantId}
-            </if>
-            <if test="startDate != null and startDate != ''">
-                and xsr.end_date &gt;=  #{startDate}
-            </if>
-            <if test="endDate != null and endDate != ''">
-                and xsr.end_date &lt;=  #{endDate}
-            </if>
-        </where>
-        group by date_format(xsr.end_date, '%Y-%m-%d')
-        order by date_format(xsr.end_date, '%Y-%m-%d') asc
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+        <if test='datasourceType == "MYSQL"'>
+            select date_format(xsr.end_date, '%Y-%m-%d') date,IFNULL(avg(xsr.mark),0) mark
+            from xqua_streaming_result xsr
+            <where>
+                <if test="tenantId != null">
+                    xsr.tenant_id = #{tenantId}
+                </if>
+                <if test="startDate != null and startDate != ''">
+                    and xsr.end_date &gt;=  #{startDate}
+                </if>
+                <if test="endDate != null and endDate != ''">
+                    and xsr.end_date &lt;=  #{endDate}
+                </if>
+            </where>
+            group by date_format(xsr.end_date, '%Y-%m-%d')
+            order by date_format(xsr.end_date, '%Y-%m-%d') asc
+        </if>
+        <if test='datasourceType == "ORACLE"'>
+            select to_char(xsr.end_date, '%Y-%m-%d') date,
+            (case when avg(xsr.mark) is null then 0 else avg(xsr.mark) end ) mark
+            from xqua_streaming_result xsr
+            <where>
+                <if test="tenantId != null">
+                    xsr.tenant_id = #{tenantId}
+                </if>
+                <if test="startDate != null and startDate != ''">
+                    and xsr.end_date &gt;=  #{startDate}
+                </if>
+                <if test="endDate != null and endDate != ''">
+                    and xsr.end_date &lt;=  #{endDate}
+                </if>
+            </where>
+            group by to_char(xsr.end_date, '%Y-%m-%d')
+            order by to_char(xsr.end_date, '%Y-%m-%d') asc
+        </if>
     </select>
 
     <select id="listWarningLevel" resultType="com.hand.hdsp.quality.infra.vo.WarningLevelVO">
-        select date_format(xsr.end_date, '%Y-%m-%d') date,
-        xsrr.warning_level warningLevel,
-        count(xsrr.warning_level) levelCount
-        from xqua_streaming_result xsr
-        INNER JOIN xqua_streaming_result_base xsrb
-        on xsr.result_id=xsrb.result_id
-        INNER JOIN xqua_streaming_result_rule xsrr
-        on xsrb.result_base_id=xsrr.result_base_id
-        <where>
-            <if test="tenantId != null">
-                xsr.tenant_id = #{tenantId}
-            </if>
-            <if test="startDate != null and startDate != ''">
-                and xsr.end_date &gt;=  #{startDate}
-            </if>
-            <if test="endDate != null and endDate != ''">
-                and xsr.end_date &lt;=  #{endDate}
-            </if>
-        </where>
-        group by date_format(xsr.end_date, '%Y-%m-%d'),xsrr.warning_level
-        order by date_format(xsr.end_date, '%Y-%m-%d') asc
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+        <if test='datasourceType == "MYSQL"'>
+            select date_format(xsr.end_date, '%Y-%m-%d') date,
+            xsrr.warning_level warningLevel,
+            count(xsrr.warning_level) levelCount
+            from xqua_streaming_result xsr
+            INNER JOIN xqua_streaming_result_base xsrb
+            on xsr.result_id=xsrb.result_id
+            INNER JOIN xqua_streaming_result_rule xsrr
+            on xsrb.result_base_id=xsrr.result_base_id
+            <where>
+                <if test="tenantId != null">
+                    xsr.tenant_id = #{tenantId}
+                </if>
+                <if test="startDate != null and startDate != ''">
+                    and xsr.end_date &gt;=  #{startDate}
+                </if>
+                <if test="endDate != null and endDate != ''">
+                    and xsr.end_date &lt;=  #{endDate}
+                </if>
+            </where>
+            group by date_format(xsr.end_date, '%Y-%m-%d'),xsrr.warning_level
+            order by date_format(xsr.end_date, '%Y-%m-%d') asc
+        </if>
+        <if test='datasourceType == "ORACLE"'>
+            select to_char(xsr.end_date, '%Y-%m-%d') date,
+            xsrr.warning_level warningLevel,
+            count(xsrr.warning_level) levelCount
+            from xqua_streaming_result xsr
+            INNER JOIN xqua_streaming_result_base xsrb
+            on xsr.result_id=xsrb.result_id
+            INNER JOIN xqua_streaming_result_rule xsrr
+            on xsrb.result_base_id=xsrr.result_base_id
+            <where>
+                <if test="tenantId != null">
+                    xsr.tenant_id = #{tenantId}
+                </if>
+                <if test="startDate != null and startDate != ''">
+                    and xsr.end_date &gt;=  #{startDate}
+                </if>
+                <if test="endDate != null and endDate != ''">
+                    and xsr.end_date &lt;=  #{endDate}
+                </if>
+            </where>
+            group by to_char(xsr.end_date, '%Y-%m-%d'),xsrr.warning_level
+            order by to_char(xsr.end_date, '%Y-%m-%d') asc
+        </if>
     </select>
 
     <select id="listDelayTopic" resultType="java.util.Map">
@@ -289,26 +338,52 @@
     </select>
 
     <select id="listRuleError" resultType="com.hand.hdsp.quality.infra.vo.RuleExceptionVO">
-        select date_format(xsr.end_date, '%Y-%m-%d') date,
-        xsrr.rule_type ruleType,
-        IFNULL(SUM(xsrb.exception_rule_count),0) exceptionRuleCount
-        from xqua_streaming_result xsr
-        INNER JOIN xqua_streaming_result_base xsrb
-        on xsr.result_id=xsrb.result_id
-        INNER JOIN xqua_streaming_result_rule xsrr
-        on xsrb.result_base_id=xsrr.result_base_id
-        <where>
-            <if test="tenantId != null">
-                xsr.tenant_id = #{tenantId}
-            </if>
-            <if test="startDate != null and startDate != ''">
-                and xsr.end_date &gt;=  #{startDate}
-            </if>
-            <if test="endDate != null and endDate != ''">
-                and xsr.end_date &lt;=  #{endDate}
-            </if>
-        </where>
-        group by date_format(xsr.end_date, '%Y-%m-%d'),xsrr.rule_type
-        order by date_format(xsr.end_date, '%Y-%m-%d') asc
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+        <if test='datasourceType == "MYSQL"'>
+            select date_format(xsr.end_date, '%Y-%m-%d') date,
+            xsrr.rule_type ruleType,
+            IFNULL(SUM(xsrb.exception_rule_count),0) exceptionRuleCount
+            from xqua_streaming_result xsr
+            INNER JOIN xqua_streaming_result_base xsrb
+            on xsr.result_id=xsrb.result_id
+            INNER JOIN xqua_streaming_result_rule xsrr
+            on xsrb.result_base_id=xsrr.result_base_id
+            <where>
+                <if test="tenantId != null">
+                    xsr.tenant_id = #{tenantId}
+                </if>
+                <if test="startDate != null and startDate != ''">
+                    and xsr.end_date &gt;=  #{startDate}
+                </if>
+                <if test="endDate != null and endDate != ''">
+                    and xsr.end_date &lt;=  #{endDate}
+                </if>
+            </where>
+            group by date_format(xsr.end_date, '%Y-%m-%d'),xsrr.rule_type
+            order by date_format(xsr.end_date, '%Y-%m-%d') asc
+        </if>
+        <if test='datasourceType == "ORACLE"'>
+            select to_char(xsr.end_date, '%Y-%m-%d') date,
+            xsrr.rule_type ruleType,
+            (case when SUM(xsrb.exception_rule_count) is null then 0 else SUM(xsrb.exception_rule_count) end ) exceptionRuleCount
+            from xqua_streaming_result xsr
+            INNER JOIN xqua_streaming_result_base xsrb
+            on xsr.result_id=xsrb.result_id
+            INNER JOIN xqua_streaming_result_rule xsrr
+            on xsrb.result_base_id=xsrr.result_base_id
+            <where>
+                <if test="tenantId != null">
+                    xsr.tenant_id = #{tenantId}
+                </if>
+                <if test="startDate != null and startDate != ''">
+                    and xsr.end_date &gt;=  #{startDate}
+                </if>
+                <if test="endDate != null and endDate != ''">
+                    and xsr.end_date &lt;=  #{endDate}
+                </if>
+            </where>
+            group by to_char(xsr.end_date, '%Y-%m-%d'),xsrr.rule_type
+            order by to_char(xsr.end_date, '%Y-%m-%d') asc
+        </if>
     </select>
 </mapper>

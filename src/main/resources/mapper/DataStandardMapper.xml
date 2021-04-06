@@ -57,7 +57,7 @@
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.DataStandardDTO">
         select
         iu.login_name lastUpdateName,
-        IFNull(iu2.login_name,"") chargeName,
+        ( case when iu2.login_name is null then "" else iu2.login_name end ) chargeName,
         iu2.phone chargeTel,
         iu2.email chargeEmail,
         hu.unit_name chargeDeptName,

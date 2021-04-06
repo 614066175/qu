@@ -24,6 +24,7 @@
         select
         xbpt.rule_code,
         xbpt.rule_name,
+        --todo GROUP_CONCAT
         (select GROUP_CONCAT(check_item) from xqua_batch_plan_table_line xbptl) as check_item
         from xqua_batch_plan_table xbpt
         where xbpt.tenant_id = #{tenantId}
