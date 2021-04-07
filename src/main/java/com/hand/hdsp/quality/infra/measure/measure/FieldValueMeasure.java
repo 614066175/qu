@@ -158,11 +158,12 @@ public class FieldValueMeasure implements Measure {
                 );
                 String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
                 List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(), sql);
-                if (Integer.parseInt(String.valueOf(response.get(0).get(COUNT))) != 0) {
+                //oracle 只能是大写，hive只能是小写
+                if (Integer.parseInt(response.get(0).values().toArray()[0].toString()) != 0) {
                     warningLevelVOList.add(
                             WarningLevelVO.builder()
                                     .warningLevel(warningLevelDTO.getWarningLevel())
-                                    .levelCount((Long) response.get(0).get(COUNT))
+                                    .levelCount(Long.parseLong(String.valueOf(response.get(0).values().toArray()[0].toString())) )
                                     .build());
                     PlanExceptionUtil.getPlanException(param, batchResultBase.getPackageObjectName(), sql, driverSession, warningLevelDTO);
                 }
@@ -203,11 +204,11 @@ public class FieldValueMeasure implements Measure {
                 variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
                 String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
                 List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(), sql);
-                if (Integer.parseInt(String.valueOf(response.get(0).get(COUNT))) != 0) {
+                if (Integer.parseInt(response.get(0).values().toArray()[0].toString()) != 0) {
                     warningLevelVOList.add(
                             WarningLevelVO.builder()
                                     .warningLevel(warningLevelDTO.getWarningLevel())
-                                    .levelCount((Long) response.get(0).get(COUNT))
+                                    .levelCount(Long.parseLong(response.get(0).values().toArray()[0].toString()))
                                     .build());
                     PlanExceptionUtil.getPlanException(param, batchResultBase.getPackageObjectName(), sql, driverSession, warningLevelDTO);
                 }

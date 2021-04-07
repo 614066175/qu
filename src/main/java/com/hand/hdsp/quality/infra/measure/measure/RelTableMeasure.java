@@ -178,7 +178,7 @@ public class RelTableMeasure implements Measure {
                         onCondition
                 );
                 List<Map<String, Object>> result = driverSession.executeOneQuery(param.getSchema(), sql);
-                if (CollectionUtils.isNotEmpty(result) && (long) result.get(0).get(COUNT) != 0) {
+                if (CollectionUtils.isNotEmpty(result) && Long.parseLong(result.get(0).values().toArray()[0].toString()) != 0) {
                     List<WarningLevelDTO> warningLevelDTOList = JsonUtils.json2WarningLevel(batchPlanRelTable.getWarningLevel());
                     //取高等级告警
                     String warningLevel = "";
@@ -208,7 +208,7 @@ public class RelTableMeasure implements Measure {
                     }
                     WarningLevelVO warningLevelVO = WarningLevelVO.builder()
                             .warningLevel(warningLevel)
-                            .levelCount((long) result.get(0).get(COUNT))
+                            .levelCount(Long.parseLong(result.get(0).values().toArray()[0].toString()))
                             .build();
                     batchResultItem.setWarningLevel(JsonUtils.object2Json(Collections.singletonList(warningLevelVO)));
                     batchResultItem.setExceptionInfo("数据满足计算值比较告警");

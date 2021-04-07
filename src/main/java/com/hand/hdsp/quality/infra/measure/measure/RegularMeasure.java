@@ -95,7 +95,7 @@ public class RegularMeasure implements Measure {
                 List<String> noMatchList=new ArrayList<>();
                 for (MeasureResultDO measureResultDO : list) {
                     if (!pattern.matcher(measureResultDO.getResult()).find()) {
-                        noMatchList.add(measureResultDO.getResult());
+                        noMatchList.add(String.format("'%s'",measureResultDO.getResult()));
                         batchResultItem.setActualValue(measureResultDO.getResult());
                         batchResultItem.setWarningLevel(JsonUtils.object2Json(
                                 Collections.singletonList(
@@ -109,7 +109,6 @@ public class RegularMeasure implements Measure {
 //                        break;
                     }
                 }
-
                 if(CollectionUtils.isNotEmpty(noMatchList)){
                     String noMatchCondition = String.format("%s in (%s)",
                             MeasureUtil.handleFieldName(param.getFieldName()),
@@ -124,11 +123,12 @@ public class RegularMeasure implements Measure {
                                 noMatchCondition
                         ));
                     }
-                    String noMacthSql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
+//                    String noMacthSql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
                     //获取不符合正则的异常数据
-                    String newSql=String.format("select %s.* %s",
+                    String newSql=String.format("select %s.* from %s where 1=1 and %s ",
                             batchResultBase.getPackageObjectName(),
-                            noMacthSql.substring(noMacthSql.indexOf("from"))
+                            batchResultBase.getPackageObjectName(),
+                            param.getWhereCondition()
                     );
                     List<PrimaryKey> primaryKeys = driverSession.tablePk(param.getSchema(), batchResultBase.getPackageObjectName());
                     List<Map<String, Object>> exceptionMapList = driverSession.executeOneQuery(param.getSchema(), newSql);
