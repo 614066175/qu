@@ -19,6 +19,7 @@
     </resultMap>
 
     <select id="selectSql" resultType="com.hand.hdsp.quality.domain.entity.ItemTemplateSql">
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         select sql_id,
                check_item,
                datasource_type,
@@ -28,10 +29,15 @@
         where enabled_flag = 1
           and check_item = #{checkItem}
           and datasource_type in (#{datasourceType}, '_ALL')
+        <if test='datasourceType == "ORACLE"'>
+            and ROWNUM = 1
+        </if>
             <if test="tag != null">
                 and tag = #{tag}
             </if>
         ORDER BY datasource_type
-        LIMIT 1
+        <if test='datasourceType == "MYSQL"'>
+            LIMIT 1
+        </if>
     </select>
 </mapper>

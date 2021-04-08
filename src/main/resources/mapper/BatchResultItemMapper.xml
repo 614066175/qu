@@ -49,18 +49,31 @@
     </select>
 
     <select id="queryList" resultType="com.hand.hdsp.quality.infra.dataobject.BatchResultItemDO">
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+
         select xbri.current_value
         from xqua_batch_result_item xbri
         join xqua_batch_result_rule xbrr on xbri.result_rule_id = xbrr.result_rule_id
         where xbri.current_value is not null
         and xbri.condition_id = #{conditionId}
         and xbrr.rule_type = #{ruleType}
-        <if test="measureDate != null">
-            and date_format(xbri.creation_date, '%Y%m%d') = date_format(#{measureDate}, '%Y%m%d')
+        <if test='datasourceType == "MYSQL"'>
+            <if test="measureDate != null">
+                and date_format(xbri.creation_date, '%Y%m%d') = date_format(#{measureDate}, '%Y%m%d')
+            </if>
+            <if test="measureDateFrom != null">
+                and date_format(xbri.creation_date, '%Y%m%d') &gt;= date_format(#{measureDateFrom}, '%Y%m%d')
+                and date_format(xbri.creation_date, '%Y%m%d') &lt;= date_format(date_sub(curdate(),interval 1 day), '%Y%m%d')
+            </if>
         </if>
-        <if test="measureDateFrom != null">
-            and date_format(xbri.creation_date, '%Y%m%d') &gt;= date_format(#{measureDateFrom}, '%Y%m%d')
-            and date_format(xbri.creation_date, '%Y%m%d') &lt;= date_format(date_sub(curdate(),interval 1 day), '%Y%m%d')
+        <if test='datasourceType == "ORACLE"'>
+            <if test="measureDate != null">
+                and to_char(xbri.creation_date, 'yyyyMMdd') = to_char(#{measureDate}, 'yyyyMMdd')
+            </if>
+            <if test="measureDateFrom != null">
+                and to_char(xbri.creation_date, 'yyyyMMdd') &gt;= to_char(#{measureDateFrom}, 'yyyyMMdd')
+                and to_char(xbri.creation_date, 'yyyyMMdd') &lt;= to_char(SYSDATE-1, 'yyyyMMdd')
+            </if>
         </if>
         order by xbri.creation_date desc
     </select>
@@ -151,6 +164,7 @@
         GROUP BY xbri.warning_level
     </select>
     <select id="assetTable" resultType="com.hand.hdsp.quality.api.dto.BatchResultItemDTO">
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         SELECT
             xbri.result_rule_id,
             xbri.plan_line_id,
@@ -189,6 +203,14 @@
             JOIN xqua_batch_result xbr ON xbrb.result_id = xbr.result_id
             JOIN xqua_batch_plan_base xbpb ON xbpb.plan_base_id = xbrb.plan_base_id
             JOIN xqua_batch_plan xbp ON xbpb.plan_id = xbp.plan_id
+        <if test='datasourceType == "ORACLE"'>
+            <if test="fieldName != null ">
+                join (select DISTINCT result_item_id,REGEXP_SUBSTR(REGEXP_REPLACE(xbri.field_name, '\(([^)]+)\)', ''), '[^,]+', 1, LEVEL) as name
+                from xqua_batch_result_item
+                CONNECT BY REGEXP_SUBSTR(REGEXP_REPLACE(xbri.field_name, '\(([^)]+)\)', ''), '[^,]+', 1, LEVEL) IS NOT NULL) a
+                on xbri.result_item_id=a.result_item_id and a.name=#{fieldName}
+            </if>
+        </if>
         WHERE
             xbpb.sql_type = 'TABLE'
             <if test="datasourceId != null ">
@@ -200,12 +222,14 @@
             <if test="objectName != null ">
                 AND xbpb.object_name = #{objectName}
             </if>
+        <if test='datasourceType == "MYSQL"'>
             <if test="fieldName != null ">
             --todo FIND_IN_SET REPLACE SUBSTRING_INDEX
                 AND FIND_IN_SET(#{fieldName},
                 REPLACE(REPLACE(REPLACE(xbri.field_name,SUBSTRING_INDEX(SUBSTRING_INDEX(xbri.field_name,')',1),'(',-1),''),
                 SUBSTRING_INDEX(SUBSTRING_INDEX(xbri.field_name,'(',-1),')',1),''),'()',''))
             </if>
+        </if>
     </select>
     <select id="selectWarningLevelByResultId" resultType="com.hand.hdsp.quality.infra.vo.ResultWaringVO">
             SELECT

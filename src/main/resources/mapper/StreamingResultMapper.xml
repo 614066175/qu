@@ -242,7 +242,7 @@
             order by date_format(xsr.end_date, '%Y-%m-%d') asc
         </if>
         <if test='datasourceType == "ORACLE"'>
-            select to_char(xsr.end_date, '%Y-%m-%d') date,
+            select to_char(xsr.end_date, 'yyyy-MM-dd') date,
             (case when avg(xsr.mark) is null then 0 else avg(xsr.mark) end ) mark
             from xqua_streaming_result xsr
             <where>
@@ -256,8 +256,8 @@
                     and xsr.end_date &lt;=  #{endDate}
                 </if>
             </where>
-            group by to_char(xsr.end_date, '%Y-%m-%d')
-            order by to_char(xsr.end_date, '%Y-%m-%d') asc
+            group by to_char(xsr.end_date, 'yyyy-MM-dd')
+            order by to_char(xsr.end_date, 'yyyy-MM-dd') asc
         </if>
     </select>
 
@@ -287,7 +287,7 @@
             order by date_format(xsr.end_date, '%Y-%m-%d') asc
         </if>
         <if test='datasourceType == "ORACLE"'>
-            select to_char(xsr.end_date, '%Y-%m-%d') date,
+            select to_char(xsr.end_date, 'yyyy-MM-dd') date,
             xsrr.warning_level warningLevel,
             count(xsrr.warning_level) levelCount
             from xqua_streaming_result xsr
@@ -306,8 +306,8 @@
                     and xsr.end_date &lt;=  #{endDate}
                 </if>
             </where>
-            group by to_char(xsr.end_date, '%Y-%m-%d'),xsrr.warning_level
-            order by to_char(xsr.end_date, '%Y-%m-%d') asc
+            group by to_char(xsr.end_date, 'yyyy-MM-dd'),xsrr.warning_level
+            order by to_char(xsr.end_date, 'yyyy-MM-dd') asc
         </if>
     </select>
 
@@ -363,7 +363,7 @@
             order by date_format(xsr.end_date, '%Y-%m-%d') asc
         </if>
         <if test='datasourceType == "ORACLE"'>
-            select to_char(xsr.end_date, '%Y-%m-%d') date,
+            select to_char(xsr.end_date, 'yyyy-MM-dd') date,
             xsrr.rule_type ruleType,
             (case when SUM(xsrb.exception_rule_count) is null then 0 else SUM(xsrb.exception_rule_count) end ) exceptionRuleCount
             from xqua_streaming_result xsr
@@ -382,8 +382,8 @@
                     and xsr.end_date &lt;=  #{endDate}
                 </if>
             </where>
-            group by to_char(xsr.end_date, '%Y-%m-%d'),xsrr.rule_type
-            order by to_char(xsr.end_date, '%Y-%m-%d') asc
+            group by to_char(xsr.end_date, 'yyyy-MM-dd'),xsrr.rule_type
+            order by to_char(xsr.end_date, 'yyyy-MM-dd') asc
         </if>
     </select>
 </mapper>

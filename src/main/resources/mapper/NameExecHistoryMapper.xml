@@ -57,6 +57,7 @@
     </select>
 
     <select id="getHistoryList" resultMap="DtoResultMap">
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         SELECT
         <include refid="BaseProperties">
             <property name="prefix" value="xneh"/>
@@ -72,9 +73,15 @@
         <if test="execEndTime !=null">
             AND xneh.exec_end_time &lt;= #{execEndTime}
         </if>
-        --todo datediff
-        <if test="startDay != null">
-            AND ( datediff ( xneh.exec_start_time , #{startDay} ) = 0 )
+        <if test='datasourceType == "MYSQL"'>
+            <if test="startDay != null">
+                AND ( datediff ( xneh.exec_start_time , #{startDay} ) = 0 )
+            </if>
+        </if>
+        <if test='datasourceType == "ORACLE"'>
+            <if test="startDay != null">
+                and ROUND(TO_NUMBER(xneh.exec_start_time - #{startDay}))=0
+            </if>
         </if>
         ORDER BY xneh.history_id DESC
     </select>
@@ -97,10 +104,10 @@
             GROUP BY DATE_FORMAT(creation_date,'%Y-%m-%d')
         </if>
         <if test='datasourceType == "ORACLE"'>
-            SELECT to_char(creation_date,'%Y-%m-%d') as date, AVG(abnormal_num) as averageAbnormalNum
+            SELECT to_char(creation_date,'yyyy-MM-dd') as date, AVG(abnormal_num) as averageAbnormalNum
             FROM xsta_name_exec_history xneh
             WHERE xneh.exec_status='SUCCESS'AND xneh.standard_id=#{standardId}
-            GROUP BY to_char(creation_date,'%Y-%m-%d')
+            GROUP BY to_char(creation_date,'yyyy-MM-dd')
         </if>
     </select>
 
