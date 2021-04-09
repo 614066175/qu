@@ -51,7 +51,7 @@
             and rownum=1
         </if>
         ORDER BY xneh.history_id DESC
-        <if test='datasourceType == "MYSQL"'>
+        <if test='datasourceType != "ORACLE"'>
             LIMIT 1
         </if>
     </select>
@@ -97,18 +97,20 @@
 
     <select id="getReport" resultType="com.hand.hdsp.quality.infra.vo.NameStandardHisReportVO">
         <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
-        <if test='datasourceType == "MYSQL"'>
-            SELECT DATE_FORMAT(creation_date,'%Y-%m-%d') as date, AVG(abnormal_num) as averageAbnormalNum
-            FROM xsta_name_exec_history xneh
-            WHERE xneh.exec_status='SUCCESS'AND xneh.standard_id=#{standardId}
-            GROUP BY DATE_FORMAT(creation_date,'%Y-%m-%d')
-        </if>
-        <if test='datasourceType == "ORACLE"'>
-            SELECT to_char(creation_date,'yyyy-MM-dd') as date, AVG(abnormal_num) as averageAbnormalNum
-            FROM xsta_name_exec_history xneh
-            WHERE xneh.exec_status='SUCCESS'AND xneh.standard_id=#{standardId}
-            GROUP BY to_char(creation_date,'yyyy-MM-dd')
-        </if>
+        <choose>
+            <when test='datasourceType == "ORACLE"'>
+                SELECT to_char(creation_date,'yyyy-MM-dd') as date, AVG(abnormal_num) as averageAbnormalNum
+                FROM xsta_name_exec_history xneh
+                WHERE xneh.exec_status='SUCCESS'AND xneh.standard_id=#{standardId}
+                GROUP BY to_char(creation_date,'yyyy-MM-dd')
+            </when>
+            <otherwise>
+                SELECT DATE_FORMAT(creation_date,'%Y-%m-%d') as date, AVG(abnormal_num) as averageAbnormalNum
+                FROM xsta_name_exec_history xneh
+                WHERE xneh.exec_status='SUCCESS'AND xneh.standard_id=#{standardId}
+                GROUP BY DATE_FORMAT(creation_date,'%Y-%m-%d')
+            </otherwise>
+        </choose>
     </select>
 
 </mapper>

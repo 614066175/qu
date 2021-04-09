@@ -36,7 +36,7 @@
                 and tag = #{tag}
             </if>
         ORDER BY datasource_type
-        <if test='datasourceType == "MYSQL"'>
+        <if test='datasourceType != "ORACLE"'>
             LIMIT 1
         </if>
     </select>

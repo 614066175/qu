@@ -57,24 +57,26 @@
         where xbri.current_value is not null
         and xbri.condition_id = #{conditionId}
         and xbrr.rule_type = #{ruleType}
-        <if test='datasourceType == "MYSQL"'>
-            <if test="measureDate != null">
-                and date_format(xbri.creation_date, '%Y%m%d') = date_format(#{measureDate}, '%Y%m%d')
-            </if>
-            <if test="measureDateFrom != null">
-                and date_format(xbri.creation_date, '%Y%m%d') &gt;= date_format(#{measureDateFrom}, '%Y%m%d')
-                and date_format(xbri.creation_date, '%Y%m%d') &lt;= date_format(date_sub(curdate(),interval 1 day), '%Y%m%d')
-            </if>
-        </if>
-        <if test='datasourceType == "ORACLE"'>
-            <if test="measureDate != null">
-                and to_char(xbri.creation_date, 'yyyyMMdd') = to_char(#{measureDate}, 'yyyyMMdd')
-            </if>
-            <if test="measureDateFrom != null">
-                and to_char(xbri.creation_date, 'yyyyMMdd') &gt;= to_char(#{measureDateFrom}, 'yyyyMMdd')
-                and to_char(xbri.creation_date, 'yyyyMMdd') &lt;= to_char(SYSDATE-1, 'yyyyMMdd')
-            </if>
-        </if>
+        <choose>
+            <when test='datasourceType == "ORACLE"'>
+                <if test="measureDate != null">
+                    and to_char(xbri.creation_date, 'yyyyMMdd') = to_char(#{measureDate}, 'yyyyMMdd')
+                </if>
+                <if test="measureDateFrom != null">
+                    and to_char(xbri.creation_date, 'yyyyMMdd') &gt;= to_char(#{measureDateFrom}, 'yyyyMMdd')
+                    and to_char(xbri.creation_date, 'yyyyMMdd') &lt;= to_char(SYSDATE-1, 'yyyyMMdd')
+                </if>
+            </when>
+            <otherwise>
+                <if test="measureDate != null">
+                    and date_format(xbri.creation_date, '%Y%m%d') = date_format(#{measureDate}, '%Y%m%d')
+                </if>
+                <if test="measureDateFrom != null">
+                    and date_format(xbri.creation_date, '%Y%m%d') &gt;= date_format(#{measureDateFrom}, '%Y%m%d')
+                    and date_format(xbri.creation_date, '%Y%m%d') &lt;= date_format(date_sub(curdate(),interval 1 day), '%Y%m%d')
+                </if>
+            </otherwise>
+        </choose>
         order by xbri.creation_date desc
     </select>
 
@@ -224,7 +226,6 @@
             </if>
         <if test='datasourceType == "MYSQL"'>
             <if test="fieldName != null ">
-            --todo FIND_IN_SET REPLACE SUBSTRING_INDEX
                 AND FIND_IN_SET(#{fieldName},
                 REPLACE(REPLACE(REPLACE(xbri.field_name,SUBSTRING_INDEX(SUBSTRING_INDEX(xbri.field_name,')',1),'(',-1),''),
                 SUBSTRING_INDEX(SUBSTRING_INDEX(xbri.field_name,'(',-1),')',1),''),'()',''))
@@ -268,7 +269,7 @@
         JOIN xsta_data_standard xds ON xbrr.rule_code=xds.standard_code
         left JOIN xqua_batch_result_item xbri ON xbri.result_rule_id = xbrr.result_rule_id
         <where>
-            xbrr.check_type="STANDARD"
+            xbrr.check_type='STANDARD'
             <if test="tenantId != null ">
                 AND xbri.tenant_id = #{tenantId}
             </if>
