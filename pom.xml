@@ -19,6 +19,13 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc7</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
         <!-- 自研工作流-->
         <dependency>
             <groupId>org.hzero.boot</groupId>

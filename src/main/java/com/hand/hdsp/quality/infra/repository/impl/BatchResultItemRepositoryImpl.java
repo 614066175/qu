@@ -58,6 +58,16 @@ public class BatchResultItemRepositoryImpl extends BaseRepositoryImpl<BatchResul
     @Override
     public Page<BatchResultItemDTO> assetTable(PageRequest pageRequest, BatchResultItemDTO batchResultItemDTO) {
         Page<BatchResultItemDTO> page = PageHelper.doPage(pageRequest, () -> batchResultItemMapper.assetTable(batchResultItemDTO));
+//        String datasourceType = SpringDatasourceHelper.getDatasourceType();
+//        List<BatchResultItemDTO> content = page.getContent();
+//        if("ORACLE".equals(datasourceType)&&Objects.nonNull(batchResultItemDTO.getFieldName())){
+//            content.stream().filter(dto -> {
+//                List<String> fields = Arrays.asList(dto.getFieldName().split(","));
+//                List<String> collect = fields.stream().peek(s -> s.substring(0, s.indexOf("("))).collect(Collectors.toList());
+//                return collect.contains(batchResultItemDTO.getFieldName());
+//            }).collect(Collectors.toList());
+//        }
+        //如果字段条件不为空
         for (BatchResultItemDTO dto : page.getContent()) {
             //处理告警配置
             dto.setWarningLevelList(JsonUtils.json2WarningLevel(dto.getWarningLevelJson()));

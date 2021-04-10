@@ -57,7 +57,7 @@
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.DataStandardDTO">
         select
         iu.login_name lastUpdateName,
-        IFNull(iu2.login_name,"") chargeName,
+        ( case when iu2.login_name is null then '' else iu2.login_name end ) chargeName,
         iu2.phone chargeTel,
         iu2.email chargeEmail,
         hu.unit_name chargeDeptName,
@@ -69,9 +69,9 @@
         </include>
         from xsta_data_standard ds
         left join xsta_standard_group xsg on xsg.group_id=ds.group_id
-        left join hzero_platform.iam_user iu on ds.last_updated_by=iu.id
-        left join hzero_platform.iam_user iu2 on ds.charge_id=iu2.id
-        left join hzero_platform.hpfm_unit hu on hu.unit_id=ds.charge_dept_id
+        left join iam_user iu on ds.last_updated_by=iu.id
+        left join iam_user iu2 on ds.charge_id=iu2.id
+        left join hpfm_unit hu on hu.unit_id=ds.charge_dept_id
         <where>
             <if test="dataStandardDTO.standardId!=null">
                 ds.standard_id=#{dataStandardDTO.standardId}
@@ -117,7 +117,7 @@
         SELECT
             unit_id
         FROM
-            hzero_platform.hpfm_unit
+            hpfm_unit
         WHERE
             unit_name=#{chargeDeptName}
     </select>
@@ -125,7 +125,7 @@
         SELECT
             id
         FROM
-            hzero_platform.iam_user
+            iam_user
         WHERE
             login_name=#{chargeName}
     </select>
@@ -134,7 +134,7 @@
         SELECT
             organization_id
         FROM
-            hzero_platform.iam_user
+            iam_user
         WHERE
             login_name=#{chargeName}
     </select>
@@ -142,7 +142,7 @@
         SELECT
             login_name
         FROM
-            hzero_platform.iam_user
+            iam_user
         WHERE
             id=#{chargeId}
     </select>
@@ -150,7 +150,7 @@
        SELECT
             unit_name
         FROM
-            hzero_platform.hpfm_unit
+            hpfm_unit
         WHERE
             unit_id=#{chargeDeptId}
     </select>
@@ -158,9 +158,9 @@
         SELECT
             he.employee_num
         FROM
-            hzero_platform.iam_user iu
-            join hzero_platform.hpfm_employee_user heu on iu.id=heu.user_id
-            join hzero_platform.`hpfm_employee` he on heu.employee_id=he.employee_id
+            iam_user iu
+            join hpfm_employee_user heu on iu.id=heu.user_id
+            join hpfm_employee he on heu.employee_id=he.employee_id
             where iu.id=#{chargeId}
     </select>
     <select id="isEncrypt" resultType="java.lang.Long">

@@ -21,10 +21,18 @@
     </resultMap>
 
     <select id="list" resultType="com.hand.hdsp.quality.infra.dataobject.BatchPlanTableDO">
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         select
         xbpt.rule_code,
         xbpt.rule_name,
-        (select GROUP_CONCAT(check_item) from xqua_batch_plan_table_line xbptl) as check_item
+        <choose>
+            <when test='datasourceType == "ORACLE"'>
+                (select WM_CONCAT(check_item) from xqua_batch_plan_table_line xbptl) as check_item
+            </when>
+            <otherwise>
+                (select GROUP_CONCAT(check_item) from xqua_batch_plan_table_line xbptl) as check_item
+            </otherwise>
+        </choose>
         from xqua_batch_plan_table xbpt
         where xbpt.tenant_id = #{tenantId}
         <if test="ruleName != null and ruleName != ''">
