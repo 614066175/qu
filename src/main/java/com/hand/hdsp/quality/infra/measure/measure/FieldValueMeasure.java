@@ -16,6 +16,7 @@ import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.dataobject.MeasureResultDO;
+import com.hand.hdsp.quality.infra.feign.PlatformFeign;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
@@ -28,10 +29,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
+import org.hzero.boot.platform.lov.dto.LovDTO;
 import org.hzero.boot.platform.lov.dto.LovValueDTO;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.hzero.starter.driver.core.session.DriverSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * <p>
@@ -53,6 +57,13 @@ public class FieldValueMeasure implements Measure {
     private final LovAdapter lovAdapter;
     private final DriverSessionService driverSessionService;
 
+    @Autowired
+    private PlatformFeign platformFeign;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+
     public FieldValueMeasure(ItemTemplateSqlRepository templateSqlRepository,
                              LovAdapter lovAdapter, DriverSessionService driverSessionService) {
         this.templateSqlRepository = templateSqlRepository;
@@ -72,8 +83,30 @@ public class FieldValueMeasure implements Measure {
         String countType = param.getCountType();
         if (PlanConstant.CountType.LOV_VALUE.equals(countType)) {
             WarningLevelDTO warningLevelDTO = warningLevelList.get(0);
-            List<LovValueDTO> lovValueDTOList = lovAdapter.queryLovValue(warningLevelDTO.getLovCode(), tenantId);
-            if (CollectionUtils.isEmpty(lovValueDTOList)) {
+            LovDTO lovDTO = lovAdapter.queryLovInfo(warningLevelDTO.getLovCode(), tenantId);
+            String lovValueString = Strings.EMPTY;
+            if ("URL".equals(lovDTO.getLovTypeCode())) {
+                //设置size为0查询所有
+                List<Map<String, Object>> body = platformFeign.queryLovData(warningLevelDTO.getLovCode(), tenantId,null,null,0,tenantId).getBody();
+                if (CollectionUtils.isEmpty(body)) {
+                    throw new CommonException(ErrorCode.NOT_FIND_VALUE);
+                }
+                //找到value_field
+                List<String> values = body.stream().map(map -> String.valueOf(map.get(lovDTO.getValueField()))).collect(Collectors.toList());
+                lovValueString = values.stream()
+                        .map(value -> "'" + value + "'")
+                        .collect(Collectors.joining(BaseConstants.Symbol.COMMA));
+            }
+            if ("IDP".equals(lovDTO.getLovTypeCode())) {
+                List<LovValueDTO> lovValueDTOList = lovAdapter.queryLovValue(warningLevelDTO.getLovCode(), tenantId);
+                if (CollectionUtils.isEmpty(lovValueDTOList)) {
+                    throw new CommonException(ErrorCode.NOT_FIND_VALUE);
+                }
+                lovValueString = lovValueDTOList.stream()
+                        .map(lovValueDTO -> "'" + lovValueDTO.getValue() + "'")
+                        .collect(Collectors.joining(BaseConstants.Symbol.COMMA));
+            }
+            if (Strings.isEmpty(lovValueString)) {
                 throw new CommonException(ErrorCode.NOT_FIND_VALUE);
             }
 
@@ -86,10 +119,7 @@ public class FieldValueMeasure implements Measure {
             Map<String, String> variables = new HashMap<>(8);
             variables.put("table", batchResultBase.getPackageObjectName());
             variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
-            variables.put("listValue", lovValueDTOList.stream()
-                    .map(lovValueDTO -> "'" + lovValueDTO.getValue() + "'")
-                    .collect(Collectors.joining(BaseConstants.Symbol.COMMA))
-            );
+            variables.put("listValue", lovValueString);
             String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
             List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(), sql);
             if (CollectionUtils.isNotEmpty(response)) {
@@ -158,11 +188,12 @@ public class FieldValueMeasure implements Measure {
                 );
                 String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
                 List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(), sql);
-                if (Integer.parseInt(String.valueOf(response.get(0).get(COUNT))) != 0) {
+                //oracle 只能是大写，hive只能是小写
+                if (Integer.parseInt(response.get(0).values().toArray()[0].toString()) != 0) {
                     warningLevelVOList.add(
                             WarningLevelVO.builder()
                                     .warningLevel(warningLevelDTO.getWarningLevel())
-                                    .levelCount((Long) response.get(0).get(COUNT))
+                                    .levelCount(Long.parseLong(String.valueOf(response.get(0).values().toArray()[0].toString())))
                                     .build());
                     PlanExceptionUtil.getPlanException(param, batchResultBase.getPackageObjectName(), sql, driverSession, warningLevelDTO);
                 }
@@ -203,11 +234,11 @@ public class FieldValueMeasure implements Measure {
                 variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
                 String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
                 List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(), sql);
-                if (Integer.parseInt(String.valueOf(response.get(0).get(COUNT))) != 0) {
+                if (Integer.parseInt(response.get(0).values().toArray()[0].toString()) != 0) {
                     warningLevelVOList.add(
                             WarningLevelVO.builder()
                                     .warningLevel(warningLevelDTO.getWarningLevel())
-                                    .levelCount((Long) response.get(0).get(COUNT))
+                                    .levelCount(Long.parseLong(response.get(0).values().toArray()[0].toString()))
                                     .build());
                     PlanExceptionUtil.getPlanException(param, batchResultBase.getPackageObjectName(), sql, driverSession, warningLevelDTO);
                 }
