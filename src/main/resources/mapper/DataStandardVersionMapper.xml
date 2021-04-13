@@ -68,9 +68,9 @@
         FROM
         xsta_data_standard_version  dsv
         left join xsta_standard_group xsg on xsg.group_id=dsv.group_id
-        left join hzero_platform.iam_user iu on dsv.last_updated_by=iu.id
-        left join hzero_platform.iam_user iu2 on dsv.charge_id=iu2.id
-        left join hzero_platform.hpfm_unit hu on hu.unit_id=dsv.charge_dept_id
+        left join iam_user iu on dsv.last_updated_by=iu.id
+        left join iam_user iu2 on dsv.charge_id=iu2.id
+        left join hpfm_unit hu on hu.unit_id=dsv.charge_dept_id
         WHERE
         dsv.version_id = #{versionId}
     </select>
@@ -86,9 +86,9 @@
         FROM
         xsta_data_standard_version  dsv
         left join xsta_standard_group xsg on xsg.group_id=dsv.group_id
-        left join hzero_platform.iam_user iu on dsv.last_updated_by=iu.id
-        left join hzero_platform.iam_user iu2 on dsv.charge_id=iu2.id
-        left join hzero_platform.hpfm_unit hu on hu.unit_id=dsv.charge_dept_id
+        left join iam_user iu on dsv.last_updated_by=iu.id
+        left join iam_user iu2 on dsv.charge_id=iu2.id
+        left join hpfm_unit hu on hu.unit_id=dsv.charge_dept_id
         WHERE
         <if test="dataStandardVersionDTO.standardId!=null">
             dsv.standard_id=#{dataStandardVersionDTO.standardId}

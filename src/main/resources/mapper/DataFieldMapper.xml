@@ -67,9 +67,9 @@
         </include>
         from xsta_field_standard fs
         left join xsta_standard_group xsg on xsg.group_id=fs.group_id
-        left join hzero_platform.iam_user iu on fs.last_updated_by=iu.id
-        left join hzero_platform.iam_user iu2 on fs.charge_id=iu2.id
-        left join hzero_platform.hpfm_unit hu on hu.unit_id=fs.charge_dept_id
+        left join iam_user iu on fs.last_updated_by=iu.id
+        left join iam_user iu2 on fs.charge_id=iu2.id
+        left join hpfm_unit hu on hu.unit_id=fs.charge_dept_id
         <where>
             <if test="dataFieldDTO.fieldId!=null">
                 fs.field_id=#{dataFieldDTO.fieldId}
@@ -111,7 +111,7 @@
         SELECT
             unit_id
         FROM
-            hzero_platform.hpfm_unit
+            hpfm_unit
         WHERE
             unit_name=#{chargeDeptName}
     </select>
@@ -120,7 +120,7 @@
         SELECT
             id
         FROM
-            hzero_platform.iam_user
+            iam_user
         WHERE
             login_name=#{chargeName}
     </select>
@@ -128,7 +128,7 @@
         SELECT
             organization_id
         FROM
-            hzero_platform.iam_user
+            iam_user
         WHERE
             login_name=#{chargeName}
     </select>
@@ -136,7 +136,7 @@
         SELECT
             login_name
         FROM
-            hzero_platform.iam_user
+            iam_user
         WHERE
             id=#{chargeId}
     </select>
@@ -144,7 +144,7 @@
        SELECT
             unit_name
         FROM
-            hzero_platform.hpfm_unit
+            hpfm_unit
         WHERE
             unit_id=#{chargeDeptId}
     </select>

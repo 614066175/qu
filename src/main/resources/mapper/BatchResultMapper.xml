@@ -34,14 +34,25 @@
     </sql>
 
     <sql id="custom_where">
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         <if test="tenantId != null">
             and ${mt}.tenant_id = #{tenantId}
         </if>
-        <if test="startDate != null and startDate != ''">
-            and ${mt}.creation_date &gt;= #{startDate}
+        <if test='datasourceType == "MYSQL"'>
+            <if test="startDate != null and startDate != ''">
+                and ${mt}.creation_date &gt;= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and ${mt}.creation_date &lt;= #{endDate}
+            </if>
         </if>
-        <if test="endDate != null and endDate != ''">
-            and ${mt}.creation_date &lt;= #{endDate}
+        <if test='datasourceType == "ORACLE"'>
+            <if test="startDate != null and startDate != ''">
+                and ${mt}.creation_date &gt;= to_date(  #{startDate},'yyyy-MM-dd HH24:mi:ss')
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and ${mt}.creation_date &lt;= to_date(  #{endDate},'yyyy-MM-dd HH24:mi:ss')
+            </if>
         </if>
         <if test="datasourceId != null">
             and xbpb.datasource_id = #{datasourceId}
@@ -151,7 +162,7 @@
     </select>
 
     <select id="selectScore" resultType="long">
-        select ROUND(IFNULL(avg(xbr.mark),0),1) mark
+        select ROUND((case when avg(xbr.mark) is null then 0 else avg(xbr.mark) end ),1) mark
         from xqua_batch_result xbr
         join xqua_batch_result_base xbrb on xbr.result_id=xbrb.result_id
         join xqua_batch_plan_base xbpb on xbrb.plan_base_id = xbpb.plan_base_id
@@ -261,59 +272,122 @@
     </select>
 
     <select id="listMarkTrend" resultType="com.hand.hdsp.quality.infra.vo.MarkTrendVO">
-        select date_format(xbr.end_date, '%Y-%m-%d') date,IFNULL(avg(xbr.mark),0) mark
-        from xqua_batch_result xbr
-        join xqua_batch_result_base xbrb on xbr.result_id=xbrb.result_id
-        join xqua_batch_plan_base xbpb on xbrb.plan_base_id = xbpb.plan_base_id
-        <where>
-            and xbr.end_date is not null
-            <include refid="custom_where">
-                <property name="mt" value="xbr"/>
-            </include>
-        </where>
-        group by date_format(xbr.end_date, '%Y-%m-%d')
-        order by date_format(xbr.end_date, '%Y-%m-%d')
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+        <if test='datasourceType == "MYSQL"'>
+            select date_format(xbr.end_date, '%Y-%m-%d') date,IFNULL(avg(xbr.mark),0) mark
+            from xqua_batch_result xbr
+            join xqua_batch_result_base xbrb on xbr.result_id=xbrb.result_id
+            join xqua_batch_plan_base xbpb on xbrb.plan_base_id = xbpb.plan_base_id
+            <where>
+                and xbr.end_date is not null
+                <include refid="custom_where">
+                    <property name="mt" value="xbr"/>
+                </include>
+            </where>
+            group by date_format(xbr.end_date, '%Y-%m-%d')
+            order by date_format(xbr.end_date, '%Y-%m-%d')
+        </if>
+        <if test='datasourceType =="ORACLE"'>
+            select TO_DATE(TO_CHAR(xbr.end_date, 'yyyy-MM-dd'), 'yyyy-MM-dd') "date",
+            (case when avg(xbr.mark) is null then 0 else avg(xbr.mark) end )mark
+            from xqua_batch_result xbr
+            join xqua_batch_result_base xbrb on xbr.result_id=xbrb.result_id
+            join xqua_batch_plan_base xbpb on xbrb.plan_base_id = xbpb.plan_base_id
+            <where>
+                and xbr.end_date is not null
+                <include refid="custom_where">
+                    <property name="mt" value="xbr"/>
+                </include>
+            </where>
+            group by to_char(xbr.end_date, 'yyyy-MM-dd')
+            order by to_char(xbr.end_date, 'yyyy-MM-dd')
+        </if>
     </select>
 
     <select id="listRuleException" resultType="com.hand.hdsp.quality.infra.vo.RuleExceptionVO">
-        select date_format(xbr.start_date, '%Y-%m-%d') date,
-        xbrr.rule_type ruleType,
-        IFNULL(SUM(xbrb.exception_rule_count),0) exceptionRuleCount
-        from xqua_batch_result xbr
-        INNER JOIN xqua_batch_result_base xbrb
-        on xbr.result_id=xbrb.result_id
-        INNER JOIN xqua_batch_result_rule xbrr
-        on xbrb.result_base_id=xbrr.result_base_id
-        join xqua_batch_plan_base xbpb on xbrb.plan_base_id = xbpb.plan_base_id
-        <where>
-            <include refid="custom_where">
-                <property name="mt" value="xbr"/>
-            </include>
-        </where>
-        group by date_format(xbr.start_date, '%Y-%m-%d'),xbrr.rule_type
-        order by date_format(xbr.start_date, '%Y-%m-%d')
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+        <if test='datasourceType == "MYSQL"'>
+            select date_format(xbr.start_date, '%Y-%m-%d') date,
+            xbrr.rule_type ruleType,
+            IFNULL(SUM(xbrb.exception_rule_count),0) exceptionRuleCount
+            from xqua_batch_result xbr
+            INNER JOIN xqua_batch_result_base xbrb
+            on xbr.result_id=xbrb.result_id
+            INNER JOIN xqua_batch_result_rule xbrr
+            on xbrb.result_base_id=xbrr.result_base_id
+            join xqua_batch_plan_base xbpb on xbrb.plan_base_id = xbpb.plan_base_id
+            <where>
+                <include refid="custom_where">
+                    <property name="mt" value="xbr"/>
+                </include>
+            </where>
+            group by date_format(xbr.start_date, '%Y-%m-%d'),xbrr.rule_type
+            order by date_format(xbr.start_date, '%Y-%m-%d')
+        </if>
+        <if test='datasourceType == "ORACLE"'>
+            select TO_DATE(TO_CHAR(xbr.start_date, 'yyyy-MM-dd'), 'yyyy-MM-dd') "date",
+            xbrr.rule_type ruleType,
+            (case when SUM(xbrb.exception_rule_count) is null then 0 else SUM(xbrb.exception_rule_count) end ) exceptionRuleCount
+            from xqua_batch_result xbr
+            INNER JOIN xqua_batch_result_base xbrb
+            on xbr.result_id=xbrb.result_id
+            INNER JOIN xqua_batch_result_rule xbrr
+            on xbrb.result_base_id=xbrr.result_base_id
+            join xqua_batch_plan_base xbpb on xbrb.plan_base_id = xbpb.plan_base_id
+            <where>
+                <include refid="custom_where">
+                    <property name="mt" value="xbr"/>
+                </include>
+            </where>
+            group by to_char(xbr.start_date, 'yyyy-MM-dd'),xbrr.rule_type
+            order by to_char(xbr.start_date, 'yyyy-MM-dd')
+        </if>
     </select>
 
     <select id="listWarningLevel" resultType="com.hand.hdsp.quality.infra.vo.WarningLevelVO">
-        select date_format(xbr.start_date, '%Y-%m-%d') date,
-        xbri.warning_level warningLevel,
-        count(xbri.warning_level) levelCount
-        from xqua_batch_result xbr
-        INNER JOIN xqua_batch_result_base xbrb
-        on xbr.result_id=xbrb.result_id
-        join xqua_batch_plan_base xbpb on xbrb.plan_base_id = xbpb.plan_base_id
-        INNER JOIN xqua_batch_result_rule xbrr
-        on xbrb.result_base_id=xbrr.result_base_id
-        join xqua_batch_result_item xbri on xbrr.result_rule_id = xbri.result_rule_id
-        <where>
-            and xbri.warning_level is not null
-            <include refid="custom_where">
-                <property name="mt" value="xbr"/>
-            </include>
-        </where>
-        group by date_format(xbr.start_date, '%Y-%m-%d'),xbri.warning_level
-        order by date_format(xbr.start_date, '%Y-%m-%d')
-
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+        <choose>
+            <when test='datasourceType == "ORACLE"'>
+                select TO_DATE(TO_CHAR(xbr.start_date, 'yyyy-MM-dd'), 'yyyy-MM-dd') "date",
+                xbri.warning_level warningLevel,
+                count(xbri.warning_level) levelCount
+                from xqua_batch_result xbr
+                INNER JOIN xqua_batch_result_base xbrb
+                on xbr.result_id=xbrb.result_id
+                join xqua_batch_plan_base xbpb on xbrb.plan_base_id = xbpb.plan_base_id
+                INNER JOIN xqua_batch_result_rule xbrr
+                on xbrb.result_base_id=xbrr.result_base_id
+                join xqua_batch_result_item xbri on xbrr.result_rule_id = xbri.result_rule_id
+                <where>
+                    and xbri.warning_level is not null
+                    <include refid="custom_where">
+                        <property name="mt" value="xbr"/>
+                    </include>
+                </where>
+                group by to_char(xbr.start_date, 'yyyy-MM-dd'),xbri.warning_level
+                order by to_char(xbr.start_date, 'yyyy-MM-dd')
+            </when>
+            <otherwise>
+                select date_format(xbr.start_date, '%Y-%m-%d') date,
+                xbri.warning_level warningLevel,
+                count(xbri.warning_level) levelCount
+                from xqua_batch_result xbr
+                INNER JOIN xqua_batch_result_base xbrb
+                on xbr.result_id=xbrb.result_id
+                join xqua_batch_plan_base xbpb on xbrb.plan_base_id = xbpb.plan_base_id
+                INNER JOIN xqua_batch_result_rule xbrr
+                on xbrb.result_base_id=xbrr.result_base_id
+                join xqua_batch_result_item xbri on xbrr.result_rule_id = xbri.result_rule_id
+                <where>
+                    and xbri.warning_level is not null
+                    <include refid="custom_where">
+                        <property name="mt" value="xbr"/>
+                    </include>
+                </where>
+                group by date_format(xbr.start_date, '%Y-%m-%d'),xbri.warning_level
+                order by date_format(xbr.start_date, '%Y-%m-%d')
+            </otherwise>
+        </choose>
     </select>
 
     <select id="errorTablePercentage" resultType="com.hand.hdsp.quality.infra.vo.ErrorTablePercentageVO">
@@ -365,29 +439,64 @@
     </select>
 
     <select id="errorTableList" resultType="com.hand.hdsp.quality.infra.vo.ErrorTableListVO">
-        SELECT
-        xbpb.object_name,
-        xbpb.datasource_id,
-        concat(xd.datasource_code,'.',xbpb.datasource_schema) datasource_schema,
-        COUNT(distinct xbri.result_rule_id) exception_rule_count,
-        COUNT(distinct xbri.result_rule_id,IFNULL(xbri.plan_line_id,0),IFNULL(xbri.condition_id,0)) exception_item_count,
-        COUNT(*) exception_warn_count
-        FROM
-        xqua_batch_result_item xbri
-        JOIN xqua_batch_result_rule xbrr ON xbri.result_rule_id = xbrr.result_rule_id
-        JOIN xqua_batch_result_base xbrb ON xbrr.result_base_id = xbrb.result_base_id
-        JOIN xqua_batch_plan_base xbpb ON xbrb.plan_base_id = xbpb.plan_base_id
-        JOIN hpfm_datasource xd ON xd.datasource_id = xbpb.datasource_id
-        WHERE
-        xbrr.result_flag = 0
-        <include refid="custom_where">
-            <property name="mt" value="xbri"/>
-        </include>
-        GROUP BY
-        xbpb.object_name,
-        xbpb.datasource_id,
-        xd.datasource_code,
-        xbpb.datasource_schema
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+        <choose>
+            <when test='datasourceType == "ORACLE"'>
+                SELECT
+                xbpb.object_name,
+                xbpb.datasource_id,
+                concat(concat(xd.datasource_code,'.'),xbpb.datasource_schema) datasource_schema,
+                COUNT(distinct xbri.result_rule_id) exception_rule_count,
+                COUNT(distinct xbri.result_rule_id ||
+                case when xbri.plan_line_id is null then 0 else xbri.plan_line_id end ||
+                case when xbri.condition_id is null then 0 else xbri.condition_id end ) exception_item_count,
+                COUNT(*) exception_warn_count
+                FROM
+                xqua_batch_result_item xbri
+                JOIN xqua_batch_result_rule xbrr ON xbri.result_rule_id = xbrr.result_rule_id
+                JOIN xqua_batch_result_base xbrb ON xbrr.result_base_id = xbrb.result_base_id
+                JOIN xqua_batch_plan_base xbpb ON xbrb.plan_base_id = xbpb.plan_base_id
+                JOIN hpfm_datasource xd ON xd.datasource_id = xbpb.datasource_id
+                WHERE
+                xbrr.result_flag = 0
+                <include refid="custom_where">
+                    <property name="mt" value="xbri"/>
+                </include>
+                GROUP BY
+                xbpb.object_name,
+                xbpb.datasource_id,
+                xd.datasource_code,
+                xbpb.datasource_schema
+            </when>
+            <otherwise>
+                SELECT
+                xbpb.object_name,
+                xbpb.datasource_id,
+                concat(concat(xd.datasource_code,'.'),xbpb.datasource_schema) datasource_schema,
+                COUNT(distinct xbri.result_rule_id) exception_rule_count,
+                COUNT(distinct xbri.result_rule_id ,
+                case when xbri.plan_line_id is null then 0 else xbri.plan_line_id end ,
+                case when xbri.condition_id is null then 0 else xbri.condition_id end ) exception_item_count,
+                COUNT(*) exception_warn_count
+                FROM
+                xqua_batch_result_item xbri
+                JOIN xqua_batch_result_rule xbrr ON xbri.result_rule_id = xbrr.result_rule_id
+                JOIN xqua_batch_result_base xbrb ON xbrr.result_base_id = xbrb.result_base_id
+                JOIN xqua_batch_plan_base xbpb ON xbrb.plan_base_id = xbpb.plan_base_id
+                JOIN hpfm_datasource xd ON xd.datasource_id = xbpb.datasource_id
+                WHERE
+                xbrr.result_flag = 0
+                <include refid="custom_where">
+                    <property name="mt" value="xbri"/>
+                </include>
+                GROUP BY
+                xbpb.object_name,
+                xbpb.datasource_id,
+                xd.datasource_code,
+                xbpb.datasource_schema
+            </otherwise>
+        </choose>
+
     </select>
 
     <select id="errorTableItemList" resultType="com.hand.hdsp.quality.infra.vo.ErrorTableItemListVO">
@@ -700,17 +809,36 @@
 	        )
     </select>
     <select id="listResultDetail" resultType="com.hand.hdsp.quality.api.dto.BatchResultMarkDTO">
-        SELECT avg(mark) avgMark,
-        DATE_FORMAT(end_date,'%Y-%m-%d') day
-        FROM xqua_batch_result
-        <where>
-            <if test="planId!=null and planId != ''">
-                plan_id=#{planId}
-            </if>
-            <if test="tenantId !=null and tenantId !=''">
-                and tenant_id=#{tenantId}
-            </if>
-        </where>
-        group by day
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+        <choose>
+            <when test='datasourceType == "ORACLE"'>
+                SELECT avg(mark) avgMark,
+                to_char(end_date,'yyyy-MM-dd') "day"
+                FROM xqua_batch_result
+                <where>
+                    <if test="planId!=null and planId != ''">
+                        plan_id=#{planId}
+                    </if>
+                    <if test="tenantId !=null and tenantId !=''">
+                        and tenant_id=#{tenantId}
+                    </if>
+                </where>
+                group by to_char(end_date,'yyyy-MM-dd')
+            </when>
+            <otherwise>
+                SELECT avg(mark) avgMark,
+                DATE_FORMAT(end_date,'%Y-%m-%d') day
+                FROM xqua_batch_result
+                <where>
+                    <if test="planId!=null and planId != ''">
+                        plan_id=#{planId}
+                    </if>
+                    <if test="tenantId !=null and tenantId !=''">
+                        and tenant_id=#{tenantId}
+                    </if>
+                </where>
+                group by day
+            </otherwise>
+        </choose>
     </select>
 </mapper>

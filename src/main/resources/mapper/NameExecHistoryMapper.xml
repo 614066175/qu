@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.hand.hdsp.quality.infra.mapper.NameExecHistoryMapper">
-	<!-- 可根据自己的需求，是否要使用 -->
+    <!-- 可根据自己的需求，是否要使用 -->
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.NameExecHistory">
         <result column="history_id" property="historyId" jdbcType="DECIMAL"/>
         <result column="standard_id" property="standardId" jdbcType="DECIMAL"/>
@@ -39,6 +39,7 @@
         ${prefix}.object_version_number
     </sql>
     <select id="getLatestHistory" resultMap="DtoResultMap">
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         SELECT
         <include refid="BaseProperties">
             <property name="prefix" value="xneh"/>
@@ -46,10 +47,17 @@
         FROM xsta_name_exec_history xneh
         LEFT JOIN xsta_name_exec_his_detail xnehd ON (xneh.history_id=xnehd.history_id)
         WHERE xneh.standard_id=#{standardId}
-        ORDER BY xneh.history_id DESC LIMIT 1
+        <if test='datasourceType == "ORACLE"'>
+            and rownum=1
+        </if>
+        ORDER BY xneh.history_id DESC
+        <if test='datasourceType != "ORACLE"'>
+            LIMIT 1
+        </if>
     </select>
 
     <select id="getHistoryList" resultMap="DtoResultMap">
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         SELECT
         <include refid="BaseProperties">
             <property name="prefix" value="xneh"/>
@@ -65,8 +73,15 @@
         <if test="execEndTime !=null">
             AND xneh.exec_end_time &lt;= #{execEndTime}
         </if>
-        <if test="startDay != null">
-            AND ( datediff ( xneh.exec_start_time , #{startDay} ) = 0 )
+        <if test='datasourceType == "MYSQL"'>
+            <if test="startDay != null">
+                AND ( datediff ( xneh.exec_start_time , #{startDay} ) = 0 )
+            </if>
+        </if>
+        <if test='datasourceType == "ORACLE"'>
+            <if test="startDay != null">
+                and ROUND(TO_NUMBER(xneh.exec_start_time - #{startDay}))=0
+            </if>
         </if>
         ORDER BY xneh.history_id DESC
     </select>
@@ -81,10 +96,21 @@
     </select>
 
     <select id="getReport" resultType="com.hand.hdsp.quality.infra.vo.NameStandardHisReportVO">
-        SELECT DATE_FORMAT(creation_date,'%Y-%m-%d') as date, AVG(abnormal_num) as averageAbnormalNum
-        FROM xsta_name_exec_history xneh
-        WHERE xneh.exec_status='SUCCESS'AND xneh.standard_id=#{standardId}
-        GROUP BY DATE_FORMAT(creation_date,'%Y-%m-%d')
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+        <choose>
+            <when test='datasourceType == "ORACLE"'>
+                SELECT to_char(creation_date,'yyyy-MM-dd') as date, AVG(abnormal_num) as averageAbnormalNum
+                FROM xsta_name_exec_history xneh
+                WHERE xneh.exec_status='SUCCESS'AND xneh.standard_id=#{standardId}
+                GROUP BY to_char(creation_date,'yyyy-MM-dd')
+            </when>
+            <otherwise>
+                SELECT DATE_FORMAT(creation_date,'%Y-%m-%d') as date, AVG(abnormal_num) as averageAbnormalNum
+                FROM xsta_name_exec_history xneh
+                WHERE xneh.exec_status='SUCCESS'AND xneh.standard_id=#{standardId}
+                GROUP BY DATE_FORMAT(creation_date,'%Y-%m-%d')
+            </otherwise>
+        </choose>
     </select>
 
 </mapper>
