@@ -297,6 +297,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             }
             inboundMessage.setLabels(labels);
             inboundMessage.setDataSet(dataSet);
+            //同步告警走的是alert服务的handler，异步告警走的是event服务,生成事件消息处理
+//            inboundMessage.setAsyncFlag(1);
             alertMessageHandler.sendMessage(inboundMessage);
         }
     }
