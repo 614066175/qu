@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
@@ -32,9 +33,11 @@ import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.boot.platform.lov.dto.LovDTO;
 import org.hzero.boot.platform.lov.dto.LovValueDTO;
 import org.hzero.core.base.BaseConstants;
+import org.hzero.core.util.ResponseUtils;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -87,7 +90,9 @@ public class FieldValueMeasure implements Measure {
             String lovValueString = Strings.EMPTY;
             if ("URL".equals(lovDTO.getLovTypeCode())) {
                 //设置size为0查询所有
-                List<Map<String, Object>> body = platformFeign.queryLovData(warningLevelDTO.getLovCode(), tenantId,null,null,0,tenantId).getBody();
+                ResponseEntity<String> stringResponseEntity = platformFeign.queryLovData(warningLevelDTO.getLovCode(), tenantId, null, null, 0, tenantId);
+                List<Map<String, Object>> body = ResponseUtils.getResponse(stringResponseEntity, new TypeReference<List<Map<String, Object>>>() {
+                });
                 if (CollectionUtils.isEmpty(body)) {
                     throw new CommonException(ErrorCode.NOT_FIND_VALUE);
                 }

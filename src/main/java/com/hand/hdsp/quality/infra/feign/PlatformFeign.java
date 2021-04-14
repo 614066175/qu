@@ -1,8 +1,5 @@
 package com.hand.hdsp.quality.infra.feign;
 
-import java.util.List;
-import java.util.Map;
-
 import com.hand.hdsp.quality.infra.feign.fallback.PlatformFeignFallBack;
 import io.swagger.annotations.ApiParam;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -37,5 +34,8 @@ public interface PlatformFeign {
      * @return
      */
     @GetMapping({"/v1/{organizationId}/lovs/data"})
-    ResponseEntity<List<Map<String, Object>>> queryLovData(@ApiParam(value = "值集代码",required = true) @RequestParam String lovCode, @ApiParam("租户ID") @PathVariable("organizationId") Long organizationId, @ApiParam("值tag") @RequestParam(required = false) String tag, @ApiParam("page") @RequestParam(required = false) Integer page, @ApiParam("size") @RequestParam(required = false) Integer size, @ApiParam("租户ID") @RequestParam(required = false) Long tenantId);
+    ResponseEntity<String> queryLovData(@ApiParam(value = "值集代码",required = true) @RequestParam String lovCode,
+                                        @ApiParam("租户ID") @PathVariable("organizationId") Long organizationId,
+                                        @ApiParam("值tag") @RequestParam(required = false) String tag, @ApiParam("page") @RequestParam(required = false) Integer page,
+                                        @ApiParam("size") @RequestParam(required = false) Integer size, @ApiParam("租户ID") @RequestParam(required = false) Long tenantId);
 }

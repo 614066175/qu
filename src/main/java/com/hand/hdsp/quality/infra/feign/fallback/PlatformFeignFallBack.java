@@ -1,8 +1,5 @@
 package com.hand.hdsp.quality.infra.feign.fallback;
 
-import java.util.List;
-import java.util.Map;
-
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.feign.PlatformFeign;
 import io.choerodon.core.exception.CommonException;
@@ -23,7 +20,7 @@ import org.springframework.stereotype.Component;
 public class PlatformFeignFallBack implements PlatformFeign {
 
     @Override
-    public ResponseEntity<List<Map<String, Object>>> queryLovData(String lovCode, Long organizationId, String tag, Integer page, Integer size, Long tenantId) {
+    public ResponseEntity<String> queryLovData(String lovCode, Long organizationId, String tag, Integer page, Integer size, Long tenantId) {
         throw new CommonException(ErrorCode.NOT_FIND_VALUE);
     }
 }
