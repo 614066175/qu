@@ -225,7 +225,7 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     private void convertToDataLengthList(DataStandardDTO dataStandardDTO) {
         //对数据长度进行处理
-        if (Objects.nonNull(dataStandardDTO.getDataLength())) {
+        if (Strings.isNotEmpty(dataStandardDTO.getDataLength())) {
             List<String> dataLength = Arrays.asList(dataStandardDTO.getDataLength().split(","));
             List<Long> dataLengthList = dataLength.stream().map(Long::parseLong).collect(Collectors.toList());
             dataStandardDTO.setDataLengthList(dataLengthList);
