@@ -17,10 +17,10 @@ import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.dataobject.MeasureResultDO;
-import com.hand.hdsp.quality.infra.feign.PlatformFeign;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
+import com.hand.hdsp.quality.infra.util.EurekaUtil;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.util.PlanExceptionUtil;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
@@ -32,12 +32,11 @@ import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.boot.platform.lov.dto.LovDTO;
 import org.hzero.boot.platform.lov.dto.LovValueDTO;
+import org.hzero.boot.platform.lov.dto.LovViewDTO;
 import org.hzero.core.base.BaseConstants;
-import org.hzero.core.util.ResponseUtils;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -61,7 +60,7 @@ public class FieldValueMeasure implements Measure {
     private final DriverSessionService driverSessionService;
 
     @Autowired
-    private PlatformFeign platformFeign;
+    private EurekaUtil eurekaUtil;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -90,14 +89,37 @@ public class FieldValueMeasure implements Measure {
             String lovValueString = Strings.EMPTY;
             if ("URL".equals(lovDTO.getLovTypeCode())) {
                 //设置size为0查询所有
-                ResponseEntity<String> stringResponseEntity = platformFeign.queryLovData(warningLevelDTO.getLovCode(), tenantId, null, null, 0, tenantId);
-                List<Map<String, Object>> body = ResponseUtils.getResponse(stringResponseEntity, new TypeReference<List<Map<String, Object>>>() {
+                //尝试feign调用platform接口报错 400 bad request
+//                ResponseEntity<String> stringResponseEntity = platformFeign.queryLovData(warningLevelDTO.getLovCode(), tenantId, null, null, 0, tenantId);
+//                List<Map<String, Object>> body = ResponseUtils.getResponse(stringResponseEntity, new TypeReference<List<Map<String, Object>>>() {
+//                });
+//                if (CollectionUtils.isEmpty(body)) {
+//                    throw new CommonException(ErrorCode.NOT_FIND_VALUE);
+//                }
+                //设置size为0查询所有
+                Map<String, String> params = new HashMap<>();
+                params.put("organizationId", String.valueOf(tenantId));
+                params.put("size",String.valueOf(0));
+
+                String serverCode = lovDTO.getRouteName();
+                String json = restTemplate.getForObject("http://" + eurekaUtil.getServerName(serverCode) + preProcessUrlParam(lovDTO.getCustomUrl(), params), String.class, params);
+                List<Map<String, Object>> body = JsonUtil.toObj(json, new TypeReference<List<Map<String, Object>>>() {
                 });
-                if (CollectionUtils.isEmpty(body)) {
-                    throw new CommonException(ErrorCode.NOT_FIND_VALUE);
+
+
+                if(CollectionUtils.isNotEmpty(body)){
+                    Map<String, Object> result = body.get(0);
+                    //判断是不是分页结果
+                    if(result.containsKey("totalPages")){
+                        //如果是，那么结果取content
+                        body= (List<Map<String, Object>>) result.get("content");
+                    }
                 }
+                //查询值集视图 一般值集编码和视图编码保持一致，不一致查表
+                LovViewDTO lovViewDTO = lovAdapter.queryLovViewInfo(warningLevelDTO.getLovCode(), tenantId);
+
                 //找到value_field
-                List<String> values = body.stream().map(map -> String.valueOf(map.get(lovDTO.getValueField()))).collect(Collectors.toList());
+                List<String> values = body.stream().map(map -> String.valueOf(map.get(lovViewDTO.getValueField()))).collect(Collectors.toList());
                 lovValueString = values.stream()
                         .map(value -> "'" + value + "'")
                         .collect(Collectors.joining(BaseConstants.Symbol.COMMA));
@@ -258,5 +280,26 @@ public class FieldValueMeasure implements Measure {
             throw new CommonException(ErrorCode.FIELD_NO_SUPPORT_CHECK_TYPE);
         }
         return batchResultItem;
+    }
+
+    private String preProcessUrlParam(String url, Map<String, String> params) {
+        StringBuilder stringBuilder = new StringBuilder(url);
+        Set<String> keySet = params.keySet();
+        if (CollectionUtils.isNotEmpty(keySet)) {
+            boolean firstKey = !url.contains("?");
+            Iterator var6 = keySet.iterator();
+
+            while(var6.hasNext()) {
+                String key = (String)var6.next();
+                if (firstKey) {
+                    stringBuilder.append('?').append(key).append("={").append(key).append('}');
+                    firstKey = false;
+                } else {
+                    stringBuilder.append('&').append(key).append("={").append(key).append('}');
+                }
+            }
+        }
+
+        return stringBuilder.toString();
     }
 }
