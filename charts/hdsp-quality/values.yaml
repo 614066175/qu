@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: registry.cn-hangzhou.aliyuncs.com/hzero-hdip/hdsp-quality
+  repository: registry.choerodon.com.cn/hzero-hdip/hdsp-quality
   pullPolicy: Always
 
 preJob:
@@ -29,25 +29,25 @@ env:
     # 是否自动刷新服务权限
     CHOERODON_EUREKA_EVENT_PARSE_PERMISSION: true
     # Eureka 注册中心地址
-    EUREKA_DEFAULT_ZONE: http://register.trial:8000/eureka/
+    EUREKA_DEFAULT_ZONE: http://hzero-register.hdsp:8000/eureka
     # 服务以IP地址注册
     EUREKA_INSTANCE_PREFER_IP_ADDRESS: true
     # 是否启用配置中心
     SPRING_CLOUD_CONFIG_ENABLED: true
     SPRING_PROFILES_ACTIVE: default
     # 配置中心地址
-    SPRING_CLOUD_CONFIG_URI: http://config.trial:8010/
+    SPRING_CLOUD_CONFIG_URI: http://hzero-config.hdsp:8610
     # 数据库地址
-    SPRING_DATASOURCE_URL: jdbc:mysql://172.23.40.31:3307/hdsp_quality?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    SPRING_DATASOURCE_URL: jdbc:mysql://mysql.hdsp-storage:3306/hdsp_quality?useUnicode=true&characterEncoding=utf-8&useSSL=false
     # 数据库用户名
-    SPRING_DATASOURCE_USERNAME: hdsp
+    SPRING_DATASOURCE_USERNAME: hdsp_test
     # 数据库密码
-    SPRING_DATASOURCE_PASSWORD: HDSP@test123
+    SPRING_DATASOURCE_PASSWORD: hdsp_test123$%^
     # Redis host
-    SPRING_REDIS_HOST: 172.23.40.31
+    SPRING_REDIS_HOST: redis.hdsp-storage
     # Redis DB
     SPRING_REDIS_DATABASE: 1
-    SPRING_REDIS_PORT: 6389
+    SPRING_REDIS_PORT: 6379
     # Hystrix 熔断超时时间
     HYSTRIX_COMMAND_TIMEOUT_IN_MILLISECONDS: 40000
     # Ribbon 读取超时时间
@@ -63,6 +63,7 @@ env:
     JAVA_OPTS: >
       -Xms500m
       -Xmx500m
+      -DLICENSE.MAC.VERIFY=false
 
 metrics:
   path: /prometheus
