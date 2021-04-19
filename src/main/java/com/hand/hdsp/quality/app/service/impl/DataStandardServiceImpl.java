@@ -241,7 +241,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         }
         //暂未做申请审核 todo 删除申请头表行表
 
-        dataStandardRepository.deleteDTO(dataStandardDTO);
+        dataStandardRepository.deleteByPrimaryKey(dataStandardDTO.getStandardId());
         //删除版本表数据
         List<DataStandardVersionDTO> dataStandardVersionDTOS = dataStandardVersionRepository.selectDTOByCondition(Condition.builder(DataStandardVersion.class)
                 .andWhere(Sqls.custom()
