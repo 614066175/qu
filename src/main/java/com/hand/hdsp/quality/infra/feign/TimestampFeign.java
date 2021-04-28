@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
  * @date 2020/2/4 10:11
  */
 @FeignClient(
-        value = "${hdsp.service.core:hdsp-core}",
+        value = "${hdsp.service.dispatch:hdsp-dispatch}",
         fallback = TimestampFallback.class
 )
 public interface TimestampFeign {
