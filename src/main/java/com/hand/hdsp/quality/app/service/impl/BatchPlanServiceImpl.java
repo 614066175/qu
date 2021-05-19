@@ -219,9 +219,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 .append("rest.username=").append("admin").append("\n")
                 .append("rest.password=").append("NO PASSWORD").append("\n")
                 .append("rest.external=false\n")
-                .append("rest.app=hdsp-quality\n")
+                .append("rest.app="+serviceId+"\n")
                 .append("rest.useGateway=true\n")
-                .append("rest.uri=/xqua/v2/")
+                .append("rest.uri=/"+serviceShort+"/v1/")
                 .append(batchPlanDTO.getTenantId())
                 .append("/batch-plans/exec/")
                 .append(batchPlanDTO.getPlanId()+"\n")
@@ -297,6 +297,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             }
             inboundMessage.setLabels(labels);
             inboundMessage.setDataSet(dataSet);
+            //同步告警走的是alert服务的handler，异步告警走的是event服务,生成事件消息处理
+//            inboundMessage.setAsyncFlag(1);
             alertMessageHandler.sendMessage(inboundMessage);
         }
     }

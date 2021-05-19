@@ -181,4 +181,25 @@ public class BatchPlanController extends BaseController {
         return Results.success();
     }
 
+    @ApiOperation(value = "执行批数据评估方案")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    ), @ApiImplicitParam(
+            name = "planId",
+            value = "批数据评估方案表主键",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/exec/{planId}")
+    public ResponseEntity<?> execNew(@PathVariable("organizationId") Long tenantId,
+                                  @PathVariable Long planId) {
+        Long resultId = batchPlanService.exec(tenantId, planId);
+        batchPlanService.sendMessage(planId, resultId);
+        return Results.success();
+    }
+
 }

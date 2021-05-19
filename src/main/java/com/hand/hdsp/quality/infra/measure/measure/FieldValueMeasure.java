@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
@@ -19,6 +20,7 @@ import com.hand.hdsp.quality.infra.dataobject.MeasureResultDO;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
+import com.hand.hdsp.quality.infra.util.EurekaUtil;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.util.PlanExceptionUtil;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
@@ -28,10 +30,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
+import org.hzero.boot.platform.lov.dto.LovDTO;
 import org.hzero.boot.platform.lov.dto.LovValueDTO;
+import org.hzero.boot.platform.lov.dto.LovViewDTO;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.hzero.starter.driver.core.session.DriverSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * <p>
@@ -53,6 +59,13 @@ public class FieldValueMeasure implements Measure {
     private final LovAdapter lovAdapter;
     private final DriverSessionService driverSessionService;
 
+    @Autowired
+    private EurekaUtil eurekaUtil;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+
     public FieldValueMeasure(ItemTemplateSqlRepository templateSqlRepository,
                              LovAdapter lovAdapter, DriverSessionService driverSessionService) {
         this.templateSqlRepository = templateSqlRepository;
@@ -72,8 +85,55 @@ public class FieldValueMeasure implements Measure {
         String countType = param.getCountType();
         if (PlanConstant.CountType.LOV_VALUE.equals(countType)) {
             WarningLevelDTO warningLevelDTO = warningLevelList.get(0);
-            List<LovValueDTO> lovValueDTOList = lovAdapter.queryLovValue(warningLevelDTO.getLovCode(), tenantId);
-            if (CollectionUtils.isEmpty(lovValueDTOList)) {
+            LovDTO lovDTO = lovAdapter.queryLovInfo(warningLevelDTO.getLovCode(), tenantId);
+            String lovValueString = Strings.EMPTY;
+            if ("URL".equals(lovDTO.getLovTypeCode())) {
+                //设置size为0查询所有
+                //尝试feign调用platform接口报错 400 bad request
+//                ResponseEntity<String> stringResponseEntity = platformFeign.queryLovData(warningLevelDTO.getLovCode(), tenantId, null, null, 0, tenantId);
+//                List<Map<String, Object>> body = ResponseUtils.getResponse(stringResponseEntity, new TypeReference<List<Map<String, Object>>>() {
+//                });
+//                if (CollectionUtils.isEmpty(body)) {
+//                    throw new CommonException(ErrorCode.NOT_FIND_VALUE);
+//                }
+                //设置size为0查询所有
+                Map<String, String> params = new HashMap<>();
+                params.put("organizationId", String.valueOf(tenantId));
+                params.put("size",String.valueOf(0));
+
+                String serverCode = lovDTO.getRouteName();
+                String json = restTemplate.getForObject("http://" + eurekaUtil.getServerName(serverCode) + preProcessUrlParam(lovDTO.getCustomUrl(), params), String.class, params);
+                List<Map<String, Object>> body = JsonUtil.toObj(json, new TypeReference<List<Map<String, Object>>>() {
+                });
+
+
+                if(CollectionUtils.isNotEmpty(body)){
+                    Map<String, Object> result = body.get(0);
+                    //判断是不是分页结果
+                    if(result.containsKey("totalPages")){
+                        //如果是，那么结果取content
+                        body= (List<Map<String, Object>>) result.get("content");
+                    }
+                }
+                //查询值集视图 一般值集编码和视图编码保持一致，不一致查表
+                LovViewDTO lovViewDTO = lovAdapter.queryLovViewInfo(warningLevelDTO.getLovCode(), tenantId);
+
+                //找到value_field
+                List<String> values = body.stream().map(map -> String.valueOf(map.get(lovViewDTO.getValueField()))).collect(Collectors.toList());
+                lovValueString = values.stream()
+                        .map(value -> "'" + value + "'")
+                        .collect(Collectors.joining(BaseConstants.Symbol.COMMA));
+            }
+            if ("IDP".equals(lovDTO.getLovTypeCode())) {
+                List<LovValueDTO> lovValueDTOList = lovAdapter.queryLovValue(warningLevelDTO.getLovCode(), tenantId);
+                if (CollectionUtils.isEmpty(lovValueDTOList)) {
+                    throw new CommonException(ErrorCode.NOT_FIND_VALUE);
+                }
+                lovValueString = lovValueDTOList.stream()
+                        .map(lovValueDTO -> "'" + lovValueDTO.getValue() + "'")
+                        .collect(Collectors.joining(BaseConstants.Symbol.COMMA));
+            }
+            if (Strings.isEmpty(lovValueString)) {
                 throw new CommonException(ErrorCode.NOT_FIND_VALUE);
             }
 
@@ -86,10 +146,7 @@ public class FieldValueMeasure implements Measure {
             Map<String, String> variables = new HashMap<>(8);
             variables.put("table", batchResultBase.getPackageObjectName());
             variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
-            variables.put("listValue", lovValueDTOList.stream()
-                    .map(lovValueDTO -> "'" + lovValueDTO.getValue() + "'")
-                    .collect(Collectors.joining(BaseConstants.Symbol.COMMA))
-            );
+            variables.put("listValue", lovValueString);
             String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
             List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(), sql);
             if (CollectionUtils.isNotEmpty(response)) {
@@ -158,11 +215,12 @@ public class FieldValueMeasure implements Measure {
                 );
                 String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
                 List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(), sql);
-                if (Integer.parseInt(String.valueOf(response.get(0).get(COUNT))) != 0) {
+                //oracle 只能是大写，hive只能是小写
+                if (Integer.parseInt(response.get(0).values().toArray()[0].toString()) != 0) {
                     warningLevelVOList.add(
                             WarningLevelVO.builder()
                                     .warningLevel(warningLevelDTO.getWarningLevel())
-                                    .levelCount((Long) response.get(0).get(COUNT))
+                                    .levelCount(Long.parseLong(String.valueOf(response.get(0).values().toArray()[0].toString())))
                                     .build());
                     PlanExceptionUtil.getPlanException(param, batchResultBase.getPackageObjectName(), sql, driverSession, warningLevelDTO);
                 }
@@ -203,11 +261,11 @@ public class FieldValueMeasure implements Measure {
                 variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
                 String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
                 List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(), sql);
-                if (Integer.parseInt(String.valueOf(response.get(0).get(COUNT))) != 0) {
+                if (Integer.parseInt(response.get(0).values().toArray()[0].toString()) != 0) {
                     warningLevelVOList.add(
                             WarningLevelVO.builder()
                                     .warningLevel(warningLevelDTO.getWarningLevel())
-                                    .levelCount((Long) response.get(0).get(COUNT))
+                                    .levelCount(Long.parseLong(response.get(0).values().toArray()[0].toString()))
                                     .build());
                     PlanExceptionUtil.getPlanException(param, batchResultBase.getPackageObjectName(), sql, driverSession, warningLevelDTO);
                 }
@@ -222,5 +280,26 @@ public class FieldValueMeasure implements Measure {
             throw new CommonException(ErrorCode.FIELD_NO_SUPPORT_CHECK_TYPE);
         }
         return batchResultItem;
+    }
+
+    private String preProcessUrlParam(String url, Map<String, String> params) {
+        StringBuilder stringBuilder = new StringBuilder(url);
+        Set<String> keySet = params.keySet();
+        if (CollectionUtils.isNotEmpty(keySet)) {
+            boolean firstKey = !url.contains("?");
+            Iterator var6 = keySet.iterator();
+
+            while(var6.hasNext()) {
+                String key = (String)var6.next();
+                if (firstKey) {
+                    stringBuilder.append('?').append(key).append("={").append(key).append('}');
+                    firstKey = false;
+                } else {
+                    stringBuilder.append('&').append(key).append("={").append(key).append('}');
+                }
+            }
+        }
+
+        return stringBuilder.toString();
     }
 }

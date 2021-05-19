@@ -36,6 +36,12 @@ public class BatchPlanController extends BaseController {
         this.batchPlanService = batchPlanService;
     }
 
+    /**
+     * 不走v2
+     * @param tenantId
+     * @param planId
+     * @return
+     */
     @ApiOperation(value = "执行批数据评估方案")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
@@ -50,6 +56,7 @@ public class BatchPlanController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/exec/{planId}")
+    @Deprecated
     public ResponseEntity<?> exec(@PathVariable("organizationId") Long tenantId,
                                   @PathVariable Long planId) {
         Long resultId = batchPlanService.exec(tenantId, planId);
