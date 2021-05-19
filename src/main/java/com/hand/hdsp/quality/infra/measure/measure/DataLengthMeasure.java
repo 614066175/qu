@@ -74,11 +74,11 @@ public class DataLengthMeasure implements Measure {
                 variables.put("num",warningLevelDTO.getExpectedValue());
                 String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
                 List<Map<String, Object>> maps = driverSession.executeOneQuery(param.getSchema(),sql);
-                if (Integer.parseInt(String.valueOf(maps.get(0).get(COUNT))) != 0) {
+                if (Integer.parseInt(maps.get(0).values().toArray()[0].toString()) != 0) {
                     warningLevelVOList.add(
                             WarningLevelVO.builder()
                                     .warningLevel(warningLevelDTO.getWarningLevel())
-                                    .levelCount((Long) maps.get(0).get(COUNT))
+                                    .levelCount(Long.parseLong(maps.get(0).values().toArray()[0].toString()))
                                     .build());
                     PlanExceptionUtil.getPlanException(param,batchResultBase.getPackageObjectName(),sql,driverSession, warningLevelDTO);
                 }
@@ -111,11 +111,11 @@ public class DataLengthMeasure implements Measure {
                 variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
                 String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
                 List<Map<String, Object>> maps = driverSession.executeOneQuery(param.getSchema(),sql);
-                if (Integer.parseInt(String.valueOf(maps.get(0).get(COUNT))) != 0) {
+                if (Integer.parseInt(maps.get(0).values().toArray()[0].toString()) != 0) {
                     warningLevelVOList.add(
                             WarningLevelVO.builder()
                                     .warningLevel(warningLevelDTO.getWarningLevel())
-                                    .levelCount((Long) maps.get(0).get(COUNT))
+                                    .levelCount(Long.parseLong(maps.get(0).values().toArray()[0].toString()))
                                     .build());
                     //有异常，查询异常数据
                     PlanExceptionUtil.getPlanException(param,batchResultBase.getPackageObjectName(),sql,driverSession, warningLevelDTO);
