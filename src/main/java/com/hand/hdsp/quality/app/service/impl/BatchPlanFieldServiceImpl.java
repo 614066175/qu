@@ -125,8 +125,8 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
                     });
                 });
                 //批量删除落标表和落标关系表
-                standardAimRepository.batchDTODelete(standardAimDTOList);
-                standardAimRelationRepository.batchDTODelete(standardAimRelationDTOList);
+                standardAimRepository.batchDTODeleteByPrimaryKey(standardAimDTOList);
+                standardAimRelationRepository.batchDTODeleteByPrimaryKey(standardAimRelationDTOList);
             }
         }
     }

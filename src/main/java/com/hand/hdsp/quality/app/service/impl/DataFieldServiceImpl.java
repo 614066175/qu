@@ -155,14 +155,14 @@ public class DataFieldServiceImpl implements DataFieldService {
 //                standardApproveRepository.deleteDTO(standardApproveDTOS.get(0));
 //            }
 //        }
-        dataFieldRepository.deleteDTO(dataFieldDTO);
+        dataFieldRepository.deleteByPrimaryKey(dataFieldDTO);
         //删除版本表数据
         List<DataFieldVersionDTO> dataStandardVersionDTOS = dataFieldVersionRepository.selectDTOByCondition(Condition.builder(DataFieldVersion.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(DataFieldVersion.FIELD_FIELD_ID, dataFieldDTO.getFieldId())
                         .andEqualTo(DataFieldVersion.FIELD_TENANT_ID, dataFieldDTO.getTenantId()))
                 .build());
-        dataFieldVersionRepository.batchDTODelete(dataStandardVersionDTOS);
+        dataFieldVersionRepository.batchDTODeleteByPrimaryKey(dataStandardVersionDTOS);
         // 删除额外信息
         List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
                 .andWhere(Sqls.custom()
@@ -171,7 +171,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                         .andEqualTo(StandardExtra.FIELD_TENANT_ID, dataFieldDTO.getTenantId())
                 ).build());
         //todo 删除落标表
-        standardExtraRepository.batchDTODelete(standardExtraDTOS);
+        standardExtraRepository.batchDTODeleteByPrimaryKey(standardExtraDTOS);
     }
 
     @Override

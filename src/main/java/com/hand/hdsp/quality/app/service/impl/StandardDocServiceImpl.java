@@ -1,5 +1,13 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import javax.servlet.http.HttpServletResponse;
+
 import com.hand.hdsp.quality.api.dto.StandardDocDTO;
 import com.hand.hdsp.quality.app.service.MinioStorageService;
 import com.hand.hdsp.quality.app.service.StandardDocService;
@@ -20,14 +28,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URLEncoder;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * <p>标准文档管理表应用服务默认实现</p>
@@ -85,7 +85,7 @@ public class StandardDocServiceImpl implements StandardDocService {
         if (CollectionUtils.isEmpty(standardDocDTOList)) {
             return;
         }
-        standardDocRepository.batchDTODelete(standardDocDTOList);
+        standardDocRepository.batchDTODeleteByPrimaryKey(standardDocDTOList);
         // 删minio
         for (StandardDocDTO s : standardDocDTOList) {
             minioStorageService.deleteFileByUrl(

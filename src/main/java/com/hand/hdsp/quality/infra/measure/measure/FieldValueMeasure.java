@@ -221,7 +221,6 @@ public class FieldValueMeasure implements Measure {
                             WarningLevelVO.builder()
                                     .warningLevel(warningLevelDTO.getWarningLevel())
                                     .levelCount(Long.parseLong(String.valueOf(response.get(0).values().toArray()[0].toString())))
-                                    .levelCount(Long.parseLong(String.valueOf(response.get(0).values().toArray()[0].toString())) )
                                     .build());
                     PlanExceptionUtil.getPlanException(param, batchResultBase.getPackageObjectName(), sql, driverSession, warningLevelDTO);
                 }
