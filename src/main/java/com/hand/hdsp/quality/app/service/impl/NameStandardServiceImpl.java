@@ -69,7 +69,7 @@ public class NameStandardServiceImpl implements NameStandardService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void remove(NameStandardDTO nameStandardDTO) {
-        if (nameStandardRepository.selectCount(nameStandardConverter.dtoToEntity(nameStandardDTO))<=0){
+        if (Objects.isNull(nameStandardRepository.selectDTOByPrimaryKey(nameStandardDTO))){
             throw new CommonException(ErrorCode.NAME_STANDARD_NOT_EXIST);
         }
         List<NameExecHistoryDTO> historyList = nameExecHistoryRepository.selectDTO(NameExecHistory.FIELD_STANDARD_ID,
@@ -83,7 +83,8 @@ public class NameStandardServiceImpl implements NameStandardService {
                             .build())
                     .collect(Collectors.toList());
             nameExecHisDetailRepository.batchDTODelete(detailList);
-            nameExecHistoryRepository.batchDTODelete(historyList);
+            //oracle包含全字段的不能使用batchDTODelete，时间类型作为条件会有问题
+            nameExecHistoryRepository.batchDTODeleteByPrimaryKey(historyList);
         }
         List<NameAimDTO> aimDtoList = nameAimRepository.selectDTO(NameAim.FIELD_STANDARD_ID,
                 nameStandardDTO.getStandardId());
@@ -107,10 +108,10 @@ public class NameStandardServiceImpl implements NameStandardService {
                     .collect(Collectors.toList());
             nameAimIncludeRepository.batchDTODelete(includeDtoList);
             //删除落标
-            nameAimRepository.batchDTODelete(aimDtoList);
+            nameAimRepository.batchDTODeleteByPrimaryKey(aimDtoList);
         }
         //删除标准
-        nameStandardRepository.deleteDTO(nameStandardDTO);
+        nameStandardRepository.deleteByPrimaryKey(nameStandardDTO);
     }
 
     @Transactional(rollbackFor = Exception.class)

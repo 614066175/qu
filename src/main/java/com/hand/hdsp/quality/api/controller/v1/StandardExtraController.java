@@ -164,7 +164,7 @@ public class StandardExtraController extends BaseController {
     public ResponseEntity<?> batchRemove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody List<StandardExtraDTO> standardExtraDTOList) {
         standardExtraDTOList.forEach(standardExtraDTO -> standardExtraDTO.setTenantId(tenantId));
-        standardExtraRepository.batchDTODelete(standardExtraDTOList);
+        standardExtraRepository.batchDTODeleteByPrimaryKey(standardExtraDTOList);
         return Results.success(standardExtraDTOList);
     }
 }

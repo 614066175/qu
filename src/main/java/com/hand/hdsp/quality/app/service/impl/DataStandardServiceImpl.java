@@ -248,7 +248,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .andEqualTo(DataStandardVersion.FIELD_STANDARD_ID, dataStandardDTO.getStandardId())
                         .andEqualTo(DataStandardVersion.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                 .build());
-        dataStandardVersionRepository.batchDTODelete(dataStandardVersionDTOS);
+        dataStandardVersionRepository.batchDTODeleteByPrimaryKey(dataStandardVersionDTOS);
         //删除额外信息表数据
         List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
                 .andWhere(Sqls.custom()
@@ -256,7 +256,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, DATA)
                         .andEqualTo(StandardExtra.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                 .build());
-        standardExtraRepository.batchDTODelete(standardExtraDTOS);
+        standardExtraRepository.batchDTODeleteByPrimaryKey(standardExtraDTOS);
         //删除额外信息历史表数据
         List<ExtraVersionDTO> extraVersionDTOS = extraVersionRepository.selectDTOByCondition(Condition.builder(ExtraVersion.class)
                 .andWhere(Sqls.custom()
@@ -264,7 +264,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .andEqualTo(ExtraVersion.FIELD_STANDARD_TYPE, DATA)
                         .andEqualTo(ExtraVersion.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                 .build());
-        extraVersionRepository.batchDTODelete(extraVersionDTOS);
+        extraVersionRepository.batchDTODeleteByPrimaryKey(extraVersionDTOS);
         //删除数据标准的标准落标以及关系表
         List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
                 .andWhere(Sqls.custom()
@@ -503,7 +503,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                             .andEqualTo(StandardAimRelation.FIELD_AIM_TYPE, AimType.AIM)
                             .andEqualTo(StandardAimRelation.FIELD_TENANT_ID, standardAimDTO.getTenantId()))
                     .build());
-            standardAimRelationRepository.batchDTODelete(standardAimRelationDTOS);
+            standardAimRelationRepository.batchDTODeleteByPrimaryKey(standardAimRelationDTOS);
             DataStandardDTO dataStandardDTO = dataStandardRepository.selectDTOByPrimaryKey(standardAimDTO.getStandardId());
             //如果标准为在线状态则去数据质量落标对应规则
             if (StandardStatus.ONLINE.equals(dataStandardDTO.getStandardStatus())) {
@@ -551,7 +551,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .andEqualTo(StandardAim.FIELD_TABLE_NAME, assetFieldDTO.getTableName())
                         .andEqualTo(StandardAim.FIELD_FIELD_NAME, assetFieldDTO.getFieldName()))
                 .build());
-        standardAimRepository.batchDTODelete(standardAimDTOS);
+        standardAimRepository.batchDTODeleteByPrimaryKey(standardAimDTOS);
         //创建新的字段落标
         if (CollectionUtils.isNotEmpty(assetFieldDTO.getStandardIdList())) {
             assetFieldDTO.getStandardIdList().forEach(standardId -> {

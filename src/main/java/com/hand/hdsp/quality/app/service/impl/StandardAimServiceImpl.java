@@ -106,14 +106,14 @@ public class StandardAimServiceImpl implements StandardAimService {
     @Override
     public void batchDelete(List<StandardAimDTO> standardAimDTOList) {
         if(CollectionUtils.isNotEmpty(standardAimDTOList)){
-            standardAimRepository.batchDTODelete(standardAimDTOList);
+            standardAimRepository.batchDTODeleteByPrimaryKey(standardAimDTOList);
             standardAimDTOList.forEach(standardAimDTO -> {
                 List<StandardAimRelationDTO> standardAimRelationDTOS = standardAimRelationRepository.selectDTOByCondition(Condition.builder(StandardAimRelation.class)
                         .andWhere(Sqls.custom()
                                 .andEqualTo(StandardAimRelation.FIELD_AIM_ID, standardAimDTO.getAimId())
                                 .andEqualTo(StandardAimRelation.FIELD_TENANT_ID, standardAimDTO.getTenantId()))
                         .build());
-                standardAimRelationRepository.batchDTODelete(standardAimRelationDTOS);
+                standardAimRelationRepository.batchDTODeleteByPrimaryKey(standardAimRelationDTOS);
             });
         }
     }
