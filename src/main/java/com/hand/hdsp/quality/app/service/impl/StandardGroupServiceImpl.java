@@ -103,13 +103,15 @@ public class StandardGroupServiceImpl implements StandardGroupService {
             //获取DATA所有的分组已经分组下的标准
             standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                     .andWhere(Sqls.custom()
-                            .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, StandardConstant.StandardType.DATA))
+                            .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, StandardConstant.StandardType.DATA)
+                            .andEqualTo(StandardGroup.FIELD_TENANT_ID,dto.getTenantId()))
                     .build());
             if (CollectionUtils.isNotEmpty(standardGroupDTOS)) {
                 standardGroupDTOS.forEach(standardGroupDTO -> {
                     List<DataStandardDTO> dataStandardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                             .andWhere(Sqls.custom()
-                                    .andEqualTo(DataStandard.FIELD_GROUP_ID, standardGroupDTO.getGroupId()))
+                                    .andEqualTo(DataStandard.FIELD_GROUP_ID, standardGroupDTO.getGroupId())
+                                    .andEqualTo(DataStandard.FIELD_TENANT_ID,dto.getTenantId()))
                             .build());
                     //查询负责人名称和负责部门
                     dataStandardDTOList.forEach(dataStandardDTO -> {
