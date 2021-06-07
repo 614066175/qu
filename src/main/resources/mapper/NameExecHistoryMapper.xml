@@ -99,7 +99,7 @@
         <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         <choose>
             <when test='datasourceType == "ORACLE"'>
-                SELECT to_char(creation_date,'yyyy-MM-dd') as date, AVG(abnormal_num) as averageAbnormalNum
+                SELECT to_char(creation_date,'yyyy-MM-dd') as "date", AVG(abnormal_num) as averageAbnormalNum
                 FROM xsta_name_exec_history xneh
                 WHERE xneh.exec_status='SUCCESS'AND xneh.standard_id=#{standardId}
                 GROUP BY to_char(creation_date,'yyyy-MM-dd')
