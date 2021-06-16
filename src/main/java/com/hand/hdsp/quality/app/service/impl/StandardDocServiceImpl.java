@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import javax.servlet.http.HttpServletResponse;
 
+import com.hand.hdsp.core.util.EurekaUtil;
 import com.hand.hdsp.quality.api.dto.StandardDocDTO;
 import com.hand.hdsp.quality.app.service.MinioStorageService;
 import com.hand.hdsp.quality.app.service.StandardDocService;
@@ -15,7 +16,6 @@ import com.hand.hdsp.quality.domain.entity.StandardDoc;
 import com.hand.hdsp.quality.domain.repository.StandardDocRepository;
 import com.hand.hdsp.quality.infra.constant.StandardDocConstant;
 import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
-import com.hand.hdsp.quality.infra.util.EurekaUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
