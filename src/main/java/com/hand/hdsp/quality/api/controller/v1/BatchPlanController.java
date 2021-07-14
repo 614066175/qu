@@ -60,7 +60,8 @@ public class BatchPlanController extends BaseController {
                 Condition.builder(BatchPlan.class)
                         .andWhere(Sqls.custom()
                         .andLike(BatchPlan.FIELD_PLAN_CODE,batchPlanDTO.getPlanCode(),true)
-                        .andLike(BatchPlan.FIELD_PLAN_NAME,batchPlanDTO.getPlanName(),true))
+                        .andLike(BatchPlan.FIELD_PLAN_NAME,batchPlanDTO.getPlanName(),true)
+                        .andEqualTo(BatchPlan.FIELD_TENANT_ID,batchPlanDTO.getTenantId()))
                         .build()
         ));
         return Results.success(list);
