@@ -104,7 +104,7 @@
                 AND fs.last_update_date &lt;= #{lastUpdateDateTo}
             </if>
         </where>
-        order by fs.last_update_date desc
+        order by fs.creation_date desc
     </select>
 
     <select id="selectIdByChargeDeptName" resultType="java.lang.Long">

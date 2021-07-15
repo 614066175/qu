@@ -111,7 +111,7 @@
                 and date(ds.last_update_date)&lt;=date(#{dataStandardDTO.lastUpdateDateTo})
             </if>
         </where>
-        order by ds.last_update_date desc
+        order by ds.creation_date desc
     </select>
     <select id="selectIdByChargeDeptName" resultType="java.lang.Long">
         SELECT
