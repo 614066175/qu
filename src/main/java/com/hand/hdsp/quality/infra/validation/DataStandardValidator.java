@@ -73,7 +73,7 @@ public class DataStandardValidator extends BatchValidatorHandler {
                 }
                 dataStandardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                         .andWhere(Sqls.custom()
-                                .andEqualTo(DataStandard.FIELD_STANDARD_NAME, dataStandardDTO.getStandardCode())
+                                .andEqualTo(DataStandard.FIELD_STANDARD_NAME, dataStandardDTO.getStandardName())
                                 .andEqualTo(DataStandard.FIELD_TENANT_ID, tenantId))
                         .build());
                 //标准名称存在

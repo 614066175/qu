@@ -61,6 +61,18 @@ public class StandardDocValidator extends BatchValidatorHandler {
                         addErrorMsg(i, "标准名称已存在");
                         return false;
                     }
+
+                    //标准编码不符合规范
+                    if (!standardDocDTO.getStandardCode().matches("^[a-zA-Z][a-zA-Z0-9_]*$")){
+                        addErrorMsg(i, "标准编码不符合:1-64个字符，可包含字母、数字或下划线”_”，英文字母开头");
+                        return false;
+                    }
+
+                    //分组名称不符合规范
+                    if (!standardDocDTO.getGroupName().matches("^[a-zA-Z][a-zA-Z0-9_]*$")){
+                        addErrorMsg(i, "标准编码不符合:1-64个字符，可包含字母、数字或下划线”_”，英文字母开头");
+                        return false;
+                    }
                     return true;
                 }
             }
