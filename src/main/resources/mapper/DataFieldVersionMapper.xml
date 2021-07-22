@@ -50,9 +50,7 @@
         ${fsv}.charge_tel,
         ${fsv}.charge_email,
         ${fsv}.version_number,
-        ${fsv}.tenant_id,
-        ${fsv}.object_version_number,
-        ${fsv}.last_update_date
+        ${fsv}.tenant_id
     </sql>
 
     <select id="detail" resultType="com.hand.hdsp.quality.api.dto.DataFieldVersionDTO">
