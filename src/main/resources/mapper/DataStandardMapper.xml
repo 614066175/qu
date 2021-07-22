@@ -55,6 +55,7 @@
     </sql>
 
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.DataStandardDTO">
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         select
         iu.login_name lastUpdateName,
         ( case when iu2.login_name is null then '' else iu2.login_name end ) chargeName,
@@ -105,10 +106,24 @@
                 and ds.tenant_id=#{dataStandardDTO.tenantId}
             </if>
             <if test="dataStandardDTO.lastUpdateDateFrom!=null">
-                and date(ds.last_update_date)>=date(#{dataStandardDTO.lastUpdateDateFrom})
+                <choose>
+                    <when test="datasourceType == 'ORACLE'">
+                        and ds.last_update_date>=to_date(#{dataStandardDTO.lastUpdateDateFrom}, 'yyyy-mm-dd hh24:mi:ss')
+                    </when>
+                    <otherwise>
+                        and date(ds.last_update_date)>=date(#{dataStandardDTO.lastUpdateDateFrom})
+                    </otherwise>
+                </choose>
             </if>
             <if test="dataStandardDTO.lastUpdateDateTo!=null">
-                and date(ds.last_update_date)&lt;=date(#{dataStandardDTO.lastUpdateDateTo})
+                <choose>
+                    <when test="datasourceType == 'ORACLE'">
+                        and ds.last_update_date&lt;=to_date(#{dataStandardDTO.lastUpdateDateTo}, 'yyyy-mm-dd hh24:mi:ss')
+                    </when>
+                    <otherwise>
+                        and date(ds.last_update_date)&lt;=date(#{dataStandardDTO.lastUpdateDateTo})
+                    </otherwise>
+                </choose>
             </if>
         </where>
         order by ds.creation_date desc
