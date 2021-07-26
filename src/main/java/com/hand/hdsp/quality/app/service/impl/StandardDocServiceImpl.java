@@ -6,6 +6,7 @@ import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 
 import com.hand.hdsp.quality.api.dto.StandardDocDTO;
@@ -75,6 +76,10 @@ public class StandardDocServiceImpl implements StandardDocService {
         if (Objects.nonNull(multipartFile)) {
             handleStandardDocUpload(standardDocDTO, multipartFile);
         }
+        Optional.ofNullable(standardDocDTO.getStandardDesc()).orElseGet(()->{
+            standardDocMapper.updateDesc(standardDocDTO);
+            return null;
+        });
         standardDocRepository.updateByDTOPrimaryKeySelective(standardDocDTO);
         return standardDocRepository.selectDTOByPrimaryKeyAndTenant(standardDocDTO);
     }

@@ -33,6 +33,13 @@
         ${sd}.last_updated_by,
         ${sd}.last_update_date
     </sql>
+    <update id="updateDesc">
+        update
+        xsta_standard_doc
+        set standard_desc = null
+        where doc_id = #{standardDocDTO.docId}
+        and tenant_id = #{standardDocDTO.tenantId}
+    </update>
 
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.StandardDocDTO">
         select
