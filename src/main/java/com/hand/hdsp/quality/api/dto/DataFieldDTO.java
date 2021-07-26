@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.dto;
 
+import java.util.Date;
 import java.util.List;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
@@ -139,10 +140,10 @@ public class DataFieldDTO extends AuditDomain {
     private List<Long> dataLengthList;
 
     @Transient
-    private String lastUpdateDateFrom;
+    private Date lastUpdateDateFrom;
 
     @Transient
-    private String lastUpdateDateTo;
+    private Date lastUpdateDateTo;
 
 
     @Transient
