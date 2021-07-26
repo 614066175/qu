@@ -2,17 +2,17 @@ package com.hand.hdsp.quality.app.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimRelationDTO;
 import com.hand.hdsp.quality.app.service.StandardAimService;
-import com.hand.hdsp.quality.domain.entity.BatchPlan;
 import com.hand.hdsp.quality.domain.entity.StandardAim;
 import com.hand.hdsp.quality.domain.entity.StandardAimRelation;
 import com.hand.hdsp.quality.domain.repository.*;
+import com.hand.hdsp.quality.infra.mapper.StandardAimMapper;
 import com.hand.hdsp.quality.infra.vo.ColumnVO;
 import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.boot.driver.app.service.DriverSessionService;
@@ -34,10 +34,11 @@ public class StandardAimServiceImpl implements StandardAimService {
     private final DataStandardRepository dataStandardRepository;
     private final DataFieldRepository dataFieldRepository;
     private final StandardAimRepository standardAimRepository;
+    private final StandardAimMapper standardAimMapper;
     private final BatchPlanRepository batchPlanRepository;
     private final StandardAimRelationRepository standardAimRelationRepository;
 
-    public StandardAimServiceImpl(DriverSessionService driverSessionService, DataStandardRepository dataStandardRepository, DataFieldRepository dataFieldRepository, StandardAimRepository standardAimRepository, BatchPlanRepository batchPlanRepository, StandardAimRelationRepository standardAimRelationRepository) {
+    public StandardAimServiceImpl(DriverSessionService driverSessionService, DataStandardRepository dataStandardRepository, DataFieldRepository dataFieldRepository, StandardAimRepository standardAimRepository, BatchPlanRepository batchPlanRepository, StandardAimRelationRepository standardAimRelationRepository, StandardAimMapper standardAimMapper) {
 
         this.driverSessionService = driverSessionService;
         this.dataStandardRepository = dataStandardRepository;
@@ -45,13 +46,14 @@ public class StandardAimServiceImpl implements StandardAimService {
         this.standardAimRepository = standardAimRepository;
         this.batchPlanRepository = batchPlanRepository;
         this.standardAimRelationRepository = standardAimRelationRepository;
+        this.standardAimMapper = standardAimMapper;
     }
 
     @Override
     public List<ColumnVO> unAimField(StandardAimDTO standardAimDTO) {
         DriverSession driverSession = driverSessionService.getDriverSession(standardAimDTO.getTenantId(), standardAimDTO.getDatasourceCode());
         List<Column> columns = driverSession.columnMetaData(standardAimDTO.getSchemaName(), standardAimDTO.getTableName());
-        List<ColumnVO> columnVOS=new ArrayList<>();
+        List<ColumnVO> columnVOS = new ArrayList<>();
         //判断字段是否已经在此标准落标过
         if (CollectionUtils.isNotEmpty(columns)) {
             columns.forEach(column -> {
@@ -69,10 +71,10 @@ public class StandardAimServiceImpl implements StandardAimService {
                                 .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, standardAimDTO.getDatasourceCode())
                                 .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, standardAimDTO.getSchemaName())
                                 .andEqualTo(StandardAim.FIELD_TABLE_NAME, standardAimDTO.getTableName())
-                                .andEqualTo(StandardAim.FIELD_FIELD_NAME, String.format("%s(%s)",column.getColumnName(),column.getTypeName()))
+                                .andEqualTo(StandardAim.FIELD_FIELD_NAME, String.format("%s(%s)", column.getColumnName(), column.getTypeName()))
                                 .andEqualTo(StandardAim.FIELD_TENANT_ID, standardAimDTO.getTenantId()))
                         .build());
-                if(CollectionUtils.isNotEmpty(standardAimDTOS)){
+                if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
                     columnVO.setSelectable(false);
                 }
                 columnVOS.add(columnVO);
@@ -83,7 +85,7 @@ public class StandardAimServiceImpl implements StandardAimService {
 
     @Override
     public Page<StandardAimDTO> list(PageRequest pageRequest, StandardAimDTO standardAimDTO) {
-        Page<StandardAimDTO> list = standardAimRepository.pageAndSortDTO(pageRequest, standardAimDTO);
+        Page<StandardAimDTO> list = PageHelper.doPageAndSort(pageRequest, () -> standardAimMapper.selectByConditionLike(standardAimDTO));
         List<StandardAimDTO> content = list.getContent();
         if (CollectionUtils.isNotEmpty(content)) {
             content.forEach(dto -> {
@@ -92,12 +94,6 @@ public class StandardAimServiceImpl implements StandardAimService {
                         dto.getSchemaName(),
                         dto.getTableName(),
                         dto.getFieldName()));
-                if(Objects.nonNull(dto.getPlanId())){
-                    BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(dto.getPlanId());
-                    if(Objects.nonNull(batchPlan)){
-                        dto.setPlanName(batchPlan.getPlanName());
-                    }
-                }
             });
         }
         return list;
@@ -105,7 +101,7 @@ public class StandardAimServiceImpl implements StandardAimService {
 
     @Override
     public void batchDelete(List<StandardAimDTO> standardAimDTOList) {
-        if(CollectionUtils.isNotEmpty(standardAimDTOList)){
+        if (CollectionUtils.isNotEmpty(standardAimDTOList)) {
             standardAimRepository.batchDTODeleteByPrimaryKey(standardAimDTOList);
             standardAimDTOList.forEach(standardAimDTO -> {
                 List<StandardAimRelationDTO> standardAimRelationDTOS = standardAimRelationRepository.selectDTOByCondition(Condition.builder(StandardAimRelation.class)

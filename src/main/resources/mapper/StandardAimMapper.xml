@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.hand.hdsp.quality.infra.mapper.StandardAimMapper">
-	<!-- 可根据自己的需求，是否要使用 -->
+    <!-- 可根据自己的需求，是否要使用 -->
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.StandardAim">
         <result column="aim_id" property="aimId" jdbcType="DECIMAL"/>
         <result column="standard_id" property="standardId" jdbcType="DECIMAL"/>
@@ -22,4 +22,50 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
+    <select id="selectByConditionLike" resultType="com.hand.hdsp.quality.api.dto.StandardAimDTO">
+        select
+        xsa.aim_id,
+        xsa.standard_id,
+        xsa.standard_type,
+        xsa.field_name,
+        xsa.field_desc,
+        xsa.datasource_id,
+        xsa.datasource_code,
+        xsa.datasource_type,
+        xsa.schema_name,
+        xsa.table_name,
+        xsa.table_desc,
+        xsa.plan_id,
+        xbp.plan_name,
+        xsa.tenant_id
+        from xsta_standard_aim xsa
+        left join xqua_batch_plan xbp on xbp.plan_id = xsa.plan_id
+        where 1=1
+        and xsa.tenant_id = #{standardAimDTO.tenantId}
+        and xsa.standard_id = #{standardAimDTO.standardId}
+        <if test="standardAimDTO.fieldName!=null">
+            and xsa.field_name like CONCAT('%',#{standardAimDTO.fieldName},'%')
+        </if>
+        <if test="standardAimDTO.fieldDesc!=null">
+            and xsa.field_desc like CONCAT('%',#{standardAimDTO.fieldDesc},'%')
+        </if>
+        <if test="standardAimDTO.datasourceType!=null">
+            and xsa.datasource_type like CONCAT('%',#{standardAimDTO.datasourceType},'%')
+        </if>
+        <if test="standardAimDTO.datasourceCode!=null">
+            and xsa.datasource_code like CONCAT('%',#{standardAimDTO.datasourceCode},'%')
+        </if>
+        <if test="standardAimDTO.schemaName!=null">
+            and xsa.schema_name like CONCAT('%',#{standardAimDTO.schemaName},'%')
+        </if>
+        <if test="standardAimDTO.schemaName!=null">
+            and xsa.table_name like CONCAT('%',#{standardAimDTO.tableName},'%')
+        </if>
+        <if test="standardAimDTO.tableDesc!=null">
+            and xsa.table_desc like CONCAT('%',#{standardAimDTO.tableDesc},'%')
+        </if>
+        <if test="standardAimDTO.planName!=null">
+            and xbp.plan_name like CONCAT('%',#{standardAimDTO.planName},'%')
+        </if>
+    </select>
 </mapper>
