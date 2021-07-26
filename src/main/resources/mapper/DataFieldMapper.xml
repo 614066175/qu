@@ -98,10 +98,10 @@
                 and fs.tenant_id=#{dataFieldDTO.tenantId}
             </if>
             <if test="dataFieldDTO.lastUpdateDateFrom !=null">
-                AND fs.last_update_date &gt;= #{lastUpdateDateFrom}
+                AND fs.last_update_date &gt;= #{dataFieldDTO.lastUpdateDateFrom}
             </if>
             <if test="dataFieldDTO.lastUpdateDateTo != null">
-                AND fs.last_update_date &lt;= #{lastUpdateDateTo}
+                AND fs.last_update_date &lt;= #{dataFieldDTO.lastUpdateDateTo}
             </if>
         </where>
         order by fs.creation_date desc
