@@ -82,7 +82,7 @@
             </if>
             <if test="dataFieldDTO.sysCommonName!=null">
                 <bind name="sysCommonName" value="'%'+ dataFieldDTO.sysCommonName +'%'"/>
-                and fs.sysCommonName like #{sysCommonName}
+                and fs.sys_common_name like #{sysCommonName}
             </if>
             <if test="dataFieldDTO.standardStatus!=null">
                 and fs.standard_status=#{dataFieldDTO.standardStatus}
