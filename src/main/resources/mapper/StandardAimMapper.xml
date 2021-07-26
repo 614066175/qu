@@ -44,28 +44,36 @@
         and xsa.tenant_id = #{standardAimDTO.tenantId}
         and xsa.standard_id = #{standardAimDTO.standardId}
         <if test="standardAimDTO.fieldName!=null">
-            and xsa.field_name like CONCAT('%',#{standardAimDTO.fieldName},'%')
+            <bind name="fieldName" value="'%'+ standardAimDTO.fieldName +'%'"/>
+            and xsa.field_name like #{fieldName}
         </if>
         <if test="standardAimDTO.fieldDesc!=null">
-            and xsa.field_desc like CONCAT('%',#{standardAimDTO.fieldDesc},'%')
+            <bind name="fieldDesc" value="'%'+ standardAimDTO.fieldDesc +'%'"/>
+            and xsa.field_desc like #{fieldDesc}
         </if>
         <if test="standardAimDTO.datasourceType!=null">
-            and xsa.datasource_type like CONCAT('%',#{standardAimDTO.datasourceType},'%')
+            <bind name="datasourceType" value="'%'+ standardAimDTO.datasourceType +'%'"/>
+            and xsa.datasource_type like UPPER(#{datasourceType})
         </if>
         <if test="standardAimDTO.datasourceCode!=null">
-            and xsa.datasource_code like CONCAT('%',#{standardAimDTO.datasourceCode},'%')
+            <bind name="datasourceCode" value="'%'+ standardAimDTO.datasourceCode +'%'"/>
+            and xsa.datasource_code like #{datasourceCode}
         </if>
         <if test="standardAimDTO.schemaName!=null">
-            and xsa.schema_name like CONCAT('%',#{standardAimDTO.schemaName},'%')
+            <bind name="schemaName" value="'%'+ standardAimDTO.schemaName +'%'"/>
+            and xsa.schema_name like #{schemaName}
         </if>
         <if test="standardAimDTO.schemaName!=null">
-            and xsa.table_name like CONCAT('%',#{standardAimDTO.tableName},'%')
+            <bind name="tableName" value="'%'+ standardAimDTO.tableName +'%'"/>
+            and xsa.table_name like #{tableName}
         </if>
         <if test="standardAimDTO.tableDesc!=null">
-            and xsa.table_desc like CONCAT('%',#{standardAimDTO.tableDesc},'%')
+            <bind name="tableDesc" value="'%'+ standardAimDTO.tableDesc +'%'"/>
+            and xsa.table_desc like #{tableDesc}
         </if>
         <if test="standardAimDTO.planName!=null">
-            and xbp.plan_name like CONCAT('%',#{standardAimDTO.planName},'%')
+            <bind name="planName" value="'%'+ standardAimDTO.planName +'%'"/>
+            and xbp.plan_name like #{planName}
         </if>
     </select>
 </mapper>
