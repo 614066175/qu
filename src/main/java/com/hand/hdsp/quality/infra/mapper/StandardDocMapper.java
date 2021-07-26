@@ -30,4 +30,11 @@ public interface StandardDocMapper extends BaseMapper<StandardDoc> {
      * @return
      */
     String selectUserNameById(Long userId);
+
+    /**
+     * 更新注释为null
+     * @param standardDocDTO 更新条件
+     * @return 返回值
+     */
+    Integer updateDesc(@Param("standardDocDTO") StandardDocDTO standardDocDTO);
 }
