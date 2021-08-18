@@ -359,9 +359,11 @@ public class DataStandardServiceImpl implements DataStandardService {
             //开启工作流
             //根据上下线状态开启不同的工作流实例
             if(ONLINE.equals(dataStandardDTO.getStandardStatus())){
+                this.workflowing(dataStandardDTO.getTenantId(),dataStandardDTO.getStandardCode(),ONLINE_APPROVING);
                 this.startWorkFlow(WorkFlowConstant.DataStandard.ONLINE_WORKFLOW_KEY,dataStandardDTO);
             }
             if(OFFLINE.equals(dataStandardDTO.getStandardStatus())){
+                this.workflowing(dataStandardDTO.getTenantId(),dataStandardDTO.getStandardCode(),ONLINE_APPROVING);
                 this.startWorkFlow(WorkFlowConstant.DataStandard.OFFLINE_WORKFLOW_KEY,dataStandardDTO);
             }
         }else{

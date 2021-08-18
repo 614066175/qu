@@ -23,9 +23,11 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.workflow.WorkflowClient;
+import org.hzero.boot.workflow.dto.RunInstance;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
@@ -41,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @author wsl 2020-11-25 15:38:21
  */
+@Slf4j
 @Service
 public class DataFieldServiceImpl implements DataFieldService {
 
@@ -212,9 +215,12 @@ public class DataFieldServiceImpl implements DataFieldService {
             //开启工作流
             //根据上下线状态开启不同的工作流实例
             if(ONLINE.equals(dataFieldDTO.getStandardStatus())){
+                //先修改状态再启动工作流，启动工作流需要花费一定时间,有异常回滚
+                this.workflowing(dataFieldDTO.getTenantId(),dataFieldDTO.getFieldId(),ONLINE_APPROVING);
                 this.startWorkFlow(WorkFlowConstant.FieldStandard.ONLINE_WORKFLOW_KEY,dataFieldDTO);
             }
             if(OFFLINE.equals(dataFieldDTO.getStandardStatus())){
+                this.workflowing(dataFieldDTO.getTenantId(),dataFieldDTO.getFieldId(),OFFLINE_APPROVING);
                 this.startWorkFlow(WorkFlowConstant.FieldStandard.OFFLINE_WORKFLOW_KEY,dataFieldDTO);
             }
         } else {
@@ -238,7 +244,7 @@ public class DataFieldServiceImpl implements DataFieldService {
         //给流程变量
         var.put("fieldId", dataFieldDTO.getFieldId());
         //使用自研工作流客户端
-        workflowClient.startInstanceByFlowKey(dataFieldDTO.getTenantId(), workflowKey, bussinessKey, "USER",String.valueOf(DetailsHelper.getUserDetails().getUserId()), var);
+        workflowClient.startInstanceByFlowKey(dataFieldDTO.getTenantId(), workflowKey, bussinessKey, "USER", String.valueOf(DetailsHelper.getUserDetails().getUserId()), var);
     }
 
 
