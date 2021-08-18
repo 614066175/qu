@@ -4,30 +4,35 @@ package com.hand.hdsp.quality.app.service.impl;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.DataFieldService;
 import com.hand.hdsp.quality.app.service.DataStandardService;
 import com.hand.hdsp.quality.domain.entity.DataField;
 import com.hand.hdsp.quality.domain.entity.DataFieldVersion;
+import com.hand.hdsp.quality.domain.entity.DataStandard;
 import com.hand.hdsp.quality.domain.entity.StandardExtra;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
+import org.hzero.boot.workflow.WorkflowClient;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,6 +63,12 @@ public class DataFieldServiceImpl implements DataFieldService {
     private final ExtraVersionRepository extraVersionRepository;
 
     private final DataStandardMapper dataStandardMapper;
+
+    @Value("${hdsp.quality.enable-workflow}")
+    private boolean enableWorkflow;
+
+    @Autowired
+    private WorkflowClient workflowClient;
 
 
     public DataFieldServiceImpl(DataFieldRepository dataFieldRepository, StandardExtraRepository standardExtraRepository, StandardApproveRepository standardApproveRepository, DataFieldVersionRepository dataFieldVersionRepository, DataFieldMapper dataFieldMapper, DataStandardService dataStandardService, StandardAimRepository standardAimRepository, ExtraVersionRepository extraVersionRepository, DataStandardMapper dataStandardMapper) {
@@ -113,7 +124,7 @@ public class DataFieldServiceImpl implements DataFieldService {
         }
         DataFieldDTO dataFieldDTO = dataFieldDTOList.get(0);
         //判断当前租户是否启用安全加密
-        if(dataStandardMapper.isEncrypt(tenantId)==1){
+        if (dataStandardMapper.isEncrypt(tenantId) == 1) {
             //解密邮箱，电话
             if (Strings.isNotEmpty(dataFieldDTO.getChargeTel())) {
                 dataFieldDTO.setChargeTel(DataSecurityHelper.decrypt(dataFieldDTO.getChargeTel()));
@@ -186,34 +197,50 @@ public class DataFieldServiceImpl implements DataFieldService {
             throw new CommonException(ErrorCode.DATA_FIELD_NAME_EXIST);
         }
         oldDataFieldDTO.setStandardStatus(dataFieldDTO.getStandardStatus());
-        if (ONLINE_APPROVING.equals(dataFieldDTO.getStandardStatus())) {
-            doApprove(oldDataFieldDTO);
-        }
-        if (OFFLINE_APPROVING.equals(dataFieldDTO.getStandardStatus())) {
-            doApprove(oldDataFieldDTO);
-        }
         dataFieldRepository.updateByDTOPrimaryKey(oldDataFieldDTO);
     }
 
     @Override
-    public void aim(Long tenantId,List<StandardAimDTO> standardAimDTOList) {
-        dataStandardService.aim(tenantId,standardAimDTOList);
+    public void aim(Long tenantId, List<StandardAimDTO> standardAimDTOList) {
+        dataStandardService.aim(tenantId, standardAimDTOList);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void publishOrOff(DataFieldDTO dataFieldDTO) {
-        DataFieldDTO dto = dataFieldRepository.selectDTOByPrimaryKey(dataFieldDTO.getFieldId());
-        if (Objects.isNull(dto)) {
-            throw new CommonException(ErrorCode.DATA_FIELD_STANDARD_NOT_EXIST);
-        }
-        dataFieldDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
-        dataFieldRepository.updateDTOOptional(dataFieldDTO, DataField.FIELD_STANDARD_STATUS);
-        if (ONLINE.equals(dataFieldDTO.getStandardStatus())) {
-            //存版本表
-            doVersion(dataFieldDTO);
+        if (enableWorkflow) {
+            //开启工作流
+            //根据上下线状态开启不同的工作流实例
+            if(ONLINE.equals(dataFieldDTO.getStandardStatus())){
+                this.startWorkFlow(WorkFlowConstant.FieldStandard.ONLINE_WORKFLOW_KEY,dataFieldDTO);
+            }
+            if(OFFLINE.equals(dataFieldDTO.getStandardStatus())){
+                this.startWorkFlow(WorkFlowConstant.FieldStandard.OFFLINE_WORKFLOW_KEY,dataFieldDTO);
+            }
+        } else {
+            DataFieldDTO dto = dataFieldRepository.selectDTOByPrimaryKey(dataFieldDTO.getFieldId());
+            if (Objects.isNull(dto)) {
+                throw new CommonException(ErrorCode.DATA_FIELD_STANDARD_NOT_EXIST);
+            }
+            dataFieldDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
+            dataFieldRepository.updateDTOOptional(dataFieldDTO, DataField.FIELD_STANDARD_STATUS);
+            if (ONLINE.equals(dataFieldDTO.getStandardStatus())) {
+                //存版本表
+                doVersion(dataFieldDTO);
+            }
         }
     }
+
+    private void startWorkFlow(String workflowKey, DataFieldDTO dataFieldDTO) {
+        //使用当前时间戳作为业务主键
+        String bussinessKey=String.valueOf(System.currentTimeMillis());
+        Map<String, Object> var = new HashMap<>();
+        //给流程变量
+        var.put("fieldId", dataFieldDTO.getFieldId());
+        //使用自研工作流客户端
+        workflowClient.startInstanceByFlowKey(dataFieldDTO.getTenantId(), workflowKey, bussinessKey, "USER",String.valueOf(DetailsHelper.getUserDetails().getUserId()), var);
+    }
+
 
     @Override
     public List<DataFieldDTO> export(DataFieldDTO dto, ExportParam exportParam, PageRequest pageRequest) {
@@ -253,6 +280,66 @@ public class DataFieldServiceImpl implements DataFieldService {
         }
     }
 
-    private void doApprove(DataFieldDTO oldDataFieldDTO) {
+    @Override
+    public void onlineWorkflowSuccess(Long tenantId, Long fieldId) {
+        workflowing(tenantId, fieldId, ONLINE);
+    }
+
+    @Override
+    public void onlineWorkflowFail(Long tenantId, Long fieldId) {
+        workflowing(tenantId, fieldId, OFFLINE);
+    }
+
+    @Override
+    public void offlineWorkflowSuccess(Long tenantId, Long fieldId) {
+        workflowing(tenantId, fieldId, OFFLINE);
+    }
+
+    @Override
+    public void offlineWorkflowFail(Long tenantId, Long fieldId) {
+        workflowing(tenantId, fieldId, ONLINE);
+    }
+
+    @Override
+    public void onlineWorkflowing(Long tenantId, Long fieldId) {
+        workflowing(tenantId, fieldId, ONLINE_APPROVING);
+    }
+
+    @Override
+    public void offlineWorkflowing(Long tenantId, Long fieldId) {
+        workflowing(tenantId, fieldId, OFFLINE_APPROVING);
+    }
+
+    @Override
+    public List<AssigneeUserDTO> findCharger(Long tenantId, Long fieldId) {
+        DataFieldDTO dataFieldDTO = dataFieldRepository.selectDTOByPrimaryKey(
+                DataFieldDTO.builder().fieldId(fieldId).tenantId(tenantId).build()
+        );
+        if (dataFieldDTO != null) {
+            //查询责任人
+            return Arrays.asList(dataStandardMapper.selectAssigneeUser(dataFieldDTO.getChargeId()));
+        } else {
+            throw new CommonException(ErrorCode.NOT_FIND_VALUE);
+        }
+    }
+
+    /**
+     * 指定字段标准修改状态，供审批中，审批结束任务状态变更
+     *
+     * @param tenantId
+     * @param fieldId
+     * @param status
+     */
+    private void workflowing(Long tenantId, Long fieldId, String status) {
+        DataFieldDTO dataFieldDTO = dataFieldRepository.selectDTOByPrimaryKey(
+                DataFieldDTO.builder().fieldId(fieldId).tenantId(tenantId).build()
+        );
+        if (dataFieldDTO != null) {
+            dataFieldDTO.setStandardStatus(status);
+            dataFieldRepository.updateDTOOptional(dataFieldDTO, DataStandard.FIELD_STANDARD_STATUS);
+            if (ONLINE.equals(status)) {
+                doVersion(dataFieldDTO);
+            }
+        }
     }
 }

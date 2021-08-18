@@ -19,6 +19,7 @@ import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardConstant.AimType;
 import com.hand.hdsp.quality.infra.constant.WarningLevel;
+import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.feign.AssetFeign;
 import com.hand.hdsp.quality.infra.feign.WorkFlowFeign;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
@@ -28,6 +29,7 @@ import com.hand.hdsp.quality.infra.util.StandardHandler;
 import com.hand.hdsp.quality.infra.util.ValueRangeHandler;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
@@ -43,6 +45,7 @@ import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -109,6 +112,9 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     @Autowired
     private List<StandardHandler> handlers;
+
+    @Value("${hdsp.quality.enable-workflow}")
+    private boolean enableWorkFlow;
 
     @Resource
     private AssetFeign assetFeign;
@@ -349,6 +355,22 @@ public class DataStandardServiceImpl implements DataStandardService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void publishOrOff(DataStandardDTO dataStandardDTO) {
+        if(enableWorkFlow){
+            //开启工作流
+            //根据上下线状态开启不同的工作流实例
+            if(ONLINE.equals(dataStandardDTO.getStandardStatus())){
+                this.startWorkFlow(WorkFlowConstant.DataStandard.ONLINE_WORKFLOW_KEY,dataStandardDTO);
+            }
+            if(OFFLINE.equals(dataStandardDTO.getStandardStatus())){
+                this.startWorkFlow(WorkFlowConstant.DataStandard.OFFLINE_WORKFLOW_KEY,dataStandardDTO);
+            }
+        }else{
+            //通用上线下线
+            doPublishOrOff(dataStandardDTO);
+        }
+    }
+
+    private void doPublishOrOff(DataStandardDTO dataStandardDTO) {
         DataStandardDTO dto = dataStandardRepository.selectDTOByPrimaryKey(dataStandardDTO.getStandardId());
         if (Objects.isNull(dto)) {
             throw new CommonException(ErrorCode.DATA_STANDARD_NOT_EXIST);
@@ -625,17 +647,19 @@ public class DataStandardServiceImpl implements DataStandardService {
     }
 
     @Override
-    public void publishByWorkflow(Long tenantId, DataStandardDTO dataStandardDTO) {
-        //发布流程Id
-        String publishFlowId = "FLOW1364824631562809345";
+    public void startWorkFlow(String workflowKey,DataStandardDTO dataStandardDTO) {
+        //使用当前时间戳作为业务主键
         String bussinessKey=String.valueOf(System.currentTimeMillis());
         Map<String, Object> var = new HashMap<>();
+        //给流程变量
         var.put("dataStandardCode", dataStandardDTO.getStandardCode());
-        workFlowFeign.startInstanceByFlowKey(tenantId, publishFlowId, "10001", "ygltl", var);
+        //使用自研工作流客户端
+        workflowClient.startInstanceByFlowKey(dataStandardDTO.getTenantId(), workflowKey, bussinessKey, "USER",String.valueOf(DetailsHelper.getUserDetails().getUserId()), var);
+//        workFlowFeign.startInstanceByFlowKey(dataStandardDTO.getTenantId(), workflowKey, bussinessKey, "USER",String.valueOf(DetailsHelper.getUserDetails().getUserId()), var);
     }
 
     @Override
-    public List<String> findCharger(Long tenantId, String dataStandardCode) {
+    public List<AssigneeUserDTO> findCharger(Long tenantId, String dataStandardCode) {
         List<DataStandardDTO> standardDTOS = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(DataStandard.FIELD_TENANT_ID, tenantId)
@@ -643,13 +667,11 @@ public class DataStandardServiceImpl implements DataStandardService {
                 .build());
         if (CollectionUtils.isNotEmpty(standardDTOS)) {
             Long chargeId = standardDTOS.get(0).getChargeId();
-            //工作流只支持员工级，因此测试先获取用户下员工来进行审批,员工编码进行了加密需要解密
-            List<String> employeeNums = dataStandardMapper.selectEmployeeByChargeId(chargeId).stream()
-                    .map(str -> str = DataSecurityHelper.decrypt(str))
-                    .collect(Collectors.toList());
-            return employeeNums;
+            //查询用户
+            return Arrays.asList(dataStandardMapper.selectAssigneeUser(chargeId));
+        }else{
+            throw new CommonException(ErrorCode.NOT_FIND_VALUE);
         }
-        return null;
     }
 
     @Override
@@ -687,6 +709,12 @@ public class DataStandardServiceImpl implements DataStandardService {
     }
 
     @Override
+    public void onlineWorkflowFail(Long tenantId, String dataStandardCode) {
+        //上线失败，修改发布审核中状态未离线
+        workflowing(tenantId,dataStandardCode,OFFLINE);
+    }
+
+    @Override
     public void offlineWorkflowSuccess(Long tenantId, String dataStandardCode) {
         List<DataStandardDTO> standardDTOS = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                 .andWhere(Sqls.custom()
@@ -703,6 +731,11 @@ public class DataStandardServiceImpl implements DataStandardService {
     }
 
     @Override
+    public void offlineWorkflowFail(Long tenantId, String dataStandardCode) {
+        workflowing(tenantId,dataStandardCode,ONLINE);
+    }
+
+    @Override
     public void offlineWorkflowing(Long tenantId, String dataStandardCode) {
         workflowing(tenantId,dataStandardCode,OFFLINE_APPROVING);
     }
@@ -713,6 +746,12 @@ public class DataStandardServiceImpl implements DataStandardService {
     }
 
 
+    /**
+     * 指定数据标准修改状态，供审批中，审批结束任务状态变更
+     * @param tenantId
+     * @param dataStandardCode
+     * @param status
+     */
     private void workflowing(Long tenantId, String dataStandardCode,String status) {
         List<DataStandardDTO> standardDTOS = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                 .andWhere(Sqls.custom()

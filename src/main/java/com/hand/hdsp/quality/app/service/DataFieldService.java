@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.app.service;
 
 import java.util.List;
 
+import com.hand.hdsp.quality.api.dto.AssigneeUserDTO;
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import io.choerodon.core.domain.Page;
@@ -75,4 +76,53 @@ public interface DataFieldService {
      */
     List<DataFieldDTO> export(DataFieldDTO dto, ExportParam exportParam, PageRequest pageRequest);
 
+    /**
+     * 上线通过事件
+     * @param tenantId
+     * @param fieldId
+     */
+    void onlineWorkflowSuccess(Long tenantId, Long fieldId);
+
+    /**
+     * 上线拒绝事件
+     * @param tenantId
+     * @param fieldId
+     */
+    void onlineWorkflowFail(Long tenantId, Long fieldId);
+
+    /**
+     * 下线通过事件
+     * @param tenantId
+     * @param fieldId
+     */
+    void offlineWorkflowSuccess(Long tenantId, Long fieldId);
+
+    /**
+     * 上线拒绝事件
+     * @param tenantId
+     * @param fieldId
+     */
+    void offlineWorkflowFail(Long tenantId, Long fieldId);
+
+    /**
+     * 上线工作流审批中
+     * @param tenantId
+     * @param fieldId
+     */
+    void onlineWorkflowing(Long tenantId, Long fieldId);
+
+    /**
+     * 下线工作流审批中
+     * @param tenantId
+     * @param fieldId
+     */
+    void offlineWorkflowing(Long tenantId, Long fieldId);
+
+    /**
+     * 查找责任人审批
+     * @param tenantId
+     * @param fieldId
+     * @return
+     */
+    List<AssigneeUserDTO> findCharger(Long tenantId, Long fieldId);
 }

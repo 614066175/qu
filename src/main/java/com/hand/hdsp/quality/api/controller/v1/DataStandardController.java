@@ -4,14 +4,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
-import com.hand.hdsp.quality.api.dto.AssetFieldDTO;
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
-import com.hand.hdsp.quality.api.dto.DataStandardDTO;
-import com.hand.hdsp.quality.api.dto.StandardAimDTO;
+import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.DataStandardService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.DataStandard;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
+import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
@@ -316,9 +314,8 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/find-charger/{dataStandardCode}")
-    public ResponseEntity<List<String>> findCharger(@PathVariable(name = "organizationId") Long tenantId, @PathVariable String dataStandardCode) {
-        List<String> charger = dataStandardService.findCharger(tenantId, dataStandardCode);
-        return Results.success(charger);
+    public ResponseEntity<List<AssigneeUserDTO>> findCharger(@PathVariable(name = "organizationId") Long tenantId, @PathVariable String dataStandardCode) {
+        return Results.success(dataStandardService.findCharger(tenantId, dataStandardCode));
     }
 
     @ApiOperation(value = "工作流发布接口")
@@ -331,12 +328,13 @@ public class DataStandardController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/publish-by-workflow")
     public ResponseEntity<DataStandardDTO> publishByWorkflow(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
-        dataStandardService.publishByWorkflow(tenantId,dataStandardDTO);
+        dataStandardDTO.setTenantId(tenantId);
+        dataStandardService.startWorkFlow(WorkFlowConstant.DataStandard.ONLINE_WORKFLOW_KEY,dataStandardDTO);
         return Results.success(dataStandardDTO);
     }
 
 
-    @ApiOperation(value = "上线工作流通过事件接口")
+    @ApiOperation(value = "数据标准上线工作流通过事件接口")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -350,7 +348,21 @@ public class DataStandardController {
         return Results.success();
     }
 
-    @ApiOperation(value = "下线工作流发布通过事件接口")
+    @ApiOperation(value = "数据标准上线工作流拒绝事件接口")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/online-workflow-fail/{dataStandardCode}")
+    public ResponseEntity<DataStandardDTO> onlineWorkflowFail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable String dataStandardCode) {
+        dataStandardService.onlineWorkflowFail(tenantId,dataStandardCode);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "数据标准下线工作流发布通过事件接口")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -359,10 +371,26 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/offline-workflow-success/{dataStandardCode}")
-    public ResponseEntity<DataStandardDTO> offLineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId, @PathVariable String dataStandardCode) {
+    public ResponseEntity<DataStandardDTO> offlineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId, @PathVariable String dataStandardCode) {
         dataStandardService.offlineWorkflowSuccess(tenantId,dataStandardCode);
         return Results.success();
     }
+
+    @ApiOperation(value = "数据标准下线工作流发布拒绝事件接口")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/offline-workflow-fail/{dataStandardCode}")
+    public ResponseEntity<DataStandardDTO> offlineWorkflowFail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable String dataStandardCode) {
+        dataStandardService.offlineWorkflowFail(tenantId,dataStandardCode);
+        return Results.success();
+    }
+
+
 
     @ApiOperation(value = "数据标准上线审批中事件")
     @ApiImplicitParams({@ApiImplicitParam(

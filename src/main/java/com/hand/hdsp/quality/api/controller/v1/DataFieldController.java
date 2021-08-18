@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
+import com.hand.hdsp.quality.api.dto.AssigneeUserDTO;
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
+import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import com.hand.hdsp.quality.app.service.DataFieldService;
 import com.hand.hdsp.quality.config.SwaggerTags;
@@ -189,6 +191,106 @@ public class DataFieldController extends BaseController {
         List<DataFieldDTO> dtoList =
                 dataFieldService.export(dto, exportParam, pageRequest);
         return Results.success(dtoList);
+    }
+
+
+    @ApiOperation(value = "字段标准上线工作流通过事件接口")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/online-workflow-success/{fieldId}")
+    public ResponseEntity<DataStandardDTO> onlineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long fieldId) {
+        dataFieldService.onlineWorkflowSuccess(tenantId,fieldId);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "字段标准上线工作流拒绝事件接口")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/online-workflow-fail/{fieldId}")
+    public ResponseEntity<DataStandardDTO> onlineWorkflowFail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long fieldId) {
+        dataFieldService.onlineWorkflowFail(tenantId,fieldId);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "字段标准下线工作流发布通过事件接口")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/offline-workflow-success/{fieldId}")
+    public ResponseEntity<DataStandardDTO> offlineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long fieldId) {
+        dataFieldService.offlineWorkflowSuccess(tenantId,fieldId);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "字段标准下线工作流发布拒绝事件接口")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/offline-workflow-fail/{fieldId}")
+    public ResponseEntity<DataStandardDTO> offlineWorkflowFail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long fieldId) {
+        dataFieldService.offlineWorkflowFail(tenantId,fieldId);
+        return Results.success();
+    }
+
+
+
+    @ApiOperation(value = "字段标准上线审批中事件")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/online-workflowing/{fieldId}")
+    public ResponseEntity<DataStandardDTO> onlineWorkflowing(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long fieldId) {
+        dataFieldService.onlineWorkflowing(tenantId,fieldId);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "字段标准下线审批中事件")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/offline-workflowing/{fieldId}")
+    public ResponseEntity<DataStandardDTO> offlineWorkflowing(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long fieldId) {
+        dataFieldService.offlineWorkflowing(tenantId,fieldId);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "根据字段标准ID查询责任人，用于审批规则")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/find-charger/{fieldId}")
+    public ResponseEntity<List<AssigneeUserDTO>> findCharger(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long fieldId) {
+        return Results.success(dataFieldService.findCharger(tenantId, fieldId));
     }
 
 }
