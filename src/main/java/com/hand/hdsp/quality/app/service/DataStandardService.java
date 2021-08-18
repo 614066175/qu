@@ -2,10 +2,7 @@ package com.hand.hdsp.quality.app.service;
 
 import java.util.List;
 
-import com.hand.hdsp.quality.api.dto.AssetFieldDTO;
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
-import com.hand.hdsp.quality.api.dto.DataStandardDTO;
-import com.hand.hdsp.quality.api.dto.StandardAimDTO;
+import com.hand.hdsp.quality.api.dto.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.export.vo.ExportParam;
@@ -121,21 +118,70 @@ public interface DataStandardService {
 
     /**
      * 元数据数据标准详情
+     *
      * @param tenantId
      * @param standardId
      * @return
      */
     DataStandardDTO assetDetail(Long tenantId, Long standardId);
 
-    void publishByWorkflow(Long tenantId, DataStandardDTO dataStandardDTO);
+    /**
+     * 开启工作流
+     * @param workflowKey
+     * @param dataStandardDTO
+     */
+    void startWorkFlow(String workflowKey, DataStandardDTO dataStandardDTO);
 
-    List<String> findCharger(Long tenantId, String dataStandardCode);
+    /**
+     * 查找标准审批人
+     * @param tenantId
+     * @param dataStandardCode
+     * @return
+     */
+    List<AssigneeUserDTO> findCharger(Long tenantId, String dataStandardCode);
 
+    /**
+     * 上线通过事件
+     * @param tenantId
+     * @param dataStandardCode
+     */
     void onlineWorkflowSuccess(Long tenantId, String dataStandardCode);
 
+    /**
+     * 上线拒绝事件
+     * @param tenantId
+     * @param dataStandardCode
+     */
+    void onlineWorkflowFail(Long tenantId, String dataStandardCode);
+
+    /**
+     * 下线通过事件
+     * @param tenantId
+     * @param dataStandardCode
+     */
     void offlineWorkflowSuccess(Long tenantId, String dataStandardCode);
 
+    /**
+     * 上线拒绝事件
+     * @param tenantId
+     * @param dataStandardCode
+     */
+    void offlineWorkflowFail(Long tenantId, String dataStandardCode);
+
+    /**
+     * 上线工作流审批中
+     * @param tenantId
+     * @param dataStandardCode
+     */
     void onlineWorkflowing(Long tenantId, String dataStandardCode);
 
+    /**
+     * 下线工作流审批中
+     * @param tenantId
+     * @param dataStandardCode
+     */
     void offlineWorkflowing(Long tenantId, String dataStandardCode);
+
+
+
 }

@@ -169,14 +169,14 @@
         WHERE
             unit_id=#{chargeDeptId}
     </select>
-    <select id="selectEmployeeByChargeId" resultType="java.lang.String">
+    <select id="selectAssigneeUser" resultType="com.hand.hdsp.quality.api.dto.AssigneeUserDTO">
         SELECT
-            he.employee_num
+            id,
+            login_name,
+            real_name
         FROM
             iam_user iu
-            join hpfm_employee_user heu on iu.id=heu.user_id
-            join hpfm_employee he on heu.employee_id=he.employee_id
-            where iu.id=#{chargeId}
+        where iu.id=#{chargeId}
     </select>
     <select id="isEncrypt" resultType="java.lang.Long">
         select enable_data_security

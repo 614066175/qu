@@ -143,6 +143,8 @@ hzero:
       name: ${HZERO_SERVICE_REPORT_NAME:hzero-report}
 
 hdsp:
+  quality:
+    enable-workflow: true
   # 提取信息
   route-data:
     service-short: ${HDSP_ROUTE_DATA_SERVICE_SHORT:xqua}

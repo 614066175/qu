@@ -2,10 +2,12 @@ package com.hand.hdsp.quality.infra.mapper;
 
 import java.util.List;
 
+import com.hand.hdsp.quality.api.dto.AssigneeUserDTO;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.domain.entity.DataStandard;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.security.core.userdetails.User;
 
 /**
  * <p>
@@ -54,7 +56,7 @@ public interface DataStandardMapper extends BaseMapper<DataStandard> {
      */
     String selectChargeDeptNameById(@Param("chargeDeptId") Long chargeDeptId);
 
-    List<String> selectEmployeeByChargeId(@Param("chargeId") Long chargeId);
+    AssigneeUserDTO selectAssigneeUser(@Param("chargeId") Long chargeId);
 
     Long isEncrypt(Long tenantId);
 }
