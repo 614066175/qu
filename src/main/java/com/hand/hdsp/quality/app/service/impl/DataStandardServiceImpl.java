@@ -106,14 +106,12 @@ public class DataStandardServiceImpl implements DataStandardService {
     @Autowired
     private WorkflowClient workflowClient;
 
-    @Autowired
-    private WorkFlowFeign workFlowFeign;
 
 
     @Autowired
     private List<StandardHandler> handlers;
 
-    @Value("${hdsp.quality.enable-workflow}")
+    @Value("${hdsp.workflow.enabled:false}")
     private boolean enableWorkFlow;
 
     @Resource

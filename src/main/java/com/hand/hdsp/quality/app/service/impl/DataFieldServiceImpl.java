@@ -67,7 +67,7 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     private final DataStandardMapper dataStandardMapper;
 
-    @Value("${hdsp.quality.enable-workflow}")
+    @Value("${hdsp.workflow.enabled:false}")
     private boolean enableWorkflow;
 
     @Autowired
