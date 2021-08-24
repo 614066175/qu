@@ -83,11 +83,11 @@
             </if>
             <if test="dataFieldDTO.fieldComment!=null">
                 <bind name="fieldComment" value="'%'+ dataFieldDTO.fieldComment +'%'"/>
-                and fs.field_name like #{fieldComment}
+                and fs.field_comment like #{fieldComment}
             </if>
             <if test="dataFieldDTO.standardDesc!=null">
                 <bind name="standardDesc" value="'%'+ dataFieldDTO.standardDesc +'%'"/>
-                and fs.field_name like #{standardDesc}
+                and fs.standard_desc like #{standardDesc}
             </if>
             <if test="dataFieldDTO.sysCommonName!=null">
                 <bind name="sysCommonName" value="'%'+ dataFieldDTO.sysCommonName +'%'"/>
