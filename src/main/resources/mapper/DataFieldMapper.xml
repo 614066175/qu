@@ -77,8 +77,17 @@
             <if test="dataFieldDTO.groupId!=null">
                 and fs.group_id=#{dataFieldDTO.groupId}
             </if>
-            <if test="dataFieldDTO.fieldName">
-                and fs.field_name=#{dataFieldDTO.fieldName}
+            <if test="dataFieldDTO.fieldName!=null">
+                <bind name="fieldName" value="'%'+ dataFieldDTO.fieldName +'%'"/>
+                and fs.field_name like #{fieldName}
+            </if>
+            <if test="dataFieldDTO.fieldComment!=null">
+                <bind name="fieldComment" value="'%'+ dataFieldDTO.fieldComment +'%'"/>
+                and fs.field_name like #{fieldComment}
+            </if>
+            <if test="dataFieldDTO.standardDesc!=null">
+                <bind name="standardDesc" value="'%'+ dataFieldDTO.standardDesc +'%'"/>
+                and fs.field_name like #{standardDesc}
             </if>
             <if test="dataFieldDTO.sysCommonName!=null">
                 <bind name="sysCommonName" value="'%'+ dataFieldDTO.sysCommonName +'%'"/>
