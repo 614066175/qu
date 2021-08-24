@@ -76,6 +76,10 @@ public class ProblemController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{problemId}")
     public ResponseEntity<?> detail(@PathVariable Long problemId) {
+        //前端需要
+        if(problemId == -1){
+            return Results.success(ProblemDTO.builder().build());
+        }
         ProblemDTO problemDTO = problemRepository.selectDTOByPrimaryKeyAndTenant(problemId);
         if(problemDTO != null){
             List<Problem> problems = problemRepository.selectByCondition(Condition.builder(Problem.class).andWhere(
