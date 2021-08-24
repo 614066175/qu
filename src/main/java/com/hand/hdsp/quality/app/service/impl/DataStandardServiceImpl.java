@@ -361,7 +361,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                 this.startWorkFlow(WorkFlowConstant.DataStandard.ONLINE_WORKFLOW_KEY,dataStandardDTO);
             }
             if(OFFLINE.equals(dataStandardDTO.getStandardStatus())){
-                this.workflowing(dataStandardDTO.getTenantId(),dataStandardDTO.getStandardCode(),ONLINE_APPROVING);
+                this.workflowing(dataStandardDTO.getTenantId(),dataStandardDTO.getStandardCode(),OFFLINE_APPROVING);
                 this.startWorkFlow(WorkFlowConstant.DataStandard.OFFLINE_WORKFLOW_KEY,dataStandardDTO);
             }
         }else{
