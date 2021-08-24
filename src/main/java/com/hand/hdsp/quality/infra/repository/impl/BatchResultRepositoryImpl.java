@@ -3,10 +3,7 @@ package com.hand.hdsp.quality.infra.repository.impl;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
@@ -16,15 +13,18 @@ import com.hand.hdsp.quality.api.dto.BatchResultItemDTO;
 import com.hand.hdsp.quality.api.dto.TimeRangeDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.domain.repository.BatchResultRepository;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.util.TimeToString;
 import com.hand.hdsp.quality.infra.vo.*;
 import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hzero.core.base.BaseConstants;
 import org.springframework.stereotype.Component;
 
 /**
@@ -36,6 +36,7 @@ import org.springframework.stereotype.Component;
 public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, BatchResultDTO> implements BatchResultRepository {
 
     private final BatchResultMapper batchResultMapper;
+    private static final String FIELD = "FIELD";
 
     public BatchResultRepositoryImpl(BatchResultMapper batchResultMapper) {
         this.batchResultMapper = batchResultMapper;
@@ -60,8 +61,8 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
     @Override
     public Map<String, Object> numberView(TimeRangeDTO timeRangeDTO) {
         //没有选择高级时间查询条件的话就处理外层时间
-        if(StringUtils.isEmpty(timeRangeDTO.getStartDate())
-                &&StringUtils.isEmpty(timeRangeDTO.getEndDate())){
+        if (StringUtils.isEmpty(timeRangeDTO.getStartDate())
+                && StringUtils.isEmpty(timeRangeDTO.getEndDate())) {
             TimeToString.timeToString(timeRangeDTO);
         }
         Map<String, Object> map = new HashMap<>(8);
@@ -101,6 +102,83 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
         list.forEach(vo -> vo.setPercentage(vo.getCountSum().divide(sum, 2, RoundingMode.HALF_UP)));
         return list;
     }
+
+    @Override
+    public List<ProblemTriggerVO> problemTrigger(TimeRangeDTO timeRangeDTO) {
+        TimeToString.timeToString(timeRangeDTO);
+        List<ProblemTriggerVO> triggers = batchResultMapper.problemTrigger(timeRangeDTO);
+        List<ProblemTriggerVO> lastTriggers = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(triggers)) {
+            //将字段类型不一致的问题筛选出去，并把剩余的问题合并到同一个list
+            lastTriggers.addAll(triggers.stream()
+                    .filter(u -> FIELD.equals(u.getRuleType()))
+                    .filter(u -> this.typeConvert(u.getFieldName()).contains(u.getColumnType()))
+                    .collect(Collectors.toList()));
+            lastTriggers.addAll(triggers.stream()
+                    .filter(u -> !FIELD.equals(u.getRuleType()))
+                    .collect(Collectors.toList()));
+            //对处理好的list进行分组聚合
+            Map<Long, Long> collect = lastTriggers.stream().collect(Collectors.groupingBy(ProblemTriggerVO::getProblemId, Collectors.counting()));
+            //返回聚合好的problemId,problemName和触发次数
+            lastTriggers = collect.entrySet().stream()
+                    .map(entry-> ProblemTriggerVO.builder()
+                            .problemId(entry.getKey())
+                            .triggerCount(entry.getValue())
+                            .problemName(triggers.stream()
+                                    .map(u->ProblemTriggerVO.builder().problemId(u.getProblemId()).problemName(u.getProblemName()).build())
+                                    .distinct().collect(Collectors.toMap(ProblemTriggerVO::getProblemId,ProblemTriggerVO::getProblemName)).get(entry.getKey()))
+                            .build()).collect(Collectors.toList());
+        }
+        return lastTriggers;
+    }
+
+    @Override
+    public List<String> typeConvert(String type) {
+        String[] splits = type.split(",");
+        List<String> list = new ArrayList<>();
+        for (int i = 0; i < splits.length; i++) {
+            splits[i] = splits[i].substring(splits[i].indexOf("(") + 1, splits[i].indexOf(")"));
+            switch (splits[i]) {
+                case "VARCHAR":
+                case "VARCHAR2":
+                case "varchar":
+                case "text":
+                    list.add("STRING");
+                    break;
+                case "BIGINT":
+                case "bigint":
+                    list.add("BIGINTEGER");
+                    break;
+                case "int":
+                case "int4":
+                case "INT":
+                case "serial":
+                case "smallint":
+                case "tinyint":
+                case "INT UNSIGNED":
+                case "bool":
+                    list.add("INTEGER");
+                    break;
+                case "datetime":
+                case "TIMESTAMP":
+                    list.add("DATETIME");
+                    break;
+                case "DECIMAL":
+                case "numeric":
+                case "NUMBER":
+                case "float":
+                    list.add("DECIMAL");
+                    break;
+                case "date":
+                    list.add("DATE");
+                    break;
+                default:
+                    throw new CommonException(ErrorCode.UNKNOWN_DATATYPE);
+            }
+        }
+        return list;
+    }
+
 
     @Override
     public List<ErrorTablePercentageVO> errorTableItemPercentage(TimeRangeDTO timeRangeDTO) {

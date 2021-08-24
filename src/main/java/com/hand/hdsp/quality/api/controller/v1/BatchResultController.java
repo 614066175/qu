@@ -410,6 +410,7 @@ public class BatchResultController extends BaseController {
     }
 
 
+
     @ApiOperation(value = "评估详情-异常数据")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
@@ -424,5 +425,35 @@ public class BatchResultController extends BaseController {
                                                                      PageRequest pageRequest) {
         exceptionDataDTO.setTenantId(tenantId);
         return Results.success(batchResultService.listExceptionDetail(exceptionDataDTO,pageRequest));
+    }
+
+    @ApiOperation(value = "问题数据趋势分析")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/problem_trend")
+    public ResponseEntity<?> problemTrend(@PathVariable(name = "organizationId") Long tenantId,
+                                          TimeRangeDTO timeRangeDTO) {
+        timeRangeDTO.setTenantId(tenantId);
+        return Results.success(batchResultService.listProblemData(timeRangeDTO));
+    }
+
+    @ApiOperation(value = "问题触发次数统计")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/problem-trigger")
+    public ResponseEntity<?> problemTrigger(@PathVariable(name = "organizationId") Long tenantId,
+                                                                    TimeRangeDTO timeRangeDTO) {
+        timeRangeDTO.setTenantId(tenantId);
+        return Results.success(batchResultRepository.problemTrigger(timeRangeDTO));
     }
 }

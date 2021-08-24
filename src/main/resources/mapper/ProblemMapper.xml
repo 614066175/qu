@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.ProblemMapper">
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.Problem">
+        <result column="problem_id" property="problemId" jdbcType="DECIMAL"/>
+        <result column="problem_parent_id" property="problemParentId" jdbcType="DECIMAL"/>
+        <result column="problem_code" property="problemCode" jdbcType="VARCHAR"/>
+        <result column="problem_name" property="problemName" jdbcType="VARCHAR"/>
+        <result column="problem_type" property="problemType" jdbcType="VARCHAR"/>
+        <result column="problem_desc" property="problemDesc" jdbcType="VARCHAR"/>
+        <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
+        <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
+        <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
+    </resultMap>
+    <select id="list" resultType="com.hand.hdsp.quality.infra.vo.ProblemVO">
+        SELECT
+            xp.problem_id,
+            xp.problem_parent_id,
+            xp.problem_code,
+            xp.problem_name,
+            xp.problem_type
+        FROM
+	        xqua_problem xp
+        WHERE
+	        xp.tenant_id = #{tenantId}
+    </select>
+    <select id="listForChild" resultType="com.hand.hdsp.quality.api.dto.ProblemDTO">
+        SELECT
+            xp.problem_id
+        FROM
+	        xqua_problem xp
+        WHERE
+	        xp.problem_parent_id = #{problemId}
+	        and xp.tenant_id = #{tenantId}
+    </select>
+</mapper>

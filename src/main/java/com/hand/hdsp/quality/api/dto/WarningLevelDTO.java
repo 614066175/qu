@@ -51,4 +51,10 @@ public class WarningLevelDTO extends AuditDomain {
     private String warningLevelMeaning;
 
     private String compareSymbolMeaning;
+
+    /**
+     * 标记是否触发改告警
+     */
+    @Builder.Default
+    private Long ifAlert = 0L;
 }

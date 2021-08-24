@@ -113,6 +113,13 @@ public interface BatchResultMapper extends BaseMapper<BatchResult> {
     List<ErrorTablePercentageVO> errorTablePercentage(TimeRangeDTO timeRangeDTO);
 
     /**
+     * 问题触发次数统计
+     * @param timeRangeDTO 时间查询条件
+     * @return 返回值
+     */
+    List<ProblemTriggerVO> problemTrigger(TimeRangeDTO timeRangeDTO);
+
+    /**
      * 灾区表-校验项占比情况
      *
      * @param timeRangeDTO
@@ -173,4 +180,18 @@ public interface BatchResultMapper extends BaseMapper<BatchResult> {
      * @return
      */
     List<BatchResultMarkDTO> listResultDetail(BatchResultDTO batchResultDTO);
+
+    /**
+     * 当方案是全量同步时查询问题趋势
+     * @param timeRangeDTO 查询条件
+     * @return 返回值
+     */
+    List<TimeRangeDTO> selectProblemTrend(TimeRangeDTO timeRangeDTO);
+
+    /**
+     * 当方案是增量同步时查询问题趋势
+     * @param timeRangeDTO 查询条件
+     * @return 返回值
+     */
+    List<TimeRangeDTO> selectProblemWithIncre(TimeRangeDTO timeRangeDTO);
 }
