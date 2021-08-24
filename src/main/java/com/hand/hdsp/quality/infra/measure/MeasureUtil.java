@@ -218,6 +218,7 @@ public class MeasureUtil {
                                             .warningLevel(warningLevelDTO.getWarningLevel())
                                             .build()))
                     );
+                    warningLevelDTO.setIfAlert(1L);
                     batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
                     break;
                 }
@@ -231,6 +232,7 @@ public class MeasureUtil {
                                             .build()))
                     );
                     batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
+                    warningLevelDTO.setIfAlert(1L);
                     break;
                 }
 
@@ -247,6 +249,7 @@ public class MeasureUtil {
                                                 .build()))
                         );
                         batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
+                        warningLevelDTO.setIfAlert(1L);
                         break;
                     }
                 }
@@ -262,6 +265,7 @@ public class MeasureUtil {
                                             .build()))
                     );
                     batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
+                    warningLevelDTO.setIfAlert(1L);
                     break;
                 }
                 // 如果是数字，则用 BigDecimal.compareTo 比较
@@ -274,6 +278,7 @@ public class MeasureUtil {
                                             .build()))
                     );
                     batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
+                    warningLevelDTO.setIfAlert(1L);
                     break;
                 }
 
@@ -290,6 +295,7 @@ public class MeasureUtil {
                                                 .build()))
                         );
                         batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
+                        warningLevelDTO.setIfAlert(1L);
                         break;
                     }
                 }
@@ -329,6 +335,7 @@ public class MeasureUtil {
                                     .warningLevel(warningLevel.getWarningLevel())
                                     .build())));
                     batchResultItem.setExceptionInfo(FIXED_RANGE_WARNING_INFO);
+                    warningLevel.setIfAlert(1L);
                     break;
                 }
             }
@@ -362,6 +369,7 @@ public class MeasureUtil {
                                     .warningLevel(warningLevel.getWarningLevel())
                                     .build())));
                     batchResultItem.setExceptionInfo(FIXED_RANGE_WARNING_INFO);
+                    warningLevel.setIfAlert(1L);
                     break;
                 }
             }

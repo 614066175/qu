@@ -79,6 +79,9 @@ public class FieldValueMeasure implements Measure {
         BatchResultBase batchResultBase = param.getBatchResultBase();
         BatchResultItem batchResultItem = param.getBatchResultItem();
         List<WarningLevelDTO> warningLevelList = param.getWarningLevelList();
+        if(CollectionUtils.isEmpty(param.getExceptionMapList())){
+            param.setExceptionMapList(new ArrayList<>());
+        }
         DriverSession driverSession = driverSessionService.getDriverSession(tenantId, param.getPluginDatasourceDTO().getDatasourceCode());
 
         // 值集校验
@@ -99,7 +102,7 @@ public class FieldValueMeasure implements Measure {
                 //设置size为0查询所有
                 Map<String, String> params = new HashMap<>();
                 params.put("organizationId", String.valueOf(tenantId));
-                params.put("size",String.valueOf(0));
+                params.put("size", String.valueOf(0));
 
                 String serverCode = lovDTO.getRouteName();
                 String json = restTemplate.getForObject("http://" + eurekaUtil.getServerName(serverCode) + preProcessUrlParam(lovDTO.getCustomUrl(), params), String.class, params);
@@ -107,12 +110,12 @@ public class FieldValueMeasure implements Measure {
                 });
 
 
-                if(CollectionUtils.isNotEmpty(body)){
+                if (CollectionUtils.isNotEmpty(body)) {
                     Map<String, Object> result = body.get(0);
                     //判断是不是分页结果
-                    if(result.containsKey("totalPages")){
+                    if (result.containsKey("totalPages")) {
                         //如果是，那么结果取content
-                        body= (List<Map<String, Object>>) result.get("content");
+                        body = (List<Map<String, Object>>) result.get("content");
                     }
                 }
                 //查询值集视图 一般值集编码和视图编码保持一致，不一致查表
@@ -168,8 +171,9 @@ public class FieldValueMeasure implements Measure {
             variables.put("table", batchResultBase.getPackageObjectName());
             variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
             variables.put("size", PlanConstant.DEFAULT_SIZE + "");
-
-            boolean successFlag = true;
+            //用于统计告警规则，为后续聚合做准备
+            List<WarningLevelVO> warningLevels = new ArrayList<>();
+            //开始校验
             for (int i = 0; ; i++) {
                 int start = i * PlanConstant.DEFAULT_SIZE;
                 variables.put("start", start + "");
@@ -179,13 +183,46 @@ public class FieldValueMeasure implements Measure {
                 for (MeasureResultDO measureResultDO : list) {
                     MeasureUtil.fixedCompare(param.getCompareWay(), measureResultDO.getResult(), warningLevelList, batchResultItem);
                     if (StringUtils.isNotBlank(batchResultItem.getWarningLevel())) {
+                        //统计告警等级，为后续聚合做准备
+                        warningLevels.addAll(JsonUtils.json2WarningLevelVO(batchResultItem.getWarningLevel()));
+                        //设置对应行的实际值，这里需要再讨论
                         batchResultItem.setActualValue(measureResultDO.getResult());
-                        successFlag = false;
-                        break;
+                        //将告警等级设置为null，方便下条数据的循环
+                        batchResultItem.setWarningLevel(null);
                     }
                 }
-                //当成功标记为false 或者 查询出来的数据量小于每页大小时（即已到最后一页了）退出
-                if (!successFlag || list.size() < PlanConstant.DEFAULT_SIZE) {
+
+                //第一页数据检验完成，将统计好的告警规则进行分组聚合
+                Map<String, Long> collect = warningLevels.stream().collect(Collectors.groupingBy(WarningLevelVO::getWarningLevel, Collectors.counting()));
+                batchResultItem.setWarningLevel(JsonUtils.object2Json(collect.entrySet()
+                        .stream().map(map -> WarningLevelVO.builder()
+                                .warningLevel(map.getKey())
+                                .levelCount(map.getValue()).build()
+                        ).collect(Collectors.toList())));
+
+                //查询第一页的异常数据，并把异常数据复制给param
+                warningLevelList.forEach(warn -> {
+                    //固定值范围比较
+                    StringBuilder condition = new StringBuilder();
+                    if (RANGE.equals(param.getCompareWay())) {
+                        if (Strings.isNotEmpty(warn.getStartValue())) {
+                            condition.append(String.format(START_SQL, warn.getStartValue()));
+                        }
+                        if (Strings.isNotEmpty(warn.getEndValue())) {
+                            condition.append(String.format(END_SQL, warn.getEndValue()));
+                        }
+                    }
+                    //固定值比较
+                    if (VALUE.equals(param.getCompareWay())) {
+                        condition.append(String.format(VALUE_SQL, warn.getExpectedValue()));
+                    }
+                    String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, String.format("%s%s", Optional.ofNullable(param.getWhereCondition()).orElse("1=1"), condition));
+                    if (warn.getIfAlert() == 1L) {
+                        PlanExceptionUtil.getPlanException(param, batchResultBase.getPackageObjectName(), sql, driverSession, warn);
+                    }
+                });
+                //查询出来的数据量小于每页大小时（即已到最后一页了）退出
+                if (list.size() < PlanConstant.DEFAULT_SIZE) {
                     break;
                 }
             }
@@ -289,8 +326,8 @@ public class FieldValueMeasure implements Measure {
             boolean firstKey = !url.contains("?");
             Iterator var6 = keySet.iterator();
 
-            while(var6.hasNext()) {
-                String key = (String)var6.next();
+            while (var6.hasNext()) {
+                String key = (String) var6.next();
                 if (firstKey) {
                     stringBuilder.append('?').append(key).append("={").append(key).append('}');
                     firstKey = false;

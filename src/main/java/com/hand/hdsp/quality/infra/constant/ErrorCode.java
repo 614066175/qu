@@ -135,4 +135,10 @@ public interface ErrorCode {
     String PLAN_BASE_ID_IS_EMPTY = "hdsp.xqua.err.plan_base_id_is_empty";
     String PAGE_ERROR = "hdsp.xqua.err.page_error";
     String EXCEPTION_PARAM_ERROR = "hdsp.xqua.err.exception_param_error";
+
+    String PROBLEM_HAS_CHILD_PROBLEM = "hdsp.xqua.err.problem_has_child_problem";
+
+    String CHECK_RULE_IS_ERROR = "hdsp.xqua.err.check_rule_is_error";
+
+    String UNKNOWN_DATATYPE = "hdsp.xqua.err.unknown_datatype";
 }
