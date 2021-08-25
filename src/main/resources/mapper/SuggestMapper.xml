@@ -44,6 +44,7 @@
             xs.tenant_id,
             xs.problem_id,
             xs.last_update_date,
+            xs.object_version_number,
             xcr.rule_type,
             xcr.check_way,
             xcr.check_item,
@@ -54,6 +55,9 @@
         left join xqua_problem xp on xp.problem_id = xs.problem_id
         left join hzero_platform.iam_user iu on iu.id = xs.last_updated_by
         where 1=1 and xs.tenant_id = #{suggestDTO.tenantId}
+        <if test="suggestDTO.suggestId!=null">
+            and xs.suggest_id=#{suggestDTO.suggestId}
+        </if>
         <if test="suggestDTO.problemId!=null">
             and xs.problem_id=#{suggestDTO.problemId}
         </if>

@@ -99,4 +99,7 @@ public class SuggestDTO extends AuditDomain {
     @Transient
     private List<String> types;
 
+    @Transient
+    private Long objectVersionNumber;
+
 }
