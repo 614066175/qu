@@ -152,7 +152,7 @@
         </if>
     </select>
     <select id="getGroupId" resultType="java.lang.Long">
-        SELECT xsg.group_id FROM xsta_standard_group xsg WHERE xsg.group_code=#{groupCode}
+        SELECT xsg.group_id FROM xsta_standard_group xsg WHERE xsg.group_code=#{groupCode} AND xsg.standard_type = 'NAME'
     </select>
     <select id="detail" resultMap="DtoResultMap">
         SELECT
