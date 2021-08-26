@@ -6,7 +6,9 @@ import java.util.stream.Collectors;
 import com.alibaba.fastjson.JSONArray;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchResultService;
+import com.hand.hdsp.quality.domain.entity.BatchPlanBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
+import com.hand.hdsp.quality.domain.repository.BatchPlanBaseRepository;
 import com.hand.hdsp.quality.domain.repository.BatchResultBaseRepository;
 import com.hand.hdsp.quality.domain.repository.BatchResultRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
@@ -16,6 +18,7 @@ import com.hand.hdsp.quality.infra.feign.ExecutionFlowFeign;
 import com.hand.hdsp.quality.infra.mapper.BatchResultItemMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
+import com.hand.hdsp.quality.infra.util.TimeToString;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import io.choerodon.core.domain.Page;
@@ -46,6 +49,9 @@ public class BatchResultServiceImpl implements BatchResultService {
     private final BatchResultItemMapper batchResultItemMapper;
     private final BatchResultBaseRepository batchResultBaseRepository;
     private final BatchResultRepository batchResultRepository;
+    private final BatchPlanBaseRepository batchPlanBaseRepository;
+    private final String LEFT_Braces = "{";
+    private final String INCREMENTSTRATEGY = "NONE";
 
     @Autowired
     private StringRedisTemplate redisTemplate;
@@ -53,12 +59,13 @@ public class BatchResultServiceImpl implements BatchResultService {
     public BatchResultServiceImpl(ExecutionFlowFeign executionFlowFeign,
                                   BatchResultMapper batchResultMapper,
                                   BatchResultItemMapper batchResultItemMapper,
-                                  BatchResultBaseRepository batchResultBaseRepository, BatchResultRepository batchResultRepository) {
+                                  BatchResultBaseRepository batchResultBaseRepository, BatchResultRepository batchResultRepository, BatchPlanBaseRepository batchPlanBaseRepository) {
         this.executionFlowFeign = executionFlowFeign;
         this.batchResultMapper = batchResultMapper;
         this.batchResultItemMapper = batchResultItemMapper;
         this.batchResultBaseRepository = batchResultBaseRepository;
         this.batchResultRepository = batchResultRepository;
+        this.batchPlanBaseRepository = batchPlanBaseRepository;
     }
 
 
@@ -192,29 +199,64 @@ public class BatchResultServiceImpl implements BatchResultService {
         }
         if (Strings.isNotEmpty(exceptionDataDTO.getWarningLevel())) {
             result = result.stream().filter(map -> {
-                String warningLevel =Optional.ofNullable(String.valueOf(map.get(ExceptionParam.WARNING_LEVEL)))
+                String warningLevel = Optional.ofNullable(String.valueOf(map.get(ExceptionParam.WARNING_LEVEL)))
                         .orElse("");
                 List<String> list = Arrays.asList(warningLevel.split(","));
-                if (CollectionUtils.isEmpty(list)){
+                if (CollectionUtils.isEmpty(list)) {
                     throw new CommonException(ErrorCode.EXCEPTION_PARAM_ERROR);
                 }
                 return list.contains(exceptionDataDTO.getWarningLevel());
             }).collect(Collectors.toList());
         }
         int start = pageRequest.getPage() * pageRequest.getSize();
-        int end=start+pageRequest.getSize();
-        if(start>end){
+        int end = start + pageRequest.getSize();
+        if (start > end) {
             throw new CommonException(ErrorCode.PAGE_ERROR);
         }
-        List<Map<String,Object>> content=new ArrayList<>();
-        for (int i=start;i<end;i++){
-            if(result.size()-1>=i){
+        List<Map<String, Object>> content = new ArrayList<>();
+        for (int i = start; i < end; i++) {
+            if (result.size() - 1 >= i) {
                 content.add(result.get(i));
-            }else{
+            } else {
                 break;
             }
         }
         return new Page<>(content, new PageInfo(pageRequest.getPage(), pageRequest.getSize()), result.size());
     }
+
+    @Override
+    public List<TimeRangeDTO> listProblemData(TimeRangeDTO timeRangeDTO) {
+        TimeToString.timeToString(timeRangeDTO);
+        BatchPlanBase batchPlanBase = batchPlanBaseRepository.selectByPrimaryKey(timeRangeDTO.getPlanBaseId());
+        if (batchPlanBase == null) {
+            throw new CommonException(ErrorCode.BATCH_PLAN_BASE_NOT_EXIST);
+        }
+        List<TimeRangeDTO> list;
+        if (INCREMENTSTRATEGY.equals(batchPlanBase.getIncrementStrategy())) {
+            //全量同步时，问题数据数量趋势
+            list = batchResultMapper.selectProblemTrend(timeRangeDTO);
+        } else {
+            //增量同步时，问题数据数量趋势
+            list = batchResultMapper.selectProblemWithIncre(timeRangeDTO);
+        }
+        if (CollectionUtils.isNotEmpty(list)) {
+            //筛选出来符合规则的异常统计，然后根据日期进行分组再次求和
+            Map<String, LongSummaryStatistics> collect = list.stream().filter(u -> u.getWarningLevel().contains(LEFT_Braces))
+                    .map(u -> TimeRangeDTO.builder().problemDataCount(JsonUtils.json2WarningLevelVO(u.getWarningLevel())
+                            .stream().collect(Collectors.summarizingLong(WarningLevelVO::getLevelCount)).getSum())
+                            .dateGroup(u.getDateGroup())
+                            .build())
+                    .collect(Collectors.groupingBy(TimeRangeDTO::getDateGroup, Collectors.summarizingLong(TimeRangeDTO::getProblemDataCount)));
+            //将分组求和的数据转成List
+            list = collect.entrySet().stream().map(c -> TimeRangeDTO.builder()
+                    .dateGroup(c.getKey())
+                    .problemDataCount(c.getValue().getSum()).build())
+                    .collect(Collectors.toList());
+            //对list按照时间正序排序
+            list = list.stream().sorted(Comparator.comparing(TimeRangeDTO::getDateGroup)).collect(Collectors.toList());
+        }
+        return list;
+    }
+
 
 }

@@ -76,7 +76,8 @@ public class PlanExceptionUtil {
                 map.put(EXCEPTION_INFO,String.format("%s(%s)",warningLevelDTO.getWarningLevel(),exception));
             });
         }
-        param.setExceptionMapList(exceptionMapList);
+        //直接set的话，同一个字段的不同告警规则会被覆盖掉
+        param.getExceptionMapList().addAll(exceptionMapList);
     }
 
 }

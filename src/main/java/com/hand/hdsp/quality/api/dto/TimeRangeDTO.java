@@ -62,4 +62,15 @@ public class TimeRangeDTO extends AuditDomain {
 
     private String ruleType;
 
+    /**
+     * 问题数据趋势
+     */
+    private Long planBaseId;
+
+    private String dateGroup;
+
+    private Long problemDataCount;
+
+    private String warningLevel;
+
 }

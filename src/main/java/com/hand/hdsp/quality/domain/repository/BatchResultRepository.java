@@ -73,6 +73,20 @@ public interface BatchResultRepository extends BaseRepository<BatchResult, Batch
     List<ErrorTablePercentageVO> errorTablePercentage(TimeRangeDTO timeRangeDTO);
 
     /**
+     * 问题触发次数统计
+     * @param timeRangeDTO 时间条件
+     * @return 返回值
+     */
+    List<ProblemTriggerVO> problemTrigger(TimeRangeDTO timeRangeDTO);
+
+    /**
+     * 问题知识库专用类型转换
+     * @param type  类型字符串
+     * @return 返回值
+     */
+    List<String> typeConvert(String type);
+
+    /**
      * 灾区表-校验项占比情况
      *
      * @param timeRangeDTO

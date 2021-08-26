@@ -841,4 +841,127 @@
             </otherwise>
         </choose>
     </select>
+
+    <select id="problemTrigger" resultType="com.hand.hdsp.quality.infra.vo.ProblemTriggerVO">
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+        SELECT
+        xp.problem_id,
+        xp.problem_name,
+        xcr.rule_type,
+        xcr.column_type,
+        a.field_name
+        FROM
+        xqua_problem xp
+        JOIN xqua_suggest xs ON xs.problem_id = xp.problem_id
+        JOIN xqua_check_rule xcr ON xcr.rule_id = xs.rule_id
+        JOIN (
+            SELECT
+            xbri.check_way,
+            xbri.check_item,
+            xbri.count_type,
+            xbri.field_name,
+            xbrr.rule_type,
+            xbri.creation_date
+            FROM
+            xqua_batch_result_item xbri
+            LEFT JOIN xqua_batch_result_rule xbrr ON xbri.result_rule_id = xbrr.result_rule_id
+            where xbri.tenant_id = #{tenantId}
+            <if test='datasourceType == "MYSQL"'>
+                <if test="startDate != null and startDate != ''">
+                    and xbri.creation_date &gt;= #{startDate}
+                </if>
+                <if test="endDate != null and endDate != ''">
+                    and xbri.creation_date &lt;= #{endDate}
+                </if>
+            </if>
+            <if test='datasourceType == "ORACLE"'>
+                <if test="startDate != null and startDate != ''">
+                    and xbri.creation_date &gt;= to_date(  #{startDate},'yyyy-MM-dd HH24:mi:ss')
+                </if>
+                <if test="endDate != null and endDate != ''">
+                    and xbri.creation_date &lt;= to_date(  #{endDate},'yyyy-MM-dd HH24:mi:ss')
+                </if>
+            </if>) a
+        ON ( a.rule_type = xcr.rule_type AND a.check_item = xcr.check_item )
+        WHERE xp.tenant_id = #{tenantId}
+    </select>
+    <select id="selectProblemTrend" resultType="com.hand.hdsp.quality.api.dto.TimeRangeDTO">
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+        select
+            A.groupName dateGroup,
+            xbri.warning_level
+        from
+        (
+            select
+                <if test='datasourceType == "MYSQL"'>
+                    DATE_FORMAT( xbrb.last_update_date, '%Y-%m-%d' ) groupName,
+                </if>
+                <if test='datasourceType == "ORACLE"'>
+                    to_char( xbrb.last_update_date, 'yyyy-MM-dd' ) groupName,
+                </if>
+                MAX(result_base_id) lastId
+            from xqua_batch_result_base xbrb
+            where xbrb.plan_base_id = #{planBaseId}
+            <if test='datasourceType == "MYSQL"'>
+                <if test="startDate != null and startDate != ''">
+                    and xbrb.last_update_date &gt;= #{startDate}
+                </if>
+                <if test="endDate != null and endDate != ''">
+                    and xbrb.last_update_date &lt;= #{endDate}
+                </if>
+            </if>
+            <if test='datasourceType == "ORACLE"'>
+                <if test="startDate != null and startDate != ''">
+                    and xbrb.last_update_date &gt;= to_date(  #{startDate},'yyyy-MM-dd HH24:mi:ss')
+                </if>
+                <if test="endDate != null and endDate != ''">
+                    and xbrb.last_update_date &lt;= to_date(  #{endDate},'yyyy-MM-dd HH24:mi:ss')
+                </if>
+            </if>
+            GROUP BY
+            <if test='datasourceType == "MYSQL"'>
+                DATE_FORMAT( xbrb.last_update_date, '%Y-%m-%d' )
+            </if>
+            <if test='datasourceType == "ORACLE"'>
+                to_char( xbrb.last_update_date, 'yyyy-MM-dd' )
+            </if>
+        ) A
+        LEFT JOIN xqua_batch_result_rule xbrr ON xbrr.result_base_id = A.lastId
+        LEFT JOIN xqua_batch_result_item xbri ON xbri.result_rule_id = xbrr.result_rule_id
+        where xbri.warning_level is not null
+    </select>
+    <select id="selectProblemWithIncre" resultType="com.hand.hdsp.quality.api.dto.TimeRangeDTO">
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+        SELECT
+            <if test='datasourceType == "MYSQL"'>
+                DATE_FORMAT( xbrb.last_update_date,'%Y-%m-%d') dateGroup,
+            </if>
+            <if test='datasourceType == "ORACLE"'>
+                to_char( xbrb.last_update_date, 'yyyy-MM-dd' ) dateGroup,
+            </if>
+            xbri.warning_level
+        FROM
+            xqua_batch_result_base xbrb
+            LEFT JOIN xqua_batch_result_rule xbrr ON xbrr.result_base_id = xbrb.result_base_id
+            LEFT JOIN xqua_batch_result_item xbri ON xbri.result_rule_id = xbrr.result_rule_id
+        WHERE
+            xbrb.plan_base_id = #{planBaseId}
+            <if test='datasourceType == "MYSQL"'>
+                <if test="startDate != null and startDate != ''">
+                    and xbrb.last_update_date &gt;= #{startDate}
+                </if>
+                <if test="endDate != null and endDate != ''">
+                    and xbrb.last_update_date &lt;= #{endDate}
+                </if>
+            </if>
+            <if test='datasourceType == "ORACLE"'>
+                <if test="startDate != null and startDate != ''">
+                    and xbrb.last_update_date &gt;= to_date(  #{startDate},'yyyy-MM-dd HH24:mi:ss')
+                </if>
+                <if test="endDate != null and endDate != ''">
+                    and xbrb.last_update_date &lt;= to_date(  #{endDate},'yyyy-MM-dd HH24:mi:ss')
+                </if>
+            </if>
+            AND xbri.warning_level IS NOT NULL
+    </select>
 </mapper>
