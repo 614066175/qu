@@ -144,10 +144,10 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     public void generate(Long tenantId, Long planId) {
         BatchPlanDTO batchPlanDTO = batchPlanRepository.selectDTOByPrimaryKey(planId);
         // 创建或更新job
-        String jobName = String.format(PlanConstant.JOB_NAME,tenantId, batchPlanDTO.getPlanCode());
+        String jobName = String.format(PlanConstant.JOB_NAME, tenantId, batchPlanDTO.getPlanCode());
 
         //生成数据质量command
-        String jobCommand=generateCommand(batchPlanDTO);
+        String jobCommand = generateCommand(batchPlanDTO);
 
         ResponseEntity<String> jobResult = dispatchJobFeign.createOrUpdate(tenantId,
                 JobDTO.builder().themeId(PlanConstant.DEFAULT_THEME_ID).layerId(PlanConstant.DEFAULT_LAYER_ID)
@@ -219,12 +219,12 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 .append("rest.username=").append("admin").append("\n")
                 .append("rest.password=").append("NO PASSWORD").append("\n")
                 .append("rest.external=false\n")
-                .append("rest.app="+serviceId+"\n")
+                .append("rest.app=" + serviceId + "\n")
                 .append("rest.useGateway=true\n")
-                .append("rest.uri=/"+serviceShort+"/v1/")
+                .append("rest.uri=/" + serviceShort + "/v1/")
                 .append(batchPlanDTO.getTenantId())
                 .append("/batch-plans/exec/")
-                .append(batchPlanDTO.getPlanId()+"\n")
+                .append(batchPlanDTO.getPlanId() + "\n")
                 .append("rest.method=GET\n")
                 .append("rest.contentType=application/json\n")
                 .append("rest.external=false\n")
@@ -853,20 +853,29 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         }
 
         //将所有字段级检验项异常数据存入redis
-        String key = String.format("%s:%d", PlanConstant.CACHE_BUCKET_EXCEPTION, batchResultBase.getPlanBaseId());
-        redisTemplate.opsForHash().put(key, PlanConstant.ResultRuleType.FIELD, JsonUtils.object2Json(fieldExceptionList));
+//        String key = String.format("%s:%d", PlanConstant.CACHE_BUCKET_EXCEPTION, batchResultBase.getPlanBaseId());
+//        redisTemplate.opsForHash().put(key, PlanConstant.ResultRuleType.FIELD, JsonUtils.object2Json(fieldExceptionList));
+
+        //将所有字段级校验项异常数据存入数据库
+        String exceptionList = String.format("{\"FIELD\":%s}", JsonUtils.object2Json(fieldExceptionList));
+        BatchPlanBaseDTO batchPlanBase = batchPlanBaseRepository.selectDTOByPrimaryKey(batchResultBase.getPlanBaseId());
+        if (batchPlanBase == null) {
+            throw new CommonException(ErrorCode.BATCH_PLAN_BASE_NOT_EXIST);
+        }
+        batchPlanBase.setExceptionList(exceptionList);
+        batchPlanBaseRepository.updateByDTOPrimaryKeySelective(batchPlanBase);
     }
 
     private void handleExceptionList(List<Map<String, Object>> fieldExceptionList, MeasureParamDO param) {
         boolean flag;
         if (CollectionUtils.isNotEmpty(param.getExceptionMapList())) {
-            if(CollectionUtils.isEmpty(fieldExceptionList)){
+            if (CollectionUtils.isEmpty(fieldExceptionList)) {
                 //为空直接合并
                 CollectionUtils.addAll(fieldExceptionList, param.getExceptionMapList());
-            }else{
+            } else {
                 //不为空
                 for (Map<String, Object> map : param.getExceptionMapList()) {
-                    flag=false;
+                    flag = false;
                     String pk = String.valueOf(map.get(ExceptionParam.PK));
                     for (Map<String, Object> fieldMap : fieldExceptionList) {
                         String fieldPk = String.valueOf(fieldMap.get(ExceptionParam.PK));
@@ -877,17 +886,17 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
                             String newWarningLevel = String.valueOf(map.get(ExceptionParam.WARNING_LEVEL));
                             String warningLevel = String.valueOf(fieldMap.get(ExceptionParam.WARNING_LEVEL));
-                            fieldMap.put(ExceptionParam.EXCEPTION_INFO,String.format("%s,%s",exceptionInfo,newExceptionInfo));
+                            fieldMap.put(ExceptionParam.EXCEPTION_INFO, String.format("%s,%s", exceptionInfo, newExceptionInfo));
                             List<String> warningLevelList = Arrays.asList(warningLevel.split(","));
                             //不包含这个异常等级
-                            if (CollectionUtils.isEmpty(warningLevelList)||!warningLevelList.contains(newWarningLevel)){
-                                fieldMap.put(ExceptionParam.WARNING_LEVEL,String.format("%s,%s",warningLevel,newWarningLevel));
+                            if (CollectionUtils.isEmpty(warningLevelList) || !warningLevelList.contains(newWarningLevel)) {
+                                fieldMap.put(ExceptionParam.WARNING_LEVEL, String.format("%s,%s", warningLevel, newWarningLevel));
                             }
-                            flag=true;
+                            flag = true;
                             break;
                         }
                     }
-                    if(!flag){
+                    if (!flag) {
                         fieldExceptionList.add(map);
                     }
                 }

@@ -27,4 +27,6 @@ public class ProblemTriggerVO {
     private String fieldName;
 
     private Long triggerCount;
+
+    private String datasourceType;
 }

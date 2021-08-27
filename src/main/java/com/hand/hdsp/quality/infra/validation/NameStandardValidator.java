@@ -59,7 +59,7 @@ public class NameStandardValidator extends ValidatorHandler {
             return false;
         }
         Long groupId = nameStandardMapper.getGroupId(nameStandardDTO.getGroupCode());
-        if(!Objects.isNull(groupId)){
+        if(Objects.isNull(groupId)){
            getContext().addErrorMsg("该分组编码不存在！");
         }
         return true;

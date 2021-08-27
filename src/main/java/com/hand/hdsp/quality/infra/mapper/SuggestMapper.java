@@ -27,4 +27,11 @@ public interface SuggestMapper extends BaseMapper<Suggest> {
      * @return 返回值
      */
     List<SuggestDTO> list(@Param("suggestDTO")SuggestDTO suggestDTO);
+
+    /**
+     * 根据resultBaseId获取数据库类型
+     * @param resultBaseId 查询参数
+     * @return 返回值
+     */
+    String getDatasourceType(@Param("resultBaseId")Long resultBaseId);
 }
