@@ -1,11 +1,5 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
@@ -14,18 +8,28 @@ import com.hand.hdsp.quality.api.dto.TimeRangeDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.domain.repository.BatchResultRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.converttype.ConvertTypeBase;
 import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.util.TimeToString;
 import com.hand.hdsp.quality.infra.vo.*;
+import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hzero.core.base.BaseConstants;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>批数据方案结果表资源库实现</p>
@@ -112,7 +116,8 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
             //将字段类型不一致的问题筛选出去，并把剩余的问题合并到同一个list
             lastTriggers.addAll(triggers.stream()
                     .filter(u -> FIELD.equals(u.getRuleType()))
-                    .filter(u -> this.typeConvert(u.getFieldName()).contains(u.getColumnType()))
+                    .filter(u -> ApplicationContextHelper.getContext().getBean(u.getDatasourceType(), ConvertTypeBase.class)
+                            .typeConvert(u.getFieldName(), new ArrayList<>()).contains(u.getColumnType()))
                     .collect(Collectors.toList()));
             lastTriggers.addAll(triggers.stream()
                     .filter(u -> !FIELD.equals(u.getRuleType()))
@@ -121,12 +126,12 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
             Map<Long, Long> collect = lastTriggers.stream().collect(Collectors.groupingBy(ProblemTriggerVO::getProblemId, Collectors.counting()));
             //返回聚合好的problemId,problemName和触发次数
             lastTriggers = collect.entrySet().stream()
-                    .map(entry-> ProblemTriggerVO.builder()
+                    .map(entry -> ProblemTriggerVO.builder()
                             .problemId(entry.getKey())
                             .triggerCount(entry.getValue())
                             .problemName(triggers.stream()
-                                    .map(u->ProblemTriggerVO.builder().problemId(u.getProblemId()).problemName(u.getProblemName()).build())
-                                    .distinct().collect(Collectors.toMap(ProblemTriggerVO::getProblemId,ProblemTriggerVO::getProblemName)).get(entry.getKey()))
+                                    .map(u -> ProblemTriggerVO.builder().problemId(u.getProblemId()).problemName(u.getProblemName()).build())
+                                    .distinct().collect(Collectors.toMap(ProblemTriggerVO::getProblemId, ProblemTriggerVO::getProblemName)).get(entry.getKey()))
                             .build()).collect(Collectors.toList());
         }
         return lastTriggers;

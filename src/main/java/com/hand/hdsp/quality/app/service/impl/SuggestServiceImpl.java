@@ -5,7 +5,9 @@ import com.hand.hdsp.quality.app.service.SuggestService;
 import com.hand.hdsp.quality.domain.repository.BatchResultRepository;
 import com.hand.hdsp.quality.domain.repository.SuggestRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.converttype.ConvertTypeBase;
 import com.hand.hdsp.quality.infra.mapper.SuggestMapper;
+import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -16,8 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * <p>问题知识库表应用服务默认实现</p>
@@ -62,8 +62,11 @@ public class SuggestServiceImpl implements SuggestService {
         //如果前端传递的字段类型字符串包含 "("  则做类型转换
         if(StringUtils.isNotBlank(suggestDTO.getColumnType())){
             if(suggestDTO.getColumnType().contains(LEFT_BRACKETS)){
-                suggestDTO.setTypes(batchResultRepository
-                        .typeConvert(suggestDTO.getColumnType()));
+                String datasourceType = suggestMapper.getDatasourceType(suggestDTO.getResultBaseId());
+                if(datasourceType != null){
+                    suggestDTO.setTypes(ApplicationContextHelper.getContext().getBean(datasourceType, ConvertTypeBase.class)
+                            .typeConvert(suggestDTO.getColumnType(), new ArrayList<>()));
+                }
             } else {
                 List<String> list = new ArrayList<>();
                 list.add(suggestDTO.getColumnType());

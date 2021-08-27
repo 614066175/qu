@@ -3,7 +3,9 @@ package com.hand.hdsp.quality.app.service.impl;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchResultService;
 import com.hand.hdsp.quality.domain.entity.BatchPlanBase;
@@ -188,9 +190,15 @@ public class BatchResultServiceImpl implements BatchResultService {
             throw new CommonException(ErrorCode.PLAN_BASE_ID_IS_EMPTY);
         }
         //查看base的异常数据 目前只有字段级有异常数据
-        Object json = redisTemplate.opsForHash().get(String.format("%s:%d", PlanConstant.CACHE_BUCKET_EXCEPTION,
-                exceptionDataDTO.getPlanBaseId()), PlanConstant.ResultRuleType.FIELD);
-        List<Map<String, Object>> result = (List<Map<String, Object>>) JSONArray.parse(String.valueOf(json));
+//        Object json = redisTemplate.opsForHash().get(String.format("%s:%d", PlanConstant.CACHE_BUCKET_EXCEPTION,
+//                exceptionDataDTO.getPlanBaseId()), PlanConstant.ResultRuleType.FIELD);
+
+        BatchPlanBase batchPlanBase = batchPlanBaseRepository.selectByPrimaryKey(exceptionDataDTO.getPlanBaseId());
+        if(batchPlanBase == null){
+            throw new CommonException(ErrorCode.BATCH_PLAN_BASE_NOT_EXIST);
+        }
+        JSONObject jsonObject =  JSON.parseObject(batchPlanBase.getExceptionList());
+        List<Map<String, Object>> result = (List<Map<String, Object>>) JSONArray.parse(String.valueOf(jsonObject.get("FIELD")));
         if (Strings.isNotEmpty(exceptionDataDTO.getRuleName())) {
             result = result.stream().filter(map -> {
                 String ruleName = String.valueOf(map.get("$ruleName"));

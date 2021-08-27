@@ -119,7 +119,7 @@ public class SuggestController extends BaseController {
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody List<SuggestDTO> suggests) {
-        suggestRepository.batchDTODelete(suggests);
+        suggestRepository.batchDTODeleteByPrimaryKey(suggests);
         return Results.success();
     }
 }

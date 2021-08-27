@@ -849,7 +849,8 @@
         xp.problem_name,
         xcr.rule_type,
         xcr.column_type,
-        a.field_name
+        a.field_name,
+        a.datasource_type
         FROM
         xqua_problem xp
         JOIN xqua_suggest xs ON xs.problem_id = xp.problem_id
@@ -861,10 +862,13 @@
             xbri.count_type,
             xbri.field_name,
             xbrr.rule_type,
-            xbri.creation_date
+            xbri.creation_date,
+            xbpb.datasource_type
             FROM
             xqua_batch_result_item xbri
             LEFT JOIN xqua_batch_result_rule xbrr ON xbri.result_rule_id = xbrr.result_rule_id
+            LEFT JOIN xqua_batch_result_base xbrb on xbrb.result_base_id = xbrr.result_base_id
+            LEFT JOIN xqua_batch_plan_base xbpb on xbpb.plan_base_id = xbrb.plan_base_id
             where xbri.tenant_id = #{tenantId}
             <if test='datasourceType == "MYSQL"'>
                 <if test="startDate != null and startDate != ''">
@@ -884,6 +888,7 @@
             </if>) a
         ON ( a.rule_type = xcr.rule_type AND a.check_item = xcr.check_item )
         WHERE xp.tenant_id = #{tenantId}
+        and a.datasource_type is not null
     </select>
     <select id="selectProblemTrend" resultType="com.hand.hdsp.quality.api.dto.TimeRangeDTO">
         <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
