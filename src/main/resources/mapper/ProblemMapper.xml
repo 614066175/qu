@@ -27,6 +27,7 @@
 	        xqua_problem xp
         WHERE
 	        xp.tenant_id = #{tenantId}
+	    order by xp.creation_date
     </select>
     <select id="listForChild" resultType="com.hand.hdsp.quality.api.dto.ProblemDTO">
         SELECT
