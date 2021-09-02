@@ -37,7 +37,12 @@
         xsa.table_desc,
         xsa.plan_id,
         xbp.plan_name,
-        xsa.tenant_id
+        xsa.tenant_id,
+        xsa.object_version_number,
+        xsa.creation_date,
+        xsa.created_by,
+        xsa.last_updated_by,
+        xsa.last_update_date
         from xsta_standard_aim xsa
         left join xqua_batch_plan xbp on xbp.plan_id = xsa.plan_id
         where 1=1
