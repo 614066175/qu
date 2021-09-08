@@ -9,8 +9,11 @@ import com.hand.hdsp.quality.domain.repository.DataFieldRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
+import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
 
@@ -32,63 +35,78 @@ public class DataFieldRepositoryImpl extends BaseRepositoryImpl<DataField, DataF
 
     private final DataFieldMapper dataFieldMapper;
 
-    public DataFieldRepositoryImpl(StandardGroupRepository standardGroupRepository, DataFieldMapper dataFieldMapper) {
+    private final DataStandardMapper dataStandardMapper;
+
+    public DataFieldRepositoryImpl(StandardGroupRepository standardGroupRepository,
+                                   DataFieldMapper dataFieldMapper,
+                                   DataStandardMapper dataStandardMapper) {
         this.standardGroupRepository = standardGroupRepository;
         this.dataFieldMapper = dataFieldMapper;
+        this.dataStandardMapper = dataStandardMapper;
     }
 
     @Override
     public void batchImport(List<DataFieldDTO> dataFieldDTOList) {
         List<DataFieldDTO> importDataFieldDTOList = new ArrayList<>();
-        //处理得到待导入的集合
         if (CollectionUtils.isNotEmpty(dataFieldDTOList)) {
-            dataFieldDTOList.forEach(dataFieldDTO -> {
-                //判断数据标准是否已经存在,存在则不导入
-                List<DataField> dataFields;
-                dataFields = selectByCondition(Condition.builder(DataField.class)
-                        .andWhere(Sqls.custom()
-                                .andEqualTo(DataField.FIELD_FIELD_NAME, dataFieldDTO.getFieldName())
-                                .andEqualTo(DataField.FIELD_TENANT_ID, dataFieldDTO.getTenantId())
-                        )
-                        .build());
+            int len = dataFieldDTOList.size();
+            for (int i = 0; i < len; i++) {
+                DataFieldDTO curDataFieldDTO = dataFieldDTOList.get(i);
+                Condition condition = Condition.builder(DataField.class).andWhere(
+                        Sqls.custom()
+                                .andEqualTo(DataField.FIELD_FIELD_NAME, curDataFieldDTO.getFieldName())
+                                .andEqualTo(DataField.FIELD_TENANT_ID, curDataFieldDTO.getTenantId())
+                ).build();
+                List<DataField> dataFields = selectByCondition(condition);
                 if (CollectionUtils.isNotEmpty(dataFields)) {
                     return;
                 }
-                Long chargeTenantId = dataFieldMapper.selectTenantIdByChargeName(dataFieldDTO.getChargeName());
-                if (dataFieldDTO.getTenantId().compareTo(chargeTenantId) != 0) {
+                Long chargeTenantId = dataFieldMapper.selectTenantIdByChargeName(curDataFieldDTO.getChargeName());
+                if (curDataFieldDTO.getTenantId().compareTo(chargeTenantId) != 0) {
                     return;
                 }
-                Long chargeId = dataFieldMapper.selectIdByChargeName(dataFieldDTO.getChargeName());
-                Long chargeDeptId = dataFieldMapper.selectIdByChargeDeptName(dataFieldDTO.getChargeDeptName());
-                if (Objects.isNull(chargeId) || Objects.isNull(chargeDeptId)) {
+                Long chargeId = dataFieldMapper.selectIdByChargeName(curDataFieldDTO.getChargeName());
+                if (Objects.isNull(chargeId)) {
                     return;
                 }
-                dataFieldDTO.setChargeId(chargeId);
-                dataFieldDTO.setChargeDeptId(chargeDeptId);
+                String chargeDeptName = dataFieldMapper.selectChargeDeptNameById(curDataFieldDTO.getChargeDeptId());
+                // 如果开启了加密
+                if(isEnableDataSecurity(curDataFieldDTO.getTenantId())){
+                    // 就解密
+                    chargeDeptName = DataSecurityHelper.decrypt(chargeDeptName);
+                }
 
-                List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
+                // 把查询验证后的数据设置进去
+                curDataFieldDTO.setChargeId(chargeId);
+                curDataFieldDTO.setChargeDeptName(chargeDeptName);
+                List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                         .andWhere(Sqls.custom()
-                                .andEqualTo(StandardGroup.FIELD_GROUP_CODE, dataFieldDTO.getGroupCode())
-                                .andEqualTo(StandardGroup.FIELD_TENANT_ID, dataFieldDTO.getTenantId()))
+                                .andEqualTo(StandardGroup.FIELD_GROUP_CODE, curDataFieldDTO.getGroupCode())
+                                .andEqualTo(StandardGroup.FIELD_TENANT_ID, curDataFieldDTO.getTenantId()))
                         .build());
-                if (CollectionUtils.isNotEmpty(standardGroupDTOS)) {
-                    dataFieldDTO.setGroupId(standardGroupDTOS.get(0).getGroupId());
+                if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
+                    curDataFieldDTO.setGroupId(standardGroupDTOList.get(0).getGroupId());
                 } else {
                     //创建分组
                     StandardGroupDTO standardGroupDTO = StandardGroupDTO.builder()
-                            .groupCode(dataFieldDTO.getGroupCode())
-                            .groupName(dataFieldDTO.getGroupName())
-                            .groupDesc(dataFieldDTO.getStandardDesc())
+                            .groupCode(curDataFieldDTO.getGroupCode())
+                            .groupName(curDataFieldDTO.getGroupName())
+                            .groupDesc(curDataFieldDTO.getStandardDesc())
                             .standardType(StandardConstant.StandardType.FIELD)
-                            .tenantId(dataFieldDTO.getTenantId())
+                            .tenantId(curDataFieldDTO.getTenantId())
                             .build();
                     standardGroupRepository.insertDTOSelective(standardGroupDTO);
-                    dataFieldDTO.setGroupId(standardGroupDTO.getGroupId());
+                    curDataFieldDTO.setGroupId(standardGroupDTO.getGroupId());
                 }
-                importDataFieldDTOList.add(dataFieldDTO);
-                dataFieldDTO.setStandardStatus(CREATE);
-            });
+                importDataFieldDTOList.add(curDataFieldDTO);
+                curDataFieldDTO.setStandardStatus(CREATE);
+            }
         }
         batchInsertDTOSelective(importDataFieldDTOList);
+    }
+
+    @Override
+    public boolean isEnableDataSecurity(Long tenantId) {
+        return dataStandardMapper.isEncrypt(tenantId) == 1;
     }
 }
