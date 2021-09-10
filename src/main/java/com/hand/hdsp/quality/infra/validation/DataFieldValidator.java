@@ -36,40 +36,35 @@ public class DataFieldValidator extends ValidatorHandler {
 
     private final DataFieldRepository dataFieldRepository;
 
+    private final StandardGroupRepository standardGroupRepository;
+
     public DataFieldValidator(ObjectMapper objectMapper, DataFieldRepository dataFieldRepository, StandardGroupRepository standardGroupRepository) {
         this.objectMapper = objectMapper;
         this.dataFieldRepository = dataFieldRepository;
+        this.standardGroupRepository = standardGroupRepository;
     }
 
 
-    /**
-     * 对标准字段名称作校验
-     * @param data DataFieldDTO的json格式
-     * @return 字段验证是否成功
-     */
     @Override
     public boolean validate(String data) {
-        if(StringUtils.isEmpty(data)){
-            return false;
-        }
         DataFieldDTO dataFieldDTO;
-        try {
-            dataFieldDTO = objectMapper.readValue(data, DataFieldDTO.class);
-        }catch (IOException e){
-            addErrorMsg(e.getMessage());
-            e.printStackTrace();
-            return false;
+        if (StringUtils.isNoneBlank(data)) {
+            try {
+                dataFieldDTO = objectMapper.readValue(data, DataFieldDTO.class);
+                //导入数据标准分组是否存在
+                Long tenantId = DetailsHelper.getUserDetails().getTenantId();
+                List<DataFieldDTO> dataFieldDTOList;
+                dataFieldDTOList = dataFieldRepository.selectDTOByCondition(Condition.builder(DataField.class)
+                        .andWhere(Sqls.custom()
+                                .andEqualTo(DataField.FIELD_FIELD_NAME, dataFieldDTO.getFieldName())
+                                .andEqualTo(DataField.FIELD_TENANT_ID, tenantId))
+                        .build());
+                //标准名称存在
+                return CollectionUtils.isEmpty(dataFieldDTOList);
+            } catch (IOException e) {
+                return false;
+            }
         }
-        Long tenantId = DetailsHelper.getUserDetails().getTenantId();
-        Condition condition = Condition.builder(DataField.class).andWhere(Sqls.custom()
-                .andEqualTo(DataField.FIELD_FIELD_NAME, dataFieldDTO.getFieldName())
-                .andEqualTo(DataField.FIELD_TENANT_ID, tenantId)
-        ).build();
-        List<DataFieldDTO> dataFieldDTOList = dataFieldRepository.selectDTOByCondition(condition);
-        if(CollectionUtils.isNotEmpty(dataFieldDTOList)){
-            addErrorMsg("标准字段名称：" + dataFieldDTO.getFieldName() + "已存在;");
-            return false;
-        }
-        return true;
+        return false;
     }
 }
