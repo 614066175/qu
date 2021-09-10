@@ -1,11 +1,6 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
-
-import java.util.*;
-
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.DataFieldService;
 import com.hand.hdsp.quality.app.service.DataStandardService;
@@ -25,9 +20,9 @@ import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.workflow.WorkflowClient;
-import org.hzero.boot.workflow.dto.RunInstance;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
@@ -37,6 +32,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
 /**
  * <p>字段标准表应用服务默认实现</p>
@@ -214,14 +214,14 @@ public class DataFieldServiceImpl implements DataFieldService {
         if (enableWorkflow) {
             //开启工作流
             //根据上下线状态开启不同的工作流实例
-            if(ONLINE.equals(dataFieldDTO.getStandardStatus())){
+            if (ONLINE.equals(dataFieldDTO.getStandardStatus())) {
                 //先修改状态再启动工作流，启动工作流需要花费一定时间,有异常回滚
-                this.workflowing(dataFieldDTO.getTenantId(),dataFieldDTO.getFieldId(),ONLINE_APPROVING);
-                this.startWorkFlow(WorkFlowConstant.FieldStandard.ONLINE_WORKFLOW_KEY,dataFieldDTO);
+                this.workflowing(dataFieldDTO.getTenantId(), dataFieldDTO.getFieldId(), ONLINE_APPROVING);
+                this.startWorkFlow(WorkFlowConstant.FieldStandard.ONLINE_WORKFLOW_KEY, dataFieldDTO);
             }
-            if(OFFLINE.equals(dataFieldDTO.getStandardStatus())){
-                this.workflowing(dataFieldDTO.getTenantId(),dataFieldDTO.getFieldId(),OFFLINE_APPROVING);
-                this.startWorkFlow(WorkFlowConstant.FieldStandard.OFFLINE_WORKFLOW_KEY,dataFieldDTO);
+            if (OFFLINE.equals(dataFieldDTO.getStandardStatus())) {
+                this.workflowing(dataFieldDTO.getTenantId(), dataFieldDTO.getFieldId(), OFFLINE_APPROVING);
+                this.startWorkFlow(WorkFlowConstant.FieldStandard.OFFLINE_WORKFLOW_KEY, dataFieldDTO);
             }
         } else {
             DataFieldDTO dto = dataFieldRepository.selectDTOByPrimaryKey(dataFieldDTO.getFieldId());
@@ -239,7 +239,7 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     private void startWorkFlow(String workflowKey, DataFieldDTO dataFieldDTO) {
         //使用当前时间戳作为业务主键
-        String bussinessKey=String.valueOf(System.currentTimeMillis());
+        String bussinessKey = String.valueOf(System.currentTimeMillis());
         Map<String, Object> var = new HashMap<>();
         //给流程变量
         var.put("fieldId", dataFieldDTO.getFieldId());
@@ -250,7 +250,37 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     @Override
     public List<DataFieldDTO> export(DataFieldDTO dto, ExportParam exportParam, PageRequest pageRequest) {
-        return list(pageRequest, dto);
+        Page<DataFieldDTO> list = list(pageRequest, dto);
+        if (list == null) {
+            return new ArrayList<>();
+        }
+        for (DataFieldDTO dataFieldDTO : list) {
+            // 如果开启了数据加密
+            if (dataStandardMapper.isEncrypt(dataFieldDTO.getTenantId()) == 1) {
+                decodeForDataFieldDTO(dataFieldDTO);
+            }
+        }
+        return list;
+    }
+
+    /**
+     * 保证导入导出数据的一致性
+     *
+     * @param dataFieldDTO
+     */
+    public void decodeForDataFieldDTO(DataFieldDTO dataFieldDTO) {
+        // 解密电话号码
+        if (StringUtils.isNotEmpty(dataFieldDTO.getChargeTel())) {
+            dataFieldDTO.setChargeTel(DataSecurityHelper.decrypt(dataFieldDTO.getChargeTel()));
+        }
+        // 解密邮箱地址
+        if (StringUtils.isNotEmpty(dataFieldDTO.getChargeEmail())) {
+            dataFieldDTO.setChargeEmail(DataSecurityHelper.decrypt(dataFieldDTO.getChargeEmail()));
+        }
+        // 解密部门名称
+        if (StringUtils.isNotEmpty(dataFieldDTO.getChargeDeptName())) {
+            dataFieldDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeDeptName()));
+        }
     }
 
     private void doVersion(DataFieldDTO dataFieldDTO) {
