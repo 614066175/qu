@@ -62,7 +62,6 @@
         xsg.group_name,
         xsg.group_code,
         xsg.group_desc,
-        fs.tenant_id,
         <include refid="baseColumn">
             <property name="fs" value="fs"/>
         </include>

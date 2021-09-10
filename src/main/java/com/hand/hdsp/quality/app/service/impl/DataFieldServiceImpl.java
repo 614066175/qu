@@ -23,10 +23,8 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.workflow.WorkflowClient;
 import org.hzero.boot.workflow.dto.RunInstance;
@@ -252,28 +250,7 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     @Override
     public List<DataFieldDTO> export(DataFieldDTO dto, ExportParam exportParam, PageRequest pageRequest) {
-        Page<DataFieldDTO> list = list(pageRequest, dto);
-        if(list == null){ return new ArrayList<>();}
-        for (DataFieldDTO dataFieldDTO : list) {
-            // 如果开启了数据加密
-            if(dataStandardMapper.isEncrypt(dataFieldDTO.getTenantId()) == 1){
-                decodeForDataFieldDTO(dataFieldDTO);
-            }
-        }
-        return list;
-    }
-
-    /**
-     * 保证导入导出数据的一致性
-     * @param dataFieldDTO
-     */
-    public void decodeForDataFieldDTO(DataFieldDTO dataFieldDTO){
-        // 解密电话号码
-        if(StringUtils.isNotEmpty(dataFieldDTO.getChargeTel())){ dataFieldDTO.setChargeTel(DataSecurityHelper.decrypt(dataFieldDTO.getChargeTel())); }
-        // 解密邮箱地址
-        if(StringUtils.isNotEmpty(dataFieldDTO.getChargeEmail())){ dataFieldDTO.setChargeEmail(DataSecurityHelper.decrypt(dataFieldDTO.getChargeEmail())); }
-        // 解密部门名称
-        if(StringUtils.isNotEmpty(dataFieldDTO.getChargeDeptName())){ dataFieldDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeDeptName())); }
+        return list(pageRequest, dto);
     }
 
     private void doVersion(DataFieldDTO dataFieldDTO) {
