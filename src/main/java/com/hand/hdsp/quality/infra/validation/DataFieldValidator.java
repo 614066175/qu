@@ -77,6 +77,7 @@ public class DataFieldValidator extends ValidatorHandler {
         Long chargeTenantId = dataFieldMapper.selectTenantIdByChargeName(dataFieldDTO.getChargeName());
         if(Objects.isNull(chargeTenantId) || chargeTenantId.compareTo(tenantId) != 0){
             addErrorMsg("责任人不存在或该责任人与您的租户不匹配！");
+            return false;
         }
         return true;
     }
