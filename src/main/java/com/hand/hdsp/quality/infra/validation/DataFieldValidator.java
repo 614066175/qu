@@ -6,6 +6,7 @@ import com.hand.hdsp.quality.domain.entity.DataField;
 import com.hand.hdsp.quality.domain.repository.DataFieldRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
+import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -18,6 +19,7 @@ import org.hzero.mybatis.util.Sqls;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>
@@ -34,9 +36,12 @@ public class DataFieldValidator extends ValidatorHandler {
 
     private final DataFieldRepository dataFieldRepository;
 
-    public DataFieldValidator(ObjectMapper objectMapper, DataFieldRepository dataFieldRepository, StandardGroupRepository standardGroupRepository) {
+    private final DataFieldMapper dataFieldMapper;
+
+    public DataFieldValidator(ObjectMapper objectMapper, DataFieldRepository dataFieldRepository, StandardGroupRepository standardGroupRepository, DataFieldMapper dataFieldMapper) {
         this.objectMapper = objectMapper;
         this.dataFieldRepository = dataFieldRepository;
+        this.dataFieldMapper = dataFieldMapper;
     }
 
 
@@ -68,6 +73,10 @@ public class DataFieldValidator extends ValidatorHandler {
         if (CollectionUtils.isNotEmpty(dataFieldDTOList)) {
             addErrorMsg("标准字段名称：" + dataFieldDTO.getFieldName() + "已存在;");
             return false;
+        }
+        Long chargeTenantId = dataFieldMapper.selectTenantIdByChargeName(dataFieldDTO.getChargeName());
+        if(Objects.isNull(chargeTenantId) || chargeTenantId.compareTo(tenantId) != 0){
+            addErrorMsg("责任人不存在或该责任人与您的租户不匹配！");
         }
         return true;
     }
