@@ -5,6 +5,7 @@ import com.hand.hdsp.quality.app.service.BatchPlanRelTableService;
 import com.hand.hdsp.quality.domain.entity.BatchPlanBase;
 import com.hand.hdsp.quality.domain.repository.BatchPlanBaseRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanRelTableRepository;
+import com.hand.hdsp.quality.infra.constant.RuleType;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -86,6 +87,7 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
             dto.setWarningLevelList(JsonUtils.json2WarningLevel(dto.getWarningLevel()));
             dto.setRelationshipList(JsonUtils.json2Relationship(dto.getRelationship()));
             dto.setTableRelCheckList(JsonUtils.json2TableRelCheck(dto.getTableRelCheck()));
+            dto.setRuleType(RuleType.REL_TABLE);
         }
         return pages;
     }
