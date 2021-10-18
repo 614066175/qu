@@ -212,12 +212,11 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     private String generateCommand(BatchPlanDTO batchPlanDTO) {
         StringBuilder builder = new StringBuilder();
         builder.append("type=rest\n")
-                .append("rest.grantType=").append("PASSWORD").append("\n")
+                .append("rest.grantType=").append("IMPLICIT").append("\n")
+                .append("rest.responseType=").append("IMPLICIT").append("\n")
                 .append("rest.clientId=").append("client").append("\n")
-                .append("rest.clientSecret=").append("secret").append("\n")
-                .append("rest.tokenUri=").append("oauth/public/no-password-login").append("\n")
+                .append("rest.tokenUri=").append("/xoau/public/custom-token/oauth").append("\n")
                 .append("rest.username=").append("admin").append("\n")
-                .append("rest.password=").append("NO PASSWORD").append("\n")
                 .append("rest.external=false\n")
                 .append("rest.app=" + serviceId + "\n")
                 .append("rest.useGateway=true\n")
@@ -227,7 +226,6 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 .append(batchPlanDTO.getPlanId() + "\n")
                 .append("rest.method=GET\n")
                 .append("rest.contentType=application/json\n")
-                .append("rest.external=false\n")
                 .append("rest.body={}\n")
                 .append("rest.auth=OAUTH2\n")
                 .append("rest.retry.enabled=false\n")
