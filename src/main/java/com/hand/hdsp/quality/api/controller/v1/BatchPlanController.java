@@ -203,4 +203,20 @@ public class BatchPlanController extends BaseController {
         return Results.success();
     }
 
+
+    @ApiOperation(value = "清空质量任务关联任务名")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/clear-job-name/{jobName}")
+    public ResponseEntity<?> clearJobName(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                          @PathVariable String jobName) {
+        batchPlanRepository.clearJobName(jobName, tenantId);
+        return Results.success();
+    }
+
 }

@@ -28,4 +28,12 @@ public interface BatchPlanRepository extends BaseRepository<BatchPlan, BatchPlan
      * @param batchPlanDTOList
      */
     void batchImport(List<BatchPlanDTO> batchPlanDTOList);
+
+    /**
+     * 数据开发数据质量任务删除时，清空质量任务任务名
+     * @param jobName
+     * @param tenantId
+     */
+    void clearJobName(String jobName, Long tenantId);
+
 }
