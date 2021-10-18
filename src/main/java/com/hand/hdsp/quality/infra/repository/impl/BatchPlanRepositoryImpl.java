@@ -13,6 +13,7 @@ import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.domain.repository.BatchPlanRepository;
 import com.hand.hdsp.quality.domain.repository.PlanGroupRepository;
 import com.hand.hdsp.quality.infra.constant.GroupType;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
@@ -70,6 +71,21 @@ public class BatchPlanRepositoryImpl extends BaseRepositoryImpl<BatchPlan, Batch
     @Override
     public void batchImport(List<BatchPlanDTO> batchPlanDTOList) {
 
+    }
+
+    @Override
+    public void clearJobName(String jobName, Long tenantId) {
+        List<BatchPlanDTO> batchPlanDTOS = this.selectDTOByCondition(Condition.builder(BatchPlan.class)
+                .andWhere(Sqls.custom().andEqualTo(BatchPlan.FIELD_PLAN_JOB_NAME, jobName)
+                        .andEqualTo(BatchPlan.FIELD_TENANT_ID, tenantId))
+                .build());
+        if(CollectionUtils.isNotEmpty(batchPlanDTOS)) {
+            batchPlanDTOS.forEach(batchPlanDTO -> {
+                //清空任务名
+                batchPlanDTO.setPlanJobName(null);
+                this.updateDTOAllColumnWhereTenant(batchPlanDTO,tenantId);
+            });
+        }
     }
 
     private void getGroup(Long parentId, List<PlanGroup> groups) {
