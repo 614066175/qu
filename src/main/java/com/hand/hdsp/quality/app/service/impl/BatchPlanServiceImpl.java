@@ -1,13 +1,5 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.SqlType.TABLE;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.annotation.Resource;
-
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanService;
 import com.hand.hdsp.quality.domain.entity.*;
@@ -22,12 +14,14 @@ import com.hand.hdsp.quality.infra.dataobject.BatchPlanTableConDO;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.dataobject.SpecifiedParamsResponseDO;
 import com.hand.hdsp.quality.infra.feign.DispatchJobFeign;
+import com.hand.hdsp.quality.infra.feign.LineageFeign;
 import com.hand.hdsp.quality.infra.feign.RestJobFeign;
 import com.hand.hdsp.quality.infra.feign.TimestampFeign;
 import com.hand.hdsp.quality.infra.mapper.BatchResultItemMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureCollector;
+import com.hand.hdsp.quality.infra.util.CustomThreadPool;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.util.ParamsUtil;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
@@ -58,6 +52,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
+
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.SqlType.TABLE;
+
 /**
  * <p>
  * 批数据评估方案表应用服务默认实现
@@ -80,6 +83,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     private String serviceShort;
     @Value("${hdsp.route-data.service-id}")
     private String serviceId;
+
 
     @Resource
     private BatchPlanBaseRepository batchPlanBaseRepository;
@@ -125,6 +129,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     private StringRedisTemplate redisTemplate;
     @Resource
     private DriverSessionService driverSessionService;
+
+    @Resource
+    private LineageFeign lineageFeign;
 
 
     @Override
@@ -526,7 +533,42 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             log.error("exec plan error!", e);
             throw e;
         }
+        //质量评估完后。根据评估结果获取每个base的情况，去做血缘的质量问题的处理，此处理不阻塞且不影响评估流程
+        ThreadPoolExecutor executor = CustomThreadPool.getExecutor();
+        executor.submit(() -> qualityLineage(batchResult));
         return batchResult.getResultId();
+    }
+
+    private void qualityLineage(BatchResult batchResult) {
+        //获取所有基础配置的结果
+        List<BatchResultBase> batchResultBases = batchResultBaseRepository.select(
+                BatchResultBase.builder()
+                        .resultId(batchResult.getResultId())
+                        .tenantId(batchResult.getTenantId()).build()
+        );
+        //过滤出有异常的配置项
+        List<BatchResultBase> errorBases = batchResultBases.stream().filter(batchResultBase -> batchResultBase.getExceptionRuleCount() > 0).collect(Collectors.toList());
+
+        List<LineageDTO> lineageDTOS = new ArrayList<>();
+
+        if (CollectionUtils.isNotEmpty(errorBases)) {
+            errorBases.forEach(batchResultBase -> {
+                //获取基础配置
+                BatchPlanBase batchPlanBase = batchPlanBaseRepository.selectByPrimaryKey(batchResultBase.getPlanBaseId());
+                //构建有质量问题的血缘节点
+                LineageDTO lineageDTO = LineageDTO.builder()
+                        .datasourceCode(batchPlanBase.getDatasourceCode())
+                        .schemaName(batchPlanBase.getDatasourceSchema())
+                        .tableName(batchPlanBase.getObjectName())
+                        .qualityFlag(1)
+                        .build();
+                lineageDTOS.add(lineageDTO);
+            });
+
+            //修改血缘节点状态
+            lineageFeign.updateLineageStatus(batchResult.getTenantId(), lineageDTOS);
+        }
+
     }
 
     /**

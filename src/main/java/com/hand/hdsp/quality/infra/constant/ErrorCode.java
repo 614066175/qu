@@ -141,4 +141,6 @@ public interface ErrorCode {
     String CHECK_RULE_IS_ERROR = "hdsp.xqua.err.check_rule_is_error";
 
     String UNKNOWN_DATATYPE = "hdsp.xqua.err.unknown_datatype";
+
+    String LINEAGE_ERROR="hdsp.xqua.err.lineage_error";
 }
