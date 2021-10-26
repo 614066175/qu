@@ -540,35 +540,38 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     }
 
     private void qualityLineage(BatchResult batchResult) {
-        //获取所有基础配置的结果
-        List<BatchResultBase> batchResultBases = batchResultBaseRepository.select(
-                BatchResultBase.builder()
-                        .resultId(batchResult.getResultId())
-                        .tenantId(batchResult.getTenantId()).build()
-        );
-        //过滤出有异常的配置项
-        List<BatchResultBase> errorBases = batchResultBases.stream().filter(batchResultBase -> batchResultBase.getExceptionRuleCount() > 0).collect(Collectors.toList());
+        try {
+            //获取所有基础配置的结果
+            List<BatchResultBase> batchResultBases = batchResultBaseRepository.select(
+                    BatchResultBase.builder()
+                            .resultId(batchResult.getResultId())
+                            .tenantId(batchResult.getTenantId()).build()
+            );
+            //过滤出有异常的配置项
+            List<BatchResultBase> errorBases = batchResultBases.stream().filter(batchResultBase -> batchResultBase.getExceptionRuleCount() > 0).collect(Collectors.toList());
 
-        List<LineageDTO> lineageDTOS = new ArrayList<>();
+            List<LineageDTO> lineageDTOS = new ArrayList<>();
 
-        if (CollectionUtils.isNotEmpty(errorBases)) {
-            errorBases.forEach(batchResultBase -> {
-                //获取基础配置
-                BatchPlanBase batchPlanBase = batchPlanBaseRepository.selectByPrimaryKey(batchResultBase.getPlanBaseId());
-                //构建有质量问题的血缘节点
-                LineageDTO lineageDTO = LineageDTO.builder()
-                        .datasourceCode(batchPlanBase.getDatasourceCode())
-                        .schemaName(batchPlanBase.getDatasourceSchema())
-                        .tableName(batchPlanBase.getObjectName())
-                        .qualityFlag(1)
-                        .build();
-                lineageDTOS.add(lineageDTO);
-            });
+            if (CollectionUtils.isNotEmpty(errorBases)) {
+                errorBases.forEach(batchResultBase -> {
+                    //获取基础配置
+                    BatchPlanBase batchPlanBase = batchPlanBaseRepository.selectByPrimaryKey(batchResultBase.getPlanBaseId());
+                    //构建有质量问题的血缘节点
+                    LineageDTO lineageDTO = LineageDTO.builder()
+                            .datasourceCode(batchPlanBase.getDatasourceCode())
+                            .schemaName(batchPlanBase.getDatasourceSchema())
+                            .tableName(batchPlanBase.getObjectName())
+                            .qualityFlag(1)
+                            .build();
+                    lineageDTOS.add(lineageDTO);
+                });
 
-            //修改血缘节点状态
-            lineageFeign.updateLineageStatus(batchResult.getTenantId(), lineageDTOS);
+                //修改血缘节点状态
+                lineageFeign.updateLineageStatus(batchResult.getTenantId(), lineageDTOS);
+            }
+        } catch (Exception e) {
+            log.error("更新血缘异常！！！", e);
         }
-
     }
 
     /**
