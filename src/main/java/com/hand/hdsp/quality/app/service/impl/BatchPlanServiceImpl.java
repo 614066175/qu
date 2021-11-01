@@ -549,6 +549,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             );
             //过滤出有异常的配置项
             List<BatchResultBase> errorBases = batchResultBases.stream().filter(batchResultBase -> batchResultBase.getExceptionRuleCount() > 0).collect(Collectors.toList());
+            //过滤出正常的的配置项
+            List<BatchResultBase> successBases = batchResultBases.stream().filter(batchResultBase -> batchResultBase.getExceptionRuleCount() == 0).collect(Collectors.toList());
 
             List<LineageDTO> lineageDTOS = new ArrayList<>();
 
@@ -565,10 +567,24 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                             .build();
                     lineageDTOS.add(lineageDTO);
                 });
-
-                //修改血缘节点状态
-                lineageFeign.updateLineageStatus(batchResult.getTenantId(), lineageDTOS);
             }
+
+            if (CollectionUtils.isNotEmpty(successBases)) {
+                successBases.forEach(batchResultBase -> {
+                    //获取基础配置
+                    BatchPlanBase batchPlanBase = batchPlanBaseRepository.selectByPrimaryKey(batchResultBase.getPlanBaseId());
+                    //构建有质量问题的血缘节点
+                    LineageDTO lineageDTO = LineageDTO.builder()
+                            .datasourceCode(batchPlanBase.getDatasourceCode())
+                            .schemaName(batchPlanBase.getDatasourceSchema())
+                            .tableName(batchPlanBase.getObjectName())
+                            .qualityFlag(0)
+                            .build();
+                    lineageDTOS.add(lineageDTO);
+                });
+            }
+            //修改血缘节点状态
+            lineageFeign.updateLineageStatus(batchResult.getTenantId(), lineageDTOS);
         } catch (Exception e) {
             log.error("更新血缘异常！！！", e);
         }
@@ -873,7 +889,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 batchResultItem.setTenantId(tenantId);
                 batchResultItemRepository.insertSelective(batchResultItem);
 
-                if (StringUtils.isNotBlank(batchResultItem.getWarningLevel())) {
+                if (StringUtils.isNotBlank(batchResultItem.getWarningLevel()) && !"[]".equals(batchResultItem.getWarningLevel())) {
                     batchResultBase.setExceptionCheckItemCount(batchResultBase.getExceptionCheckItemCount() + 1);
                     exceptionFlag = true;
 
@@ -1061,7 +1077,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         BigDecimal sum = BigDecimal.ZERO;
         for (BatchResultItemDTO batchResultItemDTO : itemDTOList) {
             // 一个校验项满足多个告警
-            if (!PlanConstant.WARNING_LEVEL_NORMAL.equals(batchResultItemDTO.getWarningLevel())) {
+            if (Strings.isNotEmpty(batchResultItemDTO.getWarningLevel())&&!"[]".equals(batchResultItemDTO.getWarningLevel())) {
                 List<WarningLevelVO> warningLevelVOS =
                         JsonUtils.json2WarningLevelVO(batchResultItemDTO.getWarningLevel());
                 for (WarningLevelVO warningLevelVO : warningLevelVOS) {
