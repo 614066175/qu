@@ -94,4 +94,9 @@ public class BatchResultBaseRepositoryImpl extends BaseRepositoryImpl<BatchResul
         }
         return batchResultBaseDTOList;
     }
+
+    @Override
+    public Long selectMaxResultBaseId(Long planBaseId) {
+        return batchResultItemMapper.selectMaxResultBaseId(planBaseId);
+    }
 }

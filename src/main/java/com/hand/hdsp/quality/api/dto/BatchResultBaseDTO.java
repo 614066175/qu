@@ -69,6 +69,9 @@ public class BatchResultBaseDTO extends AuditDomain {
     @ApiModelProperty(value = "表大小")
     private Long tableSize;
 
+    @ApiModelProperty(value = "字段级异常数据记录")
+    private String exceptionList;
+
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;

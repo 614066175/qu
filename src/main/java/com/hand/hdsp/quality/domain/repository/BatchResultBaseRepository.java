@@ -30,4 +30,11 @@ public interface BatchResultBaseRepository extends BaseRepository<BatchResultBas
      * @return
      */
     List<BatchResultBaseDTO> listResultBaseAll(BatchResultBaseDTO batchResultBaseDTO);
+
+    /**
+     * 根据planBaseId获取最大结果Id
+     * @param planBaseId 查询条件
+     * @return 返回值
+     */
+    Long selectMaxResultBaseId(Long planBaseId);
 }

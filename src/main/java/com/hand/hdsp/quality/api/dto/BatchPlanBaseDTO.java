@@ -81,8 +81,6 @@ public class BatchPlanBaseDTO extends AuditDomain {
     @ExcelColumn(zh = "数据过滤",en = "whereCondition")
     private String whereCondition;
 
-    private String exceptionList;
-
     @ExcelColumn(zh = "表级规则",en = "batchPlanTableDTOList",child = true)
     private List<BatchPlanTableDTO> batchPlanTableDTOList;
 

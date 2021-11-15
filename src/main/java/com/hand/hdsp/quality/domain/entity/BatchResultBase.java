@@ -63,6 +63,8 @@ public class BatchResultBase extends AuditDomain {
 
     private Long tableSize;
 
+    private String exceptionList;
+
     private Long tenantId;
 
     @Transient

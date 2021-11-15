@@ -89,4 +89,11 @@ public interface BatchResultItemMapper extends BaseMapper<BatchResultItem> {
      * @return
      */
     List<String> dataStandardWaringLevelVO(BatchResultBaseDTO batchResultBaseDTO);
+
+    /**
+     * 根据planBaseId查询最大结果值
+     * @param planBaseId 查询条件
+     * @return 返回值
+     */
+    Long selectMaxResultBaseId(@Param("planBaseId") Long planBaseId);
 }
