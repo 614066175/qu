@@ -278,4 +278,11 @@
             </if>
         </where>
     </select>
+    <select id="selectMaxResultBaseId" resultType="java.lang.Long">
+        SELECT
+            MAX( result_base_id )
+        FROM
+            xqua_batch_result_base
+        where plan_base_id = #{planBaseId}
+    </select>
 </mapper>

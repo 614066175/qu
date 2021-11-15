@@ -917,12 +917,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
         //将所有字段级校验项异常数据存入数据库
         String exceptionList = String.format("{\"FIELD\":%s}", JsonUtils.object2Json(fieldExceptionList));
-        BatchPlanBaseDTO batchPlanBase = batchPlanBaseRepository.selectDTOByPrimaryKey(batchResultBase.getPlanBaseId());
-        if (batchPlanBase == null) {
-            throw new CommonException(ErrorCode.BATCH_PLAN_BASE_NOT_EXIST);
-        }
-        batchPlanBase.setExceptionList(exceptionList);
-        batchPlanBaseRepository.updateByDTOPrimaryKeySelective(batchPlanBase);
+        batchResultBase.setExceptionList(exceptionList);
+        batchResultBaseRepository.updateByPrimaryKey(batchResultBase);
     }
 
     private void handleExceptionList(List<Map<String, Object>> fieldExceptionList, MeasureParamDO param) {
@@ -1077,7 +1073,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         BigDecimal sum = BigDecimal.ZERO;
         for (BatchResultItemDTO batchResultItemDTO : itemDTOList) {
             // 一个校验项满足多个告警
-            if (Strings.isNotEmpty(batchResultItemDTO.getWarningLevel())&&!"[]".equals(batchResultItemDTO.getWarningLevel())) {
+            if (Strings.isNotEmpty(batchResultItemDTO.getWarningLevel()) && !"[]".equals(batchResultItemDTO.getWarningLevel())) {
                 List<WarningLevelVO> warningLevelVOS =
                         JsonUtils.json2WarningLevelVO(batchResultItemDTO.getWarningLevel());
                 for (WarningLevelVO warningLevelVO : warningLevelVOS) {

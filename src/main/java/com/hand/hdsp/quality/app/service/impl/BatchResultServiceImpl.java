@@ -193,11 +193,12 @@ public class BatchResultServiceImpl implements BatchResultService {
 //        Object json = redisTemplate.opsForHash().get(String.format("%s:%d", PlanConstant.CACHE_BUCKET_EXCEPTION,
 //                exceptionDataDTO.getPlanBaseId()), PlanConstant.ResultRuleType.FIELD);
 
-        BatchPlanBase batchPlanBase = batchPlanBaseRepository.selectByPrimaryKey(exceptionDataDTO.getPlanBaseId());
-        if(batchPlanBase == null){
-            throw new CommonException(ErrorCode.BATCH_PLAN_BASE_NOT_EXIST);
+        Long resultBaseId = batchResultBaseRepository.selectMaxResultBaseId(exceptionDataDTO.getPlanBaseId());
+        if (Objects.isNull(resultBaseId)) {
+            throw new CommonException(ErrorCode.BATCH_RESULT_NOT_EXIST);
         }
-        JSONObject jsonObject =  JSON.parseObject(batchPlanBase.getExceptionList());
+        BatchResultBase batchResultBase = batchResultBaseRepository.selectByPrimaryKey(resultBaseId);
+        JSONObject jsonObject = JSON.parseObject(batchResultBase.getExceptionList());
         List<Map<String, Object>> result = (List<Map<String, Object>>) JSONArray.parse(String.valueOf(jsonObject.get("FIELD")));
         if (Strings.isNotEmpty(exceptionDataDTO.getRuleName())) {
             result = result.stream().filter(map -> {

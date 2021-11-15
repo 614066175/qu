@@ -64,7 +64,5 @@ public class BatchPlanBase extends AuditDomain {
 
     private Long tenantId;
 
-    private String exceptionList;
-
 
 }
