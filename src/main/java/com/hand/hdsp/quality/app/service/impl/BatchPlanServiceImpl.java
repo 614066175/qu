@@ -1073,7 +1073,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         BigDecimal sum = BigDecimal.ZERO;
         for (BatchResultItemDTO batchResultItemDTO : itemDTOList) {
             // 一个校验项满足多个告警
-            if (Strings.isNotEmpty(batchResultItemDTO.getWarningLevel()) && !"[]".equals(batchResultItemDTO.getWarningLevel())) {
+            if (Strings.isNotEmpty(batchResultItemDTO.getWarningLevel())
+                    && !"[]".equals(batchResultItemDTO.getWarningLevel())
+                    && !PlanConstant.WARNING_LEVEL_NORMAL.equals(batchResultItemDTO.getWarningLevel())) {
                 List<WarningLevelVO> warningLevelVOS =
                         JsonUtils.json2WarningLevelVO(batchResultItemDTO.getWarningLevel());
                 for (WarningLevelVO warningLevelVO : warningLevelVOS) {
