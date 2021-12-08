@@ -17,7 +17,7 @@ public interface NameAimService {
      * @param nameAimDtoList 落标列表
      * @return List<NameAimDTO>
      */
-    List<NameAimDTO> batchCreate(List<NameAimDTO> nameAimDtoList);
+    List<NameAimDTO> batchCreate(List<NameAimDTO> nameAimDtoList,Long tenantId, Long projectId);
 
     /**
      * 删除落标
@@ -40,5 +40,5 @@ public interface NameAimService {
      * @param nameAimDTOList 落标列表
      * @return List<NameAimDTO>
      */
-    List<NameAimDTO> bitchUpdate(List<NameAimDTO> nameAimDTOList);
+    List<NameAimDTO> bitchUpdate(List<NameAimDTO> nameAimDTOList, Long tenantId, Long projectId);
 }

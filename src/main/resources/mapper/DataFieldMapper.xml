@@ -62,6 +62,8 @@
         xsg.group_name,
         xsg.group_code,
         xsg.group_desc,
+        iu.login_name lastUpdatedByName,
+        iu3.login_name createdByName,
         <include refid="baseColumn">
             <property name="fs" value="fs"/>
         </include>
@@ -69,6 +71,7 @@
         left join xsta_standard_group xsg on xsg.group_id=fs.group_id
         left join iam_user iu on fs.last_updated_by=iu.id
         left join iam_user iu2 on fs.charge_id=iu2.id
+        left join iam_user iu3 on fs.created_by=iu3.id
         left join hpfm_unit hu on hu.unit_id=fs.charge_dept_id
         <where>
             <if test="dataFieldDTO.fieldId!=null">
@@ -111,6 +114,9 @@
             </if>
             <if test="dataFieldDTO.lastUpdateDateTo != null">
                 AND fs.last_update_date &lt;= #{dataFieldDTO.lastUpdateDateTo}
+            </if>
+            <if test="dataFieldDTO.projectId !=null">
+                and fs.project_id=#{dataFieldDTO.projectId}
             </if>
         </where>
         order by fs.creation_date desc

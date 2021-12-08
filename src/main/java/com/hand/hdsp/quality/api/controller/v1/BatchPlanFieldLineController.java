@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
@@ -45,9 +46,11 @@ public class BatchPlanFieldLineController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   BatchPlanFieldLineDTO batchPlanFieldLineDTO, @ApiIgnore @SortDefault(value = BatchPlanFieldLine.FIELD_PLAN_LINE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchPlanFieldLineDTO.setTenantId(tenantId);
+        batchPlanFieldLineDTO.setProjectId(projectId);
         Page<BatchPlanFieldLineDTO> list = batchPlanFieldLineRepository.pageAndSortDTO(pageRequest, batchPlanFieldLineDTO);
         return Results.success(list);
     }
@@ -62,8 +65,10 @@ public class BatchPlanFieldLineController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> listAll(@PathVariable(name = "organizationId") Long tenantId,
+                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                      BatchPlanFieldLine batchPlanFieldLine) {
         batchPlanFieldLine.setTenantId(tenantId);
+        batchPlanFieldLine.setProjectId(projectId);
         List<BatchPlanFieldLine> list = batchPlanFieldLineRepository.select(batchPlanFieldLine);
         return Results.success(list);
     }
@@ -96,8 +101,11 @@ public class BatchPlanFieldLineController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanFieldLineDTO batchPlanFieldLineDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody BatchPlanFieldLineDTO batchPlanFieldLineDTO) {
         batchPlanFieldLineDTO.setTenantId(tenantId);
+        batchPlanFieldLineDTO.setProjectId(projectId);
         this.validObject(batchPlanFieldLineDTO);
         batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
         return Results.success(batchPlanFieldLineDTO);
@@ -112,7 +120,10 @@ public class BatchPlanFieldLineController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanFieldLineDTO batchPlanFieldLineDTO) {
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody BatchPlanFieldLineDTO batchPlanFieldLineDTO) {
+        batchPlanFieldLineDTO.setProjectId(projectId);
         batchPlanFieldLineRepository.updateDTOAllColumnWhereTenant(batchPlanFieldLineDTO, tenantId);
         return Results.success(batchPlanFieldLineDTO);
     }

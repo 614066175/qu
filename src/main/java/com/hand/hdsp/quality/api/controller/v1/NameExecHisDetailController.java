@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import org.hzero.core.util.Results;
 import org.hzero.core.base.BaseController;
 import com.hand.hdsp.quality.domain.entity.NameExecHisDetail;
@@ -44,9 +45,11 @@ public class NameExecHisDetailController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<Page<NameExecHisDetailDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
-                NameExecHisDetailDTO nameExecHisDetailDTO, @ApiIgnore @SortDefault(value = NameExecHisDetail.FIELD_DETAIL_ID,
+                                                           @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                           NameExecHisDetailDTO nameExecHisDetailDTO, @ApiIgnore @SortDefault(value = NameExecHisDetail.FIELD_DETAIL_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         nameExecHisDetailDTO.setTenantId(tenantId);
+        nameExecHisDetailDTO.setProjectId(projectId);
         Page<NameExecHisDetailDTO> list = nameExecHisDetailRepository.pageAndSortDTO(pageRequest, nameExecHisDetailDTO);
         return Results.success(list);
     }

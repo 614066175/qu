@@ -52,4 +52,6 @@ public class ExtraVersionDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
+    private Long projectId;
+
 }

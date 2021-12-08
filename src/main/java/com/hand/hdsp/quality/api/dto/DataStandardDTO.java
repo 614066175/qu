@@ -161,4 +161,6 @@ public class DataStandardDTO extends AuditDomain{
     @Transient
     private String lastUpdatedByName;
 
+    private Long projectId;
+
 }

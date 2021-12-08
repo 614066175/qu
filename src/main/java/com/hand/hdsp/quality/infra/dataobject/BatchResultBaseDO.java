@@ -42,4 +42,6 @@ public class BatchResultBaseDO extends AuditDomain {
     private Long tableSize;
 
     private Long tenantId;
+
+    private Long projectId;
 }

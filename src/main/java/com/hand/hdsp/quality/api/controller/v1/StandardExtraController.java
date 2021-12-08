@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.api.controller.v1;
 
 import java.util.List;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.StandardExtraDTO;
 import com.hand.hdsp.quality.app.service.StandardExtraService;
 import com.hand.hdsp.quality.domain.entity.StandardExtra;
@@ -49,9 +50,11 @@ public class StandardExtraController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   StandardExtraDTO standardExtraDTO, @ApiIgnore @SortDefault(value = StandardExtra.FIELD_EXTRA_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardExtraDTO.setTenantId(tenantId);
+        standardExtraDTO.setProjectId(projectId);
         Page<StandardExtraDTO> list = standardExtraRepository.pageAndSortDTO(pageRequest, standardExtraDTO);
         return Results.success(list);
     }
@@ -84,8 +87,11 @@ public class StandardExtraController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody StandardExtraDTO standardExtraDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody StandardExtraDTO standardExtraDTO) {
         standardExtraDTO.setTenantId(tenantId);
+        standardExtraDTO.setProjectId(projectId);
         this.validObject(standardExtraDTO);
         standardExtraRepository.insertDTOSelective(standardExtraDTO);
         return Results.success(standardExtraDTO);
@@ -100,8 +106,11 @@ public class StandardExtraController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody StandardExtraDTO standardExtraDTO) {
-                standardExtraRepository.updateDTOWhereTenant(standardExtraDTO, tenantId);
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody StandardExtraDTO standardExtraDTO) {
+        standardExtraDTO.setProjectId(projectId);
+        standardExtraRepository.updateDTOWhereTenant(standardExtraDTO, tenantId);
         return Results.success(standardExtraDTO);
     }
 
@@ -116,7 +125,7 @@ public class StandardExtraController extends BaseController {
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody StandardExtraDTO standardExtraDTO) {
-                standardExtraDTO.setTenantId(tenantId);
+        standardExtraDTO.setTenantId(tenantId);
         standardExtraRepository.deleteByPrimaryKey(standardExtraDTO);
         return Results.success();
     }
@@ -131,8 +140,13 @@ public class StandardExtraController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/batch-create")
-    public ResponseEntity<?> batchCreate(@PathVariable("organizationId") Long tenantId, @RequestBody List<StandardExtraDTO> standardExtraDTOList) {
-        standardExtraDTOList.forEach(standardExtraDTO -> standardExtraDTO.setTenantId(tenantId));
+    public ResponseEntity<?> batchCreate(@PathVariable("organizationId") Long tenantId,
+                                         @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                         @RequestBody List<StandardExtraDTO> standardExtraDTOList) {
+        standardExtraDTOList.forEach(standardExtraDTO -> {
+            standardExtraDTO.setTenantId(tenantId);
+            standardExtraDTO.setProjectId(projectId);
+        });
         standardExtraRepository.batchInsertDTOSelective(standardExtraDTOList);
         return Results.success(standardExtraDTOList);
     }
@@ -146,8 +160,13 @@ public class StandardExtraController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/batch-update")
-    public ResponseEntity<?> batchUpdate(@PathVariable("organizationId") Long tenantId, @RequestBody List<StandardExtraDTO> standardExtraDTOList) {
-        standardExtraDTOList.forEach(standardExtraDTO -> standardExtraDTO.setTenantId(tenantId));
+    public ResponseEntity<?> batchUpdate(@PathVariable("organizationId") Long tenantId,
+                                         @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                         @RequestBody List<StandardExtraDTO> standardExtraDTOList) {
+        standardExtraDTOList.forEach(standardExtraDTO ->{
+            standardExtraDTO.setTenantId(tenantId);
+            standardExtraDTO.setProjectId(projectId);
+        });
         standardExtraService.batchUpdate(standardExtraDTOList);
         return Results.success(standardExtraDTOList);
     }
@@ -162,7 +181,7 @@ public class StandardExtraController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping("/batch-remove")
     public ResponseEntity<?> batchRemove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestBody List<StandardExtraDTO> standardExtraDTOList) {
+                                         @RequestBody List<StandardExtraDTO> standardExtraDTOList) {
         standardExtraDTOList.forEach(standardExtraDTO -> standardExtraDTO.setTenantId(tenantId));
         standardExtraRepository.batchDTODeleteByPrimaryKey(standardExtraDTOList);
         return Results.success(standardExtraDTOList);

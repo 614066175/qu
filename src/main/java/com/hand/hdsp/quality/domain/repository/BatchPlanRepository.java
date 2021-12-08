@@ -34,6 +34,6 @@ public interface BatchPlanRepository extends BaseRepository<BatchPlan, BatchPlan
      * @param jobName
      * @param tenantId
      */
-    void clearJobName(String jobName, Long tenantId);
+    void clearJobName(String jobName, Long tenantId, Long projectId);
 
 }

@@ -48,5 +48,6 @@ public class BatchPlanFieldCon extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 
 }

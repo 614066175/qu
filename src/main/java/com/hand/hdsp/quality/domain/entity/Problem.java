@@ -61,5 +61,6 @@ public class Problem extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 
 }

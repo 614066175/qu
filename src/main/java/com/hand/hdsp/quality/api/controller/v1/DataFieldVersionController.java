@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.app.service.DataFieldVersionService;
 import org.hzero.core.util.Results;
 import org.hzero.core.base.BaseController;
@@ -49,9 +50,11 @@ public class DataFieldVersionController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<Page<DataFieldVersionDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
-                DataFieldVersionDTO dataFieldVersionDTO, @ApiIgnore @SortDefault(value = DataFieldVersion.FIELD_VERSION_ID,
+                                                          @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                          DataFieldVersionDTO dataFieldVersionDTO, @ApiIgnore @SortDefault(value = DataFieldVersion.FIELD_VERSION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         dataFieldVersionDTO.setTenantId(tenantId);
+        dataFieldVersionDTO.setProjectId(projectId);
         Page<DataFieldVersionDTO> list = dataFieldVersionService.list(pageRequest, dataFieldVersionDTO);
         return Results.success(list);
     }
@@ -84,8 +87,11 @@ public class DataFieldVersionController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<DataFieldVersionDTO> create(@PathVariable("organizationId") Long tenantId, @RequestBody DataFieldVersionDTO dataFieldVersionDTO) {
+    public ResponseEntity<DataFieldVersionDTO> create(@PathVariable("organizationId") Long tenantId,
+                                                      @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                      @RequestBody DataFieldVersionDTO dataFieldVersionDTO) {
         dataFieldVersionDTO.setTenantId(tenantId);
+        dataFieldVersionDTO.setProjectId(projectId);
         this.validObject(dataFieldVersionDTO);
         dataFieldVersionRepository.insertDTOSelective(dataFieldVersionDTO);
         return Results.success(dataFieldVersionDTO);
@@ -100,8 +106,11 @@ public class DataFieldVersionController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<DataFieldVersionDTO> update(@PathVariable("organizationId") Long tenantId, @RequestBody DataFieldVersionDTO dataFieldVersionDTO) {
-                dataFieldVersionRepository.updateDTOWhereTenant(dataFieldVersionDTO, tenantId);
+    public ResponseEntity<DataFieldVersionDTO> update(@PathVariable("organizationId") Long tenantId,
+                                                      @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                      @RequestBody DataFieldVersionDTO dataFieldVersionDTO) {
+        dataFieldVersionDTO.setProjectId(projectId);
+        dataFieldVersionRepository.updateDTOWhereTenant(dataFieldVersionDTO, tenantId);
         return Results.success(dataFieldVersionDTO);
     }
 
@@ -115,8 +124,8 @@ public class DataFieldVersionController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<DataFieldVersionDTO> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestBody DataFieldVersionDTO dataFieldVersionDTO) {
-                dataFieldVersionDTO.setTenantId(tenantId);
+                                                      @RequestBody DataFieldVersionDTO dataFieldVersionDTO) {
+        dataFieldVersionDTO.setTenantId(tenantId);
         dataFieldVersionRepository.deleteByPrimaryKey(dataFieldVersionDTO);
         return Results.success();
     }

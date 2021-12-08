@@ -97,7 +97,8 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
             List<DataStandardDTO> dataStandardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                     .andWhere(Sqls.custom()
                             .andEqualTo(DataStandard.FIELD_STANDARD_CODE, batchPlanFieldDTO.getRuleCode())
-                            .andEqualTo(DataStandard.FIELD_TENANT_ID, batchPlanFieldDTO.getTenantId()))
+                            .andEqualTo(DataStandard.FIELD_TENANT_ID, batchPlanFieldDTO.getTenantId())
+                            .andEqualTo(DataStandard.FIELD_PROJECT_ID, batchPlanFieldDTO.getProjectId()))
                     .build());
             if (CollectionUtils.isNotEmpty(dataStandardDTOList)
                     && CollectionUtils.isNotEmpty(batchPlanFieldLineDTOList)) {
@@ -112,14 +113,16 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
                                     .andEqualTo(StandardAim.FIELD_FIELD_NAME, batchPlanFieldLineDTO.getFieldName())
                                     .andEqualTo(StandardAim.FIELD_DATASOURCE_ID, batchPlanBaseDTO.getDatasourceId())
                                     .andEqualTo(StandardAim.FIELD_TABLE_NAME, batchPlanBaseDTO.getObjectName())
-                                    .andEqualTo(StandardAim.FIELD_TENANT_ID, batchPlanBaseDTO.getTenantId()))
+                                    .andEqualTo(StandardAim.FIELD_TENANT_ID, batchPlanBaseDTO.getTenantId())
+                                    .andEqualTo(StandardAim.FIELD_PROJECT_ID, batchPlanBaseDTO.getProjectId()))
                             .build());
                     standardAimDTOList.addAll(aimList);
                     aimList.forEach(standardAimDTO -> {
                         List<StandardAimRelationDTO> relationList = standardAimRelationRepository.selectDTOByCondition(Condition.builder(StandardAimRelation.class)
                                 .andWhere(Sqls.custom()
                                         .andEqualTo(StandardAimRelation.FIELD_AIM_ID, standardAimDTO.getAimId())
-                                        .andEqualTo(StandardAimRelation.FIELD_TENANT_ID, standardAimDTO.getTenantId()))
+                                        .andEqualTo(StandardAimRelation.FIELD_TENANT_ID, standardAimDTO.getTenantId())
+                                        .andEqualTo(StandardAimRelation.FIELD_PROJECT_ID, standardAimDTO.getProjectId()))
                                 .build());
                         standardAimRelationDTOList.addAll(relationList);
                     });
@@ -264,17 +267,17 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
     public Map<String, List<BatchPlanFieldDTO>> listSelected(BatchPlanFieldDTO batchPlanFieldDTO) {
         List<BatchPlanFieldDTO> list = batchPlanFieldRepository.selectList(batchPlanFieldDTO);
         return list.stream().map(rule -> {
-            //如果包含逗号，则按逗号分隔
-            if (rule.getFieldName().contains(BaseConstants.Symbol.COMMA)) {
-                return Arrays.stream(rule.getFieldName().split(BaseConstants.Symbol.COMMA)).map(s -> {
-                    BatchPlanFieldDTO dto = BatchPlanFieldDTO.builder().build();
-                    BeanUtils.copyProperties(rule, dto);
-                    dto.setFieldName(s);
-                    return dto;
-                }).collect(Collectors.toList());
-            }
-            return Collections.singletonList(rule);
-        })
+                    //如果包含逗号，则按逗号分隔
+                    if (rule.getFieldName().contains(BaseConstants.Symbol.COMMA)) {
+                        return Arrays.stream(rule.getFieldName().split(BaseConstants.Symbol.COMMA)).map(s -> {
+                            BatchPlanFieldDTO dto = BatchPlanFieldDTO.builder().build();
+                            BeanUtils.copyProperties(rule, dto);
+                            dto.setFieldName(s);
+                            return dto;
+                        }).collect(Collectors.toList());
+                    }
+                    return Collections.singletonList(rule);
+                })
                 //将list拉平
                 .flatMap(Collection::stream)
                 .distinct()

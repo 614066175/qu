@@ -58,6 +58,8 @@
         <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         select
         iu.login_name lastUpdateName,
+        iu.login_name lastUpdatedByName,
+        iu3.login_name createdByName,
         ( case when iu2.login_name is null then '' else iu2.login_name end ) chargeName,
         iu2.phone chargeTel,
         iu2.email chargeEmail,
@@ -72,6 +74,7 @@
         left join xsta_standard_group xsg on xsg.group_id=ds.group_id
         left join iam_user iu on ds.last_updated_by=iu.id
         left join iam_user iu2 on ds.charge_id=iu2.id
+        left join iam_user iu3 on ds.created_by=iu3.id
         left join hpfm_unit hu on hu.unit_id=ds.charge_dept_id
         <where>
             <if test="dataStandardDTO.standardId!=null">
@@ -104,6 +107,9 @@
             </if>
             <if test="dataStandardDTO.tenantId!=null">
                 and ds.tenant_id=#{dataStandardDTO.tenantId}
+            </if>
+            <if test="dataStandardDTO.projectId !=null">
+                and ds.project_id=#{dataStandardDTO.projectId}
             </if>
             <if test="dataStandardDTO.lastUpdateDateFrom!=null">
                 <choose>

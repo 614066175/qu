@@ -190,6 +190,9 @@
             <if test="tenantId != null">
                 and xsr.tenant_id = #{tenantId}
             </if>
+            <if test="projectId !=null">
+                and xsr.project_id =#{projectId}
+            </if>
             <if test="planName != null">
                 <bind name="planName" value="'%' + planName + '%'"/>
                 and xsp.plan_name like #{planName}

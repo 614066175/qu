@@ -87,4 +87,6 @@ public class BatchPlanDTO extends AuditDomain {
     @Transient
     private String groupCode;
 
+    private Long projectId;
+
 }

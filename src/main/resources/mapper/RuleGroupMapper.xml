@@ -45,5 +45,8 @@
         <if test="parentGroupId != null">
             and xrg.parent_group_id = #{parentGroupId}
         </if>
+        <if test="projectId != null">
+            and xrg.project_id = #{projectId}
+        </if>
     </select>
 </mapper>

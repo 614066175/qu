@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.StreamingPlanDTO;
 import com.hand.hdsp.quality.app.service.StreamingPlanService;
 import com.hand.hdsp.quality.config.SwaggerTags;
@@ -47,9 +48,11 @@ public class StreamingPlanController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   StreamingPlanDTO streamingPlanDTO, @ApiIgnore @SortDefault(value = StreamingPlan.FIELD_PLAN_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         streamingPlanDTO.setTenantId(tenantId);
+        streamingPlanDTO.setProjectId(projectId);
         Page<StreamingPlanDTO> list = streamingPlanRepository.pageAndSortDTO(pageRequest, streamingPlanDTO);
         return Results.success(list);
     }
@@ -64,8 +67,10 @@ public class StreamingPlanController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> listWithOutPage(@PathVariable(name = "organizationId") Long tenantId,
-                                  StreamingPlan streamingPlan) {
+                                             @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                             StreamingPlan streamingPlan) {
         streamingPlan.setTenantId(tenantId);
+        streamingPlan.setProjectId(projectId);
         return Results.success(streamingPlanRepository.select(streamingPlan));
     }
 
@@ -79,8 +84,10 @@ public class StreamingPlanController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/group")
     public ResponseEntity<?> group(@PathVariable(name = "organizationId") Long tenantId,
+                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                    StreamingPlanDTO streamingPlanDTO) {
         streamingPlanDTO.setTenantId(tenantId);
+        streamingPlanDTO.setProjectId(projectId);
         return Results.success(streamingPlanRepository.getGroupByPlanName(streamingPlanDTO));
     }
 
@@ -113,8 +120,11 @@ public class StreamingPlanController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody StreamingPlanDTO streamingPlanDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody StreamingPlanDTO streamingPlanDTO) {
         streamingPlanDTO.setTenantId(tenantId);
+        streamingPlanDTO.setProjectId(projectId);
         this.validObject(streamingPlanDTO);
         streamingPlanRepository.insertDTOSelective(streamingPlanDTO);
         return Results.success(streamingPlanDTO);
@@ -129,7 +139,10 @@ public class StreamingPlanController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody StreamingPlanDTO streamingPlanDTO) {
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody StreamingPlanDTO streamingPlanDTO) {
+        streamingPlanDTO.setProjectId(projectId);
         streamingPlanRepository.updateDTOAllColumnWhereTenant(streamingPlanDTO, tenantId);
         return Results.success(streamingPlanDTO);
     }

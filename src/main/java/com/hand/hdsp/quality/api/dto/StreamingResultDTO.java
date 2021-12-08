@@ -64,4 +64,6 @@ public class StreamingResultDTO extends AuditDomain {
 
     private Long exceptionRuleCount;
 
+    private Long projectId;
+
 }

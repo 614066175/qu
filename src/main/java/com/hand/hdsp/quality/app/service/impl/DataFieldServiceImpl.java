@@ -92,7 +92,8 @@ public class DataFieldServiceImpl implements DataFieldService {
         List<DataFieldDTO> dataFieldDTOS = dataFieldRepository.selectDTOByCondition(Condition.builder(DataField.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(DataField.FIELD_FIELD_NAME, dataFieldDTO.getFieldName())
-                        .andEqualTo(DataField.FIELD_TENANT_ID, dataFieldDTO.getTenantId()))
+                        .andEqualTo(DataField.FIELD_TENANT_ID, dataFieldDTO.getTenantId())
+                        .andEqualTo(DataField.FIELD_PROJECT_ID, dataFieldDTO.getProjectId()))
                 .build());
         if (CollectionUtils.isNotEmpty(dataFieldDTOS)) {
             throw new CommonException(ErrorCode.DATA_FIELD_NAME_EXIST);
@@ -110,6 +111,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                         .extraValue(s.getExtraValue())
                         .standardType(FIELD)
                         .tenantId(dataFieldDTO.getTenantId())
+                        .projectId(dataFieldDTO.getProjectId())
                         .build();
                 standardExtraRepository.insertDTOSelective(extraDTO);
             });
@@ -156,25 +158,13 @@ public class DataFieldServiceImpl implements DataFieldService {
                 || OFFLINE_APPROVING.equals(dataFieldDTO.getStandardStatus())) {
             throw new CommonException(ErrorCode.DATA_FIELD_CAN_NOT_DELETE);
         }
-//        if (ONLINE_APPROVING.equals(dataFieldDTO.getStandardStatus())) {
-//            //删除申请记录表记录
-//            List<StandardApproveDTO> standardApproveDTOS = standardApproveRepository.selectDTOByCondition(Condition.builder(StandardApprove.class)
-//                    .andWhere(Sqls.custom()
-//                            .andEqualTo(StandardApprove.FIELD_STANDARD_NAME, dataFieldDTO.getFieldName())
-//                            .andEqualTo(StandardApprove.FIELD_STANDARD_TYPE, FIELD)
-//                            .andEqualTo(StandardApprove.FIELD_OPERATION, OFFLINE_APPROVING)
-//                            .andEqualTo(StandardApprove.FIELD_TENANT_ID, dataFieldDTO.getTenantId()))
-//                    .build());
-//            if (CollectionUtils.isNotEmpty(standardApproveDTOS)) {
-//                standardApproveRepository.deleteDTO(standardApproveDTOS.get(0));
-//            }
-//        }
         dataFieldRepository.deleteByPrimaryKey(dataFieldDTO);
         //删除版本表数据
         List<DataFieldVersionDTO> dataStandardVersionDTOS = dataFieldVersionRepository.selectDTOByCondition(Condition.builder(DataFieldVersion.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(DataFieldVersion.FIELD_FIELD_ID, dataFieldDTO.getFieldId())
-                        .andEqualTo(DataFieldVersion.FIELD_TENANT_ID, dataFieldDTO.getTenantId()))
+                        .andEqualTo(DataFieldVersion.FIELD_TENANT_ID, dataFieldDTO.getTenantId())
+                        .andEqualTo(DataFieldVersion.FIELD_PROJECT_ID, dataFieldDTO.getProjectId()))
                 .build());
         dataFieldVersionRepository.batchDTODeleteByPrimaryKey(dataStandardVersionDTOS);
         // 删除额外信息
@@ -183,6 +173,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                         .andEqualTo(StandardExtra.FIELD_STANDARD_ID, dataFieldDTO.getFieldId())
                         .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, FIELD)
                         .andEqualTo(StandardExtra.FIELD_TENANT_ID, dataFieldDTO.getTenantId())
+                        .andEqualTo(StandardExtra.FIELD_PROJECT_ID, dataFieldDTO.getProjectId())
                 ).build());
         //todo 删除落标表
         standardExtraRepository.batchDTODeleteByPrimaryKey(standardExtraDTOS);
@@ -204,8 +195,8 @@ public class DataFieldServiceImpl implements DataFieldService {
     }
 
     @Override
-    public void aim(Long tenantId, List<StandardAimDTO> standardAimDTOList) {
-        dataStandardService.aim(tenantId, standardAimDTOList);
+    public void aim(Long tenantId, List<StandardAimDTO> standardAimDTOList, Long projectId) {
+        dataStandardService.aim(tenantId, standardAimDTOList, projectId);
     }
 
     @Override
@@ -303,7 +294,8 @@ public class DataFieldServiceImpl implements DataFieldService {
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardExtra.FIELD_STANDARD_ID, dataFieldDTO.getFieldId())
                         .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, FIELD)
-                        .andEqualTo(StandardExtra.FIELD_TENANT_ID, dataFieldDTO.getTenantId()))
+                        .andEqualTo(StandardExtra.FIELD_TENANT_ID, dataFieldDTO.getTenantId())
+                        .andEqualTo(StandardExtra.FIELD_PROJECT_ID, dataFieldDTO.getProjectId()))
                 .build());
         if (CollectionUtils.isNotEmpty(standardExtraDTOS)) {
             //存附件信息版本表

@@ -36,4 +36,6 @@ public class BatchResultRuleDO extends AuditDomain {
     private Integer resultFlag;
 
     private Long tenantId;
+
+    private Long projectId;
 }

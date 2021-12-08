@@ -77,7 +77,7 @@ public class StandardGroupServiceImpl implements StandardGroupService {
         if (CollectionUtils.isNotEmpty(dataStandardDTOS)) {
             throw new CommonException(ErrorCode.GROUP_HAS_STANDARD);
         }
-        standardGroupRepository.deleteDTO(standardGroupDTO);
+        standardGroupRepository.deleteByPrimaryKey(standardGroupDTO);
     }
 
     @Override

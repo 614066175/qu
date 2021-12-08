@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.api.controller.v1;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.app.service.StandardGroupService;
 import com.hand.hdsp.quality.config.SwaggerTags;
@@ -50,7 +51,10 @@ public class StandardGroupController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
-    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId, StandardGroupVO standardGroupVO , PageRequest pageRequest) {
+    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  StandardGroupVO standardGroupVO , PageRequest pageRequest) {
+        standardGroupVO.setTenantId(tenantId);
         return Results.success(standardGroupService.list(pageRequest,standardGroupVO));
     }
 
@@ -78,8 +82,10 @@ public class StandardGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable(name = "organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardGroupDTO standardGroupDTO) {
         standardGroupDTO.setTenantId(tenantId);
+        standardGroupDTO.setProjectId(projectId);
         return Results.success(standardGroupRepository.insertDTOSelective(standardGroupDTO));
     }
 
@@ -92,8 +98,11 @@ public class StandardGroupController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> updateGroup(@PathVariable(name = "organizationId") Long tenantId, @RequestBody StandardGroupDTO standardGroupDTO) {
+    public ResponseEntity<?> updateGroup(@PathVariable(name = "organizationId") Long tenantId,
+                                         @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                         @RequestBody StandardGroupDTO standardGroupDTO) {
         standardGroupDTO.setTenantId(tenantId);
+        standardGroupDTO.setProjectId(projectId);
         standardGroupRepository.updateByDTOPrimaryKeySelective(standardGroupDTO);
         return Results.success(standardGroupDTO);
     }
@@ -107,8 +116,11 @@ public class StandardGroupController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
-    public ResponseEntity<?> delete(@PathVariable(name = "organizationId") Long tenantId, @RequestBody StandardGroupDTO standardGroupDTO) {
+    public ResponseEntity<?> delete(@PathVariable(name = "organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody StandardGroupDTO standardGroupDTO) {
         standardGroupDTO.setTenantId(tenantId);
+        standardGroupDTO.setProjectId(projectId);
         standardGroupService.delete(standardGroupDTO);
         return Results.success(standardGroupDTO);
     }

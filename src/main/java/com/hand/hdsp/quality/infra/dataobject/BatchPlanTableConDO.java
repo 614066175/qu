@@ -35,4 +35,5 @@ public class BatchPlanTableConDO extends AuditDomain {
 
     private String customSql;
 
+    private Long projectId;
 }

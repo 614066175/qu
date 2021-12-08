@@ -56,4 +56,6 @@ public class Rule extends AuditDomain {
     private Integer enabledFlag;
 
     private Long tenantId;
+
+    private Long projectId;
 }

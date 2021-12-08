@@ -37,13 +37,15 @@ public class BatchPlanRepositoryImpl extends BaseRepositoryImpl<BatchPlan, Batch
     public List<PlanGroup> listByGroup(BatchPlanDTO batchPlanDTO) {
         @NotNull Long tenantId = batchPlanDTO.getTenantId();
         if (StringUtils.isEmpty(batchPlanDTO.getPlanName())) {
-            List<PlanGroup> all = planGroupRepository.select(PlanGroup.builder().groupType(GroupType.BATCH).tenantId(tenantId).build());
+            List<PlanGroup> all = planGroupRepository.select(PlanGroup.builder()
+                    .groupType(GroupType.BATCH).projectId(batchPlanDTO.getProjectId()).tenantId(tenantId).build());
             all.add(PlanGroup.ROOT_PLAN_GROUP);
             return all;
         }
         List<BatchPlan> batchPlans = this.selectByCondition(
                 Condition.builder(BatchPlan.class)
                         .where(Sqls.custom().andLike(BatchPlan.FIELD_PLAN_NAME, batchPlanDTO.getPlanName(), true)
+                                .andEqualTo(BatchPlan.FIELD_PROJECT_ID, batchPlanDTO.getProjectId())
                                 .andEqualTo(BatchPlan.FIELD_TENANT_ID, tenantId))
                         .build()
         );
@@ -74,16 +76,17 @@ public class BatchPlanRepositoryImpl extends BaseRepositoryImpl<BatchPlan, Batch
     }
 
     @Override
-    public void clearJobName(String jobName, Long tenantId) {
+    public void clearJobName(String jobName, Long tenantId, Long projectId) {
         List<BatchPlanDTO> batchPlanDTOS = this.selectDTOByCondition(Condition.builder(BatchPlan.class)
                 .andWhere(Sqls.custom().andEqualTo(BatchPlan.FIELD_PLAN_JOB_NAME, jobName)
-                        .andEqualTo(BatchPlan.FIELD_TENANT_ID, tenantId))
+                        .andEqualTo(BatchPlan.FIELD_TENANT_ID, tenantId)
+                        .andEqualTo(BatchPlan.FIELD_PROJECT_ID, projectId))
                 .build());
-        if(CollectionUtils.isNotEmpty(batchPlanDTOS)) {
+        if (CollectionUtils.isNotEmpty(batchPlanDTOS)) {
             batchPlanDTOS.forEach(batchPlanDTO -> {
                 //清空任务名
                 batchPlanDTO.setPlanJobName(null);
-                this.updateDTOAllColumnWhereTenant(batchPlanDTO,tenantId);
+                this.updateDTOAllColumnWhereTenant(batchPlanDTO, tenantId);
             });
         }
     }

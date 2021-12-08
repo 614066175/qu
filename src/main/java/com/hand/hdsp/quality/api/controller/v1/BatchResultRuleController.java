@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.BatchResultRule;
@@ -43,9 +44,11 @@ public class BatchResultRuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   BatchResultRuleDTO batchResultRuleDTO, @ApiIgnore @SortDefault(value = BatchResultRule.FIELD_RESULT_RULE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchResultRuleDTO.setTenantId(tenantId);
+        batchResultRuleDTO.setProjectId(projectId);
         Page<BatchResultRuleDTO> list = batchResultRuleRepository.pageAndSortDTO(pageRequest, batchResultRuleDTO);
         return Results.success(list);
     }
@@ -78,8 +81,11 @@ public class BatchResultRuleController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody BatchResultRuleDTO batchResultRuleDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody BatchResultRuleDTO batchResultRuleDTO) {
         batchResultRuleDTO.setTenantId(tenantId);
+        batchResultRuleDTO.setProjectId(projectId);
         this.validObject(batchResultRuleDTO);
         batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
         return Results.success(batchResultRuleDTO);
@@ -94,7 +100,10 @@ public class BatchResultRuleController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody BatchResultRuleDTO batchResultRuleDTO) {
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody BatchResultRuleDTO batchResultRuleDTO) {
+        batchResultRuleDTO.setProjectId(projectId);
         batchResultRuleRepository.updateDTOAllColumnWhereTenant(batchResultRuleDTO, tenantId);
         return Results.success(batchResultRuleDTO);
     }

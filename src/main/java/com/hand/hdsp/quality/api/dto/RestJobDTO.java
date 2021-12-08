@@ -69,4 +69,6 @@ public class RestJobDTO extends AuditDomain {
     @ApiModelProperty(value = "租户ID")
     private Long tenantId;
 
+    private Long projectId;
+
 }

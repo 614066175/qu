@@ -78,4 +78,6 @@ public class BatchResultItemDO extends AuditDomain {
     private Date measureDateFrom;
 
     private String ruleType;
+
+    private Long projectId;
 }

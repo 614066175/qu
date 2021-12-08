@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.app.service.ProblemService;
 import com.hand.hdsp.quality.domain.entity.Problem;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
@@ -52,8 +53,10 @@ public class ProblemController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/tree")
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                ProblemVO problemVO) {
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  ProblemVO problemVO) {
         problemVO.setTenantId(tenantId);
+        problemVO.setProjectId(projectId);
         return Results.success(problemService.listForTree(problemVO));
     }
 
@@ -85,8 +88,11 @@ public class ProblemController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody ProblemDTO problemDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody ProblemDTO problemDTO) {
         problemDTO.setTenantId(tenantId);
+        problemDTO.setProjectId(projectId);
         this.validObject(problemDTO);
         problemRepository.insertDTOSelective(problemDTO);
         return Results.success(problemDTO);
@@ -101,8 +107,10 @@ public class ProblemController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody ProblemDTO problemDTO) {
-
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody ProblemDTO problemDTO) {
+        problemDTO.setProjectId(projectId);
         problemRepository.updateDTOAllColumnWhereTenant(problemDTO, tenantId);
         return Results.success(problemDTO);
     }

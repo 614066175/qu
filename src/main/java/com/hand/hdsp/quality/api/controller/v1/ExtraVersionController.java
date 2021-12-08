@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.ExtraVersionDTO;
 import com.hand.hdsp.quality.domain.entity.ExtraVersion;
 import com.hand.hdsp.quality.domain.repository.ExtraVersionRepository;
@@ -44,9 +45,11 @@ public class ExtraVersionController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   ExtraVersionDTO extraVersionDTO, @ApiIgnore @SortDefault(value = ExtraVersion.FIELD_VERSION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         extraVersionDTO.setTenantId(tenantId);
+        extraVersionDTO.setProjectId(projectId);
         Page<ExtraVersionDTO> list = extraVersionRepository.pageAndSortDTO(pageRequest, extraVersionDTO);
         return Results.success(list);
     }
@@ -79,8 +82,11 @@ public class ExtraVersionController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody ExtraVersionDTO extraVersionDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody ExtraVersionDTO extraVersionDTO) {
         extraVersionDTO.setTenantId(tenantId);
+        extraVersionDTO.setProjectId(projectId);
         this.validObject(extraVersionDTO);
         extraVersionRepository.insertDTOSelective(extraVersionDTO);
         return Results.success(extraVersionDTO);
@@ -95,8 +101,11 @@ public class ExtraVersionController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody ExtraVersionDTO extraVersionDTO) {
-                extraVersionRepository.updateDTOWhereTenant(extraVersionDTO, tenantId);
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody ExtraVersionDTO extraVersionDTO) {
+        extraVersionDTO.setProjectId(projectId);
+        extraVersionRepository.updateDTOWhereTenant(extraVersionDTO, tenantId);
         return Results.success(extraVersionDTO);
     }
 
@@ -111,7 +120,7 @@ public class ExtraVersionController extends BaseController {
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody ExtraVersionDTO extraVersionDTO) {
-                extraVersionDTO.setTenantId(tenantId);
+        extraVersionDTO.setTenantId(tenantId);
         extraVersionRepository.deleteByPrimaryKey(extraVersionDTO);
         return Results.success();
     }

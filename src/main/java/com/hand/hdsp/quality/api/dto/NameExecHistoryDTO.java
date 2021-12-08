@@ -91,4 +91,5 @@ public class NameExecHistoryDTO extends AuditDomain {
     @Transient
     private Date startDay;
 
+    private Long projectId;
 }

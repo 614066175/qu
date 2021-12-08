@@ -81,7 +81,7 @@ public interface PlanConstant {
     /**
      * 数据质量任务名称
      */
-    String JOB_NAME = "DQ%d_%s";
+    String JOB_NAME = "DQ%d_%d_%s";
 
 
     /**

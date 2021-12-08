@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.StandardOutbibDTO;
 import com.hand.hdsp.quality.domain.entity.StandardOutbib;
 import com.hand.hdsp.quality.domain.repository.StandardOutbibRepository;
@@ -44,9 +45,11 @@ public class StandardOutbibController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   StandardOutbibDTO standardOutbibDTO, @ApiIgnore @SortDefault(value = StandardOutbib.FIELD_OUTBIB_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardOutbibDTO.setTenantId(tenantId);
+        standardOutbibDTO.setProjectId(projectId);
         Page<StandardOutbibDTO> list = standardOutbibRepository.pageAndSortDTO(pageRequest, standardOutbibDTO);
         return Results.success(list);
     }
@@ -79,8 +82,11 @@ public class StandardOutbibController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody StandardOutbibDTO standardOutbibDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody StandardOutbibDTO standardOutbibDTO) {
         standardOutbibDTO.setTenantId(tenantId);
+        standardOutbibDTO.setProjectId(projectId);
         this.validObject(standardOutbibDTO);
         standardOutbibRepository.insertDTOSelective(standardOutbibDTO);
         return Results.success(standardOutbibDTO);
@@ -95,8 +101,11 @@ public class StandardOutbibController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody StandardOutbibDTO standardOutbibDTO) {
-                standardOutbibRepository.updateDTOWhereTenant(standardOutbibDTO, tenantId);
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody StandardOutbibDTO standardOutbibDTO) {
+        standardOutbibDTO.setProjectId(projectId);
+        standardOutbibRepository.updateDTOWhereTenant(standardOutbibDTO, tenantId);
         return Results.success(standardOutbibDTO);
     }
 
@@ -111,7 +120,7 @@ public class StandardOutbibController extends BaseController {
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody StandardOutbibDTO standardOutbibDTO) {
-                standardOutbibDTO.setTenantId(tenantId);
+        standardOutbibDTO.setTenantId(tenantId);
         standardOutbibRepository.deleteByPrimaryKey(standardOutbibDTO);
         return Results.success();
     }

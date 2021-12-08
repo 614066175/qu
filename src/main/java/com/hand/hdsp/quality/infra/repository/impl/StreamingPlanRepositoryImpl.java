@@ -33,8 +33,11 @@ public class StreamingPlanRepositoryImpl extends BaseRepositoryImpl<StreamingPla
 
     @Override
     public List<PlanGroup> getGroupByPlanName(StreamingPlanDTO streamingPlanDTO) {
-        if (StringUtils.isEmpty(streamingPlanDTO.getPlanName())){
-            List<PlanGroup> all = planGroupRepository.select(PlanGroup.builder().groupType(GroupType.STREAMING).build());
+        if (StringUtils.isEmpty(streamingPlanDTO.getPlanName())) {
+            List<PlanGroup> all = planGroupRepository.select(PlanGroup.builder()
+                    .groupType(GroupType.STREAMING)
+                    .projectId(streamingPlanDTO.getProjectId())
+                    .build());
             all.add(PlanGroup.ROOT_PLAN_GROUP);
             return all;
         }
@@ -43,7 +46,7 @@ public class StreamingPlanRepositoryImpl extends BaseRepositoryImpl<StreamingPla
                         .where(Sqls.custom().andLike(StreamingPlan.FIELD_PLAN_NAME, streamingPlanDTO.getPlanName(), true))
                         .build()
         );
-        if (streamingPlans.isEmpty()){
+        if (streamingPlans.isEmpty()) {
             return Collections.emptyList();
         }
         List<Long> groupIds = streamingPlans.stream().map(StreamingPlan::getGroupId).collect(Collectors.toList());
@@ -55,21 +58,21 @@ public class StreamingPlanRepositoryImpl extends BaseRepositoryImpl<StreamingPla
                         .build()
         );
         List<PlanGroup> groups = new ArrayList<>();
-        planGroups.forEach(p ->{
-            getGroup(p.getParentGroupId(),groups);
+        planGroups.forEach(p -> {
+            getGroup(p.getParentGroupId(), groups);
             groups.add(p);
         });
         planGroups.add(PlanGroup.ROOT_PLAN_GROUP);
         return planGroups;
     }
 
-    private void getGroup(Long parentId,List<PlanGroup> groups){
-        if (parentId == 0 || parentId == null){
+    private void getGroup(Long parentId, List<PlanGroup> groups) {
+        if (parentId == 0 || parentId == null) {
             return;
         }
         PlanGroup planGroup1 = planGroupRepository.selectByPrimaryKey(parentId);
         groups.add(planGroup1);
-        getGroup(planGroup1.getParentGroupId(),groups);
+        getGroup(planGroup1.getParentGroupId(), groups);
     }
 
 }

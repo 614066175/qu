@@ -72,6 +72,7 @@ public class DataField extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 
 
 }

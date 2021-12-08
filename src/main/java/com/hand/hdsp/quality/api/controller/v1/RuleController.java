@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.app.service.RuleService;
 import com.hand.hdsp.quality.config.SwaggerTags;
@@ -46,9 +47,11 @@ public class RuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  RuleDTO ruleDTO, @ApiIgnore @SortDefault(value = Rule.FIELD_RULE_ID,
-            direction = Sort.Direction.DESC) PageRequest pageRequest) {
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  RuleDTO ruleDTO,
+                                  @ApiIgnore @SortDefault(value = Rule.FIELD_RULE_ID, direction = Sort.Direction.DESC) PageRequest pageRequest) {
         ruleDTO.setTenantId(tenantId);
+        ruleDTO.setProjectId(projectId);
         if (ruleDTO.getGroupId() != null && ruleDTO.getGroupId() == 0) {
             ruleDTO.setGroupId(null);
         }
@@ -66,9 +69,11 @@ public class RuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> listTenant(@PathVariable(name = "organizationId") Long tenantId,
-                                        RuleDTO ruleDTO, @ApiIgnore @SortDefault(value = Rule.FIELD_RULE_ID,
-            direction = Sort.Direction.DESC) PageRequest pageRequest) {
+                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                        RuleDTO ruleDTO,
+                                        @ApiIgnore @SortDefault(value = Rule.FIELD_RULE_ID, direction = Sort.Direction.DESC) PageRequest pageRequest) {
         ruleDTO.setTenantId(tenantId);
+        ruleDTO.setProjectId(projectId);
         if (ruleDTO.getGroupId() != null && ruleDTO.getGroupId() == 0) {
             ruleDTO.setGroupId(null);
         }
@@ -104,8 +109,11 @@ public class RuleController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody RuleDTO ruleDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody RuleDTO ruleDTO) {
         ruleDTO.setTenantId(tenantId);
+        ruleDTO.setProjectId(projectId);
         this.validObject(ruleDTO);
         ruleService.insert(ruleDTO);
         return Results.success(ruleDTO);
@@ -120,8 +128,11 @@ public class RuleController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody RuleDTO ruleDTO) {
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody RuleDTO ruleDTO) {
         ruleDTO.setTenantId(tenantId);
+        ruleDTO.setProjectId(projectId);
         ruleService.update(ruleDTO);
         return Results.success(ruleDTO);
     }

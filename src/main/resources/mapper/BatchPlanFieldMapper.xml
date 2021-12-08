@@ -96,5 +96,8 @@
                  left join xqua_batch_plan_field_line xbptl on xbpfc.plan_line_id = xbptl.plan_line_id
                  left join xqua_batch_plan_field xbpf on xbptl.plan_rule_id = xbpf.plan_rule_id
         where xbpf.plan_base_id = #{planBaseId}
+        <if test="projectId !=null">
+            and xbpf.project_id=#{projectId}
+        </if>
     </select>
 </mapper>

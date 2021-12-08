@@ -56,4 +56,5 @@ public class StreamingResultRuleDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
+    private Long projectId;
 }

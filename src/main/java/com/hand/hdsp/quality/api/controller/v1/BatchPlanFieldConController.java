@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldConDTO;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.BatchPlanFieldCon;
@@ -44,9 +45,11 @@ public class BatchPlanFieldConController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   BatchPlanFieldConDTO batchPlanFieldConDTO, @ApiIgnore @SortDefault(value = BatchPlanFieldCon.FIELD_CONDITION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchPlanFieldConDTO.setTenantId(tenantId);
+        batchPlanFieldConDTO.setProjectId(projectId);
         Page<BatchPlanFieldConDTO> list = batchPlanFieldConRepository.pageAndSortDTO(pageRequest, batchPlanFieldConDTO);
         return Results.success(list);
     }
@@ -79,8 +82,11 @@ public class BatchPlanFieldConController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanFieldConDTO batchPlanFieldConDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody BatchPlanFieldConDTO batchPlanFieldConDTO) {
         batchPlanFieldConDTO.setTenantId(tenantId);
+        batchPlanFieldConDTO.setProjectId(projectId);
         this.validObject(batchPlanFieldConDTO);
         batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
         return Results.success(batchPlanFieldConDTO);
@@ -95,8 +101,11 @@ public class BatchPlanFieldConController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanFieldConDTO batchPlanFieldConDTO) {
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody BatchPlanFieldConDTO batchPlanFieldConDTO) {
         SecurityTokenHelper.validToken(batchPlanFieldConDTO, false);
+        batchPlanFieldConDTO.setProjectId(projectId);
         batchPlanFieldConRepository.updateDTOAllColumnWhereTenant(batchPlanFieldConDTO, tenantId);
         return Results.success(batchPlanFieldConDTO);
     }

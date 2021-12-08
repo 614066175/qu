@@ -46,11 +46,15 @@
         xsg.group_name,
         xsg.group_code,
         xsg.group_desc,
+        iu1.login_name createdByName,
+        iu2.login_name lastUpdatedByName,
         <include refid="baseColumn">
             <property name="sd" value="sd"/>
         </include>
         from xsta_standard_doc sd
         left join xsta_standard_group xsg on xsg.group_id=sd.group_id
+        left join iam_user iu1 on iu1.id=sd.created_by
+        left join iam_user iu2 on iu2.id=sd.last_updated_by
         <where>
             <if test="standardDocDTO.docId!=null">
                 sd.doc_id=#{standardDocDTO.docId}
@@ -60,6 +64,9 @@
             </if>
             <if test="standardDocDTO.tenantId!=null">
                 and sd.tenant_id=#{standardDocDTO.tenantId}
+            </if>
+            <if test="standardDocDTO.projectId !=null">
+                and sd.project_id =#{standardDocDTO.projectId}
             </if>
             <if test="standardDocDTO.standardCode!=null">
                 <bind name="standardCode" value="'%'+ standardDocDTO.standardCode +'%'"/>

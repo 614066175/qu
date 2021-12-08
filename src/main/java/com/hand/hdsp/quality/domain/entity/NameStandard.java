@@ -88,5 +88,6 @@ public class NameStandard extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 
 }

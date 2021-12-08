@@ -43,4 +43,6 @@ public class PlanGroupTreeVO {
     private String type;
 
     private Long tenantId;
+
+    private Long projectId;
 }

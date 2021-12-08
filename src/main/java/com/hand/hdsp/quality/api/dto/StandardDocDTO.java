@@ -83,6 +83,8 @@ public class StandardDocDTO extends AuditDomain {
     @Transient
     private String lastUpdatedByName;
 
+    private Long projectId;
+
     public interface Group1 {
     }
 

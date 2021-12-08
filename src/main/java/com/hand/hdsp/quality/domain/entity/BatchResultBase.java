@@ -67,6 +67,8 @@ public class BatchResultBase extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
+
     @Transient
     private String datasourceType;
 

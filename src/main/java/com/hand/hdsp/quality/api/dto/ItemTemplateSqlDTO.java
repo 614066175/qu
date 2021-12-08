@@ -48,4 +48,6 @@ public class ItemTemplateSqlDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
+    private Long projectId;
+
 }

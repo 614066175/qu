@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.StreamingResultRuleDTO;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.StreamingResultRule;
@@ -43,9 +44,11 @@ public class StreamingResultRuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   StreamingResultRuleDTO streamingResultRuleDTO, @ApiIgnore @SortDefault(value = StreamingResultRule.FIELD_RESULT_RULE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         streamingResultRuleDTO.setTenantId(tenantId);
+        streamingResultRuleDTO.setProjectId(projectId);
         Page<StreamingResultRuleDTO> list = streamingResultRuleRepository.pageAndSortDTO(pageRequest, streamingResultRuleDTO);
         return Results.success(list);
     }
@@ -60,8 +63,10 @@ public class StreamingResultRuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/result-rule")
     public ResponseEntity<?> resultRule(@PathVariable(name = "organizationId") Long tenantId,
+                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         StreamingResultRuleDTO streamingResultRuleDTO) {
         streamingResultRuleDTO.setTenantId(tenantId);
+        streamingResultRuleDTO.setProjectId(projectId);
         return Results.success(streamingResultRuleRepository.listResultRule(streamingResultRuleDTO));
     }
 
@@ -93,8 +98,11 @@ public class StreamingResultRuleController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody StreamingResultRuleDTO streamingResultRuleDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody StreamingResultRuleDTO streamingResultRuleDTO) {
         streamingResultRuleDTO.setTenantId(tenantId);
+        streamingResultRuleDTO.setProjectId(projectId);
         this.validObject(streamingResultRuleDTO);
         streamingResultRuleRepository.insertDTOSelective(streamingResultRuleDTO);
         return Results.success(streamingResultRuleDTO);
@@ -109,7 +117,10 @@ public class StreamingResultRuleController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody StreamingResultRuleDTO streamingResultRuleDTO) {
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody StreamingResultRuleDTO streamingResultRuleDTO) {
+        streamingResultRuleDTO.setProjectId(projectId);
         streamingResultRuleRepository.updateDTOAllColumnWhereTenant(streamingResultRuleDTO, tenantId);
         return Results.success(streamingResultRuleDTO);
     }

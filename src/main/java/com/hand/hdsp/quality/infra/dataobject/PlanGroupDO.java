@@ -31,4 +31,6 @@ public class PlanGroupDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
+
 }

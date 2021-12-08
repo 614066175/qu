@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.NameStandardDTO;
 import com.hand.hdsp.quality.app.service.NameStandardService;
 import com.hand.hdsp.quality.config.SwaggerTags;
@@ -59,16 +60,12 @@ public class NameStandardController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<Page<NameStandardDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
-                NameStandardDTO nameStandardDTO, @ApiIgnore @SortDefault(value = NameStandard.FIELD_STANDARD_ID,
+                                                      @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                      NameStandardDTO nameStandardDTO, @ApiIgnore @SortDefault(value = NameStandard.FIELD_STANDARD_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         nameStandardDTO.setTenantId(tenantId);
-        Page<NameStandardDTO> list = PageHelper.doPage(pageRequest,()->nameStandardRepository.list(nameStandardDTO));
-        list.getContent().stream()
-                .peek(dto -> {
-                    dto.setCreatedByName(standardDocMapper.selectUserNameById(dto.getCreatedBy()));
-                    dto.setLastUpdatedByName(standardDocMapper.selectUserNameById(dto.getLastUpdatedBy()));
-                })
-                .collect(Collectors.toList());
+        nameStandardDTO.setProjectId(projectId);
+        Page<NameStandardDTO> list = PageHelper.doPage(pageRequest, () -> nameStandardRepository.list(nameStandardDTO));
         return Results.success(list);
     }
 
@@ -100,8 +97,11 @@ public class NameStandardController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<NameStandardDTO> create(@PathVariable("organizationId") Long tenantId, @RequestBody NameStandardDTO nameStandardDTO) {
+    public ResponseEntity<NameStandardDTO> create(@PathVariable("organizationId") Long tenantId,
+                                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                  @RequestBody NameStandardDTO nameStandardDTO) {
         nameStandardDTO.setTenantId(tenantId);
+        nameStandardDTO.setProjectId(projectId);
         this.validObject(nameStandardDTO);
         nameStandardRepository.insertDTOSelective(nameStandardDTO);
         return Results.success(nameStandardDTO);
@@ -116,7 +116,11 @@ public class NameStandardController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<NameStandardDTO> update(@PathVariable("organizationId") Long tenantId, @RequestBody NameStandardDTO nameStandardDTO) {
+    public ResponseEntity<NameStandardDTO> update(@PathVariable("organizationId") Long tenantId,
+                                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                  @RequestBody NameStandardDTO nameStandardDTO) {
+        nameStandardDTO.setTenantId(tenantId);
+        nameStandardDTO.setProjectId(projectId);
         return Results.success(nameStandardService.update(nameStandardDTO));
     }
 
@@ -130,9 +134,13 @@ public class NameStandardController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<Void> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestBody List<NameStandardDTO> nameStandardDtoList) {
-                nameStandardDtoList.forEach(x->x.setTenantId(tenantId));
-                nameStandardService.bitchRemove(nameStandardDtoList);
+                                       @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                       @RequestBody List<NameStandardDTO> nameStandardDtoList) {
+        nameStandardDtoList.forEach(x -> {
+            x.setTenantId(tenantId);
+            x.setProjectId(projectId);
+        });
+        nameStandardService.bitchRemove(nameStandardDtoList);
         return Results.success();
     }
 
@@ -146,7 +154,7 @@ public class NameStandardController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/execute")
     public ResponseEntity<Void> execute(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                       @RequestBody List<Long> nameStandardIdList) {
+                                        @RequestBody List<Long> nameStandardIdList) {
         nameStandardService.batchExecuteStandard(nameStandardIdList);
         return Results.success();
     }
@@ -163,7 +171,7 @@ public class NameStandardController extends BaseController {
 
         dto.setTenantId(tenantId);
         Page<NameStandardDTO> dtoList = nameStandardService.export(dto, exportParam, pageRequest);
-        response.addHeader("Access-Control-Expose-Headers","Content-Disposition");
+        response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
         return Results.success(dtoList);
     }
 

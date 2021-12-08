@@ -35,6 +35,9 @@
 
     <sql id="custom_where">
         <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+        <if test="projectId !=null">
+            and ${mt}.project_id=#{projectId}
+        </if>
         <if test="tenantId != null">
             and ${mt}.tenant_id = #{tenantId}
         </if>
@@ -91,6 +94,9 @@
             <if test="groupId != null and groupId != 0">
                 xpg.group_id = #{groupId}
             </if>
+            <if test="projectId !=null ">
+                xbp.project_id=#{projectId}
+            </if>
             <if test="tenantId != null">
                 and xbp.tenant_id = #{tenantId}
             </if>
@@ -140,6 +146,9 @@
         <where>
             <if test="groupId != null and groupId != 0">
                 and xbp.group_id = #{groupId}
+            </if>
+            <if test="projectId !=null">
+                and xbr.project_id=#{projectId}
             </if>
             <if test="tenantId != null">
                 and xbr.tenant_id = #{tenantId}

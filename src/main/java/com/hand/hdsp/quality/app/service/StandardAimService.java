@@ -33,5 +33,5 @@ public interface StandardAimService {
      *
      * @param standardAimDTOList
      */
-    void batchDelete(List<StandardAimDTO> standardAimDTOList);
+    void batchDelete(List<StandardAimDTO> standardAimDTOList, Long tenantId, Long projectId);
 }

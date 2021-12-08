@@ -58,5 +58,6 @@ public class BatchResultRule extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 
 }

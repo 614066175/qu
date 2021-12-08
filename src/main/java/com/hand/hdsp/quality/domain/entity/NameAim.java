@@ -64,5 +64,6 @@ public class NameAim extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 
 }
