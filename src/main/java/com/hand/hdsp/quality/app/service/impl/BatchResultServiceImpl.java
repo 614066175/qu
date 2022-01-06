@@ -200,6 +200,9 @@ public class BatchResultServiceImpl implements BatchResultService {
             throw new CommonException(ErrorCode.BATCH_RESULT_NOT_EXIST);
         }
         BatchResultBase batchResultBase = batchResultBaseRepository.selectByPrimaryKey(resultBaseId);
+        if(batchResultBase==null||Strings.isEmpty(batchResultBase.getExceptionList())){
+            return new Page<>();
+        }
         JSONObject jsonObject = JSON.parseObject(batchResultBase.getExceptionList());
         List<Map<String, Object>> result = JsonUtil.toObj(String.valueOf(jsonObject.get("FIELD")), new TypeReference<List<Map<String, Object>>>() {
         });
