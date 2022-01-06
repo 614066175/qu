@@ -17,6 +17,7 @@
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
 
     <sql id="baseColumn">
@@ -47,6 +48,9 @@
             </if>
             <if test="planBaseId != null">
                 and plan_base_id = #{planBaseId}
+            </if>
+            <if test="projectId != null">
+                and xbpf.project_id = #{projectId}
             </if>
         </where>
 
@@ -97,7 +101,7 @@
                  left join xqua_batch_plan_field xbpf on xbptl.plan_rule_id = xbpf.plan_rule_id
         where xbpf.plan_base_id = #{planBaseId}
         <if test="projectId !=null">
-            and xbpf.project_id=#{projectId}
+            and xbpfc.project_id=#{projectId}
         </if>
     </select>
 </mapper>

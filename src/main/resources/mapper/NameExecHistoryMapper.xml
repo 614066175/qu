@@ -18,6 +18,7 @@
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
     <resultMap id="DtoResultMap" type="com.hand.hdsp.quality.api.dto.NameExecHistoryDTO" extends="BaseResultMap">
         <collection property="execDetails" ofType="com.hand.hdsp.quality.api.dto.NameExecHisDetailDTO"
@@ -66,6 +67,9 @@
         WHERE xneh.standard_id=#{standardId}
         <if test="execStatus != null">
             AND xneh.exec_status = #{execStatus}
+        </if>
+        <if test="projectId != null">
+            and xneh.project_id = #{projectId}
         </if>
         <if test="execStartTime !=null">
             AND xneh.exec_start_time &gt;= #{execStartTime}

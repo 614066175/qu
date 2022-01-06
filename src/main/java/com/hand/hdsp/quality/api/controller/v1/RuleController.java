@@ -95,8 +95,10 @@ public class RuleController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/detail/{ruleId}")
-    public ResponseEntity<?> detail(@PathVariable("organizationId") Long tenantId, @PathVariable Long ruleId) {
-        RuleDTO ruleDTO = ruleService.detail(ruleId, tenantId);
+    public ResponseEntity<?> detail(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @PathVariable Long ruleId) {
+        RuleDTO ruleDTO = ruleService.detail(ruleId, tenantId,projectId);
         return Results.success(ruleDTO);
     }
 

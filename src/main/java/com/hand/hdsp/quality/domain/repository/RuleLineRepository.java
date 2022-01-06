@@ -31,7 +31,7 @@ public interface RuleLineRepository extends BaseRepository<RuleLine, RuleLineDTO
      * @param tenantId
      * @return
      */
-    List<RuleLineDTO> list(Long ruleId, Long tenantId);
+    List<RuleLineDTO> list(Long ruleId, Long tenantId ,Long projectId);
 
     /**
      * 列表（分页）

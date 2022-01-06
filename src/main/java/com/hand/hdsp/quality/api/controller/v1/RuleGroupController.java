@@ -160,10 +160,12 @@ public class RuleGroupController extends BaseController {
     @GetMapping("/export")
     @ExcelExport(value = RuleGroupDTO.class)
     public ResponseEntity<?> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     RuleDTO dto,
                                     ExportParam exportParam,
                                     HttpServletResponse response) {
         dto.setTenantId(tenantId);
+        dto.setProjectId(projectId);
         List<RuleGroupDTO> dtoList =
                 ruleGroupService.export(dto, exportParam);
         response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");

@@ -78,6 +78,7 @@ public class RuleGroupServiceImpl implements RuleGroupService {
             List<RuleDTO> ruleDTOList = ruleRepository.selectDTOByCondition(Condition.builder(Rule.class)
                     .andWhere(Sqls.custom()
                             .andEqualTo(Rule.FIELD_GROUP_ID, ruleGroupDTO.getGroupId())
+                            .andEqualTo(Rule.FIELD_PROJECT_ID,ruleGroupDTO.getProjectId())
                             .andEqualTo(Rule.FIELD_TENANT_ID, ruleGroupDTO.getTenantId()))
                     .andWhere(Sqls.custom()
                             .andEqualTo(Rule.FIELD_RULE_CODE, dto.getRuleCode(), true)

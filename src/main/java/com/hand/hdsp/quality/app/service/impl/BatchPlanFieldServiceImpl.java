@@ -138,18 +138,21 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
     @Transactional(rollbackFor = Exception.class)
     public void insert(BatchPlanFieldDTO batchPlanFieldDTO) {
         Long tenantId = batchPlanFieldDTO.getTenantId();
+        Long projectId = batchPlanFieldDTO.getProjectId();
         batchPlanFieldRepository.insertDTOSelective(batchPlanFieldDTO);
         List<BatchPlanFieldLineDTO> batchPlanFieldLineDTOList = batchPlanFieldDTO.getBatchPlanFieldLineDTOList();
         if (CollectionUtils.isNotEmpty(batchPlanFieldLineDTOList)) {
 
             for (BatchPlanFieldLineDTO batchPlanFieldLineDTO : batchPlanFieldLineDTOList) {
                 batchPlanFieldLineDTO.setPlanRuleId(batchPlanFieldDTO.getPlanRuleId());
+                batchPlanFieldLineDTO.setProjectId(projectId);
                 batchPlanFieldLineDTO.setTenantId(tenantId);
                 batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
 
                 if (CollectionUtils.isNotEmpty(batchPlanFieldLineDTO.getBatchPlanFieldConDTOList())) {
                     for (BatchPlanFieldConDTO batchPlanFieldConDTO : batchPlanFieldLineDTO.getBatchPlanFieldConDTOList()) {
                         batchPlanFieldConDTO.setPlanLineId(batchPlanFieldLineDTO.getPlanLineId());
+                        batchPlanFieldConDTO.setProjectId(projectId);
                         batchPlanFieldConDTO.setTenantId(tenantId);
                         batchPlanFieldConDTO.setWarningLevel(JsonUtils.object2Json(batchPlanFieldConDTO.getWarningLevelList()));
                         batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
@@ -163,7 +166,8 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
             List<DataStandardDTO> dataStandardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                     .andWhere(Sqls.custom()
                             .andEqualTo(DataStandard.FIELD_STANDARD_CODE, batchPlanFieldDTO.getRuleCode())
-                            .andEqualTo(DataStandard.FIELD_TENANT_ID, batchPlanFieldDTO.getTenantId()))
+                            .andEqualTo(DataStandard.FIELD_PROJECT_ID, projectId)
+                            .andEqualTo(DataStandard.FIELD_TENANT_ID, tenantId))
                     .build());
             //规则为数据标准且规则校验项不为空
             if (CollectionUtils.isNotEmpty(dataStandardDTOList) && CollectionUtils.isNotEmpty(batchPlanFieldLineDTOList)) {
@@ -182,7 +186,8 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
                             .schemaName(batchPlanBaseDTO.getDatasourceSchema())
                             .tableName(batchPlanBaseDTO.getObjectName())
                             .planId(batchPlanBaseDTO.getPlanId())
-                            .tenantId(batchPlanFieldDTO.getTenantId())
+                            .tenantId(tenantId)
+                            .projectId(projectId)
                             .build();
                     //查询表注释，字段注释
                     DriverSession driverSession = driverSessionService.getDriverSession(batchPlanBaseDTO.getTenantId(), batchPlanBaseDTO.getDatasourceCode());
@@ -206,7 +211,8 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
                             .planId(batchPlanBaseDTO.getPlanId())
                             .planBaseId(batchPlanBaseDTO.getPlanBaseId())
                             .planRuleId(batchPlanFieldDTO.getPlanRuleId())
-                            .tenantId(batchPlanFieldDTO.getTenantId())
+                            .tenantId(tenantId)
+                            .projectId(projectId)
                             .build();
                     standardAimRelationRepository.insertDTOSelective(standardAimRelationDTO);
                 });
@@ -218,14 +224,17 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
     @Transactional(rollbackFor = Exception.class)
     public void update(BatchPlanFieldDTO batchPlanFieldDTO) {
         Long tenantId = batchPlanFieldDTO.getTenantId();
+        Long projectId = batchPlanFieldDTO.getProjectId();
         batchPlanFieldRepository.updateDTOAllColumnWhereTenant(batchPlanFieldDTO, tenantId);
         if (batchPlanFieldDTO.getBatchPlanFieldLineDTOList() != null) {
             for (BatchPlanFieldLineDTO batchPlanFieldLineDTO : batchPlanFieldDTO.getBatchPlanFieldLineDTOList()) {
                 if (AuditDomain.RecordStatus.update.equals(batchPlanFieldLineDTO.get_status())) {
+                    batchPlanFieldLineDTO.setProjectId(projectId);
                     batchPlanFieldLineRepository.updateDTOAllColumnWhereTenant(batchPlanFieldLineDTO, tenantId);
                 } else if (AuditDomain.RecordStatus.create.equals(batchPlanFieldLineDTO.get_status())) {
                     batchPlanFieldLineDTO.setPlanRuleId(batchPlanFieldDTO.getPlanRuleId());
                     batchPlanFieldLineDTO.setTenantId(tenantId);
+                    batchPlanFieldLineDTO.setProjectId(projectId);
                     batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
                 } else if (AuditDomain.RecordStatus.delete.equals(batchPlanFieldLineDTO.get_status())) {
                     batchPlanFieldLineRepository.deleteByPrimaryKey(batchPlanFieldLineDTO);
@@ -234,10 +243,12 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
                     for (BatchPlanFieldConDTO con : batchPlanFieldLineDTO.getBatchPlanFieldConDTOList()) {
                         if (AuditDomain.RecordStatus.update.equals(con.get_status())) {
                             con.setWarningLevel(JsonUtils.object2Json(con.getWarningLevelList()));
+                            con.setProjectId(projectId);
                             batchPlanFieldConRepository.updateDTOAllColumnWhereTenant(con, tenantId);
                         } else if (AuditDomain.RecordStatus.create.equals(con.get_status())) {
                             con.setWarningLevel(JsonUtils.object2Json(con.getWarningLevelList()));
                             con.setPlanLineId(batchPlanFieldLineDTO.getPlanLineId());
+                            con.setProjectId(projectId);
                             con.setTenantId(tenantId);
                             batchPlanFieldConRepository.insertDTOSelective(con);
                         } else if (AuditDomain.RecordStatus.delete.equals(con.get_status())) {

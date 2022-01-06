@@ -33,6 +33,7 @@
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
 
     <select id="selectByResultId" resultType="com.hand.hdsp.quality.api.dto.BatchResultItemDTO">
@@ -220,6 +221,9 @@
             xbpb.sql_type = 'TABLE'
             <if test="datasourceId != null ">
                 AND xbpb.datasource_id = #{datasourceId}
+            </if>
+            <if test="projectId != null">
+                and xbri.project_id = #{projectId}
             </if>
             <if test="datasourceSchema != null ">
                 AND xbpb.datasource_schema = #{datasourceSchema}

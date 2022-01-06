@@ -36,16 +36,17 @@ public class BatchPlanRepositoryImpl extends BaseRepositoryImpl<BatchPlan, Batch
     @Override
     public List<PlanGroup> listByGroup(BatchPlanDTO batchPlanDTO) {
         @NotNull Long tenantId = batchPlanDTO.getTenantId();
+        Long projectId = batchPlanDTO.getProjectId();
         if (StringUtils.isEmpty(batchPlanDTO.getPlanName())) {
             List<PlanGroup> all = planGroupRepository.select(PlanGroup.builder()
-                    .groupType(GroupType.BATCH).projectId(batchPlanDTO.getProjectId()).tenantId(tenantId).build());
+                    .groupType(GroupType.BATCH).projectId(projectId).tenantId(tenantId).build());
             all.add(PlanGroup.ROOT_PLAN_GROUP);
             return all;
         }
         List<BatchPlan> batchPlans = this.selectByCondition(
                 Condition.builder(BatchPlan.class)
                         .where(Sqls.custom().andLike(BatchPlan.FIELD_PLAN_NAME, batchPlanDTO.getPlanName(), true)
-                                .andEqualTo(BatchPlan.FIELD_PROJECT_ID, batchPlanDTO.getProjectId())
+                                .andEqualTo(BatchPlan.FIELD_PROJECT_ID, projectId)
                                 .andEqualTo(BatchPlan.FIELD_TENANT_ID, tenantId))
                         .build()
         );
@@ -58,6 +59,7 @@ public class BatchPlanRepositoryImpl extends BaseRepositoryImpl<BatchPlan, Batch
                         .where(Sqls.custom()
                                 .andIn(PlanGroup.FIELD_GROUP_ID, groupIds)
                                 .andEqualTo(PlanGroup.FIELD_GROUP_TYPE, GroupType.BATCH)
+                                .andEqualTo(PlanGroup.FIELD_PROJECT_ID, projectId)
                                 .andEqualTo(PlanGroup.FIELD_TENANT_ID, tenantId))
                         .build()
         );

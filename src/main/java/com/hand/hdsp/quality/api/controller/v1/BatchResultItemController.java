@@ -72,9 +72,11 @@ public class BatchResultItemController extends BaseController {
     @PostMapping("/asset-table")
     @ProcessLovValue(targetField = {"body", "body.warningLevelList"})
     public ResponseEntity<?> assetTable(@PathVariable(name = "organizationId") Long tenantId,
+                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         @RequestBody BatchResultItemDTO batchResultItemDTO, @ApiIgnore @SortDefault(value = BatchResultItem.FIELD_RESULT_ITEM_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchResultItemDTO.setTenantId(tenantId);
+        batchResultItemDTO.setProjectId(projectId);
         Page<BatchResultItemDTO> list = batchResultItemRepository.assetTable(pageRequest, batchResultItemDTO);
         return Results.success(list);
     }

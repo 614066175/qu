@@ -164,11 +164,13 @@ public class NameStandardController extends BaseController {
     @GetMapping("/export")
     @ExcelExport(value = NameStandardDTO.class)
     public ResponseEntity<List<NameStandardDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                         NameStandardDTO dto,
                                                         ExportParam exportParam,
                                                         HttpServletResponse response,
                                                         PageRequest pageRequest) {
 
+        dto.setProjectId(projectId);
         dto.setTenantId(tenantId);
         Page<NameStandardDTO> dtoList = nameStandardService.export(dto, exportParam, pageRequest);
         response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");

@@ -17,6 +17,7 @@
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
 
     <sql id="Plan_And_Result">
@@ -125,6 +126,9 @@
             </if>
             <if test="resultId != null">
                 and xbr.result_id = #{resultId}
+            </if>
+            <if test="projectId != null">
+                and xbr.project_id = #{projectId}
             </if>
         </where>
     </select>

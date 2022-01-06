@@ -94,7 +94,6 @@ public class StandardAimController extends BaseController {
         standardAimDTO.setTenantId(tenantId);
         standardAimDTO.setProjectId(projectId);
         this.validObject(standardAimDTO);
-
         return Results.success(standardAimDTO);
     }
 

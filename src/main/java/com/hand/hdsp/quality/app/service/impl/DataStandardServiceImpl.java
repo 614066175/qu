@@ -157,6 +157,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         List<DataStandardDTO> dataStandardDTOS = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(DataStandard.FIELD_STANDARD_CODE, dataStandardDTO.getStandardCode())
+                        .andEqualTo(DataStandard.FIELD_PROJECT_ID, dataStandardDTO.getProjectId())
                         .andEqualTo(DataStandard.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                 .build());
         if (CollectionUtils.isNotEmpty(dataStandardDTOS)) {
@@ -166,6 +167,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         List<DataStandardDTO> standardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(DataStandard.FIELD_STANDARD_NAME, dataStandardDTO.getStandardName())
+                        .andEqualTo(DataStandard.FIELD_PROJECT_ID, dataStandardDTO.getProjectId())
                         .andEqualTo(DataStandard.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                 .build());
         if (CollectionUtils.isNotEmpty(standardDTOList)) {
@@ -183,6 +185,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .extraKey(s.getExtraKey())
                         .extraValue(s.getExtraValue())
                         .standardType(DATA)
+                        .projectId(dataStandardDTO.getProjectId())
                         .tenantId(dataStandardDTO.getTenantId())
                         .build();
                 standardExtraRepository.insertDTOSelective(extraDTO);

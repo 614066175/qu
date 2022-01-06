@@ -158,6 +158,7 @@ public class StandardDocController extends BaseController {
     @GetMapping("/export")
     @ExcelExport(value = StandardDocDTO.class)
     public ResponseEntity<List<StandardDocDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                                       @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                        StandardDocDTO dto,
                                                        ExportParam exportParam,
                                                        HttpServletResponse response,
@@ -165,6 +166,7 @@ public class StandardDocController extends BaseController {
                                                                direction = Sort.Direction.DESC) PageRequest pageRequest) {
         response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
         dto.setTenantId(tenantId);
+        dto.setProjectId(projectId);
         List<StandardDocDTO> dtoList =
                 standardDocService.export(dto, exportParam, pageRequest);
         return Results.success(dtoList);

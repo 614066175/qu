@@ -66,6 +66,7 @@ public class BatchResultBaseRepositoryImpl extends BaseRepositoryImpl<BatchResul
     public List<BatchResultBaseDTO> listResultBaseAll(BatchResultBaseDTO batchResultBaseDTO) {
         List<BatchResultBaseDTO> batchResultBaseDTOList = selectDTOByCondition(Condition.builder(BatchResultBase.class)
                 .andWhere(Sqls.custom()
+                        .andEqualTo(BatchResultBase.FIELD_PROJECT_ID, batchResultBaseDTO.getProjectId())
                         .andEqualTo(BatchResultBase.FIELD_RESULT_ID, batchResultBaseDTO.getResultId())
                         .andEqualTo(BatchResultBase.FIELD_TENANT_ID, batchResultBaseDTO.getTenantId()))
                 .build());

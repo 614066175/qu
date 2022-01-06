@@ -265,12 +265,14 @@ public class DataStandardController {
     @GetMapping("/export")
     @ExcelExport(value = DataStandardDTO.class)
     public ResponseEntity<List<DataStandardDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                         DataStandardDTO dto,
                                                         ExportParam exportParam,
                                                         HttpServletResponse response,
                                                         PageRequest pageRequest) {
 
         dto.setTenantId(tenantId);
+        dto.setProjectId(projectId);
         List<DataStandardDTO> dtoList =
                 dataStandardService.export(dto, exportParam, pageRequest);
         return Results.success(dtoList);
@@ -365,7 +367,8 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/publish-by-workflow")
-    public ResponseEntity<DataStandardDTO> publishByWorkflow(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
+    public ResponseEntity<DataStandardDTO> publishByWorkflow(@PathVariable(name = "organizationId") Long tenantId,
+                                                             @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
         dataStandardService.startWorkFlow(WorkFlowConstant.DataStandard.ONLINE_WORKFLOW_KEY, dataStandardDTO);
         return Results.success(dataStandardDTO);

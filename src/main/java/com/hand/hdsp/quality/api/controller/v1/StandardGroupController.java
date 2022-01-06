@@ -67,8 +67,11 @@ public class StandardGroupController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/group")
-    public ResponseEntity<?> group(@PathVariable(name = "organizationId") Long tenantId, StandardGroupVO standardGroupVO) {
+    public ResponseEntity<?> group(@PathVariable(name = "organizationId") Long tenantId,
+                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                   StandardGroupVO standardGroupVO) {
         standardGroupVO.setTenantId(tenantId);
+        standardGroupVO.setProjectId(projectId);
         return Results.success(standardGroupService.listByGroup(standardGroupVO));
     }
 

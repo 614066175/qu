@@ -32,8 +32,8 @@ public class RuleLineRepositoryImpl extends BaseRepositoryImpl<RuleLine, RuleLin
     }
 
     @Override
-    public List<RuleLineDTO> list(Long ruleId, Long tenantId) {
-        return ruleLineMapper.list(ruleId, tenantId);
+    public List<RuleLineDTO> list(Long ruleId, Long tenantId,Long projectId) {
+        return ruleLineMapper.list(ruleId, tenantId,projectId);
     }
 
     @Override
