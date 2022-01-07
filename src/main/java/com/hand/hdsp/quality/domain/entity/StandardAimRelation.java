@@ -31,6 +31,7 @@ public class StandardAimRelation extends AuditDomain {
     public static final String FIELD_PLAN_BASE_ID = "planBaseId";
     public static final String FIELD_PLAN_RULE_ID = "planRuleId";
     public static final String FIELD_TENANT_ID = "tenantId";
+    public static final String FIELD_PROJECT_ID = "projectId";
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -56,5 +57,6 @@ public class StandardAimRelation extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 
 }

@@ -27,4 +27,5 @@ public class RuleGroupDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 }

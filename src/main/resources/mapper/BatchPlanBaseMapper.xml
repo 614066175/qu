@@ -21,6 +21,7 @@
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
 
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO">
@@ -69,6 +70,9 @@
             ) t_rel_table_num ON t_rel_table_num.plan_base_id = xbpb.plan_base_id
         where
         xbpb.tenant_id = #{tenantId}
+        <if test="projectId !=null">
+            and xbpb.project_id=#{projectId}
+        </if>
         <if test="planId != null">
             and xbpb.plan_id = #{planId}
         </if>

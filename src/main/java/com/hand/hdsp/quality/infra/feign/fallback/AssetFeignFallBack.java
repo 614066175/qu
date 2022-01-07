@@ -1,7 +1,5 @@
 package com.hand.hdsp.quality.infra.feign.fallback;
 
-import com.hand.hdsp.quality.api.dto.ApprovalHeaderDTO;
-import com.hand.hdsp.quality.api.dto.ApprovalLineDTO;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.infra.feign.AssetFeign;
 import lombok.extern.slf4j.Slf4j;
@@ -20,40 +18,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class AssetFeignFallBack implements AssetFeign {
 
-    @Override
-    public ResponseEntity<?> create(Long tenantId, ApprovalHeaderDTO approvalHeaderDTO) {
-       return null;
-    }
-
-    @Override
-    public ResponseEntity<?> remove(Long tenantId, ApprovalHeaderDTO approvalHeaderDTO) {
-        return null;
-    }
-
-    @Override
-    public ResponseEntity<?> update(Long tenantId, ApprovalHeaderDTO approvalHeaderDTO) {
-        return null;
-    }
-
-    @Override
-    public ResponseEntity<ApprovalHeaderDTO> getByUnique(Long tenantId, ApprovalHeaderDTO approvalHeaderDTO) {
-        return null;
-    }
-
-    @Override
-    public ResponseEntity<?> create(Long tenantId, ApprovalLineDTO approvalLineDTO) {
-        return null;
-    }
-
-    @Override
-    public ResponseEntity<?> update(Long tenantId, ApprovalLineDTO approvalLineDTO) {
-        return null;
-    }
-
-    @Override
-    public ResponseEntity<?> remove(Long tenantId, ApprovalLineDTO approvalLineDTO) {
-        return null;
-    }
 
     @Override
     public ResponseEntity<?> saveStandardToEs(Long tenantId, DataStandardDTO dataStandardDTO) {

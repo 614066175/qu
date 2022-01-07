@@ -44,14 +44,17 @@ public class StreamingPlanBaseServiceImpl implements StreamingPlanBaseService {
     @Transactional(rollbackFor = Exception.class)
     public void update(StreamingPlanBaseDTO streamingPlanBaseDTO) {
         Long tenantId = streamingPlanBaseDTO.getTenantId();
+        Long projectId = streamingPlanBaseDTO.getProjectId();
         streamingPlanBaseRepository.updateDTOAllColumnWhereTenant(streamingPlanBaseDTO, tenantId);
         if (streamingPlanBaseDTO.getStreamingPlanRuleDTOList() != null) {
             for (StreamingPlanRuleDTO streamingPlanRuleDTO : streamingPlanBaseDTO.getStreamingPlanRuleDTOList()) {
                 if (AuditDomain.RecordStatus.update.equals(streamingPlanRuleDTO.get_status())) {
+                    streamingPlanRuleDTO.setProjectId(projectId);
                     streamingPlanRuleRepository.updateDTOAllColumnWhereTenant(streamingPlanRuleDTO, tenantId);
                 } else if (AuditDomain.RecordStatus.create.equals(streamingPlanRuleDTO.get_status())) {
                     streamingPlanRuleDTO.setPlanBaseId(streamingPlanRuleDTO.getPlanBaseId());
                     streamingPlanRuleDTO.setTenantId(tenantId);
+                    streamingPlanRuleDTO.setProjectId(projectId);
                     streamingPlanRuleRepository.insertDTOSelective(streamingPlanRuleDTO);
                 } else if (AuditDomain.RecordStatus.delete.equals(streamingPlanRuleDTO.get_status())) {
                     streamingPlanRuleRepository.deleteByPrimaryKey(streamingPlanRuleDTO);
@@ -70,8 +73,8 @@ public class StreamingPlanBaseServiceImpl implements StreamingPlanBaseService {
             for (StreamingPlanRuleDTO streamingPlanRuleDTO : streamingPlanBaseDTO.getStreamingPlanRuleDTOList()) {
                 streamingPlanRuleDTO.setPlanBaseId(streamingPlanBaseDTO.getPlanBaseId());
                 streamingPlanRuleDTO.setTenantId(tenantId);
+                streamingPlanBaseDTO.setProjectId(streamingPlanBaseDTO.getProjectId());
                 streamingPlanRuleRepository.insertDTOSelective(streamingPlanRuleDTO);
-
             }
         }
     }

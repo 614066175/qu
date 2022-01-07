@@ -51,4 +51,5 @@ public class DataFieldDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 }

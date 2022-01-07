@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.api.controller.v1;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
 import com.hand.hdsp.quality.app.service.RuleGroupService;
@@ -57,9 +58,11 @@ public class RuleGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   RuleGroupDTO ruleGroupDTO, @ApiIgnore @SortDefault(value = RuleGroup.FIELD_GROUP_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         ruleGroupDTO.setTenantId(tenantId);
+        ruleGroupDTO.setProjectId(projectId);
         Page<RuleGroupDTO> list = ruleGroupRepository.pageAndSortDTO(pageRequest, ruleGroupDTO);
         return Results.success(list);
     }
@@ -74,8 +77,10 @@ public class RuleGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> listNoPage(@PathVariable(name = "organizationId") Long tenantId,
+                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         RuleGroup ruleGroup) {
         ruleGroup.setTenantId(tenantId);
+        ruleGroup.setProjectId(projectId);
         return Results.success(ruleGroupService.listNoPage(ruleGroup));
     }
 
@@ -107,8 +112,11 @@ public class RuleGroupController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody RuleGroupDTO ruleGroupDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody RuleGroupDTO ruleGroupDTO) {
         ruleGroupDTO.setTenantId(tenantId);
+        ruleGroupDTO.setProjectId(projectId);
         validObject(ruleGroupDTO);
         ruleGroupRepository.insertDTOSelective(ruleGroupDTO);
         return Results.success(ruleGroupDTO);
@@ -123,7 +131,10 @@ public class RuleGroupController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody RuleGroupDTO ruleGroupDTO) {
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody RuleGroupDTO ruleGroupDTO) {
+        ruleGroupDTO.setProjectId(projectId);
         ruleGroupRepository.updateDTOAllColumnWhereTenant(ruleGroupDTO, tenantId);
         return Results.success(ruleGroupDTO);
     }
@@ -149,13 +160,15 @@ public class RuleGroupController extends BaseController {
     @GetMapping("/export")
     @ExcelExport(value = RuleGroupDTO.class)
     public ResponseEntity<?> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     RuleDTO dto,
                                     ExportParam exportParam,
                                     HttpServletResponse response) {
         dto.setTenantId(tenantId);
+        dto.setProjectId(projectId);
         List<RuleGroupDTO> dtoList =
                 ruleGroupService.export(dto, exportParam);
-        response.addHeader("Access-Control-Expose-Headers","Content-Disposition");
+        response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
         return Results.success(dtoList);
     }
 }

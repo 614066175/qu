@@ -19,7 +19,7 @@ public interface RuleService {
      * @param tenantId
      * @return
      */
-    RuleDTO detail(Long ruleId, Long tenantId);
+    RuleDTO detail(Long ruleId, Long tenantId,Long projectId);
 
     /**
      * 同时保存规则校验项、告警等级

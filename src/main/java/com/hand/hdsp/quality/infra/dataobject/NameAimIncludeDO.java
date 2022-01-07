@@ -28,4 +28,6 @@ public class NameAimIncludeDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
+
 }

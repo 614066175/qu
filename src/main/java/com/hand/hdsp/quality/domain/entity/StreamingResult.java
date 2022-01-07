@@ -54,5 +54,6 @@ public class StreamingResult extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 
 }

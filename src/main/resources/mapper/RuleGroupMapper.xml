@@ -14,6 +14,7 @@
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
 
     <sql id="baseColumn">
@@ -44,6 +45,9 @@
         </if>
         <if test="parentGroupId != null">
             and xrg.parent_group_id = #{parentGroupId}
+        </if>
+        <if test="projectId != null">
+            and xrg.project_id = #{projectId}
         </if>
     </select>
 </mapper>

@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.StreamingPlanBaseDTO;
 import com.hand.hdsp.quality.app.service.StreamingPlanBaseService;
 import com.hand.hdsp.quality.config.SwaggerTags;
@@ -47,9 +48,11 @@ public class StreamingPlanBaseController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   StreamingPlanBaseDTO streamingPlanBaseDTO, @ApiIgnore @SortDefault(value = StreamingPlanBase.FIELD_PLAN_BASE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         streamingPlanBaseDTO.setTenantId(tenantId);
+        streamingPlanBaseDTO.setProjectId(projectId);
         Page<StreamingPlanBaseDTO> list = streamingPlanBaseRepository.pageAndSortDTO(pageRequest, streamingPlanBaseDTO);
         return Results.success(list);
     }
@@ -64,9 +67,11 @@ public class StreamingPlanBaseController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> listBase(@PathVariable(name = "organizationId") Long tenantId,
+                                      @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                       StreamingPlanBaseDTO streamingPlanBaseDTO, @ApiIgnore @SortDefault(value = StreamingPlanBase.FIELD_PLAN_BASE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         streamingPlanBaseDTO.setTenantId(tenantId);
+        streamingPlanBaseDTO.setProjectId(projectId);
         Page<StreamingPlanBaseDTO> list = streamingPlanBaseRepository.list(pageRequest, streamingPlanBaseDTO);
         return Results.success(list);
     }
@@ -99,8 +104,11 @@ public class StreamingPlanBaseController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody StreamingPlanBaseDTO streamingPlanBaseDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody StreamingPlanBaseDTO streamingPlanBaseDTO) {
         streamingPlanBaseDTO.setTenantId(tenantId);
+        streamingPlanBaseDTO.setProjectId(projectId);
         this.validObject(streamingPlanBaseDTO);
         streamingPlanBaseService.insert(streamingPlanBaseDTO);
         return Results.success(streamingPlanBaseDTO);
@@ -115,8 +123,11 @@ public class StreamingPlanBaseController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody StreamingPlanBaseDTO streamingPlanBaseDTO) {
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody StreamingPlanBaseDTO streamingPlanBaseDTO) {
         streamingPlanBaseDTO.setTenantId(tenantId);
+        streamingPlanBaseDTO.setProjectId(projectId);
         streamingPlanBaseService.update(streamingPlanBaseDTO);
         return Results.success(streamingPlanBaseDTO);
     }

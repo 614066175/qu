@@ -29,4 +29,5 @@ public class BatchPlanDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 }

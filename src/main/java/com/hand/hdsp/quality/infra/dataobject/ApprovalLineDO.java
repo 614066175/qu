@@ -23,4 +23,5 @@ public class ApprovalLineDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 }

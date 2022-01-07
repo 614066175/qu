@@ -28,6 +28,7 @@
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
 
     <sql id="baseColumn">
@@ -95,6 +96,9 @@
         </if>
         <if test="dataStandardVersionDTO.versionId!=null">
             dsv.version_id = #{dataStandardVersionDTO.versionId}
+        </if>
+        <if test="projectId != null">
+            and dsv.project_id = #{projectId}
         </if>
     </select>
 </mapper>

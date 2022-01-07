@@ -148,39 +148,22 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void generate(Long tenantId, Long planId) {
+    public void generate(Long tenantId, Long projectId, Long planId) {
         BatchPlanDTO batchPlanDTO = batchPlanRepository.selectDTOByPrimaryKey(planId);
         // 创建或更新job
-        String jobName = String.format(PlanConstant.JOB_NAME, tenantId, batchPlanDTO.getPlanCode());
+        String jobName = String.format(PlanConstant.JOB_NAME, tenantId, projectId, batchPlanDTO.getPlanCode());
 
         //生成数据质量command
         String jobCommand = generateCommand(batchPlanDTO);
 
-        ResponseEntity<String> jobResult = dispatchJobFeign.createOrUpdate(tenantId,
+        ResponseEntity<String> jobResult = dispatchJobFeign.createOrUpdate(tenantId, projectId,
                 JobDTO.builder().themeId(PlanConstant.DEFAULT_THEME_ID).layerId(PlanConstant.DEFAULT_LAYER_ID)
                         .jobName(jobName).jobCommand(jobCommand).jobDescription(batchPlanDTO.getPlanName())
                         .jobClass(PlanConstant.JOB_CLASS).jobType(PlanConstant.JOB_TYPE)
-                        .jobLevel(PlanConstant.JOB_LEVEL).enabledFlag(1).tenantId(tenantId).build());
+                        .jobLevel(PlanConstant.JOB_LEVEL).enabledFlag(1).tenantId(tenantId)
+                        .projectId(projectId).build());
         ResponseUtils.getResponse(jobResult, JobDTO.class);
 
-        // 查询是否存在restJob
-//        ResponseEntity<String> findResult = restJobFeign.findName(tenantId, jobName);
-//        RestJobDTO restJobDTO = ResponseUtils.getResponse(findResult, RestJobDTO.class);
-//
-//        restJobDTO.setExternal(0);
-//        restJobDTO.setMethod(PlanConstant.JOB_METHOD);
-//        restJobDTO.setServiceCode(serviceId);
-//        restJobDTO.setServiceName(serviceShort);
-//        restJobDTO.setUseGateway(1);
-//        restJobDTO.setUrl(String.format(JOB_URL, tenantId, planId));
-//        restJobDTO.setJobName(jobName);
-//        restJobDTO.setBody(JOB_BODY);
-//        restJobDTO.setHeader(JOB_HEADER);
-//        restJobDTO.setSettingInfo(JOB_SETTING_INFO);
-//
-//        // 插入或更新
-//        ResponseEntity<String> restJobResult = restJobFeign.create(tenantId, restJobDTO);
-//        ResponseUtils.getResponse(restJobResult, RestJobDTO.class);
 
         // 保存jobName到BatchPlan中
         batchPlanDTO.setPlanJobName(jobName);
@@ -497,11 +480,11 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     }
 
     @Override
-    public Long exec(Long tenantId, Long planId) {
+    public Long exec(Long tenantId, Long planId, Long projectId) {
 
         // 插入批数据方案结果表
         BatchResult batchResult = BatchResult.builder().planId(planId).startDate(new Date())
-                .planStatus(PlanConstant.PlanStatus.RUNNING).tenantId(tenantId).build();
+                .planStatus(PlanConstant.PlanStatus.RUNNING).tenantId(tenantId).projectId(projectId).build();
         batchResultRepository.insertSelective(batchResult);
 
         // 时间戳对象list

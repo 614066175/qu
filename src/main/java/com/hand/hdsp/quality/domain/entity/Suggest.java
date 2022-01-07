@@ -58,5 +58,6 @@ public class Suggest extends AuditDomain {
 
     private String suggestContent;
 
+    private Long projectId;
 
 }

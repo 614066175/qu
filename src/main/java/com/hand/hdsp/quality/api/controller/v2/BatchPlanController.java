@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v2;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.app.service.BatchPlanService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import io.choerodon.core.iam.ResourceLevel;
@@ -11,10 +12,7 @@ import io.swagger.annotations.ApiOperation;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -38,6 +36,7 @@ public class BatchPlanController extends BaseController {
 
     /**
      * 不走v2
+     *
      * @param tenantId
      * @param planId
      * @return
@@ -58,8 +57,9 @@ public class BatchPlanController extends BaseController {
     @GetMapping("/exec/{planId}")
     @Deprecated
     public ResponseEntity<?> exec(@PathVariable("organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   @PathVariable Long planId) {
-        Long resultId = batchPlanService.exec(tenantId, planId);
+        Long resultId = batchPlanService.exec(tenantId, planId, projectId);
         batchPlanService.sendMessage(planId, resultId);
         return Results.success();
     }

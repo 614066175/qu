@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.RuleLineDTO;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.RuleLine;
@@ -43,9 +44,11 @@ public class RuleLineController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   RuleLineDTO ruleLineDTO, @ApiIgnore @SortDefault(value = RuleLine.FIELD_RULE_LINE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         ruleLineDTO.setTenantId(tenantId);
+        ruleLineDTO.setProjectId(projectId);
         Page<RuleLineDTO> list = ruleLineRepository.pageAndSortDTO(pageRequest, ruleLineDTO);
         return Results.success(list);
     }
@@ -60,9 +63,11 @@ public class RuleLineController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> listTenant(@PathVariable(name = "organizationId") Long tenantId,
+                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         RuleLineDTO ruleLineDTO, @ApiIgnore @SortDefault(value = RuleLine.FIELD_RULE_LINE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         ruleLineDTO.setTenantId(tenantId);
+        ruleLineDTO.setProjectId(projectId);
         Page<RuleLineDTO> list = ruleLineRepository.listTenant(pageRequest, ruleLineDTO);
         return Results.success(list);
     }
@@ -95,8 +100,11 @@ public class RuleLineController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody RuleLineDTO ruleLineDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody RuleLineDTO ruleLineDTO) {
         ruleLineDTO.setTenantId(tenantId);
+        ruleLineDTO.setProjectId(projectId);
         this.validObject(ruleLineDTO);
         ruleLineRepository.insertDTOSelective(ruleLineDTO);
         return Results.success(ruleLineDTO);
@@ -111,7 +119,10 @@ public class RuleLineController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody RuleLineDTO ruleLineDTO) {
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody RuleLineDTO ruleLineDTO) {
+        ruleLineDTO.setProjectId(projectId);
         ruleLineRepository.updateDTOAllColumnWhereTenant(ruleLineDTO, tenantId);
         return Results.success(ruleLineDTO);
     }

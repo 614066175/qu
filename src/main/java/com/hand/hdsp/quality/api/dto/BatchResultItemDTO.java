@@ -156,4 +156,6 @@ public class BatchResultItemDTO extends AuditDomain {
 
     @Transient
     private String datasourceSchema;
+
+    private Long projectId;
 }

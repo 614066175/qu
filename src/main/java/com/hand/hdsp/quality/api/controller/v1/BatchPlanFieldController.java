@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanFieldService;
 import com.hand.hdsp.quality.config.SwaggerTags;
@@ -48,8 +49,10 @@ public class BatchPlanFieldController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   BatchPlanField batchPlanField) {
         batchPlanField.setTenantId(tenantId);
+        batchPlanField.setProjectId(projectId);
         return Results.success(batchPlanFieldRepository.select(batchPlanField));
     }
 
@@ -63,8 +66,10 @@ public class BatchPlanFieldController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list-selected")
     public ResponseEntity<?> listSelected(@PathVariable(name = "organizationId") Long tenantId,
+                                          @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                           BatchPlanFieldDTO batchPlanFieldDTO) {
         batchPlanFieldDTO.setTenantId(tenantId);
+        batchPlanFieldDTO.setProjectId(projectId);
         return Results.success(batchPlanFieldService.listSelected(batchPlanFieldDTO));
     }
 
@@ -114,8 +119,11 @@ public class BatchPlanFieldController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanFieldDTO batchPlanFieldDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody BatchPlanFieldDTO batchPlanFieldDTO) {
         batchPlanFieldDTO.setTenantId(tenantId);
+        batchPlanFieldDTO.setProjectId(projectId);
         this.validObject(batchPlanFieldDTO);
         batchPlanFieldService.insert(batchPlanFieldDTO);
         return Results.success(batchPlanFieldDTO);
@@ -130,8 +138,11 @@ public class BatchPlanFieldController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanFieldDTO batchPlanFieldDTO) {
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody BatchPlanFieldDTO batchPlanFieldDTO) {
         batchPlanFieldDTO.setTenantId(tenantId);
+        batchPlanFieldDTO.setProjectId(projectId);
         batchPlanFieldService.update(batchPlanFieldDTO);
         return Results.success(batchPlanFieldDTO);
     }
@@ -146,8 +157,10 @@ public class BatchPlanFieldController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody BatchPlanFieldDTO batchPlanFieldDTO) {
         batchPlanFieldDTO.setTenantId(tenantId);
+        batchPlanFieldDTO.setProjectId(projectId);
         batchPlanFieldService.delete(batchPlanFieldDTO);
         return Results.success();
     }
@@ -163,9 +176,11 @@ public class BatchPlanFieldController extends BaseController {
     @GetMapping("/detail-list")
     @ProcessLovValue(targetField = {"body", "body.warningLevelList"})
     public ResponseEntity<?> detailList(@PathVariable(name = "organizationId") Long tenantId,
+                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         BatchPlanFieldDTO batchPlanFieldDTO, @ApiIgnore @SortDefault(value = BatchPlanBase.FIELD_PLAN_BASE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchPlanFieldDTO.setTenantId(tenantId);
+        batchPlanFieldDTO.setProjectId(projectId);
         return Results.success(batchPlanFieldService.selectDetailList(pageRequest, batchPlanFieldDTO));
     }
 }

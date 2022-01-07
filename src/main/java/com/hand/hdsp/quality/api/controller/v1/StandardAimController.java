@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.api.controller.v1;
 
 import java.util.List;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import com.hand.hdsp.quality.app.service.StandardAimService;
 import com.hand.hdsp.quality.domain.entity.StandardAim;
@@ -50,9 +51,11 @@ public class StandardAimController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   StandardAimDTO standardAimDTO, @ApiIgnore @SortDefault(value = StandardAim.FIELD_AIM_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardAimDTO.setTenantId(tenantId);
+        standardAimDTO.setProjectId(projectId);
         Page<StandardAimDTO> list = standardAimService.list(pageRequest, standardAimDTO);
         return Results.success(list);
     }
@@ -85,10 +88,12 @@ public class StandardAimController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody StandardAimDTO standardAimDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody StandardAimDTO standardAimDTO) {
         standardAimDTO.setTenantId(tenantId);
+        standardAimDTO.setProjectId(projectId);
         this.validObject(standardAimDTO);
-
         return Results.success(standardAimDTO);
     }
 
@@ -101,7 +106,10 @@ public class StandardAimController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody StandardAimDTO standardAimDTO) {
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody StandardAimDTO standardAimDTO) {
+        standardAimDTO.setProjectId(projectId);
         standardAimRepository.updateDTOWhereTenant(standardAimDTO, tenantId);
         return Results.success(standardAimDTO);
     }
@@ -116,8 +124,9 @@ public class StandardAimController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody List<StandardAimDTO> standardAimDTOList) {
-        standardAimService.batchDelete(standardAimDTOList);
+        standardAimService.batchDelete(standardAimDTOList, tenantId, projectId);
         return Results.success();
     }
 
@@ -131,8 +140,10 @@ public class StandardAimController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/un-aimed-field")
     public ResponseEntity<?> unAimedField(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                          @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                           StandardAimDTO standardAimDTO) {
         standardAimDTO.setTenantId(tenantId);
+        standardAimDTO.setProjectId(projectId);
         return Results.success(standardAimService.unAimField(standardAimDTO));
     }
 }

@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import org.hzero.core.util.Results;
 import org.hzero.core.base.BaseController;
 import com.hand.hdsp.quality.domain.entity.NameAimExclude;
@@ -47,9 +48,11 @@ public class NameAimExcludeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<Page<NameAimExcludeDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
+                                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                         NameAimExcludeDTO nameAimExcludeDTO, @ApiIgnore @SortDefault(value = NameAimExclude.FIELD_EXCLUDE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         nameAimExcludeDTO.setTenantId(tenantId);
+        nameAimExcludeDTO.setProjectId(projectId);
         Page<NameAimExcludeDTO> list = nameAimExcludeRepository.pageAndSortDTO(pageRequest, nameAimExcludeDTO);
         return Results.success(list);
     }
@@ -82,8 +85,11 @@ public class NameAimExcludeController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<NameAimExcludeDTO> create(@PathVariable("organizationId") Long tenantId, @RequestBody NameAimExcludeDTO nameAimExcludeDTO) {
+    public ResponseEntity<NameAimExcludeDTO> create(@PathVariable("organizationId") Long tenantId,
+                                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                    @RequestBody NameAimExcludeDTO nameAimExcludeDTO) {
         nameAimExcludeDTO.setTenantId(tenantId);
+        nameAimExcludeDTO.setProjectId(projectId);
         this.validObject(nameAimExcludeDTO);
         nameAimExcludeRepository.insertDTOSelective(nameAimExcludeDTO);
         return Results.success(nameAimExcludeDTO);
@@ -98,8 +104,11 @@ public class NameAimExcludeController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<NameAimExcludeDTO> update(@PathVariable("organizationId") Long tenantId, @RequestBody NameAimExcludeDTO nameAimExcludeDTO) {
-                nameAimExcludeRepository.updateDTOWhereTenant(nameAimExcludeDTO, tenantId);
+    public ResponseEntity<NameAimExcludeDTO> update(@PathVariable("organizationId") Long tenantId,
+                                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                    @RequestBody NameAimExcludeDTO nameAimExcludeDTO) {
+        nameAimExcludeDTO.setProjectId(projectId);
+        nameAimExcludeRepository.updateDTOWhereTenant(nameAimExcludeDTO, tenantId);
         return Results.success(nameAimExcludeDTO);
     }
 
@@ -113,8 +122,8 @@ public class NameAimExcludeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<Void> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestBody NameAimExcludeDTO nameAimExcludeDTO) {
-                nameAimExcludeDTO.setTenantId(tenantId);
+                                       @RequestBody NameAimExcludeDTO nameAimExcludeDTO) {
+        nameAimExcludeDTO.setTenantId(tenantId);
         nameAimExcludeRepository.deleteByPrimaryKey(nameAimExcludeDTO);
         return Results.success();
     }

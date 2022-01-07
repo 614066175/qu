@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * description
@@ -27,6 +28,6 @@ public interface DispatchJobFeign {
      * @return job
      */
     @PostMapping("/v1/{organizationId}/dispatch-jobs/create-update")
-    ResponseEntity<String> createOrUpdate(@PathVariable(name = "organizationId") Long tenantId, @RequestBody JobDTO jobDTO);
+    ResponseEntity<String> createOrUpdate(@PathVariable(name = "organizationId") Long tenantId, @RequestParam Long projectId, @RequestBody JobDTO jobDTO);
 
 }

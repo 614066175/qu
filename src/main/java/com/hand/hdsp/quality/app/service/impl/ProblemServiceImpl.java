@@ -74,6 +74,6 @@ public class ProblemServiceImpl implements ProblemService {
         //级联删除建议
         List<Suggest> suggests = suggestRepository.selectByCondition(Condition.builder(Suggest.class)
                 .andWhere(Sqls.custom().andEqualTo(Suggest.FIELD_PROBLEM_ID, problemDTO.getProblemId())).build());
-        suggestRepository.batchDelete(suggests);
+        suggestRepository.batchDeleteByPrimaryKey(suggests);
     }
 }

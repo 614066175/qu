@@ -52,4 +52,6 @@ public class NameAimRuleDTO extends AuditDomain {
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;
+
+    private Long projectId;
 }

@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.api.controller.v1;
 
 import java.util.List;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.app.service.NameAimService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import io.swagger.annotations.*;
@@ -40,12 +41,12 @@ public class NameAimController extends BaseController {
             paramType = "path",
             required = true
     ),
-        @ApiImplicitParam(
-                name = "standardId",
-                value = "落标ID",
-                paramType = "path",
-                required = true
-        )
+            @ApiImplicitParam(
+                    name = "standardId",
+                    value = "落标ID",
+                    paramType = "path",
+                    required = true
+            )
     })
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list/{standardId}")
@@ -82,9 +83,11 @@ public class NameAimController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<List<NameAimDTO>> create(@PathVariable("organizationId") Long tenantId, @RequestBody List<NameAimDTO> nameAimDTOList) {
+    public ResponseEntity<List<NameAimDTO>> create(@PathVariable("organizationId") Long tenantId,
+                                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                   @RequestBody List<NameAimDTO> nameAimDTOList) {
         this.validObject(nameAimDTOList);
-        return Results.success(nameAimService.batchCreate(nameAimDTOList));
+        return Results.success(nameAimService.batchCreate(nameAimDTOList, tenantId, projectId));
     }
 
     @ApiOperation(value = "修改命名落标表")
@@ -96,8 +99,10 @@ public class NameAimController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<List<NameAimDTO>> update(@PathVariable("organizationId") Long tenantId, @RequestBody List<NameAimDTO> nameAimDTOList) {
-        return Results.success(nameAimService.bitchUpdate(nameAimDTOList));
+    public ResponseEntity<List<NameAimDTO>> update(@PathVariable("organizationId") Long tenantId,
+                                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                   @RequestBody List<NameAimDTO> nameAimDTOList) {
+        return Results.success(nameAimService.bitchUpdate(nameAimDTOList, tenantId, projectId));
     }
 
     @ApiOperation(value = "删除命名落标表")
@@ -110,8 +115,8 @@ public class NameAimController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<Void> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestBody NameAimDTO nameAimDTO) {
-                nameAimDTO.setTenantId(tenantId);
+                                       @RequestBody NameAimDTO nameAimDTO) {
+        nameAimDTO.setTenantId(tenantId);
         nameAimService.remove(nameAimDTO.getAimId());
         return Results.success();
     }

@@ -55,4 +55,6 @@ public class StreamingResultBaseDTO extends AuditDomain {
 
     private List<ResultWaringVO> resultWaringVOList;
 
+    private Long projectId;
+
 }

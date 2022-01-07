@@ -52,5 +52,7 @@ public class BatchPlan extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
+
 
 }

@@ -73,4 +73,6 @@ public class TimeRangeDTO extends AuditDomain {
 
     private String warningLevel;
 
+    private Long projectId;
+
 }

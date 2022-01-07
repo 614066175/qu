@@ -70,4 +70,6 @@ public class StandardGroupDTO extends AuditDomain {
     @ExcelColumn(zh = "数据标准列表", en = "dataStandardDTOList", child = true)
     private List<DataStandardDTO> dataStandardDTOList;
 
+    private Long projectId;
+
 }

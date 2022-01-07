@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.StandardDocDTO;
 import com.hand.hdsp.quality.app.service.StandardDocService;
 import com.hand.hdsp.quality.config.SwaggerTags;
@@ -56,16 +57,12 @@ public class StandardDocController extends BaseController {
     @GetMapping
     public ResponseEntity<Page<StandardDocDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
                                                      StandardDocDTO standardDocDTO,
+                                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                      @ApiIgnore @SortDefault(value = StandardDoc.FIELD_DOC_ID,
                                                              direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardDocDTO.setTenantId(tenantId);
+        standardDocDTO.setProjectId(projectId);
         Page<StandardDocDTO> list = standardDocService.list(pageRequest, standardDocDTO);
-        list.getContent().stream()
-                .peek(dto -> {
-                    dto.setCreatedByName(standardDocMapper.selectUserNameById(dto.getCreatedBy()));
-                    dto.setLastUpdatedByName(standardDocMapper.selectUserNameById(dto.getLastUpdatedBy()));
-                })
-                .collect(Collectors.toList());
         return Results.success(list);
     }
 
@@ -98,9 +95,11 @@ public class StandardDocController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<StandardDocDTO> create(@ApiParam(value = "租户id", required = true) @PathVariable("organizationId") Long tenantId,
+                                                 @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                  @RequestPart StandardDocDTO standardDocDTO,
                                                  @RequestPart(value = "file", required = false) MultipartFile multipartFile) {
         standardDocDTO.setTenantId(tenantId);
+        standardDocDTO.setProjectId(projectId);
         this.validObject(standardDocDTO);
         return Results.success(standardDocService.create(standardDocDTO, multipartFile));
     }
@@ -115,9 +114,11 @@ public class StandardDocController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<StandardDocDTO> update(@PathVariable("organizationId") Long tenantId,
+                                                 @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                  @RequestPart StandardDocDTO standardDocDTO,
                                                  @RequestPart(value = "file", required = false) MultipartFile multipartFile) {
         standardDocDTO.setTenantId(tenantId);
+        standardDocDTO.setProjectId(projectId);
         return Results.success(standardDocService.update(standardDocDTO, multipartFile));
     }
 
@@ -157,6 +158,7 @@ public class StandardDocController extends BaseController {
     @GetMapping("/export")
     @ExcelExport(value = StandardDocDTO.class)
     public ResponseEntity<List<StandardDocDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                                       @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                        StandardDocDTO dto,
                                                        ExportParam exportParam,
                                                        HttpServletResponse response,
@@ -164,6 +166,7 @@ public class StandardDocController extends BaseController {
                                                                direction = Sort.Direction.DESC) PageRequest pageRequest) {
         response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
         dto.setTenantId(tenantId);
+        dto.setProjectId(projectId);
         List<StandardDocDTO> dtoList =
                 standardDocService.export(dto, exportParam, pageRequest);
         return Results.success(dtoList);

@@ -52,6 +52,8 @@ public class StandardDoc extends AuditDomain {
     private String docPath;
 
     private Long tenantId;
+
+    private Long projectId;
 }
 
 

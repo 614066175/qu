@@ -77,7 +77,7 @@ public class StandardGroupServiceImpl implements StandardGroupService {
         if (CollectionUtils.isNotEmpty(dataStandardDTOS)) {
             throw new CommonException(ErrorCode.GROUP_HAS_STANDARD);
         }
-        standardGroupRepository.deleteDTO(standardGroupDTO);
+        standardGroupRepository.deleteByPrimaryKey(standardGroupDTO);
     }
 
     @Override
@@ -103,6 +103,7 @@ public class StandardGroupServiceImpl implements StandardGroupService {
             //获取DATA所有的分组已经分组下的标准
             standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                     .andWhere(Sqls.custom()
+                            .andEqualTo(StandardGroup.FIELD_PROJECT_ID,dto.getProjectId())
                             .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, StandardConstant.StandardType.DATA)
                             .andEqualTo(StandardGroup.FIELD_TENANT_ID,dto.getTenantId()))
                     .build());
@@ -110,6 +111,7 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                 standardGroupDTOS.forEach(standardGroupDTO -> {
                     List<DataStandardDTO> dataStandardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                             .andWhere(Sqls.custom()
+                                    .andEqualTo(DataStandard.FIELD_PROJECT_ID,dto.getProjectId())
                                     .andEqualTo(DataStandard.FIELD_GROUP_ID, standardGroupDTO.getGroupId())
                                     .andEqualTo(DataStandard.FIELD_TENANT_ID,dto.getTenantId()))
                             .build());

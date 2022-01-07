@@ -15,6 +15,7 @@
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
     <resultMap id="DtoResultMap" type="com.hand.hdsp.quality.api.dto.NameExecHisDetailDTO" extends="BaseResultMap">
 

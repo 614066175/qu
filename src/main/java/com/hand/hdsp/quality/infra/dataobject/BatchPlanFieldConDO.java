@@ -46,4 +46,5 @@ public class BatchPlanFieldConDO extends AuditDomain {
 
     private String regularExpression;
 
+    private Long projectId;
 }

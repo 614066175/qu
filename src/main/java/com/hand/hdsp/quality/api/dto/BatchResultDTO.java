@@ -114,4 +114,6 @@ public class BatchResultDTO extends AuditDomain {
     @Transient
     private List<Map<String,Object>> exceptionMapList;
 
+    private Long projectId;
+
 }

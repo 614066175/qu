@@ -56,5 +56,6 @@ public class ExtraVersion extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 
 }

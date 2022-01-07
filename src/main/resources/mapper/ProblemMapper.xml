@@ -15,6 +15,7 @@
         <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
     <select id="list" resultType="com.hand.hdsp.quality.infra.vo.ProblemVO">
         SELECT
@@ -25,8 +26,12 @@
             xp.problem_type
         FROM
 	        xqua_problem xp
-        WHERE
+        <where>
 	        xp.tenant_id = #{tenantId}
+            <if test="projectId != null">
+                and xp.project_id = #{projectId}
+            </if>
+        </where>
 	    order by xp.creation_date
     </select>
     <select id="listForChild" resultType="com.hand.hdsp.quality.api.dto.ProblemDTO">

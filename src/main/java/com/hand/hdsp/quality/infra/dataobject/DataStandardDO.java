@@ -53,4 +53,6 @@ public class DataStandardDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
+
 }

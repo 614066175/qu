@@ -49,4 +49,6 @@ public class BatchPlanTableConDTO extends AuditDomain {
 
     @ApiModelProperty(value = "方案告警等级List")
     private List<WarningLevelDTO> warningLevelList;
+
+    private Long projectId;
 }
