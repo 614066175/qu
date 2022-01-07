@@ -321,8 +321,9 @@ public class DataStandardController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/asset-detail/{standardId}")
     public ResponseEntity<DataStandardDTO> assetDetail(@PathVariable(name = "organizationId") Long tenantId,
+                                                       @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                        @PathVariable(name = "standardId") Long standardId) {
-        return Results.success(dataStandardService.assetDetail(tenantId, standardId));
+        return Results.success(dataStandardService.assetDetail(tenantId, standardId,projectId));
     }
 
     @ApiOperation(value = "修改数据标准属性")

@@ -121,9 +121,10 @@ public interface DataStandardService {
      *
      * @param tenantId
      * @param standardId
+     * @param projectId
      * @return
      */
-    DataStandardDTO assetDetail(Long tenantId, Long standardId);
+    DataStandardDTO assetDetail(Long tenantId, Long standardId, Long projectId);
 
     /**
      * 开启工作流

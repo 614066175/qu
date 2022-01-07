@@ -276,7 +276,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, DATA)
                         .andEqualTo(StandardAim.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                 .build());
-        standardAimService.batchDelete(standardAimDTOS,dataStandardDTO.getTenantId(),dataStandardDTO.getProjectId());
+        standardAimService.batchDelete(standardAimDTOS, dataStandardDTO.getTenantId(), dataStandardDTO.getProjectId());
     }
 
     @Override
@@ -615,7 +615,7 @@ public class DataStandardServiceImpl implements DataStandardService {
     }
 
     @Override
-    public DataStandardDTO assetDetail(Long tenantId, Long standardId) {
+    public DataStandardDTO assetDetail(Long tenantId, Long standardId, Long projectId) {
         List<DataStandardDTO> dataStandardDTOList = dataStandardMapper.list(DataStandardDTO
                 .builder()
                 .standardId(standardId)
@@ -629,7 +629,8 @@ public class DataStandardServiceImpl implements DataStandardService {
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardExtra.FIELD_STANDARD_ID, standardId)
                         .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, DATA)
-                        .andEqualTo(StandardExtra.FIELD_TENANT_ID, tenantId))
+                        .andEqualTo(StandardExtra.FIELD_TENANT_ID, tenantId)
+                        .andEqualTo(StandardExtra.FIELD_PROJECT_ID, projectId))
                 .build());
         dataStandardDTO.setStandardExtraDTOList(standardExtraDTOS);
         dataStandardDTO.setMetadataName(dataStandardDTO.getStandardName());
