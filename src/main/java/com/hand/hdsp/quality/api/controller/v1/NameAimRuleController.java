@@ -50,7 +50,7 @@ public class NameAimRuleController extends BaseController {
                                                      NameAimRuleDTO nameAimRuleDTO, @ApiIgnore @SortDefault(value = NameAimRule.FIELD_RULE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         nameAimRuleDTO.setTenantId(tenantId);
-        nameAimRuleDTO.setProjectId(projectId);
+        nameAimRuleDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<NameAimRuleDTO> list = nameAimRuleRepository.pageAndSortDTO(pageRequest, nameAimRuleDTO);
         return Results.success(list);
     }
@@ -87,7 +87,7 @@ public class NameAimRuleController extends BaseController {
                                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                  @RequestBody NameAimRuleDTO nameAimRuleDTO) {
         nameAimRuleDTO.setTenantId(tenantId);
-        nameAimRuleDTO.setProjectId(projectId);
+        nameAimRuleDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(nameAimRuleDTO);
         nameAimRuleRepository.insertDTOSelective(nameAimRuleDTO);
         return Results.success(nameAimRuleDTO);
@@ -105,7 +105,7 @@ public class NameAimRuleController extends BaseController {
     public ResponseEntity<NameAimRuleDTO> update(@PathVariable("organizationId") Long tenantId,
                                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                  @RequestBody NameAimRuleDTO nameAimRuleDTO) {
-        nameAimRuleDTO.setProjectId(projectId);
+        nameAimRuleDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         nameAimRuleRepository.updateDTOWhereTenant(nameAimRuleDTO, tenantId);
         return Results.success(nameAimRuleDTO);
     }

@@ -61,7 +61,7 @@ public class StandardDocController extends BaseController {
                                                      @ApiIgnore @SortDefault(value = StandardDoc.FIELD_DOC_ID,
                                                              direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardDocDTO.setTenantId(tenantId);
-        standardDocDTO.setProjectId(projectId);
+        standardDocDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<StandardDocDTO> list = standardDocService.list(pageRequest, standardDocDTO);
         return Results.success(list);
     }
@@ -99,7 +99,7 @@ public class StandardDocController extends BaseController {
                                                  @RequestPart StandardDocDTO standardDocDTO,
                                                  @RequestPart(value = "file", required = false) MultipartFile multipartFile) {
         standardDocDTO.setTenantId(tenantId);
-        standardDocDTO.setProjectId(projectId);
+        standardDocDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(standardDocDTO);
         return Results.success(standardDocService.create(standardDocDTO, multipartFile));
     }
@@ -118,7 +118,7 @@ public class StandardDocController extends BaseController {
                                                  @RequestPart StandardDocDTO standardDocDTO,
                                                  @RequestPart(value = "file", required = false) MultipartFile multipartFile) {
         standardDocDTO.setTenantId(tenantId);
-        standardDocDTO.setProjectId(projectId);
+        standardDocDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         return Results.success(standardDocService.update(standardDocDTO, multipartFile));
     }
 
@@ -166,7 +166,7 @@ public class StandardDocController extends BaseController {
                                                                direction = Sort.Direction.DESC) PageRequest pageRequest) {
         response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
         dto.setTenantId(tenantId);
-        dto.setProjectId(projectId);
+        dto.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         List<StandardDocDTO> dtoList =
                 standardDocService.export(dto, exportParam, pageRequest);
         return Results.success(dtoList);

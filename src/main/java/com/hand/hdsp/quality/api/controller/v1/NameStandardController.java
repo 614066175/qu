@@ -64,7 +64,7 @@ public class NameStandardController extends BaseController {
                                                       NameStandardDTO nameStandardDTO, @ApiIgnore @SortDefault(value = NameStandard.FIELD_STANDARD_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         nameStandardDTO.setTenantId(tenantId);
-        nameStandardDTO.setProjectId(projectId);
+        nameStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<NameStandardDTO> list = PageHelper.doPage(pageRequest, () -> nameStandardRepository.list(nameStandardDTO));
         return Results.success(list);
     }
@@ -101,7 +101,7 @@ public class NameStandardController extends BaseController {
                                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                   @RequestBody NameStandardDTO nameStandardDTO) {
         nameStandardDTO.setTenantId(tenantId);
-        nameStandardDTO.setProjectId(projectId);
+        nameStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(nameStandardDTO);
         nameStandardRepository.insertDTOSelective(nameStandardDTO);
         return Results.success(nameStandardDTO);
@@ -120,7 +120,7 @@ public class NameStandardController extends BaseController {
                                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                   @RequestBody NameStandardDTO nameStandardDTO) {
         nameStandardDTO.setTenantId(tenantId);
-        nameStandardDTO.setProjectId(projectId);
+        nameStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         return Results.success(nameStandardService.update(nameStandardDTO));
     }
 
@@ -138,7 +138,7 @@ public class NameStandardController extends BaseController {
                                        @RequestBody List<NameStandardDTO> nameStandardDtoList) {
         nameStandardDtoList.forEach(x -> {
             x.setTenantId(tenantId);
-            x.setProjectId(projectId);
+            x.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         });
         nameStandardService.bitchRemove(nameStandardDtoList);
         return Results.success();
@@ -170,7 +170,7 @@ public class NameStandardController extends BaseController {
                                                         HttpServletResponse response,
                                                         PageRequest pageRequest) {
 
-        dto.setProjectId(projectId);
+        dto.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         dto.setTenantId(tenantId);
         Page<NameStandardDTO> dtoList = nameStandardService.export(dto, exportParam, pageRequest);
         response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");

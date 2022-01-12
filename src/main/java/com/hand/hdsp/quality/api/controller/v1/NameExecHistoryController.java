@@ -47,7 +47,7 @@ public class NameExecHistoryController extends BaseController {
     public ResponseEntity<Page<NameExecHistoryDTO>> list(NameExecHistoryDTO nameExecHistoryDTO,
                                                          @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                          PageRequest pageRequest) {
-        nameExecHistoryDTO.setProjectId(projectId);
+        nameExecHistoryDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<NameExecHistoryDTO> list = PageHelper.doPage(pageRequest,
                 ()->nameExecHistoryRepository.getHistoryList(nameExecHistoryDTO));
         return Results.success(list);

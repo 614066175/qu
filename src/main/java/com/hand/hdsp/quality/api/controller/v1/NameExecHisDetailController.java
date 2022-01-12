@@ -49,7 +49,7 @@ public class NameExecHisDetailController extends BaseController {
                                                            NameExecHisDetailDTO nameExecHisDetailDTO, @ApiIgnore @SortDefault(value = NameExecHisDetail.FIELD_DETAIL_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         nameExecHisDetailDTO.setTenantId(tenantId);
-        nameExecHisDetailDTO.setProjectId(projectId);
+        nameExecHisDetailDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<NameExecHisDetailDTO> list = nameExecHisDetailRepository.pageAndSortDTO(pageRequest, nameExecHisDetailDTO);
         return Results.success(list);
     }

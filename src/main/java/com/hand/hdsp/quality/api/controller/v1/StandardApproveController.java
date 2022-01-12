@@ -49,7 +49,7 @@ public class StandardApproveController extends BaseController {
                 StandardApproveDTO standardApproveDTO, @ApiIgnore @SortDefault(value = StandardApprove.FIELD_APPROVE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardApproveDTO.setTenantId(tenantId);
-        standardApproveDTO.setProjectId(projectId);
+        standardApproveDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<StandardApproveDTO> list = standardApproveRepository.pageAndSortDTO(pageRequest, standardApproveDTO);
         return Results.success(list);
     }
@@ -86,7 +86,7 @@ public class StandardApproveController extends BaseController {
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardApproveDTO standardApproveDTO) {
         standardApproveDTO.setTenantId(tenantId);
-        standardApproveDTO.setProjectId(projectId);
+        standardApproveDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(standardApproveDTO);
         standardApproveRepository.insertDTOSelective(standardApproveDTO);
         return Results.success(standardApproveDTO);
@@ -104,7 +104,7 @@ public class StandardApproveController extends BaseController {
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardApproveDTO standardApproveDTO) {
-        standardApproveDTO.setProjectId(projectId);
+        standardApproveDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         standardApproveRepository.updateDTOWhereTenant(standardApproveDTO, tenantId);
         return Results.success(standardApproveDTO);
     }

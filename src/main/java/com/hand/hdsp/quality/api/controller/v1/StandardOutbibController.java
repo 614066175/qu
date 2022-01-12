@@ -49,7 +49,7 @@ public class StandardOutbibController extends BaseController {
                                   StandardOutbibDTO standardOutbibDTO, @ApiIgnore @SortDefault(value = StandardOutbib.FIELD_OUTBIB_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardOutbibDTO.setTenantId(tenantId);
-        standardOutbibDTO.setProjectId(projectId);
+        standardOutbibDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<StandardOutbibDTO> list = standardOutbibRepository.pageAndSortDTO(pageRequest, standardOutbibDTO);
         return Results.success(list);
     }
@@ -86,7 +86,7 @@ public class StandardOutbibController extends BaseController {
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardOutbibDTO standardOutbibDTO) {
         standardOutbibDTO.setTenantId(tenantId);
-        standardOutbibDTO.setProjectId(projectId);
+        standardOutbibDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(standardOutbibDTO);
         standardOutbibRepository.insertDTOSelective(standardOutbibDTO);
         return Results.success(standardOutbibDTO);
@@ -104,7 +104,7 @@ public class StandardOutbibController extends BaseController {
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardOutbibDTO standardOutbibDTO) {
-        standardOutbibDTO.setProjectId(projectId);
+        standardOutbibDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         standardOutbibRepository.updateDTOWhereTenant(standardOutbibDTO, tenantId);
         return Results.success(standardOutbibDTO);
     }

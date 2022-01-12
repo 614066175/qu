@@ -71,7 +71,7 @@ public class StandardGroupController extends BaseController {
                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                    StandardGroupVO standardGroupVO) {
         standardGroupVO.setTenantId(tenantId);
-        standardGroupVO.setProjectId(projectId);
+        standardGroupVO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         return Results.success(standardGroupService.listByGroup(standardGroupVO));
     }
 
@@ -88,7 +88,7 @@ public class StandardGroupController extends BaseController {
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardGroupDTO standardGroupDTO) {
         standardGroupDTO.setTenantId(tenantId);
-        standardGroupDTO.setProjectId(projectId);
+        standardGroupDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         return Results.success(standardGroupRepository.insertDTOSelective(standardGroupDTO));
     }
 
@@ -105,7 +105,7 @@ public class StandardGroupController extends BaseController {
                                          @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                          @RequestBody StandardGroupDTO standardGroupDTO) {
         standardGroupDTO.setTenantId(tenantId);
-        standardGroupDTO.setProjectId(projectId);
+        standardGroupDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         standardGroupRepository.updateByDTOPrimaryKeySelective(standardGroupDTO);
         return Results.success(standardGroupDTO);
     }
@@ -123,7 +123,7 @@ public class StandardGroupController extends BaseController {
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardGroupDTO standardGroupDTO) {
         standardGroupDTO.setTenantId(tenantId);
-        standardGroupDTO.setProjectId(projectId);
+        standardGroupDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         standardGroupService.delete(standardGroupDTO);
         return Results.success(standardGroupDTO);
     }

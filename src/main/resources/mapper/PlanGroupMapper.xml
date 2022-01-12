@@ -31,6 +31,9 @@
     from xqua_plan_group
     where group_type = 'BATCH'
         and tenant_id = #{tenantId}
+        <if test="projectId != null">
+            and project_id=#{projectId}
+        </if>
     union
     select
     plan_id id,
@@ -65,6 +68,9 @@
     from xqua_plan_group
     where group_type = 'STREAMING'
         and tenant_id = #{tenantId}
+        <if test="projectId !=null">
+            and project_id = #{projectId}
+        </if>
     union
     select
     plan_id id,
@@ -74,15 +80,15 @@
     plan_code group_code,
     plan_name group_name,
     'plan' type
-    from xqua_streaming_plan
+    from xqua_streaming_plan xsp
     <where>
         and tenant_id = #{tenantId}
         <if test="projectId != null">
-            and xbp.project_id=#{projectId}
+            and xsp.project_id=#{projectId}
         </if>
         <if test="planName != null">
             <bind name="planName" value="'%' + planName + '%'"/>
-            and xbp.plan_name like #{planName}
+            and xsp.plan_name like #{planName}
         </if>
     </where>
     </select>

@@ -65,7 +65,7 @@ public class DataStandardController {
                                                       @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                       DataStandardDTO dataStandardDTO, PageRequest pageRequest) {
         dataStandardDTO.setTenantId(tenantId);
-        dataStandardDTO.setProjectId(projectId);
+        dataStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<DataStandardDTO> list = dataStandardService.list(pageRequest, dataStandardDTO);
         return Results.success(list);
     }
@@ -97,7 +97,7 @@ public class DataStandardController {
                                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                   @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
-        dataStandardDTO.setProjectId(projectId);
+        dataStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         dataStandardService.create(dataStandardDTO);
         return Results.success(dataStandardDTO);
     }
@@ -115,7 +115,7 @@ public class DataStandardController {
                                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                   @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
-        dataStandardDTO.setProjectId(projectId);
+        dataStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         dataStandardService.delete(dataStandardDTO);
         return Results.success(dataStandardDTO);
     }
@@ -133,7 +133,7 @@ public class DataStandardController {
                                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                   @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
-        dataStandardDTO.setProjectId(projectId);
+        dataStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         dataStandardService.update(dataStandardDTO);
         return Results.success(dataStandardDTO);
     }
@@ -152,7 +152,7 @@ public class DataStandardController {
                                                         @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                         @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
-        dataStandardDTO.setProjectId(projectId);
+        dataStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         dataStandardService.updateStatus(dataStandardDTO);
         return Results.success(dataStandardDTO);
     }
@@ -171,7 +171,7 @@ public class DataStandardController {
                                                               @RequestBody List<DataStandardDTO> dataStandardDTOList) {
         dataStandardDTOList.forEach(dataStandardDTO -> {
             dataStandardDTO.setTenantId(tenantId);
-            dataStandardDTO.setProjectId(projectId);
+            dataStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
             dataStandardService.publishOrOff(dataStandardDTO);
         });
         return Results.success(dataStandardDTOList);
@@ -191,7 +191,7 @@ public class DataStandardController {
                                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                        DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
-        dataStandardDTO.setProjectId(projectId);
+        dataStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         List<DataStandardDTO> standardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(DataStandard.FIELD_STANDARD_NAME, dataStandardDTO.getStandardName())
@@ -220,7 +220,7 @@ public class DataStandardController {
         if (CollectionUtils.isNotEmpty(dataStandardDTOList)) {
             dataStandardDTOList.forEach(dataStandardDTO -> {
                 dataStandardDTO.setTenantId(tenantId);
-                dataStandardDTO.setProjectId(projectId);
+                dataStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
                 dataStandardService.delete(dataStandardDTO);
             });
         }
@@ -272,7 +272,7 @@ public class DataStandardController {
                                                         PageRequest pageRequest) {
 
         dto.setTenantId(tenantId);
-        dto.setProjectId(projectId);
+        dto.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         List<DataStandardDTO> dtoList =
                 dataStandardService.export(dto, exportParam, pageRequest);
         return Results.success(dtoList);
@@ -339,7 +339,7 @@ public class DataStandardController {
                                                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                                   @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
-        dataStandardDTO.setProjectId(projectId);
+        dataStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         dataStandardRepository.updateDTOAllColumnWhereTenant(dataStandardDTO, tenantId);
         return Results.success(dataStandardDTO);
     }
