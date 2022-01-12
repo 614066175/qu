@@ -53,7 +53,7 @@ public class DataStandardVersionController extends BaseController {
                                   DataStandardVersionDTO dataStandardVersionDTO, @ApiIgnore @SortDefault(value = DataStandardVersion.FIELD_VERSION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         dataStandardVersionDTO.setTenantId(tenantId);
-        dataStandardVersionDTO.setProjectId(projectId);
+        dataStandardVersionDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<DataStandardVersionDTO> list = dataStandardVersionService.list(pageRequest, dataStandardVersionDTO);
         return Results.success(list);
     }
@@ -89,7 +89,7 @@ public class DataStandardVersionController extends BaseController {
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody DataStandardVersionDTO dataStandardVersionDTO) {
         dataStandardVersionDTO.setTenantId(tenantId);
-        dataStandardVersionDTO.setProjectId(projectId);
+        dataStandardVersionDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(dataStandardVersionDTO);
         dataStandardVersionRepository.insertDTOSelective(dataStandardVersionDTO);
         return Results.success(dataStandardVersionDTO);
@@ -107,7 +107,7 @@ public class DataStandardVersionController extends BaseController {
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody DataStandardVersionDTO dataStandardVersionDTO) {
-        dataStandardVersionDTO.setProjectId(projectId);
+        dataStandardVersionDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         dataStandardVersionRepository.updateDTOWhereTenant(dataStandardVersionDTO, tenantId);
         return Results.success(dataStandardVersionDTO);
     }

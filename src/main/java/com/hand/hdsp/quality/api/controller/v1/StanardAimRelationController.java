@@ -49,7 +49,7 @@ public class StanardAimRelationController extends BaseController {
                                   StandardAimRelationDTO standardAimRelationDTO, @ApiIgnore @SortDefault(value = StandardAimRelation.FIELD_RELATION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardAimRelationDTO.setTenantId(tenantId);
-        standardAimRelationDTO.setProjectId(projectId);
+        standardAimRelationDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<StandardAimRelationDTO> list = stanardAimRelationRepository.pageAndSortDTO(pageRequest, standardAimRelationDTO);
         return Results.success(list);
     }
@@ -86,7 +86,7 @@ public class StanardAimRelationController extends BaseController {
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardAimRelationDTO standardAimRelationDTO) {
         standardAimRelationDTO.setTenantId(tenantId);
-        standardAimRelationDTO.setProjectId(projectId);
+        standardAimRelationDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(standardAimRelationDTO);
         stanardAimRelationRepository.insertDTOSelective(standardAimRelationDTO);
         return Results.success(standardAimRelationDTO);
@@ -104,7 +104,7 @@ public class StanardAimRelationController extends BaseController {
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardAimRelationDTO standardAimRelationDTO) {
-        standardAimRelationDTO.setProjectId(projectId);
+        standardAimRelationDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         stanardAimRelationRepository.updateDTOWhereTenant(standardAimRelationDTO, tenantId);
         return Results.success(standardAimRelationDTO);
     }

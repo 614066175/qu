@@ -54,7 +54,7 @@ public class StandardExtraController extends BaseController {
                                   StandardExtraDTO standardExtraDTO, @ApiIgnore @SortDefault(value = StandardExtra.FIELD_EXTRA_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardExtraDTO.setTenantId(tenantId);
-        standardExtraDTO.setProjectId(projectId);
+        standardExtraDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<StandardExtraDTO> list = standardExtraRepository.pageAndSortDTO(pageRequest, standardExtraDTO);
         return Results.success(list);
     }
@@ -91,7 +91,7 @@ public class StandardExtraController extends BaseController {
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardExtraDTO standardExtraDTO) {
         standardExtraDTO.setTenantId(tenantId);
-        standardExtraDTO.setProjectId(projectId);
+        standardExtraDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(standardExtraDTO);
         standardExtraRepository.insertDTOSelective(standardExtraDTO);
         return Results.success(standardExtraDTO);
@@ -109,7 +109,7 @@ public class StandardExtraController extends BaseController {
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardExtraDTO standardExtraDTO) {
-        standardExtraDTO.setProjectId(projectId);
+        standardExtraDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         standardExtraRepository.updateDTOWhereTenant(standardExtraDTO, tenantId);
         return Results.success(standardExtraDTO);
     }
@@ -145,7 +145,7 @@ public class StandardExtraController extends BaseController {
                                          @RequestBody List<StandardExtraDTO> standardExtraDTOList) {
         standardExtraDTOList.forEach(standardExtraDTO -> {
             standardExtraDTO.setTenantId(tenantId);
-            standardExtraDTO.setProjectId(projectId);
+            standardExtraDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         });
         standardExtraRepository.batchInsertDTOSelective(standardExtraDTOList);
         return Results.success(standardExtraDTOList);
@@ -165,7 +165,7 @@ public class StandardExtraController extends BaseController {
                                          @RequestBody List<StandardExtraDTO> standardExtraDTOList) {
         standardExtraDTOList.forEach(standardExtraDTO ->{
             standardExtraDTO.setTenantId(tenantId);
-            standardExtraDTO.setProjectId(projectId);
+            standardExtraDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         });
         standardExtraService.batchUpdate(standardExtraDTOList);
         return Results.success(standardExtraDTOList);

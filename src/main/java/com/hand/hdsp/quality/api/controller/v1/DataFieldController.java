@@ -65,7 +65,7 @@ public class DataFieldController extends BaseController {
                                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                    DataFieldDTO dataFieldDTO, PageRequest pageRequest) {
         dataFieldDTO.setTenantId(tenantId);
-        dataFieldDTO.setProjectId(projectId);
+        dataFieldDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<DataFieldDTO> list = dataFieldService.list(pageRequest, dataFieldDTO);
         return Results.success(list);
     }
@@ -83,7 +83,7 @@ public class DataFieldController extends BaseController {
                                                @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                @RequestBody DataFieldDTO dataFieldDTO) {
         dataFieldDTO.setTenantId(tenantId);
-        dataFieldDTO.setProjectId(projectId);
+        dataFieldDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         dataFieldService.create(dataFieldDTO);
         return Results.success(dataFieldDTO);
     }
@@ -116,7 +116,7 @@ public class DataFieldController extends BaseController {
                                             @RequestBody List<DataFieldDTO> dataFieldDTOList) {
         if (CollectionUtils.isNotEmpty(dataFieldDTOList)) {
             dataFieldDTOList.forEach(dataFieldDTO -> {
-                dataFieldDTO.setProjectId(projectId);
+                dataFieldDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
                 dataFieldDTO.setTenantId(tenantId);
                 dataFieldService.delete(dataFieldDTO);
             });
@@ -137,7 +137,7 @@ public class DataFieldController extends BaseController {
                                                @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                @RequestBody DataFieldDTO dataFieldDTO) {
         dataFieldDTO.setTenantId(tenantId);
-        dataFieldDTO.setProjectId(projectId);
+        dataFieldDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         dataFieldRepository.updateByDTOPrimaryKey(dataFieldDTO);
         return Results.success(dataFieldDTO);
     }
@@ -155,7 +155,7 @@ public class DataFieldController extends BaseController {
                                                      @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                      @RequestBody DataFieldDTO dataFieldDTO) {
         dataFieldDTO.setTenantId(tenantId);
-        dataFieldDTO.setProjectId(projectId);
+        dataFieldDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         dataFieldService.updateStatus(dataFieldDTO);
         return Results.success(dataFieldDTO);
     }
@@ -190,7 +190,7 @@ public class DataFieldController extends BaseController {
                                                            @RequestBody List<DataFieldDTO> dataFieldDTOList) {
         dataFieldDTOList.forEach(dataFieldDTO -> {
             dataFieldDTO.setTenantId(tenantId);
-            dataFieldDTO.setProjectId(projectId);
+            dataFieldDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
             dataFieldService.publishOrOff(dataFieldDTO);
         });
         return Results.success(dataFieldDTOList);
@@ -209,7 +209,7 @@ public class DataFieldController extends BaseController {
 
         response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
         dto.setTenantId(tenantId);
-        dto.setProjectId(projectId);
+        dto.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         List<DataFieldDTO> dtoList =
                 dataFieldService.export(dto, exportParam, pageRequest);
         return Results.success(dtoList);

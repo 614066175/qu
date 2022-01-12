@@ -55,7 +55,7 @@ public class StandardAimController extends BaseController {
                                   StandardAimDTO standardAimDTO, @ApiIgnore @SortDefault(value = StandardAim.FIELD_AIM_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardAimDTO.setTenantId(tenantId);
-        standardAimDTO.setProjectId(projectId);
+        standardAimDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<StandardAimDTO> list = standardAimService.list(pageRequest, standardAimDTO);
         return Results.success(list);
     }
@@ -92,7 +92,7 @@ public class StandardAimController extends BaseController {
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardAimDTO standardAimDTO) {
         standardAimDTO.setTenantId(tenantId);
-        standardAimDTO.setProjectId(projectId);
+        standardAimDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(standardAimDTO);
         return Results.success(standardAimDTO);
     }
@@ -109,7 +109,7 @@ public class StandardAimController extends BaseController {
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardAimDTO standardAimDTO) {
-        standardAimDTO.setProjectId(projectId);
+        standardAimDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         standardAimRepository.updateDTOWhereTenant(standardAimDTO, tenantId);
         return Results.success(standardAimDTO);
     }
@@ -143,7 +143,7 @@ public class StandardAimController extends BaseController {
                                           @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                           StandardAimDTO standardAimDTO) {
         standardAimDTO.setTenantId(tenantId);
-        standardAimDTO.setProjectId(projectId);
+        standardAimDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         return Results.success(standardAimService.unAimField(standardAimDTO));
     }
 }

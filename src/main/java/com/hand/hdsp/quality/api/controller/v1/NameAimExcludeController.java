@@ -52,7 +52,7 @@ public class NameAimExcludeController extends BaseController {
                                                         NameAimExcludeDTO nameAimExcludeDTO, @ApiIgnore @SortDefault(value = NameAimExclude.FIELD_EXCLUDE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         nameAimExcludeDTO.setTenantId(tenantId);
-        nameAimExcludeDTO.setProjectId(projectId);
+        nameAimExcludeDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<NameAimExcludeDTO> list = nameAimExcludeRepository.pageAndSortDTO(pageRequest, nameAimExcludeDTO);
         return Results.success(list);
     }
@@ -89,7 +89,7 @@ public class NameAimExcludeController extends BaseController {
                                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                     @RequestBody NameAimExcludeDTO nameAimExcludeDTO) {
         nameAimExcludeDTO.setTenantId(tenantId);
-        nameAimExcludeDTO.setProjectId(projectId);
+        nameAimExcludeDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(nameAimExcludeDTO);
         nameAimExcludeRepository.insertDTOSelective(nameAimExcludeDTO);
         return Results.success(nameAimExcludeDTO);
@@ -107,7 +107,7 @@ public class NameAimExcludeController extends BaseController {
     public ResponseEntity<NameAimExcludeDTO> update(@PathVariable("organizationId") Long tenantId,
                                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                     @RequestBody NameAimExcludeDTO nameAimExcludeDTO) {
-        nameAimExcludeDTO.setProjectId(projectId);
+        nameAimExcludeDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         nameAimExcludeRepository.updateDTOWhereTenant(nameAimExcludeDTO, tenantId);
         return Results.success(nameAimExcludeDTO);
     }

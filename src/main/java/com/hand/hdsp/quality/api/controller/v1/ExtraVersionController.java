@@ -49,7 +49,7 @@ public class ExtraVersionController extends BaseController {
                                   ExtraVersionDTO extraVersionDTO, @ApiIgnore @SortDefault(value = ExtraVersion.FIELD_VERSION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         extraVersionDTO.setTenantId(tenantId);
-        extraVersionDTO.setProjectId(projectId);
+        extraVersionDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<ExtraVersionDTO> list = extraVersionRepository.pageAndSortDTO(pageRequest, extraVersionDTO);
         return Results.success(list);
     }
@@ -86,7 +86,7 @@ public class ExtraVersionController extends BaseController {
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody ExtraVersionDTO extraVersionDTO) {
         extraVersionDTO.setTenantId(tenantId);
-        extraVersionDTO.setProjectId(projectId);
+        extraVersionDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(extraVersionDTO);
         extraVersionRepository.insertDTOSelective(extraVersionDTO);
         return Results.success(extraVersionDTO);
@@ -104,7 +104,7 @@ public class ExtraVersionController extends BaseController {
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody ExtraVersionDTO extraVersionDTO) {
-        extraVersionDTO.setProjectId(projectId);
+        extraVersionDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         extraVersionRepository.updateDTOWhereTenant(extraVersionDTO, tenantId);
         return Results.success(extraVersionDTO);
     }

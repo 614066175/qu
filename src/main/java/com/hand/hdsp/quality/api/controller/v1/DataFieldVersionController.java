@@ -54,7 +54,7 @@ public class DataFieldVersionController extends BaseController {
                                                           DataFieldVersionDTO dataFieldVersionDTO, @ApiIgnore @SortDefault(value = DataFieldVersion.FIELD_VERSION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         dataFieldVersionDTO.setTenantId(tenantId);
-        dataFieldVersionDTO.setProjectId(projectId);
+        dataFieldVersionDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<DataFieldVersionDTO> list = dataFieldVersionService.list(pageRequest, dataFieldVersionDTO);
         return Results.success(list);
     }
@@ -91,7 +91,7 @@ public class DataFieldVersionController extends BaseController {
                                                       @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                       @RequestBody DataFieldVersionDTO dataFieldVersionDTO) {
         dataFieldVersionDTO.setTenantId(tenantId);
-        dataFieldVersionDTO.setProjectId(projectId);
+        dataFieldVersionDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(dataFieldVersionDTO);
         dataFieldVersionRepository.insertDTOSelective(dataFieldVersionDTO);
         return Results.success(dataFieldVersionDTO);
@@ -109,7 +109,7 @@ public class DataFieldVersionController extends BaseController {
     public ResponseEntity<DataFieldVersionDTO> update(@PathVariable("organizationId") Long tenantId,
                                                       @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                       @RequestBody DataFieldVersionDTO dataFieldVersionDTO) {
-        dataFieldVersionDTO.setProjectId(projectId);
+        dataFieldVersionDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         dataFieldVersionRepository.updateDTOWhereTenant(dataFieldVersionDTO, tenantId);
         return Results.success(dataFieldVersionDTO);
     }
