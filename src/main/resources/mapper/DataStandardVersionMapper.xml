@@ -97,8 +97,8 @@
         <if test="dataStandardVersionDTO.versionId!=null">
             dsv.version_id = #{dataStandardVersionDTO.versionId}
         </if>
-        <if test="projectId != null">
-            and dsv.project_id = #{projectId}
+        <if test="dataStandardVersionDTO.projectId != null">
+            and dsv.project_id = #{dataStandardVersionDTO.projectId}
         </if>
     </select>
 </mapper>

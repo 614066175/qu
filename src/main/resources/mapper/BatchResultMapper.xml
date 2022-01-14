@@ -96,7 +96,7 @@
                 xpg.group_id = #{groupId}
             </if>
             <if test="projectId !=null ">
-                xbp.project_id=#{projectId}
+                and xbp.project_id=#{projectId}
             </if>
             <if test="tenantId != null">
                 and xbp.tenant_id = #{tenantId}
