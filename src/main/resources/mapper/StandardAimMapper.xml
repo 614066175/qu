@@ -50,7 +50,7 @@
         and xsa.tenant_id = #{standardAimDTO.tenantId}
         and xsa.standard_id = #{standardAimDTO.standardId}
         <if test="standardAimDTO.projectId !=null">
-            and xsa.project_id=#{projectId}
+            and xsa.project_id=#{standardAimDTO.projectId}
         </if>
         <if test="standardAimDTO.fieldName!=null">
             <bind name="fieldName" value="'%'+ standardAimDTO.fieldName +'%'"/>
