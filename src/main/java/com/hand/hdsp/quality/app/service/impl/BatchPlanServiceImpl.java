@@ -627,7 +627,10 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     .planBaseId(batchPlanBase.getPlanBaseId()).objectName(objectName)
                     .packageObjectName(packageObjectName).datasourceType(batchPlanBase.getDatasourceType())
                     .ruleCount(0L).exceptionRuleCount(0L).checkItemCount(0L).exceptionCheckItemCount(0L)
-                    .tenantId(tenantId).build();
+                    .tenantId(tenantId)
+                    //从result中取projectId
+                    .projectId(batchResult.getProjectId())
+                    .build();
             if (TABLE.equals(batchPlanBase.getSqlType())) {
                 //保存表的数据量
                 DriverSession driverSession = driverSessionService.getDriverSession(tenantId, batchPlanBase.getDatasourceCode());
@@ -715,7 +718,10 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     .planRuleId(batchPlanTable.getPlanRuleId()).ruleCode(batchPlanTable.getRuleCode())
                     .ruleName(batchPlanTable.getRuleName()).ruleDesc(batchPlanTable.getRuleDesc())
                     .checkType(batchPlanTable.getCheckType()).weight(batchPlanTable.getWeight()).resultFlag(1)
-                    .tenantId(tenantId).build();
+                    .tenantId(tenantId)
+                    //从batchResultBase中取projectId
+                    .projectId(batchResultBase.getProjectId())
+                    .build();
             batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
 
             List<BatchPlanTableLine> batchPlanTableLines = null;
@@ -759,6 +765,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 batchResultItem.setCheckItem(batchPlanTableConDO.getCheckItem());
                 batchResultItem.setCountType(batchPlanTableConDO.getCountType());
                 batchResultItem.setCustomSql(batchPlanTableConDO.getCustomSql());
+                batchResultItem.setProjectId(batchResultBase.getProjectId());
                 batchResultItem.setTenantId(tenantId);
                 batchResultItemRepository.insertSelective(batchResultItem);
 
@@ -819,7 +826,10 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     .planRuleId(batchPlanField.getPlanRuleId()).ruleCode(batchPlanField.getRuleCode())
                     .ruleName(batchPlanField.getRuleName()).ruleDesc(batchPlanField.getRuleDesc())
                     .checkType(batchPlanField.getCheckType()).weight(batchPlanField.getWeight()).resultFlag(1)
-                    .tenantId(tenantId).build();
+                    .tenantId(tenantId)
+                    //从batchResultBase中取projectId
+                    .projectId(batchResultBase.getProjectId())
+                    .build();
             batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
 
             for (BatchPlanFieldConDO batchPlanFieldConDO : conList) {
@@ -868,7 +878,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 batchResultItem.setCheckFieldName(batchPlanFieldConDO.getCheckFieldName());
                 batchResultItem.setCheckFieldName(batchPlanFieldConDO.getCheckFieldName());
                 batchResultItem.setRegularExpression(batchPlanFieldConDO.getRegularExpression());
-
+                batchResultItem.setProjectId(batchResultBase.getProjectId());
                 batchResultItem.setTenantId(tenantId);
                 batchResultItemRepository.insertSelective(batchResultItem);
 
@@ -901,7 +911,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         //将所有字段级校验项异常数据存入数据库
         String exceptionList = String.format("{\"FIELD\":%s}", JsonUtils.object2Json(fieldExceptionList));
         batchResultBase.setExceptionList(exceptionList);
-        batchResultBaseRepository.updateByPrimaryKey(batchResultBase);
+        batchResultBaseRepository.updateByPrimaryKeySelective(batchResultBase);
     }
 
     private void handleExceptionList(List<Map<String, Object>> fieldExceptionList, MeasureParamDO param) {
@@ -978,7 +988,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     .planRuleId(batchPlanRelTable.getPlanRuleId()).ruleCode(batchPlanRelTable.getRuleCode())
                     .ruleName(batchPlanRelTable.getRuleName()).ruleDesc(batchPlanRelTable.getRuleDesc())
                     .checkType(batchPlanRelTable.getCheckType()).weight(batchPlanRelTable.getWeight())
-                    .resultFlag(1).tenantId(tenantId).build();
+                    .resultFlag(1).tenantId(tenantId)
+                    .projectId(batchResultBase.getProjectId())
+                    .build();
 
             batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
 
@@ -992,6 +1004,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             batchResultItem.setRelationship(batchPlanRelTable.getRelationship());
             batchResultItem.setWarningLevelJson(batchPlanRelTable.getWarningLevel());
             batchResultItem.setTenantId(tenantId);
+            batchResultItem.setProjectId(batchResultBase.getProjectId());
             List<TableRelCheckDTO> tableRelCheckDTOS =
                     JsonUtils.json2TableRelCheck(batchPlanRelTable.getTableRelCheck());
             List<String> resultList = new ArrayList<>();
