@@ -637,7 +637,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 List<Map<String, Object>> maps = driverSession.executeOneQuery(batchPlanBase.getDatasourceSchema(),
                         String.format("select count(*) as COUNT from %s", batchPlanBase.getObjectName()));
                 if (CollectionUtils.isNotEmpty(maps)) {
+                    log.info("查询结果："+ maps);
                     String key = maps.get(0).keySet().iterator().next();
+                    log.info("key:"+key);
                     Long count = Long.parseLong(String.valueOf(maps.get(0).get(key)));
                     batchResultBase.setDataCount(count);
                 }
