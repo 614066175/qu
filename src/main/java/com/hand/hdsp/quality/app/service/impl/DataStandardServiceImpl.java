@@ -644,7 +644,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                                 .andWhere(Sqls.custom()
                                         .andEqualTo(StandardGroup.FIELD_GROUP_ID, dataStandardDTO.getParentGroupId())
                                         .andEqualTo(StandardGroup.FIELD_TENANT_ID, tenantId)
-                                        .andEqualTo(StandardGroup.FIELD_PROJECT_ID, dataStandardDTO.getProjectId()))
+                                        .andEqualTo(StandardGroup.FIELD_PROJECT_ID, projectId))
                                 .build());
                 dataStandardDTO.setParentGroupId(standardGroups.get(0).getParentGroupId());
                 dataStandardDTO.setNameLevelPath(String.format("%s/%s",
