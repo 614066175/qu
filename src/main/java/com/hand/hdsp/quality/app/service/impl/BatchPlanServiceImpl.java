@@ -504,6 +504,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             updateTimestamp(tenantId, timestampList, false);
             batchResult.setPlanStatus(PlanConstant.PlanStatus.FAILED);
             batchResult.setExceptionInfo(MessageAccessor.getMessage(e.getMessage(), e.getParameters()).getDesc());
+            // 错误也应该添加结束时间
+            batchResult.setEndDate(new Date());
             batchResultRepository.updateByPrimaryKeySelective(batchResult);
             log.error("exec plan error!", e);
             throw e;
@@ -512,6 +514,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             updateTimestamp(tenantId, timestampList, false);
             batchResult.setPlanStatus(PlanConstant.PlanStatus.FAILED);
             batchResult.setExceptionInfo(ExceptionUtils.getMessage(e));
+            // 错误也应该添加结束时间
+            batchResult.setEndDate(new Date());
             batchResultRepository.updateByPrimaryKeySelective(batchResult);
             log.error("exec plan error!", e);
             throw e;
