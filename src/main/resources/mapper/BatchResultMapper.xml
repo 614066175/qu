@@ -161,8 +161,6 @@
         xbr.end_date,
         xbr.exception_info,
         xbp.plan_name
-        ORDER BY
-        xbr.result_id DESC
     </select>
 
     <select id="selectScore" resultType="long">
