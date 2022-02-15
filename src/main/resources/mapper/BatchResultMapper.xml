@@ -105,8 +105,11 @@
                 <bind name="planName" value="'%' + planName + '%'"/>
                 and xbp.plan_name like #{planName}
             </if>
-            <if test="planStatus != null">
+            <if test="planStatus != null and planStatus != 'NOTASSESS' ">
                 and xbr.plan_status = #{planStatus}
+            </if>
+            <if test="planStatus == 'NOTASSESS'">
+                and xbr.plan_status is null
             </if>
         </where>
     </select>
