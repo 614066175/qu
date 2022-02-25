@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.CREATE;
 
 import java.util.ArrayList;
@@ -15,9 +17,11 @@ import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
+import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
 
@@ -39,12 +43,11 @@ public class DataStandardRepositoryImpl extends BaseRepositoryImpl<DataStandard,
     }
 
     @Override
-    public void batchImport(List<DataStandardDTO> dataStandardDTOList) {
+    public boolean batchImport(List<DataStandardDTO> dataStandardDTOList) {
         List<DataStandardDTO> importDataStandardDTOList = new ArrayList<>();
         //处理得到待导入的集合
         if (CollectionUtils.isNotEmpty(dataStandardDTOList)) {
-            dataStandardDTOList.forEach(dataStandardDTO -> {
-                //判断数据标准是否已经存在,存在则不导入
+            for (DataStandardDTO dataStandardDTO : dataStandardDTOList) {//判断数据标准是否已经存在,存在则不导入
                 List<DataStandard> dataStandards;
                 dataStandards = selectByCondition(Condition.builder(DataStandard.class)
                         .andWhere(Sqls.custom()
@@ -53,7 +56,7 @@ public class DataStandardRepositoryImpl extends BaseRepositoryImpl<DataStandard,
                         )
                         .build());
                 if (CollectionUtils.isNotEmpty(dataStandards)) {
-                    return;
+                    throw new CommonException("标准编码已存在");
                 }
                 dataStandards = selectByCondition(Condition.builder(DataStandard.class)
                         .andWhere(Sqls.custom()
@@ -62,25 +65,26 @@ public class DataStandardRepositoryImpl extends BaseRepositoryImpl<DataStandard,
                         )
                         .build());
                 if (CollectionUtils.isNotEmpty(dataStandards)) {
-                    return;
+                    throw new CommonException("标准名称已存在");
                 }
-                Long chargeTenantId = dataStandardMapper.selectTenantIdByChargeName(dataStandardDTO.getChargeName());
-                if(dataStandardDTO.getTenantId().compareTo(chargeTenantId)!=0){
-                    return ;
-                }
-                Long chargeId = dataStandardMapper.selectIdByChargeName(dataStandardDTO.getChargeName());
-                if(Strings.isNotEmpty(dataStandardDTO.getChargeDeptName())){
-                    Long chargeDeptId = dataStandardMapper.selectIdByChargeDeptName(dataStandardDTO.getChargeDeptName());
-                    if(Objects.isNull(chargeId)||Objects.isNull(chargeDeptId)){
-                        return ;
+                List<Long> chargeId = dataStandardMapper.selectIdByChargeName(dataStandardDTO.getChargeName(), dataStandardDTO.getTenantId());
+                if (Strings.isNotEmpty(dataStandardDTO.getChargeDeptName())) {
+                    String chargeDeptName = dataStandardDTO.getChargeDeptName();
+                    if (DataSecurityHelper.isTenantOpen()) {
+                        chargeDeptName = DataSecurityHelper.encrypt(chargeDeptName);
                     }
-                    dataStandardDTO.setChargeDeptId(chargeDeptId);
+                    List<Long> chargeDeptId = dataStandardMapper.selectIdByChargeDeptName(chargeDeptName, dataStandardDTO.getTenantId());
+                    if (CollectionUtils.isEmpty(chargeDeptId)) {
+                        throw new CommonException("责任部门不存在");
+                    }
+                    dataStandardDTO.setChargeDeptId(chargeDeptId.get(0));
                 }
-                dataStandardDTO.setChargeId(chargeId);
+                dataStandardDTO.setChargeId(chargeId.get(0));
                 List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                         .andWhere(Sqls.custom()
                                 .andEqualTo(StandardGroup.FIELD_GROUP_CODE, dataStandardDTO.getGroupCode())
-                                .andEqualTo(StandardGroup.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
+                                .andEqualTo(StandardGroup.FIELD_TENANT_ID, dataStandardDTO.getTenantId())
+                                .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, DATA))
                         .build());
                 if (CollectionUtils.isNotEmpty(standardGroupDTOS)) {
                     dataStandardDTO.setGroupId(standardGroupDTOS.get(0).getGroupId());
@@ -98,8 +102,9 @@ public class DataStandardRepositoryImpl extends BaseRepositoryImpl<DataStandard,
                 }
                 importDataStandardDTOList.add(dataStandardDTO);
                 dataStandardDTO.setStandardStatus(CREATE);
-            });
+            }
         }
         batchInsertDTOSelective(importDataStandardDTOList);
+        return true;
     }
 }

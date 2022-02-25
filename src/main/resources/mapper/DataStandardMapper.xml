@@ -142,6 +142,7 @@
             hpfm_unit
         WHERE
             unit_name=#{chargeDeptName}
+             and tenant_id=#{tenantId}
     </select>
     <select id="selectIdByChargeName" resultType="java.lang.Long">
         SELECT
@@ -150,16 +151,9 @@
             iam_user
         WHERE
             login_name=#{chargeName}
+          and organization_id in (#{tenantId},0)
     </select>
 
-    <select id="selectTenantIdByChargeName" resultType="java.lang.Long">
-        SELECT
-            organization_id
-        FROM
-            iam_user
-        WHERE
-            login_name=#{chargeName}
-    </select>
     <select id="selectChargeNameById" resultType="java.lang.String">
         SELECT
             login_name

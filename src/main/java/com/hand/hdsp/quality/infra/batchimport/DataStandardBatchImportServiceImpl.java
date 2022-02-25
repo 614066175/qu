@@ -51,7 +51,6 @@ public class DataStandardBatchImportServiceImpl implements IBatchImportService {
             log.error("Permission Object Read Json Error", e);
             return false;
         }
-        dataStandardRepository.batchImport(dataStandardDTOList);
-        return true;
+        return dataStandardRepository.batchImport(dataStandardDTOList);
     }
 }
