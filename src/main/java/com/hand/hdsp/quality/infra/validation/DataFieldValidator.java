@@ -67,6 +67,7 @@ public class DataFieldValidator extends ValidatorHandler {
             return false;
         }
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
+        dataFieldDTO.setTenantId(tenantId);
         Condition condition = Condition.builder(DataField.class).andWhere(Sqls.custom()
                 .andEqualTo(DataField.FIELD_FIELD_NAME, dataFieldDTO.getFieldName())
                 .andEqualTo(DataField.FIELD_TENANT_ID, tenantId)
@@ -77,19 +78,19 @@ public class DataFieldValidator extends ValidatorHandler {
             return false;
         }
         //如果有责任人部门，则进行验证
-        if(Strings.isNotEmpty(dataFieldDTO.getChargeDeptName())){
+        if (Strings.isNotEmpty(dataFieldDTO.getChargeDeptName())) {
             String chargeDeptName = dataFieldDTO.getChargeDeptName();
-            if(DataSecurityHelper.isTenantOpen()){
-                chargeDeptName=DataSecurityHelper.encrypt(chargeDeptName);
+            if (DataSecurityHelper.isTenantOpen()) {
+                chargeDeptName = DataSecurityHelper.encrypt(chargeDeptName);
             }
-            List<Long> chargeDeptId = dataFieldMapper.selectIdByChargeDeptName(chargeDeptName,tenantId);
-            if(CollectionUtils.isEmpty(chargeDeptId)){
+            List<Long> chargeDeptId = dataFieldMapper.selectIdByChargeDeptName(chargeDeptName, tenantId);
+            if (CollectionUtils.isEmpty(chargeDeptId)) {
                 addErrorMsg("未找到此责任部门，请检查数据");
                 return false;
             }
         }
-        List<Long> chargeId = dataFieldMapper.selectIdByChargeName(dataFieldDTO.getChargeName(), dataFieldDTO.getTenantId());
-        if(CollectionUtils.isEmpty(chargeId)){
+        List<Long> chargeId = dataFieldMapper.selectIdByChargeName(dataFieldDTO.getChargeName(), tenantId);
+        if (CollectionUtils.isEmpty(chargeId)) {
             addErrorMsg("未找到此责任人，请检查数据");
             return false;
         }
