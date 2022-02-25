@@ -45,7 +45,6 @@ public class DataFieldStandardBatchImportServiceImpl implements IBatchImportServ
             log.error("StandardDoc Object Read Json Error", e);
             return false;
         }
-        dataFieldRepository.batchImport(dataFieldDTOList);
-        return true;
+        return dataFieldRepository.batchImport(dataFieldDTOList);
     }
 }

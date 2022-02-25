@@ -11,10 +11,12 @@ import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.imported.app.service.ValidatorHandler;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidator;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidators;
 import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 
 import java.io.IOException;
@@ -74,9 +76,21 @@ public class DataFieldValidator extends ValidatorHandler {
             addErrorMsg("标准字段名称：" + dataFieldDTO.getFieldName() + "已存在;");
             return false;
         }
-        Long chargeTenantId = dataFieldMapper.selectTenantIdByChargeName(dataFieldDTO.getChargeName());
-        if(Objects.isNull(chargeTenantId) || chargeTenantId.compareTo(tenantId) != 0){
-            addErrorMsg("责任人不存在或该责任人与您的租户不匹配！");
+        //如果有责任人部门，则进行验证
+        if(Strings.isNotEmpty(dataFieldDTO.getChargeDeptName())){
+            String chargeDeptName = dataFieldDTO.getChargeDeptName();
+            if(DataSecurityHelper.isTenantOpen()){
+                chargeDeptName=DataSecurityHelper.encrypt(chargeDeptName);
+            }
+            List<Long> chargeDeptId = dataFieldMapper.selectIdByChargeDeptName(chargeDeptName,tenantId);
+            if(CollectionUtils.isEmpty(chargeDeptId)){
+                addErrorMsg("未找到此责任部门，请检查数据");
+                return false;
+            }
+        }
+        List<Long> chargeId = dataFieldMapper.selectIdByChargeName(dataFieldDTO.getChargeName(), dataFieldDTO.getTenantId());
+        if(CollectionUtils.isEmpty(chargeId)){
+            addErrorMsg("未找到此责任人，请检查数据");
             return false;
         }
         return true;

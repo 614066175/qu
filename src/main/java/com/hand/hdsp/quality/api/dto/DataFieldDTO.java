@@ -30,6 +30,18 @@ import org.hzero.export.annotation.ExcelSheet;
 @ExcelSheet(zh = "字段标准", en = "Field Standard")
 public class DataFieldDTO extends AuditDomain {
 
+    @Transient
+    @ExcelColumn(zh = "分组名称", en = "groupName", groups = {Group1.class})
+    private String groupName;
+
+    @Transient
+    @ExcelColumn(zh = "分组编码", en = "groupCode", groups = {Group1.class})
+    private String groupCode;
+
+    @Transient
+    @ExcelColumn(zh = "分组描述", en = "groupDesc", groups = {Group1.class})
+    private String groupDesc;
+
     @ApiModelProperty("字段标准ID，主键，供其他表做外键")
     private Long fieldId;
 
@@ -123,17 +135,7 @@ public class DataFieldDTO extends AuditDomain {
     @ExcelColumn(zh = "责任部门", en = "chargeDeptName", groups = {Group2.class})
     private String chargeDeptName;
 
-    @Transient
-    @ExcelColumn(zh = "分组名称", en = "groupName", groups = {Group1.class})
-    private String groupName;
 
-    @Transient
-    @ExcelColumn(zh = "分组编码", en = "groupCode", groups = {Group1.class})
-    private String groupCode;
-
-    @Transient
-    @ExcelColumn(zh = "分组描述", en = "groupDesc", groups = {Group1.class})
-    private String groupDesc;
 
 
     @Transient

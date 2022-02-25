@@ -10,13 +10,16 @@ import com.hand.hdsp.quality.domain.entity.DataStandard;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.imported.app.service.BatchValidatorHandler;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidator;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidators;
 import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 
 /**
@@ -55,12 +58,6 @@ public class DataStandardValidator extends BatchValidatorHandler {
                 DataStandardDTO dataStandardDTO = objectMapper.readValue(data.get(i), DataStandardDTO.class);
                 dataStandardDTO.setTenantId(tenantId);
                 dataStandardDTOList.add(dataStandardDTO);
-                //判断导入数据的负责人租户是不是和当前登录用户租户相同
-                Long chargeTenantId = dataStandardMapper.selectTenantIdByChargeName(dataStandardDTO.getChargeName());
-                if (tenantId.compareTo(chargeTenantId) != 0) {
-                    addErrorMsg(i, "负责人租户ID和当前租户ID不一致");
-                    return false;
-                }
                 dataStandardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                         .andWhere(Sqls.custom()
                                 .andEqualTo(DataStandard.FIELD_STANDARD_CODE, dataStandardDTO.getStandardCode())
@@ -80,6 +77,24 @@ public class DataStandardValidator extends BatchValidatorHandler {
                 if (CollectionUtils.isNotEmpty(dataStandardDTOList)) {
                     addErrorMsg(i, "标准名称已存在");
                     return false;
+                }
+                List<Long> chargeId = dataStandardMapper.selectIdByChargeName(dataStandardDTO.getChargeName(),
+                        dataStandardDTO.getTenantId());
+                if(CollectionUtils.isEmpty(chargeId)){
+                    addErrorMsg(i,"未找到此责任人，请检查数据");
+                    return false;
+                }
+                //如果责任部门不为空时进行检验
+                if (Strings.isNotEmpty(dataStandardDTO.getChargeDeptName())) {
+                    String chargeDeptName = dataStandardDTO.getChargeDeptName();
+                    if (DataSecurityHelper.isTenantOpen()) {
+                        chargeDeptName = DataSecurityHelper.encrypt(chargeDeptName);
+                    }
+                    List<Long> chargeDeptId = dataStandardMapper.selectIdByChargeDeptName(chargeDeptName, dataStandardDTO.getTenantId());
+                    if (CollectionUtils.isEmpty(chargeDeptId)) {
+                        addErrorMsg(i,"未找到此责任人，请检查数据");
+                        return false;
+                    }
                 }
                 return true;
             }

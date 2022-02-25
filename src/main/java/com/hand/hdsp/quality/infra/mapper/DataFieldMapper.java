@@ -20,7 +20,7 @@ public interface DataFieldMapper extends BaseMapper<DataField> {
      * @param chargeDeptName 负责人部门
      * @return Long
      */
-    Long selectIdByChargeDeptName(@Param("chargeDeptName") String chargeDeptName);
+    List<Long> selectIdByChargeDeptName(@Param("chargeDeptName") String chargeDeptName, @Param("tenantId") Long tenantId);
 
     /**
      * 根据负责部门名称获取负责部门id
@@ -28,7 +28,7 @@ public interface DataFieldMapper extends BaseMapper<DataField> {
      * @param chargeName 负责人名称
      * @return Long
      */
-    Long selectIdByChargeName(@Param("chargeName") String chargeName);
+    List<Long> selectIdByChargeName(@Param("chargeName") String chargeName, @Param("tenantId") Long tenantId);
 
     /**
      * 查询数据标准列表
@@ -38,13 +38,6 @@ public interface DataFieldMapper extends BaseMapper<DataField> {
      */
     List<DataFieldDTO> list(@Param("dataFieldDTO") DataFieldDTO dataFieldDTO);
 
-    /**
-     * 根据负责人名称查询负责人所在租户
-     *
-     * @param chargeName 负责人名称
-     * @return Long
-     */
-    Long selectTenantIdByChargeName(@Param("chargeName") String chargeName);
 
     /**
      * 根据负责人名称查询负责人ID
