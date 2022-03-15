@@ -11,6 +11,7 @@ import com.hand.hdsp.quality.domain.repository.StandardDocRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
+import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -18,6 +19,8 @@ import org.hzero.boot.imported.app.service.IDoImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
+
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DOC;
 
 /**
  * @author StoneHell
@@ -29,11 +32,13 @@ public class StandardDocImportServiceImpl implements IDoImportService {
     private final ObjectMapper objectMapper;
     private final StandardGroupRepository standardGroupRepository;
     private final StandardDocRepository standardDocRepository;
+    private final StandardDocMapper standardDocMapper;
 
-    public StandardDocImportServiceImpl(ObjectMapper objectMapper, StandardGroupRepository standardGroupRepository, StandardDocRepository standardDocRepository) {
+    public StandardDocImportServiceImpl(ObjectMapper objectMapper, StandardGroupRepository standardGroupRepository, StandardDocRepository standardDocRepository, StandardDocMapper standardDocMapper) {
         this.objectMapper = objectMapper;
         this.standardGroupRepository = standardGroupRepository;
         this.standardDocRepository = standardDocRepository;
+        this.standardDocMapper = standardDocMapper;
     }
 
     @Override
@@ -50,10 +55,19 @@ public class StandardDocImportServiceImpl implements IDoImportService {
         // 设置租户Id
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         standardDocDTO.setTenantId(tenantId);
+        // 查找负责人id和负责部门id
+        List<Long> chargeId = standardDocMapper.selectIdByChargeName(standardDocDTO.getChargeName(), standardDocDTO.getTenantId());
+        List<Long> chargeDeptId = standardDocMapper.selectIdByChargeDeptName(standardDocDTO.getChargeDeptName(), standardDocDTO.getTenantId());
+        if (CollectionUtils.isEmpty(chargeId) || CollectionUtils.isEmpty(chargeDeptId)) {
+            return false;
+        }
+        standardDocDTO.setChargeId(chargeId.get(0));
+        standardDocDTO.setChargeDeptId(chargeDeptId.get(0));
         List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardGroup.FIELD_GROUP_CODE, standardDocDTO.getGroupCode())
-                        .andEqualTo(StandardGroup.FIELD_TENANT_ID, standardDocDTO.getTenantId()))
+                        .andEqualTo(StandardGroup.FIELD_TENANT_ID, standardDocDTO.getTenantId())
+                        .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, DOC))
                 .build());
         if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
             standardDocDTO.setGroupId(standardGroupDTOList.get(0).getGroupId());

@@ -77,6 +77,29 @@ public class StandardDocDTO extends AuditDomain {
     @ExcelColumn(zh = "分组描述", en = "groupDesc", groups = {Group1.class})
     private String groupDesc;
 
+    @ApiModelProperty(value = "责任部门ID")
+    private Long chargeDeptId;
+
+    @ApiModelProperty(value = "责任人ID")
+    private Long chargeId;
+
+    @ApiModelProperty(value = "责任人电话")
+    @ExcelColumn(zh = "责任人电话",en = "chargeTel")
+    private String chargeTel;
+
+    @ExcelColumn(zh = "责任人邮箱",en = "chargeEmail")
+    @ApiModelProperty(value = "责任人邮箱")
+    private String chargeEmail;
+
+    @Transient
+    @ExcelColumn(zh = "责任人",en = "chargeName")
+    private String chargeName;
+
+    @Transient
+    @ExcelColumn(zh = "责任部门", en = "chargeDeptName")
+    private String chargeDeptName;
+
+
     @Transient
     private String createdByName;
 

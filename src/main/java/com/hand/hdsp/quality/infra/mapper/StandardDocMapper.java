@@ -37,4 +37,20 @@ public interface StandardDocMapper extends BaseMapper<StandardDoc> {
      * @return 返回值
      */
     Integer updateDesc(@Param("standardDocDTO") StandardDocDTO standardDocDTO);
+
+    /**
+     * 根据负责部门名称获取负责人部门id
+     *
+     * @param chargeDeptName 负责人部门
+     * @return Long
+     */
+    List<Long> selectIdByChargeDeptName(@Param("chargeDeptName") String chargeDeptName, @Param("tenantId") Long tenantId);
+
+    /**
+     * 根据负责人名称获取负责部门id
+     *
+     * @param chargeName 负责人名称
+     * @return Long
+     */
+    List<Long> selectIdByChargeName(@Param("chargeName") String chargeName, @Param("tenantId") Long tenantId);
 }
