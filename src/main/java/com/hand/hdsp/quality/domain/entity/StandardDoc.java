@@ -52,6 +52,14 @@ public class StandardDoc extends AuditDomain {
     private String docPath;
 
     private Long tenantId;
+
+    private Long chargeDeptId;
+
+    private Long chargeId;
+
+    private String chargeTel;
+
+    private String chargeEmail;
 }
 
 
