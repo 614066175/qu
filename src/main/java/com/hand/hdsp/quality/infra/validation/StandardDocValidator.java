@@ -73,12 +73,13 @@ public class StandardDocValidator extends BatchValidatorHandler {
                         return false;
                     }
 
-                    //分组名称不符合规范
-                    if (!standardDocDTO.getGroupName().matches("^[a-zA-Z][a-zA-Z0-9_]*$")){
-                        addErrorMsg(i, "标准编码不符合:1-64个字符，可包含字母、数字或下划线”_”，英文字母开头");
+                    // 对责任人进行验证
+                    List<Long> chargeId = standardDocMapper.selectIdByChargeName(standardDocDTO.getChargeName(), tenantId);
+                    if (CollectionUtils.isEmpty(chargeId)) {
+                        addErrorMsg(i,"未找到此责任人，请检查数据");
                         return false;
                     }
-                    //如果有责任人部门，则进行验证
+                    //如果有责任部门，则进行验证
                     if (Strings.isNotEmpty(standardDocDTO.getChargeDeptName())) {
                         String chargeDeptName = standardDocDTO.getChargeDeptName();
                         if (DataSecurityHelper.isTenantOpen()) {
@@ -89,11 +90,6 @@ public class StandardDocValidator extends BatchValidatorHandler {
                             addErrorMsg(i,"未找到此责任部门，请检查数据");
                             return false;
                         }
-                    }
-                    List<Long> chargeId = standardDocMapper.selectIdByChargeName(standardDocDTO.getChargeName(), tenantId);
-                    if (CollectionUtils.isEmpty(chargeId)) {
-                        addErrorMsg(i,"未找到此责任人，请检查数据");
-                        return false;
                     }
                     return true;
                 }

@@ -12,12 +12,15 @@ import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.imported.app.service.IDoImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DOC;
@@ -55,14 +58,25 @@ public class StandardDocImportServiceImpl implements IDoImportService {
         // 设置租户Id
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         standardDocDTO.setTenantId(tenantId);
-        // 查找负责人id和负责部门id
+        // 查找负责人id
         List<Long> chargeId = standardDocMapper.selectIdByChargeName(standardDocDTO.getChargeName(), standardDocDTO.getTenantId());
-        List<Long> chargeDeptId = standardDocMapper.selectIdByChargeDeptName(standardDocDTO.getChargeDeptName(), standardDocDTO.getTenantId());
-        if (CollectionUtils.isEmpty(chargeId) || CollectionUtils.isEmpty(chargeDeptId)) {
-            return false;
+        if (CollectionUtils.isEmpty(chargeId)){
+            throw new CommonException("责任人不存在");
         }
         standardDocDTO.setChargeId(chargeId.get(0));
-        standardDocDTO.setChargeDeptId(chargeDeptId.get(0));
+        // 查找负责部门id
+        if (Strings.isNotEmpty(standardDocDTO.getChargeDeptName())) {
+            String chargeDeptName = standardDocDTO.getChargeDeptName();
+            // 判断是否加密
+            if (DataSecurityHelper.isTenantOpen()) {
+                chargeDeptName = DataSecurityHelper.encrypt(chargeDeptName);
+            }
+            List<Long> chargeDeptId = standardDocMapper.selectIdByChargeDeptName(chargeDeptName, standardDocDTO.getTenantId());
+            if (CollectionUtils.isEmpty(chargeDeptId)) {
+                throw new CommonException("责任部门不存在");
+            }
+            standardDocDTO.setChargeDeptId(chargeDeptId.get(0));
+        }
         List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardGroup.FIELD_GROUP_CODE, standardDocDTO.getGroupCode())
