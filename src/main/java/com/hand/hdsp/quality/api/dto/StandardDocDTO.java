@@ -39,20 +39,32 @@ public class StandardDocDTO extends AuditDomain {
     @NotNull
     private Long groupId;
 
+    @Transient
+    @ExcelColumn(zh = "分组编码", en = "groupCode", order = 1)
+    private String groupCode;
+
+    @Transient
+    @ExcelColumn(zh = "分组名称", en = "groupName", order = 2)
+    private String groupName;
+
+    @Transient
+    @ExcelColumn(zh = "分组描述", en = "groupDesc", order = 3)
+    private String groupDesc;
+
     @ApiModelProperty(value = "数据标准编码")
     @NotBlank
     @Size(max = 50)
-    @ExcelColumn(zh = "标准编码", en = "标准编码", groups = {Group1.class})
+    @ExcelColumn(zh = "标准编码", en = "标准编码", order = 4)
     private String standardCode;
 
     @ApiModelProperty(value = "数据标准名称")
     @NotBlank
     @Size(max = 120)
-    @ExcelColumn(zh = "标准名称", en = "标准名称", groups = {Group1.class})
+    @ExcelColumn(zh = "标准名称", en = "标准名称", order = 5)
     private String standardName;
 
     @ApiModelProperty(value = "数据标准描述")
-    @ExcelColumn(zh = "标准描述", en = "标准描述", groups = {Group1.class})
+    @ExcelColumn(zh = "标准描述", en = "标准描述", order = 6)
     private String standardDesc;
 
     @ApiModelProperty(value = "数据标准文档名称")
@@ -65,40 +77,27 @@ public class StandardDocDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
-    @Transient
-    @ExcelColumn(zh = "分组名称", en = "groupName", groups = {Group1.class})
-    private String groupName;
-
-    @Transient
-    @ExcelColumn(zh = "分组编码", en = "groupCode", groups = {Group1.class})
-    private String groupCode;
-
-    @Transient
-    @ExcelColumn(zh = "分组描述", en = "groupDesc", groups = {Group1.class})
-    private String groupDesc;
-
     @ApiModelProperty(value = "责任部门ID")
     private Long chargeDeptId;
 
     @ApiModelProperty(value = "责任人ID")
     private Long chargeId;
 
-    @ApiModelProperty(value = "责任人电话")
-    @ExcelColumn(zh = "责任人电话",en = "chargeTel")
-    private String chargeTel;
-
-    @ExcelColumn(zh = "责任人邮箱",en = "chargeEmail")
-    @ApiModelProperty(value = "责任人邮箱")
-    private String chargeEmail;
-
     @Transient
-    @ExcelColumn(zh = "责任人",en = "chargeName")
-    private String chargeName;
-
-    @Transient
-    @ExcelColumn(zh = "责任部门", en = "chargeDeptName")
+    @ExcelColumn(zh = "责任部门", en = "chargeDeptName", order = 7)
     private String chargeDeptName;
 
+    @Transient
+    @ExcelColumn(zh = "责任人", en = "chargeName", order = 8)
+    private String chargeName;
+
+    @ApiModelProperty(value = "责任人电话")
+    @ExcelColumn(zh = "责任人电话", en = "chargeTel", order = 9)
+    private String chargeTel;
+
+    @ExcelColumn(zh = "责任人邮箱", en = "chargeEmail", order = 10)
+    @ApiModelProperty(value = "责任人邮箱")
+    private String chargeEmail;
 
     @Transient
     private String createdByName;
