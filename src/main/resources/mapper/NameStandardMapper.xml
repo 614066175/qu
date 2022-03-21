@@ -181,5 +181,25 @@
         LEFT JOIN xsta_standard_group xsg ON (xsg.group_id=xns.group_id)
         WHERE xns.standard_id=#{standardId}
     </select>
+    <select id="detailUser" resultType="com.hand.hdsp.quality.api.dto.NameStandardDTO">
+        SELECT
+        iu.id AS standardId
+        FROM iam_user iu
+        <where>
+            <if test="standardName != null and standardName != ''">
+                iu.real_name = #{standardName}
+            </if>
+        </where>
+    </select>
+    <select id="detailUnit" resultType="com.hand.hdsp.quality.api.dto.NameStandardDTO">
+        SELECT
+        hu.unit_id
+        FROM hpfm_unit hu
+        <where>
+            <if test="chargeDeptName != null and chargeDeptName != ''">
+                hu.unit_name = #{chargeDeptName}
+            </if>
+        </where>
+    </select>
 
 </mapper>
