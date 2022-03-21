@@ -50,8 +50,8 @@ public class StandardGroupController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
-    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId, StandardGroupVO standardGroupVO , PageRequest pageRequest) {
-        return Results.success(standardGroupService.list(pageRequest,standardGroupVO));
+    public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId, StandardGroupVO standardGroupVO, PageRequest pageRequest) {
+        return Results.success(standardGroupService.list(pageRequest, standardGroupVO));
     }
 
     @ApiOperation(value = "根据标准名找到对应分组")
@@ -80,7 +80,7 @@ public class StandardGroupController extends BaseController {
     public ResponseEntity<?> create(@PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody StandardGroupDTO standardGroupDTO) {
         standardGroupDTO.setTenantId(tenantId);
-        return Results.success(standardGroupRepository.insertDTOSelective(standardGroupDTO));
+        return Results.success(standardGroupService.create(standardGroupDTO));
     }
 
     @ApiOperation(value = "修改分组")
@@ -94,8 +94,7 @@ public class StandardGroupController extends BaseController {
     @PutMapping
     public ResponseEntity<?> updateGroup(@PathVariable(name = "organizationId") Long tenantId, @RequestBody StandardGroupDTO standardGroupDTO) {
         standardGroupDTO.setTenantId(tenantId);
-        standardGroupRepository.updateByDTOPrimaryKeySelective(standardGroupDTO);
-        return Results.success(standardGroupDTO);
+        return Results.success(standardGroupService.update(standardGroupDTO));
     }
 
     @ApiOperation(value = "删除分组")
@@ -118,13 +117,13 @@ public class StandardGroupController extends BaseController {
     @GetMapping("/export")
     @ExcelExport(value = StandardGroupDTO.class)
     public ResponseEntity<?> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                                        StandardGroupDTO dto,
-                                                        ExportParam exportParam,
-                                                        HttpServletResponse response) {
+                                    StandardGroupDTO dto,
+                                    ExportParam exportParam,
+                                    HttpServletResponse response) {
         dto.setTenantId(tenantId);
         List<StandardGroupDTO> dtoList =
                 standardGroupService.export(dto, exportParam);
-        response.addHeader("Access-Control-Expose-Headers","Content-Disposition");
+        response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
         return Results.success(dtoList);
     }
 }

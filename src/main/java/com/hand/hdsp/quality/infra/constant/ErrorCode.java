@@ -143,4 +143,10 @@ public interface ErrorCode {
     String UNKNOWN_DATATYPE = "hdsp.xqua.err.unknown_datatype";
 
     String LINEAGE_ERROR="hdsp.xqua.err.lineage_error";
+
+    String DOC_STANDARD_NAME_ALREADY_EXIST = "hdsp.xqua.err.doc_standard_name_already_exist";
+
+    String NAME_STANDARD_NAME_ALREADY_EXIST="hdsp.xqua.err.name_standard_name_already_exist";
+
+    String GROUP_NAME_ALREADY_EXIST="hdsp.xqua.err.group_name_already_exist";
 }
