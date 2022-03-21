@@ -128,10 +128,11 @@ public class NameStandardServiceImpl implements NameStandardService {
 
     @Override
     public NameStandardDTO update(NameStandardDTO nameStandardDTO) {
-        List<NameStandardDTO> dtoList = nameStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
+        List<NameStandardDTO> dtoList = nameStandardRepository.selectDTOByCondition(Condition.builder(NameStandard.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(NameStandard.FIELD_TENANT_ID, nameStandardDTO.getTenantId())
-                        .andEqualTo(NameStandard.FIELD_STANDARD_NAME, nameStandardDTO.getStandardName()))
+                        .andEqualTo(NameStandard.FIELD_STANDARD_NAME, nameStandardDTO.getStandardName())
+                        .andEqualTo(NameStandard.FIELD_PROJECT_ID, nameStandardDTO.getProjectId()))
                 .build());
         if (dtoList.size() > 1 || (dtoList.size() == 1 && !dtoList.get(0).getStandardCode().equals(nameStandardDTO.getStandardCode()))) {
             throw new CommonException(ErrorCode.NAME_STANDARD_NAME_ALREADY_EXIST);
@@ -234,7 +235,8 @@ public class NameStandardServiceImpl implements NameStandardService {
         List<NameStandardDTO> dtos = nameStandardRepository.selectDTOByCondition(Condition.builder(NameStandard.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(NameStandard.FIELD_TENANT_ID, nameStandardDTO.getTenantId())
-                        .andEqualTo(NameStandard.FIELD_STANDARD_CODE, nameStandardDTO.getStandardCode()))
+                        .andEqualTo(NameStandard.FIELD_STANDARD_CODE, nameStandardDTO.getStandardCode())
+                        .andEqualTo(NameStandard.FIELD_PROJECT_ID, nameStandardDTO.getProjectId()))
                 .build());
         if (CollectionUtils.isNotEmpty(dtos)) {
             throw new CommonException(ErrorCode.CODE_ALREADY_EXISTS);
@@ -242,7 +244,8 @@ public class NameStandardServiceImpl implements NameStandardService {
         dtos = nameStandardRepository.selectDTOByCondition(Condition.builder(NameStandard.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(NameStandard.FIELD_TENANT_ID, nameStandardDTO.getTenantId())
-                        .andEqualTo(NameStandard.FIELD_STANDARD_NAME, nameStandardDTO.getStandardName()))
+                        .andEqualTo(NameStandard.FIELD_STANDARD_NAME, nameStandardDTO.getStandardName())
+                        .andEqualTo(NameStandard.FIELD_PROJECT_ID, nameStandardDTO.getProjectId()))
                 .build());
         if (CollectionUtils.isNotEmpty(dtos)) {
             throw new CommonException(ErrorCode.NAME_STANDARD_NAME_ALREADY_EXIST);

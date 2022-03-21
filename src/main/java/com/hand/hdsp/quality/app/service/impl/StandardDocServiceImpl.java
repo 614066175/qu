@@ -78,7 +78,8 @@ public class StandardDocServiceImpl implements StandardDocService {
         List<StandardDocDTO> standardDocDTOList = standardDocRepository.selectDTOByCondition(Condition.builder(StandardDoc.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardDoc.FIELD_TENANT_ID, standardDocDTO.getTenantId())
-                        .andEqualTo(StandardDoc.FIELD_STANDARD_CODE, standardDocDTO.getStandardCode()))
+                        .andEqualTo(StandardDoc.FIELD_STANDARD_CODE, standardDocDTO.getStandardCode())
+                        .andEqualTo(StandardDoc.FIELD_PROJECT_ID, standardDocDTO.getProjectId()))
                 .build());
         //标准编码存在
         if (CollectionUtils.isNotEmpty(standardDocDTOList)) {
@@ -88,7 +89,8 @@ public class StandardDocServiceImpl implements StandardDocService {
         standardDocDTOList = standardDocRepository.selectDTOByCondition(Condition.builder(StandardDoc.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardDoc.FIELD_STANDARD_NAME, standardDocDTO.getStandardName())
-                        .andEqualTo(StandardDoc.FIELD_TENANT_ID, standardDocDTO.getTenantId()))
+                        .andEqualTo(StandardDoc.FIELD_TENANT_ID, standardDocDTO.getTenantId())
+                        .andEqualTo(StandardDoc.FIELD_PROJECT_ID, standardDocDTO.getProjectId()))
                 .build());
         //标准名称存在
         if (CollectionUtils.isNotEmpty(standardDocDTOList)) {
@@ -108,7 +110,8 @@ public class StandardDocServiceImpl implements StandardDocService {
         List<StandardDocDTO> dtoList = standardDocRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardDoc.FIELD_TENANT_ID, standardDocDTO.getTenantId())
-                        .andEqualTo(StandardDoc.FIELD_STANDARD_NAME, standardDocDTO.getStandardName()))
+                        .andEqualTo(StandardDoc.FIELD_STANDARD_NAME, standardDocDTO.getStandardName())
+                        .andEqualTo(StandardDoc.FIELD_PROJECT_ID, standardDocDTO.getProjectId()))
                 .build());
         if (dtoList.size() > 1 || (dtoList.size() == 1 && !dtoList.get(0).getStandardCode().equals(standardDocDTO.getStandardCode()))) {
             throw new CommonException(ErrorCode.DOC_STANDARD_NAME_ALREADY_EXIST);
