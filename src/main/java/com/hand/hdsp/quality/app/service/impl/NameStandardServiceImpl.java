@@ -128,7 +128,7 @@ public class NameStandardServiceImpl implements NameStandardService {
 
     @Override
     public NameStandardDTO update(NameStandardDTO nameStandardDTO) {
-        List<NameStandardDTO> dtoList = nameStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
+        List<NameStandardDTO> dtoList = nameStandardRepository.selectDTOByCondition(Condition.builder(NameStandard.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(NameStandard.FIELD_TENANT_ID, nameStandardDTO.getTenantId())
                         .andEqualTo(NameStandard.FIELD_STANDARD_NAME, nameStandardDTO.getStandardName()))
