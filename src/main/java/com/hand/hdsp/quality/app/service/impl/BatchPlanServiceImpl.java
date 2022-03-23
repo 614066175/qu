@@ -504,6 +504,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             updateTimestamp(tenantId, timestampList, false);
             batchResult.setPlanStatus(PlanConstant.PlanStatus.FAILED);
             batchResult.setExceptionInfo(MessageAccessor.getMessage(e.getMessage(), e.getParameters()).getDesc());
+            // 错误也应该添加结束时间
+            batchResult.setEndDate(new Date());
             batchResultRepository.updateByPrimaryKeySelective(batchResult);
             log.error("exec plan error!", e);
             throw e;
@@ -512,6 +514,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             updateTimestamp(tenantId, timestampList, false);
             batchResult.setPlanStatus(PlanConstant.PlanStatus.FAILED);
             batchResult.setExceptionInfo(ExceptionUtils.getMessage(e));
+            // 错误也应该添加结束时间
+            batchResult.setEndDate(new Date());
             batchResultRepository.updateByPrimaryKeySelective(batchResult);
             log.error("exec plan error!", e);
             throw e;
@@ -637,7 +641,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 List<Map<String, Object>> maps = driverSession.executeOneQuery(batchPlanBase.getDatasourceSchema(),
                         String.format("select count(*) as COUNT from %s", batchPlanBase.getObjectName()));
                 if (CollectionUtils.isNotEmpty(maps)) {
+                    log.info("查询结果："+ maps);
                     String key = maps.get(0).keySet().iterator().next();
+                    log.info("key:"+key);
                     Long count = Long.parseLong(String.valueOf(maps.get(0).get(key)));
                     batchResultBase.setDataCount(count);
                 }

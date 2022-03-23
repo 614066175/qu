@@ -1,11 +1,5 @@
 package com.hand.hdsp.quality.infra.batchimport;
 
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.CREATE;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Objects;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
@@ -22,6 +16,12 @@ import org.hzero.boot.imported.app.service.IDoImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
+
+import java.io.IOException;
+import java.util.List;
+
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.CREATE;
 
 /**
  * <p>
@@ -64,22 +64,19 @@ public class DataFieldStandardImportServiceImpl implements IDoImportService {
         // 设置租户Id
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         dataFieldDTO.setTenantId(tenantId);
-        Long chargeTenantId = dataFieldMapper.selectTenantIdByChargeName(dataFieldDTO.getChargeName());
-        if (tenantId.compareTo(chargeTenantId) != 0) {
+        List<Long> chargeId = dataFieldMapper.selectIdByChargeName(dataFieldDTO.getChargeName(), dataFieldDTO.getTenantId());
+        List<Long> chargeDeptId = dataFieldMapper.selectIdByChargeDeptName(dataFieldDTO.getChargeDeptName(), dataFieldDTO.getTenantId());
+        if (CollectionUtils.isEmpty(chargeId) || CollectionUtils.isEmpty(chargeDeptId)) {
             return false;
         }
-        Long chargeId = dataFieldMapper.selectIdByChargeName(dataFieldDTO.getChargeName());
-        Long chargeDeptId = dataFieldMapper.selectIdByChargeDeptName(dataFieldDTO.getChargeDeptName());
-        if (Objects.isNull(chargeId) || Objects.isNull(chargeDeptId)) {
-            return false;
-        }
-        dataFieldDTO.setChargeId(chargeId);
-        dataFieldDTO.setChargeDeptId(chargeDeptId);
+        dataFieldDTO.setChargeId(chargeId.get(0));
+        dataFieldDTO.setChargeDeptId(chargeDeptId.get(0));
 
         List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardGroup.FIELD_GROUP_CODE, dataFieldDTO.getGroupCode())
-                        .andEqualTo(StandardGroup.FIELD_TENANT_ID, dataFieldDTO.getTenantId()))
+                        .andEqualTo(StandardGroup.FIELD_TENANT_ID, dataFieldDTO.getTenantId())
+                        .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE,FIELD))
                 .build());
         if (CollectionUtils.isNotEmpty(standardGroupDTOS)) {
             dataFieldDTO.setGroupId(standardGroupDTOS.get(0).getGroupId());

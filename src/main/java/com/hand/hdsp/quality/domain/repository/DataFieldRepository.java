@@ -19,7 +19,7 @@ public interface DataFieldRepository extends BaseRepository<DataField, DataField
      *
      * @param dataFieldDTOList DataFieldDTO
      */
-    void batchImport(List<DataFieldDTO> dataFieldDTOList);
+    boolean batchImport(List<DataFieldDTO> dataFieldDTOList);
 
     /**
      * 查询是否开启了数据加密

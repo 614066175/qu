@@ -9,11 +9,16 @@ import java.util.Objects;
 import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 
+import com.hand.hdsp.core.util.PageParseUtil;
+import com.hand.hdsp.quality.api.dto.NameStandardDTO;
 import com.hand.hdsp.quality.api.dto.StandardDocDTO;
 import com.hand.hdsp.quality.app.service.MinioStorageService;
 import com.hand.hdsp.quality.app.service.StandardDocService;
+import com.hand.hdsp.quality.domain.entity.DataStandard;
+import com.hand.hdsp.quality.domain.entity.NameStandard;
 import com.hand.hdsp.quality.domain.entity.StandardDoc;
 import com.hand.hdsp.quality.domain.repository.StandardDocRepository;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardDocConstant;
 import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
 import com.hand.hdsp.quality.infra.util.EurekaUtil;
@@ -22,8 +27,11 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.hzero.boot.driver.infra.util.PageUtil;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -57,12 +65,35 @@ public class StandardDocServiceImpl implements StandardDocService {
 
     @Override
     public Page<StandardDocDTO> list(PageRequest pageRequest, StandardDocDTO standardDocDTO) {
-        return PageHelper.doPageAndSort(pageRequest, () -> standardDocMapper.list(standardDocDTO));
+        List<StandardDocDTO> list = standardDocMapper.list(standardDocDTO);
+        for (StandardDocDTO docDTO : list) {
+            decodeForStandardDocDTO(docDTO);
+        }
+        return PageParseUtil.springPage2C7nPage(PageUtil.doPage(list, org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize())));
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public StandardDocDTO create(StandardDocDTO standardDocDTO, MultipartFile multipartFile) {
+        List<StandardDocDTO> standardDocDTOList = standardDocRepository.selectDTOByCondition(Condition.builder(StandardDoc.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardDoc.FIELD_TENANT_ID, standardDocDTO.getTenantId())
+                        .andEqualTo(StandardDoc.FIELD_STANDARD_CODE, standardDocDTO.getStandardCode()))
+                .build());
+        //标准编码存在
+        if (CollectionUtils.isNotEmpty(standardDocDTOList)) {
+            throw new CommonException(ErrorCode.CODE_ALREADY_EXISTS);
+        }
+        // 标准名称存在
+        standardDocDTOList = standardDocRepository.selectDTOByCondition(Condition.builder(StandardDoc.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardDoc.FIELD_STANDARD_NAME, standardDocDTO.getStandardName())
+                        .andEqualTo(StandardDoc.FIELD_TENANT_ID, standardDocDTO.getTenantId()))
+                .build());
+        //标准名称存在
+        if (CollectionUtils.isNotEmpty(standardDocDTOList)) {
+            throw new CommonException(ErrorCode.DOC_STANDARD_NAME_ALREADY_EXIST);
+        }
         if (Objects.nonNull(multipartFile)) {
             handleStandardDocUpload(standardDocDTO, multipartFile);
         }
@@ -73,10 +104,19 @@ public class StandardDocServiceImpl implements StandardDocService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public StandardDocDTO update(StandardDocDTO standardDocDTO, MultipartFile multipartFile) {
+        // 验证标准名称是否已存在
+        List<StandardDocDTO> dtoList = standardDocRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardDoc.FIELD_TENANT_ID, standardDocDTO.getTenantId())
+                        .andEqualTo(StandardDoc.FIELD_STANDARD_NAME, standardDocDTO.getStandardName()))
+                .build());
+        if (dtoList.size() > 1 || (dtoList.size() == 1 && !dtoList.get(0).getStandardCode().equals(standardDocDTO.getStandardCode()))) {
+            throw new CommonException(ErrorCode.DOC_STANDARD_NAME_ALREADY_EXIST);
+        }
         if (Objects.nonNull(multipartFile)) {
             handleStandardDocUpload(standardDocDTO, multipartFile);
         }
-        Optional.ofNullable(standardDocDTO.getStandardDesc()).orElseGet(()->{
+        Optional.ofNullable(standardDocDTO.getStandardDesc()).orElseGet(() -> {
             standardDocMapper.updateDesc(standardDocDTO);
             return null;
         });
@@ -142,6 +182,24 @@ public class StandardDocServiceImpl implements StandardDocService {
     @Override
     public List<StandardDocDTO> export(StandardDocDTO dto, ExportParam exportParam, PageRequest pageRequest) {
         return list(pageRequest, dto);
+    }
+
+    private void decodeForStandardDocDTO(StandardDocDTO dto) {
+        if (DataSecurityHelper.isTenantOpen()) {
+            // 解密电话号码
+            if (StringUtils.isNotEmpty(dto.getChargeTel())) {
+                dto.setChargeTel(DataSecurityHelper.decrypt(dto.getChargeTel()));
+            }
+            // 解密邮箱地址
+            if (StringUtils.isNotEmpty(dto.getChargeEmail())) {
+                dto.setChargeEmail(DataSecurityHelper.decrypt(dto.getChargeEmail()));
+            }
+            // 解密部门名称
+            if (StringUtils.isNotEmpty(dto.getChargeDeptName())) {
+                dto.setChargeDeptName(DataSecurityHelper.decrypt(dto.getChargeDeptName()));
+            }
+        }
+
     }
 
     /**

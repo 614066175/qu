@@ -21,28 +21,26 @@ public interface DataStandardMapper extends BaseMapper<DataStandard> {
 
     /**
      * 根据负责人名称获取负责人id
+     *
      * @param chargeDeptName 负责人部门
      */
-    Long selectIdByChargeDeptName(@Param("chargeDeptName") String chargeDeptName);
+    List<Long> selectIdByChargeDeptName(@Param("chargeDeptName") String chargeDeptName, @Param("tenantId") Long tenantId);
 
     /**
      * 根据负责部门名称获取负责部门id
+     *
      * @param chargeName 负责人名称
      */
-    Long selectIdByChargeName(@Param("chargeName") String chargeName);
+    List<Long> selectIdByChargeName(@Param("chargeName") String chargeName, @Param("tenantId") Long tenantId);
+
     /**
      * 查询数据标准列表
+     *
      * @param dataStandardDTO
      * @return
      */
     List<DataStandardDTO> list(@Param("dataStandardDTO") DataStandardDTO dataStandardDTO);
 
-    /**
-     * 根据负责人名称查询负责人所在租户
-     * @param chargeName
-     * @return
-     */
-    Long selectTenantIdByChargeName(@Param("chargeName") String chargeName);
 
     /**
      * @param chargeId

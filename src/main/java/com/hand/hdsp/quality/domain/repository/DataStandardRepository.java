@@ -21,5 +21,5 @@ public interface DataStandardRepository extends BaseRepository<DataStandard, Dat
      *
      * @param dataStandardDTOList DataStandardDTO
      */
-    void batchImport(List<DataStandardDTO> dataStandardDTOList);
+    boolean batchImport(List<DataStandardDTO> dataStandardDTOList);
 }

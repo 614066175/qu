@@ -28,6 +28,8 @@
         ${sd}.doc_name,
         ${sd}.doc_path,
         ${sd}.tenant_id,
+        ${sd}.charge_dept_id,
+        ${sd}.charge_id,
         ${sd}.object_version_number,
         ${sd}.creation_date,
         ${sd}.created_by,
@@ -49,13 +51,18 @@
         xsg.group_desc,
         iu1.login_name createdByName,
         iu2.login_name lastUpdatedByName,
+        iu2.login_name chargeName,
+        iu2.phone chargeTel,
+        iu2.email chargeEmail,
+        hu.unit_name chargeDeptName,
         <include refid="baseColumn">
             <property name="sd" value="sd"/>
         </include>
         from xsta_standard_doc sd
         left join xsta_standard_group xsg on xsg.group_id=sd.group_id
-        left join iam_user iu1 on iu1.id=sd.created_by
-        left join iam_user iu2 on iu2.id=sd.last_updated_by
+        left join iam_user iu on sd.last_updated_by=iu.id
+        left join iam_user iu2 on sd.charge_id=iu2.id
+        left join hpfm_unit hu on hu.unit_id=sd.charge_dept_id
         <where>
             <if test="standardDocDTO.docId!=null">
                 sd.doc_id=#{standardDocDTO.docId}
@@ -92,5 +99,25 @@
         select login_name
         from iam_user
         where id=#{userId}
+    </select>
+
+    <select id="selectIdByChargeDeptName" resultType="java.lang.Long">
+        SELECT
+            unit_id
+        FROM
+            hpfm_unit
+        WHERE
+            unit_name=#{chargeDeptName}
+          and tenant_id =#{tenantId}
+    </select>
+
+    <select id="selectIdByChargeName" resultType="java.lang.Long">
+        SELECT
+            id
+        FROM
+            iam_user
+        WHERE
+            login_name=#{chargeName}
+          and organization_id in (#{tenantId},0)
     </select>
 </mapper>

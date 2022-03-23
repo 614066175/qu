@@ -200,7 +200,7 @@ public class BatchResultServiceImpl implements BatchResultService {
             throw new CommonException(ErrorCode.BATCH_RESULT_NOT_EXIST);
         }
         BatchResultBase batchResultBase = batchResultBaseRepository.selectByPrimaryKey(resultBaseId);
-        if(batchResultBase==null||Strings.isEmpty(batchResultBase.getExceptionList())){
+        if (batchResultBase == null || Strings.isEmpty(batchResultBase.getExceptionList())) {
             return new Page<>();
         }
         JSONObject jsonObject = JSON.parseObject(batchResultBase.getExceptionList());
@@ -236,6 +236,8 @@ public class BatchResultServiceImpl implements BatchResultService {
                 break;
             }
         }
+        //去除合并pk的展示
+        content = content.stream().peek(map -> map.remove(ExceptionParam.PK)).collect(Collectors.toList());
         return new Page<>(content, new PageInfo(pageRequest.getPage(), pageRequest.getSize()), result.size());
     }
 
@@ -258,14 +260,14 @@ public class BatchResultServiceImpl implements BatchResultService {
             //筛选出来符合规则的异常统计，然后根据日期进行分组再次求和
             Map<String, LongSummaryStatistics> collect = list.stream().filter(u -> u.getWarningLevel().contains(LEFT_Braces))
                     .map(u -> TimeRangeDTO.builder().problemDataCount(JsonUtils.json2WarningLevelVO(u.getWarningLevel())
-                            .stream().collect(Collectors.summarizingLong(WarningLevelVO::getLevelCount)).getSum())
+                                    .stream().collect(Collectors.summarizingLong(WarningLevelVO::getLevelCount)).getSum())
                             .dateGroup(u.getDateGroup())
                             .build())
                     .collect(Collectors.groupingBy(TimeRangeDTO::getDateGroup, Collectors.summarizingLong(TimeRangeDTO::getProblemDataCount)));
             //将分组求和的数据转成List
             list = collect.entrySet().stream().map(c -> TimeRangeDTO.builder()
-                    .dateGroup(c.getKey())
-                    .problemDataCount(c.getValue().getSum()).build())
+                            .dateGroup(c.getKey())
+                            .problemDataCount(c.getValue().getSum()).build())
                     .collect(Collectors.toList());
             //对list按照时间正序排序
             list = list.stream().sorted(Comparator.comparing(TimeRangeDTO::getDateGroup)).collect(Collectors.toList());

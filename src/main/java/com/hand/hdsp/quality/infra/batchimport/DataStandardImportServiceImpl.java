@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.infra.batchimport;
 
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.CREATE;
 
 import java.io.IOException;
@@ -64,21 +65,18 @@ public class DataStandardImportServiceImpl implements IDoImportService {
         // 设置租户Id
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         dataStandardDTO.setTenantId(tenantId);
-        Long chargeTenantId = dataStandardMapper.selectTenantIdByChargeName(dataStandardDTO.getChargeName());
-        if (tenantId.compareTo(chargeTenantId) != 0) {
+        List<Long> chargeId = dataStandardMapper.selectIdByChargeName(dataStandardDTO.getChargeName(),dataStandardDTO.getTenantId());
+        List<Long> chargeDeptId = dataStandardMapper.selectIdByChargeDeptName(dataStandardDTO.getChargeDeptName(),dataStandardDTO.getTenantId());
+        if (CollectionUtils.isEmpty(chargeId) || CollectionUtils.isEmpty(chargeDeptId)) {
             return false;
         }
-        Long chargeId = dataStandardMapper.selectIdByChargeName(dataStandardDTO.getChargeName());
-        Long chargeDeptId = dataStandardMapper.selectIdByChargeDeptName(dataStandardDTO.getChargeDeptName());
-        if (Objects.isNull(chargeId) || Objects.isNull(chargeDeptId)) {
-            return false;
-        }
-        dataStandardDTO.setChargeId(chargeId);
-        dataStandardDTO.setChargeDeptId(chargeDeptId);
+        dataStandardDTO.setChargeId(chargeId.get(0));
+        dataStandardDTO.setChargeDeptId(chargeDeptId.get(0));
         List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardGroup.FIELD_GROUP_CODE, dataStandardDTO.getGroupCode())
-                        .andEqualTo(StandardGroup.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
+                        .andEqualTo(StandardGroup.FIELD_TENANT_ID, dataStandardDTO.getTenantId())
+                        .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE,DATA))
                 .build());
         if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
             dataStandardDTO.setGroupId(standardGroupDTOList.get(0).getGroupId());
