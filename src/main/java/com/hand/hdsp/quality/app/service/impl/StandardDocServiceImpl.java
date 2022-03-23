@@ -10,11 +10,15 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 
 import com.hand.hdsp.core.util.PageParseUtil;
+import com.hand.hdsp.quality.api.dto.NameStandardDTO;
 import com.hand.hdsp.quality.api.dto.StandardDocDTO;
 import com.hand.hdsp.quality.app.service.MinioStorageService;
 import com.hand.hdsp.quality.app.service.StandardDocService;
+import com.hand.hdsp.quality.domain.entity.DataStandard;
+import com.hand.hdsp.quality.domain.entity.NameStandard;
 import com.hand.hdsp.quality.domain.entity.StandardDoc;
 import com.hand.hdsp.quality.domain.repository.StandardDocRepository;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardDocConstant;
 import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
 import com.hand.hdsp.quality.infra.util.EurekaUtil;
@@ -71,6 +75,25 @@ public class StandardDocServiceImpl implements StandardDocService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public StandardDocDTO create(StandardDocDTO standardDocDTO, MultipartFile multipartFile) {
+        List<StandardDocDTO> standardDocDTOList = standardDocRepository.selectDTOByCondition(Condition.builder(StandardDoc.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardDoc.FIELD_TENANT_ID, standardDocDTO.getTenantId())
+                        .andEqualTo(StandardDoc.FIELD_STANDARD_CODE, standardDocDTO.getStandardCode()))
+                .build());
+        //标准编码存在
+        if (CollectionUtils.isNotEmpty(standardDocDTOList)) {
+            throw new CommonException(ErrorCode.CODE_ALREADY_EXISTS);
+        }
+        // 标准名称存在
+        standardDocDTOList = standardDocRepository.selectDTOByCondition(Condition.builder(StandardDoc.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardDoc.FIELD_STANDARD_NAME, standardDocDTO.getStandardName())
+                        .andEqualTo(StandardDoc.FIELD_TENANT_ID, standardDocDTO.getTenantId()))
+                .build());
+        //标准名称存在
+        if (CollectionUtils.isNotEmpty(standardDocDTOList)) {
+            throw new CommonException(ErrorCode.DOC_STANDARD_NAME_ALREADY_EXIST);
+        }
         if (Objects.nonNull(multipartFile)) {
             handleStandardDocUpload(standardDocDTO, multipartFile);
         }
@@ -81,6 +104,15 @@ public class StandardDocServiceImpl implements StandardDocService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public StandardDocDTO update(StandardDocDTO standardDocDTO, MultipartFile multipartFile) {
+        // 验证标准名称是否已存在
+        List<StandardDocDTO> dtoList = standardDocRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardDoc.FIELD_TENANT_ID, standardDocDTO.getTenantId())
+                        .andEqualTo(StandardDoc.FIELD_STANDARD_NAME, standardDocDTO.getStandardName()))
+                .build());
+        if (dtoList.size() > 1 || (dtoList.size() == 1 && !dtoList.get(0).getStandardCode().equals(standardDocDTO.getStandardCode()))) {
+            throw new CommonException(ErrorCode.DOC_STANDARD_NAME_ALREADY_EXIST);
+        }
         if (Objects.nonNull(multipartFile)) {
             handleStandardDocUpload(standardDocDTO, multipartFile);
         }
@@ -88,7 +120,6 @@ public class StandardDocServiceImpl implements StandardDocService {
             standardDocMapper.updateDesc(standardDocDTO);
             return null;
         });
-        // todo
         standardDocRepository.updateByDTOPrimaryKeySelective(standardDocDTO);
         return standardDocRepository.selectDTOByPrimaryKeyAndTenant(standardDocDTO);
     }

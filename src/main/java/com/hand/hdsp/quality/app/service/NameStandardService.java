@@ -70,4 +70,10 @@ public interface NameStandardService {
      */
     List<NameStandardTableVO> getTables(NameStandardDatasourceVO nameStandardDatasourceVO);
 
+    /**
+     * 创建命名标准文档
+     * @param nameStandardDTO
+     * @return
+     */
+    NameStandardDTO create(NameStandardDTO nameStandardDTO);
 }

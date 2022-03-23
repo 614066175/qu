@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.NameStandardService;
+import com.hand.hdsp.quality.domain.entity.DataStandard;
 import com.hand.hdsp.quality.domain.entity.NameAim;
 import com.hand.hdsp.quality.domain.entity.NameExecHistory;
 import com.hand.hdsp.quality.domain.entity.NameStandard;
@@ -26,6 +27,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.export.vo.ExportParam;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.stereotype.Service;
@@ -72,15 +75,15 @@ public class NameStandardServiceImpl implements NameStandardService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void remove(NameStandardDTO nameStandardDTO) {
-        if (Objects.isNull(nameStandardRepository.selectDTOByPrimaryKey(nameStandardDTO))){
+        if (Objects.isNull(nameStandardRepository.selectDTOByPrimaryKey(nameStandardDTO))) {
             throw new CommonException(ErrorCode.NAME_STANDARD_NOT_EXIST);
         }
         List<NameExecHistoryDTO> historyList = nameExecHistoryRepository.selectDTO(NameExecHistory.FIELD_STANDARD_ID,
                 nameStandardDTO.getStandardId());
         //删除执行历史
-        if (CollectionUtils.isNotEmpty(historyList)){
-            List<NameExecHisDetailDTO> detailList= historyList.stream()
-                    .map(x->NameExecHisDetailDTO.builder()
+        if (CollectionUtils.isNotEmpty(historyList)) {
+            List<NameExecHisDetailDTO> detailList = historyList.stream()
+                    .map(x -> NameExecHisDetailDTO.builder()
                             .historyId(x.getHistoryId())
                             .tenantId(nameStandardDTO.getTenantId())
                             .build())
@@ -92,10 +95,10 @@ public class NameStandardServiceImpl implements NameStandardService {
         List<NameAimDTO> aimDtoList = nameAimRepository.selectDTO(NameAim.FIELD_STANDARD_ID,
                 nameStandardDTO.getStandardId());
         //删除落标
-        if (CollectionUtils.isNotEmpty(aimDtoList)){
+        if (CollectionUtils.isNotEmpty(aimDtoList)) {
             //删除落标排除项
             List<NameAimExcludeDTO> excludeDtoList = aimDtoList.stream()
-                    .map(x->NameAimExcludeDTO.builder()
+                    .map(x -> NameAimExcludeDTO.builder()
                             .aimId(x.getAimId())
                             .tenantId(nameStandardDTO.getTenantId())
                             .build())
@@ -104,7 +107,7 @@ public class NameStandardServiceImpl implements NameStandardService {
 
             //删除落标包含项
             List<NameAimIncludeDTO> includeDtoList = aimDtoList.stream()
-                    .map(x->NameAimIncludeDTO.builder()
+                    .map(x -> NameAimIncludeDTO.builder()
                             .aimId(x.getAimId())
                             .tenantId(nameStandardDTO.getTenantId())
                             .build())
@@ -120,7 +123,7 @@ public class NameStandardServiceImpl implements NameStandardService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void bitchRemove(List<NameStandardDTO> standardDtoList) {
-        if (CollectionUtils.isEmpty(standardDtoList)){
+        if (CollectionUtils.isEmpty(standardDtoList)) {
             throw new CommonException(ErrorCode.NAME_STANDARD_PARAMS_EMPTY);
         }
         standardDtoList.forEach(this::remove);
@@ -128,11 +131,13 @@ public class NameStandardServiceImpl implements NameStandardService {
 
     @Override
     public NameStandardDTO update(NameStandardDTO nameStandardDTO) {
-        NameStandardDTO exist = Optional.ofNullable(nameStandardRepository
-                .selectDTOByPrimaryKey(nameStandardDTO.getStandardId()))
-                .orElseThrow(()->new CommonException(ErrorCode.NAME_STANDARD_NOT_EXIST));
-        if (StringUtils.isNotEmpty(nameStandardDTO.getStandardCode())&&!exist.getStandardCode().equals(nameStandardDTO.getStandardCode())){
-            throw new CommonException("hdsp.xsta.err.cannot_update_field", NameStandard.FIELD_STANDARD_CODE);
+        List<NameStandardDTO> dtoList = nameStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(NameStandard.FIELD_TENANT_ID, nameStandardDTO.getTenantId())
+                        .andEqualTo(NameStandard.FIELD_STANDARD_NAME, nameStandardDTO.getStandardName()))
+                .build());
+        if (dtoList.size() > 1 || (dtoList.size() == 1 && !dtoList.get(0).getStandardCode().equals(nameStandardDTO.getStandardCode()))) {
+            throw new CommonException(ErrorCode.NAME_STANDARD_NAME_ALREADY_EXIST);
         }
         nameStandardRepository.updateByDTOPrimaryKeySelective(nameStandardDTO);
         return nameStandardDTO;
@@ -141,7 +146,7 @@ public class NameStandardServiceImpl implements NameStandardService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void executeStandard(NameStandard nameStandard) {
-        if (Objects.isNull(nameStandard)){
+        if (Objects.isNull(nameStandard)) {
             throw new CommonException(ErrorCode.NAME_STANDARD_NOT_EXIST);
         }
         List<NameAimDTO> nameAimDTOList = nameAimRepository.list(nameStandard.getStandardId());
@@ -157,7 +162,7 @@ public class NameStandardServiceImpl implements NameStandardService {
             List<NameExecHisDetailDTO> abnormalList = new ArrayList<>();
             nameExecHisDetailDTOList.forEach(x -> {
                 if (!Pattern.matches(nameStandard.getStandardRule(), x.getTableName())) {
-                    x.setErrorMessage(String.format(ERROR_MESSAGE,nameStandard.getStandardRule()));
+                    x.setErrorMessage(String.format(ERROR_MESSAGE, nameStandard.getStandardRule()));
                     abnormalList.add(x);
                 }
             });
@@ -165,17 +170,17 @@ public class NameStandardServiceImpl implements NameStandardService {
             nameExecHistoryDTO.setExecEndTime(new Date());
             nameExecHistoryDTO.setExecStatus(NameStandardStatusEnum.SUCCESS.getStatusCode());
             nameExecHistoryRepository.insertDTOSelective(nameExecHistoryDTO);
-            abnormalList.forEach(x->x.setHistoryId(nameExecHistoryDTO.getHistoryId()));
+            abnormalList.forEach(x -> x.setHistoryId(nameExecHistoryDTO.getHistoryId()));
             nameExecHisDetailRepository.batchInsertDTOSelective(abnormalList);
 
             nameStandard.setLatestCheckedStatus(NameStandardStatusEnum.SUCCESS.getStatusCode());
-            nameStandard.setLatestAbnormalNum((long)abnormalList.size());
-            nameStandardRepository.updateOptional(nameStandard,NameStandard.FIELD_LATEST_CHECKED_STATUS,
+            nameStandard.setLatestAbnormalNum((long) abnormalList.size());
+            nameStandardRepository.updateOptional(nameStandard, NameStandard.FIELD_LATEST_CHECKED_STATUS,
                     NameStandard.FIELD_LATEST_ABNORMAL_NUM);
 
-        }catch (Exception e){
+        } catch (Exception e) {
             nameStandard.setLatestCheckedStatus(NameStandardStatusEnum.FAILED.getStatusCode());
-            nameStandardRepository.updateOptional(nameStandard,NameStandard.FIELD_LATEST_CHECKED_STATUS);
+            nameStandardRepository.updateOptional(nameStandard, NameStandard.FIELD_LATEST_CHECKED_STATUS);
             nameExecHistoryDTO.setExecStatus(NameStandardStatusEnum.FAILED.getStatusCode());
             nameExecHistoryDTO.setErrorMessage(e.toString());
             nameExecHistoryRepository.insertDTOSelective(nameExecHistoryDTO);
@@ -186,17 +191,17 @@ public class NameStandardServiceImpl implements NameStandardService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void batchExecuteStandard(List<Long> standardIdList) {
-        if (CollectionUtils.isEmpty(standardIdList)){
+        if (CollectionUtils.isEmpty(standardIdList)) {
             throw new CommonException(ErrorCode.NAME_STANDARD_PARAMS_EMPTY);
         }
         //将所有标准都改为运行中状态，不符合标准数量设置为-1
         List<NameStandardDTO> nameStandardDTOList = nameStandardRepository.selectDTOByIds(standardIdList);
-        nameStandardDTOList.forEach(x->{
+        nameStandardDTOList.forEach(x -> {
             x.setLatestCheckedStatus(NameStandardStatusEnum.RUNNING.getStatusCode());
             x.setLatestAbnormalNum(-1L);
         });
         List<NameStandard> nameStandards = nameStandardConverter.dtoListToEntityList(nameStandardDTOList);
-        nameStandardRepository.batchUpdateOptional(nameStandards,NameStandard.FIELD_LATEST_ABNORMAL_NUM,
+        nameStandardRepository.batchUpdateOptional(nameStandards, NameStandard.FIELD_LATEST_ABNORMAL_NUM,
                 NameStandard.FIELD_LATEST_CHECKED_STATUS);
         nameStandards.forEach(this::executeStandard);
     }
@@ -237,60 +242,82 @@ public class NameStandardServiceImpl implements NameStandardService {
 
     @Override
     public List<NameStandardTableVO> getTables(NameStandardDatasourceVO nameStandardDatasourceVO) {
-        if(StringUtils.isEmpty(nameStandardDatasourceVO.getDatasource())
-                ||CollectionUtils.isEmpty(nameStandardDatasourceVO.getSchemas())){
+        if (StringUtils.isEmpty(nameStandardDatasourceVO.getDatasource())
+                || CollectionUtils.isEmpty(nameStandardDatasourceVO.getSchemas())) {
             throw new CommonException(ErrorCode.NAME_STANDARD_PARAMS_EMPTY);
         }
         List<NameStandardTableVO> nameStandardTableVoList = new ArrayList<>(nameStandardDatasourceVO.getSchemas().size());
         DriverSession driverSession = driverSessionService.getDriverSession(DetailsHelper.getUserDetails().getTenantId(),
                 nameStandardDatasourceVO.getDatasource());
-        nameStandardDatasourceVO.getSchemas().forEach(x-> nameStandardTableVoList
+        nameStandardDatasourceVO.getSchemas().forEach(x -> nameStandardTableVoList
                 .add(NameStandardTableVO.builder()
                         .title(x)
                         .id(x)
                         .children(driverSession.tableList(x).stream()
-                                .map(o->NameStandardTableVO.builder()
-                                        .id(x+"."+o).title(o)
+                                .map(o -> NameStandardTableVO.builder()
+                                        .id(x + "." + o).title(o)
                                         .build()).collect(Collectors.toList()))
                         .build()));
         return nameStandardTableVoList;
     }
 
+    @Override
+    public NameStandardDTO create(NameStandardDTO nameStandardDTO) {
+        List<NameStandardDTO> dtos = nameStandardRepository.selectDTOByCondition(Condition.builder(NameStandard.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(NameStandard.FIELD_TENANT_ID, nameStandardDTO.getTenantId())
+                        .andEqualTo(NameStandard.FIELD_STANDARD_CODE, nameStandardDTO.getStandardCode()))
+                .build());
+        if (CollectionUtils.isNotEmpty(dtos)) {
+            throw new CommonException(ErrorCode.CODE_ALREADY_EXISTS);
+        }
+        dtos = nameStandardRepository.selectDTOByCondition(Condition.builder(NameStandard.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(NameStandard.FIELD_TENANT_ID, nameStandardDTO.getTenantId())
+                        .andEqualTo(NameStandard.FIELD_STANDARD_NAME, nameStandardDTO.getStandardName()))
+                .build());
+        if (CollectionUtils.isNotEmpty(dtos)) {
+            throw new CommonException(ErrorCode.NAME_STANDARD_NAME_ALREADY_EXIST);
+        }
+        nameStandardRepository.insertDTOSelective(nameStandardDTO);
+        return nameStandardDTO;
+    }
+
     /**
      * 获取要校验的表
      *
-     * @param nameAimDTO 落标
+     * @param nameAimDTO   落标
      * @param aimTableList 接收结果的list
      */
-    private void getAimTableFromNameAimDTO(NameAimDTO nameAimDTO,List<NameExecHisDetailDTO> aimTableList){
-        DriverSession driverSession = driverSessionService.getDriverSession(nameAimDTO.getTenantId(),nameAimDTO.getDatasourceCode());
-        nameAimDTO.getNameAimIncludeDTOList().forEach(x->{
+    private void getAimTableFromNameAimDTO(NameAimDTO nameAimDTO, List<NameExecHisDetailDTO> aimTableList) {
+        DriverSession driverSession = driverSessionService.getDriverSession(nameAimDTO.getTenantId(), nameAimDTO.getDatasourceCode());
+        nameAimDTO.getNameAimIncludeDTOList().forEach(x -> {
             List<String> tables = driverSession.tableList(x.getSchemaName());
-            if(CollectionUtils.isEmpty(tables)){
-                throw new CommonException("invalid schema:{0}/{1}",nameAimDTO.getDatasourceCode(),x.getSchemaName());
+            if (CollectionUtils.isEmpty(tables)) {
+                throw new CommonException("invalid schema:{0}/{1}", nameAimDTO.getDatasourceCode(), x.getSchemaName());
             }
-            if(!Objects.isNull(nameAimDTO.getExcludeRule())) {
+            if (!Objects.isNull(nameAimDTO.getExcludeRule())) {
                 //获取满足排除规则的表
                 List<String> excludeRuleTable = tables.stream().filter(o -> Pattern.matches(nameAimDTO.getExcludeRule(), o))
                         .collect(Collectors.toList());
-                if (CollectionUtils.isNotEmpty(excludeRuleTable)){
+                if (CollectionUtils.isNotEmpty(excludeRuleTable)) {
                     //去除满足排除规则的表
                     tables.removeAll(excludeRuleTable);
                 }
             }
             List<String> excludeTables = nameAimDTO.getNameAimExcludeDTOList().stream()
-                    .filter(o->o.getSchemaName().equals(x.getSchemaName()))
+                    .filter(o -> o.getSchemaName().equals(x.getSchemaName()))
                     .map(NameAimExcludeDTO::getTableName)
                     .collect(Collectors.toList());
-            if (CollectionUtils.isNotEmpty(excludeTables)){
+            if (CollectionUtils.isNotEmpty(excludeTables)) {
                 tables.removeAll(excludeTables);
             }
             aimTableList.addAll(tables.stream()
-                    .map(o-> NameExecHisDetailDTO.builder()
+                    .map(o -> NameExecHisDetailDTO.builder()
                             .tenantId(nameAimDTO.getTenantId())
                             .tableName(o)
                             .schemaName(x.getSchemaName())
-                            .sourcePath(nameAimDTO.getDatasourceCode()+"/"+x.getSchemaName()+"/"+o)
+                            .sourcePath(nameAimDTO.getDatasourceCode() + "/" + x.getSchemaName() + "/" + o)
                             .build())
                     .collect(Collectors.toList())
             );

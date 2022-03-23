@@ -105,7 +105,7 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                     .andWhere(Sqls.custom()
                             .andEqualTo(StandardGroup.FIELD_PROJECT_ID,dto.getProjectId())
                             .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, StandardConstant.StandardType.DATA)
-                            .andEqualTo(StandardGroup.FIELD_TENANT_ID,dto.getTenantId()))
+                            .andEqualTo(StandardGroup.FIELD_TENANT_ID, dto.getTenantId()))
                     .build());
             if (CollectionUtils.isNotEmpty(standardGroupDTOS)) {
                 standardGroupDTOS.forEach(standardGroupDTO -> {
@@ -113,7 +113,7 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                             .andWhere(Sqls.custom()
                                     .andEqualTo(DataStandard.FIELD_PROJECT_ID,dto.getProjectId())
                                     .andEqualTo(DataStandard.FIELD_GROUP_ID, standardGroupDTO.getGroupId())
-                                    .andEqualTo(DataStandard.FIELD_TENANT_ID,dto.getTenantId()))
+                                    .andEqualTo(DataStandard.FIELD_TENANT_ID, dto.getTenantId()))
                             .build());
                     //查询负责人名称和负责部门
                     dataStandardDTOList.forEach(dataStandardDTO -> {
@@ -126,5 +126,43 @@ public class StandardGroupServiceImpl implements StandardGroupService {
             }
         }
         return standardGroupDTOS;
+    }
+
+    @Override
+    public int create(StandardGroupDTO standardGroupDTO) {
+        List<StandardGroupDTO> dtoList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardGroup.FIELD_TENANT_ID, standardGroupDTO.getTenantId())
+                        .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, standardGroupDTO.getStandardType())
+                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE, standardGroupDTO.getGroupCode()))
+                .build());
+        if (CollectionUtils.isNotEmpty(dtoList)) {
+            throw new CommonException(ErrorCode.CODE_ALREADY_EXISTS);
+        }
+        dtoList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardGroup.FIELD_TENANT_ID, standardGroupDTO.getTenantId())
+                        .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, standardGroupDTO.getStandardType())
+                        .andEqualTo(StandardGroup.FIELD_GROUP_NAME, standardGroupDTO.getGroupName()))
+                .build());
+        if (CollectionUtils.isNotEmpty(dtoList)) {
+            throw new CommonException(ErrorCode.GROUP_NAME_ALREADY_EXIST);
+        }
+        return standardGroupRepository.insertDTOSelective(standardGroupDTO);
+    }
+
+    @Override
+    public StandardGroupDTO update(StandardGroupDTO standardGroupDTO) {
+        List<StandardGroupDTO> dtoList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, standardGroupDTO.getStandardType())
+                        .andEqualTo(StandardGroup.FIELD_TENANT_ID, standardGroupDTO.getTenantId())
+                        .andEqualTo(StandardGroup.FIELD_GROUP_NAME, standardGroupDTO.getGroupName()))
+                .build());
+        if (dtoList.size() > 1 || (dtoList.size() == 1 && !dtoList.get(0).getGroupCode().equals(standardGroupDTO.getGroupCode()))) {
+            throw new CommonException(ErrorCode.GROUP_NAME_ALREADY_EXIST);
+        }
+        standardGroupRepository.updateByDTOPrimaryKeySelective(standardGroupDTO);
+        return standardGroupRepository.selectDTOByPrimaryKeyAndTenant(standardGroupDTO);
     }
 }

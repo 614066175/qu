@@ -103,8 +103,7 @@ public class NameStandardController extends BaseController {
         nameStandardDTO.setTenantId(tenantId);
         nameStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(nameStandardDTO);
-        nameStandardRepository.insertDTOSelective(nameStandardDTO);
-        return Results.success(nameStandardDTO);
+        return Results.success(nameStandardService.create(nameStandardDTO));
     }
 
     @ApiOperation(value = "修改命名标准表")

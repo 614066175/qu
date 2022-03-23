@@ -47,4 +47,18 @@ public interface StandardGroupService {
      * @return
      */
     List<StandardGroupDTO> export(StandardGroupDTO dto, ExportParam exportParam);
+
+    /**
+     * 新建分组
+     * @param standardGroupDTO
+     * @return
+     */
+    int create(StandardGroupDTO standardGroupDTO);
+
+    /**
+     * 修改分组
+     * @param standardGroupDTO
+     * @return
+     */
+    StandardGroupDTO update(StandardGroupDTO standardGroupDTO);
 }
