@@ -50,4 +50,11 @@
             and xrg.project_id = #{projectId}
         </if>
     </select>
+    <select id="searchChildGroup" resultType="java.lang.Integer">
+        select count(*)
+        from
+        xqua_rule_group
+        where
+        parent_group_id = #{groupId}
+    </select>
 </mapper>

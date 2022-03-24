@@ -3,14 +3,18 @@ package com.hand.hdsp.quality.app.service.impl;
 import java.util.List;
 
 import com.hand.hdsp.quality.api.dto.RuleDTO;
+import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
 import com.hand.hdsp.quality.api.dto.RuleLineDTO;
 import com.hand.hdsp.quality.app.service.RuleService;
 import com.hand.hdsp.quality.domain.entity.Rule;
+import com.hand.hdsp.quality.domain.repository.RuleGroupRepository;
 import com.hand.hdsp.quality.domain.repository.RuleLineRepository;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.converter.RuleConverter;
 import com.hand.hdsp.quality.infra.converter.RuleLineConverter;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.domain.AuditDomain;
 import org.hzero.export.vo.ExportParam;
 import org.springframework.stereotype.Service;
@@ -28,15 +32,18 @@ public class RuleServiceImpl implements RuleService {
     private final RuleLineRepository ruleLineRepository;
     private final RuleConverter ruleConverter;
     private final RuleLineConverter ruleLineConverter;
+    private final RuleGroupRepository ruleGroupRepository;
 
     public RuleServiceImpl(RuleRepository ruleRepository,
                            RuleLineRepository ruleLineRepository,
                            RuleConverter ruleConverter,
-                           RuleLineConverter ruleLineConverter) {
+                           RuleLineConverter ruleLineConverter,
+                           RuleGroupRepository ruleGroupRepository) {
         this.ruleRepository = ruleRepository;
         this.ruleLineRepository = ruleLineRepository;
         this.ruleConverter = ruleConverter;
         this.ruleLineConverter = ruleLineConverter;
+        this.ruleGroupRepository = ruleGroupRepository;
     }
 
 
@@ -55,15 +62,21 @@ public class RuleServiceImpl implements RuleService {
     @Transactional(rollbackFor = Exception.class)
     public void insert(RuleDTO ruleDTO) {
         Long tenantId = ruleDTO.getTenantId();
-        ruleRepository.insertDTOSelective(ruleDTO);
-        if (ruleDTO.getRuleLineDTOList() != null) {
-            for (RuleLineDTO ruleLineDTO : ruleDTO.getRuleLineDTOList()) {
-                ruleLineDTO.setRuleId(ruleDTO.getRuleId());
-                ruleLineDTO.setTenantId(tenantId);
-                ruleLineDTO.setProjectId(ruleDTO.getProjectId());
-                //todo 范围重叠判断
-                ruleLineDTO.setWarningLevel(JsonUtils.object2Json(ruleLineDTO.getWarningLevelList()));
-                ruleLineRepository.insertDTOSelective(ruleLineDTO);
+        RuleGroupDTO ruleGroupDTO = new RuleGroupDTO();
+        ruleGroupDTO.setGroupId(ruleDTO.getGroupId());
+        if (ruleGroupRepository.searchChildGroup(ruleGroupDTO)){
+            throw new CommonException(ErrorCode.CANNOT_CREATE_RULE);
+        } else {
+            ruleRepository.insertDTOSelective(ruleDTO);
+            if (ruleDTO.getRuleLineDTOList() != null) {
+                for (RuleLineDTO ruleLineDTO : ruleDTO.getRuleLineDTOList()) {
+                    ruleLineDTO.setRuleId(ruleDTO.getRuleId());
+                    ruleLineDTO.setTenantId(tenantId);
+                    ruleLineDTO.setProjectId(ruleDTO.getProjectId());
+                    //todo 范围重叠判断
+                    ruleLineDTO.setWarningLevel(JsonUtils.object2Json(ruleLineDTO.getWarningLevelList()));
+                    ruleLineRepository.insertDTOSelective(ruleLineDTO);
+                }
             }
         }
     }

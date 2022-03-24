@@ -58,4 +58,9 @@ public class RuleGroupRepositoryImpl extends BaseRepositoryImpl<RuleGroup, RuleG
         });
         batchInsertDTOSelective(list);
     }
+
+    @Override
+    public boolean searchChildGroup(RuleGroupDTO ruleGroupDTO) {
+        return ruleGroupMapper.searchChildGroup(ruleGroupDTO) != 0;
+    }
 }

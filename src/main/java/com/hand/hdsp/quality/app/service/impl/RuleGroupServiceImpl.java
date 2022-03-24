@@ -114,4 +114,15 @@ public class RuleGroupServiceImpl implements RuleGroupService {
         });
         return ruleGroupDTOList;
     }
+
+    @Override
+    public void create(RuleGroupDTO ruleGroupDTO, Long tenantId, Long projectId) {
+        RuleDTO ruleDTO = new RuleDTO();
+        ruleDTO.setGroupId(ruleGroupDTO.getParentGroupId());
+        if(ruleRepository.searchRules(ruleDTO)){
+            throw new CommonException(ErrorCode.CANNOT_CREATE_GROUP);
+        }else {
+            ruleGroupRepository.insertDTOSelective(ruleGroupDTO);
+        }
+    }
 }
