@@ -103,7 +103,7 @@ public class StandardGroupServiceImpl implements StandardGroupService {
             //获取DATA所有的分组已经分组下的标准
             standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                     .andWhere(Sqls.custom()
-                            .andEqualTo(StandardGroup.FIELD_PROJECT_ID,dto.getProjectId())
+                            .andEqualTo(StandardGroup.FIELD_PROJECT_ID, dto.getProjectId())
                             .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, StandardConstant.StandardType.DATA)
                             .andEqualTo(StandardGroup.FIELD_TENANT_ID, dto.getTenantId()))
                     .build());
@@ -111,7 +111,7 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                 standardGroupDTOS.forEach(standardGroupDTO -> {
                     List<DataStandardDTO> dataStandardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                             .andWhere(Sqls.custom()
-                                    .andEqualTo(DataStandard.FIELD_PROJECT_ID,dto.getProjectId())
+                                    .andEqualTo(DataStandard.FIELD_PROJECT_ID, dto.getProjectId())
                                     .andEqualTo(DataStandard.FIELD_GROUP_ID, standardGroupDTO.getGroupId())
                                     .andEqualTo(DataStandard.FIELD_TENANT_ID, dto.getTenantId()))
                             .build());
@@ -134,7 +134,8 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardGroup.FIELD_TENANT_ID, standardGroupDTO.getTenantId())
                         .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, standardGroupDTO.getStandardType())
-                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE, standardGroupDTO.getGroupCode()))
+                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE, standardGroupDTO.getGroupCode())
+                        .andEqualTo(StandardGroup.FIELD_PROJECT_ID, standardGroupDTO.getProjectId()))
                 .build());
         if (CollectionUtils.isNotEmpty(dtoList)) {
             throw new CommonException(ErrorCode.CODE_ALREADY_EXISTS);
@@ -143,7 +144,8 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardGroup.FIELD_TENANT_ID, standardGroupDTO.getTenantId())
                         .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, standardGroupDTO.getStandardType())
-                        .andEqualTo(StandardGroup.FIELD_GROUP_NAME, standardGroupDTO.getGroupName()))
+                        .andEqualTo(StandardGroup.FIELD_GROUP_NAME, standardGroupDTO.getGroupName())
+                        .andEqualTo(StandardGroup.FIELD_PROJECT_ID, standardGroupDTO.getProjectId()))
                 .build());
         if (CollectionUtils.isNotEmpty(dtoList)) {
             throw new CommonException(ErrorCode.GROUP_NAME_ALREADY_EXIST);
@@ -157,7 +159,8 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, standardGroupDTO.getStandardType())
                         .andEqualTo(StandardGroup.FIELD_TENANT_ID, standardGroupDTO.getTenantId())
-                        .andEqualTo(StandardGroup.FIELD_GROUP_NAME, standardGroupDTO.getGroupName()))
+                        .andEqualTo(StandardGroup.FIELD_GROUP_NAME, standardGroupDTO.getGroupName())
+                        .andEqualTo(StandardGroup.FIELD_PROJECT_ID, standardGroupDTO.getProjectId()))
                 .build());
         if (dtoList.size() > 1 || (dtoList.size() == 1 && !dtoList.get(0).getGroupCode().equals(standardGroupDTO.getGroupCode()))) {
             throw new CommonException(ErrorCode.GROUP_NAME_ALREADY_EXIST);

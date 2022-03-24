@@ -336,7 +336,8 @@ public class DataStandardServiceImpl implements DataStandardService {
         List<DataStandardDTO> dtoList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(DataStandard.FIELD_TENANT_ID, dataStandardDTO.getTenantId())
-                        .andEqualTo(DataStandard.FIELD_STANDARD_NAME, dataStandardDTO.getStandardName()))
+                        .andEqualTo(DataStandard.FIELD_STANDARD_NAME, dataStandardDTO.getStandardName())
+                        .andEqualTo(DataStandard.FIELD_PROJECT_ID, dataStandardDTO.getProjectId()))
                 .build());
         if (dtoList.size() > 1 || (dtoList.size() == 1 && !dtoList.get(0).getStandardCode().equals(dataStandardDTO.getStandardCode()))) {
             throw new CommonException(ErrorCode.DATA_STANDARD_NAME_EXIST);
