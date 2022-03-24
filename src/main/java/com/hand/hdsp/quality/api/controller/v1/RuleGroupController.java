@@ -110,7 +110,7 @@ public class RuleGroupController extends BaseController {
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody RuleGroupDTO ruleGroupDTO) {
         ruleGroupDTO.setTenantId(tenantId);
         validObject(ruleGroupDTO);
-        ruleGroupRepository.insertDTOSelective(ruleGroupDTO);
+        ruleGroupService.create(ruleGroupDTO, tenantId, projectId);
         return Results.success(ruleGroupDTO);
     }
 
