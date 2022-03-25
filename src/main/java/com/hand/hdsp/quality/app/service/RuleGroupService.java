@@ -41,14 +41,4 @@ public interface RuleGroupService {
     List<RuleGroup> listNoPage(RuleGroup ruleGroup);
 
     List<RuleGroupDTO> export(RuleDTO dto, ExportParam exportParam);
-
-    /**
-     * 创建
-     *
-     * @param ruleGroupDTO
-     * @param tenantId 租户id
-     * @param projectId 项目id
-     * @return
-     */
-    void create(RuleGroupDTO ruleGroupDTO, Long tenantId, Long projectId);
 }

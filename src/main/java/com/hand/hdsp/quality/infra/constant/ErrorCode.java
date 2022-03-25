@@ -149,7 +149,4 @@ public interface ErrorCode {
     String NAME_STANDARD_NAME_ALREADY_EXIST="hdsp.xqua.err.name_standard_name_already_exist";
 
     String GROUP_NAME_ALREADY_EXIST="hdsp.xqua.err.group_name_already_exist";
-
-    String CANNOT_CREATE_GROUP="hdsp.xqua.err.cannot_create_group";
-    String CANNOT_CREATE_RULE ="hdsp.xqua.err.cannot_create_rule";
 }

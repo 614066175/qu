@@ -48,11 +48,4 @@ public interface RuleRepository extends BaseRepository<Rule, RuleDTO>, ProxySelf
      * @param ruleDTOList
      */
     void batchImport(List<RuleDTO> ruleDTOList);
-
-    /**
-     * 查询规则
-     * @param ruleDTO
-     * @return
-     */
-    boolean searchRules(RuleDTO ruleDTO);
 }

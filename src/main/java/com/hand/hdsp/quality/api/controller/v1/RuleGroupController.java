@@ -118,7 +118,7 @@ public class RuleGroupController extends BaseController {
         ruleGroupDTO.setTenantId(tenantId);
         ruleGroupDTO.setProjectId(projectId);
         validObject(ruleGroupDTO);
-        ruleGroupService.create(ruleGroupDTO, tenantId, projectId);
+        ruleGroupRepository.insertDTOSelective(ruleGroupDTO);
         return Results.success(ruleGroupDTO);
     }
 

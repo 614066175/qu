@@ -94,9 +94,4 @@ public class RuleRepositoryImpl extends BaseRepositoryImpl<Rule, RuleDTO> implem
         ruleLineRepository.batchInsertDTOSelective(ruleLineDTOList);
     }
 
-    @Override
-    public boolean searchRules(RuleDTO ruleDTO) {
-        return ruleMapper.searchRules(ruleDTO) != 0;
-    }
-
 }

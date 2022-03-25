@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
-import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
 import com.hand.hdsp.quality.domain.entity.RuleGroup;
 
@@ -30,11 +29,4 @@ public interface RuleGroupRepository extends BaseRepository<RuleGroup, RuleGroup
      * @param ruleGroupDTOList
      */
     void batchImport(List<RuleGroupDTO> ruleGroupDTOList);
-
-    /**
-     * 查询子级分组
-     * @param ruleGroupDTO
-     * @return boolean
-     */
-    boolean searchChildGroup(RuleGroupDTO ruleGroupDTO);
 }

@@ -157,12 +157,5 @@
         </where>
         order by rule_id desc
     </select>
-    <select id="searchRules" resultType="java.lang.Integer">
-        select count(*)
-        from
-        xqua_rule xr
-        where
-        group_id = #{groupId}
-    </select>
 
 </mapper>
