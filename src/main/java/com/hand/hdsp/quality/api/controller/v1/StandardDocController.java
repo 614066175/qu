@@ -96,7 +96,7 @@ public class StandardDocController extends BaseController {
     @PostMapping
     public ResponseEntity<StandardDocDTO> create(@ApiParam(value = "租户id", required = true) @PathVariable("organizationId") Long tenantId,
                                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                                 @RequestPart StandardDocDTO standardDocDTO,
+                                                 StandardDocDTO standardDocDTO,
                                                  @RequestPart(value = "file", required = false) MultipartFile multipartFile) {
         standardDocDTO.setTenantId(tenantId);
         standardDocDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
