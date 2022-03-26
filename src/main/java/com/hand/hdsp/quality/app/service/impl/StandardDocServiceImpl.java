@@ -156,7 +156,6 @@ public class StandardDocServiceImpl implements StandardDocService {
         List<StandardDocDTO> standardDocs = standardDocRepository.selectDTOByCondition(
                 Condition.builder(StandardDoc.class).where(Sqls.custom()
                         .andEqualTo(StandardDoc.FIELD_DOC_ID, standardDocDTO.getDocId())
-                        .andEqualTo(StandardDoc.FIELD_PROJECT_ID, standardDocDTO.getProjectId())
                         .andEqualTo(StandardDoc.FIELD_TENANT_ID, standardDocDTO.getTenantId())
                 ).build());
         if (CollectionUtils.isNotEmpty(standardDocs)) {
