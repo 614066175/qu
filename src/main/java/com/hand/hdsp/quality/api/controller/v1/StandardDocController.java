@@ -98,7 +98,7 @@ public class StandardDocController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<StandardDocDTO> create(@ApiParam(value = "租户id", required = true) @PathVariable("organizationId") Long tenantId,
-                                                 StandardDocDTO standardDocDTO,
+                                                 @RequestPart StandardDocDTO standardDocDTO,
                                                  @RequestPart(value = "file", required = false) MultipartFile multipartFile) {
         standardDocDTO.setTenantId(tenantId);
         this.validObject(standardDocDTO);
