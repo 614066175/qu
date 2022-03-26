@@ -85,7 +85,8 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                 List<DataStandardDTO> dataStandardDTOS = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                         .andWhere(Sqls.custom()
                                 .andEqualTo(DataStandard.FIELD_GROUP_ID, standardGroupDTO.getGroupId())
-                                .andEqualTo(DataStandard.FIELD_TENANT_ID, standardGroupDTO.getTenantId()))
+                                .andEqualTo(DataStandard.FIELD_TENANT_ID, standardGroupDTO.getTenantId())
+                                .andEqualTo(DataStandard.FIELD_PROJECT_ID, standardGroupDTO.getProjectId()))
                         .build());
                 if (CollectionUtils.isNotEmpty(dataStandardDTOS)) {
                     throw new CommonException(ErrorCode.GROUP_HAS_STANDARD);
@@ -95,7 +96,8 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                 List<DataFieldDTO> dataFieldDTOS = dataFieldRepository.selectDTOByCondition(Condition.builder(DataField.class)
                         .andWhere(Sqls.custom()
                                 .andEqualTo(DataField.FIELD_GROUP_ID, standardGroupDTO.getGroupId())
-                                .andEqualTo(DataField.FIELD_TENANT_ID, standardGroupDTO.getTenantId()))
+                                .andEqualTo(DataField.FIELD_TENANT_ID, standardGroupDTO.getTenantId())
+                                .andEqualTo(DataField.FIELD_PROJECT_ID, standardGroupDTO.getProjectId()))
                         .build());
                 if (CollectionUtils.isNotEmpty(dataFieldDTOS)) {
                     throw new CommonException(ErrorCode.GROUP_HAS_STANDARD);
@@ -105,7 +107,8 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                 List<NameStandardDTO> nameStandardDTOS = nameStandardRepository.selectDTOByCondition(Condition.builder(NameStandard.class)
                         .andWhere(Sqls.custom()
                                 .andEqualTo(NameStandard.FIELD_GROUP_ID, standardGroupDTO.getGroupId())
-                                .andEqualTo(NameStandard.FIELD_TENANT_ID, standardGroupDTO.getTenantId()))
+                                .andEqualTo(NameStandard.FIELD_TENANT_ID, standardGroupDTO.getTenantId())
+                                .andEqualTo(NameStandard.FIELD_PROJECT_ID, standardGroupDTO.getProjectId()))
                         .build());
                 if (CollectionUtils.isNotEmpty(nameStandardDTOS)) {
                     throw new CommonException(ErrorCode.GROUP_HAS_STANDARD);
@@ -115,7 +118,8 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                 List<StandardDocDTO> standardDocDTOS = standardDocRepository.selectDTOByCondition(Condition.builder(StandardDoc.class)
                         .andWhere(Sqls.custom()
                                 .andEqualTo(StandardDoc.FIELD_GROUP_ID, standardGroupDTO.getGroupId())
-                                .andEqualTo(StandardDoc.FIELD_TENANT_ID, standardGroupDTO.getTenantId()))
+                                .andEqualTo(StandardDoc.FIELD_TENANT_ID, standardGroupDTO.getTenantId())
+                                .andEqualTo(StandardDoc.FIELD_PROJECT_ID,standardGroupDTO.getProjectId()))
                         .build());
                 if (CollectionUtils.isNotEmpty(standardDocDTOS)) {
                     throw new CommonException(ErrorCode.GROUP_HAS_STANDARD);
