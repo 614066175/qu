@@ -145,9 +145,9 @@ public class StandardDocController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/download-standard-doc")
+    @PostMapping("/download-standard-doc")
     public void download(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                         StandardDocDTO standardDocDTO,
+                         @RequestBody StandardDocDTO standardDocDTO,
                          HttpServletResponse response) {
         standardDocDTO.setTenantId(tenantId);
         standardDocService.downloadStandardDoc(standardDocDTO, response);
