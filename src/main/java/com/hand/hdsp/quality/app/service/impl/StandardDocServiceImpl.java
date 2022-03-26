@@ -158,7 +158,7 @@ public class StandardDocServiceImpl implements StandardDocService {
         if (CollectionUtils.isNotEmpty(standardDocs)) {
             standardDocDTO = standardDocs.get(0);
         } else {
-            throw new CommonException("该标准没有文件");
+            throw new CommonException(ErrorCode.DOC_NO_FILE);
         }
         // 读取文件获取输入流
         response.setContentType("application/octet-stream;charset=utf-8");
