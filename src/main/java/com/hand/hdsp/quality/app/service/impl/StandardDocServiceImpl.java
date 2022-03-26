@@ -1,8 +1,13 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -34,6 +39,7 @@ import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -152,29 +158,49 @@ public class StandardDocServiceImpl implements StandardDocService {
         if (CollectionUtils.isNotEmpty(standardDocs)) {
             standardDocDTO = standardDocs.get(0);
         } else {
-            throw new CommonException("hdsp.xqua.error.no-permission");
+            throw new CommonException("该标准没有文件");
         }
-        try {
-            String docName = URLEncoder.encode(standardDocDTO.getDocName(), "UTF-8");
-            response.setHeader("content-disposition", "attachment;filename=" + docName);
-            InputStream in = minioStorageService.downloadByUrl(
-                    standardDocDTO.getTenantId(),
-                    StandardDocConstant.STANDARD_DOC_MINIO_BUCKET,
-                    null,
-                    standardDocDTO.getDocPath()
-            );
+        // 读取文件获取输入流
+        response.setContentType("application/octet-stream;charset=utf-8");
+        try (InputStream inputStream = getFileInputStream(standardDocDTO.getDocPath());
+             OutputStream output = new BufferedOutputStream(response.getOutputStream());
+             ByteArrayOutputStream bos = new ByteArrayOutputStream();) {
+            assert inputStream != null;
             int count;
-            byte[] by = new byte[1024];
-            OutputStream out = response.getOutputStream();
-            while ((count = in.read(by)) != -1) {
-                //将缓冲区的数据输出到浏览器
-                out.write(by, 0, count);
+            byte[] bs = new byte[1024];
+            while ((count = inputStream.read(bs)) != -1) {
+                bos.write(bs, 0, count);
             }
-            in.close();
-            out.flush();
-            out.close();
+            bs = bos.toByteArray();
+            // 设置下载文件的名称
+            String fileName = String.format("attachment;filename=%s", URLEncoder.encode(standardDocDTO.getDocName(), StandardCharsets.UTF_8.name()));
+            // 作为附件下载
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, fileName);
+            output.write(bs);
         } catch (Exception e) {
-            throw new CommonException("hdsp.xqua.error.file.download.fail", e);
+            throw new CommonException(ErrorCode.FILE_DOWNLOAD_FAIL, e);
+        }
+    }
+
+    /**
+     * 读取文件获取输入流
+     *
+     * @param path 路径名
+     * @return 输入流
+     */
+    public static InputStream getFileInputStream(String path) {
+        URL url;
+        try {
+            url = new URL(path);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            //设置超时间为3秒
+            conn.setConnectTimeout(3 * 1000);
+            //防止屏蔽程序抓取而返回403错误
+            conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+            //得到输入流
+            return conn.getInputStream();
+        } catch (Exception e) {
+            throw new CommonException("读取网络文件异常:" + e);
         }
     }
 

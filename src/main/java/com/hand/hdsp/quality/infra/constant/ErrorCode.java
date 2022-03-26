@@ -149,4 +149,8 @@ public interface ErrorCode {
     String NAME_STANDARD_NAME_ALREADY_EXIST="hdsp.xqua.err.name_standard_name_already_exist";
 
     String GROUP_NAME_ALREADY_EXIST="hdsp.xqua.err.group_name_already_exist";
+
+    String FILE_DOWNLOAD_FAIL="hdsp.xqua.err.file_download_fail";
+
+    String DOC_NO_FILE="hdsp.xqua.err.doc_no_file";
 }
