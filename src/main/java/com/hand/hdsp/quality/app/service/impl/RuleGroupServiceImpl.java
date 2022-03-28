@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.hand.hdsp.quality.api.dto.RuleDTO;
@@ -72,17 +73,21 @@ public class RuleGroupServiceImpl implements RuleGroupService {
 
     @Override
     public List<RuleGroupDTO> export(RuleDTO dto, ExportParam exportParam) {
-        List<RuleGroupDTO> ruleGroupDTOList = ruleGroupRepository.selectDTOByCondition(Condition.builder(RuleGroup.class).build());
+        List<RuleGroupDTO> ruleGroupDTOList = ruleGroupRepository.selectDTOByCondition(Condition.builder(RuleGroup.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(RuleGroup.FIELD_GROUP_ID, dto.getGroupId(), true)
+                        .andIn(RuleGroup.FIELD_TENANT_ID, Arrays.asList(0, dto.getTenantId())))
+                .build());
         ruleGroupDTOList.forEach(ruleGroupDTO -> {
             //查询某一分组下的，筛选后的标准规则
             List<RuleDTO> ruleDTOList = ruleRepository.selectDTOByCondition(Condition.builder(Rule.class)
                     .andWhere(Sqls.custom()
                             .andEqualTo(Rule.FIELD_GROUP_ID, ruleGroupDTO.getGroupId())
-                            .andEqualTo(Rule.FIELD_TENANT_ID, ruleGroupDTO.getTenantId()))
+                            .andIn(Rule.FIELD_TENANT_ID, Arrays.asList(0, dto.getTenantId())))
                     .andWhere(Sqls.custom()
-                            .andEqualTo(Rule.FIELD_RULE_CODE, dto.getRuleCode(), true)
-                            .andEqualTo(Rule.FIELD_RULE_NAME, dto.getRuleName(), true)
-                            .andEqualTo(Rule.FIELD_RULE_DESC, dto.getRuleDesc(),true)
+                            .andLike(Rule.FIELD_RULE_CODE, dto.getRuleCode(), true)
+                            .andLike(Rule.FIELD_RULE_NAME, dto.getRuleName(), true)
+                            .andLike(Rule.FIELD_RULE_DESC, dto.getRuleDesc(), true)
                             .andEqualTo(Rule.FIELD_CHECK_TYPE, dto.getCheckType(), true)
                             .andEqualTo(Rule.FIELD_EXCEPTION_BLOCK, dto.getExceptionBlock(), true)
                             .andEqualTo(Rule.FIELD_WEIGHT, dto.getWeight(), true))
@@ -93,7 +98,7 @@ public class RuleGroupServiceImpl implements RuleGroupService {
                         .andWhere(Sqls.custom()
                                 .andEqualTo(RuleLine.FIELD_RULE_ID, ruleDTO.getRuleId()))
                         .build());
-                ruleLineDTOList.forEach(ruleLineDTO -> BeanUtils.copyProperties(ruleLineDTO,ruleDTO));
+                ruleLineDTOList.forEach(ruleLineDTO -> BeanUtils.copyProperties(ruleLineDTO, ruleDTO));
             });
             ruleGroupDTO.setRuleDTOList(ruleDTOList);
         });

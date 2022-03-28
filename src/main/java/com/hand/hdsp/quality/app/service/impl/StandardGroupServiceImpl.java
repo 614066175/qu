@@ -174,11 +174,11 @@ public class StandardGroupServiceImpl implements StandardGroupService {
 
     @Override
     public int create(StandardGroupDTO standardGroupDTO) {
-//        // 校验父目录下是否有标准
-//        if (standardGroupDTO.getParentGroupId() != null) {
-//            StandardGroupDTO dto = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
-//            existStandard(dto);
-//        }
+        // 校验父目录下是否有标准
+        if (standardGroupDTO.getParentGroupId() != null) {
+            StandardGroupDTO dto = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
+            existStandard(dto);
+        }
         // 校验编码存在
         List<StandardGroupDTO> dtoList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                 .andWhere(Sqls.custom()
