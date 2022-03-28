@@ -33,8 +33,10 @@ import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
+import org.hzero.boot.driver.infra.util.PageUtil;
 import org.hzero.boot.workflow.WorkflowClient;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
@@ -42,6 +44,7 @@ import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.infra.meta.Table;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
+import org.hzero.starter.driver.core.infra.util.PageParseUtil;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -327,7 +330,11 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     @Override
     public Page<DataStandardDTO> list(PageRequest pageRequest, DataStandardDTO dataStandardDTO) {
-        return PageHelper.doPageAndSort(pageRequest, () -> dataStandardMapper.list(dataStandardDTO));
+        List<DataStandardDTO> list = dataStandardMapper.list(dataStandardDTO);
+        for (DataStandardDTO dto : list) {
+            decodeForDataStandardDTO(dto);
+        }
+        return PageParseUtil.springPage2C7nPage(PageUtil.doPage(list, org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize())));
     }
 
     @Override
@@ -546,6 +553,27 @@ public class DataStandardServiceImpl implements DataStandardService {
     @Override
     public List<DataStandardDTO> export(DataStandardDTO dto, ExportParam exportParam, PageRequest pageRequest) {
         return list(pageRequest, dto);
+    }
+
+    /**
+     * 解密字段
+     * @param dto
+     */
+    private void decodeForDataStandardDTO(DataStandardDTO dto) {
+        if (DataSecurityHelper.isTenantOpen()) {
+            // 解密电话号码
+            if (StringUtils.isNotEmpty(dto.getChargeTel())) {
+                dto.setChargeTel(DataSecurityHelper.decrypt(dto.getChargeTel()));
+            }
+            // 解密邮箱地址
+            if (StringUtils.isNotEmpty(dto.getChargeEmail())) {
+                dto.setChargeEmail(DataSecurityHelper.decrypt(dto.getChargeEmail()));
+            }
+            // 解密部门名称
+            if (StringUtils.isNotEmpty(dto.getChargeDeptName())) {
+                dto.setChargeDeptName(DataSecurityHelper.decrypt(dto.getChargeDeptName()));
+            }
+        }
     }
 
     @Override
