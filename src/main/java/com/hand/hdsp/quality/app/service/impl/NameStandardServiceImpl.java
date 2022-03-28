@@ -14,6 +14,7 @@ import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.NameStandardStatusEnum;
 import com.hand.hdsp.quality.infra.converter.NameStandardConverter;
+import com.hand.hdsp.quality.infra.util.DataSecurityUtil;
 import com.hand.hdsp.quality.infra.vo.NameStandardDatasourceVO;
 import com.hand.hdsp.quality.infra.vo.NameStandardTableVO;
 import io.choerodon.core.domain.Page;
@@ -23,10 +24,12 @@ import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -205,7 +208,36 @@ public class NameStandardServiceImpl implements NameStandardService {
 
     @Override
     public Page<NameStandardDTO> export(NameStandardDTO dto, ExportParam exportParam, PageRequest pageRequest) {
-        return PageHelper.doPageAndSort(pageRequest, () -> nameStandardRepository.list(dto));
+        //命名标准导出 分组编码、标准编码、命名标准名称、命名标准描述、命名标准类型、命名标准规则、是否忽略大小写、责任人电话、责任人邮箱、责任人姓名、责任部门
+        //对责任人电话、责任人邮箱、责任人部门进行解密
+        Page<NameStandardDTO> page = PageHelper.doPageAndSort(pageRequest, () -> nameStandardRepository.list(dto));
+        decrypt(page);
+        return page;
+    }
+
+    private void decrypt(List<NameStandardDTO> list) {
+        if (DataSecurityHelper.isTenantOpen( ) && CollectionUtils.isNotEmpty(list)) {
+            list.forEach(this::decrypt);
+        }
+    }
+
+    private void decrypt(NameStandardDTO us) {
+        Integer apiEncryptFlag = DetailsHelper.getUserDetails().getApiEncryptFlag();
+        //判断解密字段当不为空且该租户是加密进行解密
+        if (DataSecurityHelper.isTenantOpen( ) && apiEncryptFlag != null && apiEncryptFlag == 1) {
+            //判断解密责任人电话
+            if (StringUtils.isNotEmpty(us.getChargeTel( ))) {
+                us.setChargeTel(DataSecurityUtil.decrypt(us.getChargeTel( )));
+            }
+            //判断解密责任人邮箱
+            if (StringUtils.isNotEmpty(us.getChargeEmail( ))) {
+                us.setChargeEmail(DataSecurityUtil.decrypt(us.getChargeEmail( )));
+            }
+            //判断解密责任人部门
+            if (StringUtils.isNotEmpty(us.getChargeDeptName( ))) {
+                us.setChargeDeptName(DataSecurityUtil.decrypt(us.getChargeDeptName( )));
+            }
+        }
     }
 
     @Override
