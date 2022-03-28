@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -84,7 +85,8 @@ public class RuleGroupServiceImpl implements RuleGroupService {
         dto.setProjectId(projectId);
         List<RuleGroupDTO> ruleGroupDTOList = ruleGroupRepository.selectDTOByCondition(Condition.builder(RuleGroup.class)
                 .andWhere(Sqls.custom()
-                        .andEqualTo(RuleGroup.FIELD_TENANT_ID, dto.getTenantId())
+                        .andEqualTo(RuleGroup.FIELD_GROUP_ID, dto.getGroupId(), true)
+                        .andIn(RuleGroup.FIELD_TENANT_ID, Arrays.asList(0, dto.getTenantId()))
                         .andEqualTo(RuleGroup.FIELD_PROJECT_ID, dto.getProjectId()))
                 .build());
         ruleGroupDTOList.forEach(ruleGroupDTO -> {
@@ -93,11 +95,11 @@ public class RuleGroupServiceImpl implements RuleGroupService {
                     .andWhere(Sqls.custom()
                             .andEqualTo(Rule.FIELD_GROUP_ID, ruleGroupDTO.getGroupId())
                             .andEqualTo(Rule.FIELD_PROJECT_ID, ruleGroupDTO.getProjectId())
-                            .andEqualTo(Rule.FIELD_TENANT_ID, ruleGroupDTO.getTenantId()))
+                            .andIn(Rule.FIELD_TENANT_ID, Arrays.asList(0, dto.getTenantId())))
                     .andWhere(Sqls.custom()
-                            .andEqualTo(Rule.FIELD_RULE_CODE, dto.getRuleCode(), true)
-                            .andEqualTo(Rule.FIELD_RULE_NAME, dto.getRuleName(), true)
-                            .andEqualTo(Rule.FIELD_RULE_DESC, dto.getRuleDesc(), true)
+                            .andLike(Rule.FIELD_RULE_CODE, dto.getRuleCode(), true)
+                            .andLike(Rule.FIELD_RULE_NAME, dto.getRuleName(), true)
+                            .andLike(Rule.FIELD_RULE_DESC, dto.getRuleDesc(), true)
                             .andEqualTo(Rule.FIELD_CHECK_TYPE, dto.getCheckType(), true)
                             .andEqualTo(Rule.FIELD_EXCEPTION_BLOCK, dto.getExceptionBlock(), true)
                             .andEqualTo(Rule.FIELD_WEIGHT, dto.getWeight(), true))
