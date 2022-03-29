@@ -94,6 +94,7 @@
                 and sd.doc_name like #{docName}
             </if>
         </where>
+        order by sd.doc_id desc
     </select>
 
     <select id="selectUserNameById" resultType="java.lang.String">

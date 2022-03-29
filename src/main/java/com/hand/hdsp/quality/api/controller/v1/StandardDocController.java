@@ -112,7 +112,7 @@ public class StandardDocController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping
+    @PostMapping("/update")
     public ResponseEntity<StandardDocDTO> update(@PathVariable("organizationId") Long tenantId,
                                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                  @RequestPart StandardDocDTO standardDocDTO,
