@@ -113,7 +113,7 @@ public class StandardDocController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping
+    @PostMapping("/update")
     public ResponseEntity<StandardDocDTO> update(@PathVariable("organizationId") Long tenantId,
                                                  @RequestPart StandardDocDTO standardDocDTO,
                                                  @RequestPart(value = "file", required = false) MultipartFile multipartFile) {
