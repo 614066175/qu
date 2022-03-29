@@ -36,6 +36,18 @@ public class DataStandardDTO extends AuditDomain{
     @NotNull
     private Long groupId;
 
+    @Transient
+    @ExcelColumn(zh = "分组编码", en = "groupCode")
+    private String groupCode;
+
+    @Transient
+    @ExcelColumn(zh = "分组名称", en = "groupName")
+    private String groupName;
+
+    @Transient
+    @ExcelColumn(zh = "分组描述", en = "groupDesc")
+    private String groupDesc;
+
     @ApiModelProperty(value = "数据标准编码")
     @NotBlank
     @Size(max = 50)
@@ -127,16 +139,7 @@ public class DataStandardDTO extends AuditDomain{
     private String chargeDeptName;
 
     @Transient
-    private String groupName;
-
-    @Transient
-    private String groupCode;
-
-    @Transient
     private Long parentGroupId;
-
-    @Transient
-    private String groupDesc;
 
     @Transient
     private String nameLevelPath;
