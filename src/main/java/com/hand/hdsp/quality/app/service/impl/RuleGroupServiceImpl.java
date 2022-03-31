@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.app.service.impl;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
@@ -15,6 +16,7 @@ import com.hand.hdsp.quality.domain.repository.RuleLineRepository;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
@@ -73,21 +75,30 @@ public class RuleGroupServiceImpl implements RuleGroupService {
 
     @Override
     public List<RuleGroupDTO> export(RuleDTO dto, ExportParam exportParam) {
+        //此处为hzero导出功能，从上下文中获取projectId
+        long projectId = 0L;
+        Map<String, Object> additionInfo =
+                DetailsHelper.getUserDetails().getAdditionInfo();
+        if (additionInfo != null && additionInfo.get("projectId") != null) {
+            projectId = Long.parseLong(String.valueOf(additionInfo.get("projectId")));
+        }
+        dto.setProjectId(projectId);
         List<RuleGroupDTO> ruleGroupDTOList = ruleGroupRepository.selectDTOByCondition(Condition.builder(RuleGroup.class)
                 .andWhere(Sqls.custom()
-                        .andEqualTo(RuleGroup.FIELD_GROUP_ID, dto.getGroupId(), true)
-                        .andIn(RuleGroup.FIELD_TENANT_ID, Arrays.asList(0, dto.getTenantId())))
+                        .andEqualTo(RuleGroup.FIELD_TENANT_ID, dto.getTenantId())
+                        .andEqualTo(RuleGroup.FIELD_PROJECT_ID, dto.getProjectId()))
                 .build());
         ruleGroupDTOList.forEach(ruleGroupDTO -> {
             //查询某一分组下的，筛选后的标准规则
             List<RuleDTO> ruleDTOList = ruleRepository.selectDTOByCondition(Condition.builder(Rule.class)
                     .andWhere(Sqls.custom()
                             .andEqualTo(Rule.FIELD_GROUP_ID, ruleGroupDTO.getGroupId())
-                            .andIn(Rule.FIELD_TENANT_ID, Arrays.asList(0, dto.getTenantId())))
+                            .andEqualTo(Rule.FIELD_PROJECT_ID, ruleGroupDTO.getProjectId())
+                            .andEqualTo(Rule.FIELD_TENANT_ID, ruleGroupDTO.getTenantId()))
                     .andWhere(Sqls.custom()
-                            .andLike(Rule.FIELD_RULE_CODE, dto.getRuleCode(), true)
-                            .andLike(Rule.FIELD_RULE_NAME, dto.getRuleName(), true)
-                            .andLike(Rule.FIELD_RULE_DESC, dto.getRuleDesc(), true)
+                            .andEqualTo(Rule.FIELD_RULE_CODE, dto.getRuleCode(), true)
+                            .andEqualTo(Rule.FIELD_RULE_NAME, dto.getRuleName(), true)
+                            .andEqualTo(Rule.FIELD_RULE_DESC, dto.getRuleDesc(), true)
                             .andEqualTo(Rule.FIELD_CHECK_TYPE, dto.getCheckType(), true)
                             .andEqualTo(Rule.FIELD_EXCEPTION_BLOCK, dto.getExceptionBlock(), true)
                             .andEqualTo(Rule.FIELD_WEIGHT, dto.getWeight(), true))

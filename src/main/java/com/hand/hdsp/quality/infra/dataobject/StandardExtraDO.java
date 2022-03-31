@@ -27,4 +27,5 @@ public class StandardExtraDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 }

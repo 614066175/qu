@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.StandardAimRelationDTO;
 import com.hand.hdsp.quality.domain.entity.StandardAimRelation;
 import com.hand.hdsp.quality.domain.repository.StandardAimRelationRepository;
@@ -44,9 +45,11 @@ public class StanardAimRelationController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   StandardAimRelationDTO standardAimRelationDTO, @ApiIgnore @SortDefault(value = StandardAimRelation.FIELD_RELATION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardAimRelationDTO.setTenantId(tenantId);
+        standardAimRelationDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<StandardAimRelationDTO> list = stanardAimRelationRepository.pageAndSortDTO(pageRequest, standardAimRelationDTO);
         return Results.success(list);
     }
@@ -79,8 +82,11 @@ public class StanardAimRelationController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody StandardAimRelationDTO standardAimRelationDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody StandardAimRelationDTO standardAimRelationDTO) {
         standardAimRelationDTO.setTenantId(tenantId);
+        standardAimRelationDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(standardAimRelationDTO);
         stanardAimRelationRepository.insertDTOSelective(standardAimRelationDTO);
         return Results.success(standardAimRelationDTO);
@@ -95,8 +101,11 @@ public class StanardAimRelationController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody StandardAimRelationDTO standardAimRelationDTO) {
-                stanardAimRelationRepository.updateDTOWhereTenant(standardAimRelationDTO, tenantId);
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody StandardAimRelationDTO standardAimRelationDTO) {
+        standardAimRelationDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        stanardAimRelationRepository.updateDTOWhereTenant(standardAimRelationDTO, tenantId);
         return Results.success(standardAimRelationDTO);
     }
 
@@ -111,7 +120,7 @@ public class StanardAimRelationController extends BaseController {
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody StandardAimRelationDTO standardAimRelationDTO) {
-                standardAimRelationDTO.setTenantId(tenantId);
+        standardAimRelationDTO.setTenantId(tenantId);
         stanardAimRelationRepository.deleteByPrimaryKey(standardAimRelationDTO);
         return Results.success();
     }

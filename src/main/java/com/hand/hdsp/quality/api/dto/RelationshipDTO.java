@@ -37,5 +37,7 @@ public class RelationshipDTO extends AuditDomain {
     @Size(max = 50)
     private String baseFieldName;
 
+    private Long projectId;
+
 
 }

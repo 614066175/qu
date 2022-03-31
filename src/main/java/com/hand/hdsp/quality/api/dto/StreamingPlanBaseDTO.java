@@ -53,4 +53,6 @@ public class StreamingPlanBaseDTO extends AuditDomain {
     private Long delayNum;
 
     private Long cutoffNum;
+
+    private Long projectId;
 }

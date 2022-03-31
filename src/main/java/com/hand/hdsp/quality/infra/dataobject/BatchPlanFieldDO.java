@@ -33,4 +33,5 @@ public class BatchPlanFieldDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 }

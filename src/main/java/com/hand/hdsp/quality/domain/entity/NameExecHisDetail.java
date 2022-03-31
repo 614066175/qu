@@ -61,5 +61,6 @@ public class NameExecHisDetail extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 
 }

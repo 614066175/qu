@@ -52,4 +52,6 @@ public class NameStandardDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
+
 }

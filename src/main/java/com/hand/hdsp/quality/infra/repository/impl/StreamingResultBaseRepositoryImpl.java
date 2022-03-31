@@ -32,11 +32,12 @@ public class StreamingResultBaseRepositoryImpl extends BaseRepositoryImpl<Stream
                 Condition.builder(StreamingResultBase.class)
                         .where(Sqls.custom()
                                 .andEqualTo(StreamingResultBase.FIELD_RESULT_ID, streamingResultBaseDTO.getResultId(), true)
+                                .andEqualTo(StreamingResultBase.FIELD_PROJECT_ID, streamingResultBaseDTO.getProjectId(),true)
                                 .andEqualTo(StreamingResultBase.FIELD_TENANT_ID, streamingResultBaseDTO.getTenantId(), true))
                         .build()
         );
         if (!streamingResultBases.isEmpty()){
-            streamingResultBases.forEach( s -> s.setResultWaringVOList(streamingResultRuleMapper.selectWarnByTopic(StreamingResultRuleDTO.builder().tenantId(streamingResultBaseDTO.getTenantId()).topicInfo(s.getTopicInfo()).resultBaseId(s.getResultBaseId()).build())));
+            streamingResultBases.forEach( s -> s.setResultWaringVOList(streamingResultRuleMapper.selectWarnByTopic(StreamingResultRuleDTO.builder().tenantId(streamingResultBaseDTO.getTenantId()).projectId(streamingResultBaseDTO.getProjectId()).topicInfo(s.getTopicInfo()).resultBaseId(s.getResultBaseId()).build())));
         }
         return streamingResultBases;
     }

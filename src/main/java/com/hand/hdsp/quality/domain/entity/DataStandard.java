@@ -43,6 +43,7 @@ public class DataStandard extends AuditDomain {
     public static final String FIELD_CHARGE_EMAIL = "chargeEmail";
     public static final String FIELD_STANDARD_STATUS = "standardStatus";
     public static final String FIELD_TENANT_ID = "tenantId";
+    public static final String FIELD_PROJECT_ID = "projectId";
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -92,5 +93,6 @@ public class DataStandard extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 
 }

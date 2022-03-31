@@ -86,4 +86,6 @@ public class BatchResultBaseDTO extends AuditDomain {
 
     private List<BatchResultItemDTO> tableRelResult;
 
+    private Long projectId;
+
 }

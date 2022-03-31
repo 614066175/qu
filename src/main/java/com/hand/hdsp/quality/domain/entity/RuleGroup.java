@@ -85,4 +85,6 @@ public class RuleGroup extends AuditDomain {
     private String groupDesc;
 
     private Long tenantId;
+
+    private Long projectId;
 }

@@ -49,4 +49,6 @@ public class StandardAimRelationDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
+    private Long projectId;
+
 }

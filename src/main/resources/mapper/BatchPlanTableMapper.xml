@@ -18,6 +18,7 @@
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
 
     <select id="list" resultType="com.hand.hdsp.quality.infra.dataobject.BatchPlanTableDO">
@@ -35,6 +36,9 @@
         </choose>
         from xqua_batch_plan_table xbpt
         where xbpt.tenant_id = #{tenantId}
+        <if test="projectId != null">
+            and xbpt.project_id = #{projectId}
+        </if>
         <if test="ruleName != null and ruleName != ''">
             <bind name="ruleName" value="'%' + ruleName + '%'"/>
             and xbpt.rule_name like #{ruleName}
@@ -61,5 +65,8 @@
                  left join xqua_batch_plan_table_line xbptl on xbptc.plan_line_id = xbptl.plan_line_id
                  left join xqua_batch_plan_table xbpt on xbptl.plan_rule_id = xbpt.plan_rule_id
         where xbpt.plan_base_id = #{planBaseId}
+        <if test="projectId !=null">
+            and xbpt.project_id=#{projectId}
+        </if>
     </select>
 </mapper>

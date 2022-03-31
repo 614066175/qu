@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.api.controller.v1;
 
 import java.util.Map;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.BatchResultItemDTO;
 import com.hand.hdsp.quality.app.service.BatchResultItemService;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
@@ -51,8 +52,10 @@ public class BatchResultItemController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   BatchResultItemDTO batchResultItemDTO, @ApiIgnore @SortDefault(value = BatchResultItem.FIELD_RESULT_ITEM_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
+        batchResultItemDTO.setProjectId(projectId);
         batchResultItemDTO.setTenantId(tenantId);
         Page<BatchResultItemDTO> list = batchResultItemRepository.pageAndSortDTO(pageRequest, batchResultItemDTO);
         return Results.success(list);
@@ -69,9 +72,11 @@ public class BatchResultItemController extends BaseController {
     @PostMapping("/asset-table")
     @ProcessLovValue(targetField = {"body", "body.warningLevelList"})
     public ResponseEntity<?> assetTable(@PathVariable(name = "organizationId") Long tenantId,
+                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         @RequestBody BatchResultItemDTO batchResultItemDTO, @ApiIgnore @SortDefault(value = BatchResultItem.FIELD_RESULT_ITEM_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchResultItemDTO.setTenantId(tenantId);
+        batchResultItemDTO.setProjectId(projectId);
         Page<BatchResultItemDTO> list = batchResultItemRepository.assetTable(pageRequest, batchResultItemDTO);
         return Results.success(list);
     }
@@ -86,14 +91,13 @@ public class BatchResultItemController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/analysis-quality")
     public ResponseEntity<Map<String, Map<String, Long>>> analysisQuality(@PathVariable(name = "organizationId") Long tenantId,
-                                        @RequestBody BatchResultItemDTO batchResultItemDTO) {
+                                                                          @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                                          @RequestBody BatchResultItemDTO batchResultItemDTO) {
         batchResultItemDTO.setTenantId(tenantId);
+        batchResultItemDTO.setProjectId(projectId);
         Map<String, Map<String, Long>> map = batchResultItemService.analysisQuality(batchResultItemDTO);
         return Results.success(map);
     }
-
-
-
 
 
     @ApiOperation(value = "评估结果各级规则错误信息")
@@ -107,9 +111,11 @@ public class BatchResultItemController extends BaseController {
     @GetMapping("/result-rule")
     @ProcessLovValue(targetField = {"body", "body.warningLevelList"})
     public ResponseEntity<?> resultRule(@PathVariable(name = "organizationId") Long tenantId,
+                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         BatchResultItemDTO batchResultItemDTO, @ApiIgnore @SortDefault(value = BatchResultItem.FIELD_RESULT_ITEM_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchResultItemDTO.setTenantId(tenantId);
+        batchResultItemDTO.setProjectId(projectId);
         return Results.success(batchResultItemRepository.listRuleError(pageRequest, batchResultItemDTO));
     }
 
@@ -141,8 +147,11 @@ public class BatchResultItemController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody BatchResultItemDTO batchResultItemDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody BatchResultItemDTO batchResultItemDTO) {
         batchResultItemDTO.setTenantId(tenantId);
+        batchResultItemDTO.setProjectId(projectId);
         this.validObject(batchResultItemDTO);
         batchResultItemRepository.insertDTOSelective(batchResultItemDTO);
         return Results.success(batchResultItemDTO);
@@ -157,7 +166,10 @@ public class BatchResultItemController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody BatchResultItemDTO batchResultItemDTO) {
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody BatchResultItemDTO batchResultItemDTO) {
+        batchResultItemDTO.setProjectId(projectId);
         batchResultItemRepository.updateDTOAllColumnWhereTenant(batchResultItemDTO, tenantId);
         return Results.success(batchResultItemDTO);
     }

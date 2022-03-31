@@ -59,7 +59,7 @@ public interface DataFieldService {
      * @param tenantId
      * @param standardAimDTOList List<StandardAimDTO>
      */
-    void aim(Long tenantId,List<StandardAimDTO> standardAimDTOList);
+    void aim(Long tenantId,List<StandardAimDTO> standardAimDTOList, Long projectId);
 
     /**
      * 发布数字段标准

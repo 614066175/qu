@@ -78,4 +78,6 @@ public class MeasureParamDO {
 
     private String ruleName;
 
+    private Long projectId;
+
 }

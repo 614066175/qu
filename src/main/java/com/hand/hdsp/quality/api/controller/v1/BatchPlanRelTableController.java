@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.BatchPlanRelTableDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanRelTableService;
 import com.hand.hdsp.quality.config.SwaggerTags;
@@ -48,9 +49,11 @@ public class BatchPlanRelTableController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   BatchPlanRelTableDTO batchPlanRelTableDTO, @ApiIgnore @SortDefault(value = BatchPlanRelTable.FIELD_PLAN_RULE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchPlanRelTableDTO.setTenantId(tenantId);
+        batchPlanRelTableDTO.setProjectId(projectId);
         Page<BatchPlanRelTableDTO> list = batchPlanRelTableService.list(pageRequest, batchPlanRelTableDTO);
         return Results.success(list);
     }
@@ -65,8 +68,10 @@ public class BatchPlanRelTableController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> listNoPage(@PathVariable(name = "organizationId") Long tenantId,
+                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         BatchPlanRelTable batchPlanRelTable) {
         batchPlanRelTable.setTenantId(tenantId);
+        batchPlanRelTable.setProjectId(projectId);
         return Results.success(batchPlanRelTableRepository.select(batchPlanRelTable));
     }
 
@@ -98,8 +103,11 @@ public class BatchPlanRelTableController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanRelTableDTO batchPlanRelTableDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody BatchPlanRelTableDTO batchPlanRelTableDTO) {
         batchPlanRelTableDTO.setTenantId(tenantId);
+        batchPlanRelTableDTO.setProjectId(projectId);
         this.validObject(batchPlanRelTableDTO);
         batchPlanRelTableService.insert(batchPlanRelTableDTO);
         return Results.success(batchPlanRelTableDTO);
@@ -114,8 +122,11 @@ public class BatchPlanRelTableController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanRelTableDTO batchPlanRelTableDTO) {
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody BatchPlanRelTableDTO batchPlanRelTableDTO) {
         batchPlanRelTableDTO.setTenantId(tenantId);
+        batchPlanRelTableDTO.setProjectId(projectId);
         batchPlanRelTableService.update(batchPlanRelTableDTO);
         return Results.success(batchPlanRelTableDTO);
     }
@@ -147,9 +158,11 @@ public class BatchPlanRelTableController extends BaseController {
     @GetMapping("/detail-list")
     @ProcessLovValue(targetField = {"body", "body.warningLevelList"})
     public ResponseEntity<?> detailList(@PathVariable(name = "organizationId") Long tenantId,
+                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         BatchPlanRelTableDTO batchPlanRelTableDTO, @ApiIgnore @SortDefault(value = BatchPlanRelTable.FIELD_PLAN_RULE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchPlanRelTableDTO.setTenantId(tenantId);
+        batchPlanRelTableDTO.setProjectId(projectId);
         Page<BatchPlanRelTableDTO> list = batchPlanRelTableService.selectDetailList(pageRequest, batchPlanRelTableDTO);
         return Results.success(list);
     }

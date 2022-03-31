@@ -41,6 +41,7 @@ public class StandardExtraServiceImpl implements StandardExtraService {
                             .andEqualTo(StandardExtra.FIELD_STANDARD_ID, standardExtraDTO.getStandardId())
                             .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, standardExtraDTO.getStandardType())
                             .andEqualTo(StandardExtra.FIELD_EXTRA_KEY, standardExtraDTO.getExtraKey())
+                            .andEqualTo(StandardExtra.FIELD_PROJECT_ID,standardExtraDTO.getProjectId())
                             .andEqualTo(StandardExtra.FIELD_TENANT_ID, standardExtraDTO.getTenantId()))
                     .build());
             if(CollectionUtils.isNotEmpty(standardExtraDTOS)){

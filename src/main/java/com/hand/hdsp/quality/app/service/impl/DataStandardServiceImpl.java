@@ -1,16 +1,5 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.*;
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.RANGE;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.LengthType.FIXED;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.annotation.Resource;
-
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.DataStandardService;
 import com.hand.hdsp.quality.app.service.StandardAimService;
@@ -21,7 +10,6 @@ import com.hand.hdsp.quality.infra.constant.StandardConstant.AimType;
 import com.hand.hdsp.quality.infra.constant.WarningLevel;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.feign.AssetFeign;
-import com.hand.hdsp.quality.infra.feign.WorkFlowFeign;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import com.hand.hdsp.quality.infra.util.DataLengthHandler;
 import com.hand.hdsp.quality.infra.util.DataPatternHandler;
@@ -51,6 +39,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.*;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.RANGE;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.LengthType.FIXED;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
 /**
  * <p>
@@ -161,6 +160,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         List<DataStandardDTO> dataStandardDTOS = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(DataStandard.FIELD_STANDARD_CODE, dataStandardDTO.getStandardCode())
+                        .andEqualTo(DataStandard.FIELD_PROJECT_ID, dataStandardDTO.getProjectId())
                         .andEqualTo(DataStandard.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                 .build());
         if (CollectionUtils.isNotEmpty(dataStandardDTOS)) {
@@ -170,6 +170,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         List<DataStandardDTO> standardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(DataStandard.FIELD_STANDARD_NAME, dataStandardDTO.getStandardName())
+                        .andEqualTo(DataStandard.FIELD_PROJECT_ID, dataStandardDTO.getProjectId())
                         .andEqualTo(DataStandard.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                 .build());
         if (CollectionUtils.isNotEmpty(standardDTOList)) {
@@ -187,6 +188,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .extraKey(s.getExtraKey())
                         .extraValue(s.getExtraValue())
                         .standardType(DATA)
+                        .projectId(dataStandardDTO.getProjectId())
                         .tenantId(dataStandardDTO.getTenantId())
                         .build();
                 standardExtraRepository.insertDTOSelective(extraDTO);
@@ -245,7 +247,6 @@ public class DataStandardServiceImpl implements DataStandardService {
                 || OFFLINE_APPROVING.equals(dataStandardDTO.getStandardStatus())) {
             throw new CommonException(ErrorCode.DATA_STANDARD_CAN_NOT_DELETE);
         }
-        //暂未做申请审核 todo 删除申请头表行表
 
         dataStandardRepository.deleteByPrimaryKey(dataStandardDTO.getStandardId());
         //删除版本表数据
@@ -278,7 +279,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, DATA)
                         .andEqualTo(StandardAim.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                 .build());
-        standardAimService.batchDelete(standardAimDTOS);
+        standardAimService.batchDelete(standardAimDTOS, dataStandardDTO.getTenantId(), dataStandardDTO.getProjectId());
     }
 
     @Override
@@ -342,7 +343,8 @@ public class DataStandardServiceImpl implements DataStandardService {
         List<DataStandardDTO> dtoList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(DataStandard.FIELD_TENANT_ID, dataStandardDTO.getTenantId())
-                        .andEqualTo(DataStandard.FIELD_STANDARD_NAME, dataStandardDTO.getStandardName()))
+                        .andEqualTo(DataStandard.FIELD_STANDARD_NAME, dataStandardDTO.getStandardName())
+                        .andEqualTo(DataStandard.FIELD_PROJECT_ID, dataStandardDTO.getProjectId()))
                 .build());
         if (dtoList.size() > 1 || (dtoList.size() == 1 && !dtoList.get(0).getStandardCode().equals(dataStandardDTO.getStandardCode()))) {
             throw new CommonException(ErrorCode.DATA_STANDARD_NAME_EXIST);
@@ -497,17 +499,19 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void aim(Long tenantId, List<StandardAimDTO> standardAimDTOList) {
+    public void aim(Long tenantId, List<StandardAimDTO> standardAimDTOList, Long projectId) {
         if (CollectionUtils.isNotEmpty(standardAimDTOList)) {
             standardAimDTOList.forEach(standardAimDTO -> {
                 standardAimDTO.setTenantId(tenantId);
+                standardAimDTO.setProjectId(projectId);
                 List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
                         .andWhere(Sqls.custom()
                                 .andEqualTo(StandardAim.FIELD_STANDARD_ID, standardAimDTO.getStandardId())
                                 .andEqualTo(StandardAim.FIELD_DATASOURCE_TYPE, standardAimDTO.getDatasourceType())
                                 .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, standardAimDTO.getSchemaName())
                                 .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, standardAimDTO.getDatasourceCode())
-                                .andEqualTo(StandardAim.FIELD_FIELD_NAME, standardAimDTO.getFieldName()))
+                                .andEqualTo(StandardAim.FIELD_FIELD_NAME, standardAimDTO.getFieldName())
+                                .andEqualTo(StandardAim.FIELD_PROJECT_ID, standardAimDTO.getProjectId()))
                         .build());
                 if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
                     throw new CommonException(ErrorCode.STANDARD_AIM_EXIST);
@@ -526,18 +530,21 @@ public class DataStandardServiceImpl implements DataStandardService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void batchRelatePlan(List<StandardAimDTO> standardAimDTOList) {
+    public void batchRelatePlan(Long tenantId, List<StandardAimDTO> standardAimDTOList, Long projectId) {
         //判断数据标准状态，非在线状态，则只存落标表，在数据质量不生成规则
         if (CollectionUtils.isEmpty(standardAimDTOList)) {
             throw new CommonException(ErrorCode.STANDARD_AIM_LIST_IS_EMPTY);
         }
         standardAimDTOList.forEach(standardAimDTO -> {
+            standardAimDTO.setTenantId(tenantId);
+            standardAimDTO.setProjectId(projectId);
             //删除原先的落标关系表
             List<StandardAimRelationDTO> standardAimRelationDTOS = standardAimRelationRepository.selectDTOByCondition(Condition.builder(StandardAimRelation.class)
                     .andWhere(Sqls.custom()
                             .andEqualTo(StandardAimRelation.FIELD_AIM_ID, standardAimDTO.getAimId())
                             .andEqualTo(StandardAimRelation.FIELD_AIM_TYPE, AimType.AIM)
-                            .andEqualTo(StandardAimRelation.FIELD_TENANT_ID, standardAimDTO.getTenantId()))
+                            .andEqualTo(StandardAimRelation.FIELD_TENANT_ID, standardAimDTO.getTenantId())
+                            .andEqualTo(StandardAimRelation.FIELD_PROJECT_ID, standardAimDTO.getProjectId()))
                     .build());
             standardAimRelationRepository.batchDTODeleteByPrimaryKey(standardAimRelationDTOS);
             DataStandardDTO dataStandardDTO = dataStandardRepository.selectDTOByPrimaryKey(standardAimDTO.getStandardId());
@@ -598,7 +605,7 @@ public class DataStandardServiceImpl implements DataStandardService {
     }
 
     @Override
-    public void fieldAimStandard(AssetFieldDTO assetFieldDTO) {
+    public void fieldAimStandard(AssetFieldDTO assetFieldDTO, Long projectId) {
         //根据字段删除落标
         List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
                 .andWhere(Sqls.custom()
@@ -606,7 +613,8 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, assetFieldDTO.getDatasourceCode())
                         .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, assetFieldDTO.getDatasourceSchema())
                         .andEqualTo(StandardAim.FIELD_TABLE_NAME, assetFieldDTO.getTableName())
-                        .andEqualTo(StandardAim.FIELD_FIELD_NAME, assetFieldDTO.getFieldName()))
+                        .andEqualTo(StandardAim.FIELD_FIELD_NAME, assetFieldDTO.getFieldName())
+                        .andEqualTo(StandardAim.FIELD_PROJECT_ID, projectId))
                 .build());
         standardAimRepository.batchDTODeleteByPrimaryKey(standardAimDTOS);
         //创建新的字段落标
@@ -623,7 +631,7 @@ public class DataStandardServiceImpl implements DataStandardService {
     }
 
     @Override
-    public List<DataStandardDTO> standardByField(AssetFieldDTO assetFieldDTO) {
+    public List<DataStandardDTO> standardByField(AssetFieldDTO assetFieldDTO, Long projectId) {
         List<DataStandardDTO> dataStandardDTOList = new ArrayList<>();
         List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
                 .andWhere(Sqls.custom()
@@ -631,7 +639,8 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, assetFieldDTO.getDatasourceCode())
                         .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, assetFieldDTO.getDatasourceSchema())
                         .andEqualTo(StandardAim.FIELD_TABLE_NAME, assetFieldDTO.getTableName())
-                        .andEqualTo(StandardAim.FIELD_FIELD_NAME, assetFieldDTO.getFieldName()))
+                        .andEqualTo(StandardAim.FIELD_FIELD_NAME, assetFieldDTO.getFieldName())
+                        .andEqualTo(StandardAim.FIELD_PROJECT_ID, projectId))
                 .build());
         if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
             standardAimDTOS.forEach(standardAimDTO -> {
@@ -643,7 +652,7 @@ public class DataStandardServiceImpl implements DataStandardService {
     }
 
     @Override
-    public DataStandardDTO assetDetail(Long tenantId, Long standardId) {
+    public DataStandardDTO assetDetail(Long tenantId, Long standardId, Long projectId) {
         List<DataStandardDTO> dataStandardDTOList = dataStandardMapper.list(DataStandardDTO
                 .builder()
                 .standardId(standardId)
@@ -657,7 +666,8 @@ public class DataStandardServiceImpl implements DataStandardService {
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardExtra.FIELD_STANDARD_ID, standardId)
                         .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, DATA)
-                        .andEqualTo(StandardExtra.FIELD_TENANT_ID, tenantId))
+                        .andEqualTo(StandardExtra.FIELD_TENANT_ID, tenantId)
+                        .andEqualTo(StandardExtra.FIELD_PROJECT_ID, projectId))
                 .build());
         dataStandardDTO.setStandardExtraDTOList(standardExtraDTOS);
         dataStandardDTO.setMetadataName(dataStandardDTO.getStandardName());
@@ -670,7 +680,8 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .selectByCondition(Condition.builder(StandardGroup.class)
                                 .andWhere(Sqls.custom()
                                         .andEqualTo(StandardGroup.FIELD_GROUP_ID, dataStandardDTO.getParentGroupId())
-                                        .andEqualTo(StandardGroup.FIELD_TENANT_ID, tenantId))
+                                        .andEqualTo(StandardGroup.FIELD_TENANT_ID, tenantId)
+                                        .andEqualTo(StandardGroup.FIELD_PROJECT_ID, projectId))
                                 .build());
                 dataStandardDTO.setParentGroupId(standardGroups.get(0).getParentGroupId());
                 dataStandardDTO.setNameLevelPath(String.format("%s/%s",

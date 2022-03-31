@@ -71,4 +71,6 @@ public class PlanGroupDTO extends AuditDomain {
     @ExcelColumn(zh = "评估方案列表", en = "batchPlanDTOList", child = true)
     private List<BatchPlanDTO> batchPlanDTOList;
 
+    private Long projectId;
+
 }

@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.app.service.RuleService;
 import com.hand.hdsp.quality.config.SwaggerTags;
@@ -62,7 +63,7 @@ public class RuleSiteController extends BaseController {
     @Permission(level = ResourceLevel.SITE)
     @GetMapping("/{ruleId}")
     public ResponseEntity<?> detail(@PathVariable Long ruleId) {
-        RuleDTO ruleDTO = ruleService.detail(ruleId, BaseConstants.DEFAULT_TENANT_ID);
+        RuleDTO ruleDTO = ruleService.detail(ruleId, BaseConstants.DEFAULT_TENANT_ID, HdspConstant.DEFAULT_PROJECT_ID);
         return Results.success(ruleDTO);
     }
 

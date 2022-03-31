@@ -41,9 +41,9 @@ public class RuleServiceImpl implements RuleService {
 
 
     @Override
-    public RuleDTO detail(Long ruleId, Long tenantId) {
+    public RuleDTO detail(Long ruleId, Long tenantId,Long projectId) {
         RuleDTO ruleDTO = ruleRepository.selectDTOByPrimaryKey(ruleId);
-        List<RuleLineDTO> ruleLineDTOList = ruleLineRepository.list(ruleId, tenantId);
+        List<RuleLineDTO> ruleLineDTOList = ruleLineRepository.list(ruleId, tenantId,projectId);
         for (RuleLineDTO ruleLineDTO : ruleLineDTOList) {
             ruleLineDTO.setWarningLevelList(JsonUtils.json2WarningLevel(ruleLineDTO.getWarningLevel()));
         }
@@ -57,10 +57,10 @@ public class RuleServiceImpl implements RuleService {
         Long tenantId = ruleDTO.getTenantId();
         ruleRepository.insertDTOSelective(ruleDTO);
         if (ruleDTO.getRuleLineDTOList() != null) {
-
             for (RuleLineDTO ruleLineDTO : ruleDTO.getRuleLineDTOList()) {
                 ruleLineDTO.setRuleId(ruleDTO.getRuleId());
                 ruleLineDTO.setTenantId(tenantId);
+                ruleLineDTO.setProjectId(ruleDTO.getProjectId());
                 //todo 范围重叠判断
                 ruleLineDTO.setWarningLevel(JsonUtils.object2Json(ruleLineDTO.getWarningLevelList()));
                 ruleLineRepository.insertDTOSelective(ruleLineDTO);
@@ -72,15 +72,18 @@ public class RuleServiceImpl implements RuleService {
     @Transactional(rollbackFor = Exception.class)
     public void update(RuleDTO ruleDTO) {
         Long tenantId = ruleDTO.getTenantId();
+        Long projectId = ruleDTO.getProjectId();
         ruleRepository.updateDTOAllColumnWhereTenant(ruleDTO, tenantId);
         if (ruleDTO.getRuleLineDTOList() != null) {
             for (RuleLineDTO ruleLineDTO : ruleDTO.getRuleLineDTOList()) {
                 if (AuditDomain.RecordStatus.update.equals(ruleLineDTO.get_status())) {
                     //todo 范围重叠判断
                     ruleLineDTO.setWarningLevel(JsonUtils.object2Json(ruleLineDTO.getWarningLevelList()));
+                    ruleLineDTO.setProjectId(projectId);
                     ruleLineRepository.updateDTOAllColumnWhereTenant(ruleLineDTO, tenantId);
                 } else if (AuditDomain.RecordStatus.create.equals(ruleLineDTO.get_status())) {
                     ruleLineDTO.setRuleId(ruleDTO.getRuleId());
+                    ruleLineDTO.setProjectId(projectId);
                     ruleLineDTO.setTenantId(tenantId);
                     //todo 范围重叠判断
                     ruleLineDTO.setWarningLevel(JsonUtils.object2Json(ruleLineDTO.getWarningLevelList()));

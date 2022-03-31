@@ -56,6 +56,8 @@ public class StandardDoc extends AuditDomain {
     private Long chargeDeptId;
 
     private Long chargeId;
+
+    private Long projectId;
 }
 
 

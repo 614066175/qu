@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.BatchPlanTableLineDTO;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.BatchPlanTableLine;
@@ -43,9 +44,11 @@ public class BatchPlanTableLineController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   BatchPlanTableLineDTO batchPlanTableLineDTO, @ApiIgnore @SortDefault(value = BatchPlanTableLine.FIELD_PLAN_LINE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchPlanTableLineDTO.setTenantId(tenantId);
+        batchPlanTableLineDTO.setProjectId(projectId);
         Page<BatchPlanTableLineDTO> list = batchPlanTableLineRepository.pageAndSortDTO(pageRequest, batchPlanTableLineDTO);
         return Results.success(list);
     }
@@ -60,8 +63,10 @@ public class BatchPlanTableLineController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> query(@PathVariable(name = "organizationId") Long tenantId,
+                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                    BatchPlanTableLine batchPlanTableLine) {
         batchPlanTableLine.setTenantId(tenantId);
+        batchPlanTableLine.setProjectId(projectId);
         return Results.success(batchPlanTableLineRepository.select(batchPlanTableLine));
     }
 
@@ -93,8 +98,11 @@ public class BatchPlanTableLineController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanTableLineDTO batchPlanTableLineDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody BatchPlanTableLineDTO batchPlanTableLineDTO) {
         batchPlanTableLineDTO.setTenantId(tenantId);
+        batchPlanTableLineDTO.setProjectId(projectId);
         this.validObject(batchPlanTableLineDTO);
         batchPlanTableLineRepository.insertDTOSelective(batchPlanTableLineDTO);
         return Results.success(batchPlanTableLineDTO);
@@ -109,7 +117,10 @@ public class BatchPlanTableLineController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody BatchPlanTableLineDTO batchPlanTableLineDTO) {
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody BatchPlanTableLineDTO batchPlanTableLineDTO) {
+        batchPlanTableLineDTO.setProjectId(projectId);
         batchPlanTableLineRepository.updateDTOAllColumnWhereTenant(batchPlanTableLineDTO, tenantId);
         return Results.success(batchPlanTableLineDTO);
     }

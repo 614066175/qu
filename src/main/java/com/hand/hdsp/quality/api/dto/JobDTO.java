@@ -87,4 +87,6 @@ public class JobDTO extends AuditDomain {
 
     private String type;
 
+    private Long projectId;
+
 }

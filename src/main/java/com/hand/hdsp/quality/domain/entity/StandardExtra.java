@@ -30,6 +30,7 @@ public class StandardExtra extends AuditDomain {
     public static final String FIELD_EXTRA_KEY = "extraKey";
     public static final String FIELD_EXTRA_VALUE = "extraValue";
     public static final String FIELD_TENANT_ID = "tenantId";
+    public static final String FIELD_PROJECT_ID = "projectId";
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -53,5 +54,6 @@ public class StandardExtra extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 
 }

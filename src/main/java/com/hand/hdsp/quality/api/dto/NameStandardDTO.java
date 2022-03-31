@@ -159,4 +159,6 @@ public class NameStandardDTO extends AuditDomain {
     @Transient
     private String lastUpdatedByName;
 
+    private Long projectId;
+
 }

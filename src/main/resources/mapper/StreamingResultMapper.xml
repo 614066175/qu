@@ -16,6 +16,7 @@
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
 
     <sql id="StreamingPlan_And_Result">
@@ -53,6 +54,9 @@
             <if test="tenantId != null">
                 and xsr.tenant_id = #{tenantId}
             </if>
+            <if test="projectId != null">
+                and xsr.project_id = #{projectId}
+            </if>
             <if test="planName != null">
                 <bind name="planName" value="'%' + planName + '%'"/>
                 and xsp.plan_name like #{planName}
@@ -80,6 +84,9 @@
             </if>
             <if test="tenantId != null">
                 and xpg.tenant_id = #{tenantId}
+            </if>
+            <if test="projectId != null">
+                and xsp.project_id = #{projectId}
             </if>
             <if test="planName != null">
                 <bind name="planName" value="'%' + planName + '%'"/>
@@ -109,6 +116,9 @@
             <if test="tenantId != null">
                 and xsr.tenant_id = #{tenantId}
             </if>
+            <if test="projectId != null">
+                and xsr.project_id = #{projectId}
+            </if>
             <if test="planName != null">
                 <bind name="planName" value="'%' + planName + '%'"/>
                 and xsp.plan_name like #{planName}
@@ -137,6 +147,9 @@
             <if test="tenantId != null">
                 and xpg.tenant_id = #{tenantId}
             </if>
+            <if test="projectId != null">
+                and xsp.project_id = #{projectId}
+            </if>
             <if test="planName != null">
                 <bind name="planName" value="'%' + planName + '%'"/>
                 and xsp.plan_name like #{planName}
@@ -157,6 +170,9 @@
         <where>
             <if test="tenantId != null">
                 xsr.tenant_id = #{tenantId}
+            </if>
+            <if test="projectId != null">
+                and xsp.project_id = #{projectId}
             </if>
             <if test="planId != null">
                 and xsr.plan_id = #{planId}
@@ -190,6 +206,9 @@
             <if test="tenantId != null">
                 and xsr.tenant_id = #{tenantId}
             </if>
+            <if test="projectId !=null">
+                and xsr.project_id =#{projectId}
+            </if>
             <if test="planName != null">
                 <bind name="planName" value="'%' + planName + '%'"/>
                 and xsp.plan_name like #{planName}
@@ -211,6 +230,9 @@
             <if test="tenantId != null">
                 xsr.tenant_id = #{tenantId}
             </if>
+            <if test="projectId != null">
+                and xsr.project_id = #{projectId}
+            </if>
             <if test="startDate != null and startDate != ''">
                 and xsr.end_date &gt;=  #{startDate}
             </if>
@@ -231,6 +253,9 @@
                     <if test="tenantId != null">
                         xsr.tenant_id = #{tenantId}
                     </if>
+                    <if test="projectId != null">
+                        and xsr.project_id = #{projectId}
+                    </if>
                     <if test="startDate != null and startDate != ''">
                         and xsr.end_date &gt;=  #{startDate}
                     </if>
@@ -247,6 +272,9 @@
                 <where>
                     <if test="tenantId != null">
                         xsr.tenant_id = #{tenantId}
+                    </if>
+                    <if test="projectId != null">
+                        and xsr.project_id = #{projectId}
                     </if>
                     <if test="startDate != null and startDate != ''">
                         and xsr.end_date &gt;=  #{startDate}
@@ -277,6 +305,9 @@
                     <if test="tenantId != null">
                         xsr.tenant_id = #{tenantId}
                     </if>
+                    <if test="projectId != null">
+                        and xsr.project_id = #{projectId}
+                    </if>
                     <if test="startDate != null and startDate != ''">
                         and xsr.end_date &gt;=  #{startDate}
                     </if>
@@ -299,6 +330,9 @@
                 <where>
                     <if test="tenantId != null">
                         xsr.tenant_id = #{tenantId}
+                    </if>
+                    <if test="projectId != null">
+                        and xsr.project_id = #{projectId}
                     </if>
                     <if test="startDate != null and startDate != ''">
                         and xsr.end_date &gt;=  #{startDate}
@@ -324,6 +358,9 @@
         <where>
             <if test="tenantId != null">
                 xsr.tenant_id = #{tenantId}
+            </if>
+            <if test="projectId != null">
+                and xsr.project_id = #{projectId}
             </if>
             <if test="startDate != null and startDate != ''">
                 and xsr.end_date &gt;=  #{startDate}
@@ -355,6 +392,9 @@
                     <if test="tenantId != null">
                         xsr.tenant_id = #{tenantId}
                     </if>
+                    <if test="projectId != null">
+                        and xsr.project_id = #{projectId}
+                    </if>
                     <if test="startDate != null and startDate != ''">
                         and xsr.end_date &gt;=  #{startDate}
                     </if>
@@ -377,6 +417,9 @@
                 <where>
                     <if test="tenantId != null">
                         xsr.tenant_id = #{tenantId}
+                    </if>
+                    <if test="projectId != null">
+                        and xsr.project_id = #{projectId}
                     </if>
                     <if test="startDate != null and startDate != ''">
                         and xsr.end_date &gt;=  #{startDate}

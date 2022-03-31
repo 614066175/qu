@@ -76,14 +76,14 @@ public interface DataStandardService {
      *
      * @param standardAimDTOList List<StandardAimDTO>
      */
-    void aim(Long tenantId, List<StandardAimDTO> standardAimDTOList);
+    void aim(Long tenantId, List<StandardAimDTO> standardAimDTOList, Long projectId);
 
     /**
      * 数据标准批量关联评估方案
      *
      * @param standardAimDTOList
      */
-    void batchRelatePlan(List<StandardAimDTO> standardAimDTOList);
+    void batchRelatePlan(Long tenantId, List<StandardAimDTO> standardAimDTOList,Long projectId);
 
     /**
      * 数据标准导出
@@ -108,22 +108,23 @@ public interface DataStandardService {
      *
      * @param assetFieldDTO
      */
-    void fieldAimStandard(AssetFieldDTO assetFieldDTO);
+    void fieldAimStandard(AssetFieldDTO assetFieldDTO, Long projectId);
 
     /**
      * @param assetFieldDTO
      * @return
      */
-    List<DataStandardDTO> standardByField(AssetFieldDTO assetFieldDTO);
+    List<DataStandardDTO> standardByField(AssetFieldDTO assetFieldDTO, Long projectId);
 
     /**
      * 元数据数据标准详情
      *
      * @param tenantId
      * @param standardId
+     * @param projectId
      * @return
      */
-    DataStandardDTO assetDetail(Long tenantId, Long standardId);
+    DataStandardDTO assetDetail(Long tenantId, Long standardId, Long projectId);
 
     /**
      * 开启工作流

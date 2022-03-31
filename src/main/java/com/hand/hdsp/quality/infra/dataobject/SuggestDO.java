@@ -32,4 +32,6 @@ public class SuggestDO extends AuditDomain {
 
     private String suggestContent;
 
+    private Long projectId;
+
 }

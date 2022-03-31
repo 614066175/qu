@@ -52,5 +52,6 @@ public class NameAimInclude extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 
 }

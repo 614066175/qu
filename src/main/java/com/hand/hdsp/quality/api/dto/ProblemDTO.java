@@ -62,4 +62,6 @@ public class ProblemDTO extends AuditDomain{
      * 问题父亲名字
      */
     private String problemParentName;
+
+    private Long projectId;
 }

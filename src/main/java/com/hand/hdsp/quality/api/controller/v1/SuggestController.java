@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.app.service.SuggestService;
 import org.hzero.core.util.Results;
 import org.hzero.core.base.BaseController;
@@ -52,10 +53,12 @@ public class SuggestController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                SuggestDTO suggestDTO, @ApiIgnore @SortDefault(value = Suggest.FIELD_SUGGEST_ORDER,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  SuggestDTO suggestDTO, @ApiIgnore @SortDefault(value = Suggest.FIELD_SUGGEST_ORDER,
             direction = Sort.Direction.ASC) PageRequest pageRequest) {
         suggestDTO.setTenantId(tenantId);
-        Page<SuggestDTO> list = suggestService.list(pageRequest,suggestDTO);
+        suggestDTO.setProjectId(projectId);
+        Page<SuggestDTO> list = suggestService.list(pageRequest, suggestDTO);
         return Results.success(list);
     }
 
@@ -88,8 +91,11 @@ public class SuggestController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody SuggestDTO suggestDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody SuggestDTO suggestDTO) {
         suggestDTO.setTenantId(tenantId);
+        suggestDTO.setProjectId(projectId);
         this.validObject(suggestDTO);
         return Results.success(suggestService.createSuggest(suggestDTO));
     }
@@ -103,8 +109,11 @@ public class SuggestController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody SuggestDTO suggestDTO) {
-                suggestRepository.updateDTOWhereTenant(suggestDTO, tenantId);
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody SuggestDTO suggestDTO) {
+        suggestDTO.setProjectId(projectId);
+        suggestRepository.updateDTOWhereTenant(suggestDTO, tenantId);
         return Results.success(suggestDTO);
     }
 

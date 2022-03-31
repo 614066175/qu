@@ -29,4 +29,6 @@ public class ExtraVersionDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
+
 }

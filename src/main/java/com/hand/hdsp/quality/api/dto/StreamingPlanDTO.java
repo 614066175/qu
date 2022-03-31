@@ -65,4 +65,6 @@ public class StreamingPlanDTO extends AuditDomain {
     private PlanGroup planGroup;
 
     private StreamingResultBase streamingResultBase;
+
+    private Long projectId;
 }
