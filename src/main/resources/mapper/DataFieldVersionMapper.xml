@@ -90,15 +90,16 @@
         left join iam_user iu on fsv.last_updated_by=iu.id
         left join iam_user iu2 on fsv.charge_id=iu2.id
         left join hpfm_unit hu on hu.unit_id=fsv.charge_dept_id
-        WHERE
-        <if test="dataFieldVersionDTO.fieldId!=null">
-            fsv.field_id=#{dataFieldVersionDTO.fieldId}
-        </if>
-        <if test="dataFieldVersionDTO.versionId!=null">
-            fsv.version_id = #{dataFieldVersionDTO.versionId}
-        </if>
-        <if test="projectId != null">
-            and fsv.project_id = #{dataFieldVersionDTO.projectId}
-        </if>
+        <where>
+            <if test="dataFieldVersionDTO.fieldId!=null">
+                fsv.field_id=#{dataFieldVersionDTO.fieldId}
+            </if>
+            <if test="dataFieldVersionDTO.versionId!=null">
+               and fsv.version_id = #{dataFieldVersionDTO.versionId}
+            </if>
+            <if test="dataFieldVersionDTO.projectId != null">
+                and fsv.project_id = #{dataFieldVersionDTO.projectId}
+            </if>
+        </where>
     </select>
 </mapper>
