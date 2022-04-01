@@ -98,7 +98,7 @@
             fsv.version_id = #{dataFieldVersionDTO.versionId}
         </if>
         <if test="projectId != null">
-            and fsv.project_id = #{projectId}
+            and fsv.project_id = #{dataFieldVersionDTO.projectId}
         </if>
     </select>
 </mapper>
