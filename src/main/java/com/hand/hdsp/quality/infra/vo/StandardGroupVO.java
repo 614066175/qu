@@ -28,4 +28,6 @@ public class StandardGroupVO {
     private String standardType;
 
     private Long tenantId;
+
+    private Long projectId;
 }

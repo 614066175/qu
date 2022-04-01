@@ -34,4 +34,6 @@ public class ProblemDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
+
 }

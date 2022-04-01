@@ -118,4 +118,6 @@ public class RuleDTO extends AuditDomain {
     @ApiModelProperty(value = "告警等级json")
     @ExcelColumn(zh = "告警配置",en = "warning level")
     private String warningLevel;
+
+    private Long projectId;
 }

@@ -59,4 +59,6 @@ public class NameAimIncludeDTO extends AuditDomain {
      */
     @Transient
     private List<String> excludeTables;
+
+    private Long projectId;
 }

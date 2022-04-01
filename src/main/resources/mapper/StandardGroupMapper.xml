@@ -16,6 +16,7 @@
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
 
     <sql id="baseColumn">
@@ -45,6 +46,9 @@
             </if>
             <if test="standardGroupVO.tenantId!=null">
                 and xsg.tenant_id=#{standardGroupVO.tenantId}
+            </if>
+            <if test="standardGroupVO.projectId != null">
+                and xsg.project_id = #{standardGroupVO.projectId}
             </if>
             and xsg.enabled_flag=1
         </where>

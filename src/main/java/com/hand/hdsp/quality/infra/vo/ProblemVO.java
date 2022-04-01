@@ -51,4 +51,6 @@ public class ProblemVO extends Child<ProblemVO> {
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;
+
+    private Long projectId;
 }

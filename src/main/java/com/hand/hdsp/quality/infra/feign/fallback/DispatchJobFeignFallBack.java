@@ -25,7 +25,7 @@ public class DispatchJobFeignFallBack implements DispatchJobFeign {
      * @return job
      */
     @Override
-    public ResponseEntity<String> createOrUpdate(Long tenantId, JobDTO jobDTO) {
+    public ResponseEntity<String> createOrUpdate(Long tenantId, Long projectId, JobDTO jobDTO) {
         log.error("feign调用job createOrUpdate错误, jobDTO: {}", jobDTO);
         throw new CommonException(ErrorCode.JOB_CREATE_UPDATE);
     }

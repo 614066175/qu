@@ -41,4 +41,5 @@ public class StandardOutbibDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 }

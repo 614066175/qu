@@ -29,4 +29,6 @@ public class StreamingPlanDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
+
 }

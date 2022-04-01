@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.api.controller.v1;
 
 import java.util.List;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.infra.vo.NameStandardHisReportVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -43,7 +44,10 @@ public class NameExecHistoryController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
-    public ResponseEntity<Page<NameExecHistoryDTO>> list(NameExecHistoryDTO nameExecHistoryDTO, PageRequest pageRequest) {
+    public ResponseEntity<Page<NameExecHistoryDTO>> list(NameExecHistoryDTO nameExecHistoryDTO,
+                                                         @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                         PageRequest pageRequest) {
+        nameExecHistoryDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<NameExecHistoryDTO> list = PageHelper.doPage(pageRequest,
                 ()->nameExecHistoryRepository.getHistoryList(nameExecHistoryDTO));
         return Results.success(list);

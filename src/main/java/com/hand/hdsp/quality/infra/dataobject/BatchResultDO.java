@@ -36,4 +36,6 @@ public class BatchResultDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
+
 }

@@ -37,4 +37,5 @@ public class StandardAimDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 }

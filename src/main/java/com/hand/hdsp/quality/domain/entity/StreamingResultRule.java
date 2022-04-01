@@ -55,5 +55,6 @@ public class StreamingResultRule extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 
 }

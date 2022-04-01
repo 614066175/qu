@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.ItemTemplateSqlDTO;
 import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
 import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
@@ -44,9 +45,11 @@ public class ItemTemplateSqlController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   ItemTemplateSqlDTO itemTemplateSqlDTO, @ApiIgnore @SortDefault(value = ItemTemplateSql.FIELD_SQL_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         itemTemplateSqlDTO.setTenantId(tenantId);
+        itemTemplateSqlDTO.setProjectId(projectId);
         Page<ItemTemplateSqlDTO> list = itemTemplateSqlRepository.pageAndSortDTO(pageRequest, itemTemplateSqlDTO);
         return Results.success(list);
     }
@@ -79,8 +82,11 @@ public class ItemTemplateSqlController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody ItemTemplateSqlDTO itemTemplateSqlDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody ItemTemplateSqlDTO itemTemplateSqlDTO) {
         itemTemplateSqlDTO.setTenantId(tenantId);
+        itemTemplateSqlDTO.setProjectId(projectId);
         this.validObject(itemTemplateSqlDTO);
         itemTemplateSqlRepository.insertDTOSelective(itemTemplateSqlDTO);
         return Results.success(itemTemplateSqlDTO);
@@ -95,7 +101,10 @@ public class ItemTemplateSqlController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody ItemTemplateSqlDTO itemTemplateSqlDTO) {
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody ItemTemplateSqlDTO itemTemplateSqlDTO) {
+        itemTemplateSqlDTO.setProjectId(projectId);
         itemTemplateSqlRepository.updateDTOAllColumnWhereTenant(itemTemplateSqlDTO, tenantId);
         return Results.success(itemTemplateSqlDTO);
     }

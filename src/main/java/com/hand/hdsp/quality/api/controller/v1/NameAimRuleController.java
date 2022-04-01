@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import org.hzero.core.util.Results;
 import org.hzero.core.base.BaseController;
 import com.hand.hdsp.quality.domain.entity.NameAimRule;
@@ -45,9 +46,11 @@ public class NameAimRuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<Page<NameAimRuleDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
-                NameAimRuleDTO nameAimRuleDTO, @ApiIgnore @SortDefault(value = NameAimRule.FIELD_RULE_ID,
+                                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                     NameAimRuleDTO nameAimRuleDTO, @ApiIgnore @SortDefault(value = NameAimRule.FIELD_RULE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         nameAimRuleDTO.setTenantId(tenantId);
+        nameAimRuleDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<NameAimRuleDTO> list = nameAimRuleRepository.pageAndSortDTO(pageRequest, nameAimRuleDTO);
         return Results.success(list);
     }
@@ -80,8 +83,11 @@ public class NameAimRuleController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<NameAimRuleDTO> create(@PathVariable("organizationId") Long tenantId, @RequestBody NameAimRuleDTO nameAimRuleDTO) {
+    public ResponseEntity<NameAimRuleDTO> create(@PathVariable("organizationId") Long tenantId,
+                                                 @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                 @RequestBody NameAimRuleDTO nameAimRuleDTO) {
         nameAimRuleDTO.setTenantId(tenantId);
+        nameAimRuleDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(nameAimRuleDTO);
         nameAimRuleRepository.insertDTOSelective(nameAimRuleDTO);
         return Results.success(nameAimRuleDTO);
@@ -96,8 +102,11 @@ public class NameAimRuleController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<NameAimRuleDTO> update(@PathVariable("organizationId") Long tenantId, @RequestBody NameAimRuleDTO nameAimRuleDTO) {
-                nameAimRuleRepository.updateDTOWhereTenant(nameAimRuleDTO, tenantId);
+    public ResponseEntity<NameAimRuleDTO> update(@PathVariable("organizationId") Long tenantId,
+                                                 @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                 @RequestBody NameAimRuleDTO nameAimRuleDTO) {
+        nameAimRuleDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        nameAimRuleRepository.updateDTOWhereTenant(nameAimRuleDTO, tenantId);
         return Results.success(nameAimRuleDTO);
     }
 
@@ -111,8 +120,8 @@ public class NameAimRuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<Void> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestBody NameAimRuleDTO nameAimRuleDTO) {
-                nameAimRuleDTO.setTenantId(tenantId);
+                                       @RequestBody NameAimRuleDTO nameAimRuleDTO) {
+        nameAimRuleDTO.setTenantId(tenantId);
         nameAimRuleRepository.deleteByPrimaryKey(nameAimRuleDTO);
         return Results.success();
     }

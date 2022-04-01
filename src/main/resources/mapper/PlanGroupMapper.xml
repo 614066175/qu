@@ -16,6 +16,7 @@
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
 
     <select id="treeBatch" resultType="com.hand.hdsp.quality.infra.vo.PlanGroupTreeVO">
@@ -30,6 +31,9 @@
     from xqua_plan_group
     where group_type = 'BATCH'
         and tenant_id = #{tenantId}
+        <if test="projectId != null">
+            and project_id=#{projectId}
+        </if>
     union
     select
     plan_id id,
@@ -42,6 +46,9 @@
     from xqua_batch_plan xbp
     <where>
     and tenant_id = #{tenantId}
+        <if test="projectId != null">
+            and xbp.project_id=#{projectId}
+        </if>
         <if test="planName != null">
             <bind name="planName" value="'%' + planName + '%'"/>
             and xbp.plan_name like #{planName}
@@ -61,6 +68,9 @@
     from xqua_plan_group
     where group_type = 'STREAMING'
         and tenant_id = #{tenantId}
+        <if test="projectId !=null">
+            and project_id = #{projectId}
+        </if>
     union
     select
     plan_id id,
@@ -70,12 +80,15 @@
     plan_code group_code,
     plan_name group_name,
     'plan' type
-    from xqua_streaming_plan
+    from xqua_streaming_plan xsp
     <where>
         and tenant_id = #{tenantId}
+        <if test="projectId != null">
+            and xsp.project_id=#{projectId}
+        </if>
         <if test="planName != null">
             <bind name="planName" value="'%' + planName + '%'"/>
-            and xbp.plan_name like #{planName}
+            and xsp.plan_name like #{planName}
         </if>
     </where>
     </select>

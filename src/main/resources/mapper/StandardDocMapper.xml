@@ -16,6 +16,7 @@
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
 
     <sql id="baseColumn">
@@ -48,7 +49,8 @@
         xsg.group_name,
         xsg.group_code,
         xsg.group_desc,
-        iu.login_name lastUpdateName,
+        iu1.login_name createdByName,
+        iu2.login_name lastUpdatedByName,
         iu2.login_name chargeName,
         iu2.phone chargeTel,
         iu2.email chargeEmail,
@@ -70,6 +72,9 @@
             </if>
             <if test="standardDocDTO.tenantId!=null">
                 and sd.tenant_id=#{standardDocDTO.tenantId}
+            </if>
+            <if test="standardDocDTO.projectId !=null">
+                and sd.project_id =#{standardDocDTO.projectId}
             </if>
             <if test="standardDocDTO.standardCode!=null">
                 <bind name="standardCode" value="'%'+ standardDocDTO.standardCode +'%'"/>

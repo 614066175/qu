@@ -79,4 +79,6 @@ public class NameAimDTO extends AuditDomain {
     @Transient
     private List<NameAimExcludeDTO> nameAimExcludeDTOList;
 
+    private Long projectId;
+
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.DataStandardService;
 import com.hand.hdsp.quality.config.SwaggerTags;
@@ -60,15 +61,12 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
-    public ResponseEntity<Page<DataStandardDTO>> list(@PathVariable(name = "organizationId") Long tenantId, DataStandardDTO dataStandardDTO, PageRequest pageRequest) {
+    public ResponseEntity<Page<DataStandardDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
+                                                      @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                      DataStandardDTO dataStandardDTO, PageRequest pageRequest) {
         dataStandardDTO.setTenantId(tenantId);
+        dataStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<DataStandardDTO> list = dataStandardService.list(pageRequest, dataStandardDTO);
-        list.getContent().stream()
-                .peek(dto -> {
-                    dto.setCreatedByName(standardDocMapper.selectUserNameById(dto.getCreatedBy()));
-                    dto.setLastUpdatedByName(standardDocMapper.selectUserNameById(dto.getLastUpdatedBy()));
-                })
-                .collect(Collectors.toList());
         return Results.success(list);
     }
 
@@ -81,7 +79,8 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/detail/{standardId}")
-    public ResponseEntity<DataStandardDTO> detail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable(name = "standardId") Long standardId) {
+    public ResponseEntity<DataStandardDTO> detail(@PathVariable(name = "organizationId") Long tenantId,
+                                                  @PathVariable(name = "standardId") Long standardId) {
         return Results.success(dataStandardService.detail(tenantId, standardId));
     }
 
@@ -94,8 +93,11 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<DataStandardDTO> create(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
+    public ResponseEntity<DataStandardDTO> create(@PathVariable(name = "organizationId") Long tenantId,
+                                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                  @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
+        dataStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         dataStandardService.create(dataStandardDTO);
         return Results.success(dataStandardDTO);
     }
@@ -109,8 +111,11 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
-    public ResponseEntity<DataStandardDTO> delete(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
+    public ResponseEntity<DataStandardDTO> delete(@PathVariable(name = "organizationId") Long tenantId,
+                                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                  @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
+        dataStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         dataStandardService.delete(dataStandardDTO);
         return Results.success(dataStandardDTO);
     }
@@ -124,8 +129,11 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<DataStandardDTO> update(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
+    public ResponseEntity<DataStandardDTO> update(@PathVariable(name = "organizationId") Long tenantId,
+                                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                  @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
+        dataStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         dataStandardService.update(dataStandardDTO);
         return Results.success(dataStandardDTO);
     }
@@ -140,8 +148,11 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/update-status")
-    public ResponseEntity<DataStandardDTO> updateStatus(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
+    public ResponseEntity<DataStandardDTO> updateStatus(@PathVariable(name = "organizationId") Long tenantId,
+                                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                        @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
+        dataStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         dataStandardService.updateStatus(dataStandardDTO);
         return Results.success(dataStandardDTO);
     }
@@ -155,8 +166,14 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/publish-off")
-    public ResponseEntity<List<DataStandardDTO>> publishOrOff(@PathVariable(name = "organizationId") Long tenantId, @RequestBody List<DataStandardDTO> dataStandardDTOList) {
-        dataStandardDTOList.forEach(dataStandardService::publishOrOff);
+    public ResponseEntity<List<DataStandardDTO>> publishOrOff(@PathVariable(name = "organizationId") Long tenantId,
+                                                              @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                              @RequestBody List<DataStandardDTO> dataStandardDTOList) {
+        dataStandardDTOList.forEach(dataStandardDTO -> {
+            dataStandardDTO.setTenantId(tenantId);
+            dataStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+            dataStandardService.publishOrOff(dataStandardDTO);
+        });
         return Results.success(dataStandardDTOList);
     }
 
@@ -170,16 +187,20 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/get-by-unique")
-    public ResponseEntity<DataStandardDTO> getByUnique(@PathVariable(name = "organizationId") Long tenantId, DataStandardDTO dataStandardDTO) {
+    public ResponseEntity<DataStandardDTO> getByUnique(@PathVariable(name = "organizationId") Long tenantId,
+                                                       @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                       DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
+        dataStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         List<DataStandardDTO> standardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(DataStandard.FIELD_STANDARD_NAME, dataStandardDTO.getStandardName())
-                        .andEqualTo(DataStandard.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
+                        .andEqualTo(DataStandard.FIELD_TENANT_ID, dataStandardDTO.getTenantId())
+                        .andEqualTo(DataStandard.FIELD_PROJECT_ID, dataStandardDTO.getProjectId()))
                 .build());
-        dataStandardDTO=null;
-        if (CollectionUtils.isNotEmpty(standardDTOList)){
-            dataStandardDTO=standardDTOList.get(0);
+        dataStandardDTO = null;
+        if (CollectionUtils.isNotEmpty(standardDTOList)) {
+            dataStandardDTO = standardDTOList.get(0);
         }
         return Results.success(dataStandardDTO);
     }
@@ -193,9 +214,15 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping("/batch-delete")
-    public ResponseEntity<List<DataStandardDTO>> batchDelete(@PathVariable(name = "organizationId") Long tenantId, @RequestBody List<DataStandardDTO> dataStandardDTOList) {
-        if(CollectionUtils.isNotEmpty(dataStandardDTOList)){
-            dataStandardDTOList.forEach(dataStandardService::delete);
+    public ResponseEntity<List<DataStandardDTO>> batchDelete(@PathVariable(name = "organizationId") Long tenantId,
+                                                             @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                             @RequestBody List<DataStandardDTO> dataStandardDTOList) {
+        if (CollectionUtils.isNotEmpty(dataStandardDTOList)) {
+            dataStandardDTOList.forEach(dataStandardDTO -> {
+                dataStandardDTO.setTenantId(tenantId);
+                dataStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+                dataStandardService.delete(dataStandardDTO);
+            });
         }
         return Results.success(dataStandardDTOList);
     }
@@ -209,8 +236,10 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/standard-aim")
-    public ResponseEntity<Void> standardAim(@PathVariable(name = "organizationId") Long tenantId, @RequestBody List<StandardAimDTO> standardAimDTOList) {
-        dataStandardService.aim(tenantId,standardAimDTOList);
+    public ResponseEntity<Void> standardAim(@PathVariable(name = "organizationId") Long tenantId,
+                                            @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                            @RequestBody List<StandardAimDTO> standardAimDTOList) {
+        dataStandardService.aim(tenantId, standardAimDTOList, projectId);
         return Results.success();
     }
 
@@ -223,8 +252,10 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/batch-relate-plan")
-    public ResponseEntity<Void> batchRelatePlan(@PathVariable(name = "organizationId") Long tenantId, @RequestBody List<StandardAimDTO> standardAimDTOList) {
-        dataStandardService.batchRelatePlan(standardAimDTOList);
+    public ResponseEntity<Void> batchRelatePlan(@PathVariable(name = "organizationId") Long tenantId,
+                                                @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                @RequestBody List<StandardAimDTO> standardAimDTOList) {
+        dataStandardService.batchRelatePlan(tenantId, standardAimDTOList, projectId);
         return Results.success();
     }
 
@@ -234,12 +265,14 @@ public class DataStandardController {
     @GetMapping("/export")
     @ExcelExport(value = DataStandardDTO.class)
     public ResponseEntity<List<DataStandardDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                                            DataStandardDTO dto,
-                                                            ExportParam exportParam,
-                                                            HttpServletResponse response,
-                                                            PageRequest pageRequest) {
+                                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                        DataStandardDTO dto,
+                                                        ExportParam exportParam,
+                                                        HttpServletResponse response,
+                                                        PageRequest pageRequest) {
 
         dto.setTenantId(tenantId);
+        dto.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         List<DataStandardDTO> dtoList =
                 dataStandardService.export(dto, exportParam, pageRequest);
         return Results.success(dtoList);
@@ -250,8 +283,8 @@ public class DataStandardController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/standard-to-rule")
     public ResponseEntity<BatchPlanFieldDTO> standardToRule(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                            Long standardId) {
-        BatchPlanFieldDTO batchPlanFieldDTO =dataStandardService.standardToRule(standardId);
+                                                            Long standardId) {
+        BatchPlanFieldDTO batchPlanFieldDTO = dataStandardService.standardToRule(standardId);
         return Results.success(batchPlanFieldDTO);
     }
 
@@ -260,9 +293,10 @@ public class DataStandardController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/field-aim-standard")
     public ResponseEntity<Void> fieldAimStandard(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                           @RequestBody AssetFieldDTO assetFieldDTO) {
+                                                 @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                 @RequestBody AssetFieldDTO assetFieldDTO) {
         assetFieldDTO.setTenantId(tenantId);
-        dataStandardService.fieldAimStandard(assetFieldDTO);
+        dataStandardService.fieldAimStandard(assetFieldDTO, projectId);
         return Results.success();
     }
 
@@ -270,9 +304,10 @@ public class DataStandardController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/standard-by-field")
     public ResponseEntity<List<DataStandardDTO>> standardByField(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                                 @RequestBody AssetFieldDTO assetFieldDTO) {
+                                                                 @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                                 @RequestBody AssetFieldDTO assetFieldDTO) {
         assetFieldDTO.setTenantId(tenantId);
-        List<DataStandardDTO> dataStandardDTOList=dataStandardService.standardByField(assetFieldDTO);
+        List<DataStandardDTO> dataStandardDTOList = dataStandardService.standardByField(assetFieldDTO, projectId);
         return Results.success(dataStandardDTOList);
     }
 
@@ -285,8 +320,10 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/asset-detail/{standardId}")
-    public ResponseEntity<DataStandardDTO> assetDetail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable(name = "standardId") Long standardId) {
-        return Results.success(dataStandardService.assetDetail(tenantId, standardId));
+    public ResponseEntity<DataStandardDTO> assetDetail(@PathVariable(name = "organizationId") Long tenantId,
+                                                       @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                       @PathVariable(name = "standardId") Long standardId) {
+        return Results.success(dataStandardService.assetDetail(tenantId, standardId,projectId));
     }
 
     @ApiOperation(value = "修改数据标准属性")
@@ -298,9 +335,12 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/update-standard-property")
-    public ResponseEntity<DataStandardDTO> updateStandardProperty(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
+    public ResponseEntity<DataStandardDTO> updateStandardProperty(@PathVariable(name = "organizationId") Long tenantId,
+                                                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                                  @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
-        dataStandardRepository.updateDTOAllColumnWhereTenant(dataStandardDTO,tenantId);
+        dataStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        dataStandardRepository.updateDTOAllColumnWhereTenant(dataStandardDTO, tenantId);
         return Results.success(dataStandardDTO);
     }
 
@@ -314,7 +354,8 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/find-charger/{dataStandardCode}")
-    public ResponseEntity<List<AssigneeUserDTO>> findCharger(@PathVariable(name = "organizationId") Long tenantId, @PathVariable String dataStandardCode) {
+    public ResponseEntity<List<AssigneeUserDTO>> findCharger(@PathVariable(name = "organizationId") Long tenantId,
+                                                             @PathVariable String dataStandardCode) {
         return Results.success(dataStandardService.findCharger(tenantId, dataStandardCode));
     }
 
@@ -327,9 +368,10 @@ public class DataStandardController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/publish-by-workflow")
-    public ResponseEntity<DataStandardDTO> publishByWorkflow(@PathVariable(name = "organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO) {
+    public ResponseEntity<DataStandardDTO> publishByWorkflow(@PathVariable(name = "organizationId") Long tenantId,
+                                                             @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
-        dataStandardService.startWorkFlow(WorkFlowConstant.DataStandard.ONLINE_WORKFLOW_KEY,dataStandardDTO);
+        dataStandardService.startWorkFlow(WorkFlowConstant.DataStandard.ONLINE_WORKFLOW_KEY, dataStandardDTO);
         return Results.success(dataStandardDTO);
     }
 
@@ -344,7 +386,7 @@ public class DataStandardController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/online-workflow-success/{dataStandardCode}")
     public ResponseEntity<DataStandardDTO> onlineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId, @PathVariable String dataStandardCode) {
-        dataStandardService.onlineWorkflowSuccess(tenantId,dataStandardCode);
+        dataStandardService.onlineWorkflowSuccess(tenantId, dataStandardCode);
         return Results.success();
     }
 
@@ -358,7 +400,7 @@ public class DataStandardController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/online-workflow-fail/{dataStandardCode}")
     public ResponseEntity<DataStandardDTO> onlineWorkflowFail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable String dataStandardCode) {
-        dataStandardService.onlineWorkflowFail(tenantId,dataStandardCode);
+        dataStandardService.onlineWorkflowFail(tenantId, dataStandardCode);
         return Results.success();
     }
 
@@ -372,7 +414,7 @@ public class DataStandardController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/offline-workflow-success/{dataStandardCode}")
     public ResponseEntity<DataStandardDTO> offlineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId, @PathVariable String dataStandardCode) {
-        dataStandardService.offlineWorkflowSuccess(tenantId,dataStandardCode);
+        dataStandardService.offlineWorkflowSuccess(tenantId, dataStandardCode);
         return Results.success();
     }
 
@@ -386,10 +428,9 @@ public class DataStandardController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/offline-workflow-fail/{dataStandardCode}")
     public ResponseEntity<DataStandardDTO> offlineWorkflowFail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable String dataStandardCode) {
-        dataStandardService.offlineWorkflowFail(tenantId,dataStandardCode);
+        dataStandardService.offlineWorkflowFail(tenantId, dataStandardCode);
         return Results.success();
     }
-
 
 
     @ApiOperation(value = "数据标准上线审批中事件")
@@ -402,7 +443,7 @@ public class DataStandardController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/online-workflowing/{dataStandardCode}")
     public ResponseEntity<DataStandardDTO> onlineWorkflowing(@PathVariable(name = "organizationId") Long tenantId, @PathVariable String dataStandardCode) {
-        dataStandardService.onlineWorkflowing(tenantId,dataStandardCode);
+        dataStandardService.onlineWorkflowing(tenantId, dataStandardCode);
         return Results.success();
     }
 
@@ -416,7 +457,7 @@ public class DataStandardController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/offline-workflowing/{dataStandardCode}")
     public ResponseEntity<DataStandardDTO> offlineWorkflowing(@PathVariable(name = "organizationId") Long tenantId, @PathVariable String dataStandardCode) {
-        dataStandardService.offlineWorkflowing(tenantId,dataStandardCode);
+        dataStandardService.offlineWorkflowing(tenantId, dataStandardCode);
         return Results.success();
     }
 }

@@ -53,4 +53,6 @@ public class RuleLine extends AuditDomain {
     private String warningLevel;
 
     private Long tenantId;
+
+    private Long projectId;
 }

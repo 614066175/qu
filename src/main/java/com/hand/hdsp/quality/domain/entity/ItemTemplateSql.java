@@ -52,5 +52,6 @@ public class ItemTemplateSql extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 
 }

@@ -24,6 +24,7 @@ public class StreamingResultRuleRepositoryImpl extends BaseRepositoryImpl<Stream
                 Condition.builder(StreamingResultRule.class)
                         .where(Sqls.custom()
                                 .andEqualTo(StreamingResultRule.FIELD_RESULT_BASE_ID, streamingResultRuleDTO.getResultBaseId(), true)
+                                .andEqualTo(StreamingResultRule.FIELD_PROJECT_ID,streamingResultRuleDTO.getProjectId(),true)
                                 .andEqualTo(StreamingResultRule.FIELD_TENANT_ID, streamingResultRuleDTO.getTenantId(), true))
                         .build()
         );

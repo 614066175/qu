@@ -103,4 +103,6 @@ public class DataFieldVersionDTO extends AuditDomain {
 
     @Transient
     private String groupName;
+
+    private Long projectId;
 }

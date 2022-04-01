@@ -66,5 +66,7 @@ public class BatchResultRuleDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
+    private Long projectId;
+
 
 }

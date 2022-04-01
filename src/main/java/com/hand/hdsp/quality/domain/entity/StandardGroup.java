@@ -32,6 +32,7 @@ public class StandardGroup extends AuditDomain {
     public static final String FIELD_STANDARD_TYPE = "standardType";
     public static final String FIELD_ENABLED_FLAG = "enabledFlag";
     public static final String FIELD_TENANT_ID = "tenantId";
+    public static final String FIELD_PROJECT_ID = "projectId";
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -59,5 +60,6 @@ public class StandardGroup extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 
 }

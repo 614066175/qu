@@ -32,8 +32,8 @@ public interface RuleLineMapper extends BaseMapper<RuleLine> {
      * @param tenantId
      * @return
      */
-    @Select("select * from xqua_rule_line where rule_id = #{ruleId} and tenant_id in(0,#{tenantId})")
-    List<RuleLineDTO> list(@Param("ruleId") Long ruleId, @Param("tenantId") Long tenantId);
+    @Select("select * from xqua_rule_line where rule_id = #{ruleId} and tenant_id in(0,#{tenantId}) and project_id = #{projectId}")
+    List<RuleLineDTO> list(@Param("ruleId") Long ruleId, @Param("tenantId") Long tenantId,@Param("projectId") Long projectId);
 
     /**
      * 列表（分页）
@@ -41,6 +41,6 @@ public interface RuleLineMapper extends BaseMapper<RuleLine> {
      * @param ruleLineDTO
      * @return
      */
-    @Select("select * from xqua_rule_line where rule_id = #{ruleId} and tenant_id in(0,#{tenantId})")
+    @Select("select * from xqua_rule_line where rule_id = #{ruleId} and tenant_id in(0,#{tenantId}) and project_id = #{projectId}")
     List<RuleLineDTO> listTenant(RuleLineDTO ruleLineDTO);
 }

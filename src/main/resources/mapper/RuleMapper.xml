@@ -19,6 +19,7 @@
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
 
     <sql id="baseColumn">
@@ -148,6 +149,9 @@
             </if>
             <if test="enabledFlag != null">
                 and enabled_flag = #{enabledFlag}
+            </if>
+            <if test="projectId != null">
+                and project_id=#{projectId}
             </if>
             and tenant_id in(0,#{tenantId})
         </where>

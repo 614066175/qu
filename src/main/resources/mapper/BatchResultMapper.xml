@@ -17,6 +17,7 @@
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
 
     <sql id="Plan_And_Result">
@@ -35,6 +36,9 @@
 
     <sql id="custom_where">
         <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+        <if test="projectId !=null">
+            and ${mt}.project_id=#{projectId}
+        </if>
         <if test="tenantId != null">
             and ${mt}.tenant_id = #{tenantId}
         </if>
@@ -91,6 +95,9 @@
             <if test="groupId != null and groupId != 0">
                 xpg.group_id = #{groupId}
             </if>
+            <if test="projectId !=null ">
+                and xbp.project_id=#{projectId}
+            </if>
             <if test="tenantId != null">
                 and xbp.tenant_id = #{tenantId}
             </if>
@@ -126,6 +133,9 @@
             <if test="resultId != null">
                 and xbr.result_id = #{resultId}
             </if>
+            <if test="projectId != null">
+                and xbr.project_id = #{projectId}
+            </if>
         </where>
     </select>
 
@@ -147,6 +157,9 @@
         <where>
             <if test="groupId != null and groupId != 0">
                 and xbp.group_id = #{groupId}
+            </if>
+            <if test="projectId !=null">
+                and xbr.project_id=#{projectId}
             </if>
             <if test="tenantId != null">
                 and xbr.tenant_id = #{tenantId}

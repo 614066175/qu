@@ -14,6 +14,7 @@
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
         <result column="suggest_order" property="suggestOrder" jdbcType="DECIMAL"/>
         <result column="suggest_content" property="suggestContent" jdbcType="VARCHAR"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
     <select id="selectRuleId" resultType="com.hand.hdsp.quality.api.dto.SuggestDTO">
         SELECT
@@ -57,6 +58,9 @@
         where 1=1 and xs.tenant_id = #{suggestDTO.tenantId}
         <if test="suggestDTO.suggestId!=null">
             and xs.suggest_id=#{suggestDTO.suggestId}
+        </if>
+        <if test="suggestDTO.projectId != null">
+            and xs.project_id = #{suggestDTO.projectId}
         </if>
         <if test="suggestDTO.problemId!=null">
             and xs.problem_id=#{suggestDTO.problemId}

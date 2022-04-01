@@ -21,6 +21,7 @@
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
     <select id="selectByConditionLike" resultType="com.hand.hdsp.quality.api.dto.StandardAimDTO">
         select
@@ -48,6 +49,9 @@
         where 1=1
         and xsa.tenant_id = #{standardAimDTO.tenantId}
         and xsa.standard_id = #{standardAimDTO.standardId}
+        <if test="standardAimDTO.projectId !=null">
+            and xsa.project_id=#{standardAimDTO.projectId}
+        </if>
         <if test="standardAimDTO.fieldName!=null">
             <bind name="fieldName" value="'%'+ standardAimDTO.fieldName +'%'"/>
             and xsa.field_name like #{fieldName}
@@ -80,5 +84,6 @@
             <bind name="planName" value="'%'+ standardAimDTO.planName +'%'"/>
             and xbp.plan_name like #{planName}
         </if>
+
     </select>
 </mapper>

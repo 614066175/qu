@@ -105,4 +105,6 @@ public class SuggestDTO extends AuditDomain {
     @Transient
     private Long resultBaseId;
 
+    private Long projectId;
+
 }

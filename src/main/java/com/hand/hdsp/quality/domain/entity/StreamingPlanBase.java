@@ -48,5 +48,6 @@ public class StreamingPlanBase extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 
 }

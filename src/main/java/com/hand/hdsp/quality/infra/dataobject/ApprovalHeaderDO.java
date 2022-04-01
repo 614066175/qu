@@ -29,4 +29,5 @@ public class ApprovalHeaderDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 }

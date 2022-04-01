@@ -124,4 +124,6 @@ public class BatchPlanRelTableDTO extends AuditDomain {
 
     @Transient
     private String ruleType;
+
+    private Long projectId;
 }

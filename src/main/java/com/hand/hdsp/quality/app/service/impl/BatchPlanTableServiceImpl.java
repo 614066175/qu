@@ -57,18 +57,21 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
     @Transactional(rollbackFor = Exception.class)
     public void insert(BatchPlanTableDTO batchPlanTableDTO) {
         Long tenantId = batchPlanTableDTO.getTenantId();
+        Long projectId = batchPlanTableDTO.getProjectId();
         batchPlanTableRepository.insertDTOSelective(batchPlanTableDTO);
         if (batchPlanTableDTO.getBatchPlanTableLineDTOList() != null) {
 
             for (BatchPlanTableLineDTO batchPlanTableLineDTO : batchPlanTableDTO.getBatchPlanTableLineDTOList()) {
                 batchPlanTableLineDTO.setPlanRuleId(batchPlanTableDTO.getPlanRuleId());
                 batchPlanTableLineDTO.setTenantId(tenantId);
+                batchPlanTableLineDTO.setProjectId(projectId);
                 batchPlanTableLineRepository.insertDTOSelective(batchPlanTableLineDTO);
 
                 if (CollectionUtils.isNotEmpty(batchPlanTableLineDTO.getBatchPlanTableConDTOList())) {
                     for (BatchPlanTableConDTO batchPlanTableConDTO : batchPlanTableLineDTO.getBatchPlanTableConDTOList()) {
                         batchPlanTableConDTO.setPlanLineId(batchPlanTableLineDTO.getPlanLineId());
                         batchPlanTableConDTO.setTenantId(tenantId);
+                        batchPlanTableConDTO.setProjectId(projectId);
                         //todo 范围重叠判断
                         batchPlanTableConDTO.setWarningLevel(JsonUtils.object2Json(batchPlanTableConDTO.getWarningLevelList()));
                         batchPlanTableConRepository.insertDTOSelective(batchPlanTableConDTO);
@@ -82,12 +85,15 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
     @Transactional(rollbackFor = Exception.class)
     public void update(BatchPlanTableDTO batchPlanTableDTO) {
         Long tenantId = batchPlanTableDTO.getTenantId();
+        Long projectId = batchPlanTableDTO.getProjectId();
         batchPlanTableRepository.updateDTOAllColumnWhereTenant(batchPlanTableDTO, tenantId);
         if (batchPlanTableDTO.getBatchPlanTableLineDTOList() != null) {
             for (BatchPlanTableLineDTO batchPlanTableLineDTO : batchPlanTableDTO.getBatchPlanTableLineDTOList()) {
                 if (AuditDomain.RecordStatus.update.equals(batchPlanTableLineDTO.get_status())) {
+                    batchPlanTableLineDTO.setProjectId(projectId);
                     batchPlanTableLineRepository.updateDTOAllColumnWhereTenant(batchPlanTableLineDTO, tenantId);
                 } else if (AuditDomain.RecordStatus.create.equals(batchPlanTableLineDTO.get_status())) {
+                    batchPlanTableLineDTO.setProjectId(projectId);
                     batchPlanTableLineDTO.setPlanRuleId(batchPlanTableDTO.getPlanRuleId());
                     batchPlanTableLineDTO.setTenantId(tenantId);
                     batchPlanTableLineRepository.insertDTOSelective(batchPlanTableLineDTO);
@@ -99,9 +105,11 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
                     for (BatchPlanTableConDTO batchPlanTableConDTO : batchPlanTableLineDTO.getBatchPlanTableConDTOList()) {
                         if (AuditDomain.RecordStatus.update.equals(batchPlanTableConDTO.get_status())) {
                             //todo 范围重叠判断
+                            batchPlanTableConDTO.setProjectId(projectId);
                             batchPlanTableConDTO.setWarningLevel(JsonUtils.object2Json(batchPlanTableConDTO.getWarningLevelList()));
                             batchPlanTableConRepository.updateDTOAllColumnWhereTenant(batchPlanTableConDTO, tenantId);
                         } else if (AuditDomain.RecordStatus.create.equals(batchPlanTableConDTO.get_status())) {
+                            batchPlanTableConDTO.setProjectId(projectId);
                             batchPlanTableConDTO.setPlanLineId(batchPlanTableLineDTO.getPlanLineId());
                             batchPlanTableConDTO.setTenantId(tenantId);
                             //todo 范围重叠判断

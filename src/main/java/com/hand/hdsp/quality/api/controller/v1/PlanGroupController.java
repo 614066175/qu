@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.api.controller.v1;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.PlanGroupDTO;
 import com.hand.hdsp.quality.app.service.PlanGroupService;
 import com.hand.hdsp.quality.config.SwaggerTags;
@@ -53,8 +54,10 @@ public class PlanGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/all")
     public ResponseEntity<?> allList(@PathVariable(name = "organizationId") Long tenantId,
+                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                      PlanGroup planGroup) {
         planGroup.setTenantId(tenantId);
+        planGroup.setProjectId(projectId);
         List<PlanGroup> planGroups = planGroupRepository.select(planGroup);
         return Results.success(planGroups);
     }
@@ -69,9 +72,11 @@ public class PlanGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   PlanGroupDTO planGroupDTO, @ApiIgnore @SortDefault(value = PlanGroup.FIELD_GROUP_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         planGroupDTO.setTenantId(tenantId);
+        planGroupDTO.setProjectId(projectId);
         Page<PlanGroupDTO> list = planGroupRepository.pageAndSortDTO(pageRequest, planGroupDTO);
         return Results.success(list);
     }
@@ -86,8 +91,10 @@ public class PlanGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/tree")
     public ResponseEntity<?> tree(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   PlanGroupTreeVO planGroupTreeVO) {
         planGroupTreeVO.setTenantId(tenantId);
+        planGroupTreeVO.setProjectId(projectId);
         return Results.success(planGroupRepository.tree(planGroupTreeVO));
     }
 
@@ -119,8 +126,11 @@ public class PlanGroupController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody PlanGroupDTO planGroupDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody PlanGroupDTO planGroupDTO) {
         planGroupDTO.setTenantId(tenantId);
+        planGroupDTO.setProjectId(projectId);
         this.validObject(planGroupDTO);
         planGroupRepository.insertDTOSelective(planGroupDTO);
         return Results.success(planGroupDTO);
@@ -135,7 +145,10 @@ public class PlanGroupController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody PlanGroupDTO planGroupDTO) {
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody PlanGroupDTO planGroupDTO) {
+        planGroupDTO.setProjectId(projectId);
         planGroupRepository.updateDTOAllColumnWhereTenant(planGroupDTO, tenantId);
         return Results.success(planGroupDTO);
     }

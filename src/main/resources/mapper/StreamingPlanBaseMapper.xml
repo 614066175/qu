@@ -14,6 +14,7 @@
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
 
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.StreamingPlanBaseDTO">
@@ -38,6 +39,9 @@
         xqua_streaming_plan_base xspb
         where
         xspb.tenant_id = #{tenantId}
+        <if test="projectId != null">
+            and xspb.project_id = #{projectId}
+        </if>
         <if test="planId != null">
             and xspb.plan_id = #{planId}
         </if>

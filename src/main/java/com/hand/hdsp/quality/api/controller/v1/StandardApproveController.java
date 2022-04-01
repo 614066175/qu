@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.StandardApproveDTO;
 import com.hand.hdsp.quality.domain.entity.StandardApprove;
 import com.hand.hdsp.quality.domain.repository.StandardApproveRepository;
@@ -44,9 +45,11 @@ public class StandardApproveController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
+                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                 StandardApproveDTO standardApproveDTO, @ApiIgnore @SortDefault(value = StandardApprove.FIELD_APPROVE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardApproveDTO.setTenantId(tenantId);
+        standardApproveDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         Page<StandardApproveDTO> list = standardApproveRepository.pageAndSortDTO(pageRequest, standardApproveDTO);
         return Results.success(list);
     }
@@ -79,8 +82,11 @@ public class StandardApproveController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody StandardApproveDTO standardApproveDTO) {
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody StandardApproveDTO standardApproveDTO) {
         standardApproveDTO.setTenantId(tenantId);
+        standardApproveDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(standardApproveDTO);
         standardApproveRepository.insertDTOSelective(standardApproveDTO);
         return Results.success(standardApproveDTO);
@@ -95,8 +101,11 @@ public class StandardApproveController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody StandardApproveDTO standardApproveDTO) {
-                standardApproveRepository.updateDTOWhereTenant(standardApproveDTO, tenantId);
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody StandardApproveDTO standardApproveDTO) {
+        standardApproveDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        standardApproveRepository.updateDTOWhereTenant(standardApproveDTO, tenantId);
         return Results.success(standardApproveDTO);
     }
 

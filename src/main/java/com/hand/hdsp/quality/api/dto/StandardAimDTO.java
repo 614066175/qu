@@ -88,4 +88,6 @@ public class StandardAimDTO extends AuditDomain {
     @Transient
     private String typeName;
 
+    private Long projectId;
+
 }

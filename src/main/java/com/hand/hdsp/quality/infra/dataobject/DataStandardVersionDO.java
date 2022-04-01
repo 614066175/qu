@@ -53,4 +53,6 @@ public class DataStandardVersionDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
+
 }

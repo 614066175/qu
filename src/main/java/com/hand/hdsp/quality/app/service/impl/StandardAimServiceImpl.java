@@ -72,7 +72,8 @@ public class StandardAimServiceImpl implements StandardAimService {
                                 .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, standardAimDTO.getSchemaName())
                                 .andEqualTo(StandardAim.FIELD_TABLE_NAME, standardAimDTO.getTableName())
                                 .andEqualTo(StandardAim.FIELD_FIELD_NAME, String.format("%s(%s)", column.getColumnName(), column.getTypeName()))
-                                .andEqualTo(StandardAim.FIELD_TENANT_ID, standardAimDTO.getTenantId()))
+                                .andEqualTo(StandardAim.FIELD_TENANT_ID, standardAimDTO.getTenantId())
+                                .andEqualTo(StandardAim.FIELD_PROJECT_ID,standardAimDTO.getProjectId()))
                         .build());
                 if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
                     columnVO.setSelectable(false);
@@ -100,14 +101,15 @@ public class StandardAimServiceImpl implements StandardAimService {
     }
 
     @Override
-    public void batchDelete(List<StandardAimDTO> standardAimDTOList) {
+    public void batchDelete(List<StandardAimDTO> standardAimDTOList, Long tenantId, Long projectId) {
         if (CollectionUtils.isNotEmpty(standardAimDTOList)) {
             standardAimRepository.batchDTODeleteByPrimaryKey(standardAimDTOList);
             standardAimDTOList.forEach(standardAimDTO -> {
                 List<StandardAimRelationDTO> standardAimRelationDTOS = standardAimRelationRepository.selectDTOByCondition(Condition.builder(StandardAimRelation.class)
                         .andWhere(Sqls.custom()
                                 .andEqualTo(StandardAimRelation.FIELD_AIM_ID, standardAimDTO.getAimId())
-                                .andEqualTo(StandardAimRelation.FIELD_TENANT_ID, standardAimDTO.getTenantId()))
+                                .andEqualTo(StandardAimRelation.FIELD_TENANT_ID, tenantId)
+                                .andEqualTo(StandardAimRelation.FIELD_PROJECT_ID, projectId))
                         .build());
                 standardAimRelationRepository.batchDTODeleteByPrimaryKey(standardAimRelationDTOS);
             });

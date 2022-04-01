@@ -45,6 +45,7 @@ public class NameStandard extends AuditDomain {
     public static final String FIELD_LATEST_ABNORMAL_NUM = "latestAbnormalNum";
     public static final String FIELD_ENABLED_FLAG = "enabledFlag";
     public static final String FIELD_TENANT_ID = "tenantId";
+    public static final String FIELD_PROJECT_ID = "projectId";
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -88,5 +89,6 @@ public class NameStandard extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 
 }

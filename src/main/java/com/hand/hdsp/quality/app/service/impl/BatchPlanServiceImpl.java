@@ -148,39 +148,22 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void generate(Long tenantId, Long planId) {
+    public void generate(Long tenantId, Long projectId, Long planId) {
         BatchPlanDTO batchPlanDTO = batchPlanRepository.selectDTOByPrimaryKey(planId);
         // 创建或更新job
-        String jobName = String.format(PlanConstant.JOB_NAME, tenantId, batchPlanDTO.getPlanCode());
+        String jobName = String.format(PlanConstant.JOB_NAME, tenantId, projectId, batchPlanDTO.getPlanCode());
 
         //生成数据质量command
         String jobCommand = generateCommand(batchPlanDTO);
 
-        ResponseEntity<String> jobResult = dispatchJobFeign.createOrUpdate(tenantId,
+        ResponseEntity<String> jobResult = dispatchJobFeign.createOrUpdate(tenantId, projectId,
                 JobDTO.builder().themeId(PlanConstant.DEFAULT_THEME_ID).layerId(PlanConstant.DEFAULT_LAYER_ID)
                         .jobName(jobName).jobCommand(jobCommand).jobDescription(batchPlanDTO.getPlanName())
                         .jobClass(PlanConstant.JOB_CLASS).jobType(PlanConstant.JOB_TYPE)
-                        .jobLevel(PlanConstant.JOB_LEVEL).enabledFlag(1).tenantId(tenantId).build());
+                        .jobLevel(PlanConstant.JOB_LEVEL).enabledFlag(1).tenantId(tenantId)
+                        .projectId(projectId).build());
         ResponseUtils.getResponse(jobResult, JobDTO.class);
 
-        // 查询是否存在restJob
-//        ResponseEntity<String> findResult = restJobFeign.findName(tenantId, jobName);
-//        RestJobDTO restJobDTO = ResponseUtils.getResponse(findResult, RestJobDTO.class);
-//
-//        restJobDTO.setExternal(0);
-//        restJobDTO.setMethod(PlanConstant.JOB_METHOD);
-//        restJobDTO.setServiceCode(serviceId);
-//        restJobDTO.setServiceName(serviceShort);
-//        restJobDTO.setUseGateway(1);
-//        restJobDTO.setUrl(String.format(JOB_URL, tenantId, planId));
-//        restJobDTO.setJobName(jobName);
-//        restJobDTO.setBody(JOB_BODY);
-//        restJobDTO.setHeader(JOB_HEADER);
-//        restJobDTO.setSettingInfo(JOB_SETTING_INFO);
-//
-//        // 插入或更新
-//        ResponseEntity<String> restJobResult = restJobFeign.create(tenantId, restJobDTO);
-//        ResponseUtils.getResponse(restJobResult, RestJobDTO.class);
 
         // 保存jobName到BatchPlan中
         batchPlanDTO.setPlanJobName(jobName);
@@ -497,11 +480,11 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     }
 
     @Override
-    public Long exec(Long tenantId, Long planId) {
+    public Long exec(Long tenantId, Long planId, Long projectId) {
 
         // 插入批数据方案结果表
         BatchResult batchResult = BatchResult.builder().planId(planId).startDate(new Date())
-                .planStatus(PlanConstant.PlanStatus.RUNNING).tenantId(tenantId).build();
+                .planStatus(PlanConstant.PlanStatus.RUNNING).tenantId(tenantId).projectId(projectId).build();
         batchResultRepository.insertSelective(batchResult);
 
         // 时间戳对象list
@@ -648,7 +631,10 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     .planBaseId(batchPlanBase.getPlanBaseId()).objectName(objectName)
                     .packageObjectName(packageObjectName).datasourceType(batchPlanBase.getDatasourceType())
                     .ruleCount(0L).exceptionRuleCount(0L).checkItemCount(0L).exceptionCheckItemCount(0L)
-                    .tenantId(tenantId).build();
+                    .tenantId(tenantId)
+                    //从result中取projectId
+                    .projectId(batchResult.getProjectId())
+                    .build();
             if (TABLE.equals(batchPlanBase.getSqlType())) {
                 //保存表的数据量
                 DriverSession driverSession = driverSessionService.getDriverSession(tenantId, batchPlanBase.getDatasourceCode());
@@ -738,7 +724,10 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     .planRuleId(batchPlanTable.getPlanRuleId()).ruleCode(batchPlanTable.getRuleCode())
                     .ruleName(batchPlanTable.getRuleName()).ruleDesc(batchPlanTable.getRuleDesc())
                     .checkType(batchPlanTable.getCheckType()).weight(batchPlanTable.getWeight()).resultFlag(1)
-                    .tenantId(tenantId).build();
+                    .tenantId(tenantId)
+                    //从batchResultBase中取projectId
+                    .projectId(batchResultBase.getProjectId())
+                    .build();
             batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
 
             List<BatchPlanTableLine> batchPlanTableLines = null;
@@ -782,6 +771,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 batchResultItem.setCheckItem(batchPlanTableConDO.getCheckItem());
                 batchResultItem.setCountType(batchPlanTableConDO.getCountType());
                 batchResultItem.setCustomSql(batchPlanTableConDO.getCustomSql());
+                batchResultItem.setProjectId(batchResultBase.getProjectId());
                 batchResultItem.setTenantId(tenantId);
                 batchResultItemRepository.insertSelective(batchResultItem);
 
@@ -842,7 +832,10 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     .planRuleId(batchPlanField.getPlanRuleId()).ruleCode(batchPlanField.getRuleCode())
                     .ruleName(batchPlanField.getRuleName()).ruleDesc(batchPlanField.getRuleDesc())
                     .checkType(batchPlanField.getCheckType()).weight(batchPlanField.getWeight()).resultFlag(1)
-                    .tenantId(tenantId).build();
+                    .tenantId(tenantId)
+                    //从batchResultBase中取projectId
+                    .projectId(batchResultBase.getProjectId())
+                    .build();
             batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
 
             for (BatchPlanFieldConDO batchPlanFieldConDO : conList) {
@@ -891,7 +884,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 batchResultItem.setCheckFieldName(batchPlanFieldConDO.getCheckFieldName());
                 batchResultItem.setCheckFieldName(batchPlanFieldConDO.getCheckFieldName());
                 batchResultItem.setRegularExpression(batchPlanFieldConDO.getRegularExpression());
-
+                batchResultItem.setProjectId(batchResultBase.getProjectId());
                 batchResultItem.setTenantId(tenantId);
                 batchResultItemRepository.insertSelective(batchResultItem);
 
@@ -924,7 +917,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         //将所有字段级校验项异常数据存入数据库
         String exceptionList = String.format("{\"FIELD\":%s}", JsonUtils.object2Json(fieldExceptionList));
         batchResultBase.setExceptionList(exceptionList);
-        batchResultBaseRepository.updateByPrimaryKey(batchResultBase);
+        batchResultBaseRepository.updateByPrimaryKeySelective(batchResultBase);
     }
 
     private void handleExceptionList(List<Map<String, Object>> fieldExceptionList, MeasureParamDO param) {
@@ -1001,7 +994,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     .planRuleId(batchPlanRelTable.getPlanRuleId()).ruleCode(batchPlanRelTable.getRuleCode())
                     .ruleName(batchPlanRelTable.getRuleName()).ruleDesc(batchPlanRelTable.getRuleDesc())
                     .checkType(batchPlanRelTable.getCheckType()).weight(batchPlanRelTable.getWeight())
-                    .resultFlag(1).tenantId(tenantId).build();
+                    .resultFlag(1).tenantId(tenantId)
+                    .projectId(batchResultBase.getProjectId())
+                    .build();
 
             batchResultRuleRepository.insertDTOSelective(batchResultRuleDTO);
 
@@ -1015,6 +1010,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             batchResultItem.setRelationship(batchPlanRelTable.getRelationship());
             batchResultItem.setWarningLevelJson(batchPlanRelTable.getWarningLevel());
             batchResultItem.setTenantId(tenantId);
+            batchResultItem.setProjectId(batchResultBase.getProjectId());
             List<TableRelCheckDTO> tableRelCheckDTOS =
                     JsonUtils.json2TableRelCheck(batchPlanRelTable.getTableRelCheck());
             List<String> resultList = new ArrayList<>();

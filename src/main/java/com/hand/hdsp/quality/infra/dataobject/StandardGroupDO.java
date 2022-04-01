@@ -31,4 +31,5 @@ public class StandardGroupDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 }

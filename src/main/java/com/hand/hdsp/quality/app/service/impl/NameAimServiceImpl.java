@@ -44,11 +44,14 @@ public class NameAimServiceImpl implements NameAimService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public List<NameAimDTO> batchCreate(List<NameAimDTO> nameAimDtoList) {
+    public List<NameAimDTO> batchCreate(List<NameAimDTO> nameAimDtoList ,Long tenantId, Long projectId) {
         if(CollectionUtils.isEmpty(nameAimDtoList)){
             throw new CommonException(ErrorCode.NAME_STANDARD_PARAMS_EMPTY);
         }
-        nameAimDtoList.forEach(x->x.setTenantId(DetailsHelper.getUserDetails().getTenantId()));
+        nameAimDtoList.forEach(nameAimDTO -> {
+            nameAimDTO.setTenantId(tenantId);
+            nameAimDTO.setProjectId(projectId);
+        });
         //批量插入主键无法回写，这里选择单个插入
         nameAimDtoList.forEach(nameAimRepository::insertDTOSelective);
         nameAimDtoList.forEach(x->{
@@ -56,12 +59,14 @@ public class NameAimServiceImpl implements NameAimService {
                 x.getNameAimIncludeDTOList().forEach(o->{
                     o.setAimId(x.getAimId());
                     o.setTenantId(x.getTenantId());
+                    o.setProjectId(projectId);
                 });
             }
             if(CollectionUtils.isNotEmpty(x.getNameAimExcludeDTOList())){
                 x.getNameAimExcludeDTOList().forEach(o->{
                     o.setTenantId(x.getTenantId());
                     o.setAimId(x.getAimId());
+                    o.setProjectId(projectId);
                 });
             }
         });
@@ -75,6 +80,7 @@ public class NameAimServiceImpl implements NameAimService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void remove(Long primaryKey) {
         NameAimDTO nameAimDTO = nameAimRepository.selectDTOByPrimaryKey(primaryKey);
         if (Objects.isNull(nameAimDTO)) {
@@ -146,7 +152,7 @@ public class NameAimServiceImpl implements NameAimService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public List<NameAimDTO> bitchUpdate(List<NameAimDTO> nameAimDTOList) {
+    public List<NameAimDTO> bitchUpdate(List<NameAimDTO> nameAimDTOList, Long tenantId, Long projectId) {
         if(CollectionUtils.isEmpty(nameAimDTOList)){
             throw new CommonException(ErrorCode.NAME_STANDARD_PARAMS_EMPTY);
         }
@@ -157,7 +163,7 @@ public class NameAimServiceImpl implements NameAimService {
                 .filter(x->Objects.isNull(x.getAimId()))
                 .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(newNameAimDTOList)){
-            this.batchCreate(newNameAimDTOList);
+            this.batchCreate(newNameAimDTOList, tenantId, projectId);
         }
         existNameAimDTOList.forEach(this::update);
         return nameAimDTOList;

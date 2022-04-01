@@ -31,4 +31,6 @@ public class StandardDocDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
+
 }

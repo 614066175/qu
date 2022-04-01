@@ -63,4 +63,6 @@ public class BatchPlanFieldLineDTO extends AuditDomain {
 
     @ApiModelProperty(value = "字段规则条件List")
     private List<BatchPlanFieldConDTO> batchPlanFieldConDTOList;
+
+    private Long projectId;
 }

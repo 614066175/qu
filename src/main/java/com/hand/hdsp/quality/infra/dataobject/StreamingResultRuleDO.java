@@ -35,4 +35,6 @@ public class StreamingResultRuleDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
+
 }

@@ -29,4 +29,5 @@ public class StandardApproveDO extends AuditDomain {
 
     private Long tenantId;
 
+    private Long projectId;
 }
