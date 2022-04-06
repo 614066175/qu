@@ -61,7 +61,8 @@ public class PlanGroupServiceImpl implements PlanGroupService {
     public List<PlanGroupDTO> export(PlanGroupDTO dto, ExportParam exportParam) {
         List<PlanGroupDTO> planGroupDTOList = planGroupRepository.selectDTOByCondition(Condition.builder(PlanGroup.class)
                 .andWhere(Sqls.custom()
-                        .andEqualTo(PlanGroup.FIELD_GROUP_TYPE, BATCH))
+                        .andEqualTo(PlanGroup.FIELD_GROUP_TYPE, BATCH)
+                        .andEqualTo(PlanGroup.FIELD_TENANT_ID,dto.getTenantId()))
                 .build());
        planGroupDTOList.forEach(planGroupDTO -> {
            //查询分组下的评估方案
