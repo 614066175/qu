@@ -2,8 +2,11 @@ package com.hand.hdsp.quality.infra.validation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hdsp.quality.api.dto.NameStandardDTO;
+import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.domain.entity.NameStandard;
 import com.hand.hdsp.quality.domain.repository.NameStandardRepository;
+import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
+import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import com.hand.hdsp.quality.infra.mapper.NameStandardMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -30,11 +33,16 @@ public class NameStandardValidator extends ValidatorHandler {
     private final ObjectMapper objectMapper;
     private final NameStandardRepository nameStandardRepository;
     private final NameStandardMapper nameStandardMapper;
+    private final StandardGroupRepository standardGroupRepository;
 
-    public NameStandardValidator(ObjectMapper objectMapper, NameStandardRepository nameStandardRepository, NameStandardMapper nameStandardMapper) {
+    public NameStandardValidator(ObjectMapper objectMapper,
+                                 NameStandardRepository nameStandardRepository,
+                                 NameStandardMapper nameStandardMapper,
+                                 StandardGroupRepository standardGroupRepository) {
         this.objectMapper = objectMapper;
         this.nameStandardRepository = nameStandardRepository;
         this.nameStandardMapper = nameStandardMapper;
+        this.standardGroupRepository = standardGroupRepository;
     }
 
     @Override
@@ -59,8 +67,18 @@ public class NameStandardValidator extends ValidatorHandler {
             return false;
         }
         Long groupId = nameStandardMapper.getGroupId(nameStandardDTO.getGroupCode());
-        if(Objects.isNull(groupId)){
-           getContext().addErrorMsg("该分组编码不存在！");
+        if (Objects.isNull(groupId)) {
+            //创建对应的分组
+            StandardGroupDTO standardGroupDTO = StandardGroupDTO.builder()
+                    .groupCode(nameStandardDTO.getGroupCode())
+                    .groupName(nameStandardDTO.getGroupName())
+                    .groupDesc(nameStandardDTO.getStandardDesc())
+                    .standardType(StandardConstant.StandardType.NAME)
+                    .tenantId(nameStandardDTO.getTenantId())
+                    .build();
+            standardGroupRepository.insertDTOSelective(standardGroupDTO);
+            //设置新分组id
+            nameStandardDTO.setGroupId(standardGroupDTO.getGroupId());
         }
         return true;
     }
