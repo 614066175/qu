@@ -121,12 +121,12 @@ public class StandardDocServiceImpl implements StandardDocService {
         }
         if (Objects.nonNull(multipartFile)) {
             handleStandardDocUpload(standardDocDTO, multipartFile);
+        }else{
+            //没有上传文件，清除文件
+            standardDocDTO.setDocPath(null);
+            standardDocDTO.setDocName(null);
         }
-        Optional.ofNullable(standardDocDTO.getStandardDesc()).orElseGet(() -> {
-            standardDocMapper.updateDesc(standardDocDTO);
-            return null;
-        });
-        standardDocRepository.updateByDTOPrimaryKeySelective(standardDocDTO);
+        standardDocRepository.updateDTOAllColumnWhereTenant(standardDocDTO,standardDocDTO.getTenantId());
         return standardDocRepository.selectDTOByPrimaryKeyAndTenant(standardDocDTO);
     }
 
