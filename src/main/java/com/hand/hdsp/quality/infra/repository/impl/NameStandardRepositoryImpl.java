@@ -1,27 +1,23 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
 import java.util.List;
-import java.util.Objects;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.NameStandardDTO;
 import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.domain.entity.NameStandard;
-import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.NameStandardRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
+import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import com.hand.hdsp.quality.infra.mapper.NameStandardMapper;
+import com.hand.hdsp.quality.infra.util.ImportUtil;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
-import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
-import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
-
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.NAME;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>命名标准表资源库实现</p>
@@ -37,10 +33,13 @@ public class NameStandardRepositoryImpl extends BaseRepositoryImpl<NameStandard,
 
     private final StandardGroupRepository standardGroupRepository;
 
-    public NameStandardRepositoryImpl(NameStandardMapper nameStandardMapper, DataStandardMapper dataStandardMapper, StandardGroupRepository standardGroupRepository) {
+    private final ImportUtil importUtil;
+
+    public NameStandardRepositoryImpl(NameStandardMapper nameStandardMapper, DataStandardMapper dataStandardMapper, StandardGroupRepository standardGroupRepository, ImportUtil importUtil) {
         this.nameStandardMapper = nameStandardMapper;
         this.dataStandardMapper = dataStandardMapper;
         this.standardGroupRepository = standardGroupRepository;
+        this.importUtil = importUtil;
     }
 
     @Override
@@ -48,46 +47,32 @@ public class NameStandardRepositoryImpl extends BaseRepositoryImpl<NameStandard,
         return nameStandardMapper.list(nameStandardDTO);
     }
 
-    @Override
-    public void importStandard(NameStandardDTO nameStandardDTO) {
-        List<NameStandardDTO> nameStandardDTOList = this.selectDTOByCondition(Condition
-                .builder(NameStandard.class)
-                .andWhere(Sqls.custom()
-                        .andEqualTo(NameStandard.FIELD_STANDARD_CODE, nameStandardDTO.getStandardCode())
-                        .andEqualTo(NameStandard.FIELD_TENANT_ID, nameStandardDTO.getTenantId()))
-                .build());
-        if (!CollectionUtils.isEmpty(nameStandardDTOList)) {
-            return;
-        }
-        List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
-                .andWhere(Sqls.custom()
-                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE, nameStandardDTO.getGroupCode())
-                        .andEqualTo(StandardGroup.FIELD_TENANT_ID, nameStandardDTO.getTenantId())
-                        .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, NAME))
-                .build());
-        if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
-            nameStandardDTO.setGroupId(standardGroupDTOList.get(0).getGroupId());
-            this.insertDTOSelective(nameStandardDTO);
-        }
-//        } else {
-//            //创建分组
-//            StandardGroupDTO standardGroupDTO = StandardGroupDTO.builder()
-//                    .groupCode(nameStandardDTO.getGroupCode())
-//                    .groupName(nameStandardDTO.getGroupName())
-//                    .groupDesc(nameStandardDTO.getStandardDesc())
-//                    .standardType(NAME)
-//                    .tenantId(nameStandardDTO.getTenantId())
-//                    .build();
-//            standardGroupRepository.insertDTOSelective(standardGroupDTO);
-//            nameStandardDTO.setGroupId(standardGroupDTO.getGroupId());}
-    }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void batchImportStandard(List<NameStandardDTO> nameStandardDTOList) {
         if (CollectionUtils.isEmpty(nameStandardDTOList)) {
             throw new CommonException("hdsp.xsta.err.is_empty");
         }
-        nameStandardDTOList.forEach(this::importStandard);
+        nameStandardDTOList.forEach(nameStandardDTO -> {
+            //根据责任人姓名 获取目标环境的责任人id
+            nameStandardDTO.setChargeDeptId(importUtil.getChargeDeptId(nameStandardDTO.getChargeDeptName(), nameStandardDTO.getTenantId()));
+            nameStandardDTO.setChargeId(importUtil.getChargerId(nameStandardDTO.getChargeName(), nameStandardDTO.getTenantId()));
+
+            StandardGroupDTO standardGroupDTO = StandardGroupDTO.builder()
+                    .groupCode(nameStandardDTO.getGroupCode())
+                    //todo 模板没有分组名称，用分组编码当名称。
+                    .groupName(nameStandardDTO.getGroupCode())
+                    .groupDesc(nameStandardDTO.getGroupCode())
+                    .standardType(StandardConstant.StandardType.NAME)
+                    .tenantId(nameStandardDTO.getTenantId())
+                    .build();
+            //有则返回，无则新建
+            StandardGroupDTO standardGroup = importUtil.getStandardGroup(standardGroupDTO);
+            nameStandardDTO.setGroupId(standardGroup.getGroupId());
+
+            insertDTOSelective(nameStandardDTO);
+        });
     }
 
     @Override

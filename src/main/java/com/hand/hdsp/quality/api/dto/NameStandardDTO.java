@@ -78,11 +78,11 @@ public class NameStandardDTO extends AuditDomain {
     @ApiModelProperty(value = "责任部门ID")
     private Long chargeDeptId;
 
-    @ExcelColumn(zh = "责任人电话",en="chargeTel",order = 9)
+    @ExcelColumn(zh = "责任人电话",en="chargeTel",order = 11)
     @ApiModelProperty(value = "责任人电话")
     private String chargeTel;
 
-    @ExcelColumn(zh = "责任人邮箱",en="chargeEmail",order = 10)
+    @ExcelColumn(zh = "责任人邮箱",en="chargeEmail",order = 12)
     @ApiModelProperty(value = "责任人邮箱")
     private String chargeEmail;
 
@@ -126,14 +126,14 @@ public class NameStandardDTO extends AuditDomain {
     /**
      * 责任人姓名
      */
-    @ExcelColumn(zh = "责任人姓名",en="chargeName",order = 11)
+    @ExcelColumn(zh = "责任人姓名",en="chargeName",order = 10)
     @Transient
     private String chargeName;
 
     /**
      * 责任部门名称
      */
-    @ExcelColumn(zh = "责任部门",en="chargeDeptName",order = 12)
+    @ExcelColumn(zh = "责任部门",en="chargeDeptName",order = 9)
     @Transient
     private String chargeDeptName;
 

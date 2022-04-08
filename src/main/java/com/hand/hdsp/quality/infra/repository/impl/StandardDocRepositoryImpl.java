@@ -12,11 +12,10 @@ import com.hand.hdsp.quality.domain.repository.StandardDocRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
+import com.hand.hdsp.quality.infra.util.ImportUtil;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
 
@@ -32,10 +31,12 @@ public class StandardDocRepositoryImpl extends BaseRepositoryImpl<StandardDoc, S
 
     private final StandardGroupRepository standardGroupRepository;
     private final StandardDocMapper standardDocMapper;
+    private final ImportUtil importUtil;
 
-    public StandardDocRepositoryImpl(StandardGroupRepository standardGroupRepository, StandardDocMapper standardDocMapper) {
+    public StandardDocRepositoryImpl(StandardGroupRepository standardGroupRepository, StandardDocMapper standardDocMapper, ImportUtil importUtil) {
         this.standardGroupRepository = standardGroupRepository;
         this.standardDocMapper = standardDocMapper;
+        this.importUtil = importUtil;
     }
 
     @Override
@@ -61,45 +62,25 @@ public class StandardDocRepositoryImpl extends BaseRepositoryImpl<StandardDoc, S
                 if (CollectionUtils.isNotEmpty(standardDocs)) {
                     throw new CommonException("标准名称已存在");
                 }
-                // 查找负责人id
-                List<Long> chargeId = standardDocMapper.selectIdByChargeName(standardDocDTO.getChargeName(), standardDocDTO.getTenantId());
-                if (CollectionUtils.isEmpty(chargeId)){
-                    throw new CommonException("责任人不存在");
-                }
-                standardDocDTO.setChargeId(chargeId.get(0));
-                // 查找负责部门id
-                if (Strings.isNotEmpty(standardDocDTO.getChargeDeptName())) {
-                    String chargeDeptName = standardDocDTO.getChargeDeptName();
-                    // 判断是否加密
-                    if (DataSecurityHelper.isTenantOpen()) {
-                        chargeDeptName = DataSecurityHelper.encrypt(chargeDeptName);
-                    }
-                    List<Long> chargeDeptId = standardDocMapper.selectIdByChargeDeptName(chargeDeptName, standardDocDTO.getTenantId());
-                    if (CollectionUtils.isEmpty(chargeDeptId)) {
-                        throw new CommonException("责任部门不存在");
-                    }
-                    standardDocDTO.setChargeDeptId(chargeDeptId.get(0));
-                }
-                List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
-                        .andWhere(Sqls.custom()
-                                .andEqualTo(StandardGroup.FIELD_GROUP_CODE, standardDocDTO.getGroupCode())
-                                .andEqualTo(StandardGroup.FIELD_TENANT_ID, standardDocDTO.getTenantId())
-                                .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, DOC))
-                        .build());
-                if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
-                    standardDocDTO.setGroupId(standardGroupDTOList.get(0).getGroupId());
-                } else {
-                    //创建分组
-                    StandardGroupDTO standardGroupDTO = StandardGroupDTO.builder()
-                            .groupCode(standardDocDTO.getGroupCode())
-                            .groupName(standardDocDTO.getGroupName())
-                            .groupDesc(standardDocDTO.getGroupDesc())
-                            .standardType(StandardConstant.StandardType.DOC)
-                            .tenantId(standardDocDTO.getTenantId())
-                            .build();
-                    standardGroupRepository.insertDTOSelective(standardGroupDTO);
-                    standardDocDTO.setGroupId(standardGroupDTO.getGroupId());
-                }
+
+                //根据责任人姓名 获取目标环境的责任人id
+                standardDocDTO.setChargeDeptId(importUtil.getChargeDeptId(standardDocDTO.getChargeDeptName(), standardDocDTO.getTenantId()));
+                standardDocDTO.setChargeId(importUtil.getChargerId(standardDocDTO.getChargeName(), standardDocDTO.getTenantId()));
+
+
+                //创建分组
+                StandardGroupDTO standardGroupDTO = StandardGroupDTO.builder()
+                        .groupCode(standardDocDTO.getGroupCode())
+                        .groupName(standardDocDTO.getGroupName())
+                        .groupDesc(standardDocDTO.getGroupDesc())
+                        .standardType(StandardConstant.StandardType.DOC)
+                        .tenantId(standardDocDTO.getTenantId())
+                        .build();
+
+                //有则返回，无则新建
+                StandardGroupDTO standardGroup = importUtil.getStandardGroup(standardGroupDTO);
+                standardDocDTO.setGroupId(standardGroup.getGroupId());
+
                 importStandardDocDTOList.add(standardDocDTO);
             }
         }

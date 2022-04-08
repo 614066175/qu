@@ -9,6 +9,7 @@ import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import com.hand.hdsp.quality.infra.mapper.NameStandardMapper;
+import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.boot.imported.app.service.ValidatorHandler;
@@ -47,9 +48,11 @@ public class NameStandardValidator extends ValidatorHandler {
 
     @Override
     public boolean validate(String data) {
+        Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         NameStandardDTO nameStandardDTO;
         try{
             nameStandardDTO=objectMapper.readValue(data, NameStandardDTO.class);
+            nameStandardDTO.setTenantId(tenantId);
         }catch (IOException e) {
             log.error("data:{}", data);
             log.error("Read Json Error", e);
@@ -65,20 +68,6 @@ public class NameStandardValidator extends ValidatorHandler {
         if(CollectionUtils.isNotEmpty(nameStandards)){
             getContext().addErrorMsg("该标准编码已存在！");
             return false;
-        }
-        Long groupId = nameStandardMapper.getGroupId(nameStandardDTO.getGroupCode());
-        if (Objects.isNull(groupId)) {
-            //创建对应的分组
-            StandardGroupDTO standardGroupDTO = StandardGroupDTO.builder()
-                    .groupCode(nameStandardDTO.getGroupCode())
-                    .groupName(nameStandardDTO.getGroupName())
-                    .groupDesc(nameStandardDTO.getStandardDesc())
-                    .standardType(StandardConstant.StandardType.NAME)
-                    .tenantId(nameStandardDTO.getTenantId())
-                    .build();
-            standardGroupRepository.insertDTOSelective(standardGroupDTO);
-            //设置新分组id
-            nameStandardDTO.setGroupId(standardGroupDTO.getGroupId());
         }
         return true;
     }

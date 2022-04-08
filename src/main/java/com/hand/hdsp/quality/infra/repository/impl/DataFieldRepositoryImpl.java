@@ -4,22 +4,21 @@ import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.domain.entity.DataField;
-import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.DataFieldRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
-import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
+import com.hand.hdsp.quality.infra.util.ImportUtil;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.CREATE;
@@ -38,15 +37,19 @@ public class DataFieldRepositoryImpl extends BaseRepositoryImpl<DataField, DataF
 
     private final DataStandardMapper dataStandardMapper;
 
+    private final ImportUtil importUtil;
+
     public DataFieldRepositoryImpl(StandardGroupRepository standardGroupRepository,
                                    DataFieldMapper dataFieldMapper,
-                                   DataStandardMapper dataStandardMapper) {
+                                   DataStandardMapper dataStandardMapper, ImportUtil importUtil) {
         this.standardGroupRepository = standardGroupRepository;
         this.dataFieldMapper = dataFieldMapper;
         this.dataStandardMapper = dataStandardMapper;
+        this.importUtil = importUtil;
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean batchImport(List<DataFieldDTO> dataFieldDTOList) {
         List<DataFieldDTO> importDataFieldDTOList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(dataFieldDTOList)) {
@@ -60,43 +63,21 @@ public class DataFieldRepositoryImpl extends BaseRepositoryImpl<DataField, DataF
                 if (CollectionUtils.isNotEmpty(dataFields)) {
                     throw new CommonException("字段名称已存在");
                 }
-                List<Long> chargeId = dataFieldMapper.selectIdByChargeName(dataFieldDTO.getChargeName(), dataFieldDTO.getTenantId());
-                if (CollectionUtils.isEmpty(chargeId)) {
-                   throw new CommonException("责任人不存在");
-                }
-                //判断当前租户是否开启了数据加密
-                String chargeDeptName = dataFieldDTO.getChargeDeptName();
-                if (DataSecurityHelper.isTenantOpen()) {
-                    chargeDeptName = DataSecurityHelper.encrypt(chargeDeptName);
-                }
-                List<Long> chargeDeptId = dataFieldMapper.selectIdByChargeDeptName(chargeDeptName, dataFieldDTO.getTenantId());
-                if (CollectionUtils.isEmpty(chargeDeptId)) {
-                    throw new CommonException("责任部门不存在");
-                }
-                // 把查询验证后的数据设置进去
-                dataFieldDTO.setChargeId(chargeId.get(0));
-                dataFieldDTO.setChargeDeptId(chargeDeptId.get(0));
-                //索引group_code+type+tenant_id
-                List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
-                        .andWhere(Sqls.custom()
-                                .andEqualTo(StandardGroup.FIELD_GROUP_CODE, dataFieldDTO.getGroupCode())
-                                .andEqualTo(StandardGroup.FIELD_TENANT_ID, dataFieldDTO.getTenantId())
-                                .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE,FIELD))
-                        .build());
-                if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
-                    dataFieldDTO.setGroupId(standardGroupDTOList.get(0).getGroupId());
-                } else {
-                    //创建分组
-                    StandardGroupDTO standardGroupDTO = StandardGroupDTO.builder()
+
+                //使用工具类获取责任人Id，和责任部门Id
+                dataFieldDTO.setChargeDeptId(importUtil.getChargeDeptId(dataFieldDTO.getChargeDeptName(), dataFieldDTO.getTenantId()));
+                dataFieldDTO.setChargeId(importUtil.getChargerId(dataFieldDTO.getChargeName(), dataFieldDTO.getTenantId()));
+
+                StandardGroupDTO standardGroupDTO = StandardGroupDTO.builder()
                             .groupCode(dataFieldDTO.getGroupCode())
                             .groupName(dataFieldDTO.getGroupName())
                             .groupDesc(dataFieldDTO.getStandardDesc())
                             .standardType(FIELD)
                             .tenantId(dataFieldDTO.getTenantId())
                             .build();
-                    standardGroupRepository.insertDTOSelective(standardGroupDTO);
-                    dataFieldDTO.setGroupId(standardGroupDTO.getGroupId());
-                }
+                //有则返回，无则新建
+                StandardGroupDTO standardGroup = importUtil.getStandardGroup(standardGroupDTO);
+                dataFieldDTO.setGroupId(standardGroup.getGroupId());
                 importDataFieldDTOList.add(dataFieldDTO);
                 dataFieldDTO.setStandardStatus(CREATE);
             }
