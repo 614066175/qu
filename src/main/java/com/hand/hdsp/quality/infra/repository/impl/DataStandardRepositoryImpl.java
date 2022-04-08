@@ -1,12 +1,10 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.CREATE;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
@@ -17,6 +15,7 @@ import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
+import com.hand.hdsp.quality.infra.util.ImportUtil;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -24,6 +23,7 @@ import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>数据标准表资源库实现</p>
@@ -37,12 +37,16 @@ public class DataStandardRepositoryImpl extends BaseRepositoryImpl<DataStandard,
 
     private final StandardGroupRepository standardGroupRepository;
 
-    public DataStandardRepositoryImpl(DataStandardMapper dataStandardMapper, StandardGroupRepository standardGroupRepository) {
+    private final ImportUtil importUtil;
+
+    public DataStandardRepositoryImpl(DataStandardMapper dataStandardMapper, StandardGroupRepository standardGroupRepository, ImportUtil importUtil) {
         this.dataStandardMapper = dataStandardMapper;
         this.standardGroupRepository = standardGroupRepository;
+        this.importUtil = importUtil;
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean batchImport(List<DataStandardDTO> dataStandardDTOList) {
         List<DataStandardDTO> importDataStandardDTOList = new ArrayList<>();
         //处理得到待导入的集合
@@ -67,39 +71,21 @@ public class DataStandardRepositoryImpl extends BaseRepositoryImpl<DataStandard,
                 if (CollectionUtils.isNotEmpty(dataStandards)) {
                     throw new CommonException("标准名称已存在");
                 }
-                List<Long> chargeId = dataStandardMapper.selectIdByChargeName(dataStandardDTO.getChargeName(), dataStandardDTO.getTenantId());
-                if (Strings.isNotEmpty(dataStandardDTO.getChargeDeptName())) {
-                    String chargeDeptName = dataStandardDTO.getChargeDeptName();
-                    if (DataSecurityHelper.isTenantOpen()) {
-                        chargeDeptName = DataSecurityHelper.encrypt(chargeDeptName);
-                    }
-                    List<Long> chargeDeptId = dataStandardMapper.selectIdByChargeDeptName(chargeDeptName, dataStandardDTO.getTenantId());
-                    if (CollectionUtils.isEmpty(chargeDeptId)) {
-                        throw new CommonException("责任部门不存在");
-                    }
-                    dataStandardDTO.setChargeDeptId(chargeDeptId.get(0));
-                }
-                dataStandardDTO.setChargeId(chargeId.get(0));
-                List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
-                        .andWhere(Sqls.custom()
-                                .andEqualTo(StandardGroup.FIELD_GROUP_CODE, dataStandardDTO.getGroupCode())
-                                .andEqualTo(StandardGroup.FIELD_TENANT_ID, dataStandardDTO.getTenantId())
-                                .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, DATA))
-                        .build());
-                if (CollectionUtils.isNotEmpty(standardGroupDTOS)) {
-                    dataStandardDTO.setGroupId(standardGroupDTOS.get(0).getGroupId());
-                } else {
-                    //创建分组
-                    StandardGroupDTO standardGroupDTO = StandardGroupDTO.builder()
-                            .groupCode(dataStandardDTO.getGroupCode())
-                            .groupName(dataStandardDTO.getGroupName())
-                            .groupDesc(dataStandardDTO.getGroupDesc())
-                            .standardType(StandardConstant.StandardType.DATA)
-                            .tenantId(dataStandardDTO.getTenantId())
-                            .build();
-                    standardGroupRepository.insertDTOSelective(standardGroupDTO);
-                    dataStandardDTO.setGroupId(standardGroupDTO.getGroupId());
-                }
+                //使用工具类获取责任人Id，和责任部门Id
+                dataStandardDTO.setChargeDeptId(importUtil.getChargeDeptId(dataStandardDTO.getChargeDeptName(), dataStandardDTO.getTenantId()));
+                dataStandardDTO.setChargeId(importUtil.getChargerId(dataStandardDTO.getChargeName(), dataStandardDTO.getTenantId()));
+
+                StandardGroupDTO standardGroupDTO = StandardGroupDTO.builder()
+                        .groupCode(dataStandardDTO.getGroupCode())
+                        .groupName(dataStandardDTO.getGroupName())
+                        .groupDesc(dataStandardDTO.getGroupDesc())
+                        .standardType(StandardConstant.StandardType.DATA)
+                        .tenantId(dataStandardDTO.getTenantId())
+                        .build();
+                //有则返回，无则新建
+                StandardGroupDTO standardGroup = importUtil.getStandardGroup(standardGroupDTO);
+                dataStandardDTO.setGroupId(standardGroup.getGroupId());
+
                 importDataStandardDTOList.add(dataStandardDTO);
                 dataStandardDTO.setStandardStatus(CREATE);
             }

@@ -5,6 +5,7 @@ import java.util.List;
 import com.hand.hdsp.quality.api.dto.NameStandardDTO;
 import com.hand.hdsp.quality.domain.entity.NameStandard;
 import io.choerodon.mybatis.common.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>命名标准表Mapper</p>
@@ -37,19 +38,4 @@ public interface NameStandardMapper extends BaseMapper<NameStandard> {
      */
     NameStandardDTO detail(Long standardId);
 
-    /**
-     * 获取目标环境 责任人信息
-     *
-     * @param nameStandardDTO
-     * @return
-     */
-    List<NameStandardDTO> detailUser(NameStandardDTO nameStandardDTO);
-
-    /**
-     * 获取目标环境 部门信息
-     *
-     * @param nameStandardDTO
-     * @return
-     */
-    List<NameStandardDTO> detailUnit(NameStandardDTO nameStandardDTO);
 }

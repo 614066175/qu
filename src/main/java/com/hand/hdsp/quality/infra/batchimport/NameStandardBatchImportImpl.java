@@ -23,13 +23,13 @@ import org.hzero.boot.imported.infra.validator.annotation.ImportService;
  */
 @Slf4j
 @ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_NAME_STANDARD)
-public class NameStandardBitchImportImpl implements IBatchImportService {
+public class NameStandardBatchImportImpl implements IBatchImportService {
 
     private final ObjectMapper objectMapper;
     private final NameStandardRepository nameStandardRepository;
 
-    public NameStandardBitchImportImpl(ObjectMapper objectMapper,
-                                  NameStandardRepository nameStandardRepository) {
+    public NameStandardBatchImportImpl(ObjectMapper objectMapper,
+                                       NameStandardRepository nameStandardRepository) {
         this.objectMapper = objectMapper;
         this.nameStandardRepository = nameStandardRepository;
     }
