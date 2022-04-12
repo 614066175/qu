@@ -8,6 +8,7 @@ import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
@@ -47,6 +48,10 @@ public class ImportUtil {
     }
 
     public Long getChargeDeptId(String chargeDeptName, Long tenantId) {
+        //责任部门可为空
+        if(StringUtils.isEmpty(chargeDeptName)){
+            return null;
+        }
         if (DataSecurityHelper.isTenantOpen()) {
             chargeDeptName = DataSecurityHelper.encrypt(chargeDeptName);
         }
