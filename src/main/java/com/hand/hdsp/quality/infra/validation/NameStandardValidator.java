@@ -2,25 +2,25 @@ package com.hand.hdsp.quality.infra.validation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hdsp.quality.api.dto.NameStandardDTO;
-import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.domain.entity.NameStandard;
 import com.hand.hdsp.quality.domain.repository.NameStandardRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
-import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import com.hand.hdsp.quality.infra.mapper.NameStandardMapper;
+import com.hand.hdsp.quality.infra.util.ImportUtil;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.imported.app.service.ValidatorHandler;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidator;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidators;
 import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * description
@@ -35,15 +35,17 @@ public class NameStandardValidator extends ValidatorHandler {
     private final NameStandardRepository nameStandardRepository;
     private final NameStandardMapper nameStandardMapper;
     private final StandardGroupRepository standardGroupRepository;
+    private final ImportUtil importUtil;
 
     public NameStandardValidator(ObjectMapper objectMapper,
                                  NameStandardRepository nameStandardRepository,
                                  NameStandardMapper nameStandardMapper,
-                                 StandardGroupRepository standardGroupRepository) {
+                                 StandardGroupRepository standardGroupRepository, ImportUtil importUtil) {
         this.objectMapper = objectMapper;
         this.nameStandardRepository = nameStandardRepository;
         this.nameStandardMapper = nameStandardMapper;
         this.standardGroupRepository = standardGroupRepository;
+        this.importUtil = importUtil;
     }
 
     @Override
@@ -68,6 +70,22 @@ public class NameStandardValidator extends ValidatorHandler {
         if(CollectionUtils.isNotEmpty(nameStandards)){
             getContext().addErrorMsg("该标准编码已存在！");
             return false;
+        }
+        try{
+            importUtil.getChargerId(nameStandardDTO.getChargeName(),nameStandardDTO.getTenantId());
+        }catch (Exception e){
+            addErrorMsg("未找到此责任人，请检查数据");
+            return false;
+        }
+
+        //如果责任部门不为空时进行检验
+        if (Strings.isNotEmpty(nameStandardDTO.getChargeDeptName())) {
+            try{
+                importUtil.getChargeDeptId(nameStandardDTO.getChargeDeptName(),nameStandardDTO.getTenantId());
+            }catch (Exception e){
+                addErrorMsg("未找到此责任部门，请检查数据");
+                return false;
+            }
         }
         return true;
     }
