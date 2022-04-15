@@ -85,6 +85,9 @@
                 <bind name="fieldName" value="'%'+ dataFieldDTO.fieldName +'%'"/>
                 and fs.field_name like #{fieldName}
             </if>
+            <if test="dataFieldDTO.fieldType!=null">
+                and fs.field_type = #{dataFieldDTO.fieldType}
+            </if>
             <if test="dataFieldDTO.fieldComment!=null">
                 <bind name="fieldComment" value="'%'+ dataFieldDTO.fieldComment +'%'"/>
                 and fs.field_comment like #{fieldComment}
