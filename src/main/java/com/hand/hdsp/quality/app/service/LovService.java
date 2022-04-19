@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.app.service;
 
+import com.hand.hdsp.quality.api.dto.LovDTO;
+
 /**
  * <p>LOV表应用服务</p>
  *
@@ -7,4 +9,5 @@ package com.hand.hdsp.quality.app.service;
  */
 public interface LovService {
 
+    LovDTO lovRelease(Long lovId);
 }

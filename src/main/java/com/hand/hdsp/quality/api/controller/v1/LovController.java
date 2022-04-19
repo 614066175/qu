@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.quality.api.dto.LovDTO;
+import com.hand.hdsp.quality.app.service.LovService;
 import com.hand.hdsp.quality.domain.entity.Lov;
 import com.hand.hdsp.quality.domain.repository.LovRepository;
 import io.choerodon.core.domain.Page;
@@ -29,9 +30,11 @@ import springfox.documentation.annotations.ApiIgnore;
 public class LovController extends BaseController {
 
     private LovRepository lovRepository;
+    private final LovService lovService;
 
-    public LovController(LovRepository lovRepository) {
+    public LovController(LovRepository lovRepository, LovService lovService) {
         this.lovRepository = lovRepository;
+        this.lovService = lovService;
     }
 
     @ApiOperation(value = "LOV表列表")
@@ -100,6 +103,19 @@ public class LovController extends BaseController {
         lovRepository.updateDTOWhereTenant(lovDTO, tenantId);
         //
         return Results.success(lovDTO);
+    }
+
+    @ApiOperation(value = "代码集发布")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/lov-release")
+    public ResponseEntity<?> lovRelease(@PathVariable("organizationId") Long tenantId, Long lovId) {
+        return Results.success(lovService.lovRelease(lovId));
     }
 
     @ApiOperation(value = "删除LOV表")
