@@ -1,9 +1,8 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
-import com.hand.hdsp.quality.api.dto.LovValueDTO;
-import com.hand.hdsp.quality.app.service.LovValueService;
-import com.hand.hdsp.quality.domain.entity.LovValue;
-import com.hand.hdsp.quality.domain.repository.LovValueRepository;
+import com.hand.hdsp.quality.api.dto.LovValueVersionDTO;
+import com.hand.hdsp.quality.domain.entity.LovValueVersion;
+import com.hand.hdsp.quality.domain.repository.LovValueVersionRepository;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
@@ -23,18 +22,16 @@ import springfox.documentation.annotations.ApiIgnore;
 /**
  * <p>LOV独立值集表 管理 API</p>
  *
- * @author ZHENG.LI04@HAND-CHINA.COM 2022-04-18 17:20:29
+ * @author ZHENG.LI04@HAND-CHINA.COM 2022-04-19 16:38:55
  */
-@RestController("lovValueController.v1")
-@RequestMapping("/v1/{organizationId}/lov-values")
-public class LovValueController extends BaseController {
+@RestController("lovValueVersionController.v1")
+@RequestMapping("/v1/{organizationId}/lov-value-versions")
+public class LovValueVersionController extends BaseController {
 
-    private LovValueRepository lovValueRepository;
-    private LovValueService lovValueSerVice;
+    private LovValueVersionRepository lovValueVersionRepository;
 
-    public LovValueController(LovValueRepository lovValueRepository,LovValueService lovValueSerVice) {
-        this.lovValueRepository = lovValueRepository;
-        this.lovValueSerVice=lovValueSerVice;
+    public LovValueVersionController(LovValueVersionRepository lovValueVersionRepository) {
+        this.lovValueVersionRepository = lovValueVersionRepository;
     }
 
     @ApiOperation(value = "LOV独立值集表列表")
@@ -47,10 +44,10 @@ public class LovValueController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                LovValueDTO lovValueDTO, @ApiIgnore @SortDefault(value = LovValue.FIELD_LOV_VALUE_ID,
+                LovValueVersionDTO lovValueVersionDTO, @ApiIgnore @SortDefault(value = LovValueVersion.FIELD_VALUE_VERSION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
-        lovValueDTO.setTenantId(tenantId);
-        Page<LovValueDTO> list = lovValueRepository.pageAndSortDTO(pageRequest, lovValueDTO);
+        lovValueVersionDTO.setTenantId(tenantId);
+        Page<LovValueVersionDTO> list = lovValueVersionRepository.pageAndSortDTO(pageRequest, lovValueVersionDTO);
         return Results.success(list);
     }
 
@@ -61,16 +58,16 @@ public class LovValueController extends BaseController {
             paramType = "path",
             required = true
     ), @ApiImplicitParam(
-            name = "lovValueId",
+            name = "valueVersionId",
             value = "LOV独立值集表主键",
             paramType = "path",
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/{lovValueId}")
-    public ResponseEntity<?> detail(@PathVariable Long lovValueId) {
-        LovValueDTO lovValueDTO = lovValueRepository.selectDTOByPrimaryKeyAndTenant(lovValueId);
-        return Results.success(lovValueDTO);
+    @GetMapping("/{valueVersionId}")
+    public ResponseEntity<?> detail(@PathVariable Long valueVersionId) {
+        LovValueVersionDTO lovValueVersionDTO = lovValueVersionRepository.selectDTOByPrimaryKeyAndTenant(valueVersionId);
+        return Results.success(lovValueVersionDTO);
     }
 
     @ApiOperation(value = "创建LOV独立值集表")
@@ -82,11 +79,11 @@ public class LovValueController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody LovValueDTO lovValueDTO) {
-        lovValueDTO.setTenantId(tenantId);
-        this.validObject(lovValueDTO);
-        lovValueRepository.insertDTOSelective(lovValueDTO);
-        return Results.success(lovValueDTO);
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody LovValueVersionDTO lovValueVersionDTO) {
+        lovValueVersionDTO.setTenantId(tenantId);
+        this.validObject(lovValueVersionDTO);
+        lovValueVersionRepository.insertDTOSelective(lovValueVersionDTO);
+        return Results.success(lovValueVersionDTO);
     }
 
     @ApiOperation(value = "修改LOV独立值集表")
@@ -98,9 +95,9 @@ public class LovValueController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
-    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody LovValueDTO lovValueDTO) {
-                lovValueRepository.updateDTOWhereTenant(lovValueDTO, tenantId);
-        return Results.success(lovValueDTO);
+    public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody LovValueVersionDTO lovValueVersionDTO) {
+                lovValueVersionRepository.updateDTOWhereTenant(lovValueVersionDTO, tenantId);
+        return Results.success(lovValueVersionDTO);
     }
 
     @ApiOperation(value = "删除LOV独立值集表")
@@ -113,23 +110,9 @@ public class LovValueController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestBody LovValueDTO lovValueDTO) {
-                lovValueDTO.setTenantId(tenantId);
-        lovValueRepository.deleteByPrimaryKey(lovValueDTO);
+                                    @RequestBody LovValueVersionDTO lovValueVersionDTO) {
+                lovValueVersionDTO.setTenantId(tenantId);
+        lovValueVersionRepository.deleteByPrimaryKey(lovValueVersionDTO);
         return Results.success();
-    }
-
-    @ApiOperation(value = "独立值集模糊查询")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping("/fuzzy-query")
-    public ResponseEntity<?> fuzzyQuery(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                        Long lovId,String query) {
-        return Results.success( lovValueSerVice.getFuzzyQuery(lovId,query));
     }
 }

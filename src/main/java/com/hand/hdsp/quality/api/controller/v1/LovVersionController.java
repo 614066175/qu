@@ -1,6 +1,9 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.quality.api.dto.CodeVersion;
 import com.hand.hdsp.quality.api.dto.LovVersionDTO;
+import com.hand.hdsp.quality.app.service.LovValueVersionService;
+import com.hand.hdsp.quality.app.service.LovVersionService;
 import com.hand.hdsp.quality.domain.entity.LovVersion;
 import com.hand.hdsp.quality.domain.repository.LovVersionRepository;
 import io.choerodon.core.domain.Page;
@@ -19,6 +22,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.List;
+
 /**
  * <p>LOV表 管理 API</p>
  *
@@ -29,9 +34,11 @@ import springfox.documentation.annotations.ApiIgnore;
 public class LovVersionController extends BaseController {
 
     private LovVersionRepository lovVersionRepository;
+    private LovVersionService lovVersionService;
 
-    public LovVersionController(LovVersionRepository lovVersionRepository) {
+    public LovVersionController(LovVersionRepository lovVersionRepository, LovVersionService lovVersionService) {
         this.lovVersionRepository = lovVersionRepository;
+        this.lovVersionService=lovVersionService;
     }
 
     @ApiOperation(value = "LOV表列表")
@@ -115,4 +122,43 @@ public class LovVersionController extends BaseController {
         lovVersionRepository.deleteByPrimaryKey(lovVersionDTO);
         return Results.success();
     }
+
+
+    @ApiOperation(value = "代码集历史版本")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/history/version")
+    public ResponseEntity<List<CodeVersion>> version(@PathVariable(name = "organizationId") Long tenantId,
+                                                     Long lovId, @ApiIgnore @SortDefault(value = LovVersion.FIELD_VERSION_ID,
+            direction = Sort.Direction.DESC) PageRequest pageRequest) {
+        List<CodeVersion> lovVersion=  lovVersionService.getVersion(lovId);
+
+        return Results.success(lovVersion);
+    }
+
+    // TODO: 2022-04-20
+
+    @ApiOperation(value = "代码集历史版本查看")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/history/watch")
+    public ResponseEntity<List<CodeVersion>> watch(@PathVariable(name = "organizationId") Long tenantId,
+                                                     Long lovId, @ApiIgnore @SortDefault(value = LovVersion.FIELD_VERSION_ID,
+            direction = Sort.Direction.DESC) PageRequest pageRequest) {
+
+
+        return null;
+    }
+
+
 }

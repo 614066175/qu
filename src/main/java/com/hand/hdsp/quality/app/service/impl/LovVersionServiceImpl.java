@@ -1,7 +1,11 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import com.hand.hdsp.quality.api.dto.CodeVersion;
 import com.hand.hdsp.quality.app.service.LovVersionService;
+import com.hand.hdsp.quality.domain.repository.LovVersionRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * <p>LOV表应用服务默认实现</p>
@@ -11,4 +15,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class LovVersionServiceImpl implements LovVersionService {
 
+    private final LovVersionRepository lovVersionRepository;
+
+    public LovVersionServiceImpl(LovVersionRepository lovVersionRepository) {
+        this.lovVersionRepository = lovVersionRepository;
+    }
+
+
+    @Override
+    public List<CodeVersion> getVersion(Long lovId) {
+        return lovVersionRepository.getCodeVersion(lovId);
+    }
 }

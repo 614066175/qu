@@ -1,5 +1,9 @@
 package com.hand.hdsp.quality.app.service;
 
+import com.hand.hdsp.quality.api.dto.CodeVersion;
+
+import java.util.List;
+
 /**
  * <p>LOV表应用服务</p>
  *
@@ -7,4 +11,7 @@ package com.hand.hdsp.quality.app.service;
  */
 public interface LovVersionService {
 
+
+
+    List<CodeVersion> getVersion(Long lovId) ;
 }

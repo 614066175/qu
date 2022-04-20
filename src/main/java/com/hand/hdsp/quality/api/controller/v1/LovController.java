@@ -105,18 +105,7 @@ public class LovController extends BaseController {
         return Results.success(lovDTO);
     }
 
-    @ApiOperation(value = "代码集发布")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @PostMapping("/lov-release")
-    public ResponseEntity<?> lovRelease(@PathVariable("organizationId") Long tenantId, Long lovId) {
-        return Results.success(lovService.lovRelease(lovId));
-    }
+
 
     @ApiOperation(value = "删除LOV表")
     @ApiImplicitParams({@ApiImplicitParam(
@@ -133,4 +122,33 @@ public class LovController extends BaseController {
         lovRepository.deleteByPrimaryKey(lovDTO);
         return Results.success();
     }
+
+    @ApiOperation(value = "代码集发布")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/lov-release")
+    public ResponseEntity<?> lovRelease(@PathVariable("organizationId") Long tenantId, Long lovId) {
+        return Results.success(lovService.lovRelease(lovId));
+    }
+
+    @ApiOperation(value = "是否启用")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/open")
+    public ResponseEntity<?> open(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                    Long lovId) {
+        lovService.AssertOpen(lovId);
+        return Results.success();
+    }
+
 }

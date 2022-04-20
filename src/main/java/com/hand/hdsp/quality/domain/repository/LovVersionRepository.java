@@ -2,8 +2,11 @@ package com.hand.hdsp.quality.domain.repository;
 
 import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
+import com.hand.hdsp.quality.api.dto.CodeVersion;
 import com.hand.hdsp.quality.api.dto.LovVersionDTO;
 import com.hand.hdsp.quality.domain.entity.LovVersion;
+
+import java.util.List;
 
 /**
  * <p>LOV表资源库</p>
@@ -12,4 +15,5 @@ import com.hand.hdsp.quality.domain.entity.LovVersion;
  */
 public interface LovVersionRepository extends BaseRepository<LovVersion, LovVersionDTO>, ProxySelf<LovVersionRepository> {
 
+    List<CodeVersion> getCodeVersion(Long lovId);
 }

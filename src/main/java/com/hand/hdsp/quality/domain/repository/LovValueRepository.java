@@ -5,6 +5,8 @@ import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.LovValueDTO;
 import com.hand.hdsp.quality.domain.entity.LovValue;
 
+import java.util.List;
+
 /**
  * <p>LOV独立值集表资源库</p>
  *
@@ -12,4 +14,5 @@ import com.hand.hdsp.quality.domain.entity.LovValue;
  */
 public interface LovValueRepository extends BaseRepository<LovValue, LovValueDTO>, ProxySelf<LovValueRepository> {
 
+    List<LovValueDTO> query(Long lovId, String query);
 }

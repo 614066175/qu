@@ -1,5 +1,9 @@
 package com.hand.hdsp.quality.app.service;
 
+import com.hand.hdsp.quality.api.dto.LovValueDTO;
+
+import java.util.List;
+
 /**
  * <p>LOV独立值集表应用服务</p>
  *
@@ -7,4 +11,5 @@ package com.hand.hdsp.quality.app.service;
  */
 public interface LovValueService {
 
+    List<LovValueDTO> getFuzzyQuery(Long lovId, String query);
 }

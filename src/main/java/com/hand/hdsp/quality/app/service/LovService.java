@@ -1,6 +1,9 @@
 package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.LovDTO;
+import com.hand.hdsp.quality.api.dto.LovValueDTO;
+
+import java.util.List;
 
 /**
  * <p>LOV表应用服务</p>
@@ -10,4 +13,8 @@ import com.hand.hdsp.quality.api.dto.LovDTO;
 public interface LovService {
 
     LovDTO lovRelease(Long lovId);
+
+    void AssertOpen(Long lovId);
+
+
 }
