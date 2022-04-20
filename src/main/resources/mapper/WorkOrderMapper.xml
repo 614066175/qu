@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.WorkOrderMapper">
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.WorkOrder">
+        <result column="work_order_id" property="workOrderId" jdbcType="DECIMAL"/>
+        <result column="work_order_code" property="workOrderCode" jdbcType="VARCHAR"/>
+        <result column="plan_id" property="planId" jdbcType="DECIMAL"/>
+        <result column="result_id" property="resultId" jdbcType="DECIMAL"/>
+        <result column="processors_id" property="processorsId" jdbcType="DECIMAL"/>
+        <result column="immediate_level" property="immediateLevel" jdbcType="VARCHAR"/>
+        <result column="order_desc" property="orderDesc" jdbcType="VARCHAR"/>
+        <result column="work_order_status" property="workOrderStatus" jdbcType="VARCHAR"/>
+        <result column="relate_job_type" property="relateJobType" jdbcType="VARCHAR"/>
+        <result column="relate_job_id" property="relateJobId" jdbcType="DECIMAL"/>
+        <result column="order_solution" property="orderSolution" jdbcType="VARCHAR"/>
+        <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
+        <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
+        <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
+        <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
+    </resultMap>
+    <select id="orderTodo" resultType="com.hand.hdsp.quality.api.dto.WorkOrderDTO">
+        <bind name="userDetails" value="@io.choerodon.core.oauth.DetailsHelper@getUserDetails()"/>
+        SELECT
+        xwo.* ,
+        xbp.plan_name,
+        xbp.plan_desc,
+        xbr.mark planMark,
+        xbr.start_date planExecTime
+        FROM
+        xqua_work_order xwo
+        left join xqua_batch_plan xbp on xwo.plan_id=xbp.plan_id
+        left join xqua_batch_result xbr on xwo.result_id = xbr.result_id
+        <where>
+            xwo.processors_id=#{userDetails.userId}
+            <if test="tenantId !=null">
+                and xwo.tenant_id =#{tenantId}
+            </if>
+        </where>
+    </select>
+    <select id="orderApply" resultType="com.hand.hdsp.quality.api.dto.WorkOrderDTO">
+        <bind name="userDetails" value="@io.choerodon.core.oauth.DetailsHelper@getUserDetails()"/>
+        SELECT
+        xwo.* ,
+        xbp.plan_name,
+        xbp.plan_desc,
+        xbr.mark planMark,
+        xbr.start_date planExecTime
+        FROM
+        xqua_work_order xwo
+        left join xqua_batch_plan xbp on xwo.plan_id=xbp.plan_id
+        left join xqua_batch_result xbr on xwo.result_id = xbr.result_id
+        <where>
+            xwo.created_by=#{userDetails.userId}
+            <if test="tenantId !=null">
+                and xwo.tenant_id =#{tenantId}
+            </if>
+        </where>
+    </select>
+</mapper>
