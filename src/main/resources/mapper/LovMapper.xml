@@ -29,4 +29,11 @@
         <result column="decrypt_field" property="decryptField" jdbcType="VARCHAR"/>
         <result column="request_method" property="requestMethod" jdbcType="VARCHAR"/>
     </resultMap>
+    <select id="detail" resultType="com.hand.hdsp.quality.api.dto.LovDTO">
+        select
+        xl.*
+        from xqua_lov xl
+        left join (select * from xqua_lov_version  xlv where xlv.lov_version_id in (select max(lov_version) from xqua_lov_version group by lov_id  ) )
+
+    </select>
 </mapper>

@@ -19,7 +19,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>LOV表应用服务默认实现</p>
@@ -48,23 +50,18 @@ public class LovServiceImpl implements LovService {
     public LovDTO lovRelease(Long lovId) {
         //记录当前代码头行数据到版本表
         LovDTO lovDTO = lovRepository.selectDTOByPrimaryKey(lovId);
-        if (lovDTO == null) {
+        //todo 多语言
+        if (Objects.isNull(lovDTO)) {
             throw new CommonException("没有对应的头表");
         }
         List<LovValueDTO> lovValueDTOS = lovValueRepository.selectDTOByCondition(Condition.builder(LovValue.class)
                 .andWhere(Sqls.custom().andEqualTo(LovValue.FIELD_LOV_ID, lovId))
                 .build());
-        if (lovValueDTOS == null) {
-            throw new CommonException("没有对应的行表");
-        }
 
         List<LovVersionDTO> lovVersionDTOS = lovVersionRepository.selectDTOByCondition(Condition.builder(LovVersion.class)
                 .andWhere(Sqls.custom().andEqualTo(LovVersion.FIELD_LOV_ID, lovId))
                 .orderByDesc(LovVersion.FIELD_LOV_VERSION)
                 .build());
-        if (lovVersionDTOS == null) {
-            throw new CommonException("没有对应的版本头标");
-        }
 
         long lovVersion = 1L;
         if (CollectionUtils.isNotEmpty(lovVersionDTOS)) {
@@ -76,31 +73,37 @@ public class LovServiceImpl implements LovService {
         //将头表存入版本表
         lovVersionRepository.insertDTOSelective(lovVersionDTO);
 
-        //todo 值版本
-        Long finalLovVersion = lovVersion;
-        lovValueDTOS.forEach(lovValue -> {
-            LovValueVersionDTO lovValueVersionDTO = new LovValueVersionDTO();
+        List<LovValueVersionDTO> lovValueVersionDTOList = new ArrayList<>();
+        LovValueVersionDTO lovValueVersionDTO;
+        for (LovValueDTO lovValue : lovValueDTOS) {
+            lovValueVersionDTO = new LovValueVersionDTO();
             BeanUtils.copyProperties(lovValue, lovValueVersionDTO);
-            lovValueVersionDTO.setLovVersionId(finalLovVersion);
-            lovValueVersionRepository.insertDTOSelective(lovValueVersionDTO);
-        });
+            lovValueVersionDTO.setLovVersionId(lovVersionDTO.getLovVersionId());
+            lovValueVersionDTOList.add(lovValueVersionDTO);
+
+        }
+        lovValueVersionRepository.batchInsertDTOSelective(lovValueVersionDTOList);
         return lovDTO;
     }
 
     @Override
-    public int AssertOpen(Long lovId) {
+    public LovDTO detail(Long lovId) {
+        //sql形式
+        //lovMapper.detail(lovId);
+        //查代码集信息
         LovDTO lovDTO = lovRepository.selectDTOByPrimaryKey(lovId);
-        Integer enabledFlag = lovDTO.getEnabledFlag();
-        if (enabledFlag == 0) {
-           enabledFlag=1;
-        } else {
-            enabledFlag=0;
+        //查最大版本
+        List<LovVersionDTO> lovVersionDTOS = lovVersionRepository.selectDTOByCondition(Condition.builder(LovVersion.class)
+                .andWhere(Sqls.custom().andEqualTo(LovVersion.FIELD_LOV_ID, lovId))
+                .orderByDesc(LovVersion.FIELD_LOV_VERSION)
+                .build());
+        //默认当前版本为1版本
+        lovDTO.setLovVersion(1L);
+        if (CollectionUtils.isNotEmpty(lovVersionDTOS)) {
+            //当前版本时历史版本+1
+            lovDTO.setLovVersion(lovVersionDTOS.get(0).getLovVersion() + 1);
         }
-        lovDTO.setEnabledFlag(enabledFlag);
-        lovRepository.updateByDTOPrimaryKey(lovDTO);
-        return enabledFlag;
-
+        return lovDTO;
     }
-
 
 }

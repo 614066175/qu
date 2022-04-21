@@ -3,6 +3,8 @@ package com.hand.hdsp.quality.app.service.impl;
 import com.hand.hdsp.quality.api.dto.LovValueDTO;
 import com.hand.hdsp.quality.app.service.LovValueService;
 import com.hand.hdsp.quality.domain.repository.LovValueRepository;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,5 +25,11 @@ public class LovValueServiceImpl implements LovValueService {
     @Override
     public List<LovValueDTO> getFuzzyQuery(Long lovId, String query) {
         return lovValueRepository.query(lovId, query);
+    }
+
+    @Override
+    public Page<LovValueDTO> list(PageRequest pageRequest, LovValueDTO lovValueDTO) {
+        //todo value like querySting or meaning like querySting
+        return null;
     }
 }

@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
+import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -95,5 +96,9 @@ public class LovDTO extends AuditDomain {
     @NotBlank
     @Size(max = 30)
     private String requestMethod;
+
+
+    @Transient
+    private Long lovVersion;
 
 }

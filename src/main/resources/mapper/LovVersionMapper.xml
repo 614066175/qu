@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.hand.hdsp.quality.infra.mapper.LovVersionMapper">
-	<!-- 可根据自己的需求，是否要使用 -->
+    <!-- 可根据自己的需求，是否要使用 -->
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.LovVersion">
-        <result column="version_id" property="versionId" jdbcType="DECIMAL"/>
+        <result column="lov_version_id" property="lovVersionId" jdbcType="DECIMAL"/>
         <result column="lov_id" property="lovId" jdbcType="DECIMAL"/>
         <result column="lov_code" property="lovCode" jdbcType="VARCHAR"/>
         <result column="lov_type_code" property="lovTypeCode" jdbcType="VARCHAR"/>
@@ -32,24 +32,17 @@
         <result column="lov_version" property="lovVersion" jdbcType="DECIMAL"/>
     </resultMap>
 
-    <select id="getCodeVersin" resultType="com.hand.hdsp.quality.api.dto.CodeVersion">
-        SELECT
-                lov_version,
-                last_updated_by,
-                last_update_date,
-                version_id,
-                lov_id
-        FROM `xqua_lov_version`
-        where lov_id= #{lovId}
-        ORDER BY lov_version
-        DESC
-        LIMIT 1,30
-
-    </select>
-
-    <select id="getMaxVersionList" resultType="com.hand.hdsp.quality.api.dto.LovVersionDTO">
-        SELECT xlv.* from xqua_lov_version xlv
-        WHERE
-            lov_version =(select max(lov_version) from xqua_lov_version xlvt where  xlvt.lov_id=xlv.lov_id )
+    <select id="listAll" resultType="com.hand.hdsp.quality.api.dto.LovVersionDTO">
+        SELECT xlv.*,
+        iu.login_name updaterName
+        FROM xqua_lov_version xlv
+        left join iam_user iu on iu.id = xlv.last_updated_by
+        <where>
+            lov_id = #{lovId}
+            <if test="tenantId != null">
+                and xlv.tenant_id = #{tenantId}
+            </if>
+        </where>
+        ORDER BY lov_version asc
     </select>
 </mapper>

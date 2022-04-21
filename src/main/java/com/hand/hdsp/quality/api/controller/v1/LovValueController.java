@@ -50,8 +50,7 @@ public class LovValueController extends BaseController {
                 LovValueDTO lovValueDTO, @ApiIgnore @SortDefault(value = LovValue.FIELD_LOV_VALUE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         lovValueDTO.setTenantId(tenantId);
-        Page<LovValueDTO> list = lovValueRepository.pageAndSortDTO(pageRequest, lovValueDTO);
-        return Results.success(list);
+        return Results.success(lovValueSerVice.list(pageRequest,lovValueDTO));
     }
 
     @ApiOperation(value = "LOV独立值集表明细")
@@ -120,17 +119,17 @@ public class LovValueController extends BaseController {
     }
 
 
-    @ApiOperation(value = "独立值集模糊查询")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping("/fuzzy-query")
-    public ResponseEntity<?> fuzzyQuery(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                        Long lovId,String query) {
-        return Results.success( lovValueSerVice.getFuzzyQuery(lovId,query));
-    }
+//    @ApiOperation(value = "独立值集模糊查询")
+//    @ApiImplicitParams({@ApiImplicitParam(
+//            name = "organizationId",
+//            value = "租户",
+//            paramType = "path",
+//            required = true
+//    )})
+//    @Permission(level = ResourceLevel.ORGANIZATION)
+//    @PutMapping("/fuzzy-query")
+//    public ResponseEntity<?> fuzzyQuery(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+//                                        Long lovId,String query) {
+//        return Results.success( lovValueSerVice.getFuzzyQuery(lovId,query));
+//    }
 }

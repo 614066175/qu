@@ -2,11 +2,8 @@ package com.hand.hdsp.quality.domain.repository;
 
 import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
-import com.hand.hdsp.quality.api.dto.CodeVersion;
 import com.hand.hdsp.quality.api.dto.LovValueVersionDTO;
 import com.hand.hdsp.quality.domain.entity.LovValueVersion;
-
-import java.util.List;
 
 /**
  * <p>LOV独立值集表资源库</p>

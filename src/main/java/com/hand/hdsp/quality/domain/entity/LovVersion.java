@@ -24,7 +24,7 @@ import javax.persistence.Table;
 @Table(name = "xqua_lov_version")
 public class LovVersion extends AuditDomain {
 
-    public static final String FIELD_VERSION_ID = "versionId";
+    public static final String FIELD_LOV_VERSION_ID = "lovVersionId";
     public static final String FIELD_LOV_ID = "lovId";
     public static final String FIELD_LOV_CODE = "lovCode";
     public static final String FIELD_LOV_TYPE_CODE = "lovTypeCode";
@@ -57,7 +57,7 @@ public class LovVersion extends AuditDomain {
 
     @Id
     @GeneratedValue
-    private Long versionId;
+    private Long lovVersionId;
 
     private Long lovId;
 

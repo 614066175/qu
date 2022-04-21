@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
+import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -69,5 +70,9 @@ public class LovValueDTO extends AuditDomain {
     @ApiModelProperty(value = "生效标识：1:生效，0:失效")
     @NotNull
     private Integer enabledFlag;
+
+
+    @Transient
+    private String queryString;
 
 }

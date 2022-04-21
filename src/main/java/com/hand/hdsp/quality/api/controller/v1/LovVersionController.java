@@ -1,8 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
-import com.hand.hdsp.quality.api.dto.CodeVersion;
 import com.hand.hdsp.quality.api.dto.LovVersionDTO;
-import com.hand.hdsp.quality.app.service.LovValueVersionService;
 import com.hand.hdsp.quality.app.service.LovVersionService;
 import com.hand.hdsp.quality.domain.entity.LovVersion;
 import com.hand.hdsp.quality.domain.repository.LovVersionRepository;
@@ -38,7 +36,7 @@ public class LovVersionController extends BaseController {
 
     public LovVersionController(LovVersionRepository lovVersionRepository, LovVersionService lovVersionService) {
         this.lovVersionRepository = lovVersionRepository;
-        this.lovVersionService=lovVersionService;
+        this.lovVersionService = lovVersionService;
     }
 
     @ApiOperation(value = "LOV表列表")
@@ -51,11 +49,26 @@ public class LovVersionController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                LovVersionDTO lovVersionDTO, @ApiIgnore @SortDefault(value = LovVersion.FIELD_VERSION_ID,
+                                  LovVersionDTO lovVersionDTO, @ApiIgnore @SortDefault(value = LovVersion.FIELD_LOV_VERSION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         lovVersionDTO.setTenantId(tenantId);
         Page<LovVersionDTO> list = lovVersionRepository.pageAndSortDTO(pageRequest, lovVersionDTO);
         return Results.success(list);
+    }
+
+    @ApiOperation(value = "LOV表列表-查询所有")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/list-all")
+    public ResponseEntity<?> listAll(@PathVariable(name = "organizationId") Long tenantId,
+                                     LovVersionDTO lovVersionDTO) {
+        lovVersionDTO.setTenantId(tenantId);
+        return Results.success(lovVersionService.listAll(lovVersionDTO));
     }
 
     @ApiOperation(value = "LOV表明细")
@@ -103,7 +116,7 @@ public class LovVersionController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody LovVersionDTO lovVersionDTO) {
-                lovVersionRepository.updateDTOWhereTenant(lovVersionDTO, tenantId);
+        lovVersionRepository.updateDTOWhereTenant(lovVersionDTO, tenantId);
         return Results.success(lovVersionDTO);
     }
 
@@ -118,45 +131,10 @@ public class LovVersionController extends BaseController {
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody LovVersionDTO lovVersionDTO) {
-                lovVersionDTO.setTenantId(tenantId);
+        lovVersionDTO.setTenantId(tenantId);
         lovVersionRepository.deleteByPrimaryKey(lovVersionDTO);
         return Results.success();
     }
-
-
-    @ApiOperation(value = "代码集历史版本")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/history/version")
-    public ResponseEntity<List<CodeVersion>> version(@PathVariable(name = "organizationId") Long tenantId,
-                                                     Long lovId, @ApiIgnore @SortDefault(value = LovVersion.FIELD_VERSION_ID,
-            direction = Sort.Direction.DESC) PageRequest pageRequest) {
-        List<CodeVersion> lovVersion=  lovVersionService.getVersion(lovId);
-
-        return Results.success(lovVersion);
-    }
-
-
-    @ApiOperation(value = "代码集最大版本")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/maxVersion/list")
-    public ResponseEntity<?> maxList(@PathVariable(name = "organizationId") Long tenantId) {
-        List<LovVersionDTO> list = lovVersionService.getMaxList(tenantId);
-        return Results.success(list);
-    }
-
-
 
 
 }

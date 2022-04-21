@@ -18,11 +18,9 @@ public interface LovService {
     LovDTO lovRelease(Long lovId);
 
     /**
-     * 是否发布代码集
-     *
+     * 代码集详情接口
      * @param lovId
+     * @return
      */
-    int AssertOpen(Long lovId);
-
-
+    LovDTO detail(Long lovId);
 }

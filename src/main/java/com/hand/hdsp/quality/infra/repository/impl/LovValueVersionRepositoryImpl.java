@@ -1,13 +1,10 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
-import com.hand.hdsp.quality.api.dto.CodeVersion;
 import com.hand.hdsp.quality.api.dto.LovValueVersionDTO;
 import com.hand.hdsp.quality.domain.entity.LovValueVersion;
 import com.hand.hdsp.quality.domain.repository.LovValueVersionRepository;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * <p>LOV独立值集表资源库实现</p>

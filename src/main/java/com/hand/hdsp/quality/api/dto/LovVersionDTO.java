@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
+import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -25,7 +26,7 @@ import javax.validation.constraints.Size;
 public class LovVersionDTO extends AuditDomain {
 
     @ApiModelProperty("主键，供其他表做外键")
-    private Long versionId;
+    private Long lovVersionId;
 
     @ApiModelProperty(value = "")
     @NotNull
@@ -103,4 +104,7 @@ public class LovVersionDTO extends AuditDomain {
     @ApiModelProperty(value = "任务版本号")
     private Long lovVersion;
 
+
+    @Transient
+    private String updaterName;
 }

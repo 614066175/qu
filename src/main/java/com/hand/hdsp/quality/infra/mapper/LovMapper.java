@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.infra.mapper;
 
+import com.hand.hdsp.quality.api.dto.LovDTO;
 import com.hand.hdsp.quality.domain.entity.Lov;
 import io.choerodon.mybatis.common.BaseMapper;
 
@@ -10,4 +11,10 @@ import io.choerodon.mybatis.common.BaseMapper;
  */
 public interface LovMapper extends BaseMapper<Lov> {
 
+    /**
+     * 详情接口
+     * @param lovId
+     * @return
+     */
+    LovDTO detail(Long lovId);
 }
