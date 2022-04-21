@@ -116,4 +116,10 @@ public class BatchResultDTO extends AuditDomain {
 
     private Long projectId;
 
+    @Transient
+    private Long workOrderId;
+
+    @Transient
+    private String launchStatus;
+
 }

@@ -83,7 +83,14 @@
         xbr.mark,
         xbr.start_date,
         xbr.end_date,
-        xbr.exception_info
+        xbr.exception_info,
+        xwo.work_order_id,
+        CASE
+        WHEN ( xbr.plan_status = 'SUCCESS' AND mark &lt; 100 AND xwo.work_order_id IS NULL ) THEN
+        'NOT_LAUNCHED'
+        WHEN ( xbr.plan_status = 'SUCCESS' AND mark &lt; 100 AND xwo.work_order_id IS NOT NULL ) THEN
+        'LAUNCHED'
+        END launchStatus
         FROM xqua_batch_plan xbp
         LEFT JOIN (
         SELECT *
@@ -91,6 +98,15 @@
         WHERE result_id IN (SELECT MAX(result_id) FROM xqua_batch_result GROUP BY plan_id)) xbr
         ON xbr.plan_id = xbp.plan_id
         LEFT JOIN xqua_plan_group xpg ON xbp.group_id = xpg.group_id
+        --关联最新整改工单
+        left join (
+            SELECT
+            *
+            FROM
+            xqua_work_order
+            WHERE
+            work_order_id IN (SELECT MAX( work_order_id) FROM xqua_work_order GROUP BY plan_id,result_id )
+        ) xwo on xwo.plan_id=xbp.plan_id AND xwo.result_id = xbr.result_id
         <where>
             <if test="groupId != null and groupId != 0">
                 xpg.group_id = #{groupId}

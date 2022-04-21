@@ -153,4 +153,10 @@ public interface ErrorCode {
     String FILE_DOWNLOAD_FAIL="hdsp.xqua.err.file_download_fail";
 
     String DOC_NO_FILE="hdsp.xqua.err.doc_no_file";
+
+    String WORK_ORDER_STATUS_ERROR="hdsp.xqua.err.work_order_status_error";
+
+    String WORK_ORDER_STATUS_CAN_NOT_REVOKE="hdsp.xqua.err.work_order_status_can_not_revoke";
+
+    String WORK_ORDER_NOT_EXIST="hdsp.xqua.err.work_order_not_exist";
 }
