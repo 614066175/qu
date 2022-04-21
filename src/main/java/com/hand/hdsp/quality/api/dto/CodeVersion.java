@@ -26,5 +26,13 @@ public class CodeVersion {
     @ApiModelProperty("更新时间")
     private Long lastUpdateDate;
 
+    @ApiModelProperty("头表版本主键")
+    private Long versionId;
+
+    @ApiModelProperty("头表主键")
+    private Long lovId;
+
+
+
 
 }

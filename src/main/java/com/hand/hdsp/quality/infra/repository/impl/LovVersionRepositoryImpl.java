@@ -29,4 +29,9 @@ public class LovVersionRepositoryImpl extends BaseRepositoryImpl<LovVersion, Lov
     public List<CodeVersion> getCodeVersion(Long lovId) {
         return lovVersionMapper.getCodeVersin(lovId);
     }
+
+    @Override
+    public List<LovVersionDTO> getMaxVersionList(Long tenantId) {
+        return lovVersionMapper.getMaxVersionList(tenantId);
+    }
 }

@@ -99,9 +99,7 @@ public class LovController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody LovDTO lovDTO) {
-        //头表更新逻辑
         lovRepository.updateDTOWhereTenant(lovDTO, tenantId);
-        //
         return Results.success(lovDTO);
     }
 
@@ -147,8 +145,8 @@ public class LovController extends BaseController {
     @PutMapping("/open")
     public ResponseEntity<?> open(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     Long lovId) {
-        lovService.AssertOpen(lovId);
-        return Results.success();
+
+        return Results.success(lovService.AssertOpen(lovId));
     }
 
 }

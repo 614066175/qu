@@ -141,9 +141,8 @@ public class LovVersionController extends BaseController {
         return Results.success(lovVersion);
     }
 
-    // TODO: 2022-04-20
 
-    @ApiOperation(value = "代码集历史版本查看")
+    @ApiOperation(value = "代码集最大版本")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -151,14 +150,13 @@ public class LovVersionController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/history/watch")
-    public ResponseEntity<List<CodeVersion>> watch(@PathVariable(name = "organizationId") Long tenantId,
-                                                     Long lovId, @ApiIgnore @SortDefault(value = LovVersion.FIELD_VERSION_ID,
-            direction = Sort.Direction.DESC) PageRequest pageRequest) {
-
-
-        return null;
+    @GetMapping("/maxVersion/list")
+    public ResponseEntity<?> maxList(@PathVariable(name = "organizationId") Long tenantId) {
+        List<LovVersionDTO> list = lovVersionService.getMaxList(tenantId);
+        return Results.success(list);
     }
+
+
 
 
 }

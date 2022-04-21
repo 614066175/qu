@@ -14,5 +14,11 @@ import java.util.List;
  */
 public interface LovValueRepository extends BaseRepository<LovValue, LovValueDTO>, ProxySelf<LovValueRepository> {
 
+    /**
+     * 模糊查询
+     * @param lovId
+     * @param query
+     * @return
+     */
     List<LovValueDTO> query(Long lovId, String query);
 }

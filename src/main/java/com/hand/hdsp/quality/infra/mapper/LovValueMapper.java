@@ -13,5 +13,11 @@ import java.util.List;
  */
 public interface LovValueMapper extends BaseMapper<LovValue> {
 
+    /**
+     * 根据lovId和查询字符进行模糊查询
+     * @param lovId
+     * @param query
+     * @return
+     */
     List<LovValueDTO> getLovValueDTOS(Long lovId, String query);
 }

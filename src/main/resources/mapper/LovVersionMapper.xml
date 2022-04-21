@@ -36,11 +36,20 @@
         SELECT
                 lov_version,
                 last_updated_by,
-                last_update_date
+                last_update_date,
+                version_id,
+                lov_id
         FROM `xqua_lov_version`
         where lov_id= #{lovId}
         ORDER BY lov_version
         DESC
+        LIMIT 1,30
 
+    </select>
+
+    <select id="getMaxVersionList" resultType="com.hand.hdsp.quality.api.dto.LovVersionDTO">
+        SELECT xlv.* from xqua_lov_version xlv
+        WHERE
+            lov_version =(select max(lov_version) from xqua_lov_version xlvt where  xlvt.lov_id=xlv.lov_id )
     </select>
 </mapper>

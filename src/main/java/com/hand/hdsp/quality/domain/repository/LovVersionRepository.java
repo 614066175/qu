@@ -15,5 +15,18 @@ import java.util.List;
  */
 public interface LovVersionRepository extends BaseRepository<LovVersion, LovVersionDTO>, ProxySelf<LovVersionRepository> {
 
+    /**
+     * 获取lovId下的版本列表
+     * @param lovId
+     * @return
+     */
     List<CodeVersion> getCodeVersion(Long lovId);
+
+    /**
+     * 获取最大版本号列表
+     * @param tenantId
+     * @return
+     */
+
+    List<LovVersionDTO> getMaxVersionList(Long tenantId);
 }

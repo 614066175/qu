@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 import com.hand.hdsp.quality.api.dto.CodeVersion;
+import com.hand.hdsp.quality.api.dto.LovVersionDTO;
 import com.hand.hdsp.quality.app.service.LovVersionService;
 import com.hand.hdsp.quality.domain.repository.LovVersionRepository;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.List;
 @Service
 public class LovVersionServiceImpl implements LovVersionService {
 
+
     private final LovVersionRepository lovVersionRepository;
 
     public LovVersionServiceImpl(LovVersionRepository lovVersionRepository) {
@@ -26,4 +28,12 @@ public class LovVersionServiceImpl implements LovVersionService {
     public List<CodeVersion> getVersion(Long lovId) {
         return lovVersionRepository.getCodeVersion(lovId);
     }
+
+    @Override
+    public List<LovVersionDTO> getMaxList(Long tenantId) {
+
+        return lovVersionRepository.getMaxVersionList(tenantId);
+    }
+
+
 }

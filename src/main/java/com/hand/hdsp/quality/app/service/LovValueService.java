@@ -11,5 +11,12 @@ import java.util.List;
  */
 public interface LovValueService {
 
+    /**
+     * 代码集明细模糊查询
+     * @param lovId
+     * @param query
+     * @return
+     */
     List<LovValueDTO> getFuzzyQuery(Long lovId, String query);
+
 }

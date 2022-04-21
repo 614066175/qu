@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.infra.mapper;
 
 import com.hand.hdsp.quality.api.dto.CodeVersion;
+import com.hand.hdsp.quality.api.dto.LovVersionDTO;
 import com.hand.hdsp.quality.domain.entity.LovVersion;
 import io.choerodon.mybatis.common.BaseMapper;
 
@@ -19,5 +20,12 @@ public interface LovVersionMapper extends BaseMapper<LovVersion> {
      * @return
      */
     List<CodeVersion> getCodeVersin(Long lovId);
+
+    /**
+     * 获取最大版本的头表
+     * @param tenantId
+     * @return
+     */
+    List<LovVersionDTO> getMaxVersionList(Long tenantId);
 }
 
