@@ -17,11 +17,20 @@ public interface WorkOrderConstants {
         //待接收
         String PENDING_RECEIVE = "PENDING_RECEIVE";
 
+        //待处理
+        String PENDING_PROCESS = "PENDING_PROCESS";
+
         //处理中
         String PROCESSING = "PROCESSING";
 
         //已接收
         String RECEIVED = "RECEIVED";
+
+        //已拒绝
+        String REFUSED = "REFUSED";
+
+        //已处理
+        String PROCESSED = "PROCESSED";
 
     }
 
@@ -36,7 +45,16 @@ public interface WorkOrderConstants {
         //接收
         String RECEIVE = "RECEIVE";
 
-        //处理
-        String PROCESS = "PROCESS";
+        //开始处理
+        String START_PROCESS = "START_PROCESS";
+
+        //拒绝
+        String REFUSE = "REFUSE";
+
+        //分派
+        String ASSIGN = "ASSIGN";
+
+        //提交解决方案
+        String SUBMIT_SOLUTION = "SUBMIT_SOLUTION";
     }
 }

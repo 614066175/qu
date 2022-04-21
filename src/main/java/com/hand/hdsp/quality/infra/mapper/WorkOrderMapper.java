@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.infra.mapper;
 
 import com.hand.hdsp.quality.api.dto.WorkOrderDTO;
+import com.hand.hdsp.quality.api.dto.WorkOrderOperationDTO;
 import com.hand.hdsp.quality.domain.entity.WorkOrder;
 import io.choerodon.mybatis.common.BaseMapper;
 
@@ -26,4 +27,11 @@ public interface WorkOrderMapper extends BaseMapper<WorkOrder> {
      * @return
      */
     List<WorkOrderDTO> orderApply(WorkOrderDTO workOrderDTO);
+
+    /**
+     * 查询工单操作流程信息
+     * @param workOrderId
+     * @return
+     */
+    List<WorkOrderOperationDTO> oderOperateInfo(Long workOrderId);
 }

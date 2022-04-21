@@ -60,4 +60,14 @@
             </if>
         </where>
     </select>
+    <select id="oderOperateInfo" resultType="com.hand.hdsp.quality.api.dto.WorkOrderOperationDTO">
+        SELECT
+            xwoo.*,
+            iu.login_name operatorName
+        FROM
+            xqua_work_order_operation xwoo
+            left join iam_user iu on xwoo.operator_id=iu.id
+        where xwoo.work_order_id=#{workOrderId}
+        order by xwoo.order_operate_id asc
+    </select>
 </mapper>

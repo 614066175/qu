@@ -76,7 +76,7 @@ public class WorkOrderController extends BaseController {
         return Results.success(workOrderDTO);
     }
 
-    @ApiOperation(value = "发起整改，提交质量工单")
+    @ApiOperation(value = "质量工单-发起整改")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -93,6 +93,21 @@ public class WorkOrderController extends BaseController {
             workOrderDTO.setProjectId(projectId);
         });
         return Results.success(workOrderService.launchUpdate(workOrderDTOList));
+    }
+
+
+    @ApiOperation(value = "质量工单-撤回整改")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/revoke-order")
+    public ResponseEntity<?> revokeOrder(@PathVariable(name = "organizationId") Long tenantId,
+                                         @RequestBody List<Long> workOrderIdList) {
+        return Results.success(workOrderService.revokeOrder(workOrderIdList));
     }
 
     @ApiOperation(value = "修改")
@@ -152,14 +167,110 @@ public class WorkOrderController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("order-apply")
+    @GetMapping("/order-apply")
     public ResponseEntity<?> orderApply(@PathVariable(name = "organizationId") Long tenantId,
                                         @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         WorkOrderDTO workOrderDTO, @ApiIgnore @SortDefault(value = WorkOrder.FIELD_WORK_ORDER_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         workOrderDTO.setTenantId(tenantId);
         workOrderDTO.setProjectId(projectId);
-        return Results.success( workOrderService.orderApply(workOrderDTO,pageRequest));
+        return Results.success(workOrderService.orderApply(workOrderDTO, pageRequest));
+    }
+
+    @ApiOperation(value = "质量工单-批量接收")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/batch-receive")
+    public ResponseEntity<?> batchReceive(@PathVariable(name = "organizationId") Long tenantId,
+                                          @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                          @RequestBody List<WorkOrderDTO> workOrderDTOList) {
+        workOrderDTOList.forEach(workOrderDTO -> {
+            workOrderDTO.setTenantId(tenantId);
+            workOrderDTO.setProjectId(projectId);
+        });
+        return Results.success(workOrderService.batchReceive(workOrderDTOList));
+    }
+
+    @ApiOperation(value = "质量工单-批量接收")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/batch-refuse")
+    public ResponseEntity<?> batchRefuse(@PathVariable(name = "organizationId") Long tenantId,
+                                         @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                         @RequestBody List<WorkOrderDTO> workOrderDTOList) {
+        workOrderDTOList.forEach(workOrderDTO -> {
+            workOrderDTO.setTenantId(tenantId);
+            workOrderDTO.setProjectId(projectId);
+        });
+        return Results.success(workOrderService.batchRefuse(workOrderDTOList));
+    }
+
+    @ApiOperation(value = "质量工单-操作流程信息")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/order-operate-info/{workOrderId}")
+    public ResponseEntity<?> oderOperateInfo(@PathVariable(name = "organizationId") Long tenantId,
+                                             @PathVariable Long workOrderId) {
+        return Results.success(workOrderService.oderOperateInfo(workOrderId));
+    }
+
+    @ApiOperation(value = "质量工单-开始处理")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/start-process")
+    public ResponseEntity<?> startProcess(@PathVariable(name = "organizationId") Long tenantId,
+                                       @RequestBody Long workOrderId) {
+        return Results.success(workOrderService.startProcess(workOrderId));
+    }
+
+    @ApiOperation(value = "质量工单-分派")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/order-assign")
+    public ResponseEntity<?> orderAssign(@PathVariable(name = "organizationId") Long tenantId,
+                                          @RequestBody WorkOrderDTO workOrderDTO) {
+        workOrderDTO.setTenantId(tenantId);
+        return Results.success(workOrderService.orderAssign(workOrderDTO));
+    }
+
+    @ApiOperation(value = "质量工单-提交")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/order-submit")
+    public ResponseEntity<?> orderSubmit(@PathVariable(name = "organizationId") Long tenantId,
+                                         @RequestBody WorkOrderDTO workOrderDTO) {
+        workOrderDTO.setTenantId(tenantId);
+        return Results.success(workOrderService.orderSubmit(workOrderDTO));
     }
 
 }

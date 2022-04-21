@@ -97,4 +97,13 @@ public class WorkOrderDTO extends AuditDomain {
     @Transient
     private Date planExecTime;
 
+    @Transient
+    private String processComment;
+
+    @Transient
+    private Long assignId;
+
+    @Transient
+    private String assignName;
+
 }
