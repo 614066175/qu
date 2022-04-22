@@ -62,24 +62,37 @@ public class WorkOrderServiceImpl implements WorkOrderService {
     public List<WorkOrderDTO> launchUpdate(List<WorkOrderDTO> workOrderDTOList) {
         //发起整改
         workOrderDTOList.forEach(workOrderDTO -> {
+            //根据planId,resultId去查询，一个方案的一次评估结果只能发起一次整改
+            Optional<WorkOrderDTO> any = workOrderRepository.selectDTOByCondition(Condition.builder(WorkOrder.class)
+                    .andWhere(Sqls.custom()
+                            .andEqualTo(WorkOrder.FIELD_PLAN_ID, workOrderDTO.getPlanId())
+                            .andEqualTo(WorkOrder.FIELD_RESULT_ID, workOrderDTO.getResultId()))
+                    .build()).stream().findAny();
+            if (any.isPresent()) {
+                //已经发起过质量工单
+                throw new CommonException(ErrorCode.WORK_ORDER_ALREADY_LAUNCH);
+            }
+
             //生成质量工单编码
             workOrderDTO.setWorkOrderCode(codeRuleBuilder.generateCode(DetailsHelper.getUserDetails().getTenantId(), WORK_ORDER_CODE, GLOBAL, GLOBAL, null));
 
             //默认为待接收状态
             workOrderDTO.setWorkOrderStatus(WorkOrderStatus.PENDING_RECEIVE);
         });
-        List<WorkOrderDTO> workOrderDTOS = workOrderRepository.batchInsertDTOSelective(workOrderDTOList);
 
         //记录整改操作
         List<WorkOrderOperationDTO> workOrderOperationDTOList = new ArrayList<>();
-        workOrderDTOS.forEach(workOrderDTO -> {
+        workOrderDTOList.forEach(workOrderDTO -> {
+            //此处不使用批量插入了，批量插入接受的返回值会覆盖掉前端传递的其他参数
+            workOrderRepository.insertDTOSelective(workOrderDTO);
             WorkOrderOperationDTO workOrderOperationDTO = WorkOrderOperationDTO.builder()
                     .workOrderId(workOrderDTO.getWorkOrderId())
+                    .workOrderStatus(WorkOrderStatus.PENDING_RECEIVE)
                     //创建人即为发起操作人
                     .operatorId(DetailsHelper.getUserDetails().getUserId())
                     .operateType(OrderOperateType.LAUNCH)
-                    //发起时的操作描述即为发起整改时的工单备注
-                    .processComment(workOrderDTO.getOrderDesc())
+                    //操作描述 ${方案}需整改，紧急程度为${XX}
+                    .processComment(String.format("【%s】需整改，紧急程度为【%s】", workOrderDTO.getWorkOrderCode(), workOrderDTO.getImmediateLevelMeaning()))
                     .build();
             workOrderOperationDTOList.add(workOrderOperationDTO);
         });
@@ -100,7 +113,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
     public List<WorkOrderDTO> receiveOrRefuse(List<WorkOrderDTO> workOrderDTOList, String workOrderStatus, String orderOperateType) {
         //批量修改工单状态
         Optional<WorkOrderDTO> any = workOrderDTOList.stream()
-                .filter(workOrderDTO -> !WorkOrderStatus.RECEIVED.equals(workOrderDTO.getWorkOrderStatus()))
+                .filter(workOrderDTO -> !WorkOrderStatus.PENDING_RECEIVE.equals(workOrderDTO.getWorkOrderStatus()))
                 .findAny();
         if (any.isPresent()) {
             throw new CommonException(ErrorCode.WORK_ORDER_STATUS_ERROR);
@@ -119,6 +132,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
             //记录操作日志
             workOrderOperationDTO = WorkOrderOperationDTO.builder()
                     .workOrderId(workOrderDTO.getWorkOrderId())
+                    .workOrderStatus(workOrderStatus)
                     .operatorId(DetailsHelper.getUserDetails().getUserId())
                     .operateType(orderOperateType)
                     .processComment(workOrderDTO.getProcessComment())
@@ -164,7 +178,53 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 
     @Override
     public List<WorkOrderOperationDTO> oderOperateInfo(Long workOrderId) {
-        return workOrderMapper.oderOperateInfo(workOrderId);
+        //按照操作日志升序排序，取得最后一个操作的动作。增加下一动作的虚拟节点
+        List<WorkOrderOperationDTO> workOrderOperationDTOList = workOrderMapper.oderOperateInfo(workOrderId);
+        if (CollectionUtils.isEmpty(workOrderOperationDTOList)) {
+            return workOrderOperationDTOList;
+        }
+        WorkOrderOperationDTO workOrderOperationDTO = workOrderOperationDTOList.get(workOrderOperationDTOList.size() - 1);
+        String operateType = workOrderOperationDTO.getOperateType();
+        WorkOrderOperationDTO operationDTO = null;
+        switch (operateType) {
+            //
+            case OrderOperateType.LAUNCH:
+                operationDTO = WorkOrderOperationDTO.builder()
+                        .operateType(OrderOperateType.RECEIVE)
+                        .processComment("质量工单已下发，请数据对象所属部门尽快处理")
+                        .build();
+                break;
+            case OrderOperateType.RECEIVE:
+                operationDTO = WorkOrderOperationDTO.builder()
+                        .operateType(OrderOperateType.START_PROCESS)
+                        .processComment("质量工单已接收，请质量整改人员尽快修复问题数据并反馈")
+                        .build();
+                break;
+            case OrderOperateType.START_PROCESS:
+                operationDTO = WorkOrderOperationDTO.builder()
+                        .operateType(OrderOperateType.SUBMIT_SOLUTION)
+                        .build();
+                break;
+            case OrderOperateType.ASSIGN:
+                //判断前置动作有没有开始处理
+                Optional<WorkOrderOperationDTO> any = workOrderOperationDTOList.stream()
+                        .filter(dto -> OrderOperateType.START_PROCESS.equals(dto.getOperateType()))
+                        .findAny();
+                //如果有，则后置为提交
+                if (any.isPresent()) {
+                    operationDTO = WorkOrderOperationDTO.builder()
+                            .operateType(OrderOperateType.SUBMIT_SOLUTION)
+                            .build();
+                } else {
+                    operationDTO = WorkOrderOperationDTO.builder()
+                            .operateType(OrderOperateType.START_PROCESS)
+                            .build();
+                }
+        }
+        if (operationDTO != null) {
+            workOrderOperationDTOList.add(operationDTO);
+        }
+        return workOrderOperationDTOList;
     }
 
     @Override
@@ -209,11 +269,12 @@ public class WorkOrderServiceImpl implements WorkOrderService {
         if (workOrderDTO == null) {
             throw new CommonException(ErrorCode.WORK_ORDER_NOT_EXIST);
         }
-        //设置为待处理
-        workOrderDTO.setWorkOrderStatus(WorkOrderStatus.PENDING_PROCESS);
+        //设置为处理中
+        workOrderDTO.setWorkOrderStatus(WorkOrderStatus.PROCESSING);
         //操作记录为开始处理
         WorkOrderOperationDTO workOrderOperationDTO = WorkOrderOperationDTO.builder()
                 .workOrderId(workOrderId)
+                .workOrderStatus(WorkOrderStatus.PROCESSING)
                 .operatorId(DetailsHelper.getUserDetails().getUserId())
                 .operateType(OrderOperateType.START_PROCESS)
                 .build();
@@ -224,16 +285,17 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 
     @Override
     public WorkOrderDTO orderAssign(WorkOrderDTO workOrderDTO) {
-        //分派质量工单
-        //分派不调整工单状态，更改处理人
+        //转交质量工单
+        //转交不调整工单状态，更改处理人
         workOrderDTO.setProcessorsId(workOrderDTO.getAssignId());
 
         //操作记录为开始处理
         WorkOrderOperationDTO workOrderOperationDTO = WorkOrderOperationDTO.builder()
                 .workOrderId(workOrderDTO.getWorkOrderId())
+                .workOrderStatus(workOrderDTO.getWorkOrderStatus())
                 .operatorId(DetailsHelper.getUserDetails().getUserId())
                 .operateType(OrderOperateType.ASSIGN)
-                .processComment(String.format("%s分派给%s", DetailsHelper.getUserDetails().getRealName(), workOrderDTO.getAssignName()))
+                .processComment(String.format("转交给%s", workOrderDTO.getAssignName()))
                 .build();
         workOrderRepository.updateDTOOptional(workOrderDTO, WorkOrder.FIELD_PROCESSORS_ID);
         workOrderOperationRepository.insertDTOSelective(workOrderOperationDTO);
@@ -249,8 +311,10 @@ public class WorkOrderServiceImpl implements WorkOrderService {
         //记录提交解决方案的操作日志
         WorkOrderOperationDTO workOrderOperationDTO = WorkOrderOperationDTO.builder()
                 .workOrderId(workOrderDTO.getWorkOrderId())
+                .workOrderStatus(WorkOrderStatus.PROCESSED)
                 .operatorId(DetailsHelper.getUserDetails().getUserId())
                 .operateType(OrderOperateType.SUBMIT_SOLUTION)
+                .processComment("提交解决方案")
                 .build();
 
 

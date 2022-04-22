@@ -243,7 +243,7 @@ public class WorkOrderController extends BaseController {
         return Results.success(workOrderService.startProcess(workOrderId));
     }
 
-    @ApiOperation(value = "质量工单-分派")
+    @ApiOperation(value = "质量工单-转交")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
