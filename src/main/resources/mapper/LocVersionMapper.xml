@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.LocVersionMapper">
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.LocVersion">
+        <result column="loc_version_id" property="locVersionId" jdbcType="DECIMAL"/>
+        <result column="loc_id" property="locId" jdbcType="DECIMAL"/>
+        <result column="loc_code" property="locCode" jdbcType="VARCHAR"/>
+        <result column="loc_type_code" property="locTypeCode" jdbcType="VARCHAR"/>
+        <result column="route_name" property="routeName" jdbcType="VARCHAR"/>
+        <result column="loc_name" property="locName" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
+        <result column="parent_loc_code" property="parentlocCode" jdbcType="VARCHAR"/>
+        <result column="parent_tenant_id" property="parentTenantId" jdbcType="DECIMAL"/>
+        <result column="custom_sql" property="customSql" jdbcType="VARCHAR"/>
+        <result column="custom_url" property="customUrl" jdbcType="VARCHAR"/>
+        <result column="value_field" property="valueField" jdbcType="VARCHAR"/>
+        <result column="display_field" property="displayField" jdbcType="VARCHAR"/>
+        <result column="must_page_flag" property="mustPageFlag" jdbcType="DECIMAL"/>
+        <result column="enabled_flag" property="enabledFlag" jdbcType="DECIMAL"/>
+        <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
+        <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
+        <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
+        <result column="translation_sql" property="translationSql" jdbcType="VARCHAR"/>
+        <result column="public_flag" property="publicFlag" jdbcType="DECIMAL"/>
+        <result column="encrypt_field" property="encryptField" jdbcType="VARCHAR"/>
+        <result column="decrypt_field" property="decryptField" jdbcType="VARCHAR"/>
+        <result column="request_method" property="requestMethod" jdbcType="VARCHAR"/>
+        <result column="loc_version" property="locVersion" jdbcType="DECIMAL"/>
+    </resultMap>
+
+    <select id="listAll" resultType="com.hand.hdsp.quality.api.dto.LocVersionDTO">
+        SELECT xlv.*,
+        iu.login_name updaterName
+        FROM xqua_loc_version xlv
+        left join iam_user iu on iu.id = xlv.last_updated_by
+        <where>
+            loc_id = #{locId}
+            <if test="tenantId != null">
+                and xlv.tenant_id = #{tenantId}
+            </if>
+        </where>
+        ORDER BY loc_version asc
+    </select>
+</mapper>

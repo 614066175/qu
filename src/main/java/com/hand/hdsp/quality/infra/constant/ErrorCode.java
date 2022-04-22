@@ -153,4 +153,6 @@ public interface ErrorCode {
     String FILE_DOWNLOAD_FAIL="hdsp.xqua.err.file_download_fail";
 
     String DOC_NO_FILE="hdsp.xqua.err.doc_no_file";
+
+    String LOC_NO_FILE="hdsp.xqua.err.loc.is_empty";
 }
