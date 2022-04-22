@@ -40,6 +40,10 @@ public class WorkOrderOperationDTO extends AuditDomain {
     @Size(max = 30)
     private Long workOrderId;
 
+    @ApiModelProperty(value = "工单状态")
+    @NotBlank
+    private String workOrderStatus;
+
     @ApiModelProperty(value = "操作人，关联iam_user 的id")
     @NotNull
     private Long operatorId;

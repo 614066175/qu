@@ -5,7 +5,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import io.choerodon.mybatis.domain.AuditDomain;
+
 import java.util.Date;
+
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import lombok.AllArgsConstructor;
@@ -31,6 +33,7 @@ public class WorkOrderOperation extends AuditDomain {
 
     public static final String FIELD_ORDER_OPERATE_ID = "orderOperateId";
     public static final String FIELD_WORK_ORDER_ID = "workOrderId";
+    public static final String FIELD_WORK_ORDER_STATUS = "workOrderStatus";
     public static final String FIELD_OPERATOR_ID = "operatorId";
     public static final String FIELD_OPERATE_TYPE = "operateType";
     public static final String FIELD_PROCESS_COMMENT = "processComment";
@@ -50,6 +53,8 @@ public class WorkOrderOperation extends AuditDomain {
     private Long orderOperateId;
 
     private Long workOrderId;
+
+    private String workOrderStatus;
 
     private Long operatorId;
 

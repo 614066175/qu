@@ -106,4 +106,8 @@ public class WorkOrderDTO extends AuditDomain {
     @Transient
     private String assignName;
 
+    //紧急程度含义
+    @Transient
+    private String immediateLevelMeaning;
+
 }

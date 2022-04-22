@@ -5,6 +5,7 @@
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.WorkOrderOperation">
         <result column="order_operate_id" property="orderOperateId" jdbcType="DECIMAL"/>
         <result column="work_order_id" property="workOrderId" jdbcType="VARCHAR"/>
+        <result column="work_order_status" property="workOrderStatus" jdbcType="VARCHAR"/>
         <result column="operator_id" property="operatorId" jdbcType="DECIMAL"/>
         <result column="operate_type" property="operateType" jdbcType="VARCHAR"/>
         <result column="process_comment" property="processComment" jdbcType="VARCHAR"/>

@@ -17,8 +17,6 @@ public interface WorkOrderConstants {
         //待接收
         String PENDING_RECEIVE = "PENDING_RECEIVE";
 
-        //待处理
-        String PENDING_PROCESS = "PENDING_PROCESS";
 
         //处理中
         String PROCESSING = "PROCESSING";
@@ -29,7 +27,7 @@ public interface WorkOrderConstants {
         //已拒绝
         String REFUSED = "REFUSED";
 
-        //已处理
+        //已解决
         String PROCESSED = "PROCESSED";
 
     }
@@ -39,7 +37,7 @@ public interface WorkOrderConstants {
      */
     interface OrderOperateType {
 
-        //发起
+        //下发
         String LAUNCH = "LAUNCH";
 
         //接收
@@ -51,10 +49,12 @@ public interface WorkOrderConstants {
         //拒绝
         String REFUSE = "REFUSE";
 
-        //分派
+        //转交
         String ASSIGN = "ASSIGN";
 
         //提交解决方案
         String SUBMIT_SOLUTION = "SUBMIT_SOLUTION";
+
+
     }
 }
