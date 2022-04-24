@@ -39,6 +39,21 @@
             <if test="tenantId !=null">
                 and xwo.tenant_id =#{tenantId}
             </if>
+            <if test="workOrderCode !=null">
+                <bind name="workOrderCodeLike" value="'%'+workOrderCode+'%'"/>
+                and xwo.work_order_code like #{workOrderCodeLike}
+            </if>
+            <if test="workOrderStatus !=null">
+                and xwo.work_order_status = #{workOrderStatus}
+            </if>
+            <if test="planName !=null">
+                <bind name="planNameLike" value="'%'+planName+'%'"/>
+                and xbp.plan_name like #{planNameLike}
+            </if>
+            <if test="planDesc !=null">
+                <bind name="planDescLike" value="'%'+planDesc+'%'"/>
+                and xbp.plan_desc like #{planDescLike}
+            </if>
         </where>
     </select>
     <select id="orderApply" resultType="com.hand.hdsp.quality.api.dto.WorkOrderDTO">
@@ -57,6 +72,21 @@
             xwo.created_by=#{userDetails.userId}
             <if test="tenantId !=null">
                 and xwo.tenant_id =#{tenantId}
+            </if>
+            <if test="workOrderCode !=null">
+                <bind name="workOrderCodeLike" value="'%'+workOrderCode+'%'"/>
+                and xwo.work_order_code like #{workOrderCodeLike}
+            </if>
+            <if test="workOrderStatus !=null">
+                and xwo.work_order_status = #{workOrderStatus}
+            </if>
+            <if test="planName !=null">
+                <bind name="planNameLike" value="'%'+planName+'%'"/>
+                and xbp.plan_name like #{planNameLike}
+            </if>
+            <if test="planDesc !=null">
+                <bind name="planDescLike" value="'%'+planDesc+'%'"/>
+                and xbp.plan_desc like #{planDescLike}
             </if>
         </where>
     </select>
