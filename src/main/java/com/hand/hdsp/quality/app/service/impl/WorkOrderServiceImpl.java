@@ -62,19 +62,27 @@ public class WorkOrderServiceImpl implements WorkOrderService {
     public List<WorkOrderDTO> launchUpdate(List<WorkOrderDTO> workOrderDTOList) {
         //发起整改
         workOrderDTOList.forEach(workOrderDTO -> {
-            //根据planId,resultId去查询，一个方案的一次评估结果只能发起一次整改
-            Optional<WorkOrderDTO> any = workOrderRepository.selectDTOByCondition(Condition.builder(WorkOrder.class)
-                    .andWhere(Sqls.custom()
-                            .andEqualTo(WorkOrder.FIELD_PLAN_ID, workOrderDTO.getPlanId())
-                            .andEqualTo(WorkOrder.FIELD_RESULT_ID, workOrderDTO.getResultId()))
-                    .build()).stream().findAny();
-            if (any.isPresent()) {
-                //已经发起过质量工单
-                throw new CommonException(ErrorCode.WORK_ORDER_ALREADY_LAUNCH);
-            }
+            //如果是工单被拒绝，可重新发起整改
+            if (Objects.nonNull(workOrderDTO.getWorkOrderId())) {
+                WorkOrderDTO oldOrderDTO = workOrderRepository.selectDTOByPrimaryKey(workOrderDTO.getWorkOrderId());
+                workOrderDTO.setWorkOrderCode(oldOrderDTO.getWorkOrderCode());
+                workOrderDTO.setObjectVersionNumber(oldOrderDTO.getObjectVersionNumber());
+            } else {
+                //根据planId,resultId去查询，一个方案的一次评估结果只能发起一次整改(状态不是已拒绝的)
+                Optional<WorkOrderDTO> any = workOrderRepository.selectDTOByCondition(Condition.builder(WorkOrder.class)
+                        .andWhere(Sqls.custom()
+                                .andEqualTo(WorkOrder.FIELD_PLAN_ID, workOrderDTO.getPlanId())
+                                .andEqualTo(WorkOrder.FIELD_RESULT_ID, workOrderDTO.getResultId())
+                                .andNotEqualTo(WorkOrder.FIELD_WORK_ORDER_STATUS, WorkOrderStatus.REFUSED))
+                        .build()).stream().findAny();
+                if (any.isPresent()) {
+                    //已经发起过质量工单
+                    throw new CommonException(ErrorCode.WORK_ORDER_ALREADY_LAUNCH);
+                }
 
-            //生成质量工单编码
-            workOrderDTO.setWorkOrderCode(codeRuleBuilder.generateCode(DetailsHelper.getUserDetails().getTenantId(), WORK_ORDER_CODE, GLOBAL, GLOBAL, null));
+                //生成质量工单编码
+                workOrderDTO.setWorkOrderCode(codeRuleBuilder.generateCode(DetailsHelper.getUserDetails().getTenantId(), WORK_ORDER_CODE, GLOBAL, GLOBAL, null));
+            }
 
             //默认为待接收状态
             workOrderDTO.setWorkOrderStatus(WorkOrderStatus.PENDING_RECEIVE);
@@ -83,8 +91,13 @@ public class WorkOrderServiceImpl implements WorkOrderService {
         //记录整改操作
         List<WorkOrderOperationDTO> workOrderOperationDTOList = new ArrayList<>();
         workOrderDTOList.forEach(workOrderDTO -> {
-            //此处不使用批量插入了，批量插入接受的返回值会覆盖掉前端传递的其他参数
-            workOrderRepository.insertDTOSelective(workOrderDTO);
+            if (Objects.nonNull(workOrderDTO.getWorkOrderId())) {
+                //重新整改则更新
+                workOrderRepository.updateDTOAllColumnWhereTenant(workOrderDTO, workOrderDTO.getTenantId());
+            } else {
+                //此处不使用批量插入了，批量插入接受的返回值会覆盖掉前端传递的其他参数
+                workOrderRepository.insertDTOSelective(workOrderDTO);
+            }
             WorkOrderOperationDTO workOrderOperationDTO = WorkOrderOperationDTO.builder()
                     .workOrderId(workOrderDTO.getWorkOrderId())
                     .workOrderStatus(WorkOrderStatus.PENDING_RECEIVE)

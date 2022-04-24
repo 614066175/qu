@@ -112,7 +112,7 @@ public class BatchResultDTO extends AuditDomain {
     private List<BatchResultBaseDTO> batchResultBaseDTOList;
 
     @Transient
-    private List<Map<String,Object>> exceptionMapList;
+    private List<Map<String, Object>> exceptionMapList;
 
     private Long projectId;
 
@@ -121,5 +121,8 @@ public class BatchResultDTO extends AuditDomain {
 
     @Transient
     private String launchStatus;
+
+    @Transient
+    private String workOrderStatus;
 
 }
