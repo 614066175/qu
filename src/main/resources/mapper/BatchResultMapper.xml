@@ -90,7 +90,9 @@
         'NOT_LAUNCHED'
         WHEN ( xbr.plan_status = 'SUCCESS' AND mark &lt; 100 AND xwo.work_order_id IS NOT NULL ) THEN
         'LAUNCHED'
-        END launchStatus
+        END launchStatus,
+        xwo.work_order_id,
+        xwo.work_order_status
         FROM xqua_batch_plan xbp
         LEFT JOIN (
         SELECT *
