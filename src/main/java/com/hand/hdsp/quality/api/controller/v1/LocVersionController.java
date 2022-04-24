@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.quality.api.dto.LocDTO;
 import com.hand.hdsp.quality.api.dto.LocVersionDTO;
 import com.hand.hdsp.quality.app.service.LocVersionService;
 import com.hand.hdsp.quality.domain.entity.LocVersion;
@@ -54,7 +55,7 @@ public class LocVersionController extends BaseController {
         return Results.success(list);
     }
 
-    @ApiOperation(value = "loc表列表-查询所有")
+    @ApiOperation(value = "loc历史表-查询所有")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -64,9 +65,9 @@ public class LocVersionController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list-all")
     public ResponseEntity<?> listAll(@PathVariable(name = "organizationId") Long tenantId,
-                                     LocVersionDTO locVersionDTO) {
-        locVersionDTO.setTenantId(tenantId);
-        return Results.success(locVersionService.listAll(locVersionDTO));
+                                     LocDTO locDTO) {
+        locDTO.setTenantId(tenantId);
+        return Results.success(locVersionService.listAll(locDTO));
     }
 
     @ApiOperation(value = "loc表明细")

@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.infra.mapper;
 
+import com.hand.hdsp.quality.api.dto.LocDTO;
 import com.hand.hdsp.quality.api.dto.LocVersionDTO;
 import com.hand.hdsp.quality.domain.entity.LocVersion;
 import io.choerodon.mybatis.common.BaseMapper;
@@ -14,7 +15,7 @@ import java.util.List;
 public interface LocVersionMapper extends BaseMapper<LocVersion> {
 
 
-    List<LocVersionDTO> listAll(LocVersionDTO locVersionDTO);
+    List<LocVersionDTO> listAll(LocDTO locDTO);
 
 }
 

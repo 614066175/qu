@@ -27,5 +27,10 @@ public interface LocService {
      */
     LocDTO detail(Long locId);
 
+    /**
+     * 代码集头表模糊查询
+     * @param locDTO
+     * @return
+     */
     List<LocDTO> listAll(LocDTO locDTO);
 }

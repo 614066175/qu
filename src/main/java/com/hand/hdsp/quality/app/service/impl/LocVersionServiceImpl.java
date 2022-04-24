@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import com.hand.hdsp.quality.api.dto.LocDTO;
 import com.hand.hdsp.quality.api.dto.LocVersionDTO;
 import com.hand.hdsp.quality.app.service.LocVersionService;
 import com.hand.hdsp.quality.infra.mapper.LocVersionMapper;
@@ -24,8 +25,8 @@ public class LocVersionServiceImpl implements LocVersionService {
 
 
     @Override
-    public List<LocVersionDTO> listAll(LocVersionDTO locVersionDTO) {
-        return locVersionMapper.listAll(locVersionDTO);
+    public List<LocVersionDTO> listAll(LocDTO locDTO) {
+        return locVersionMapper.listAll(locDTO);
 
     }
 

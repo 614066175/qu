@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.app.service;
 
+import com.hand.hdsp.quality.api.dto.LocDTO;
 import com.hand.hdsp.quality.api.dto.LocVersionDTO;
 
 import java.util.List;
@@ -13,8 +14,8 @@ public interface LocVersionService {
 
 
     /**
-     * @param locVersionDTO
+     * @param locDTO
      * @return
      */
-    List<LocVersionDTO> listAll(LocVersionDTO locVersionDTO);
+    List<LocVersionDTO> listAll(LocDTO locDTO);
 }
