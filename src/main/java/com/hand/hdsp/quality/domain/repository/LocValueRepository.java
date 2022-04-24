@@ -13,4 +13,5 @@ import com.hand.hdsp.quality.domain.entity.LocValue;
 public interface LocValueRepository extends BaseRepository<LocValue, LocValueDTO>, ProxySelf<LocValueRepository> {
 
 
+
 }

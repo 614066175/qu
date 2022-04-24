@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 public class LocValueServiceImpl implements LocValueService {
     private LocValueMapper locValueMapper;
 
-
     public LocValueServiceImpl(LocValueMapper locValueMapper) {
         this.locValueMapper = locValueMapper;
     }

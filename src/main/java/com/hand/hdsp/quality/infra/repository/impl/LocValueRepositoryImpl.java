@@ -16,17 +16,6 @@ import java.util.List;
  */
 @Component
 public class LocValueRepositoryImpl extends BaseRepositoryImpl<LocValue, LocValueDTO> implements LocValueRepository {
-    private LocValueMapper locValueMapper;
-
-    public LocValueRepositoryImpl(LocValueMapper locValueMapper) {
-        this.locValueMapper = locValueMapper;
-    }
 
 
-
-    @Override
-    public List<LocValueDTO> queryList(LocValueDTO locValueDTO) {
-
-        return locValueMapper.queryList(locValueDTO);
-    }
 }
