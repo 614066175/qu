@@ -36,4 +36,15 @@
         left join (select * from xqua_loc_version  xlv where xlv.loc_version_id in (select max(loc_version) from xqua_loc_version group by loc_id  ) )
 
     </select>
+
+    <select id="list" resultType="com.hand.hdsp.quality.api.dto.LocDTO">
+        select xl.* from xqua_loc xl
+        <where>
+            xl.tenant_id=#{tenantId}
+            <if test="queryString != null and queryString !=''">
+                <bind name="locLike" value='"%" + queryString + "%"'/>
+                and (xl.loc_code like #{locLike} or xl.loc_name like #{locLike} or xl.description like #{locLike} )
+            </if>
+        </where>
+    </select>
 </mapper>

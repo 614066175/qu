@@ -4,6 +4,8 @@ import com.hand.hdsp.quality.api.dto.LocDTO;
 import com.hand.hdsp.quality.domain.entity.Loc;
 import io.choerodon.mybatis.common.BaseMapper;
 
+import java.util.List;
+
 /**
  * <p>loc表Mapper</p>
  *
@@ -18,4 +20,12 @@ public interface LocMapper extends BaseMapper<Loc> {
      * @return
      */
     LocDTO detail(Long locId);
+
+    /**
+     * 头表模糊查询
+     * @param locDTO
+     * @return
+     */
+
+    List<LocDTO> list(LocDTO locDTO);
 }

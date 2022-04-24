@@ -2,6 +2,8 @@ package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.LocDTO;
 
+import java.util.List;
+
 /**
  * <p>loc表应用服务</p>
  *
@@ -24,4 +26,6 @@ public interface LocService {
      * @return
      */
     LocDTO detail(Long locId);
+
+    List<LocDTO> listAll(LocDTO locDTO);
 }

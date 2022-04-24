@@ -54,6 +54,25 @@ public class LocController extends BaseController {
         return Results.success(list);
     }
 
+
+    @ApiOperation(value = "loc表列表")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/all")
+    public ResponseEntity<?> listAll(@PathVariable(name = "organizationId") Long tenantId,
+                                  LocDTO locDTO) {
+        locDTO.setTenantId(tenantId);
+
+        return Results.success(locService.listAll(locDTO));
+    }
+
+
+
     @ApiOperation(value = "loc表明细")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",

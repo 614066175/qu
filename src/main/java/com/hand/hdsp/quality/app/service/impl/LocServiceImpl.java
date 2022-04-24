@@ -12,6 +12,7 @@ import com.hand.hdsp.quality.domain.repository.LocValueRepository;
 import com.hand.hdsp.quality.domain.repository.LocValueVersionRepository;
 import com.hand.hdsp.quality.domain.repository.LocVersionRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.mapper.LocMapper;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.mybatis.domian.Condition;
@@ -39,11 +40,14 @@ public class LocServiceImpl implements LocService {
 
     private final LocValueVersionRepository locValueVersionRepository;
 
-    public LocServiceImpl(LocRepository locRepository, LocValueRepository locValueRepository, LocVersionRepository locVersionRepository, LocValueVersionRepository locValueVersionRepository) {
+    private final LocMapper locMapper;
+
+    public LocServiceImpl(LocRepository locRepository, LocValueRepository locValueRepository, LocVersionRepository locVersionRepository, LocValueVersionRepository locValueVersionRepository, LocMapper locMapper) {
         this.locRepository = locRepository;
         this.locValueRepository = locValueRepository;
         this.locVersionRepository = locVersionRepository;
         this.locValueVersionRepository = locValueVersionRepository;
+        this.locMapper = locMapper;
     }
 
     @Override
@@ -107,4 +111,8 @@ public class LocServiceImpl implements LocService {
         return locDTO;
     }
 
+    @Override
+    public List<LocDTO> listAll(LocDTO locDTO) {
+        return locMapper.list(locDTO);
+    }
 }

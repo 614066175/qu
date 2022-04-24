@@ -74,4 +74,7 @@ public class LocDTO extends AuditDomain {
     @Transient
     private Long locVersion;
 
+    @Transient
+    private String queryString;
+
 }
