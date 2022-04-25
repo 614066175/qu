@@ -100,4 +100,17 @@
         where xwoo.work_order_id=#{workOrderId}
         order by xwoo.order_operate_id asc
     </select>
+    <select id="detail" resultType="com.hand.hdsp.quality.api.dto.WorkOrderDTO">
+        SELECT
+            woo.*,
+            xbp.plan_name,
+            xdj.job_name relateJobName,
+            iu.login_name processorName
+        FROM
+            xqua_work_order woo
+                left join xqua_batch_plan xbp on woo.plan_id=xbp.plan_id
+                left join xdis_dispatch_job  xdj on woo.relate_job_id =xdj.job_id
+                left join iam_user iu on woo.processors_id=iu.id
+        where woo.work_order_id=#{workOrderId}
+    </select>
 </mapper>

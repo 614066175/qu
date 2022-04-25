@@ -16,6 +16,7 @@ public interface WorkOrderService {
 
     /**
      * 发起整改
+     *
      * @param workOrderDTOList
      * @return
      */
@@ -23,6 +24,7 @@ public interface WorkOrderService {
 
     /**
      * 我的待处理工单列表
+     *
      * @param workOrderDTO
      * @param pageRequest
      * @return
@@ -31,6 +33,7 @@ public interface WorkOrderService {
 
     /**
      * 我发起的工单列表
+     *
      * @param workOrderDTO
      * @param pageRequest
      * @return
@@ -40,6 +43,7 @@ public interface WorkOrderService {
 
     /**
      * 批量接收工单
+     *
      * @param workOrderDTOList
      * @return
      */
@@ -47,6 +51,7 @@ public interface WorkOrderService {
 
     /**
      * 批量拒绝工单
+     *
      * @param workOrderDTOList
      * @return
      */
@@ -54,6 +59,7 @@ public interface WorkOrderService {
 
     /**
      * 工单操作流程信息
+     *
      * @param workOrderId
      * @return
      */
@@ -61,6 +67,7 @@ public interface WorkOrderService {
 
     /**
      * 撤回质量整改工单
+     *
      * @param workOrderIdList
      * @return
      */
@@ -68,6 +75,7 @@ public interface WorkOrderService {
 
     /**
      * 开始处理质量工单
+     *
      * @param workOrderId
      * @return
      */
@@ -75,6 +83,7 @@ public interface WorkOrderService {
 
     /**
      * 质量工单分派
+     *
      * @param workOrderDTO
      * @return
      */
@@ -82,8 +91,24 @@ public interface WorkOrderService {
 
     /**
      * 质量工单提交
+     *
      * @param workOrderDTO
      * @return
      */
     WorkOrderDTO orderSubmit(WorkOrderDTO workOrderDTO);
+
+    /**
+     * 工单处理-提醒一下
+     * @param workOrderId
+     * @return
+     */
+    WorkOrderDTO orderRemind(Long workOrderId);
+
+
+    /**
+     * 获取工单详情
+     * @param workOrderId
+     * @return
+     */
+    WorkOrderDTO detail(Long workOrderId);
 }

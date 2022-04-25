@@ -163,4 +163,6 @@ public interface ErrorCode {
     String WORK_ORDER_ALREADY_LAUNCH="hdsp.xqua.err.work_order_already_launch";
 
     String LOC_NO_FILE="hdsp.xqua.err.loc.is_empty";
+
+    String WORK_ORDER_SOLUTION_CAN_NOT_NULL="hdsp.xqua.err.work_order_solution_can_not_null";
 }

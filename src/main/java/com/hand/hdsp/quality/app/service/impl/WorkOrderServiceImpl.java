@@ -16,6 +16,7 @@ import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.message.MessageClient;
 import org.hzero.boot.message.entity.Receiver;
 import org.hzero.boot.platform.code.builder.CodeRuleBuilder;
@@ -47,6 +48,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 
     public static final String ORDER_SUBMIT = "HDSP.XQUA.ORDER_SUBMIT";
     public static final String ORDER_REFUSE = "HDSP.XQUA.ORDER_REFUSE";
+    public static final String ORDER_TODO = "HDSP.XQUA.ORDER_TODO";
 
     public WorkOrderServiceImpl(WorkOrderRepository workOrderRepository, WorkOrderOperationRepository workOrderOperationRepository, CodeRuleBuilder codeRuleBuilder, WorkOrderMapper workOrderMapper, WorkOrderConverter workOrderConverter, MessageClient messageClient) {
         this.workOrderRepository = workOrderRepository;
@@ -191,6 +193,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 
     @Override
     public List<WorkOrderOperationDTO> oderOperateInfo(Long workOrderId) {
+        WorkOrderDTO workOrderDTO = detail(workOrderId);
         //按照操作日志升序排序，取得最后一个操作的动作。增加下一动作的虚拟节点
         List<WorkOrderOperationDTO> workOrderOperationDTOList = workOrderMapper.oderOperateInfo(workOrderId);
         if (CollectionUtils.isEmpty(workOrderOperationDTOList)) {
@@ -199,22 +202,26 @@ public class WorkOrderServiceImpl implements WorkOrderService {
         WorkOrderOperationDTO workOrderOperationDTO = workOrderOperationDTOList.get(workOrderOperationDTOList.size() - 1);
         String operateType = workOrderOperationDTO.getOperateType();
         WorkOrderOperationDTO operationDTO = null;
+
         switch (operateType) {
             //
             case OrderOperateType.LAUNCH:
                 operationDTO = WorkOrderOperationDTO.builder()
+                        .operatorName(workOrderDTO.getProcessorName())
                         .operateType(OrderOperateType.RECEIVE)
                         .processComment("质量工单已下发，请数据对象所属部门尽快处理")
                         .build();
                 break;
             case OrderOperateType.RECEIVE:
                 operationDTO = WorkOrderOperationDTO.builder()
+                        .operatorName(workOrderDTO.getProcessorName())
                         .operateType(OrderOperateType.START_PROCESS)
                         .processComment("质量工单已接收，请质量整改人员尽快修复问题数据并反馈")
                         .build();
                 break;
             case OrderOperateType.START_PROCESS:
                 operationDTO = WorkOrderOperationDTO.builder()
+                        .operatorName(workOrderDTO.getProcessorName())
                         .operateType(OrderOperateType.SUBMIT_SOLUTION)
                         .build();
                 break;
@@ -226,10 +233,12 @@ public class WorkOrderServiceImpl implements WorkOrderService {
                 //如果有，则后置为提交
                 if (any.isPresent()) {
                     operationDTO = WorkOrderOperationDTO.builder()
+                            .operatorName(workOrderDTO.getProcessorName())
                             .operateType(OrderOperateType.SUBMIT_SOLUTION)
                             .build();
                 } else {
                     operationDTO = WorkOrderOperationDTO.builder()
+                            .operatorName(workOrderDTO.getProcessorName())
                             .operateType(OrderOperateType.START_PROCESS)
                             .build();
                 }
@@ -318,6 +327,10 @@ public class WorkOrderServiceImpl implements WorkOrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public WorkOrderDTO orderSubmit(WorkOrderDTO workOrderDTO) {
+        if(workOrderDTO==null|| StringUtils.isEmpty(workOrderDTO.getOrderSolution())){
+            throw new CommonException(ErrorCode.WORK_ORDER_SOLUTION_CAN_NOT_NULL);
+        }
+
         //修改状态为已处理
         workOrderDTO.setWorkOrderStatus(WorkOrderStatus.PROCESSED);
 
@@ -345,6 +358,27 @@ public class WorkOrderServiceImpl implements WorkOrderService {
         //发送站内信
         messageClient.sendWebMessage(workOrderDTO.getTenantId(), ORDER_SUBMIT, null, Collections.singletonList(receiver), args);
         return workOrderDTO;
+    }
+
+    @Override
+    public WorkOrderDTO orderRemind(Long workOrderId) {
+        WorkOrderDTO workOrderDTO = workOrderRepository.selectDTOByPrimaryKey(workOrderId);
+
+        //接受组为发起人
+        Receiver receiver = new Receiver();
+        receiver.setUserId(workOrderDTO.getProcessorsId());
+        receiver.setTargetUserTenantId(DetailsHelper.getUserDetails().getTenantId());
+        //模板内容 您发起的${工单号}工单已被拒绝，可确认后重新提交。
+        Map<String, String> args = new HashMap<>();
+        args.put("workOrderCode", workOrderDTO.getWorkOrderCode());
+        //发送站内信
+        messageClient.sendWebMessage(workOrderDTO.getTenantId(), ORDER_TODO, null, Collections.singletonList(receiver), args);
+        return workOrderDTO;
+    }
+
+    @Override
+    public WorkOrderDTO detail(Long workOrderId) {
+        return workOrderMapper.detail(workOrderId);
     }
 
 }

@@ -110,4 +110,8 @@ public class WorkOrderDTO extends AuditDomain {
     @Transient
     private String immediateLevelMeaning;
 
+    //处理人名称
+    @Transient
+    private String processorName;
+
 }

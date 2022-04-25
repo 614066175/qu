@@ -34,4 +34,12 @@ public interface WorkOrderMapper extends BaseMapper<WorkOrder> {
      * @return
      */
     List<WorkOrderOperationDTO> oderOperateInfo(Long workOrderId);
+
+
+    /**
+     * 工单详情
+     * @param workOrderId
+     * @return
+     */
+    WorkOrderDTO detail(Long workOrderId);
 }
