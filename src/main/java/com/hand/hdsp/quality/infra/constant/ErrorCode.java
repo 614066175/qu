@@ -161,4 +161,6 @@ public interface ErrorCode {
     String WORK_ORDER_NOT_EXIST="hdsp.xqua.err.work_order_not_exist";
 
     String WORK_ORDER_ALREADY_LAUNCH="hdsp.xqua.err.work_order_already_launch";
+
+    String WORK_ORDER_SOLUTION_CAN_NOT_NULL="hdsp.xqua.err.work_order_solution_can_not_null";
 }
