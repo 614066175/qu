@@ -114,4 +114,7 @@ public class WorkOrderDTO extends AuditDomain {
     @Transient
     private String processorName;
 
+    @Transient
+    private String relateJobName;
+
 }
