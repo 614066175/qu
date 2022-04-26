@@ -155,4 +155,14 @@ public interface ErrorCode {
     String DOC_NO_FILE="hdsp.xqua.err.doc_no_file";
 
     String LOC_NO_FILE="hdsp.xqua.err.loc.is_empty";
+
+    String WORK_ORDER_STATUS_ERROR="hdsp.xqua.err.work_order_status_error";
+
+    String WORK_ORDER_STATUS_CAN_NOT_REVOKE="hdsp.xqua.err.work_order_status_can_not_revoke";
+
+    String WORK_ORDER_NOT_EXIST="hdsp.xqua.err.work_order_not_exist";
+
+    String WORK_ORDER_ALREADY_LAUNCH="hdsp.xqua.err.work_order_already_launch";
+
+    String WORK_ORDER_SOLUTION_CAN_NOT_NULL="hdsp.xqua.err.work_order_solution_can_not_null";
 }
