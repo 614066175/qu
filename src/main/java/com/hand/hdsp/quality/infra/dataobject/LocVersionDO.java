@@ -21,9 +21,7 @@ public class LocVersionDO extends AuditDomain {
 
     private String locCode;
 
-    private String locTypeCode;
 
-    private String routeName;
 
     private String locName;
 
@@ -35,9 +33,7 @@ public class LocVersionDO extends AuditDomain {
 
     private Long parentTenantId;
 
-    private String customSql;
 
-    private String customUrl;
 
     private String valueField;
 
@@ -47,15 +43,7 @@ public class LocVersionDO extends AuditDomain {
 
     private Integer enabledFlag;
 
-    private String translationSql;
 
-    private Integer publicFlag;
-
-    private String encryptField;
-
-    private String decryptField;
-
-    private String requestMethod;
 
     private Long locVersion;
 

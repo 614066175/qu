@@ -80,4 +80,6 @@ public class LocVersionDTO extends AuditDomain {
 
     @Transient
     private String updaterName;
+
+
 }
