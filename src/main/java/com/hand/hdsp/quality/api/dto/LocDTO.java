@@ -74,6 +74,7 @@ public class LocDTO extends AuditDomain {
     @Transient
     private Long locVersion;
 
+    @ApiModelProperty(value = "模糊查询字段")
     @Transient
     private String queryString;
 

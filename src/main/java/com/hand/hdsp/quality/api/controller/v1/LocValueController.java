@@ -19,6 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.List;
+
 /**
  * <p>loc独立值集表 管理 API</p>
  *
@@ -111,9 +113,10 @@ public class LocValueController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestBody LocValueDTO locValueDTO) {
-                locValueDTO.setTenantId(tenantId);
-        locValueRepository.deleteByPrimaryKey(locValueDTO);
+                                    @RequestBody List<LocValueDTO> locValueDTOs) {
+        locValueDTOs.forEach(lv -> lv.setTenantId(tenantId));
+        locValueRepository.batchDTODelete(locValueDTOs);
+
         return Results.success();
     }
 

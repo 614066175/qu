@@ -5,15 +5,13 @@
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.Loc">
         <result column="loc_id" property="locId" jdbcType="DECIMAL"/>
         <result column="loc_code" property="locCode" jdbcType="VARCHAR"/>
-        <result column="loc_type_code" property="locTypeCode" jdbcType="VARCHAR"/>
-        <result column="route_name" property="routeName" jdbcType="VARCHAR"/>
+
         <result column="loc_name" property="locName" jdbcType="VARCHAR"/>
         <result column="description" property="description" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="parent_loc_code" property="parentLocCode" jdbcType="VARCHAR"/>
         <result column="parent_tenant_id" property="parentTenantId" jdbcType="DECIMAL"/>
-        <result column="custom_sql" property="customSql" jdbcType="VARCHAR"/>
-        <result column="custom_url" property="customUrl" jdbcType="VARCHAR"/>
+
         <result column="value_field" property="valueField" jdbcType="VARCHAR"/>
         <result column="display_field" property="displayField" jdbcType="VARCHAR"/>
         <result column="must_page_flag" property="mustPageFlag" jdbcType="DECIMAL"/>
@@ -23,11 +21,7 @@
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
-        <result column="translation_sql" property="translationSql" jdbcType="VARCHAR"/>
-        <result column="public_flag" property="publicFlag" jdbcType="DECIMAL"/>
-        <result column="encrypt_field" property="encryptField" jdbcType="VARCHAR"/>
-        <result column="decrypt_field" property="decryptField" jdbcType="VARCHAR"/>
-        <result column="request_method" property="requestMethod" jdbcType="VARCHAR"/>
+
     </resultMap>
     <select id="detail" resultType="com.hand.hdsp.quality.api.dto.LocDTO">
         select
@@ -45,6 +39,21 @@
                 <bind name="locLike" value='"%" + queryString + "%"'/>
                 and (xl.loc_code like #{locLike} or xl.loc_name like #{locLike} or xl.description like #{locLike} )
             </if>
+
+            <if test="locCode != null and locCode !=''">
+                <bind name="locCode" value='"%" + locCode + "%"' />
+                and xl.loc_code like #{locCode}
+            </if>
+            <if test="locName != null and locName !=''">
+                <bind name="locName" value='"%" + locName + "%"' />
+                and xl.loc_name like #{locName}
+            </if>
+            <if test="description != null and description !=''">
+                <bind name="description" value='"%" + description + "%"' />
+                and xl.description like #{description}
+            </if>
+
+            ORDER BY xl.creation_date  DESC
         </where>
     </select>
 </mapper>

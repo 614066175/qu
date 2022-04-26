@@ -26,24 +26,16 @@ public class Loc extends AuditDomain {
 
     public static final String FIELD_LOC_ID = "locId";
     public static final String FIELD_LOC_CODE = "locCode";
-    public static final String FIELD_LOC_TYPE_CODE = "locTypeCode";
-    public static final String FIELD_ROUTE_NAME = "routeName";
     public static final String FIELD_LOC_NAME = "locName";
     public static final String FIELD_DESCRIPTION = "description";
     public static final String FIELD_TENANT_ID = "tenantId";
     public static final String FIELD_PARENT_LOC_CODE = "parentLocCode";
     public static final String FIELD_PARENT_TENANT_ID = "parentTenantId";
-    public static final String FIELD_CUSTOM_SQL = "customSql";
-    public static final String FIELD_CUSTOM_URL = "customUrl";
     public static final String FIELD_VALUE_FIELD = "valueField";
     public static final String FIELD_DISPLAY_FIELD = "displayField";
     public static final String FIELD_MUST_PAGE_FLAG = "mustPageFlag";
     public static final String FIELD_ENABLED_FLAG = "enabledFlag";
-    public static final String FIELD_TRANSLATION_SQL = "translationSql";
-    public static final String FIELD_PUBLIC_FLAG = "publicFlag";
-    public static final String FIELD_ENCRYPT_FIELD = "encryptField";
-    public static final String FIELD_DECRYPT_FIELD = "decryptField";
-    public static final String FIELD_REQUEST_METHOD = "requestMethod";
+
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -59,9 +51,7 @@ public class Loc extends AuditDomain {
 
     private String locCode;
 
-    private String locTypeCode;
 
-    private String routeName;
 
     private String locName;
 
@@ -73,9 +63,6 @@ public class Loc extends AuditDomain {
 
     private Long parentTenantId;
 
-    private String customSql;
-
-    private String customUrl;
 
     private String valueField;
 
@@ -85,15 +72,7 @@ public class Loc extends AuditDomain {
 
     private Integer enabledFlag;
 
-    private String translationSql;
 
-    private Integer publicFlag;
-
-    private String encryptField;
-
-    private String decryptField;
-
-    private String requestMethod;
 
 
 }

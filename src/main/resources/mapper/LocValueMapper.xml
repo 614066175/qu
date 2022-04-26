@@ -32,6 +32,15 @@
                 <bind name="valueLike" value='"%" + queryString +"%"'/>
                 and ( xlc.value like #{valueLike} or xlc.meaning like #{valueLike})
             </if>
+            <if test="value != null and value != ''">
+                <bind name="value" value='"%" + value +"%"'/>
+                and  xlc.value like #{value}
+            </if>
+            <if test="meaning != null and meaning != ''">
+                <bind name="meaning" value='"%" + meaning +"%"'/>
+                and  xlc.meaning like #{meaning}
+            </if>
+
         </where>
     </select>
 </mapper>

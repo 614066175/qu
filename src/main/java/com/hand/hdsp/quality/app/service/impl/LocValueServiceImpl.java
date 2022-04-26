@@ -25,6 +25,6 @@ public class LocValueServiceImpl implements LocValueService {
     public Page<LocValueDTO> list(PageRequest pageRequest, LocValueDTO locValueDTO) {
 
 
-        return PageHelper.doPageAndSort(pageRequest,()->locValueMapper.queryList(locValueDTO)) ;
+         return PageHelper.doPageAndSort(pageRequest,()->locValueMapper.queryList(locValueDTO)) ;
     }
 }
