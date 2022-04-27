@@ -84,7 +84,6 @@
         xbr.start_date,
         xbr.end_date,
         xbr.exception_info,
-        xwo.work_order_id,
         CASE
         WHEN ( xbr.plan_status = 'SUCCESS' AND mark &lt; 100 AND xwo.work_order_id IS NULL ) THEN
         'NOT_LAUNCHED'
