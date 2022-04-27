@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.infra.mapper;
 
 import com.hand.hdsp.quality.api.dto.LocValueVersionDTO;
+import com.hand.hdsp.quality.api.dto.LocVersionDTO;
 import com.hand.hdsp.quality.domain.entity.LocValueVersion;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.common.BaseMapper;
@@ -15,5 +16,11 @@ import java.util.List;
  */
 public interface LocValueVersionMapper extends BaseMapper<LocValueVersion> {
 
+
+    /**
+     * 查询历史行表
+     * @param locValueVersionDTO
+     * @return
+     */
     List<LocValueVersionDTO> getList( LocValueVersionDTO locValueVersionDTO);
 }

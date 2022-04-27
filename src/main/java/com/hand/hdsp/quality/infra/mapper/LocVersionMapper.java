@@ -1,6 +1,5 @@
 package com.hand.hdsp.quality.infra.mapper;
 
-import com.hand.hdsp.quality.api.dto.LocDTO;
 import com.hand.hdsp.quality.api.dto.LocVersionDTO;
 import com.hand.hdsp.quality.domain.entity.LocVersion;
 import io.choerodon.mybatis.common.BaseMapper;
@@ -14,8 +13,18 @@ import java.util.List;
  */
 public interface LocVersionMapper extends BaseMapper<LocVersion> {
 
+    /**
+     * 获取历史版本表
+     * @param locVersionDTO
+     * @return
+     */
+    List<LocVersionDTO> listAll(LocVersionDTO locVersionDTO);
 
-    List<LocVersionDTO> listAll(LocDTO locDTO);
-
+    /**
+     * 获取更新人账户名
+     * @param lastUpdatedBy
+     * @return
+     */
+    String getUpdateUserName(Long lastUpdatedBy);
 }
 

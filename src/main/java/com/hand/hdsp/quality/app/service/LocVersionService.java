@@ -1,6 +1,5 @@
 package com.hand.hdsp.quality.app.service;
 
-import com.hand.hdsp.quality.api.dto.LocDTO;
 import com.hand.hdsp.quality.api.dto.LocVersionDTO;
 
 import java.util.List;
@@ -13,9 +12,16 @@ import java.util.List;
 public interface LocVersionService {
 
 
-    /**
-     * @param locDTO
+    /** 获取历史版本表
+     * @param locVersionDTO
      * @return
      */
-    List<LocVersionDTO> listAll(LocDTO locDTO);
+    List<LocVersionDTO> listAll(LocVersionDTO locVersionDTO);
+
+    /**
+     * 获取更新人账户名
+     * @param lastUpdatedBy
+     * @return
+     */
+    String getUserName(Long lastUpdatedBy);
 }

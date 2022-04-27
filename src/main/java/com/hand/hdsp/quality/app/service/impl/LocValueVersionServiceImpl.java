@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 import com.hand.hdsp.quality.api.dto.LocValueVersionDTO;
+import com.hand.hdsp.quality.api.dto.LocVersionDTO;
 import com.hand.hdsp.quality.app.service.LocValueVersionService;
 import com.hand.hdsp.quality.infra.mapper.LocValueVersionMapper;
 import io.choerodon.core.domain.Page;

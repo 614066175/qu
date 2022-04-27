@@ -77,9 +77,11 @@ public class LocVersionDTO extends AuditDomain {
 
     // 非数据库字段
 
-
+    @ApiModelProperty(value = "最新更新人姓名")
     @Transient
     private String updaterName;
+
+
 
 
 }

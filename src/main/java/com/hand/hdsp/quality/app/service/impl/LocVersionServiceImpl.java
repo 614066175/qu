@@ -30,5 +30,8 @@ public class LocVersionServiceImpl implements LocVersionService {
 
     }
 
-
+    @Override
+    public String getUserName(Long lastUpdatedBy) {
+        return locVersionMapper.getUpdateUserName(lastUpdatedBy);
+    }
 }
