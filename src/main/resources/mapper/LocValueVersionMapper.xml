@@ -28,7 +28,7 @@
     <select id="getList" resultType="com.hand.hdsp.quality.api.dto.LocValueVersionDTO">
         select xlvc.* from xqua_loc_value_version xlvc
         <where>
-            xlvc.loc_id=#{locId}
+            xlvc.loc_version_id=#{locVersionId}
             <if test="queryString != null and queryString !=''">
                 <bind name="valueLike" value='"%" + queryString +"%"'/>
                 and ( xlvc.value like #{valueLike} or xlvc.meaning like #{valueLike})
