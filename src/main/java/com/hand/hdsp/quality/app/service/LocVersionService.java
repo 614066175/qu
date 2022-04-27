@@ -12,9 +12,16 @@ import java.util.List;
 public interface LocVersionService {
 
 
-    /**
+    /** 获取历史版本表
      * @param locVersionDTO
      * @return
      */
     List<LocVersionDTO> listAll(LocVersionDTO locVersionDTO);
+
+    /**
+     * 获取更新人账户名
+     * @param lastUpdatedBy
+     * @return
+     */
+    String getUserName(Long lastUpdatedBy);
 }
