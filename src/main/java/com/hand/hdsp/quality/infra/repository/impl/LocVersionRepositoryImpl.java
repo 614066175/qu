@@ -4,6 +4,10 @@ import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.LocVersionDTO;
 import com.hand.hdsp.quality.domain.entity.LocVersion;
 import com.hand.hdsp.quality.domain.repository.LocVersionRepository;
+import com.hand.hdsp.quality.infra.mapper.LocVersionMapper;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,6 +17,5 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class LocVersionRepositoryImpl extends BaseRepositoryImpl<LocVersion, LocVersionDTO> implements LocVersionRepository {
-
-
+    
 }
