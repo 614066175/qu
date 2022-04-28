@@ -28,8 +28,8 @@ public class LocVersionServiceImpl implements LocVersionService {
 
 
     @Override
-    public List<LocVersionDTO> listAll(LocDTO locDTO) {
-        return locVersionMapper.listAll(locDTO);
+    public List<LocVersionDTO> listAll(LocVersionDTO locVersionDTO) {
+        return locVersionMapper.listAll(locVersionDTO);
 
     }
 

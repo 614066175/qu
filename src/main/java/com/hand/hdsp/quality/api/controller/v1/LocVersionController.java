@@ -64,9 +64,9 @@ public class LocVersionController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list-all")
     public ResponseEntity<?> listAll(@PathVariable(name = "organizationId") Long tenantId,
-                                     LocDTO locDTO) {
-        locDTO.setTenantId(tenantId);
-        return Results.success(locVersionService.listAll(locDTO));
+                                     LocVersionDTO locVersionDTO) {
+        locVersionDTO.setTenantId(tenantId);
+        return Results.success(locVersionService.listAll(locVersionDTO));
     }
 
     @ApiOperation(value = "loc表明细")
