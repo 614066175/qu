@@ -48,8 +48,8 @@ public class LocValueController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                LocValueDTO locValueDTO, @ApiIgnore @SortDefault(value = LocValue.FIELD_LOC_VALUE_ID,
-            direction = Sort.Direction.DESC) PageRequest pageRequest) {
+                LocValueDTO locValueDTO, @ApiIgnore @SortDefault(value = LocValue.FIELD_ORDER_SEQ,
+            direction = Sort.Direction.ASC) PageRequest pageRequest) {
         locValueDTO.setTenantId(tenantId);
         return Results.success(locValueSerVice.list(pageRequest,locValueDTO));
     }
