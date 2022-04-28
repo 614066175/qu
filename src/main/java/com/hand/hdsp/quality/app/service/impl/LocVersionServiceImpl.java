@@ -3,6 +3,9 @@ package com.hand.hdsp.quality.app.service.impl;
 import com.hand.hdsp.quality.api.dto.LocVersionDTO;
 import com.hand.hdsp.quality.app.service.LocVersionService;
 import com.hand.hdsp.quality.infra.mapper.LocVersionMapper;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,8 +32,9 @@ public class LocVersionServiceImpl implements LocVersionService {
 
     }
 
+
     @Override
-    public String getUserName(Long lastUpdatedBy) {
-        return locVersionMapper.getUpdateUserName(lastUpdatedBy);
+    public Page<LocVersionDTO> list(PageRequest pageRequest, LocVersionDTO locVersionDTO) {
+        return PageHelper.doPageAndSort(pageRequest,()->locVersionMapper.listAll(locVersionDTO));
     }
 }

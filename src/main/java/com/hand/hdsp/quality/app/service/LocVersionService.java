@@ -1,6 +1,8 @@
 package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.LocVersionDTO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 
@@ -12,16 +14,17 @@ import java.util.List;
 public interface LocVersionService {
 
 
-    /** 获取历史版本表
+    /** 查询获取历史行表
      * @param locVersionDTO
      * @return
      */
     List<LocVersionDTO> listAll(LocVersionDTO locVersionDTO);
 
     /**
-     * 获取更新人账户名
-     * @param lastUpdatedBy
+     * 分页查询获取历史行表
+     * @param pageRequest
+     * @param locVersionDTO
      * @return
      */
-    String getUserName(Long lastUpdatedBy);
+    Page<LocVersionDTO> list(PageRequest pageRequest, LocVersionDTO locVersionDTO);
 }
