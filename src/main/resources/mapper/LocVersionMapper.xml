@@ -34,7 +34,6 @@
                 and xlv.loc_id = #{locId}
             </if>
         </where>
-        ORDER BY loc_version asc
     </select>
 
 
