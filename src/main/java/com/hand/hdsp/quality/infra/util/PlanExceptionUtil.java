@@ -2,9 +2,7 @@ package com.hand.hdsp.quality.infra.util;
 
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.ExceptionParam.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
@@ -77,6 +75,9 @@ public class PlanExceptionUtil {
             });
         }
         //直接set的话，同一个字段的不同告警规则会被覆盖掉
+        if(Objects.isNull(param.getExceptionMapList())){
+            param.setExceptionMapList(new ArrayList<>());
+        }
         param.getExceptionMapList().addAll(exceptionMapList);
     }
 
