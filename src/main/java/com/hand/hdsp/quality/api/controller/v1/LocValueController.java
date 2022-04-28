@@ -115,8 +115,7 @@ public class LocValueController extends BaseController {
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody List<LocValueDTO> locValueDTOs) {
         locValueDTOs.forEach(lv -> lv.setTenantId(tenantId));
-        locValueRepository.batchDTODelete(locValueDTOs);
-
+        locValueRepository.batchDTODeleteByPrimaryKey(locValueDTOs);
         return Results.success();
     }
 
