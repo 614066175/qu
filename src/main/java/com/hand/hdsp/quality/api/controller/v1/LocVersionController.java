@@ -51,11 +51,7 @@ public class LocVersionController extends BaseController {
                                   LocVersionDTO locVersionDTO, @ApiIgnore @SortDefault(value = LocVersion.FIELD_LOC_VERSION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         locVersionDTO.setTenantId(tenantId);
-        Page<LocVersionDTO> list = locVersionRepository.pageAndSortDTO(pageRequest, locVersionDTO);
-        for (LocVersionDTO versionDTO : list) {
-            versionDTO.setUpdaterName(locVersionService.getUserName(versionDTO.getLastUpdatedBy())) ;
-        }
-        return Results.success(list);
+        return Results.success(locVersionService.list(pageRequest,locVersionDTO));
     }
 
     @ApiOperation(value = "loc历史表-查询所有")

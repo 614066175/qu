@@ -37,8 +37,5 @@
         ORDER BY loc_version asc
     </select>
 
-    <select id="getUpdateUserName" resultType="java.lang.String">
-        select iu.login_name updaterName from iam_user iu
-        where iu.id=#{lastUpdatedBy}
-    </select>
+
 </mapper>

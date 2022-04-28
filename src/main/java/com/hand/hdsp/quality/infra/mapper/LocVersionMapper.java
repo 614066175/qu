@@ -20,11 +20,6 @@ public interface LocVersionMapper extends BaseMapper<LocVersion> {
      */
     List<LocVersionDTO> listAll(LocVersionDTO locVersionDTO);
 
-    /**
-     * 获取更新人账户名
-     * @param lastUpdatedBy
-     * @return
-     */
-    String getUpdateUserName(Long lastUpdatedBy);
+
 }
 
