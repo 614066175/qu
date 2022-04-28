@@ -24,7 +24,7 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = false)
 @ApiModel("loc独立值集表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class LocValueDTO extends AuditDomain {
+public class  LocValueDTO extends AuditDomain {
 
     @ApiModelProperty("主键")
     private Long locValueId;
