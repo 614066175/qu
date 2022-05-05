@@ -925,8 +925,13 @@
                 </if>
             </if>) a
         ON ( a.rule_type = xcr.rule_type AND a.check_item = xcr.check_item )
-        WHERE xp.tenant_id = #{tenantId}
-        and a.datasource_type is not null
+        <where>
+            xp.tenant_id = #{tenantId}
+            and a.datasource_type is not null
+            <if test="projectId !=null ">
+                and xp.project_id = #{projectId}
+            </if>
+        </where>
     </select>
     <select id="selectProblemTrend" resultType="com.hand.hdsp.quality.api.dto.TimeRangeDTO">
         <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
