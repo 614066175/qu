@@ -40,6 +40,10 @@
                 <bind name="meaning" value='"%" + meaning +"%"'/>
                 and  xlc.meaning like #{meaning}
             </if>
+            <if test="description !=null and description !=''">
+                <bind name="description" value='"%" + description +"%"'/>
+                and xlc.description like #{description}
+            </if>
 
         </where>
     </select>
