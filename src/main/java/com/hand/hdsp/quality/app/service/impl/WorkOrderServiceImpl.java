@@ -10,8 +10,10 @@ import com.hand.hdsp.quality.domain.repository.WorkOrderRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.converter.WorkOrderConverter;
 import com.hand.hdsp.quality.infra.mapper.WorkOrderMapper;
+import com.hand.hdsp.quality.infra.util.CustomThreadPool;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.hand.hdsp.quality.infra.constant.WorkOrderConstants.*;
 
@@ -46,6 +49,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
     public static final String WORK_ORDER_CODE = "XQUA.WORK_ORDER_CODE";
     private static final String GLOBAL = "GLOBAL";
 
+    public static final String ORDER_LAUNCH = "HDSP.XQUA.ORDER_LAUNCH";
     public static final String ORDER_SUBMIT = "HDSP.XQUA.ORDER_SUBMIT";
     public static final String ORDER_REFUSE = "HDSP.XQUA.ORDER_REFUSE";
     public static final String ORDER_TODO = "HDSP.XQUA.ORDER_TODO";
@@ -112,7 +116,32 @@ public class WorkOrderServiceImpl implements WorkOrderService {
             workOrderOperationDTOList.add(workOrderOperationDTO);
         });
         workOrderOperationRepository.batchInsertDTOSelective(workOrderOperationDTOList);
+        //异步发起发送消息（消息不影响主流程的运行）
+        ThreadPoolExecutor executor = CustomThreadPool.getExecutor();
+        CustomUserDetails userDetails = DetailsHelper.getUserDetails();
+        executor.submit(() -> sendMessage(workOrderDTOList, ORDER_LAUNCH, userDetails));
         return workOrderDTOList;
+    }
+
+    private void sendMessage(List<WorkOrderDTO> workOrderDTOList, String messageTemplateCode, CustomUserDetails userDetails) {
+        DetailsHelper.setCustomUserDetails(userDetails);
+        Receiver receiver;
+        for (WorkOrderDTO workOrderDTO : workOrderDTOList) {
+            //接受组为发起人
+            receiver = new Receiver();
+            //如果是发起,则接受人为处理人
+            if (ORDER_LAUNCH.equals(messageTemplateCode)) {
+                receiver.setUserId(workOrderDTO.getProcessorsId());
+            } else {
+                receiver.setUserId(workOrderDTO.getCreatedBy());
+            }
+            receiver.setTargetUserTenantId(workOrderDTO.getTenantId());
+            //模板内容 您发起的${工单号}工单已被拒绝，可确认后重新提交。
+            Map<String, String> args = new HashMap<>();
+            args.put("workOrderCode", workOrderDTO.getWorkOrderCode());
+            //发送站内信
+            messageClient.sendWebMessage(workOrderDTO.getTenantId(), messageTemplateCode, null, Collections.singletonList(receiver), args);
+        }
     }
 
     @Override
@@ -161,18 +190,10 @@ public class WorkOrderServiceImpl implements WorkOrderService {
         workOrderOperationRepository.batchInsertDTOSelective(workOrderOperationDTOList);
         //如果是拒绝，则发送消息通知
         if (OrderOperateType.REFUSE.equals(orderOperateType)) {
-            Receiver receiver;
-            for (WorkOrder order : workOrderList) {
-                //接受组为发起人
-                receiver = new Receiver();
-                receiver.setUserId(order.getCreatedBy());
-                receiver.setTargetUserTenantId(order.getTenantId());
-                //模板内容 您发起的${工单号}工单已被拒绝，可确认后重新提交。
-                Map<String, String> args = new HashMap<>();
-                args.put("workOrderCode", order.getWorkOrderCode());
-                //发送站内信
-                messageClient.sendWebMessage(order.getTenantId(), ORDER_REFUSE, null, Collections.singletonList(receiver), args);
-            }
+            //异步发起发送消息（消息不影响主流程的运行）
+            ThreadPoolExecutor executor = CustomThreadPool.getExecutor();
+            CustomUserDetails userDetails = DetailsHelper.getUserDetails();
+            executor.submit(() -> sendMessage(workOrderDTOList, ORDER_REFUSE, userDetails));
         }
         return workOrderDTOList;
     }
@@ -327,7 +348,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public WorkOrderDTO orderSubmit(WorkOrderDTO workOrderDTO) {
-        if(workOrderDTO==null|| StringUtils.isEmpty(workOrderDTO.getOrderSolution())){
+        if (workOrderDTO == null || StringUtils.isEmpty(workOrderDTO.getOrderSolution())) {
             throw new CommonException(ErrorCode.WORK_ORDER_SOLUTION_CAN_NOT_NULL);
         }
 
@@ -347,16 +368,10 @@ public class WorkOrderServiceImpl implements WorkOrderService {
         workOrderRepository.updateDTOOptional(workOrderDTO, WorkOrder.FIELD_WORK_ORDER_STATUS);
         workOrderOperationRepository.insertDTOSelective(workOrderOperationDTO);
 
-        //接受组为发起人
-        Receiver receiver = new Receiver();
-        receiver.setUserId(workOrderDTO.getCreatedBy());
-        receiver.setTargetUserTenantId(workOrderDTO.getTenantId());
-
-        //模板内容 为您发起的${workOrderCode}工单已解决，请确认。
-        Map<String, String> args = new HashMap<>();
-        args.put("workOrderCode", workOrderDTO.getWorkOrderCode());
-        //发送站内信
-        messageClient.sendWebMessage(workOrderDTO.getTenantId(), ORDER_SUBMIT, null, Collections.singletonList(receiver), args);
+        //异步发起发送消息（消息不影响主流程的运行）
+        ThreadPoolExecutor executor = CustomThreadPool.getExecutor();
+        CustomUserDetails userDetails = DetailsHelper.getUserDetails();
+        executor.submit(() -> sendMessage(Collections.singletonList(workOrderDTO), ORDER_SUBMIT, userDetails));
         return workOrderDTO;
     }
 
