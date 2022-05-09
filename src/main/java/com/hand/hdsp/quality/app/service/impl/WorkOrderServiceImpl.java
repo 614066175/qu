@@ -129,7 +129,12 @@ public class WorkOrderServiceImpl implements WorkOrderService {
         for (WorkOrderDTO workOrderDTO : workOrderDTOList) {
             //接受组为发起人
             receiver = new Receiver();
-            receiver.setUserId(workOrderDTO.getCreatedBy());
+            //如果是发起,则接受人为处理人
+            if (ORDER_LAUNCH.equals(messageTemplateCode)) {
+                receiver.setUserId(workOrderDTO.getProcessorsId());
+            } else {
+                receiver.setUserId(workOrderDTO.getCreatedBy());
+            }
             receiver.setTargetUserTenantId(workOrderDTO.getTenantId());
             //模板内容 您发起的${工单号}工单已被拒绝，可确认后重新提交。
             Map<String, String> args = new HashMap<>();
