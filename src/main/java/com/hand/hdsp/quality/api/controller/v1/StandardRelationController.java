@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import org.hzero.core.util.Results;
 import org.hzero.core.base.BaseController;
 import com.hand.hdsp.quality.domain.entity.StandardRelation;
@@ -20,6 +21,8 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiParam;
 import springfox.documentation.annotations.ApiIgnore;
+
+import java.util.List;
 
 /**
  * <p>标准-标准组关系表 管理 API</p>
@@ -46,7 +49,7 @@ public class StandardRelationController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                StandardRelationDTO standardRelationDTO, @ApiIgnore @SortDefault(value = StandardRelation.FIELD_RELATION_ID,
+                                  StandardRelationDTO standardRelationDTO, @ApiIgnore @SortDefault(value = StandardRelation.FIELD_RELATION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardRelationDTO.setTenantId(tenantId);
         Page<StandardRelationDTO> list = standardRelationRepository.pageAndSortDTO(pageRequest, standardRelationDTO);
@@ -81,11 +84,15 @@ public class StandardRelationController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId, @RequestBody StandardRelationDTO standardRelationDTO) {
-        standardRelationDTO.setTenantId(tenantId);
-        this.validObject(standardRelationDTO);
-        standardRelationRepository.insertDTOSelective(standardRelationDTO);
-        return Results.success(standardRelationDTO);
+    public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestBody List<StandardRelationDTO> standardRelationDTOList) {
+        standardRelationDTOList.forEach(standardRelationDTO -> {
+            standardRelationDTO.setTenantId(tenantId);
+            standardRelationDTO.setProjectId(projectId);
+        });
+        standardRelationRepository.batchInsertDTOSelective(standardRelationDTOList);
+        return Results.success(standardRelationDTOList);
     }
 
     @ApiOperation(value = "修改标准-标准组关系表")
@@ -98,7 +105,7 @@ public class StandardRelationController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId, @RequestBody StandardRelationDTO standardRelationDTO) {
-                standardRelationRepository.updateDTOWhereTenant(standardRelationDTO, tenantId);
+        standardRelationRepository.updateDTOWhereTenant(standardRelationDTO, tenantId);
         return Results.success(standardRelationDTO);
     }
 
@@ -113,7 +120,7 @@ public class StandardRelationController extends BaseController {
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestBody StandardRelationDTO standardRelationDTO) {
-                standardRelationDTO.setTenantId(tenantId);
+        standardRelationDTO.setTenantId(tenantId);
         standardRelationRepository.deleteByPrimaryKey(standardRelationDTO);
         return Results.success();
     }

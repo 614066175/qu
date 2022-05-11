@@ -1,11 +1,14 @@
 package com.hand.hdsp.quality.api.dto;
 
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 import io.choerodon.mybatis.domain.AuditDomain;
 import java.util.Date;
+import java.util.List;
+
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiModel;
 
@@ -60,5 +63,26 @@ public class StandardTeamDTO extends AuditDomain {
     @ApiModelProperty(value = "项目id")
     @NotNull
     private Long projectId;
+
+    @Transient
+    private String creatorName;
+
+    @Transient
+    private String updaterName;
+
+    @Transient
+    private String parentTeamCode;
+
+    @Transient
+    private String parentTeamName;
+
+    @Transient
+    private String inheriteTeamCode;
+
+    @Transient
+    private String inheriteTeamName;
+
+    @Transient
+    private List<DataFieldDTO> dataFieldDTOList;
 
 }

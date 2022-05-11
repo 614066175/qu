@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.app.service;
 
+import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.StandardTeamDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -15,6 +16,7 @@ public interface StandardTeamService {
 
     /**
      * 列表分页查询
+     *
      * @param pageRequest
      * @param standardTeamDTO
      * @return
@@ -29,7 +31,59 @@ public interface StandardTeamService {
 
     /**
      * 删除标准组
+     *
      * @param standardTeamId
      */
     void remove(Long standardTeamId);
+
+
+    /**
+     * 字段标准列表
+     *
+     * @param dataFieldDTO
+     * @param pageRequest
+     * @return
+     */
+    Page<DataFieldDTO> fieldStandardList(DataFieldDTO dataFieldDTO, PageRequest pageRequest);
+
+    /**
+     * 创建标准组
+     *
+     * @param standardTeamDTO
+     * @return
+     */
+    StandardTeamDTO create(StandardTeamDTO standardTeamDTO);
+
+    /**
+     * 标准组详情
+     *
+     * @param standardTeamId
+     * @return
+     */
+    StandardTeamDTO detail(Long standardTeamId);
+
+    /**
+     * 更新标准组
+     *
+     * @param standardTeamDTO
+     * @return
+     */
+    StandardTeamDTO update(StandardTeamDTO standardTeamDTO);
+
+    /**
+     * 根据标准组id查询下面的字段标准
+     *
+     * @param standardTeamId
+     * @return
+     */
+    List<DataFieldDTO> standardByTeamId(Long standardTeamId);
+
+    /**
+     * 查询可选父级标准组
+     *
+     * @param standardTeamId
+     * @return
+     */
+    Page<StandardTeamDTO> parentTeamList(Long standardTeamId, PageRequest pageRequest);
+
 }
