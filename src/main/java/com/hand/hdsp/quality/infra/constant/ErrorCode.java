@@ -166,4 +166,7 @@ public interface ErrorCode {
 
     String WORK_ORDER_SOLUTION_CAN_NOT_NULL="hdsp.xqua.err.work_order_solution_can_not_null";
 
+    String STANDARD_TEAM_NOT_EXIST="hdsp.xsta.standard_team_not_exist";
+
+    String STANDARD_TEAM_IS_INHERITED="hdsp.xsta.standard_team_is_inherited";
 }
