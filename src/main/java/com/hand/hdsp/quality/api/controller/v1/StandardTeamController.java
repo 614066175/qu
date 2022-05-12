@@ -194,7 +194,7 @@ public class StandardTeamController extends BaseController {
     @GetMapping("/parent-team-list")
     public ResponseEntity<?> parentTeamList(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                             @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                            Long standardTeamId, @ApiIgnore @SortDefault(value = StandardTeam.FIELD_STANDARD_TEAM_ID,
+                                            Long standardTeamId, @SortDefault(value = StandardTeam.FIELD_STANDARD_TEAM_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         Page<StandardTeamDTO> dataFieldDTOList = standardTeamService.parentTeamList(standardTeamId, pageRequest);
         return Results.success(dataFieldDTOList);

@@ -57,7 +57,7 @@ public class StandardTeamServiceImpl implements StandardTeamService {
 
     @Override
     public Page<StandardTeamDTO> list(PageRequest pageRequest, StandardTeamDTO standardTeamDTO) {
-        return null;
+        return PageHelper.doPageAndSort(pageRequest, () -> standardTeamMapper.listAll(standardTeamDTO));
     }
 
     /**
@@ -253,6 +253,7 @@ public class StandardTeamServiceImpl implements StandardTeamService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public StandardTeamDTO update(StandardTeamDTO standardTeamDTO) {
         //更新标准组
         standardTeamRepository.updateDTOAllColumnWhereTenant(standardTeamDTO, standardTeamDTO.getTenantId());
@@ -265,7 +266,7 @@ public class StandardTeamServiceImpl implements StandardTeamService {
         if (CollectionUtils.isNotEmpty(oldStandardRelations)) {
             standardRelationRepository.batchDeleteByPrimaryKey(oldStandardRelations);
         }
-        //如果更新的时候的时候有字段标准，则维护字段标准与标准组的关系
+        //如果更新的时候有字段标准，则维护字段标准与标准组的关系
         List<StandardRelation> standardRelations = convertStandardRelation(standardTeamDTO);
         standardRelationRepository.batchInsert(standardRelations);
         return standardTeamDTO;
