@@ -243,9 +243,36 @@ public class StandardTeamServiceImpl implements StandardTeamService {
                         .andEqualTo(StandardRelation.FIELD_TENANT_ID, standardTeamDTO.getTenantId())
                         .andEqualTo(StandardRelation.FIELD_PROJECT_ID, standardTeamDTO.getProjectId()))
                 .build());
+        //如果继承自不为空,获取继承自的字段集合
+        StandardTeamDTO inheriteTeamDTO;
+        List<Long> inheriteFieldIds = null;
+        if (standardTeamDTO.getInheriteTeamId() != null) {
+            inheriteTeamDTO = standardTeamRepository.selectDTOByPrimaryKey(standardTeamDTO.getInheriteTeamId());
+            if (inheriteTeamDTO != null) {
+                List<StandardRelation> inheriteRelations = standardRelationRepository.selectByCondition(Condition.builder(StandardRelation.class)
+                        .andWhere(Sqls.custom().andEqualTo(StandardRelation.FIELD_STANDARD_TEAM_ID, inheriteTeamDTO.getStandardTeamId())
+                                .andEqualTo(StandardRelation.FIELD_TENANT_ID, inheriteTeamDTO.getTenantId())
+                                .andEqualTo(StandardRelation.FIELD_PROJECT_ID, inheriteTeamDTO.getProjectId()))
+                        .build());
+                if (CollectionUtils.isNotEmpty(inheriteRelations)) {
+                    inheriteFieldIds = inheriteRelations.stream().map(StandardRelation::getFieldStandardId).collect(Collectors.toList());
+                }
+            }
+        }
+
         if (CollectionUtils.isNotEmpty(standardRelations)) {
+            List<Long> finalInheriteFieldIds = inheriteFieldIds;
             List<DataFieldDTO> dataFieldDTOList = standardRelations.stream()
-                    .map(standardRelation -> dataFieldRepository.selectDTOByPrimaryKey(standardRelation.getFieldStandardId()))
+                    .map(standardRelation -> {
+                        DataFieldDTO dataFieldDTO = dataFieldRepository.selectDTOByPrimaryKey(standardRelation.getFieldStandardId());
+                        dataFieldDTO.setCheckFlag(1);
+                        if (CollectionUtils.isNotEmpty(finalInheriteFieldIds)) {
+                            if (finalInheriteFieldIds.contains(dataFieldDTO.getFieldId())) {
+                                dataFieldDTO.setEditFlag(0);
+                            }
+                        }
+                        return dataFieldDTO;
+                    })
                     .collect(Collectors.toList());
             standardTeamDTO.setDataFieldDTOList(dataFieldDTOList);
         }
