@@ -19,8 +19,8 @@
     </resultMap>
     <select id="listAll" resultType="com.hand.hdsp.quality.api.dto.StandardTeamDTO">
         select xst.*,
-               xst2.standard_team_code parentStandardTeamCode,
-               xst2.standard_team_name parentStandardTeamName,
+               xst2.standard_team_code parentTeamCode,
+               xst2.standard_team_name parentTeamName,
                iu1.login_name          creatorName,
                iu2.login_name          updaterName
         from xsta_standard_team xst
@@ -29,6 +29,18 @@
         left join iam_user iu2 on xst.created_by = iu2.id
         <where>
             xst.tenant_id=#{tenantId}
+            <if test="standardTeamCode!=null">
+                <bind name="standardTeamCodeLike" value="'%'+standardTeamCode+'%'"/>
+                and xst.standard_team_code like #{standardTeamCodeLike}
+            </if>
+            <if test="standardTeamName!=null">
+                <bind name="standardTeamNameLike" value="'%'+standardTeamName+'%'"/>
+                and xst.standard_team_name like #{standardTeamNameLike}
+            </if>
+            <if test="standardTeamDesc!=null">
+                <bind name="standardTeamDescLike" value="'%'+standardTeamDesc+'%'"/>
+                and xst.standard_team_desc like #{standardTeamDescLike}
+            </if>
             <if test="projectId !=null">
                 and xst.project_id =#{projectId}
             </if>
