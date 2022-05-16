@@ -4,6 +4,7 @@
     <!-- 可根据自己的需求，是否要使用 -->
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.DataField">
         <result column="field_id" property="fieldId" jdbcType="DECIMAL"/>
+        <result column="standard_id" property="standardId" jdbcType="DECIMAL"/>
         <result column="group_id" property="groupId" jdbcType="DECIMAL"/>
         <result column="field_name" property="fieldName" jdbcType="VARCHAR"/>
         <result column="field_comment" property="fieldComment" jdbcType="VARCHAR"/>
@@ -27,10 +28,15 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
+        <result column="not_null_flag" property="notNullFlag" jdbcType="DECIMAL"/>
+        <result column="default_value" property="defaultValue" jdbcType="VARCHAR"/>
     </resultMap>
+
+
 
     <sql id="baseColumn">
           ${fs}.field_id,
+          ${fs}.null_able,
           ${fs}.group_id,
           ${fs}.field_name,
           ${fs}.field_comment,
@@ -50,7 +56,9 @@
           ${fs}.creation_date,
           ${fs}.created_by,
           ${fs}.last_updated_by,
-          ${fs}.last_update_date
+          ${fs}.last_update_date,
+          ${fs}.not_null_flag,
+          ${fs}.default_value
     </sql>
 
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.DataFieldDTO">

@@ -55,4 +55,7 @@ public class DataStandardDO extends AuditDomain {
 
     private Long projectId;
 
+    private Integer notNullFlag;
+
+
 }

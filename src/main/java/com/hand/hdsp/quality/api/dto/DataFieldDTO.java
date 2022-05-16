@@ -45,6 +45,9 @@ public class DataFieldDTO extends AuditDomain {
     @ApiModelProperty("字段标准ID，主键，供其他表做外键")
     private Long fieldId;
 
+    @ApiModelProperty("数据标准ID，主键，供其他表做外键")
+    private Long dataStandardId;
+
     @ApiModelProperty(value = "分组ID")
     @NotNull
     private Long groupId;
@@ -118,6 +121,10 @@ public class DataFieldDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
+    @ApiModelProperty(value = "是否必输，0（否）1（是）")
+    @NotBlank
+    private Integer notNullFlag;
+
     @Transient
     private List<StandardExtraDTO> standardExtraDTOList;
 
@@ -134,6 +141,10 @@ public class DataFieldDTO extends AuditDomain {
     @Transient
     @ExcelColumn(zh = "责任部门", en = "chargeDeptName", groups = {Group2.class})
     private String chargeDeptName;
+
+    @ApiModelProperty(value = "默认值")
+
+    private String defaultValue;
 
 
 
