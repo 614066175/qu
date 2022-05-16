@@ -99,6 +99,6 @@ public class DataStandard extends AuditDomain {
 
     private Long projectId;
 
-    private Integer notNullFlag;
+    private Integer nullFlag;
 
 }

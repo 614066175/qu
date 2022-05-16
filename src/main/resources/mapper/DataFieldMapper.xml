@@ -4,7 +4,7 @@
     <!-- 可根据自己的需求，是否要使用 -->
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.DataField">
         <result column="field_id" property="fieldId" jdbcType="DECIMAL"/>
-        <result column="standard_id" property="standardId" jdbcType="DECIMAL"/>
+        <result column="data_standard_id" property="dataStandardId" jdbcType="DECIMAL"/>
         <result column="group_id" property="groupId" jdbcType="DECIMAL"/>
         <result column="field_name" property="fieldName" jdbcType="VARCHAR"/>
         <result column="field_comment" property="fieldComment" jdbcType="VARCHAR"/>
@@ -28,7 +28,7 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
-        <result column="not_null_flag" property="notNullFlag" jdbcType="DECIMAL"/>
+        <result column="null_flag" property="nullFlag" jdbcType="DECIMAL"/>
         <result column="default_value" property="defaultValue" jdbcType="VARCHAR"/>
     </resultMap>
 
@@ -36,7 +36,6 @@
 
     <sql id="baseColumn">
           ${fs}.field_id,
-          ${fs}.null_able,
           ${fs}.group_id,
           ${fs}.field_name,
           ${fs}.field_comment,
@@ -57,7 +56,8 @@
           ${fs}.created_by,
           ${fs}.last_updated_by,
           ${fs}.last_update_date,
-          ${fs}.not_null_flag,
+          ${fs}.data_standard_id,
+          ${fs}.null_flag,
           ${fs}.default_value
     </sql>
 
@@ -73,10 +73,12 @@
         xsg.group_desc,
         iu.login_name lastUpdatedByName,
         iu3.login_name createdByName,
+        xds.standard_name dataStandardName,
         <include refid="baseColumn">
             <property name="fs" value="fs"/>
         </include>
         from xsta_field_standard fs
+        left join xsta_data_standard xds on fs.data_standard_id = xds.standard_id
         left join xsta_standard_group xsg on xsg.group_id=fs.group_id
         left join iam_user iu on fs.last_updated_by=iu.id
         left join iam_user iu2 on fs.charge_id=iu2.id

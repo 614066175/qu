@@ -42,7 +42,7 @@ public class DataField extends AuditDomain {
 
     private Long groupId;
 
-    private Long standardId;
+    private Long dataStandardId;
 
     private String fieldName;
 
@@ -78,7 +78,7 @@ public class DataField extends AuditDomain {
 
     private Long projectId;
 
-    private Integer notNullFlag;
+    private Integer nullFlag;
 
     private String defaultValue;
 

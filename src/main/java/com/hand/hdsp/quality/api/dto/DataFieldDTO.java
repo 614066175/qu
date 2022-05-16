@@ -121,9 +121,8 @@ public class DataFieldDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
-    @ApiModelProperty(value = "是否必输，0（否）1（是）")
-    @NotBlank
-    private Integer notNullFlag;
+    @ApiModelProperty(value = "是否可空，1可空 0 不可空")
+    private Integer nullFlag;
 
     @Transient
     private List<StandardExtraDTO> standardExtraDTOList;
@@ -147,8 +146,6 @@ public class DataFieldDTO extends AuditDomain {
     private String defaultValue;
 
 
-
-
     @Transient
     private List<Long> dataLengthList;
 
@@ -164,6 +161,9 @@ public class DataFieldDTO extends AuditDomain {
 
     @Transient
     private String lastUpdatedByName;
+
+    @Transient
+    private String dataStandardName;
 
     private Long projectId;
 
