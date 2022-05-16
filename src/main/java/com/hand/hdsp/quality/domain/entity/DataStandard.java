@@ -3,10 +3,13 @@ package com.hand.hdsp.quality.domain.entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 /**
@@ -44,6 +47,7 @@ public class DataStandard extends AuditDomain {
     public static final String FIELD_STANDARD_STATUS = "standardStatus";
     public static final String FIELD_TENANT_ID = "tenantId";
     public static final String FIELD_PROJECT_ID = "projectId";
+    public static final String FIELD_ENABLE_FLAG= "enableFlag";
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -94,5 +98,7 @@ public class DataStandard extends AuditDomain {
     private Long tenantId;
 
     private Long projectId;
+
+    private Integer nullFlag;
 
 }

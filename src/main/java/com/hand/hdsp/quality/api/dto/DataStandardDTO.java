@@ -32,6 +32,7 @@ public class DataStandardDTO extends AuditDomain{
     @ApiModelProperty("数据标准ID，主键，供其他表做外键")
     private Long standardId;
 
+
     @ApiModelProperty(value = "分组ID")
     @NotNull
     private Long groupId;
@@ -53,6 +54,7 @@ public class DataStandardDTO extends AuditDomain{
     @Size(max = 50)
     @ExcelColumn(zh = "标准编码", en = "standardCode" )
     private String standardCode;
+
 
     @ApiModelProperty(value = "数据标准名称")
     @NotBlank
@@ -116,6 +118,9 @@ public class DataStandardDTO extends AuditDomain{
     @NotBlank
     @Size(max = 30)
     private String standardStatus;
+
+    @ApiModelProperty(value = "是否可空，1可空 0 不可空")
+    private Integer nullFlag;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull

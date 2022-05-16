@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.hand.hdsp.quality.api.dto.AssigneeUserDTO;
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
+import com.hand.hdsp.quality.api.dto.FieldCountDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -125,4 +126,11 @@ public interface DataFieldService {
      * @return
      */
     List<AssigneeUserDTO> findCharger(Long tenantId, Long fieldId);
+
+    /**
+     * 字段落标统计
+     * @param standardAimDTO
+     * @return
+     */
+    List<FieldCountDTO> fieledCount(StandardAimDTO standardAimDTO);
 }

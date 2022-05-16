@@ -4,10 +4,7 @@ package com.hand.hdsp.quality.app.service.impl;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.DataFieldService;
 import com.hand.hdsp.quality.app.service.DataStandardService;
-import com.hand.hdsp.quality.domain.entity.DataField;
-import com.hand.hdsp.quality.domain.entity.DataFieldVersion;
-import com.hand.hdsp.quality.domain.entity.DataStandard;
-import com.hand.hdsp.quality.domain.entity.StandardExtra;
+import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
@@ -22,11 +19,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
+import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.workflow.WorkflowClient;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,11 +60,12 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     private final DataStandardService dataStandardService;
 
-    private final StandardAimRepository standardAimRepository;
 
     private final ExtraVersionRepository extraVersionRepository;
 
     private final DataStandardMapper dataStandardMapper;
+
+
 
     @Value("${hdsp.workflow.enabled:false}")
     private boolean enableWorkflow;
@@ -73,8 +73,12 @@ public class DataFieldServiceImpl implements DataFieldService {
     @Autowired
     private WorkflowClient workflowClient;
 
+    private final StandardAimRepository standardAimRepository;
 
-    public DataFieldServiceImpl(DataFieldRepository dataFieldRepository, StandardExtraRepository standardExtraRepository, StandardApproveRepository standardApproveRepository, DataFieldVersionRepository dataFieldVersionRepository, DataFieldMapper dataFieldMapper, DataStandardService dataStandardService, StandardAimRepository standardAimRepository, ExtraVersionRepository extraVersionRepository, DataStandardMapper dataStandardMapper) {
+    private final DriverSessionService driverSessionService;
+
+
+    public DataFieldServiceImpl(DataFieldRepository dataFieldRepository, StandardExtraRepository standardExtraRepository, StandardApproveRepository standardApproveRepository, DataFieldVersionRepository dataFieldVersionRepository, DataFieldMapper dataFieldMapper, DataStandardService dataStandardService, ExtraVersionRepository extraVersionRepository, DataStandardMapper dataStandardMapper, StandardAimRepository standardAimRepository,DriverSessionService driverSessionService) {
         this.dataFieldRepository = dataFieldRepository;
         this.standardExtraRepository = standardExtraRepository;
         this.standardApproveRepository = standardApproveRepository;
@@ -84,6 +88,7 @@ public class DataFieldServiceImpl implements DataFieldService {
         this.standardAimRepository = standardAimRepository;
         this.extraVersionRepository = extraVersionRepository;
         this.dataStandardMapper = dataStandardMapper;
+        this.driverSessionService=driverSessionService;
     }
 
     @Override
@@ -351,6 +356,36 @@ public class DataFieldServiceImpl implements DataFieldService {
         }
     }
 
+    @Override
+    public List<FieldCountDTO> fieledCount(StandardAimDTO standardAimDTO) {
+        List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardAim.FIELD_STANDARD_TYPE,standardAimDTO.getStandardType())
+                        .andEqualTo(StandardAim.FIELD_STANDARD_ID, standardAimDTO.getStandardId())
+                        .andEqualTo(StandardAim.FIELD_TENANT_ID, standardAimDTO.getTenantId()))
+                .build());
+        if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
+            throw new CommonException(ErrorCode.STANDARD_AIM_NOT_EXIST);}
+        String dataSourceType;
+        String dataSourceCode;
+        String schemaName;
+        String tableName;
+
+
+        for (StandardAimDTO aimDTO : standardAimDTOS) {
+            dataSourceType= aimDTO.getStandardType();
+            dataSourceCode= aimDTO.getDatasourceCode();
+            schemaName=aimDTO.getSchemaName();
+            tableName=aimDTO.getTableName();
+
+            DriverSession driverSession = driverSessionService.getDriverSession(aimDTO.getTenantId(), dataSourceCode);
+
+
+
+        }
+        return null;
+    }
+
     /**
      * 指定字段标准修改状态，供审批中，审批结束任务状态变更
      *
@@ -370,4 +405,6 @@ public class DataFieldServiceImpl implements DataFieldService {
             }
         }
     }
+
+
 }
