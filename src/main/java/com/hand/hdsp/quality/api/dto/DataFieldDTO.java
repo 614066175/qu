@@ -184,6 +184,10 @@ public class DataFieldDTO extends AuditDomain {
     @Transient
     private Integer editFlag = 1;
 
+    //标准组
+    @Transient
+    private List<StandardTeamDTO> standardTeamDTOList;
+
 
     public interface Group1 {
     }

@@ -133,4 +133,11 @@ public interface DataFieldService {
      * @return
      */
     List<FieldCountDTO> fieledCount(StandardAimDTO standardAimDTO);
+
+    /**
+     * 更新字段标准
+     * @param dataFieldDTO
+     * @return
+     */
+    DataFieldDTO update(DataFieldDTO dataFieldDTO);
 }

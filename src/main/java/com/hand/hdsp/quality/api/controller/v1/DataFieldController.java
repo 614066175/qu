@@ -135,8 +135,7 @@ public class DataFieldController extends BaseController {
                                                @RequestBody DataFieldDTO dataFieldDTO) {
         dataFieldDTO.setTenantId(tenantId);
         dataFieldDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
-        dataFieldRepository.updateByDTOPrimaryKey(dataFieldDTO);
-        return Results.success(dataFieldDTO);
+        return Results.success(dataFieldService.update(dataFieldDTO));
     }
 
     @ApiOperation(value = "数据标准修改状态")
