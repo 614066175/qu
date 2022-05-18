@@ -15,7 +15,6 @@ import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import com.hand.hdsp.quality.infra.mapper.StandardTeamMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -165,15 +164,17 @@ public class StandardTeamServiceImpl implements StandardTeamService {
                             .andEqualTo(StandardRelation.FIELD_TENANT_ID, standardTeamDTO.getTenantId())
                             .andEqualTo(StandardRelation.FIELD_PROJECT_ID, standardTeamDTO.getProjectId()))
                     .build());
-
-            if (CollectionUtils.isEmpty(standardRelations)) {
-                //如果此标准组没有字段标准，则直接分页查询字段标准
+            //如果此标准组没有字段标准，且没有继承自，则直接分页查询字段标准
+            if (CollectionUtils.isEmpty(standardRelations) && dataFieldDTO.getInheriteTeamId() == null) {
                 return PageHelper.doPage(pageRequest, () -> dataFieldMapper.list(dataFieldDTO));
             }
             //此标准组下的字段标准
-            List<Long> fieldStandardIds = standardRelations.stream()
-                    .map(StandardRelation::getFieldStandardId)
-                    .collect(Collectors.toList());
+            List<Long> fieldStandardIds = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(standardRelations)) {
+                fieldStandardIds = standardRelations.stream()
+                        .map(StandardRelation::getFieldStandardId)
+                        .collect(Collectors.toList());
+            }
 
             List<Long> inheriteFieldStandardIds = new ArrayList<>();
             //如果有继承自，则再去查询继承自的情况
@@ -190,6 +191,8 @@ public class StandardTeamServiceImpl implements StandardTeamService {
                     inheriteFieldStandardIds = inheriteRelations.stream()
                             .map(StandardRelation::getFieldStandardId)
                             .collect(Collectors.toList());
+                    //合并继承的标准
+                    fieldStandardIds.addAll(inheriteFieldStandardIds);
                 }
             }
 
