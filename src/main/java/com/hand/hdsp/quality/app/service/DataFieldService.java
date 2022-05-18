@@ -125,4 +125,11 @@ public interface DataFieldService {
      * @return
      */
     List<AssigneeUserDTO> findCharger(Long tenantId, Long fieldId);
+
+    /**
+     * 更新字段标准
+     * @param dataFieldDTO
+     * @return
+     */
+    DataFieldDTO update(DataFieldDTO dataFieldDTO);
 }
