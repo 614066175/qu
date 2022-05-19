@@ -1,11 +1,11 @@
 package com.hand.hdsp.quality.app.service;
 
-import java.util.List;
-import java.util.Map;
-
 import com.hand.hdsp.quality.api.dto.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>批数据方案结果表应用服务</p>
@@ -43,12 +43,11 @@ public interface BatchResultService {
     Page<BatchResultBaseDTO> listExceptionDetailHead(Long resultId, Long tenantId, PageRequest pageRequest);
 
     /**
-     *
      * @param exceptionDataDTO
      * @param pageRequest
-     * @return List<Map<String, Object>>
+     * @return List<Map < String, Object>>
      */
-    Page<Map<String, Object>> listExceptionDetail(ExceptionDataDTO exceptionDataDTO, PageRequest pageRequest);
+    Page<Map> listExceptionDetail(ExceptionDataDTO exceptionDataDTO, PageRequest pageRequest);
 
     /**
      * 使用sql查询问题趋势

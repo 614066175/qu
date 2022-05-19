@@ -1,8 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 
-import java.util.Map;
-
 import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
 import com.hand.hdsp.quality.api.dto.ExceptionDataDTO;
@@ -24,6 +22,8 @@ import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+
+import java.util.Map;
 
 /**
  * <p>批数据方案结果表 管理 API</p>
@@ -460,9 +460,9 @@ public class BatchResultController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/exception-detail")
-    public ResponseEntity<Page<Map<String, Object>>> exceptionDetail(@PathVariable(name = "organizationId") Long tenantId,
-                                                                     ExceptionDataDTO exceptionDataDTO,
-                                                                     PageRequest pageRequest) {
+    public ResponseEntity<Page<Map>> exceptionDetail(@PathVariable(name = "organizationId") Long tenantId,
+                                                     ExceptionDataDTO exceptionDataDTO,
+                                                     PageRequest pageRequest) {
         exceptionDataDTO.setTenantId(tenantId);
         return Results.success(batchResultService.listExceptionDetail(exceptionDataDTO, pageRequest));
     }

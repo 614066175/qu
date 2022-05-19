@@ -27,7 +27,6 @@ import com.hand.hdsp.quality.infra.util.ParamsUtil;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -864,7 +863,6 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                         .batchResultItem(BatchResultItem.builder().build()).build();
                 measure.check(param);
                 param.setRuleName(batchPlanField.getRuleName());
-                handleExceptionList(fieldExceptionList, param);
 
                 BatchResultItem batchResultItem = param.getBatchResultItem();
                 batchResultItem.setResultRuleId(batchResultRuleDTO.getResultRuleId());
@@ -911,13 +909,6 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
         }
 
-        //将所有字段级检验项异常数据存入redis
-//        String key = String.format("%s:%d", PlanConstant.CACHE_BUCKET_EXCEPTION, batchResultBase.getPlanBaseId());
-//        redisTemplate.opsForHash().put(key, PlanConstant.ResultRuleType.FIELD, JsonUtils.object2Json(fieldExceptionList));
-
-        //将所有字段级校验项异常数据存入数据库
-        String exceptionList = String.format("{\"FIELD\":%s}", JsonUtils.object2Json(fieldExceptionList));
-        batchResultBase.setExceptionList(exceptionList);
         batchResultBaseRepository.updateByPrimaryKeySelective(batchResultBase);
     }
 

@@ -343,10 +343,10 @@ public interface PlanConstant {
     }
 
     interface ExceptionParam {
-        String EXCEPTION_INFO="$exceptionInfo";
+        String EXCEPTION_INFO = "#exceptionInfo";
         //自定义主键用于一条数据多个异常时，进行异常合并
-        String PK="$pk";
-        String RULE_NAME="$ruleName";
-        String WARNING_LEVEL="$warningLevel";
+        String PK = "#pk";
+        String RULE_NAME = "#ruleName";
+        String WARNING_LEVEL = "#warningLevel";
     }
 }
