@@ -45,6 +45,7 @@
                 and xst.project_id =#{projectId}
             </if>
         </where>
+        order by xst.standard_team_id desc
     </select>
     <select id="detail" resultType="com.hand.hdsp.quality.api.dto.StandardTeamDTO">
         select xst.*,
