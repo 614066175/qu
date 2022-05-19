@@ -56,7 +56,7 @@ public class StandardTeamServiceImpl implements StandardTeamService {
 
     @Override
     public Page<StandardTeamDTO> list(PageRequest pageRequest, StandardTeamDTO standardTeamDTO) {
-        return PageHelper.doPageAndSort(pageRequest, () -> standardTeamMapper.listAll(standardTeamDTO));
+        return PageHelper.doPage(pageRequest, () -> standardTeamMapper.listAll(standardTeamDTO));
     }
 
     /**
@@ -311,7 +311,7 @@ public class StandardTeamServiceImpl implements StandardTeamService {
     @Override
     public Page<StandardTeamDTO> parentTeamList(Long standardTeamId, PageRequest pageRequest) {
         if (standardTeamId == null) {
-            return PageHelper.doPageAndSort(pageRequest, () -> standardTeamMapper.listAll(StandardTeamDTO.builder()
+            return PageHelper.doPage(pageRequest, () -> standardTeamMapper.listAll(StandardTeamDTO.builder()
                     .tenantId(DetailsHelper.getUserDetails().getTenantId())
                     .projectId(ProjectHelper.getProjectId())
                     .build()));
