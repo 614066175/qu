@@ -318,22 +318,20 @@ public class StandardTeamServiceImpl implements StandardTeamService {
         }
         //递归查找到此标准组下的标准组
         List<StandardTeam> subStandardTeamList = getSubStandardTeam(standardTeamId);
-        if (CollectionUtils.isEmpty(subStandardTeamList)) {
-            return PageHelper.doPageAndSort(pageRequest, () -> standardTeamMapper.listAll(StandardTeamDTO.builder()
-                    .tenantId(DetailsHelper.getUserDetails().getTenantId())
-                    .projectId(ProjectHelper.getProjectId())
-                    .build()));
-        }
         List<StandardTeamDTO> standardTeamDTOS = standardTeamMapper.listAll(StandardTeamDTO.builder()
                 .tenantId(DetailsHelper.getUserDetails().getTenantId())
                 .projectId(ProjectHelper.getProjectId())
                 .build());
-        List<Long> subStandardTeamIds = subStandardTeamList.stream()
-                .map(StandardTeam::getStandardTeamId).collect(Collectors.toList());
+        List<Long> subStandardTeamIds = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(standardTeamDTOS)) {
+            subStandardTeamIds = subStandardTeamList.stream()
+                    .map(StandardTeam::getStandardTeamId).collect(Collectors.toList());
+        }
         //并且加上自己
         subStandardTeamIds.add(standardTeamId);
+        List<Long> finalSubStandardTeamIds = subStandardTeamIds;
         List<StandardTeamDTO> filterStandardTeam = standardTeamDTOS.stream()
-                .filter(standardTeamDTO -> !subStandardTeamIds.contains(standardTeamDTO.getStandardTeamId()))
+                .filter(standardTeamDTO -> !finalSubStandardTeamIds.contains(standardTeamDTO.getStandardTeamId()))
                 .collect(Collectors.toList());
 
         org.springframework.data.domain.Page<StandardTeamDTO> page = PageUtil.doPage(filterStandardTeam, org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize()));
