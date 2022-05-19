@@ -62,4 +62,5 @@ public class DataFieldDO extends AuditDomain {
     private Integer notNullFlag;
 
     private String defaultValue;
+    private Long dataStandardId;
 }

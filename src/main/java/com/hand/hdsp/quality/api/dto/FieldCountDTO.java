@@ -42,8 +42,8 @@ public class FieldCountDTO {
     @ApiModelProperty(value = "表描述")
     private String tableDesc;
 
-    @ApiModelProperty(value = "表字段描述")
-    private String tableFieldDesc;
+    @ApiModelProperty(value = "字段描述")
+    private String fieldDesc;
 
     @ApiModelProperty(value = "行数")
     private Long row;
@@ -55,10 +55,12 @@ public class FieldCountDTO {
     private Long compliantRow;
 
     @ApiModelProperty(value = "总行合规比例")
-    private Float rate;
+    private Float compliantRate;
 
     @ApiModelProperty(value = "非空行合规比例")
-    private Float blankRowRate;
+    private Float aCompliantRate;
+
+
 
 
 

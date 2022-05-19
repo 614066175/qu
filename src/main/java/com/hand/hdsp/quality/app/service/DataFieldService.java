@@ -2,10 +2,7 @@ package com.hand.hdsp.quality.app.service;
 
 import java.util.List;
 
-import com.hand.hdsp.quality.api.dto.AssigneeUserDTO;
-import com.hand.hdsp.quality.api.dto.DataFieldDTO;
-import com.hand.hdsp.quality.api.dto.FieldCountDTO;
-import com.hand.hdsp.quality.api.dto.StandardAimDTO;
+import com.hand.hdsp.quality.api.dto.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.export.vo.ExportParam;
@@ -132,5 +129,5 @@ public interface DataFieldService {
      * @param standardAimDTO
      * @return
      */
-    List<FieldCountDTO> fieledCount(StandardAimDTO standardAimDTO);
+    FieldOverView fieldAimCount(StandardAimDTO standardAimDTO) throws InterruptedException;
 }

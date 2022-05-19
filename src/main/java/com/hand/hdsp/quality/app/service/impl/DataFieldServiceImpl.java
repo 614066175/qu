@@ -32,7 +32,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
@@ -66,7 +71,6 @@ public class DataFieldServiceImpl implements DataFieldService {
     private final DataStandardMapper dataStandardMapper;
 
 
-
     @Value("${hdsp.workflow.enabled:false}")
     private boolean enableWorkflow;
 
@@ -77,8 +81,10 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     private final DriverSessionService driverSessionService;
 
+    private final StandardStatisticsRepository standardStatisticsRepository;
 
-    public DataFieldServiceImpl(DataFieldRepository dataFieldRepository, StandardExtraRepository standardExtraRepository, StandardApproveRepository standardApproveRepository, DataFieldVersionRepository dataFieldVersionRepository, DataFieldMapper dataFieldMapper, DataStandardService dataStandardService, ExtraVersionRepository extraVersionRepository, DataStandardMapper dataStandardMapper, StandardAimRepository standardAimRepository,DriverSessionService driverSessionService) {
+
+    public DataFieldServiceImpl(DataFieldRepository dataFieldRepository, StandardExtraRepository standardExtraRepository, StandardApproveRepository standardApproveRepository, DataFieldVersionRepository dataFieldVersionRepository, DataFieldMapper dataFieldMapper, DataStandardService dataStandardService, ExtraVersionRepository extraVersionRepository, DataStandardMapper dataStandardMapper, StandardAimRepository standardAimRepository, DriverSessionService driverSessionService, StandardStatisticsRepository standardStatisticsRepository) {
         this.dataFieldRepository = dataFieldRepository;
         this.standardExtraRepository = standardExtraRepository;
         this.standardApproveRepository = standardApproveRepository;
@@ -88,7 +94,8 @@ public class DataFieldServiceImpl implements DataFieldService {
         this.standardAimRepository = standardAimRepository;
         this.extraVersionRepository = extraVersionRepository;
         this.dataStandardMapper = dataStandardMapper;
-        this.driverSessionService=driverSessionService;
+        this.driverSessionService = driverSessionService;
+        this.standardStatisticsRepository = standardStatisticsRepository;
     }
 
     @Override
@@ -356,34 +363,174 @@ public class DataFieldServiceImpl implements DataFieldService {
         }
     }
 
+    //在for循环中开启多线程
+    private static final ExecutorService executor = Executors.newFixedThreadPool(5);
+
+
     @Override
-    public List<FieldCountDTO> fieledCount(StandardAimDTO standardAimDTO) {
+    public FieldOverView fieldAimCount(StandardAimDTO standardAimDTO) throws InterruptedException {
         List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
                 .andWhere(Sqls.custom()
-                        .andEqualTo(StandardAim.FIELD_STANDARD_TYPE,standardAimDTO.getStandardType())
+                        .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, standardAimDTO.getStandardType())
                         .andEqualTo(StandardAim.FIELD_STANDARD_ID, standardAimDTO.getStandardId())
                         .andEqualTo(StandardAim.FIELD_TENANT_ID, standardAimDTO.getTenantId()))
                 .build());
-        if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
-            throw new CommonException(ErrorCode.STANDARD_AIM_NOT_EXIST);}
-        String dataSourceType;
-        String dataSourceCode;
-        String schemaName;
-        String tableName;
-
-
-        for (StandardAimDTO aimDTO : standardAimDTOS) {
-            dataSourceType= aimDTO.getStandardType();
-            dataSourceCode= aimDTO.getDatasourceCode();
-            schemaName=aimDTO.getSchemaName();
-            tableName=aimDTO.getTableName();
-
-            DriverSession driverSession = driverSessionService.getDriverSession(aimDTO.getTenantId(), dataSourceCode);
-
-
-
+        if (CollectionUtils.isEmpty(standardAimDTOS)) {
+            throw new CommonException(ErrorCode.STANDARD_AIM_NOT_EXIST);
         }
-        return null;
+
+        FieldOverView fieldOverView = new FieldOverView();
+        List<StandardStatisticsDTO> standardStatisticsDTOS = new ArrayList<>();
+        StandardStatisticsDTO standardStatisticsDTO = new StandardStatisticsDTO();
+
+
+
+        // 初始化计时器
+        CountDownLatch cdl = new CountDownLatch(standardAimDTOS.size());
+        for (StandardAimDTO aimDTO : standardAimDTOS) {
+            executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        standardStatisticsDTO.setAimId(aimDTO.getAimId());
+                        transfer(aimDTO, standardStatisticsDTO);
+                        String fieldName = aimDTO.getFieldName().split("\\(")[0];
+                        String dataSourceCode = aimDTO.getDatasourceCode();
+                        String schemaName = aimDTO.getSchemaName();
+                        String tableName = aimDTO.getTableName();
+
+                        //统计行数
+                        String BASE_SQL = "SELECT COUNT(*) FROM %s;\n";
+                        String sql = String.format(BASE_SQL, tableName);
+                        DriverSession driverSession = driverSessionService.getDriverSession(aimDTO.getTenantId(), dataSourceCode);
+                        List<Map<String, Object>> maps = driverSession.executeOneQuery(schemaName, sql);
+                        if (CollectionUtils.isNotEmpty(maps)) {
+                            log.info("查询结果：" + maps);
+                            String key = maps.get(0).keySet().iterator().next();
+                            log.info("key:" + key);
+                            Long count = Long.parseLong(String.valueOf(maps.get(0).get(key)));
+                            standardStatisticsDTO.setRowNum(count);
+                        }
+                        //统计非空行数
+                        BASE_SQL = "SELECT COUNT(*) FROM %s where %s is not null;\n";
+                        sql = String.format(BASE_SQL, tableName, fieldName);
+                        List<Map<String, Object>> maps1 = driverSession.executeOneQuery(schemaName, sql);
+                        if (CollectionUtils.isNotEmpty(maps1)) {
+                            log.info("查询结果：" + maps1);
+                            String key = maps1.get(0).keySet().iterator().next();
+                            log.info("key:" + key);
+                            Long count = Long.parseLong(String.valueOf(maps1.get(0).get(key)));
+                            standardStatisticsDTO.setNonNullRow(count);
+                        }
+                        // 统计合规行数
+                        //1.查询出字段标准表，并取出对应的合规校验 字段
+                        DataFieldDTO dataFieldDTO = dataFieldRepository.selectDTOByPrimaryKey(aimDTO.getStandardId());
+                        if (Objects.isNull(dataFieldDTO)) {
+                            throw new CommonException(ErrorCode.DATA_FIELD_STANDARD_NOT_EXIST);
+                        }
+                        String fieldType = dataFieldDTO.getFieldType().toUpperCase();
+                        String fieldLength = dataFieldDTO.getFieldLength();
+                        String dataPattern = dataFieldDTO.getDataPattern();
+                        String valueType = dataFieldDTO.getValueType();
+                        String valueRange = dataFieldDTO.getValueRange();
+                        //2.对value_type 的类型做处理
+                        String[] lists = new String [] {"1","2"};
+
+                        if ("AREA".equals(valueType)) {
+                            lists = valueRange.split(",");
+                        }
+                        //3.获取information_schema.columns表，根据字段名获取字段类型
+                        String informationBaseSql = "select DATA_TYPE from columns where TABLE_NAME = '%s' and COLUMN_NAME = '%s' \n";
+                        String informationSql = String.format(informationBaseSql, tableName, fieldName);
+                        List<Map<String, Object>> information_schema = driverSession.executeOneQuery("information_schema", informationSql);
+                        String key1 = information_schema.get(0).keySet().iterator().next();
+                        //4.获取字段类型
+                        String value = String.valueOf(information_schema.get(0).get(key1)).toUpperCase();
+                        BASE_SQL = "SELECT COUNT(*) FROM %s where length(%s) < %s " +
+                                "and case '%s' when  'ENUM'  then %s in (%s) " +
+                                "when 'AREA' then %s < %s and %s > %s " +
+                                "end " +
+                                "and %s REGEXP '%s'" +
+                                "and '%s' = '%s' \n";
+                        sql = String.format(BASE_SQL, tableName, fieldName, fieldLength, valueType, fieldName, valueRange, fieldName, lists[0], fieldName, lists[1], fieldName, dataPattern, fieldType, value);
+                        List<Map<String, Object>> maps2 = driverSession.executeOneQuery(schemaName, sql);
+                        if (CollectionUtils.isNotEmpty(maps2)) {
+                            log.info("查询结果：" + maps2);
+                            String key = maps2.get(0).keySet().iterator().next();
+                            log.info("key:" + key);
+                            Long count = Long.parseLong(String.valueOf(maps2.get(0).get(key)));
+                            standardStatisticsDTO.setCompliantRow(count);
+                        }
+                        // 统计总行合规比例
+                        String compliantRatePercent = getPercent(standardStatisticsDTO.getCompliantRow(), standardStatisticsDTO.getRowNum());
+                        standardStatisticsDTO.setCompliantRate(compliantRatePercent);
+                        // 统计非空行合规比列
+                        String acompliantPercent = getPercent(standardStatisticsDTO.getNonNullRow(), standardStatisticsDTO.getRowNum());
+                        standardStatisticsDTO.setAcompliantRate(acompliantPercent);
+                        standardStatisticsDTOS.add(standardStatisticsDTO);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    // 闭锁-1
+                    cdl.countDown();
+                }
+            });
+        }
+        cdl.await();
+        //关闭线程池
+        executor.shutdown();
+        System.out.println("===============    关闭线程   ====================");
+        fieldOverView.setStandardStatisticsDTOS(standardStatisticsDTOS);
+        // 落标总数统计
+        totalView(standardStatisticsDTOS, fieldOverView);
+        standardStatisticsRepository.batchInsertDTOSelective(standardStatisticsDTOS);
+        return fieldOverView;
+    }
+
+    private void transfer(StandardAimDTO aimDTO, StandardStatisticsDTO standardStatisticsDTO) {
+        standardStatisticsDTO.setTableDesc(aimDTO.getTableDesc());
+        standardStatisticsDTO.setDatasourceType(aimDTO.getDatasourceType());
+        standardStatisticsDTO.setTableName(aimDTO.getTableName());
+        standardStatisticsDTO.setFieldDesc(aimDTO.getFieldDesc());
+    }
+
+    /**
+     * 落标同属统计
+     *
+     * @param standardStatisticsDTOS
+     * @param fieldOverView
+     */
+    private void totalView(List<StandardStatisticsDTO> standardStatisticsDTOS, FieldOverView fieldOverView) {
+        Long totalRow = 0L;
+        Long totalNullRow = 0L;
+        Long totalCompliantRow = 0L;
+        for (StandardStatisticsDTO standardStatisticsDTO : standardStatisticsDTOS) {
+            totalRow += standardStatisticsDTO.getRowNum();
+            totalNullRow += standardStatisticsDTO.getNonNullRow();
+            totalCompliantRow += standardStatisticsDTO.getCompliantRow();
+        }
+        fieldOverView.setTotalRow(totalRow);
+        fieldOverView.setTotalNullRow(totalNullRow);
+        fieldOverView.setTotalCompliantRow(totalCompliantRow);
+        String compliantPercent = getPercent(totalCompliantRow, totalRow);
+        fieldOverView.setTotalAcompliantRate(compliantPercent);
+        String aCompliantpercent = getPercent(totalNullRow, totalRow);
+        fieldOverView.setTotalAcompliantRate(aCompliantpercent);
+    }
+
+
+    /**
+     * 计算百分比
+     *
+     * @param num1
+     * @param num2
+     * @return
+     */
+    private static String getPercent(Long num1, Long num2) {
+        DecimalFormat decimalFormat = new DecimalFormat("0.00%");
+        String format = decimalFormat.format((float) num1 / num2);
+        return format;
+
     }
 
     /**

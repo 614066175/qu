@@ -315,7 +315,7 @@ public class DataFieldController extends BaseController {
 
 
 
-    @ApiOperation(value = "字段落地统计")
+    @ApiOperation(value = "字段落标统计")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -323,11 +323,11 @@ public class DataFieldController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/field-count")
-    public ResponseEntity<List<FieldCountDTO>> fieledCount(@PathVariable(name = "organizationId") Long tenantId,
-                                                           StandardAimDTO standardAimDTO) {
+    @GetMapping("/field-aim-count")
+    public ResponseEntity<FieldOverView> fieldAimCount(@PathVariable(name = "organizationId") Long tenantId,
+                                                           StandardAimDTO standardAimDTO) throws Exception {
         standardAimDTO.setTenantId(tenantId);
-        return Results.success(dataFieldService.fieledCount(standardAimDTO));
+        return Results.success(dataFieldService.fieldAimCount(standardAimDTO));
     }
 
 

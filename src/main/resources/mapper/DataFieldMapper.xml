@@ -58,7 +58,8 @@
           ${fs}.last_update_date,
           ${fs}.data_standard_id,
           ${fs}.null_flag,
-          ${fs}.default_value
+          ${fs}.default_value,
+          ${fs}.data_standard_id
     </sql>
 
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.DataFieldDTO">
