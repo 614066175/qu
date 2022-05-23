@@ -44,5 +44,14 @@ public class PlanGroupTreeVO {
 
     private Long tenantId;
 
+    //质检项Id，分配列表查询时传递
+    private Long planBaseId;
+
+    //是否被分配标识（1是，0否）
+    private Integer assignedFlag;
+
+    //编辑标识（1可编辑，0不可）
+    private Integer editFlag;
+
     private Long projectId;
 }

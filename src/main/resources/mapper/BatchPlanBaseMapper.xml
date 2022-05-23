@@ -5,6 +5,8 @@
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.BatchPlanBase">
         <result column="plan_base_id" property="planBaseId" jdbcType="DECIMAL"/>
         <result column="plan_base_code" property="planBaseCode" jdbcType="VARCHAR"/>
+        <result column="plan_base_name" property="planBaseName" jdbcType="VARCHAR"/>
+        <result column="plan_base_desc" property="planBaseDesc" jdbcType="VARCHAR"/>
         <result column="plan_id" property="planId" jdbcType="DECIMAL"/>
         <result column="datasource_type" property="datasourceType" jdbcType="VARCHAR"/>
         <result column="datasource_id" property="datasourceId" jdbcType="DECIMAL"/>
@@ -34,6 +36,8 @@
         (case when t_rel_table_num.rel_table_num is null then 0 else t_rel_table_num.rel_table_num end) rel_table_num,
         xbpb.plan_base_id,
         xbpb.plan_base_code,
+        xbpb.plan_base_name,
+        xbpb.plan_base_desc,
         xbpb.plan_id,
         xbpb.datasource_type,
         xbpb.datasource_id,
@@ -41,19 +45,19 @@
         xbpb.sql_type
         from
         xqua_batch_plan_base xbpb
-            LEFT JOIN (
-                SELECT
-                xbpt.plan_base_id,
-                count(*) table_num
-                FROM
-                xqua_batch_plan_table xbpt
-                GROUP BY
-                xbpt.plan_base_id
-            ) t_table_num ON t_table_num.plan_base_id = xbpb.plan_base_id
-            LEFT JOIN (
-                SELECT
-                xbpf.plan_base_id,
-                count(*) field_num
+        LEFT JOIN (
+        SELECT
+        xbpt.plan_base_id,
+        count(*) table_num
+        FROM
+        xqua_batch_plan_table xbpt
+        GROUP BY
+        xbpt.plan_base_id
+        ) t_table_num ON t_table_num.plan_base_id = xbpb.plan_base_id
+        LEFT JOIN (
+        SELECT
+        xbpf.plan_base_id,
+        count(*) field_num
                 FROM
                 xqua_batch_plan_field xbpf
                 GROUP BY

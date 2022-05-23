@@ -21,6 +21,7 @@ import com.hand.hdsp.quality.infra.mapper.BatchResultItemMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureCollector;
+import com.hand.hdsp.quality.infra.publisher.QualityNoticePublisher;
 import com.hand.hdsp.quality.infra.util.CustomThreadPool;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.util.ParamsUtil;
@@ -132,6 +133,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
     @Resource
     private LineageFeign lineageFeign;
+
+    @Autowired
+    private QualityNoticePublisher qualityNoticePublisher;
 
 
     @Override
@@ -499,6 +503,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
             // 更新增量参数
             updateTimestamp(tenantId, timestampList, true);
+
+            //发送通知
+            qualityNoticePublisher.sendQualityNotice(tenantId, planId, batchResult.getResultId());
         } catch (CommonException e) {
             // 更新增量参数
             updateTimestamp(tenantId, timestampList, false);
@@ -641,9 +648,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 List<Map<String, Object>> maps = driverSession.executeOneQuery(batchPlanBase.getDatasourceSchema(),
                         String.format("select count(*) as COUNT from %s", batchPlanBase.getObjectName()));
                 if (CollectionUtils.isNotEmpty(maps)) {
-                    log.info("查询结果："+ maps);
+                    log.info("查询结果：" + maps);
                     String key = maps.get(0).keySet().iterator().next();
-                    log.info("key:"+key);
+                    log.info("key:" + key);
                     Long count = Long.parseLong(String.valueOf(maps.get(0).get(key)));
                     batchResultBase.setDataCount(count);
                 }
