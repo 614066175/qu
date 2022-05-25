@@ -200,4 +200,21 @@ public class StandardTeamController extends BaseController {
         return Results.success(dataFieldDTOList);
     }
 
+    @ApiOperation(value = "字段标准列表查询-用于表设计")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/standard-list")
+    public ResponseEntity<?> standardList(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                          @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                          DataFieldDTO dataFieldDTO, PageRequest pageRequest) {
+        dataFieldDTO.setTenantId(tenantId);
+        dataFieldDTO.setProjectId(projectId);
+        return Results.success(standardTeamService.standardList(dataFieldDTO, pageRequest));
+    }
+
 }

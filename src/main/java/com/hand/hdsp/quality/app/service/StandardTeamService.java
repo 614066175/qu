@@ -86,4 +86,9 @@ public interface StandardTeamService {
      */
     Page<StandardTeamDTO> parentTeamList(Long standardTeamId, PageRequest pageRequest);
 
+    /**
+     * @param dataFieldDTO
+     * @return
+     */
+    Page<DataFieldDTO> standardList(DataFieldDTO dataFieldDTO, PageRequest pageRequest);
 }
