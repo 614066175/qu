@@ -30,10 +30,10 @@ public interface BatchPlanBaseMapper extends BaseMapper<BatchPlanBase> {
     BatchPlanBaseDTO detail(Long planBaseId);
 
     /**
-     * 分组维度查询质检项 （查询此分组下所有方案的所有质检项）
+     * 查询方案下的质检项，无需考虑动态表单,供质量评估使用
      *
      * @param batchPlanBaseDTO
      * @return
      */
-    List<BatchPlanBaseDTO> groupList(BatchPlanBaseDTO batchPlanBaseDTO);
+    List<BatchPlanBase> execBaseList(BatchPlanBaseDTO batchPlanBaseDTO);
 }

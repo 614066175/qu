@@ -240,6 +240,8 @@ public class BatchResultServiceImpl implements BatchResultService {
         }
         // 页大小重新赋值，覆盖 number 参数
         query.limit(pageSize);
+        //去掉_id字段的返回
+        query.fields().exclude("_id");
         // 即可得到第n页数据
         return mongoTemplate.find(query, Map.class, collectionName);
     }

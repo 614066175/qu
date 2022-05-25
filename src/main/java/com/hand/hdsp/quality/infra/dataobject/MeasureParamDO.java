@@ -30,6 +30,8 @@ public class MeasureParamDO {
 
     private String fieldName;
 
+    private String dimensionField;
+
     private String checkFieldName;
 
     /**

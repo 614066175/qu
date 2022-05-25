@@ -239,12 +239,6 @@
         plan_base_id DESC
     </select>
 
-    <select id="groupList" resultMap="BaseResultMap">
-        <include refid="queryOwnBase"/>
-        --以及查询被分配的质检项,此处使用union直接去重
-        union
-        <include refid="queryAssignBase"/>
-    </select>
 
     <select id="detail" resultMap="BaseResultMap">
         select xbpb.plan_base_id,
@@ -275,6 +269,29 @@
                  left join xqua_base_form_value xbfv on xbpb.plan_base_id = xbfv.plan_base_id
                  left join hpfm_form_line hfl on xbfv.form_line_id = hfl.form_line_id
         where xbpb.plan_base_id = #{planBaseId}
+    </select>
+
+
+    <select id="execBaseList" resultType="com.hand.hdsp.quality.domain.entity.BatchPlanBase">
+        select xbpb.*
+        from xqua_batch_plan_base xbpb
+        join xqua_batch_plan xbp on xbpb.plan_id=xbp.plan_id
+        <where>
+            <if test="planId != null">
+                and xbp.plan_id = #{planId}
+            </if>
+        </where>
+        --以及查询被分配的质检项,此处使用union直接去重
+        union
+        select xbpb.* from
+        xqua_plan_base_assign xpba
+        join xqua_batch_plan xbp on xpba.plan_id=xbp.plan_id
+        join xqua_batch_plan_base xbpb on xpba.plan_base_id=xbpb.plan_base_id
+        <where>
+            <if test="planId != null">
+                and xpba.plan_id = #{planId}
+            </if>
+        </where>
     </select>
 
 </mapper>

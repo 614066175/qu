@@ -29,6 +29,7 @@
                xbpfl.check_item,
                xbpfl.count_type,
                xbpfl.field_name,
+               xbpfl.dimension_field,
                xbpfl.check_field_name,
                xbpfl.regular_expression
         FROM xqua_batch_plan_field_con xbpfc

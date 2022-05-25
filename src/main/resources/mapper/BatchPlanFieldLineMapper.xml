@@ -9,6 +9,7 @@
         <result column="check_item" property="checkItem" jdbcType="VARCHAR"/>
         <result column="count_type" property="countType" jdbcType="VARCHAR"/>
         <result column="field_name" property="fieldName" jdbcType="VARCHAR"/>
+        <result column="dimension_field" property="dimensionField" jdbcType="VARCHAR"/>
         <result column="check_field_name" property="checkFieldName" jdbcType="VARCHAR"/>
         <result column="regular_expression" property="regularExpression" jdbcType="VARCHAR"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>

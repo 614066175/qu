@@ -14,6 +14,7 @@ import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -111,8 +112,9 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
         }
         if (CollectionUtils.isNotEmpty(batchPlanBaseDTO.getBaseFormValueDTOS())) {
             HashMap<String, Object> map = new HashMap<>();
-            batchPlanBaseDTO.getBaseFormValueDTOS().forEach(baseFormValueDTO ->
-                    map.put(baseFormValueDTO.getItemCode(), baseFormValueDTO.getFormValue()));
+            batchPlanBaseDTO.getBaseFormValueDTOS().stream()
+                    .filter(baseFormValueDTO -> StringUtils.isNotEmpty(baseFormValueDTO.getItemCode()))
+                    .forEach(baseFormValueDTO -> map.put(baseFormValueDTO.getItemCode(), baseFormValueDTO.getFormValue()));
             batchPlanBaseDTO.setBaseFormValueJson(JsonUtil.toJson(map));
         }
         return batchPlanBaseDTO;

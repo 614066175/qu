@@ -15,6 +15,7 @@ import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.driver.infra.util.PageUtil;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
@@ -92,8 +93,10 @@ public class BatchPlanBaseRepositoryImpl extends BaseRepositoryImpl<BatchPlanBas
         page.getContent().forEach(dto -> {
             if (CollectionUtils.isNotEmpty(dto.getBaseFormValueDTOS())) {
                 HashMap<String, Object> map = new HashMap<>();
-                dto.getBaseFormValueDTOS().forEach(baseFormValueDTO ->
-                        map.put(baseFormValueDTO.getItemCode(), baseFormValueDTO.getFormValue()));
+                dto.getBaseFormValueDTOS()
+                        .stream()
+                        .filter(baseFormValueDTO -> StringUtils.isNotEmpty(baseFormValueDTO.getItemCode()))
+                        .forEach(baseFormValueDTO -> map.put(baseFormValueDTO.getItemCode(), baseFormValueDTO.getFormValue()));
                 dto.setBaseFormValueJson(JsonUtil.toJson(map));
             }
         });
@@ -141,8 +144,11 @@ public class BatchPlanBaseRepositoryImpl extends BaseRepositoryImpl<BatchPlanBas
         page.getContent().forEach(dto -> {
             if (CollectionUtils.isNotEmpty(dto.getBaseFormValueDTOS())) {
                 HashMap<String, Object> map = new HashMap<>();
-                dto.getBaseFormValueDTOS().forEach(baseFormValueDTO ->
-                        map.put(baseFormValueDTO.getItemCode(), baseFormValueDTO.getFormValue()));
+                dto.getBaseFormValueDTOS()
+                        .stream()
+                        .filter(baseFormValueDTO -> StringUtils.isNotEmpty(baseFormValueDTO.getItemCode()))
+                        .forEach(baseFormValueDTO ->
+                                map.put(baseFormValueDTO.getItemCode(), baseFormValueDTO.getFormValue()));
                 dto.setBaseFormValueJson(JsonUtil.toJson(map));
             }
         });

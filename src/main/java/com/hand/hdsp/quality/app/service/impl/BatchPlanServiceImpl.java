@@ -15,8 +15,8 @@ import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.dataobject.SpecifiedParamsResponseDO;
 import com.hand.hdsp.quality.infra.feign.DispatchJobFeign;
 import com.hand.hdsp.quality.infra.feign.LineageFeign;
-import com.hand.hdsp.quality.infra.feign.RestJobFeign;
 import com.hand.hdsp.quality.infra.feign.TimestampFeign;
+import com.hand.hdsp.quality.infra.mapper.BatchPlanBaseMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchResultItemMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
 import com.hand.hdsp.quality.infra.measure.Measure;
@@ -46,9 +46,7 @@ import org.hzero.core.util.ResponseUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.session.DriverSession;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -115,8 +113,6 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     @Resource
     private DispatchJobFeign dispatchJobFeign;
     @Resource
-    private RestJobFeign restJobFeign;
-    @Resource
     private LovAdapter lovAdapter;
     @Resource
     private TimestampFeign timestampFeign;
@@ -126,16 +122,17 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     private BatchResultMapper batchResultMapper;
     @Resource
     private AlertMessageHandler alertMessageHandler;
-    @Autowired
-    private StringRedisTemplate redisTemplate;
     @Resource
     private DriverSessionService driverSessionService;
 
     @Resource
     private LineageFeign lineageFeign;
 
-    @Autowired
+    @Resource
     private QualityNoticePublisher qualityNoticePublisher;
+
+    @Resource
+    private BatchPlanBaseMapper batchPlanBaseMapper;
 
 
     @Override
@@ -618,7 +615,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                            List<TimestampControlDTO> timestampList) {
 
         //查询此方案下的质检项，（自己的和被分配的）
-        List<BatchPlanBase> baseList = batchPlanBaseRepository.select(BatchPlanBase.FIELD_PLAN_ID, planId);
+//        List<BatchPlanBase> baseList = batchPlanBaseRepository.select(BatchPlanBase.FIELD_PLAN_ID, planId);
+        List<BatchPlanBase> baseList = batchPlanBaseMapper.execBaseList(BatchPlanBaseDTO.builder().planId(planId).build());
+
         //评估每一个方案下的base
         for (BatchPlanBase batchPlanBase : baseList) {
             String objectName = batchPlanBase.getObjectName();
@@ -640,6 +639,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     .packageObjectName(packageObjectName).datasourceType(batchPlanBase.getDatasourceType())
                     .ruleCount(0L).exceptionRuleCount(0L).checkItemCount(0L).exceptionCheckItemCount(0L)
                     .tenantId(tenantId)
+                    .sqlType(batchPlanBase.getSqlType())
                     //从result中取projectId
                     .projectId(batchResult.getProjectId())
                     .build();
@@ -716,8 +716,6 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 batchResultBase.getPlanBaseId());
         batchResultBase.setRuleCount(batchResultBase.getRuleCount() + tableList.size());
 
-//        //表级所有异常消息
-//        List<Map<String,Object>> tableExceptionList=new ArrayList<>();
 
         for (BatchPlanTable batchPlanTable : tableList) {
             List<BatchPlanTableConDO> conList = batchPlanTableConRepository.selectJoinItem(
@@ -766,8 +764,6 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     param.setSql(batchPlanTableLines.get(0).getCustomSql());
                 }
                 measure.check(param);
-//                param.setRuleName(batchPlanTable.getRuleName());
-//                handleExceptionList(tableExceptionList,param);
 
                 BatchResultItem batchResultItem = param.getBatchResultItem();
                 batchResultItem.setResultRuleId(batchResultRuleDTO.getResultRuleId());
@@ -805,9 +801,6 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             batchResultRuleRepository.updateByDTOPrimaryKeySelective(batchResultRuleDTO);
         }
 
-//        //将所有表段级检验项异常数据存入es
-//        String key=String.format("%s:%d",PlanConstant.CACHE_BUCKET_EXCEPTION,batchResultBase.getPlanBaseId());
-//        redisTemplate.opsForHash().put(key, PlanConstant.ResultRuleType.TABLE,JsonUtils.object2Json(tableExceptionList));
     }
 
 
@@ -862,6 +855,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                         .warningLevelList(JsonUtils.json2WarningLevel(batchPlanFieldConDO.getWarningLevel()))
                         .schema(schema).pluginDatasourceDTO(pluginDatasourceDTO)
                         .fieldName(batchPlanFieldConDO.getFieldName())
+                        .dimensionField(batchPlanFieldConDO.getDimensionField())
                         .checkFieldName(batchPlanFieldConDO.getCheckFieldName())
                         .regularExpression(batchPlanFieldConDO.getRegularExpression())
                         .batchResultBase(batchResultBase).batchResultRuleDTO(batchResultRuleDTO)
