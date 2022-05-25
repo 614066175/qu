@@ -1,12 +1,5 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchResultService;
 import com.hand.hdsp.quality.domain.entity.BatchPlanBase;
@@ -15,8 +8,6 @@ import com.hand.hdsp.quality.domain.repository.BatchPlanBaseRepository;
 import com.hand.hdsp.quality.domain.repository.BatchResultBaseRepository;
 import com.hand.hdsp.quality.domain.repository.BatchResultRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
-import com.hand.hdsp.quality.infra.constant.PlanConstant;
-import com.hand.hdsp.quality.infra.constant.PlanConstant.ExceptionParam;
 import com.hand.hdsp.quality.infra.feign.ExecutionFlowFeign;
 import com.hand.hdsp.quality.infra.mapper.BatchResultItemMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
@@ -30,15 +21,25 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.exception.ExceptionResponse;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang3.StringUtils;
+import org.bson.types.ObjectId;
 import org.hzero.core.util.ResponseUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
-import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.ExceptionParam.RULE_NAME;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.ExceptionParam.WARNING_LEVEL;
 
 /**
  * <p>批数据方案结果表应用服务默认实现</p>
@@ -59,17 +60,19 @@ public class BatchResultServiceImpl implements BatchResultService {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+    private final MongoTemplate mongoTemplate;
 
     public BatchResultServiceImpl(ExecutionFlowFeign executionFlowFeign,
                                   BatchResultMapper batchResultMapper,
                                   BatchResultItemMapper batchResultItemMapper,
-                                  BatchResultBaseRepository batchResultBaseRepository, BatchResultRepository batchResultRepository, BatchPlanBaseRepository batchPlanBaseRepository) {
+                                  BatchResultBaseRepository batchResultBaseRepository, BatchResultRepository batchResultRepository, BatchPlanBaseRepository batchPlanBaseRepository, MongoTemplate mongoTemplate) {
         this.executionFlowFeign = executionFlowFeign;
         this.batchResultMapper = batchResultMapper;
         this.batchResultItemMapper = batchResultItemMapper;
         this.batchResultBaseRepository = batchResultBaseRepository;
         this.batchResultRepository = batchResultRepository;
         this.batchPlanBaseRepository = batchPlanBaseRepository;
+        this.mongoTemplate = mongoTemplate;
     }
 
 
@@ -187,58 +190,60 @@ public class BatchResultServiceImpl implements BatchResultService {
     }
 
     @Override
-    public Page<Map<String, Object>> listExceptionDetail(ExceptionDataDTO exceptionDataDTO, PageRequest pageRequest) {
+    @SuppressWarnings(value = "all")
+    public Page<Map> listExceptionDetail(ExceptionDataDTO exceptionDataDTO, PageRequest pageRequest) {
         if (Objects.isNull(exceptionDataDTO.getPlanBaseId())) {
             throw new CommonException(ErrorCode.PLAN_BASE_ID_IS_EMPTY);
         }
-        //查看base的异常数据 目前只有字段级有异常数据
-//        Object json = redisTemplate.opsForHash().get(String.format("%s:%d", PlanConstant.CACHE_BUCKET_EXCEPTION,
-//                exceptionDataDTO.getPlanBaseId()), PlanConstant.ResultRuleType.FIELD);
 
         Long resultBaseId = batchResultBaseRepository.selectMaxResultBaseId(exceptionDataDTO.getPlanBaseId());
         if (Objects.isNull(resultBaseId)) {
             throw new CommonException(ErrorCode.BATCH_RESULT_NOT_EXIST);
         }
-        BatchResultBase batchResultBase = batchResultBaseRepository.selectByPrimaryKey(resultBaseId);
-        if (batchResultBase == null || Strings.isEmpty(batchResultBase.getExceptionList())) {
+        //通过mongo来进行查询
+        Query query = new Query();
+        if (StringUtils.isNotEmpty(exceptionDataDTO.getRuleName())) {
+            query.addCriteria(Criteria.where(RULE_NAME).regex(String.format(".*%s.*", exceptionDataDTO.getRuleName())));
+        }
+        if (StringUtils.isNotEmpty(exceptionDataDTO.getWarningLevel())) {
+            //告警等级
+            query.addCriteria(Criteria.where(WARNING_LEVEL).is(exceptionDataDTO.getWarningLevel()));
+        }
+        String collectionName = String.format("%d_%d", exceptionDataDTO.getPlanBaseId(), resultBaseId);
+        long count = mongoTemplate.count(query, collectionName);
+        if (count == 0) {
             return new Page<>();
         }
-        JSONObject jsonObject = JSON.parseObject(batchResultBase.getExceptionList());
-        List<Map<String, Object>> result = JsonUtil.toObj(String.valueOf(jsonObject.get("FIELD")), new TypeReference<List<Map<String, Object>>>() {
-        });
-        if (Strings.isNotEmpty(exceptionDataDTO.getRuleName())) {
-            result = result.stream().filter(map -> {
-                String ruleName = String.valueOf(map.get("$ruleName"));
-                return ruleName.contains(exceptionDataDTO.getRuleName());
-            }).collect(Collectors.toList());
-        }
-        if (Strings.isNotEmpty(exceptionDataDTO.getWarningLevel())) {
-            result = result.stream().filter(map -> {
-                String warningLevel = Optional.ofNullable(String.valueOf(map.get(ExceptionParam.WARNING_LEVEL)))
-                        .orElse("");
-                List<String> list = Arrays.asList(warningLevel.split(","));
-                if (CollectionUtils.isEmpty(list)) {
-                    throw new CommonException(ErrorCode.EXCEPTION_PARAM_ERROR);
-                }
-                return list.contains(exceptionDataDTO.getWarningLevel());
-            }).collect(Collectors.toList());
-        }
-        int start = pageRequest.getPage() * pageRequest.getSize();
-        int end = start + pageRequest.getSize();
-        if (start > end) {
-            throw new CommonException(ErrorCode.PAGE_ERROR);
-        }
-        List<Map<String, Object>> content = new ArrayList<>();
-        for (int i = start; i < end; i++) {
-            if (result.size() - 1 >= i) {
-                content.add(result.get(i));
-            } else {
-                break;
+        List<Map> content = getContent(query, collectionName, pageRequest.getPage(), pageRequest.getSize());
+        return new Page<>(content, new PageInfo(pageRequest.getPage(), pageRequest.getSize()), count);
+    }
+
+    @SuppressWarnings(value = "all")
+    public List<Map> getContent(Query query, String collectionName, int pageNum, int pageSize) {
+        // 通过 _id 来排序
+        query.with(Sort.by(Sort.Direction.ASC, "_id"));
+        if (pageNum != 0) {
+            // number 参数是为了查上一页的最后一条数据
+            int number = pageNum * pageSize;
+            query.limit(number);
+            List<Map> content = mongoTemplate.find(query, Map.class, collectionName);
+            if (CollectionUtils.isEmpty(content)) {
+                return null;
             }
+            // 取出最后一条数据
+            Map<String, Object> data = content.get(content.size() - 1);
+            // 取到上一页的最后一条数据 id，当作条件查接下来的数据
+            //mongo默认使用的时ObjectId，实际上就是以插入数据库的时间进行排序，所以直接比较ObjectId即可
+            ObjectId id = (ObjectId) data.get("_id");
+            // 从上一页最后一条开始查（大于不包括这一条）使用gt
+            query.addCriteria(Criteria.where("_id").gt(id));
         }
-        //去除合并pk的展示
-        content = content.stream().peek(map -> map.remove(ExceptionParam.PK)).collect(Collectors.toList());
-        return new Page<>(content, new PageInfo(pageRequest.getPage(), pageRequest.getSize()), result.size());
+        // 页大小重新赋值，覆盖 number 参数
+        query.limit(pageSize);
+        //去掉_id字段的返回
+        query.fields().exclude("_id");
+        // 即可得到第n页数据
+        return mongoTemplate.find(query, Map.class, collectionName);
     }
 
     @Override

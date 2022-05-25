@@ -1,12 +1,5 @@
 package com.hand.hdsp.quality.infra.measure;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.ParseException;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
@@ -20,6 +13,13 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hzero.core.base.BaseConstants;
 import org.springframework.util.Assert;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.ParseException;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <p>评估工具类</p>
@@ -156,6 +156,7 @@ public class MeasureUtil {
             throw new CommonException(ErrorCode.CONVERT_SQL);
         }
 
+        log.info("评估sql：" + sqlAction);
         return sqlAction;
     }
 

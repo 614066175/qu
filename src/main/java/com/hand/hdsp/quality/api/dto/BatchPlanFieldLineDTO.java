@@ -50,6 +50,9 @@ public class BatchPlanFieldLineDTO extends AuditDomain {
     @Size(max = 1000)
     private String fieldName;
 
+    @ApiModelProperty(value = "维度字段，多个列逗号拼接")
+    private String dimensionField;
+
     @ApiModelProperty(value = "校验字段，多个列逗号拼接")
     @Size(max = 1000)
     private String checkFieldName;

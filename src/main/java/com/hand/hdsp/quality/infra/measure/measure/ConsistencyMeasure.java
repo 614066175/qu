@@ -1,10 +1,5 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
@@ -21,6 +16,11 @@ import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.starter.driver.core.session.DriverSession;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>一致性</p>
@@ -64,7 +64,7 @@ public class ConsistencyMeasure implements Measure {
             batchResultItem.setWarningLevel(JsonUtils.object2Json(Collections.singleton(WarningLevelVO.builder()
                     .warningLevel(warningLevelDTO.getWarningLevel())
                     .build())));
-            PlanExceptionUtil.getPlanException(param,batchResultBase.getPackageObjectName(),sql,driverSession, warningLevelDTO);
+            PlanExceptionUtil.getPlanException(param, batchResultBase, sql, driverSession, warningLevelDTO);
             batchResultItem.setExceptionInfo("不满足一致性（规则字段组合相同时，校验字段均相同）");
         }
 

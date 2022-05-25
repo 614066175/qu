@@ -1,20 +1,26 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 import com.hand.hdsp.core.util.JsqlParser;
+import com.hand.hdsp.quality.api.dto.BaseFormValueDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultDTO;
 import com.hand.hdsp.quality.api.dto.ColumnDTO;
 import com.hand.hdsp.quality.app.service.BatchPlanBaseService;
+import com.hand.hdsp.quality.domain.entity.BaseFormValue;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
+import com.hand.hdsp.quality.domain.entity.PlanBaseAssign;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -46,6 +52,14 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
     @Resource
     private BatchResultRepository batchResultRepository;
 
+    private final PlanBaseAssignRepository planBaseAssignRepository;
+    private final BaseFormValueRepository baseFormValueRepository;
+
+    public BatchPlanBaseServiceImpl(PlanBaseAssignRepository planBaseAssignRepository, BaseFormValueRepository baseFormValueRepository) {
+        this.planBaseAssignRepository = planBaseAssignRepository;
+        this.baseFormValueRepository = baseFormValueRepository;
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int delete(BatchPlanBaseDTO batchPlanBaseDTO) {
@@ -75,13 +89,34 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
         //删除表间规则
         batchPlanRelTableRepository.deleteByPlanBaseId(planBaseId);
 
+        //删除所有此质检项的分配关系
+        List<PlanBaseAssign> planBaseAssignList = planBaseAssignRepository.select(PlanBaseAssign.builder().planBaseId(planBaseId).build());
+        planBaseAssignRepository.batchDeleteByPrimaryKey(planBaseAssignList);
+
+        //删除此质检相关的所有动态表单的值
+        List<BaseFormValue> baseFormValueList = baseFormValueRepository.select(BaseFormValue.builder().planBaseId(planBaseId).build());
+        baseFormValueRepository.batchDeleteByPrimaryKey(baseFormValueList);
+
         return batchPlanBaseRepository.deleteByPrimaryKey(batchPlanBaseDTO);
     }
 
     @Override
-    public BatchPlanBaseDTO detail(Long planBaseId, Long tenantId) {
+    public BatchPlanBaseDTO detail(Long planBaseId, Long currentPlanId, Long tenantId) {
         BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseRepository.detail(planBaseId);
         batchPlanBaseDTO.setDatasourceName(batchPlanBaseDTO.getDatasourceCode());
+        //如果当前方案和所属方案不一致，则返回不可编辑标识
+        if (!currentPlanId.equals(batchPlanBaseDTO.getPlanId())) {
+            batchPlanBaseDTO.setEditFlag(0);
+        } else {
+            batchPlanBaseDTO.setEditFlag(1);
+        }
+        if (CollectionUtils.isNotEmpty(batchPlanBaseDTO.getBaseFormValueDTOS())) {
+            HashMap<String, Object> map = new HashMap<>();
+            batchPlanBaseDTO.getBaseFormValueDTOS().stream()
+                    .filter(baseFormValueDTO -> StringUtils.isNotEmpty(baseFormValueDTO.getItemCode()))
+                    .forEach(baseFormValueDTO -> map.put(baseFormValueDTO.getItemCode(), baseFormValueDTO.getFormValue()));
+            batchPlanBaseDTO.setBaseFormValueJson(JsonUtil.toJson(map));
+        }
         return batchPlanBaseDTO;
     }
 
@@ -92,5 +127,49 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
                 .colName((String) map.get("fieldName"))
                 .typeName("VARCHAR")
                 .build()).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void cancelAssign(BatchPlanBaseDTO batchPlanBaseDTO) {
+        //当前评估方案移除此质检项
+        List<PlanBaseAssign> planBaseAssignList = planBaseAssignRepository.select(PlanBaseAssign.builder()
+                .planBaseId(batchPlanBaseDTO.getPlanBaseId())
+                .planId(batchPlanBaseDTO.getCurrentPlanId())
+                .tenantId(batchPlanBaseDTO.getTenantId())
+                .projectId(batchPlanBaseDTO.getProjectId())
+                .build());
+        planBaseAssignRepository.batchDeleteByPrimaryKey(planBaseAssignList);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public BatchPlanBaseDTO create(BatchPlanBaseDTO batchPlanBaseDTO) {
+        //插入质检项
+        batchPlanBaseRepository.insertDTOSelective(batchPlanBaseDTO);
+        //如果有动态表单的值
+        if (CollectionUtils.isNotEmpty(batchPlanBaseDTO.getBaseFormValueDTOS())) {
+            List<BaseFormValueDTO> baseFormValueDTOS = batchPlanBaseDTO.getBaseFormValueDTOS();
+            baseFormValueDTOS.forEach(baseFormValueDTO -> baseFormValueDTO.setPlanBaseId(batchPlanBaseDTO.getPlanBaseId()));
+            baseFormValueRepository.batchInsertDTOSelective(baseFormValueDTOS);
+        }
+        return batchPlanBaseDTO;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public BatchPlanBaseDTO update(BatchPlanBaseDTO batchPlanBaseDTO) {
+        //更新质检项
+        batchPlanBaseRepository.updateDTOAllColumnWhereTenant(batchPlanBaseDTO, batchPlanBaseDTO.getTenantId());
+        //删除此质检项的旧的动态表单数据
+        List<BaseFormValue> baseFormValues = baseFormValueRepository.select(BaseFormValue.builder().planBaseId(batchPlanBaseDTO.getPlanBaseId()).build());
+        baseFormValueRepository.batchDeleteByPrimaryKey(baseFormValues);
+        //如果有动态表单的值
+        if (CollectionUtils.isNotEmpty(batchPlanBaseDTO.getBaseFormValueDTOS())) {
+            List<BaseFormValueDTO> baseFormValueDTOS = batchPlanBaseDTO.getBaseFormValueDTOS();
+            baseFormValueDTOS.forEach(baseFormValueDTO -> baseFormValueDTO.setPlanBaseId(batchPlanBaseDTO.getPlanBaseId()));
+            baseFormValueRepository.batchInsertDTOSelective(baseFormValueDTOS);
+        }
+        return batchPlanBaseDTO;
     }
 }

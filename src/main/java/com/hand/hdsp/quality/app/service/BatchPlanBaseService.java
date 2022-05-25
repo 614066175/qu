@@ -24,10 +24,11 @@ public interface BatchPlanBaseService {
      * 基础配置表明细
      *
      * @param planBaseId
+     * @param currentPlanId
      * @param tenantId
      * @return
      */
-    BatchPlanBaseDTO detail(Long planBaseId, Long tenantId);
+    BatchPlanBaseDTO detail(Long planBaseId, Long currentPlanId, Long tenantId);
 
     /**
      * 解析自定义SQL
@@ -36,4 +37,27 @@ public interface BatchPlanBaseService {
      * @return
      */
     List<ColumnDTO> columns(String sql);
+
+    /**
+     * 取消分配
+     *
+     * @param batchPlanBaseDTO
+     */
+    void cancelAssign(BatchPlanBaseDTO batchPlanBaseDTO);
+
+    /**
+     * 创建质检项
+     *
+     * @param batchPlanBaseDTO
+     * @return
+     */
+    BatchPlanBaseDTO create(BatchPlanBaseDTO batchPlanBaseDTO);
+
+    /**
+     * 更新质检项
+     *
+     * @param batchPlanBaseDTO
+     * @return
+     */
+    BatchPlanBaseDTO update(BatchPlanBaseDTO batchPlanBaseDTO);
 }

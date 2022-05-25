@@ -1,12 +1,5 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.RANGE;
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.VALUE;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
@@ -39,6 +32,14 @@ import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareSymbol.EQUAL;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.RANGE;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.VALUE;
+
 /**
  * <p>
  * 字段值
@@ -52,7 +53,8 @@ import org.springframework.web.client.RestTemplate;
 public class FieldValueMeasure implements Measure {
 
     private static final String COUNT = "COUNT";
-    private static final String VALUE_SQL = " and ${field} = (%s)";
+    private static final String EQUAL_SQL = " and ${field} = (%s)";
+    private static final String NOT_EQUAL_SQL = " and ${field} != (%s)";
     private static final String START_SQL = " and ${field} > %s";
     private static final String END_SQL = " and ${field} < %s";
     private final ItemTemplateSqlRepository templateSqlRepository;
@@ -156,7 +158,7 @@ public class FieldValueMeasure implements Measure {
                 batchResultItem.setWarningLevel(JsonUtils.object2Json(Collections.singletonList(WarningLevelVO.builder()
                         .warningLevel(warningLevelDTO.getWarningLevel())
                         .build())));
-                PlanExceptionUtil.getPlanException(param, batchResultBase.getPackageObjectName(), sql, driverSession, warningLevelDTO);
+                PlanExceptionUtil.getPlanException(param, batchResultBase, sql, driverSession, warningLevelDTO);
                 batchResultItem.setExceptionInfo("存在字段值满足值集校验配置");
             }
 
@@ -214,11 +216,15 @@ public class FieldValueMeasure implements Measure {
                     }
                     //固定值比较
                     if (VALUE.equals(param.getCompareWay())) {
-                        condition.append(String.format(VALUE_SQL, warn.getExpectedValue()));
+                        if (EQUAL.equals(warn.getCompareSymbol())) {
+                            condition.append(String.format(EQUAL_SQL, warn.getExpectedValue()));
+                        } else {
+                            condition.append(String.format(NOT_EQUAL_SQL, warn.getExpectedValue()));
+                        }
                     }
                     String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, String.format("%s%s", Optional.ofNullable(param.getWhereCondition()).orElse("1=1"), condition));
                     if (warn.getIfAlert() == 1L) {
-                        PlanExceptionUtil.getPlanException(param, batchResultBase.getPackageObjectName(), sql, driverSession, warn);
+                        PlanExceptionUtil.getPlanException(param, batchResultBase, sql, driverSession, warn);
                     }
                 });
                 //查询出来的数据量小于每页大小时（即已到最后一页了）退出
@@ -259,7 +265,7 @@ public class FieldValueMeasure implements Measure {
                                     .warningLevel(warningLevelDTO.getWarningLevel())
                                     .levelCount(Long.parseLong(String.valueOf(response.get(0).values().toArray()[0].toString())))
                                     .build());
-                    PlanExceptionUtil.getPlanException(param, batchResultBase.getPackageObjectName(), sql, driverSession, warningLevelDTO);
+                    PlanExceptionUtil.getPlanException(param, batchResultBase, sql, driverSession, warningLevelDTO);
                 }
             });
             if (CollectionUtils.isNotEmpty(warningLevelVOList)) {
@@ -290,7 +296,12 @@ public class FieldValueMeasure implements Measure {
                 }
                 //逻辑值值比较
                 if (VALUE.equals(param.getCompareWay())) {
-                    condition.append(String.format(VALUE_SQL, warningLevelDTO.getExpectedValue()));
+                    if (EQUAL.equals(warningLevelDTO.getCompareSymbol())) {
+                        condition.append(String.format(EQUAL_SQL, warningLevelDTO.getExpectedValue()));
+                    } else {
+                        condition.append(String.format(NOT_EQUAL_SQL, warningLevelDTO.getExpectedValue()));
+                    }
+
                 }
                 itemTemplateSql.setSqlContent(itemTemplateSql.getSqlContent() + condition);
                 Map<String, String> variables = new HashMap<>(8);
@@ -304,7 +315,7 @@ public class FieldValueMeasure implements Measure {
                                     .warningLevel(warningLevelDTO.getWarningLevel())
                                     .levelCount(Long.parseLong(response.get(0).values().toArray()[0].toString()))
                                     .build());
-                    PlanExceptionUtil.getPlanException(param, batchResultBase.getPackageObjectName(), sql, driverSession, warningLevelDTO);
+                    PlanExceptionUtil.getPlanException(param, batchResultBase, sql, driverSession, warningLevelDTO);
                 }
             });
             if (CollectionUtils.isNotEmpty(warningLevelVOList)) {

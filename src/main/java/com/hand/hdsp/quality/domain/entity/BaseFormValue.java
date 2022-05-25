@@ -4,27 +4,32 @@ import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 import lombok.*;
-import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * <p>批数据方案-基础配置表实体</p>
+ * <p>质检项表单值实体</p>
  *
- * @author feng.liu01@hand-china.com 2020-03-24 16:19:53
+ * @author guoliang.li01@hand-china.com 2022-05-20 15:36:10
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@FieldNameConstants(prefix = "FIELD_")
 @VersionAudit
 @ModifyAudit
-@Table(name = "xqua_batch_plan_base")
-public class BatchPlanBase extends AuditDomain {
+@Table(name = "xqua_base_form_value")
+public class BaseFormValue extends AuditDomain {
+
+    public static final String FIELD_RELATION_ID = "relationId";
+    public static final String FIELD_PLAN_BASE_ID = "planBaseId";
+    public static final String FIELD_FORM_LINE_ID = "formLineId";
+    public static final String FIELD_FORM_VALUE = "formValue";
+    public static final String FIELD_TENANT_ID = "tenantId";
+    public static final String FIELD_PROJECT_ID = "projectId";
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -36,34 +41,13 @@ public class BatchPlanBase extends AuditDomain {
 
     @Id
     @GeneratedValue
+    private Long relationId;
+
     private Long planBaseId;
 
-    private String planBaseCode;
+    private Long formLineId;
 
-    //质检项名称
-    private String planBaseName;
-
-    private Long planId;
-
-    private String datasourceType;
-
-    private Long datasourceId;
-
-    private String datasourceCode;
-
-    private String datasourceSchema;
-
-    private String sqlType;
-
-    private String objectName;
-
-    private String description;
-
-    private String incrementStrategy;
-
-    private String incrementColumn;
-
-    private String whereCondition;
+    private String formValue;
 
     private Long tenantId;
 

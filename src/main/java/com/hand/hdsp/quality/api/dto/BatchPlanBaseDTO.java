@@ -1,9 +1,5 @@
 package com.hand.hdsp.quality.api.dto;
 
-import java.util.List;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
@@ -13,6 +9,10 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
+
+import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <p>批数据方案-基础配置表 数据传输对象</p>
@@ -28,22 +28,26 @@ import org.hzero.export.annotation.ExcelSheet;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @VersionAudit
 @ModifyAudit
-@ExcelSheet(zh = "评估方案基础配置",en = "batch plan base")
+@ExcelSheet(zh = "评估方案基础配置", en = "batch plan base")
 public class BatchPlanBaseDTO extends AuditDomain {
 
     @ApiModelProperty("表ID，主键，供其他表做外键")
     private Long planBaseId;
 
     @ApiModelProperty("基础配置编码")
-    @ExcelColumn(zh = "基础配置编码",en = "planBaseCode",showInChildren = true)
+    @ExcelColumn(zh = "基础配置编码", en = "planBaseCode", showInChildren = true)
     private String planBaseCode;
+
+    @ApiModelProperty("质检项名称")
+    private String planBaseName;
+
 
     @ApiModelProperty(value = "批数据评估方案表XQUA_BATCH_PLAN.PLAN_ID")
     @NotNull
     private Long planId;
 
     @ApiModelProperty(value = "数据源类型(快码：HDSP.DATASOURCE_TYPE)")
-    @ExcelColumn(zh = "数据源类型",en="datasourceType")
+    @ExcelColumn(zh = "数据源类型", en = "datasourceType")
     private String datasourceType;
 
     @ApiModelProperty(value = "数据源ID")
@@ -107,6 +111,31 @@ public class BatchPlanBaseDTO extends AuditDomain {
 
     @Transient
     private String planCode;
+
+    @Transient
+    private Long groupId;
+
+    @Transient
+    private List<Long> planIds;
+
+    @Transient
+    private List<Long> planBaseIds;
+
+    @Transient
+    private List<BaseFormValueDTO> baseFormValueDTOS;
+
+    @Transient
+    private Long currentPlanId;
+
+    //质检项所处的当前方案
+    @Transient
+    private String currentPlanName;
+
+    @Transient
+    private String baseFormValueJson;
+
+    @Transient
+    private Integer editFlag;
 
     private Long projectId;
 }
