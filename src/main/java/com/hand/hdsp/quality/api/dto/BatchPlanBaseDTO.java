@@ -41,8 +41,6 @@ public class BatchPlanBaseDTO extends AuditDomain {
     @ApiModelProperty("质检项名称")
     private String planBaseName;
 
-    @ApiModelProperty("质检项描述")
-    private String planBaseDesc;
 
     @ApiModelProperty(value = "批数据评估方案表XQUA_BATCH_PLAN.PLAN_ID")
     @NotNull
@@ -116,6 +114,28 @@ public class BatchPlanBaseDTO extends AuditDomain {
 
     @Transient
     private Long groupId;
+
+    @Transient
+    private List<Long> planIds;
+
+    @Transient
+    private List<Long> planBaseIds;
+
+    @Transient
+    private List<BaseFormValueDTO> baseFormValueDTOS;
+
+    @Transient
+    private Long currentPlanId;
+
+    //质检项所处的当前方案
+    @Transient
+    private String currentPlanName;
+
+    @Transient
+    private String baseFormValueJson;
+
+    @Transient
+    private Integer editFlag;
 
     private Long projectId;
 }

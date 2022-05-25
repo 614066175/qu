@@ -617,6 +617,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     private void ruleJudge(Long tenantId, Long planId, BatchResult batchResult,
                            List<TimestampControlDTO> timestampList) {
 
+        //查询此方案下的质检项，（自己的和被分配的）
         List<BatchPlanBase> baseList = batchPlanBaseRepository.select(BatchPlanBase.FIELD_PLAN_ID, planId);
         //评估每一个方案下的base
         for (BatchPlanBase batchPlanBase : baseList) {
@@ -823,9 +824,6 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         List<BatchPlanField> fieldList = batchPlanFieldRepository.select(BatchPlanTable.FIELD_PLAN_BASE_ID,
                 batchResultBase.getPlanBaseId());
         batchResultBase.setRuleCount(batchResultBase.getRuleCount() + fieldList.size());
-
-        //字段所有异常消息
-        List<Map<String, Object>> fieldExceptionList = new ArrayList<>();
 
         for (BatchPlanField batchPlanField : fieldList) {
             List<BatchPlanFieldConDO> conList = batchPlanFieldConRepository.selectJoinItem(

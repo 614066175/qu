@@ -49,10 +49,10 @@ public class BatchPlanBaseController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/list")
+    @PostMapping("/list")
     public ResponseEntity<?> listBase(@PathVariable(name = "organizationId") Long tenantId,
                                       @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                      BatchPlanBaseDTO batchPlanBaseDTO, @ApiIgnore @SortDefault(value = BatchPlanBase.FIELD_PLAN_BASE_ID,
+                                      @RequestBody BatchPlanBaseDTO batchPlanBaseDTO, @ApiIgnore @SortDefault(value = BatchPlanBase.FIELD_PLAN_BASE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchPlanBaseDTO.setTenantId(tenantId);
         batchPlanBaseDTO.setProjectId(projectId);
@@ -94,8 +94,9 @@ public class BatchPlanBaseController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{planBaseId}")
     public ResponseEntity<?> detail(@PathVariable(name = "organizationId") Long tenantId,
-                                    @PathVariable Long planBaseId) {
-        return Results.success(batchPlanBaseService.detail(planBaseId, tenantId));
+                                    @PathVariable Long planBaseId,
+                                    @RequestParam Long currentPlanId) {
+        return Results.success(batchPlanBaseService.detail(planBaseId, currentPlanId, tenantId));
     }
 
     @ApiOperation(value = "创建批数据方案-基础配置表")
@@ -113,8 +114,7 @@ public class BatchPlanBaseController extends BaseController {
         batchPlanBaseDTO.setTenantId(tenantId);
         batchPlanBaseDTO.setProjectId(projectId);
         this.validObject(batchPlanBaseDTO);
-        batchPlanBaseRepository.insertDTOSelective(batchPlanBaseDTO);
-        return Results.success(batchPlanBaseDTO);
+        return Results.success(batchPlanBaseService.create(batchPlanBaseDTO));
     }
 
     @ApiOperation(value = "修改批数据方案-基础配置表")
@@ -130,8 +130,8 @@ public class BatchPlanBaseController extends BaseController {
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody BatchPlanBaseDTO batchPlanBaseDTO) {
         batchPlanBaseDTO.setProjectId(projectId);
-        batchPlanBaseRepository.updateDTOAllColumnWhereTenant(batchPlanBaseDTO, tenantId);
-        return Results.success(batchPlanBaseDTO);
+        batchPlanBaseDTO.setTenantId(tenantId);
+        return Results.success(batchPlanBaseService.update(batchPlanBaseDTO));
     }
 
     @ApiOperation(value = "删除批数据方案-基础配置表")
@@ -150,6 +150,24 @@ public class BatchPlanBaseController extends BaseController {
         batchPlanBaseDTO.setProjectId(projectId);
         batchPlanBaseService.delete(batchPlanBaseDTO);
         return Results.success();
+    }
+
+    @ApiOperation(value = "移除（取消分配）")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @DeleteMapping("/cancel-assign")
+    public ResponseEntity<?> cancelAssign(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                          @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                          @RequestBody BatchPlanBaseDTO batchPlanBaseDTO) {
+        batchPlanBaseDTO.setTenantId(tenantId);
+        batchPlanBaseDTO.setProjectId(projectId);
+        batchPlanBaseService.cancelAssign(batchPlanBaseDTO);
+        return Results.success(batchPlanBaseDTO);
     }
 
     @ApiOperation(value = "解析自定义SQL字段信息")

@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.app.service.impl;
 
 import com.hand.hdsp.quality.api.dto.PlanBaseAssignDTO;
 import com.hand.hdsp.quality.app.service.PlanBaseAssignService;
+import com.hand.hdsp.quality.domain.entity.PlanBaseAssign;
 import com.hand.hdsp.quality.domain.repository.PlanBaseAssignRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,11 @@ public class PlanBaseAssignServiceImpl implements PlanBaseAssignService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public List<PlanBaseAssignDTO> baseAssign(List<PlanBaseAssignDTO> planBaseAssignDTOList) {
+    public List<PlanBaseAssignDTO> baseAssign(Long planBaseId, List<PlanBaseAssignDTO> planBaseAssignDTOList) {
+        //删除旧的分配关系，重新维护新得分配关系
+        List<PlanBaseAssign> planBaseAssignList = planBaseAssignRepository.select(PlanBaseAssign.builder().planBaseId(planBaseId).build());
+        planBaseAssignRepository.batchDeleteByPrimaryKey(planBaseAssignList);
+        //重新维护
         planBaseAssignRepository.batchInsertDTOSelective(planBaseAssignDTOList);
         return planBaseAssignDTOList;
     }

@@ -10,7 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * <p>质检项分配表实体</p>
+ * <p>质检项表单值实体</p>
  *
  * @author guoliang.li01@hand-china.com 2022-05-20 15:36:10
  */
@@ -21,12 +21,13 @@ import javax.persistence.Table;
 @EqualsAndHashCode(callSuper = false)
 @VersionAudit
 @ModifyAudit
-@Table(name = "xqua_plan_base_assign")
-public class PlanBaseAssign extends AuditDomain {
+@Table(name = "xqua_base_form_value")
+public class BaseFormValue extends AuditDomain {
 
-    public static final String FIELD_BASE_ASSIGN_ID = "baseAssignId";
+    public static final String FIELD_RELATION_ID = "relationId";
     public static final String FIELD_PLAN_BASE_ID = "planBaseId";
-    public static final String FIELD_PLAN_ID = "planId";
+    public static final String FIELD_FORM_LINE_ID = "formLineId";
+    public static final String FIELD_FORM_VALUE = "formValue";
     public static final String FIELD_TENANT_ID = "tenantId";
     public static final String FIELD_PROJECT_ID = "projectId";
 
@@ -40,11 +41,13 @@ public class PlanBaseAssign extends AuditDomain {
 
     @Id
     @GeneratedValue
-    private Long baseAssignId;
+    private Long relationId;
 
     private Long planBaseId;
 
-    private Long planId;
+    private Long formLineId;
+
+    private String formValue;
 
     private Long tenantId;
 

@@ -1,9 +1,6 @@
 package com.hand.hdsp.quality.infra.dataobject;
 
 
-import java.util.List;
-import java.util.Map;
-
 import com.hand.hdsp.quality.api.dto.BatchResultRuleDTO;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanRelTable;
@@ -11,6 +8,9 @@ import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import lombok.*;
 import org.hzero.boot.driver.api.dto.PluginDatasourceDTO;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>方案评估参数封装对象</p>
@@ -79,5 +79,7 @@ public class MeasureParamDO {
     private String ruleName;
 
     private Long projectId;
+
+    private String sqlType;
 
 }

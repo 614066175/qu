@@ -9,6 +9,7 @@ import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
+import org.hzero.starter.driver.core.infra.meta.PrimaryKey;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
@@ -18,8 +19,10 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.ExceptionParam.*;
 
@@ -119,6 +122,7 @@ public class PlanExceptionUtil {
      * @param warningLevelDTO
      */
     public static void getPlanException(MeasureParamDO param, BatchResultBase batchResultBase, String sql, DriverSession driverSession, WarningLevelDTO warningLevelDTO) {
+        log.info("获取异常数据");
         if (Strings.isEmpty(sql)) {
             throw new CommonException(ErrorCode.SQL_IS_EMPTY);
         }
@@ -152,11 +156,13 @@ public class PlanExceptionUtil {
         } else {
             //无需分页
             getExceptionResult(null, param, batchResultBase, sql, driverSession, warningLevelDTO);
+            log.info("异常数据获取结束");
         }
     }
 
     private static void getExceptionResult(Integer pageNumber, MeasureParamDO param, BatchResultBase batchResultBase, String sql, DriverSession driverSession, WarningLevelDTO warningLevelDTO) {
         List<Map<String, Object>> exceptionMapList;
+
         if (pageNumber != null) {
             //进行分页
             Page<Map<String, Object>> maps = driverSession.executeOneQuery(param.getSchema(), sql, PageRequest.of(pageNumber, BATCH_NUMBER));
@@ -164,9 +170,24 @@ public class PlanExceptionUtil {
         } else {
             exceptionMapList = driverSession.executeOneQuery(param.getSchema(), sql);
         }
+        List<PrimaryKey> primaryKeys = driverSession.tablePk(param.getSchema(), batchResultBase.getPackageObjectName());
         if (CollectionUtils.isNotEmpty(exceptionMapList)) {
             //每一条异常数据存上规则名和异常信息
             exceptionMapList.forEach(map -> {
+                //存储主键用于合并异常信息
+                if (CollectionUtils.isNotEmpty(primaryKeys)) {
+                    Set<String> columns = map.keySet();
+                    List<String> columnPkList = primaryKeys.stream().map(PrimaryKey::getColumnName).collect(Collectors.toList());
+                    List<String> keys = columns.stream().filter(columnPkList::contains).collect(Collectors.toList());
+                    List<String> values = keys.stream().map(key -> String.valueOf(map.get(key))).collect(Collectors.toList());
+                    map.put(PK, String.join("-", values));
+                } else {
+                    List<String> values = map.values().stream().map(String::valueOf).collect(Collectors.toList());
+                    //将所有的数据
+                    map.put(PK, String.join("-", values));
+                }
+                map.put(PLAN_BASE_ID, batchResultBase.getPlanBaseId());
+                map.put(RESULT_BASE_ID, batchResultBase.getResultBaseId());
                 map.put(RULE_NAME, param.getBatchResultRuleDTO().getRuleName());
                 map.put(WARNING_LEVEL, warningLevelDTO.getWarningLevel());
                 //异常信息 name 数据长度 满足告警等级【大于5小于10】

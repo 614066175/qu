@@ -14,8 +14,9 @@ public interface PlanBaseAssignService {
     /**
      * 质检项分配
      *
+     * @param planBaseId
      * @param planBaseAssignDTOList
      * @return
      */
-    List<PlanBaseAssignDTO> baseAssign(List<PlanBaseAssignDTO> planBaseAssignDTOList);
+    List<PlanBaseAssignDTO> baseAssign(Long planBaseId, List<PlanBaseAssignDTO> planBaseAssignDTOList);
 }

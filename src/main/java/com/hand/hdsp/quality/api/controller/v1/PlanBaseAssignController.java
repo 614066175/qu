@@ -134,11 +134,16 @@ public class PlanBaseAssignController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PostMapping("/base-assign")
+    @PostMapping("/base-assign/{planBaseId}")
     public ResponseEntity<?> baseAssign(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                        @PathVariable(name = "planBaseId") Long planBaseId,
                                         @RequestBody List<PlanBaseAssignDTO> planBaseAssignDTOList) {
-        planBaseAssignDTOList.forEach(planBaseAssignDTO -> planBaseAssignDTO.setTenantId(tenantId));
-        planBaseAssignService.baseAssign(planBaseAssignDTOList);
+        planBaseAssignDTOList.forEach(planBaseAssignDTO -> {
+            planBaseAssignDTO.setTenantId(tenantId);
+            planBaseAssignDTO.setProjectId(projectId);
+        });
+        planBaseAssignService.baseAssign(planBaseId, planBaseAssignDTOList);
         return Results.success(planBaseAssignDTOList);
     }
 

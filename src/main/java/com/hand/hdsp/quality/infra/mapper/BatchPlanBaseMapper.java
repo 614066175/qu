@@ -14,7 +14,7 @@ import java.util.List;
 public interface BatchPlanBaseMapper extends BaseMapper<BatchPlanBase> {
 
     /**
-     * 行列表
+     * 评估方案维度查询质检项
      *
      * @param batchPlanBaseDTO 查询条件
      * @return List<BatchPlanBaseDTO> 实体类list
@@ -28,4 +28,12 @@ public interface BatchPlanBaseMapper extends BaseMapper<BatchPlanBase> {
      * @return BatchPlanBaseDTO 实体类
      */
     BatchPlanBaseDTO detail(Long planBaseId);
+
+    /**
+     * 分组维度查询质检项 （查询此分组下所有方案的所有质检项）
+     *
+     * @param batchPlanBaseDTO
+     * @return
+     */
+    List<BatchPlanBaseDTO> groupList(BatchPlanBaseDTO batchPlanBaseDTO);
 }

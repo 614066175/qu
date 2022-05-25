@@ -43,8 +43,6 @@ public class BatchPlanBase extends AuditDomain {
     //质检项名称
     private String planBaseName;
 
-    private String planBaseDesc;
-
     private Long planId;
 
     private String datasourceType;

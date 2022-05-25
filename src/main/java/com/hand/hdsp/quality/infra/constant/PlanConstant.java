@@ -348,5 +348,7 @@ public interface PlanConstant {
         String PK = "#pk";
         String RULE_NAME = "#ruleName";
         String WARNING_LEVEL = "#warningLevel";
+        String PLAN_BASE_ID = "#planBaseId";
+        String RESULT_BASE_ID = "#resultBaseId";
     }
 }

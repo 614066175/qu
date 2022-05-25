@@ -2,11 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.hand.hdsp.quality.infra.mapper.BatchPlanBaseMapper">
     <!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.BatchPlanBase">
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO">
         <result column="plan_base_id" property="planBaseId" jdbcType="DECIMAL"/>
         <result column="plan_base_code" property="planBaseCode" jdbcType="VARCHAR"/>
         <result column="plan_base_name" property="planBaseName" jdbcType="VARCHAR"/>
-        <result column="plan_base_desc" property="planBaseDesc" jdbcType="VARCHAR"/>
         <result column="plan_id" property="planId" jdbcType="DECIMAL"/>
         <result column="datasource_type" property="datasourceType" jdbcType="VARCHAR"/>
         <result column="datasource_id" property="datasourceId" jdbcType="DECIMAL"/>
@@ -24,9 +23,23 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
+        <result column="table_num" property="tableNum" jdbcType="DECIMAL"/>
+        <result column="field_num" property="fieldNum" jdbcType="DECIMAL"/>
+        <result column="rel_table_num" property="relTableNum" jdbcType="DECIMAL"/>
+        <result column="plan_name" property="planName" jdbcType="VARCHAR"/>
+        <result column="plan_name" property="planName" jdbcType="VARCHAR"/>
+        <result column="currentPlanId" property="currentPlanId" jdbcType="DECIMAL"/>
+        <result column="currentPlanName" property="currentPlanName" jdbcType="VARCHAR"/>
+        <result column="datasource_code" property="datasourceCode" jdbcType="VARCHAR"/>
+        <collection property="baseFormValueDTOS" ofType="com.hand.hdsp.quality.api.dto.BaseFormValueDTO">
+            <result column="item_code" property="itemCode"/>
+            <result column="form_value" property="formValue"/>
+        </collection>
     </resultMap>
 
-    <select id="list" resultType="com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO">
+
+    <!--查询自己的质检项 -->
+    <sql id="queryOwnBase">
         select
         xbpb.datasource_schema,
         xbpb.object_name,
@@ -37,48 +50,49 @@
         xbpb.plan_base_id,
         xbpb.plan_base_code,
         xbpb.plan_base_name,
-        xbpb.plan_base_desc,
         xbpb.plan_id,
         xbpb.datasource_type,
         xbpb.datasource_id,
         xbpb.tenant_id,
-        xbpb.sql_type
+        xbpb.sql_type,
+        xbp.plan_name,
+        hfl.item_code,
+        xbfv.form_value,
+        xbpb.plan_id currentPlanId,
+        xbp.plan_name currentPlanName
         from
         xqua_batch_plan_base xbpb
-        LEFT JOIN (
-        SELECT
-        xbpt.plan_base_id,
-        count(*) table_num
-        FROM
-        xqua_batch_plan_table xbpt
-        GROUP BY
-        xbpt.plan_base_id
-        ) t_table_num ON t_table_num.plan_base_id = xbpb.plan_base_id
-        LEFT JOIN (
-        SELECT
-        xbpf.plan_base_id,
-        count(*) field_num
-                FROM
-                xqua_batch_plan_field xbpf
-                GROUP BY
-                xbpf.plan_base_id
-            ) t_field_num ON t_field_num.plan_base_id = xbpb.plan_base_id
-            LEFT JOIN (
-                SELECT
-                xbprt.plan_base_id,
-                count(*) rel_table_num
-                FROM
-                xqua_batch_plan_rel_table xbprt
-                GROUP BY
-                xbprt.plan_base_id
-            ) t_rel_table_num ON t_rel_table_num.plan_base_id = xbpb.plan_base_id
+        join xqua_batch_plan xbp on xbpb.plan_id=xbp.plan_id
+        left join xqua_base_form_value xbfv on xbpb.plan_base_id=xbfv.plan_base_id
+        left join hpfm_form_line hfl on xbfv.form_line_id=hfl.form_line_id
+        LEFT JOIN ( SELECT xbpt.plan_base_id, count(*) table_num FROM xqua_batch_plan_table xbpt GROUP BY
+        xbpt.plan_base_id ) t_table_num ON t_table_num.plan_base_id = xbpb.plan_base_id
+        LEFT JOIN ( SELECT xbpf.plan_base_id, count(*) field_num FROM xqua_batch_plan_field xbpf GROUP BY
+        xbpf.plan_base_id ) t_field_num ON t_field_num.plan_base_id = xbpb.plan_base_id
+        LEFT JOIN ( SELECT xbprt.plan_base_id, count(*) rel_table_num FROM xqua_batch_plan_rel_table xbprt GROUP BY
+        xbprt.plan_base_id ) t_rel_table_num ON t_rel_table_num.plan_base_id = xbpb.plan_base_id
         where
         xbpb.tenant_id = #{tenantId}
+        <if test="planBaseId !=null">
+            and xbpb.plan_base_id=#{planBaseId}
+        </if>
+        <if test="planBaseIds != null">
+            and xbpb.plan_base_id in
+            <foreach item="planBaseId" collection="planBaseIds" separator="," open="(" close=")">
+                #{planBaseId}
+            </foreach>
+        </if>
         <if test="projectId !=null">
             and xbpb.project_id=#{projectId}
         </if>
-        <if test="planId != null">
+        <if test="planId !=null">
             and xbpb.plan_id = #{planId}
+        </if>
+        <if test="planIds != null">
+            and xbpb.plan_id in
+            <foreach item="planId" collection="planIds" separator="," open="(" close=")">
+                #{planId}
+            </foreach>
         </if>
         <if test="tableNum != null">
             and (case when t_table_num.table_num is null then 0 else t_table_num.table_num end) = #{tableNum}
@@ -87,7 +101,8 @@
             and (case when t_field_num.field_num is null then 0 else t_field_num.field_num end) = #{fieldNum}
         </if>
         <if test="relTableNum != null">
-            and (case when t_rel_table_num.rel_table_num is null then 0 else t_rel_table_num.rel_table_num end) = #{relTableNum}
+            and (case when t_rel_table_num.rel_table_num is null then 0 else t_rel_table_num.rel_table_num end) =
+            #{relTableNum}
         </if>
         <if test="datasourceSchema != null">
             <bind name="datasourceSchema" value="'%' + datasourceSchema + '%'"/>
@@ -101,12 +116,140 @@
             <bind name="description" value="'%' + description + '%'"/>
             and xbpb.description like #{description}
         </if>
-        order by
-        xbpb.plan_base_id desc
+        <if test="planBaseCode != null">
+            <bind name="planBaseCodeLike" value="'%' + planBaseCode + '%'"/>
+            and xbpb.plan_base_code like #{planBaseCodeLike}
+        </if>
+        <if test="planBaseName != null">
+            <bind name="planBaseNameLike" value="'%' + planBaseName + '%'"/>
+            and xbpb.plan_base_name like #{planBaseNameLike}
+        </if>
+        <if test="baseFormValueDTOS!=null">
+            <foreach collection="baseFormValueDTOS" item="baseFormValueDTO" separator=" ">
+                <bind name="formValueLike" value="'%'+baseFormValueDTO.formValue+'%'"/>
+                and hfl.item_code= #{baseFormValueDTO.itemCode} and xbfv.form_value like #{formValueLike}
+            </foreach>
+        </if>
+
+    </sql>
+
+    <!--查询被分配的质检项 -->
+    <sql id="queryAssignBase">
+        SELECT
+        xbpb.datasource_schema,
+        xbpb.object_name,
+        xbpb.description,
+        ( CASE WHEN t_table_num.table_num IS NULL THEN 0 ELSE t_table_num.table_num END ) table_num,
+        ( CASE WHEN t_field_num.field_num IS NULL THEN 0 ELSE t_field_num.field_num END ) field_num,
+        ( CASE WHEN t_rel_table_num.rel_table_num IS NULL THEN 0 ELSE t_rel_table_num.rel_table_num END ) rel_table_num,
+        xbpb.plan_base_id,
+        xbpb.plan_base_code,
+        xbpb.plan_base_name,
+        xbpb.plan_id,
+        xbpb.datasource_type,
+        xbpb.datasource_id,
+        xbpb.tenant_id,
+        xbpb.sql_type,
+        xbp.plan_name,
+        hfl.item_code,
+        xbfv.form_value,
+        xbp1.plan_id currentPlanId,
+        xbp1.plan_name currentPlanName
+        FROM
+        xqua_plan_base_assign xpba
+        join xqua_batch_plan_base xbpb on xpba.plan_base_id=xbpb.plan_base_id
+        join xqua_batch_plan xbp on xbpb.plan_id=xbp.plan_id
+        join xqua_batch_plan xbp1 on xpba.plan_id=xbp1.plan_id
+        left join xqua_base_form_value xbfv on xbpb.plan_base_id=xbfv.plan_base_id
+        left join hpfm_form_line hfl on xbfv.form_line_id=hfl.form_line_id
+        LEFT JOIN ( SELECT xbpt.plan_base_id, count(*) table_num FROM xqua_batch_plan_table xbpt GROUP BY
+        xbpt.plan_base_id ) t_table_num ON t_table_num.plan_base_id = xbpb.plan_base_id
+        LEFT JOIN ( SELECT xbpf.plan_base_id, count(*) field_num FROM xqua_batch_plan_field xbpf GROUP BY
+        xbpf.plan_base_id ) t_field_num ON t_field_num.plan_base_id = xbpb.plan_base_id
+        LEFT JOIN ( SELECT xbprt.plan_base_id, count(*) rel_table_num FROM xqua_batch_plan_rel_table xbprt GROUP BY
+        xbprt.plan_base_id ) t_rel_table_num ON t_rel_table_num.plan_base_id = xbpb.plan_base_id
+        where
+        xbpb.tenant_id = #{tenantId}
+        <if test="planBaseId !=null">
+            and xbpb.plan_base_id=#{planBaseId}
+        </if>
+        <if test="planBaseIds != null">
+            and xbpb.plan_base_id in
+            <foreach item="planBaseId" collection="planBaseIds" separator="," open="(" close=")">
+                #{planBaseId}
+            </foreach>
+        </if>
+        <if test="projectId !=null">
+            and xbpb.project_id=#{projectId}
+        </if>
+        <if test="planId != null">
+            and xpba.plan_id = #{planId}
+        </if>
+        <if test="planIds != null">
+            and xbpb.plan_id in
+            <foreach item="planId" collection="planIds" separator="," open="(" close=")">
+                #{planId}
+            </foreach>
+        </if>
+        <if test="tableNum != null">
+            and (case when t_table_num.table_num is null then 0 else t_table_num.table_num end) = #{tableNum}
+        </if>
+        <if test="fieldNum != null">
+            and (case when t_field_num.field_num is null then 0 else t_field_num.field_num end) = #{fieldNum}
+        </if>
+        <if test="relTableNum != null">
+            and (case when t_rel_table_num.rel_table_num is null then 0 else t_rel_table_num.rel_table_num end) =
+            #{relTableNum}
+        </if>
+        <if test="datasourceSchema != null">
+            <bind name="datasourceSchema" value="'%' + datasourceSchema + '%'"/>
+            and xbpb.datasource_schema like #{datasourceSchema}
+        </if>
+        <if test="objectName != null">
+            <bind name="objectName" value="'%' + objectName + '%'"/>
+            and xbpb.object_name like #{objectName}
+        </if>
+        <if test="description != null">
+            <bind name="description" value="'%' + description + '%'"/>
+            and xbpb.description like #{description}
+        </if>
+        <if test="planBaseCode != null">
+            <bind name="planBaseCodeLike" value="'%' + planBaseCode + '%'"/>
+            and xbpb.plan_base_code like #{planBaseCodeLike}
+        </if>
+        <if test="planBaseName != null">
+            <bind name="planBaseNameLike" value="'%' + planBaseName + '%'"/>
+            and xbpb.plan_base_name like #{planBaseNameLike}
+        </if>
+
+        <if test="baseFormValueDTOS!=null">
+            <foreach collection="baseFormValueDTOS" item="baseFormValueDTO" separator=" ">
+                <bind name="formValueLike" value="'%'+baseFormValueDTO.formValue+'%'"/>
+                and hfl.item_code= #{baseFormValueDTO.itemCode} and xbfv.form_value like #{formValueLike}
+            </foreach>
+        </if>
+    </sql>
+
+    <select id="list" resultMap="BaseResultMap">
+        <include refid="queryOwnBase"/>
+        --以及查询被分配的质检项
+        union all
+        <include refid="queryAssignBase"/>
+        ORDER BY
+        plan_base_id DESC
     </select>
-    <select id="detail" resultType="com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO">
+
+    <select id="groupList" resultMap="BaseResultMap">
+        <include refid="queryOwnBase"/>
+        --以及查询被分配的质检项,此处使用union直接去重
+        union
+        <include refid="queryAssignBase"/>
+    </select>
+
+    <select id="detail" resultMap="BaseResultMap">
         select xbpb.plan_base_id,
                xbpb.plan_base_code,
+               xbpb.plan_base_name,
                xbpb.plan_id,
                xbpb.datasource_type,
                xbpb.datasource_id,
@@ -124,11 +267,14 @@
                xbpb.created_by,
                xbpb.last_updated_by,
                xbpb.last_update_date,
-               xbp.plan_name
+               xbp.plan_name,
+               hfl.item_code,
+               xbfv.form_value
         from xqua_batch_plan_base xbpb
-                 left join
-             xqua_batch_plan xbp
-             on xbpb.plan_id = xbp.plan_id
+                 left join xqua_batch_plan xbp on xbpb.plan_id = xbp.plan_id
+                 left join xqua_base_form_value xbfv on xbpb.plan_base_id = xbfv.plan_base_id
+                 left join hpfm_form_line hfl on xbfv.form_line_id = hfl.form_line_id
         where xbpb.plan_base_id = #{planBaseId}
     </select>
+
 </mapper>
