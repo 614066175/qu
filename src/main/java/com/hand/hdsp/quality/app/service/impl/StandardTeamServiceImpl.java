@@ -14,12 +14,14 @@ import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import com.hand.hdsp.quality.infra.mapper.StandardTeamMapper;
 import io.choerodon.core.domain.Page;
+import io.choerodon.core.domain.PageInfo;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.driver.infra.util.PageUtil;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
@@ -336,6 +338,37 @@ public class StandardTeamServiceImpl implements StandardTeamService {
 
         org.springframework.data.domain.Page<StandardTeamDTO> page = PageUtil.doPage(filterStandardTeam, org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize()));
         return PageParseUtil.springPage2C7nPage(page);
+    }
+
+    @Override
+    public Page<DataFieldDTO> standardList(DataFieldDTO dataFieldDTO, PageRequest pageRequest) {
+        if (dataFieldDTO.getStandardTeamId() == null) {
+            //如果没有传递标准组参数，则就是字段标准的列表查询
+            return PageHelper.doPage(pageRequest, () -> dataFieldMapper.list(dataFieldDTO));
+        }
+        //查询此标准组下的字段标准
+        StandardTeamDTO standardTeamDTO = detail(dataFieldDTO.getStandardTeamId());
+        if (CollectionUtils.isEmpty(standardTeamDTO.getDataFieldDTOList())) {
+            return new Page<>();
+        }
+        List<DataFieldDTO> dataFieldDTOList = standardTeamDTO.getDataFieldDTOList();
+        if (StringUtils.isNotEmpty(dataFieldDTO.getFieldName())) {
+            dataFieldDTOList = dataFieldDTOList.stream()
+                    .filter(dto -> dto.getFieldName().contains(dataFieldDTO.getFieldName()))
+                    .collect(Collectors.toList());
+        }
+        if (StringUtils.isNotEmpty(dataFieldDTO.getFieldComment())) {
+            dataFieldDTOList = dataFieldDTOList.stream()
+                    .filter(dto -> StringUtils.isNotEmpty(dto.getFieldComment())
+                            && dto.getFieldComment().contains(dataFieldDTO.getFieldComment()))
+                    .collect(Collectors.toList());
+        }
+        if (StringUtils.isNotEmpty(dataFieldDTO.getStandardStatus())) {
+            dataFieldDTOList = dataFieldDTOList.stream()
+                    .filter(dto -> dto.getStandardStatus().equals(dataFieldDTO.getStandardStatus()))
+                    .collect(Collectors.toList());
+        }
+        return new Page<>(dataFieldDTOList, new PageInfo(pageRequest.getPage(), pageRequest.getSize()), dataFieldDTOList.size());
     }
 
     private List<StandardTeam> getSubStandardTeam(Long standardTeamId) {
