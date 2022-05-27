@@ -104,11 +104,13 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
     public BatchPlanBaseDTO detail(Long planBaseId, Long currentPlanId, Long tenantId) {
         BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseRepository.detail(planBaseId);
         batchPlanBaseDTO.setDatasourceName(batchPlanBaseDTO.getDatasourceCode());
-        //如果当前方案和所属方案不一致，则返回不可编辑标识
-        if (!currentPlanId.equals(batchPlanBaseDTO.getPlanId())) {
-            batchPlanBaseDTO.setEditFlag(0);
-        } else {
-            batchPlanBaseDTO.setEditFlag(1);
+        //如果传了当前方案id,则判断编辑标识，当前方案和所属方案不一致，则返回不可编辑标识
+        if (currentPlanId != null) {
+            if (!currentPlanId.equals(batchPlanBaseDTO.getPlanId())) {
+                batchPlanBaseDTO.setEditFlag(0);
+            } else {
+                batchPlanBaseDTO.setEditFlag(1);
+            }
         }
         if (CollectionUtils.isNotEmpty(batchPlanBaseDTO.getBaseFormValueDTOS())) {
             HashMap<String, Object> map = new HashMap<>();
