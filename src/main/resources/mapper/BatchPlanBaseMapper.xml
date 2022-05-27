@@ -186,7 +186,7 @@
             and xpba.plan_id = #{planId}
         </if>
         <if test="planIds != null">
-            and xbpb.plan_id in
+            and xpba.plan_id in
             <foreach item="planId" collection="planIds" separator="," open="(" close=")">
                 #{planId}
             </foreach>

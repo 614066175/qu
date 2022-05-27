@@ -71,12 +71,19 @@ public class CommonSqlMeasure implements Measure {
         } else {
             //如果有维度字段，并且有多个结果则所有结果去进行比较
             if (response.size() != 1) {
-                response.forEach(result -> {
+                for (Map<String, Object> result : response) {
                     String value = result.values().toArray()[0].toString();
                     param.setCountValue(value);
                     Count count = countCollector.getCount(param.getCountType());
                     count.count(param);
-                });
+                    //如果有异常，则记录并且将
+                    if (param.getBatchResultItem() != null
+                            && StringUtils.isNotEmpty(param.getBatchResultItem().getExceptionInfo())) {
+                        batchResultItem.setActualValue(value);
+                        batchResultItem.setCurrentValue(value);
+                        break;
+                    }
+                }
             } else {
                 //如果只有一个结果
                 String value = response.get(0).values().toArray()[0].toString();
