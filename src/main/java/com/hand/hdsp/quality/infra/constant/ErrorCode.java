@@ -160,13 +160,16 @@ public interface ErrorCode {
 
     String WORK_ORDER_STATUS_CAN_NOT_REVOKE="hdsp.xqua.err.work_order_status_can_not_revoke";
 
-    String WORK_ORDER_NOT_EXIST="hdsp.xqua.err.work_order_not_exist";
+    String WORK_ORDER_NOT_EXIST = "hdsp.xqua.err.work_order_not_exist";
 
-    String WORK_ORDER_ALREADY_LAUNCH="hdsp.xqua.err.work_order_already_launch";
+    String WORK_ORDER_ALREADY_LAUNCH = "hdsp.xqua.err.work_order_already_launch";
 
-    String WORK_ORDER_SOLUTION_CAN_NOT_NULL="hdsp.xqua.err.work_order_solution_can_not_null";
+    String WORK_ORDER_SOLUTION_CAN_NOT_NULL = "hdsp.xqua.err.work_order_solution_can_not_null";
 
-    String STANDARD_TEAM_NOT_EXIST="hdsp.xsta.standard_team_not_exist";
+    String STANDARD_TEAM_NOT_EXIST = "hdsp.xsta.standard_team_not_exist";
 
-    String STANDARD_TEAM_IS_INHERITED="hdsp.xsta.standard_team_is_inherited";
+    String STANDARD_TEAM_IS_INHERITED = "hdsp.xsta.standard_team_is_inherited";
+
+    String PLAN_GROUP_NOT_EXIST = "hdsp.xqua.plan_group_not_exist";
+
 }

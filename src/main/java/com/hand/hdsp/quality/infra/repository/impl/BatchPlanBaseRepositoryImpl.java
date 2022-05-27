@@ -10,9 +10,11 @@ import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.domain.repository.BatchPlanBaseRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanRepository;
 import com.hand.hdsp.quality.domain.repository.PlanGroupRepository;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.mapper.BatchPlanBaseMapper;
 import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -48,11 +50,15 @@ public class BatchPlanBaseRepositoryImpl extends BaseRepositoryImpl<BatchPlanBas
     public Page<BatchPlanBaseDTO> list(PageRequest pageRequest, BatchPlanBaseDTO batchPlanBaseDTO) {
         //如果没有点击具体的评估方案，则查询分组下所有评估方案的质检项
         if (batchPlanBaseDTO.getPlanId() == null && batchPlanBaseDTO.getGroupId() != null) {
-            //递归查询此分组下所有子分组
-            List<PlanGroup> subGroupList = getSubGroup(batchPlanBaseDTO.getGroupId());
+
             PlanGroupRepository planGroupRepository = ApplicationContextHelper.getContext().getBean(PlanGroupRepository.class);
             //并加上自己
             PlanGroup planGroup = planGroupRepository.selectByPrimaryKey(batchPlanBaseDTO.getGroupId());
+            if (planGroup == null && batchPlanBaseDTO.getGroupId() != 0) {
+                throw new CommonException(ErrorCode.PLAN_GROUP_NOT_EXIST);
+            }
+            //递归查询此分组下所有子分组
+            List<PlanGroup> subGroupList = getSubGroup(batchPlanBaseDTO.getGroupId());
             //所有分组（groupId=0）无需考虑
             if (planGroup != null) {
                 subGroupList.add(planGroup);
