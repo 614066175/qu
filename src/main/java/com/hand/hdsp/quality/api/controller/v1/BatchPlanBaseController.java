@@ -95,7 +95,7 @@ public class BatchPlanBaseController extends BaseController {
     @GetMapping("/{planBaseId}")
     public ResponseEntity<?> detail(@PathVariable(name = "organizationId") Long tenantId,
                                     @PathVariable Long planBaseId,
-                                    @RequestParam Long currentPlanId) {
+                                    @RequestParam(required = false) Long currentPlanId) {
         return Results.success(batchPlanBaseService.detail(planBaseId, currentPlanId, tenantId));
     }
 
