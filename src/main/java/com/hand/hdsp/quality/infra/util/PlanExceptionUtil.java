@@ -131,11 +131,12 @@ public class PlanExceptionUtil {
         if (SQL.equals(batchResultBase.getSqlType())) {
             //则使用定义的别名
             tableName = "sql_pack";
-            sql = String.format("select %s.* %s", tableName, sql.toLowerCase().substring(sql.indexOf("from")));
+            sql = String.format("select %s.* %s", tableName, sql.substring(sql.toLowerCase().indexOf("from")));
         } else {
             tableName = batchResultBase.getPackageObjectName();
-            sql = String.format("select %s.* %s order by 1", tableName, sql.toLowerCase().substring(sql.indexOf("from")));
+            sql = String.format("select %s.* %s order by 1", tableName, sql.substring(sql.toLowerCase().indexOf("from")));
         }
+        log.info("获取异常数据sql：" + sql);
         List<Map<String, Object>> countMaps = driverSession.executeOneQuery(param.getSchema(), String.format(COUNT_SQL, sql));
         int count = Integer.parseInt(countMaps.get(0).values().toArray()[0].toString());
         if (count > BATCH_NUMBER) {
