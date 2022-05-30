@@ -81,7 +81,7 @@ public class FieldValueMeasure implements Measure {
         BatchResultBase batchResultBase = param.getBatchResultBase();
         BatchResultItem batchResultItem = param.getBatchResultItem();
         List<WarningLevelDTO> warningLevelList = param.getWarningLevelList();
-        if(CollectionUtils.isEmpty(param.getExceptionMapList())){
+        if (CollectionUtils.isEmpty(param.getExceptionMapList())) {
             param.setExceptionMapList(new ArrayList<>());
         }
         DriverSession driverSession = driverSessionService.getDriverSession(tenantId, param.getPluginDatasourceDTO().getDatasourceCode());
@@ -202,24 +202,24 @@ public class FieldValueMeasure implements Measure {
                                 .levelCount(map.getValue()).build()
                         ).collect(Collectors.toList())));
 
-                //查询第一页的异常数据，并把异常数据复制给param
+                //查询所有的异常数据
                 warningLevelList.forEach(warn -> {
                     //固定值范围比较
                     StringBuilder condition = new StringBuilder();
                     if (RANGE.equals(param.getCompareWay())) {
                         if (Strings.isNotEmpty(warn.getStartValue())) {
-                            condition.append(String.format(START_SQL, warn.getStartValue()));
+                            condition.append(String.format(START_SQL, String.format("'%s'", warn.getStartValue())));
                         }
                         if (Strings.isNotEmpty(warn.getEndValue())) {
-                            condition.append(String.format(END_SQL, warn.getEndValue()));
+                            condition.append(String.format(END_SQL, String.format("'%s'", warn.getEndValue())));
                         }
                     }
                     //固定值比较
                     if (VALUE.equals(param.getCompareWay())) {
                         if (EQUAL.equals(warn.getCompareSymbol())) {
-                            condition.append(String.format(EQUAL_SQL, warn.getExpectedValue()));
+                            condition.append(String.format(EQUAL_SQL, String.format("'%s'", warn.getExpectedValue())));
                         } else {
-                            condition.append(String.format(NOT_EQUAL_SQL, warn.getExpectedValue()));
+                            condition.append(String.format(NOT_EQUAL_SQL, String.format("'%s'", warn.getExpectedValue())));
                         }
                     }
                     String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, String.format("%s%s", Optional.ofNullable(param.getWhereCondition()).orElse("1=1"), condition));
