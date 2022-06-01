@@ -44,7 +44,9 @@
                 <bind name="description" value='"%" + description +"%"'/>
                 and xlc.description like #{description}
             </if>
-
+            <if test="enabledFlag != null ">
+                and xlc.enabled_flag = #{enabledFlag}
+            </if>
         </where>
     </select>
 </mapper>

@@ -23,8 +23,6 @@ public class LocValueServiceImpl implements LocValueService {
 
     @Override
     public Page<LocValueDTO> list(PageRequest pageRequest, LocValueDTO locValueDTO) {
-
-
          return PageHelper.doPageAndSort(pageRequest,()->locValueMapper.queryList(locValueDTO)) ;
     }
 }
