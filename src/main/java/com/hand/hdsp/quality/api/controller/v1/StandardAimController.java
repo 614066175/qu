@@ -90,11 +90,12 @@ public class StandardAimController extends BaseController {
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                    @RequestBody StandardAimDTO standardAimDTO) {
-        standardAimDTO.setTenantId(tenantId);
-        standardAimDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
-        this.validObject(standardAimDTO);
-        return Results.success(standardAimDTO);
+                                    @RequestBody List<StandardAimDTO> standardAimDTOList) {
+        standardAimDTOList.forEach(standardAimDTO -> {standardAimDTO.setTenantId(tenantId);
+            standardAimDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+            this.validObject(standardAimDTO);
+        });
+        return Results.success(standardAimRepository.batchInsertDTOSelective(standardAimDTOList));
     }
 
     @ApiOperation(value = "修改标准落标表")
