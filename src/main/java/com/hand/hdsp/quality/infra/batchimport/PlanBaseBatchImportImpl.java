@@ -1,11 +1,7 @@
 package com.hand.hdsp.quality.infra.batchimport;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlan;
@@ -20,6 +16,10 @@ import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * <p>
  * description
@@ -29,8 +29,8 @@ import org.hzero.mybatis.util.Sqls;
  * @since 1.0
  */
 @Slf4j
-@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_BATCH_PLAN,sheetIndex = 2)
-public class PlanBaseBatchImportImpl  implements IBatchImportService {
+@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_BATCH_PLAN, sheetIndex = 2)
+public class PlanBaseBatchImportImpl implements IBatchImportService {
     private final ObjectMapper objectMapper;
 
     private final BatchPlanBaseRepository batchPlanBaseRepository;
@@ -48,11 +48,13 @@ public class PlanBaseBatchImportImpl  implements IBatchImportService {
     public Boolean doImport(List<String> data) {
         // 设置租户Id
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
+        Long projectId = ProjectHelper.getProjectId();
         List<BatchPlanBaseDTO> batchPlanBaseList = new ArrayList<>(data.size());
         try {
             for (String json : data) {
-                BatchPlanBaseDTO batchPlanBaseDTO= objectMapper.readValue(json, BatchPlanBaseDTO.class);
+                BatchPlanBaseDTO batchPlanBaseDTO = objectMapper.readValue(json, BatchPlanBaseDTO.class);
                 batchPlanBaseDTO.setTenantId(tenantId);
+                batchPlanBaseDTO.setProjectId(projectId);
                 batchPlanBaseList.add(batchPlanBaseDTO);
             }
         } catch (IOException e) {
@@ -61,16 +63,17 @@ public class PlanBaseBatchImportImpl  implements IBatchImportService {
             log.error("Permission Object Read Json Error", e);
             return false;
         }
-        batchPlanBaseList.stream().peek(batchPlanBaseDTO -> {
+        batchPlanBaseList.forEach(batchPlanBaseDTO -> {
             List<BatchPlanDTO> batchPlanDTOList = batchPlanRepository.selectDTOByCondition(Condition.builder(BatchPlan.class)
                     .andWhere(Sqls.custom()
                             .andEqualTo(BatchPlan.FIELD_PLAN_CODE, batchPlanBaseDTO.getPlanCode())
-                            .andEqualTo(BatchPlan.FIELD_TENANT_ID, batchPlanBaseDTO.getTenantId()))
+                            .andEqualTo(BatchPlan.FIELD_TENANT_ID, batchPlanBaseDTO.getTenantId())
+                            .andEqualTo(BatchPlan.FIELD_PROJECT_ID, batchPlanBaseDTO.getProjectId()))
                     .build());
-            if(CollectionUtils.isNotEmpty(batchPlanDTOList)){
+            if (CollectionUtils.isNotEmpty(batchPlanDTOList)) {
                 batchPlanBaseDTO.setPlanId(batchPlanDTOList.get(0).getPlanId());
             }
-        }).collect(Collectors.toList());
+        });
         batchPlanBaseRepository.batchInsertDTOSelective(batchPlanBaseList);
         return true;
     }
