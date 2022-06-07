@@ -1,8 +1,5 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimRelationDTO;
 import com.hand.hdsp.quality.app.service.StandardAimService;
@@ -14,6 +11,7 @@ import com.hand.hdsp.quality.infra.vo.ColumnVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.mybatis.domian.Condition;
@@ -22,12 +20,16 @@ import org.hzero.starter.driver.core.infra.meta.Column;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * <p>标准落标表应用服务默认实现</p>
  *
  * @author guoliangli01@hand-china.com 2020-11-30 10:23:51
  */
 @Service
+@Slf4j
 public class StandardAimServiceImpl implements StandardAimService {
 
     private final DriverSessionService driverSessionService;
@@ -73,7 +75,7 @@ public class StandardAimServiceImpl implements StandardAimService {
                                 .andEqualTo(StandardAim.FIELD_TABLE_NAME, standardAimDTO.getTableName())
                                 .andEqualTo(StandardAim.FIELD_FIELD_NAME, String.format("%s(%s)", column.getColumnName(), column.getTypeName()))
                                 .andEqualTo(StandardAim.FIELD_TENANT_ID, standardAimDTO.getTenantId())
-                                .andEqualTo(StandardAim.FIELD_PROJECT_ID,standardAimDTO.getProjectId()))
+                                .andEqualTo(StandardAim.FIELD_PROJECT_ID, standardAimDTO.getProjectId()))
                         .build());
                 if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
                     columnVO.setSelectable(false);
@@ -114,5 +116,31 @@ public class StandardAimServiceImpl implements StandardAimService {
                 standardAimRelationRepository.batchDTODeleteByPrimaryKey(standardAimRelationDTOS);
             });
         }
+    }
+
+    @Override
+    public List<StandardAimDTO> reverseAim(Long tenantId, List<StandardAimDTO> standardAimDTOList) {
+        if (CollectionUtils.isNotEmpty(standardAimDTOList)) {
+            standardAimDTOList.forEach(standardAimDTO -> {
+                List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
+                        .andWhere(Sqls.custom()
+                                .andEqualTo(StandardAim.FIELD_STANDARD_ID, standardAimDTO.getStandardId())
+                                .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, standardAimDTO.getStandardType())
+                                .andEqualTo(StandardAim.FIELD_DATASOURCE_TYPE, standardAimDTO.getDatasourceType())
+                                .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, standardAimDTO.getSchemaName())
+                                .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, standardAimDTO.getDatasourceCode())
+                                .andEqualTo(StandardAim.FIELD_FIELD_NAME, standardAimDTO.getFieldName())
+                                .andEqualTo(StandardAim.FIELD_PROJECT_ID, standardAimDTO.getProjectId()))
+                        .build());
+                if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
+                    log.info("此字段已经落标了，不重复落标");
+                    return;
+                }
+                standardAimDTO.setFieldName(String.format("%s(%s)", standardAimDTO.getFieldName(), standardAimDTO.getTypeName()));
+                //存入落标表
+                standardAimRepository.insertDTOSelective(standardAimDTO);
+            });
+        }
+        return standardAimDTOList;
     }
 }
