@@ -29,13 +29,17 @@
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
     <select id="selectDatasourceIdAndType" resultType="com.hand.hdsp.quality.api.dto.BatchPlanRelTableDTO">
-        SELECT
-            datasource_id relDatasourceId,
-            db_type relDatasourceType
-        FROM
-            hpfm_datasource
-        WHERE
-            datasource_code =  #{batchPlanRelTableDTO.datasourceCode}
-            AND tenant_id = #{batchPlanRelTableDTO.tenantId}
+        SELECT datasource_id relDatasourceId,
+               db_type       relDatasourceType
+        FROM hpfm_datasource
+        WHERE datasource_code = #{batchPlanRelTableDTO.datasourceCode}
+          AND tenant_id = #{batchPlanRelTableDTO.tenantId}
+    </select>
+    <select id="getRelTable" resultType="com.hand.hdsp.quality.api.dto.BatchPlanRelTableDTO">
+        SELECT xbprt.*,
+               hd.datasource_code relDatasourceCode
+        FROM xqua_batch_plan_rel_table xbprt
+                 join hpfm_datasource hd on xbprt.rel_datasource_id = hd.datasource_id
+        WHERE xbprt.plan_base_id = #{planBaseId}
     </select>
 </mapper>

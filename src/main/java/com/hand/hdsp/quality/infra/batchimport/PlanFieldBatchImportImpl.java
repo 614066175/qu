@@ -1,10 +1,7 @@
 package com.hand.hdsp.quality.infra.batchimport;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldConDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
@@ -22,6 +19,10 @@ import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -58,17 +59,20 @@ public class PlanFieldBatchImportImpl implements IBatchImportService {
     public Boolean doImport(List<String> data) {
         // 设置租户Id
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
+        Long projectId = ProjectHelper.getProjectId();
         List<BatchPlanFieldDTO> batchPlanFieldDTOS = new ArrayList<>(data.size());
         try {
             for (String json : data) {
                 BatchPlanFieldDTO batchPlanFieldDTO = objectMapper.readValue(json, BatchPlanFieldDTO.class);
                 batchPlanFieldDTO.setExceptionBlock("是".equals(batchPlanFieldDTO.getExceptionBlockFlag())?1:0);
                 batchPlanFieldDTO.setTenantId(tenantId);
+                batchPlanFieldDTO.setProjectId(projectId);
                 //查询planBaseId
                 List<BatchPlanBaseDTO> batchPlanBaseDTOS = batchPlanBaseRepository.selectDTOByCondition(Condition.builder(BatchPlanBase.class)
                         .andWhere(Sqls.custom()
                                 .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_CODE, batchPlanFieldDTO.getPlanBaseCode())
-                                .andEqualTo(BatchPlanBase.FIELD_TENANT_ID, batchPlanFieldDTO.getTenantId()))
+                                .andEqualTo(BatchPlanBase.FIELD_TENANT_ID, batchPlanFieldDTO.getTenantId())
+                                .andEqualTo(BatchPlanBase.FIELD_PROJECT_ID, batchPlanFieldDTO.getProjectId()))
                         .build());
                 if(CollectionUtils.isNotEmpty(batchPlanBaseDTOS)){
                     batchPlanFieldDTO.setPlanBaseId(batchPlanBaseDTOS.get(0).getPlanBaseId());
@@ -96,6 +100,7 @@ public class PlanFieldBatchImportImpl implements IBatchImportService {
                     .checkFieldName(dto.getCheckFieldName())
                     .regularExpression(dto.getRegularExpression())
                     .tenantId(dto.getTenantId())
+                    .projectId(projectId)
                     .build();
             fieldLineDTOList.add(fieldLineDTO);
         }
@@ -110,6 +115,7 @@ public class PlanFieldBatchImportImpl implements IBatchImportService {
                     .compareWay(dto.getCompareWay())
                     .warningLevel(dto.getWarningLevel())
                     .tenantId(dto.getTenantId())
+                    .projectId(projectId)
                     .build();
             fieldConDTOList.add(fieldConDTO);
         }
