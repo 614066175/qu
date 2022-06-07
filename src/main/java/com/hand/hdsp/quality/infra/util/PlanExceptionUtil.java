@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.infra.util;
 
+import com.alibaba.druid.DbType;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
@@ -9,7 +10,6 @@ import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
-import org.hzero.starter.driver.core.infra.meta.PrimaryKey;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
@@ -126,16 +126,14 @@ public class PlanExceptionUtil {
         if (Strings.isEmpty(sql)) {
             throw new CommonException(ErrorCode.SQL_IS_EMPTY);
         }
-        String tableName;
+        String tableName = batchResultBase.getPackageObjectName();
         //如果是sql类型，则
         if (SQL.equals(batchResultBase.getSqlType())) {
             //则使用定义的别名
             tableName = "sql_pack";
-            sql = String.format("select %s.* %s", tableName, sql.toLowerCase().substring(sql.indexOf("from")));
-        } else {
-            tableName = batchResultBase.getPackageObjectName();
-            sql = String.format("select %s.* %s order by 1", tableName, sql.toLowerCase().substring(sql.indexOf("from")));
         }
+        sql = String.format("select %s.* %s", tableName, sql.substring(sql.toLowerCase().indexOf("from")));
+        log.info("获取异常数据sql：" + sql);
         List<Map<String, Object>> countMaps = driverSession.executeOneQuery(param.getSchema(), String.format(COUNT_SQL, sql));
         int count = Integer.parseInt(countMaps.get(0).values().toArray()[0].toString());
         if (count > BATCH_NUMBER) {
@@ -176,8 +174,11 @@ public class PlanExceptionUtil {
         } else {
             exceptionMapList = driverSession.executeOneQuery(param.getSchema(), sql);
         }
-        List<PrimaryKey> primaryKeys = driverSession.tablePk(param.getSchema(), batchResultBase.getPackageObjectName());
         if (CollectionUtils.isNotEmpty(exceptionMapList)) {
+            //如果是hive，则去除最后一个结果，最后一个结果是hive-sql执行日志，并非异常数据
+            if (DbType.hive.equals(driverSession.getDbType())) {
+                exceptionMapList.remove(exceptionMapList.size() - 1);
+            }
             //每一条异常数据存上规则名和异常信息
             exceptionMapList.forEach(map -> {
                 List<String> values = map.values().stream().map(String::valueOf).collect(Collectors.toList());

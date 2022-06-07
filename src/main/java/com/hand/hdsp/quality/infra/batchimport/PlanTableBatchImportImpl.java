@@ -1,10 +1,7 @@
 package com.hand.hdsp.quality.infra.batchimport;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanTableConDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanTableDTO;
@@ -23,6 +20,10 @@ import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * <p>
  * description
@@ -32,7 +33,7 @@ import org.hzero.mybatis.util.Sqls;
  * @since 1.0
  */
 @Slf4j
-@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_BATCH_PLAN,sheetIndex = 3)
+@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_BATCH_PLAN, sheetIndex = 3)
 public class PlanTableBatchImportImpl implements IBatchImportService {
 
     private final ObjectMapper objectMapper;
@@ -57,19 +58,21 @@ public class PlanTableBatchImportImpl implements IBatchImportService {
     public Boolean doImport(List<String> data) {
         // 设置租户Id
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
+        Long projectId = ProjectHelper.getProjectId();
         List<BatchPlanTableDTO> batchPlanTableDTOS = new ArrayList<>(data.size());
         try {
             for (String json : data) {
                 BatchPlanTableDTO batchPlanTableDTO = objectMapper.readValue(json, BatchPlanTableDTO.class);
-                batchPlanTableDTO.setExceptionBlock("是".equals(batchPlanTableDTO.getExceptionBlockFlag())?1:0);
+                batchPlanTableDTO.setExceptionBlock("是".equals(batchPlanTableDTO.getExceptionBlockFlag()) ? 1 : 0);
                 batchPlanTableDTO.setTenantId(tenantId);
+                batchPlanTableDTO.setProjectId(projectId);
                 //查询planBaseId
                 List<BatchPlanBaseDTO> batchPlanBaseDTOS = batchPlanBaseRepository.selectDTOByCondition(Condition.builder(BatchPlanBase.class)
                         .andWhere(Sqls.custom()
                                 .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_CODE, batchPlanTableDTO.getPlanBaseCode())
                                 .andEqualTo(BatchPlanBase.FIELD_TENANT_ID, batchPlanTableDTO.getTenantId()))
                         .build());
-                if(CollectionUtils.isNotEmpty(batchPlanBaseDTOS)){
+                if (CollectionUtils.isNotEmpty(batchPlanBaseDTOS)) {
                     batchPlanTableDTO.setPlanBaseId(batchPlanBaseDTOS.get(0).getPlanBaseId());
                 }
                 batchPlanTableDTOS.add(batchPlanTableDTO);
@@ -83,8 +86,8 @@ public class PlanTableBatchImportImpl implements IBatchImportService {
         //插入表级规则,获取返回主键
         List<BatchPlanTableDTO> tableList = batchPlanTableRepository.batchInsertDTOSelective(batchPlanTableDTOS);
         //插入规则行
-        List<BatchPlanTableLineDTO> tableLineDTOList=new ArrayList<>();
-        for(int i = 0; i < batchPlanTableDTOS.size(); i++) {
+        List<BatchPlanTableLineDTO> tableLineDTOList = new ArrayList<>();
+        for (int i = 0; i < batchPlanTableDTOS.size(); i++) {
             BatchPlanTableDTO dto = batchPlanTableDTOS.get(i);
             BatchPlanTableLineDTO tableLineDTO = BatchPlanTableLineDTO.builder()
                     .planRuleId(tableList.get(i).getPlanRuleId())
@@ -97,8 +100,8 @@ public class PlanTableBatchImportImpl implements IBatchImportService {
         }
         //插入规则行，获取返回主键
         List<BatchPlanTableLineDTO> lineList = batchPlanTableLineRepository.batchInsertDTOSelective(tableLineDTOList);
-        List<BatchPlanTableConDTO> tableConDTOList=new ArrayList<>();
-        for(int i = 0; i < batchPlanTableDTOS.size(); i++) {
+        List<BatchPlanTableConDTO> tableConDTOList = new ArrayList<>();
+        for (int i = 0; i < batchPlanTableDTOS.size(); i++) {
             BatchPlanTableDTO dto = batchPlanTableDTOS.get(i);
             BatchPlanTableConDTO tableConDTO = BatchPlanTableConDTO.builder()
                     .planLineId(lineList.get(i).getPlanLineId())
