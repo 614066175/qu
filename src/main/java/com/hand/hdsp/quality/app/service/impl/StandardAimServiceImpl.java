@@ -19,9 +19,11 @@ import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.infra.meta.Column;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>标准落标表应用服务默认实现</p>
@@ -119,27 +121,32 @@ public class StandardAimServiceImpl implements StandardAimService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public List<StandardAimDTO> reverseAim(Long tenantId, List<StandardAimDTO> standardAimDTOList) {
         if (CollectionUtils.isNotEmpty(standardAimDTOList)) {
-            standardAimDTOList.forEach(standardAimDTO -> {
-                List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
-                        .andWhere(Sqls.custom()
-                                .andEqualTo(StandardAim.FIELD_STANDARD_ID, standardAimDTO.getStandardId())
-                                .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, standardAimDTO.getStandardType())
-                                .andEqualTo(StandardAim.FIELD_DATASOURCE_TYPE, standardAimDTO.getDatasourceType())
-                                .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, standardAimDTO.getSchemaName())
-                                .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, standardAimDTO.getDatasourceCode())
-                                .andEqualTo(StandardAim.FIELD_FIELD_NAME, standardAimDTO.getFieldName())
-                                .andEqualTo(StandardAim.FIELD_PROJECT_ID, standardAimDTO.getProjectId()))
-                        .build());
-                if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
-                    log.info("此字段已经落标了，不重复落标");
-                    return;
-                }
-                standardAimDTO.setFieldName(String.format("%s(%s)", standardAimDTO.getFieldName(), standardAimDTO.getTypeName()));
-                //存入落标表
-                standardAimRepository.insertDTOSelective(standardAimDTO);
-            });
+            List<StandardAimDTO> dtos = standardAimDTOList
+                    .stream()
+                    .filter(standardAimDTO -> {
+                        List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
+                                .andWhere(Sqls.custom()
+                                        .andEqualTo(StandardAim.FIELD_STANDARD_ID, standardAimDTO.getStandardId())
+                                        .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, standardAimDTO.getStandardType())
+                                        .andEqualTo(StandardAim.FIELD_DATASOURCE_TYPE, standardAimDTO.getDatasourceType())
+                                        .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, standardAimDTO.getDatasourceCode())
+                                        .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, standardAimDTO.getSchemaName())
+                                        .andEqualTo(StandardAim.FIELD_TABLE_NAME, standardAimDTO.getTableName())
+                                        .andEqualTo(StandardAim.FIELD_FIELD_NAME, standardAimDTO.getFieldName())
+                                        .andEqualTo(StandardAim.FIELD_TENANT_ID, standardAimDTO.getTenantId())
+                                        .andEqualTo(StandardAim.FIELD_PROJECT_ID, standardAimDTO.getProjectId()))
+                                .build());
+                        if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
+                            log.info("此字段已经落标了，不重复落标");
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    }).collect(Collectors.toList());
+            standardAimRepository.batchInsertDTOSelective(dtos);
         }
         return standardAimDTOList;
     }
