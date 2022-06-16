@@ -1,12 +1,5 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.ExceptionParam.*;
-
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
@@ -18,12 +11,20 @@ import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
+import com.hand.hdsp.quality.infra.util.PlanExceptionUtil;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.starter.driver.core.infra.meta.PrimaryKey;
 import org.hzero.starter.driver.core.session.DriverSession;
+
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.ExceptionParam.*;
 
 /**
  * <p>正则表达式</p>
@@ -125,21 +126,24 @@ public class RegularMeasure implements Measure {
                     }
 //                    String noMacthSql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
                     //获取不符合正则的异常数据
-                    String newSql=String.format("select %s.* from %s where 1=1 and %s ",
+                    String newSql = String.format("select %s.* from %s where 1=1 and %s ",
                             batchResultBase.getPackageObjectName(),
                             batchResultBase.getPackageObjectName(),
                             param.getWhereCondition()
                     );
+                    param.getWarningLevelList().forEach(warningLevelDTO -> {
+                        PlanExceptionUtil.getPlanException(param, batchResultBase, newSql, driverSession, warningLevelDTO);
+                    });
                     List<PrimaryKey> primaryKeys = driverSession.tablePk(param.getSchema(), batchResultBase.getPackageObjectName());
                     List<Map<String, Object>> exceptionMapList = driverSession.executeOneQuery(param.getSchema(), newSql);
-                    if(CollectionUtils.isNotEmpty(exceptionMapList)){
+                    if (CollectionUtils.isNotEmpty(exceptionMapList)) {
                         exceptionMapList.forEach(map -> {
-                            if(CollectionUtils.isNotEmpty(primaryKeys)){
+                            if (CollectionUtils.isNotEmpty(primaryKeys)) {
                                 Set<String> columns = map.keySet();
                                 List<String> columnPkList = primaryKeys.stream().map(PrimaryKey::getColumnName).collect(Collectors.toList());
                                 List<String> keys = columns.stream().filter(columnPkList::contains).collect(Collectors.toList());
                                 List<String> values = keys.stream().map(key -> String.valueOf(map.get(key))).collect(Collectors.toList());
-                                map.put(PK,String.join("-",values));
+                                map.put(PK, String.join("-", values));
                             }else{
                                 List<String> values = map.values().stream().map(String::valueOf).collect(Collectors.toList());
                                 //将所有的数据
