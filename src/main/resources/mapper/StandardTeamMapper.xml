@@ -41,6 +41,14 @@
                 <bind name="standardTeamDescLike" value="'%'+standardTeamDesc+'%'"/>
                 and xst.standard_team_desc like #{standardTeamDescLike}
             </if>
+            <if test="creatorName!=null">
+                <bind name="creatorNameLike" value="'%'+creatorName+'%'"/>
+                and iu1.login_name like #{creatorNameLike}
+            </if>
+            <if test="updaterName!=null">
+                <bind name="updaterNameLike" value="'%'+updaterName+'%'"/>
+                and iu2.login_name like #{updaterNameLike}
+            </if>
             <if test="projectId !=null">
                 and xst.project_id =#{projectId}
             </if>
