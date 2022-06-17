@@ -1,11 +1,10 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletResponse;
-
 import com.hand.hdsp.core.constant.HdspConstant;
-import com.hand.hdsp.quality.api.dto.*;
+import com.hand.hdsp.quality.api.dto.AssigneeUserDTO;
+import com.hand.hdsp.quality.api.dto.DataFieldDTO;
+import com.hand.hdsp.quality.api.dto.DataStandardDTO;
+import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import com.hand.hdsp.quality.app.service.DataFieldService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.repository.DataFieldRepository;
@@ -23,6 +22,9 @@ import org.hzero.export.annotation.ExcelExport;
 import org.hzero.export.vo.ExportParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * <p>字段标准表 管理 API</p>
@@ -314,7 +316,6 @@ public class DataFieldController extends BaseController {
     }
 
 
-
     @ApiOperation(value = "字段落标统计")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
@@ -323,11 +324,11 @@ public class DataFieldController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/field-aim-count")
-    public ResponseEntity<FieldOverView> fieldAimCount(@PathVariable(name = "organizationId") Long tenantId,
-                                                           StandardAimDTO standardAimDTO) throws Exception {
+    @PostMapping("/field-aim-statistic")
+    public ResponseEntity<StandardAimDTO> fieldAimStatistic(@PathVariable(name = "organizationId") Long tenantId,
+                                                            StandardAimDTO standardAimDTO) {
         standardAimDTO.setTenantId(tenantId);
-        return Results.success(dataFieldService.fieldAimCount(standardAimDTO));
+        return Results.success(dataFieldService.fieldAimStatistic(standardAimDTO));
     }
 
 

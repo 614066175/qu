@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 /**
- * <p>标准落标表 管理 API</p>
+ * <p> 管理 API</p>
  *
  * @author ZHENG.LI04@HAND-CHINA.COM 2022-05-17 15:20:56
  */
