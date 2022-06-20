@@ -214,7 +214,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 .append("rest.uri=/" + serviceShort + "/v1/")
                 .append(batchPlanDTO.getTenantId())
                 .append("/batch-plans/exec/")
-                .append(batchPlanDTO.getPlanId() + "\n")
+                .append(batchPlanDTO.getPlanId() + String.format("?projectId=%d", batchPlanDTO.getProjectId()) + "\n")
                 .append("rest.method=GET\n")
                 .append("rest.contentType=application/json\n")
                 .append("rest.body={}\n")
