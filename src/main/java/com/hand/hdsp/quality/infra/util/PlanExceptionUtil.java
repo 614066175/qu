@@ -177,7 +177,10 @@ public class PlanExceptionUtil {
         if (CollectionUtils.isNotEmpty(exceptionMapList)) {
             //如果是hive，则去除最后一个结果，最后一个结果是hive-sql执行日志，并非异常数据
             if (DbType.hive.equals(driverSession.getDbType())) {
-                exceptionMapList.remove(exceptionMapList.size() - 1);
+                //判断最后一行是不是hive-sql的执行日志，如果是则移除，如果不是则不处理
+                if (exceptionMapList.get(exceptionMapList.size() - 1).get("hive-sql") != null) {
+                    exceptionMapList.remove(exceptionMapList.size() - 1);
+                }
             }
             //每一条异常数据存上规则名和异常信息
             exceptionMapList.forEach(map -> {
