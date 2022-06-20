@@ -1,24 +1,16 @@
 package com.hand.hdsp.quality.api.dto;
 
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
-import java.util.Date;
-import java.util.List;
-
-import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiModel;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.List;
 
 /**
  * <p>标准表 数据传输对象</p>
@@ -81,6 +73,10 @@ public class StandardTeamDTO extends AuditDomain {
 
     @Transient
     private String inheriteTeamName;
+
+    //当前标准组id，继承自时排除当前标准组
+    @Transient
+    private Long curStandardTeamId;
 
     @Transient
     private List<DataFieldDTO> dataFieldDTOList;
