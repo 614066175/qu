@@ -52,6 +52,9 @@
             <if test="projectId !=null">
                 and xst.project_id =#{projectId}
             </if>
+            <if test="curStandardTeamId !=null">
+                and xst.standard_team_id !=#{curStandardTeamId}
+            </if>
         </where>
         order by xst.standard_team_id desc
     </select>
