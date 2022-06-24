@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
+import com.alibaba.druid.DbType;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
@@ -92,6 +93,13 @@ public class RegularMeasure implements Measure {
                 String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
                 List<Map<String, Object>> maps = driverSession.executeOneQuery(param.getSchema(), sql);
                 List<MeasureResultDO> list = new ArrayList<>();
+                //如果是hive类型，并且结果获取到了hive-sql日志，进行排除
+                if(DbType.hive.equals(driverSession.getDbType())){
+                    //判断最后一行是不是hive-sql的执行日志，如果是则移除，如果不是则不处理
+                    if (maps.get(maps.size() - 1).get("hive-sql") != null) {
+                        maps.remove(maps.size() - 1);
+                    }
+                }
                 maps.forEach((map) -> map.forEach((k, v) -> list.add(new MeasureResultDO(String.valueOf(v)))));
                 List<String> noMatchList=new ArrayList<>();
                 for (MeasureResultDO measureResultDO : list) {

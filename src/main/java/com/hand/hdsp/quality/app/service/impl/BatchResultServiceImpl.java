@@ -209,6 +209,8 @@ public class BatchResultServiceImpl implements BatchResultService {
             //告警等级
             query.addCriteria(Criteria.where(WARNING_LEVEL).is(exceptionDataDTO.getWarningLevel()));
         }
+        //排除_id字段
+        query.fields().exclude("_id");
         String collectionName = String.format("%d_%d", exceptionDataDTO.getPlanBaseId(), resultBaseId);
         long count = mongoTemplate.count(query, collectionName);
         if (count == 0) {

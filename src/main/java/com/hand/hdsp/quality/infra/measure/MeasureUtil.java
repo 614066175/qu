@@ -172,8 +172,12 @@ public class MeasureUtil {
         }
         String[] strings = fieldName.split(BaseConstants.Symbol.COMMA);
         List<String> list = new ArrayList<>();
-        for (String string : strings) {
-            list.add(string.substring(0, string.indexOf('(')));
+        for (String column : strings) {
+            if (StringUtils.isNotEmpty(column) && column.contains("(")) {
+                list.add(column.substring(0, column.indexOf('(')));
+            }else{
+                list.add(column);
+            }
         }
         return StringUtils.join(list, BaseConstants.Symbol.COMMA);
     }
