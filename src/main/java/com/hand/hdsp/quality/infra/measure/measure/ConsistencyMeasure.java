@@ -11,7 +11,6 @@ import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
-import com.hand.hdsp.quality.infra.util.PlanExceptionUtil;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.boot.driver.app.service.DriverSessionService;
@@ -64,7 +63,7 @@ public class ConsistencyMeasure implements Measure {
             batchResultItem.setWarningLevel(JsonUtils.object2Json(Collections.singleton(WarningLevelVO.builder()
                     .warningLevel(warningLevelDTO.getWarningLevel())
                     .build())));
-            PlanExceptionUtil.getPlanException(param, batchResultBase, sql, driverSession, warningLevelDTO);
+//            PlanExceptionUtil.getPlanException(param, batchResultBase, sql, driverSession, warningLevelDTO);
             batchResultItem.setExceptionInfo("不满足一致性（规则字段组合相同时，校验字段均相同）");
         }
 
