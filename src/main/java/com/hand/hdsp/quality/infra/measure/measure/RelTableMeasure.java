@@ -1,10 +1,6 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.*;
-import java.util.stream.Collectors;
-
+import com.alibaba.druid.DbType;
 import com.hand.hdsp.quality.api.dto.RelationshipDTO;
 import com.hand.hdsp.quality.api.dto.TableRelCheckDTO;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
@@ -30,6 +26,11 @@ import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.boot.platform.lov.dto.LovValueDTO;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.starter.driver.core.session.DriverSession;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>表间关系</p>
@@ -88,8 +89,10 @@ public class RelTableMeasure implements Measure {
 
             List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(),
                     MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, batchPlanRelTable.getWhereCondition()));
-            if (response.size() != 1 || response.get(0).size() != 1) {
-                throw new CommonException(ErrorCode.CHECK_ITEM_ONE_VALUE);
+            if (!DbType.hive.equals(driverSession.getDbType())) {
+                if (response.size() != 1 || response.get(0).size() != 1) {
+                    throw new CommonException(ErrorCode.CHECK_ITEM_ONE_VALUE);
+                }
             }
 
             long dataCount = Long.parseLong(String.valueOf(response.get(0).values().toArray()[0]));
