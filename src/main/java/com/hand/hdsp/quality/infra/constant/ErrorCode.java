@@ -172,4 +172,7 @@ public interface ErrorCode {
 
     String PLAN_GROUP_NOT_EXIST = "hdsp.xqua.plan_group_not_exist";
 
+    String DATA_LENGTH_CAN_NOT_NULL = "hdsp.xsta.data_length_can_not_null";
+
+    String VALUE_RANGE_CAN_NOT_NULL = "hdsp.xsta.value_range_can_not_null";
 }
