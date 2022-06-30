@@ -184,7 +184,6 @@ public class DataFieldDTO extends AuditDomain {
     @Transient
     private Integer editFlag = 1;
 
-    private Integer nullFlag;
 
     //标准组
     @Transient
