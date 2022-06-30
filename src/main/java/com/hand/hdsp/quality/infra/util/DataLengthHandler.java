@@ -1,7 +1,18 @@
 package com.hand.hdsp.quality.infra.util;
 
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.LengthType.FIXED;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.LengthType.RANGE;
+import com.hand.hdsp.quality.api.dto.BatchPlanFieldConDTO;
+import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
+import com.hand.hdsp.quality.api.dto.DataStandardDTO;
+import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.constant.PlanConstant;
+import com.hand.hdsp.quality.infra.constant.WarningLevel;
+import io.choerodon.core.exception.CommonException;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
+import org.hzero.starter.driver.core.infra.util.JsonUtil;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -9,16 +20,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldConDTO;
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
-import com.hand.hdsp.quality.api.dto.DataStandardDTO;
-import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
-import com.hand.hdsp.quality.infra.constant.PlanConstant;
-import com.hand.hdsp.quality.infra.constant.WarningLevel;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.logging.log4j.util.Strings;
-import org.hzero.starter.driver.core.infra.util.JsonUtil;
-import org.springframework.stereotype.Component;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.LengthType.FIXED;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.LengthType.RANGE;
 
 /**
  * <p>
@@ -33,7 +36,7 @@ public class DataLengthHandler implements StandardHandler {
 
     @Override
     public BatchPlanFieldLineDTO handle(DataStandardDTO dataStandardDTO) {
-        if(Strings.isEmpty(dataStandardDTO.getDataLength())){
+        if (Strings.isEmpty(dataStandardDTO.getDataLength())) {
             return null;
         }
         BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()
@@ -65,29 +68,56 @@ public class DataLengthHandler implements StandardHandler {
             //两个值都存在生成告警规则
             List<Long> dataLengthList = dataStandardDTO.getDataLengthList();
             String warningLevel = "";
-            if (CollectionUtils.isNotEmpty(dataLengthList)
-                    && dataLengthList.size() == 2) {
-                WarningLevelDTO firstWarningLevelDTO = null;
-                if (dataLengthList.get(0) > 0) {
-                    firstWarningLevelDTO = WarningLevelDTO.builder()
+            if (CollectionUtils.isNotEmpty(dataLengthList)) {
+                //如果是全闭区间
+                if (dataLengthList.size() == 2) {
+                    WarningLevelDTO firstWarningLevelDTO = null;
+                    if (dataLengthList.get(0) > 0) {
+                        firstWarningLevelDTO = WarningLevelDTO.builder()
+                                .warningLevel(WarningLevel.ORANGE)
+                                .startValue("0")
+                                .endValue(String.valueOf(dataLengthList.get(0)))
+                                .compareSymbol(PlanConstant.CompareSymbol.EQUAL)
+                                .build();
+                    }
+                    WarningLevelDTO secondWarningLevelDTO = WarningLevelDTO.builder()
                             .warningLevel(WarningLevel.ORANGE)
-                            .startValue("0")
-                            .endValue(String.valueOf(dataLengthList.get(0)))
+                            .startValue(String.valueOf(dataLengthList.get(1)))
                             .compareSymbol(PlanConstant.CompareSymbol.EQUAL)
                             .build();
+                    if (Objects.isNull(firstWarningLevelDTO)) {
+                        warningLevelDTOList = Collections.singletonList(secondWarningLevelDTO);
+                    } else {
+                        warningLevelDTOList = Arrays.asList(firstWarningLevelDTO
+                                , secondWarningLevelDTO);
+                    }
+                    warningLevel = JsonUtil.toJson(warningLevelDTOList);
                 }
-                WarningLevelDTO secondWarningLevelDTO = WarningLevelDTO.builder()
-                        .warningLevel(WarningLevel.ORANGE)
-                        .startValue(String.valueOf(dataLengthList.get(1)))
-                        .compareSymbol(PlanConstant.CompareSymbol.EQUAL)
-                        .build();
-                if(Objects.isNull(firstWarningLevelDTO)){
-                    warningLevelDTOList=Collections.singletonList(secondWarningLevelDTO);
-                }else{
-                    warningLevelDTOList = Arrays.asList(firstWarningLevelDTO
-                            , secondWarningLevelDTO);
+                if (dataLengthList.size() == 1) {
+                    WarningLevelDTO warningLevelDTO = null;
+                    //左开右闭
+                    if (dataStandardDTO.getDataLength().startsWith(",")) {
+                        warningLevelDTO = WarningLevelDTO.builder()
+                                .warningLevel(WarningLevel.ORANGE)
+                                .startValue(String.valueOf(dataLengthList.get(0)))
+                                .compareSymbol(PlanConstant.CompareSymbol.EQUAL)
+                                .build();
+                    }
+                    //左闭右开
+                    else if (dataStandardDTO.getDataLength().endsWith(",")) {
+                        warningLevelDTO = WarningLevelDTO.builder()
+                                .warningLevel(WarningLevel.ORANGE)
+                                .startValue("0")
+                                .endValue(String.valueOf(dataLengthList.get(0)))
+                                .compareSymbol(PlanConstant.CompareSymbol.EQUAL)
+                                .build();
+                    }
+                    if (Objects.nonNull(warningLevelDTO)) {
+                        warningLevelDTOList = Collections.singletonList(warningLevelDTO);
+                    }
+                    warningLevel = JsonUtil.toJson(warningLevelDTOList);
                 }
-                warningLevel = JsonUtil.toJson(warningLevelDTOList);
+
             }
             batchPlanFieldConDTO = BatchPlanFieldConDTO.builder()
                     .planLineId(batchPlanFieldLineDTO.getPlanLineId())
@@ -99,6 +129,14 @@ public class DataLengthHandler implements StandardHandler {
         batchPlanFieldLineDTO.setBatchPlanFieldConDTOList(Collections.singletonList(batchPlanFieldConDTO));
         return batchPlanFieldLineDTO;
 
+    }
+
+    @Override
+    public void valid(DataStandardDTO dataStandardDTO) {
+        if (StringUtils.isNotEmpty(dataStandardDTO.getLengthType())
+                && StringUtils.isEmpty(dataStandardDTO.getDataLength())) {
+            throw new CommonException(ErrorCode.DATA_LENGTH_CAN_NOT_NULL, dataStandardDTO.getStandardCode());
+        }
     }
 
     private void convertToDataLengthList(DataStandardDTO dataStandardDTO) {

@@ -1,8 +1,6 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
-import java.util.List;
-import java.util.Map;
-
+import com.alibaba.druid.DbType;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
@@ -15,6 +13,9 @@ import io.choerodon.core.exception.CommonException;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.starter.driver.core.session.DriverSession;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>自定义SQL</p>
@@ -43,8 +44,10 @@ public class SqlCustomMeasure implements Measure {
         }
         DriverSession driverSession = driverSessionService.getDriverSession(tenantId, param.getPluginDatasourceDTO().getDatasourceCode());
         List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(), param.getSql());
-        if (response.size() != 1 || response.get(0).size() != 1) {
-            throw new CommonException(ErrorCode.CHECK_ITEM_ONE_VALUE);
+        if (!DbType.hive.equals(driverSession.getDbType())) {
+            if (response.size() != 1 || response.get(0).size() != 1) {
+                throw new CommonException(ErrorCode.CHECK_ITEM_ONE_VALUE);
+            }
         }
 
         String value = String.valueOf(response.get(0).values().toArray()[0]);

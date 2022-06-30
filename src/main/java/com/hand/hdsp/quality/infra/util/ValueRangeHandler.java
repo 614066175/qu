@@ -1,22 +1,25 @@
 package com.hand.hdsp.quality.infra.util;
 
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.RANGE;
+import com.hand.hdsp.quality.api.dto.BatchPlanFieldConDTO;
+import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
+import com.hand.hdsp.quality.api.dto.DataStandardDTO;
+import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.constant.PlanConstant;
+import com.hand.hdsp.quality.infra.constant.WarningLevel;
+import io.choerodon.core.exception.CommonException;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
+import org.hzero.starter.driver.core.infra.util.JsonUtil;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldConDTO;
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
-import com.hand.hdsp.quality.api.dto.DataStandardDTO;
-import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
-import com.hand.hdsp.quality.infra.constant.PlanConstant;
-import com.hand.hdsp.quality.infra.constant.WarningLevel;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.logging.log4j.util.Strings;
-import org.hzero.starter.driver.core.infra.util.JsonUtil;
-import org.springframework.stereotype.Component;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.RANGE;
 
 /**
  * <p>
@@ -106,5 +109,13 @@ public class ValueRangeHandler implements StandardHandler {
         }
         batchPlanFieldLineDTO.setBatchPlanFieldConDTOList(Collections.singletonList(batchPlanFieldConDTO));
         return batchPlanFieldLineDTO;
+    }
+
+    @Override
+    public void valid(DataStandardDTO dataStandardDTO) {
+        if (StringUtils.isNotEmpty(dataStandardDTO.getValueType())
+                && StringUtils.isEmpty(dataStandardDTO.getValueRange())) {
+            throw new CommonException(ErrorCode.VALUE_RANGE_CAN_NOT_NULL);
+        }
     }
 }

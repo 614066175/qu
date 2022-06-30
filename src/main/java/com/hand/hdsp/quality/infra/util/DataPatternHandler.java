@@ -1,17 +1,18 @@
 package com.hand.hdsp.quality.infra.util;
 
-import java.util.Collections;
-import java.util.List;
-
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldConDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.constant.WarningLevel;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * <p>
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Component;
  * @since 1.0
  */
 @Component
+@Slf4j
 public class DataPatternHandler implements StandardHandler {
 
     @Override
@@ -51,5 +53,10 @@ public class DataPatternHandler implements StandardHandler {
 
         batchPlanFieldLineDTO.setBatchPlanFieldConDTOList(Collections.singletonList(batchPlanFieldConDTO));
         return batchPlanFieldLineDTO;
+    }
+
+    @Override
+    public void valid(DataStandardDTO dataStandardDTO) {
+        log.info("正则无需校验");
     }
 }
