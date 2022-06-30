@@ -172,4 +172,7 @@ public interface ErrorCode {
 
     String PLAN_GROUP_NOT_EXIST = "hdsp.xqua.plan_group_not_exist";
 
+    String CORE_CUSTOMTABLE_COLUMN_LIST ="hdsp.xqua.err.feign_model_customtable_column_list";
+
+    String CORE_CUSTOMTABLE_LIST="hdsp.xqua.err.feign_model_customtable_list";
 }

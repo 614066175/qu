@@ -146,4 +146,7 @@ public class BatchPlanBaseDTO extends AuditDomain {
     private Integer editFlag;
 
     private Long projectId;
+
+    @ApiModelProperty(value = "是否基于标准生成规则，0 否 | 1 是")
+    private Integer buildRuleFlag;
 }

@@ -31,6 +31,7 @@
         <result column="currentPlanId" property="currentPlanId" jdbcType="DECIMAL"/>
         <result column="currentPlanName" property="currentPlanName" jdbcType="VARCHAR"/>
         <result column="datasource_code" property="datasourceCode" jdbcType="VARCHAR"/>
+        <result column="build_rule_flag" property="buildRuleFlag" jdbcType="DECIMAL"/>
         <collection property="baseFormValueDTOS" ofType="com.hand.hdsp.quality.api.dto.BaseFormValueDTO">
             <result column="item_code" property="itemCode"/>
             <result column="form_value" property="formValue"/>
@@ -263,7 +264,8 @@
                xbpb.last_update_date,
                xbp.plan_name,
                hfl.item_code,
-               xbfv.form_value
+               xbfv.form_value,
+               xbpb.build_rule_flag
         from xqua_batch_plan_base xbpb
                  left join xqua_batch_plan xbp on xbpb.plan_id = xbp.plan_id
                  left join xqua_base_form_value xbfv on xbpb.plan_base_id = xbfv.plan_base_id

@@ -74,5 +74,5 @@ public class DataField extends AuditDomain {
 
     private Long projectId;
 
-
+    private Integer nullFlag;
 }

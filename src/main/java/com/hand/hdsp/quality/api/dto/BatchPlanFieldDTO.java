@@ -146,4 +146,7 @@ public class BatchPlanFieldDTO extends AuditDomain {
     private String exceptionBlockFlag;
 
     private Long projectId;
+
+    @ApiModelProperty(value = "是否自动生成 0 否 | 1 是")
+    private Integer autoBuildFlag;
 }
