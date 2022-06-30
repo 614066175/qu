@@ -1,7 +1,6 @@
 package com.hand.hdsp.quality.infra.util;
 
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
-import com.hand.hdsp.quality.api.dto.DataStandardDTO;
+import com.hand.hdsp.quality.api.dto.*;
 
 /**
  * <p>
@@ -27,4 +26,12 @@ public interface StandardHandler {
      * @param dataStandardDTO
      */
     void valid(DataStandardDTO dataStandardDTO);
+
+    /**
+     * 字段标准转换为具体的字段规则行
+     * @param dataFieldDTO
+     * @param fieldType
+     * @return
+     */
+    BatchPlanFieldLineDTO handle(DataFieldDTO dataFieldDTO,String fieldType);
 }

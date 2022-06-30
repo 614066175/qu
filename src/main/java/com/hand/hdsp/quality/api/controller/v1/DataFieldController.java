@@ -330,4 +330,13 @@ public class DataFieldController extends BaseController {
     }
 
 
+    @ApiOperation(value = "字段标准转换标准规则")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/standard-to-rule")
+    public ResponseEntity<BatchPlanFieldDTO> standardToRule(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                                            Long standardId, String columnType) {
+        BatchPlanFieldDTO batchPlanFieldDTO = dataFieldService.standardToRule(standardId, columnType);
+        return Results.success(batchPlanFieldDTO);
+    }
+
 }

@@ -276,6 +276,11 @@ public interface PlanConstant {
          * 计算值比较 calculated value
          */
         String CALCULATED_VALUE = "CALCULATED_VALUE";
+
+        /**
+         * 空值个数
+         */
+        String FIELD_EMPTY="FIELD_EMPTY";
     }
 
     /**

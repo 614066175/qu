@@ -47,7 +47,7 @@ public class DataStandard extends AuditDomain {
     public static final String FIELD_STANDARD_STATUS = "standardStatus";
     public static final String FIELD_TENANT_ID = "tenantId";
     public static final String FIELD_PROJECT_ID = "projectId";
-    public static final String FIELD_ENABLE_FLAG= "enableFlag";
+    public static final String FIELD_NULL_FLAG = "nullFlag";
 
     //
     // 业务方法(按public protected private顺序排列)

@@ -18,6 +18,7 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
+        <result column="auto_build_flag" property="autoBuildFlag" jdbcType="DECIMAL"/>
     </resultMap>
 
     <sql id="baseColumn">
@@ -28,7 +29,8 @@
         ${std}.rule_desc,
         ${std}.check_type,
         ${std}.exception_block,
-        ${std}.weight
+        ${std}.weight,
+        ${std}.auto_build_flag
     </sql>
 
     <select id="selectList" resultType="com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO">

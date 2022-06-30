@@ -1,10 +1,17 @@
 package com.hand.hdsp.quality.infra.util;
 
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldConDTO;
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
-import com.hand.hdsp.quality.api.dto.DataStandardDTO;
-import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.LengthType.FIXED;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.LengthType.RANGE;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
+
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.constant.WarningLevel;
 import io.choerodon.core.exception.CommonException;
@@ -129,6 +136,41 @@ public class DataLengthHandler implements StandardHandler {
         batchPlanFieldLineDTO.setBatchPlanFieldConDTOList(Collections.singletonList(batchPlanFieldConDTO));
         return batchPlanFieldLineDTO;
 
+    }
+
+    @Override
+    public BatchPlanFieldLineDTO handle(DataFieldDTO dataFieldDTO, String fieldType) {
+        if (Strings.isEmpty(dataFieldDTO.getFieldLength())) {
+            return null;
+        }
+        // 创建校验项
+        BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()
+                .checkWay(PlanConstant.CheckWay.COMMON)
+                .checkItem(PlanConstant.CheckItem.DATA_LENGTH)
+                .fieldName(dataFieldDTO.getFieldName() + '(' + fieldType + ')')
+                .build();
+        List<WarningLevelDTO> warningLevelDTOList;
+        // 生成告警规则
+        String warningLevel = "";
+        WarningLevelDTO warningLevelDTO = null;
+        if (Integer.parseInt(dataFieldDTO.getFieldLength()) > 0) {
+            warningLevelDTO = WarningLevelDTO.builder()
+                    .warningLevel(WarningLevel.ORANGE)
+                    .startValue(dataFieldDTO.getFieldLength())
+                    .compareSymbol(PlanConstant.CompareSymbol.INCLUDED)
+                    .build();
+        }
+        warningLevelDTOList = Collections.singletonList(warningLevelDTO);
+        warningLevel = JsonUtil.toJson(warningLevelDTOList);
+
+        // 生成配置项
+        BatchPlanFieldConDTO batchPlanFieldConDTO = BatchPlanFieldConDTO.builder()
+                .warningLevel(warningLevel)
+                .warningLevelList(warningLevelDTOList)
+                .compareWay(PlanConstant.CompareWay.RANGE)
+                .build();
+        batchPlanFieldLineDTO.setBatchPlanFieldConDTOList(Collections.singletonList(batchPlanFieldConDTO));
+        return batchPlanFieldLineDTO;
     }
 
     @Override

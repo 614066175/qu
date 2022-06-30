@@ -10,6 +10,7 @@ import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
+import com.hand.hdsp.quality.infra.util.StandardHandler;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -35,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
@@ -82,6 +84,8 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     private final StandardRelationRepository standardRelationRepository;
 
+    @Autowired
+    private List<StandardHandler> handlers;
 
     public DataFieldServiceImpl(DataFieldRepository dataFieldRepository, StandardExtraRepository standardExtraRepository, StandardApproveRepository standardApproveRepository, DataFieldVersionRepository dataFieldVersionRepository, DataFieldMapper dataFieldMapper, DataStandardService dataStandardService, ExtraVersionRepository extraVersionRepository, DataStandardMapper dataStandardMapper, StandardAimRepository standardAimRepository,DriverSessionService driverSessionService, StandardTeamRepository standardTeamRepository, StandardRelationRepository standardRelationRepository) {
         this.dataFieldRepository = dataFieldRepository;
@@ -444,6 +448,28 @@ public class DataFieldServiceImpl implements DataFieldService {
             standardRelationRepository.batchInsertDTOSelective(standardRelationDTOList);
         }
         return dataFieldDTO;
+    }
+
+    @Override
+    public BatchPlanFieldDTO standardToRule(Long standardId, String fieldType) {
+        DataFieldDTO dataFieldDTO = dataFieldRepository.selectDTOByPrimaryKey(standardId);
+        BatchPlanFieldDTO batchPlanFieldDTO = BatchPlanFieldDTO.builder()
+                .ruleCode(dataFieldDTO.getFieldName() + "_auto")
+                .ruleName(dataFieldDTO.getFieldComment() + "自生成规则")
+                .ruleDesc(dataFieldDTO.getStandardDesc())
+                .checkType(STANDARD)
+                .autoBuildFlag(1)
+                .weight(5L)
+                .build();
+        List<BatchPlanFieldLineDTO> batchPlanFieldLineDTOList = new ArrayList<>();
+        handlers.forEach(standardHandler -> {
+            BatchPlanFieldLineDTO fieldLineDTO = standardHandler.handle(dataFieldDTO, fieldType);
+            if (fieldLineDTO != null) {
+                batchPlanFieldLineDTOList.add(fieldLineDTO);
+            }
+        });
+        batchPlanFieldDTO.setBatchPlanFieldLineDTOList(batchPlanFieldLineDTOList);
+        return batchPlanFieldDTO;
     }
 
     /**

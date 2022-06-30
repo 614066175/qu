@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.domain.entity;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import lombok.experimental.FieldNameConstants;
 
@@ -69,5 +70,6 @@ public class BatchPlanBase extends AuditDomain {
 
     private Long projectId;
 
+    private Integer buildRuleFlag;
 
 }

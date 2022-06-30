@@ -1,21 +1,24 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.core.util.JsqlParser;
-import com.hand.hdsp.quality.api.dto.BaseFormValueDTO;
-import com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO;
-import com.hand.hdsp.quality.api.dto.BatchResultDTO;
-import com.hand.hdsp.quality.api.dto.ColumnDTO;
+import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanBaseService;
+import com.hand.hdsp.quality.app.service.DataFieldService;
 import com.hand.hdsp.quality.domain.entity.BaseFormValue;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.domain.entity.PlanBaseAssign;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
+import com.hand.hdsp.quality.infra.feign.ModelFeign;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hzero.core.util.ResponseUtils;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,10 +57,16 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
 
     private final PlanBaseAssignRepository planBaseAssignRepository;
     private final BaseFormValueRepository baseFormValueRepository;
+    private final DataFieldRepository dataFieldRepository;
+    private final ModelFeign modelFeign;
+    private final DataFieldService dataFieldService;
 
-    public BatchPlanBaseServiceImpl(PlanBaseAssignRepository planBaseAssignRepository, BaseFormValueRepository baseFormValueRepository) {
+    public BatchPlanBaseServiceImpl(PlanBaseAssignRepository planBaseAssignRepository, BaseFormValueRepository baseFormValueRepository, DataFieldRepository dataFieldRepository, ModelFeign modelFeign, DataFieldService dataFieldService) {
         this.planBaseAssignRepository = planBaseAssignRepository;
         this.baseFormValueRepository = baseFormValueRepository;
+        this.dataFieldRepository = dataFieldRepository;
+        this.modelFeign = modelFeign;
+        this.dataFieldService = dataFieldService;
     }
 
     @Override
@@ -155,6 +164,44 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
             baseFormValueDTOS.forEach(baseFormValueDTO -> baseFormValueDTO.setPlanBaseId(batchPlanBaseDTO.getPlanBaseId()));
             baseFormValueRepository.batchInsertDTOSelective(baseFormValueDTOS);
         }
+        // 如果类型为数据源且开启自动生成标准
+        if ("TABLE".equals(batchPlanBaseDTO.getSqlType()) && batchPlanBaseDTO.getBuildRuleFlag() == 1) {
+            // feign调用获取对应的表设计信息
+            ResponseEntity<String> tableResponse = modelFeign.detailForFeign(
+                    batchPlanBaseDTO.getTenantId(),
+                    batchPlanBaseDTO.getProjectId(),
+                    batchPlanBaseDTO.getDatasourceType(),
+                    batchPlanBaseDTO.getDatasourceCode(),
+                    batchPlanBaseDTO.getDatasourceSchema(),
+                    batchPlanBaseDTO.getObjectName());
+            // 获取表设计的表tableId
+            CustomTableDTO dto = ResponseUtils.getResponse(tableResponse, CustomTableDTO.class,
+                    (httpStatus, response) -> {
+                        throw new CommonException(response);
+                    }, exceptionResponse -> {
+                        throw new CommonException(exceptionResponse.getMessage());
+                    });
+            if (dto != null) {
+                // feign调用获取表设计对应的表字段
+                ResponseEntity<String> columnBody = modelFeign.list(dto.getTenantId(), dto.getProjectId(), dto.getCustomTableId());
+                List<TableColumnDTO> columnDTOList = ResponseUtils.getResponse(columnBody, new TypeReference<Page<TableColumnDTO>>() {
+                }, (httpStatus, response) -> {
+                    throw new CommonException(response);
+                }, exceptionResponse -> {
+                    throw new CommonException(exceptionResponse.getMessage());
+                });
+                if (CollectionUtils.isNotEmpty(columnDTOList)) {
+                    List<TableColumnDTO> field = columnDTOList.stream().filter(column -> "FIELD".equals(column.getQuoteType())).collect(Collectors.toList());
+                    if (CollectionUtils.isNotEmpty(field)) {
+                        for (TableColumnDTO tableColumnDTO : field) {
+                            // 将字段标准转换为规则
+                            BatchPlanFieldDTO batchPlanFieldDTO = dataFieldService.standardToRule(tableColumnDTO.getQuoteId(),tableColumnDTO.getColumnType());
+                            insert(batchPlanFieldDTO, batchPlanBaseDTO);
+                        }
+                    }
+                }
+            }
+        }
         return batchPlanBaseDTO;
     }
 
@@ -173,5 +220,32 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
             baseFormValueRepository.batchInsertDTOSelective(baseFormValueDTOS);
         }
         return batchPlanBaseDTO;
+    }
+
+    /**
+     * 将字段标准生成的规则挂到表字段上
+     */
+    private void insert(BatchPlanFieldDTO batchPlanFieldDTO, BatchPlanBaseDTO batchPlanBaseDTO) {
+        // 如果字段规则表下的字段，生成了标准则插入字段规则信息
+        if (CollectionUtils.isNotEmpty(batchPlanFieldDTO.getBatchPlanFieldLineDTOList())) {
+            batchPlanFieldDTO.setPlanBaseId(batchPlanBaseDTO.getPlanBaseId());
+            batchPlanFieldDTO.setTenantId(batchPlanBaseDTO.getTenantId());
+            batchPlanFieldDTO.setProjectId(batchPlanBaseDTO.getProjectId());
+            batchPlanFieldRepository.insertDTOSelective(batchPlanFieldDTO);
+            // 插入校验项
+            for (BatchPlanFieldLineDTO batchPlanFieldLineDTO : batchPlanFieldDTO.getBatchPlanFieldLineDTOList()) {
+                batchPlanFieldLineDTO.setTenantId(batchPlanFieldLineDTO.getTenantId());
+                batchPlanFieldLineDTO.setProjectId(batchPlanBaseDTO.getProjectId());
+                batchPlanFieldLineDTO.setPlanRuleId(batchPlanFieldDTO.getPlanRuleId());
+                batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
+                // 遍历插入字段规则条件
+                for (BatchPlanFieldConDTO batchPlanFieldConDTO : batchPlanFieldLineDTO.getBatchPlanFieldConDTOList()) {
+                    batchPlanFieldConDTO.setTenantId(batchPlanFieldLineDTO.getTenantId());
+                    batchPlanFieldConDTO.setProjectId(batchPlanBaseDTO.getProjectId());
+                    batchPlanFieldConDTO.setPlanLineId(batchPlanFieldLineDTO.getPlanLineId());
+                    batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
+                }
+            }
+        }
     }
 }
