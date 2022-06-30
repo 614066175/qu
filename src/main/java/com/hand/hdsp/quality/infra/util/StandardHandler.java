@@ -13,10 +13,19 @@ import com.hand.hdsp.quality.api.dto.*;
 public interface StandardHandler {
     /**
      * 将数据标准转换成具体的字段规则行
+     *
      * @param dataStandardDTO
      * @return
      */
     BatchPlanFieldLineDTO handle(DataStandardDTO dataStandardDTO);
+
+
+    /**
+     * 发布时对标准进行校验
+     *
+     * @param dataStandardDTO
+     */
+    void valid(DataStandardDTO dataStandardDTO);
 
     /**
      * 字段标准转换为具体的字段规则行
