@@ -44,6 +44,11 @@ public class NullValueHandler implements StandardHandler {
     }
 
     @Override
+    public void valid(DataStandardDTO dataStandardDTO) {
+
+    }
+
+    @Override
     public BatchPlanFieldLineDTO handle(DataFieldDTO dataFieldDTO, String fieldType) {
         if (dataFieldDTO.getNullFlag() != 0) {
             return null;
