@@ -1,10 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.core.constant.HdspConstant;
-import com.hand.hdsp.quality.api.dto.AssigneeUserDTO;
-import com.hand.hdsp.quality.api.dto.DataFieldDTO;
-import com.hand.hdsp.quality.api.dto.DataStandardDTO;
-import com.hand.hdsp.quality.api.dto.StandardAimDTO;
+import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.DataFieldService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.repository.DataFieldRepository;
@@ -137,8 +134,7 @@ public class DataFieldController extends BaseController {
                                                @RequestBody DataFieldDTO dataFieldDTO) {
         dataFieldDTO.setTenantId(tenantId);
         dataFieldDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
-        dataFieldRepository.updateByDTOPrimaryKey(dataFieldDTO);
-        return Results.success(dataFieldDTO);
+        return Results.success(dataFieldService.update(dataFieldDTO));
     }
 
     @ApiOperation(value = "数据标准修改状态")
@@ -313,6 +309,15 @@ public class DataFieldController extends BaseController {
     @GetMapping("/find-charger/{fieldId}")
     public ResponseEntity<List<AssigneeUserDTO>> findCharger(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long fieldId) {
         return Results.success(dataFieldService.findCharger(tenantId, fieldId));
+    }
+
+    @ApiOperation(value = "字段标准转换标准规则")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/standard-to-rule")
+    public ResponseEntity<BatchPlanFieldDTO> standardToRule(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                                            Long standardId, String columnType) {
+        BatchPlanFieldDTO batchPlanFieldDTO = dataFieldService.standardToRule(standardId, columnType);
+        return Results.success(batchPlanFieldDTO);
     }
 
 

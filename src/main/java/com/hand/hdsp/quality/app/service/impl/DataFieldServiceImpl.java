@@ -10,6 +10,7 @@ import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
+import com.hand.hdsp.quality.infra.util.StandardHandler;
 import com.hand.hdsp.quality.infra.statistic.validator.StatisticValidator;
 import com.hand.hdsp.quality.infra.util.CustomThreadPool;
 import io.choerodon.core.domain.Page;
@@ -37,7 +38,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.stream.Collectors;
 
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
@@ -64,11 +67,11 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     private final DataStandardService dataStandardService;
 
+    private final StandardAimRepository standardAimRepository;
 
     private final ExtraVersionRepository extraVersionRepository;
 
     private final DataStandardMapper dataStandardMapper;
-
 
     @Value("${hdsp.workflow.enabled:false}")
     private boolean enableWorkflow;
@@ -83,6 +86,13 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     private final AimStatisticsRepository aimStatisticsRepository;
 
+    private final StandardTeamRepository standardTeamRepository;
+
+    private final StandardRelationRepository standardRelationRepository;
+
+    @Autowired
+    private List<StandardHandler> handlers;
+
     private final List<StatisticValidator> statisticValidatorList;
 
     //统计行数
@@ -91,24 +101,24 @@ public class DataFieldServiceImpl implements DataFieldService {
     //统计非空行数
     private final static String NOT_NULL_COUNT = "SELECT COUNT(*)  FROM %s where %s is not null";
 
-
-    public DataFieldServiceImpl(DataFieldRepository dataFieldRepository,
-                                StandardExtraRepository standardExtraRepository,
-                                StandardApproveRepository standardApproveRepository,
-                                DataFieldVersionRepository dataFieldVersionRepository,
-                                DataFieldMapper dataFieldMapper, DataStandardService dataStandardService,
-                                ExtraVersionRepository extraVersionRepository, DataStandardMapper dataStandardMapper,
-                                StandardAimRepository standardAimRepository, DriverSessionService driverSessionService,
-                                AimStatisticsRepository aimStatisticsRepository, List<StatisticValidator> statisticValidatorList) {
+    public DataFieldServiceImpl(DataFieldRepository dataFieldRepository, StandardExtraRepository standardExtraRepository,
+                                StandardApproveRepository standardApproveRepository, DataFieldVersionRepository dataFieldVersionRepository,
+                                DataFieldMapper dataFieldMapper, DataStandardService dataStandardService, ExtraVersionRepository extraVersionRepository,
+                                DataStandardMapper dataStandardMapper, StandardAimRepository standardAimRepository,
+                                StandardTeamRepository standardTeamRepository, StandardRelationRepository standardRelationRepository,
+                                AimStatisticsRepository aimStatisticsRepository, List<StatisticValidator> statisticValidatorList,
+                                DriverSessionService driverSessionService) {
         this.dataFieldRepository = dataFieldRepository;
         this.standardExtraRepository = standardExtraRepository;
         this.standardApproveRepository = standardApproveRepository;
         this.dataFieldVersionRepository = dataFieldVersionRepository;
         this.dataFieldMapper = dataFieldMapper;
         this.dataStandardService = dataStandardService;
+        this.standardAimRepository = standardAimRepository;
         this.extraVersionRepository = extraVersionRepository;
         this.dataStandardMapper = dataStandardMapper;
-        this.standardAimRepository = standardAimRepository;
+        this.standardTeamRepository = standardTeamRepository;
+        this.standardRelationRepository = standardRelationRepository;
         this.driverSessionService = driverSessionService;
         this.aimStatisticsRepository = aimStatisticsRepository;
         this.statisticValidatorList = statisticValidatorList;
@@ -130,6 +140,17 @@ public class DataFieldServiceImpl implements DataFieldService {
 
         dataFieldDTO.setStandardStatus(CREATE);
         dataFieldRepository.insertDTOSelective(dataFieldDTO);
+
+        //如果新建的时候维护了标准组，则维护此标准与标准组的关系
+        if (CollectionUtils.isNotEmpty(dataFieldDTO.getStandardTeamDTOList())) {
+            List<StandardTeamDTO> standardTeamDTOList = dataFieldDTO.getStandardTeamDTOList();
+            List<StandardRelationDTO> standardRelationDTOList = new ArrayList<>();
+            standardTeamDTOList.forEach(standardTeamDTO ->
+                    standardRelationDTOList.add(StandardRelationDTO.builder().fieldStandardId(dataFieldDTO.getFieldId())
+                            .standardTeamId(standardTeamDTO.getStandardTeamId())
+                            .build()));
+            standardRelationRepository.batchInsertDTOSelective(standardRelationDTOList);
+        }
 
         List<StandardExtraDTO> standardExtraDTOList = dataFieldDTO.getStandardExtraDTOList();
         if (CollectionUtils.isNotEmpty(standardExtraDTOList)) {
@@ -177,6 +198,16 @@ public class DataFieldServiceImpl implements DataFieldService {
                         .andEqualTo(StandardExtra.FIELD_TENANT_ID, tenantId))
                 .build());
         dataFieldDTO.setStandardExtraDTOList(standardExtraDTOS);
+        //查询标准组
+        List<StandardRelation> standardRelations = standardRelationRepository.select(StandardRelation.builder().fieldStandardId(fieldId).build());
+        List<Long> standardTeamIds = standardRelations.stream()
+                .map(StandardRelation::getStandardTeamId)
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(standardTeamIds)) {
+            List<StandardTeamDTO> standardTeamDTOS = standardTeamRepository.selectDTOByIds(standardTeamIds);
+            dataFieldDTO.setStandardTeamDTOList(standardTeamDTOS);
+        }
+
         return dataFieldDTO;
     }
 
@@ -206,6 +237,13 @@ public class DataFieldServiceImpl implements DataFieldService {
                 ).build());
         //todo 删除落标表
         standardExtraRepository.batchDTODeleteByPrimaryKey(standardExtraDTOS);
+
+        //删除与标准组关系
+        List<StandardRelation> standardRelationList = standardRelationRepository
+                .select(StandardRelation.builder().fieldStandardId(dataFieldDTO.getFieldId()).build());
+        if (CollectionUtils.isNotEmpty(standardRelationList)) {
+            standardRelationRepository.batchDeleteByPrimaryKey(standardRelationList);
+        }
     }
 
     @Override
@@ -378,6 +416,53 @@ public class DataFieldServiceImpl implements DataFieldService {
         } else {
             throw new CommonException(ErrorCode.NOT_FIND_VALUE);
         }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public DataFieldDTO update(DataFieldDTO dataFieldDTO) {
+        //更新
+        dataFieldRepository.updateByDTOPrimaryKey(dataFieldDTO);
+
+        //更新标准组关系
+        List<StandardRelation> standardRelations = standardRelationRepository.select(StandardRelation.builder().fieldStandardId(dataFieldDTO.getFieldId()).build());
+        if (CollectionUtils.isNotEmpty(standardRelations)) {
+            //删除旧的
+            standardRelationRepository.batchDeleteByPrimaryKey(standardRelations);
+        }
+        //维护新的关系
+        if (CollectionUtils.isNotEmpty(dataFieldDTO.getStandardTeamDTOList())) {
+            List<StandardTeamDTO> standardTeamDTOList = dataFieldDTO.getStandardTeamDTOList();
+            List<StandardRelationDTO> standardRelationDTOList = new ArrayList<>();
+            standardTeamDTOList.forEach(standardTeamDTO ->
+                    standardRelationDTOList.add(StandardRelationDTO.builder().fieldStandardId(dataFieldDTO.getFieldId())
+                            .standardTeamId(standardTeamDTO.getStandardTeamId())
+                            .build()));
+            standardRelationRepository.batchInsertDTOSelective(standardRelationDTOList);
+        }
+        return dataFieldDTO;
+    }
+
+    @Override
+    public BatchPlanFieldDTO standardToRule(Long standardId, String fieldType) {
+        DataFieldDTO dataFieldDTO = dataFieldRepository.selectDTOByPrimaryKey(standardId);
+        BatchPlanFieldDTO batchPlanFieldDTO = BatchPlanFieldDTO.builder()
+                .ruleCode(dataFieldDTO.getFieldName() + "_auto")
+                .ruleName(dataFieldDTO.getFieldComment() + "自生成规则")
+                .ruleDesc(dataFieldDTO.getStandardDesc())
+                .checkType(STANDARD)
+                .autoBuildFlag(1)
+                .weight(5L)
+                .build();
+        List<BatchPlanFieldLineDTO> batchPlanFieldLineDTOList = new ArrayList<>();
+        handlers.forEach(standardHandler -> {
+            BatchPlanFieldLineDTO fieldLineDTO = standardHandler.handle(dataFieldDTO, fieldType);
+            if (fieldLineDTO != null) {
+                batchPlanFieldLineDTOList.add(fieldLineDTO);
+            }
+        });
+        batchPlanFieldDTO.setBatchPlanFieldLineDTOList(batchPlanFieldLineDTOList);
+        return batchPlanFieldDTO;
     }
 
 

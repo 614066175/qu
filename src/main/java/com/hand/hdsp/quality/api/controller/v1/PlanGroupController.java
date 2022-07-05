@@ -1,8 +1,5 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
-
 import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.PlanGroupDTO;
 import com.hand.hdsp.quality.app.service.PlanGroupService;
@@ -24,6 +21,9 @@ import org.hzero.export.vo.ExportParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * <p>评估方案分组表 管理 API</p>
@@ -178,8 +178,7 @@ public class PlanGroupController extends BaseController {
                                     ExportParam exportParam,
                                     HttpServletResponse response) {
         dto.setTenantId(tenantId);
-        List<PlanGroupDTO> dtoList =
-                planGroupService.export(dto, exportParam);
+        List<PlanGroupDTO> dtoList = planGroupService.export(dto, exportParam);
         response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
         return Results.success(dtoList);
     }

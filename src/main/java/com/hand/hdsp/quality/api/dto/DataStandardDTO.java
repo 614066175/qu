@@ -171,4 +171,6 @@ public class DataStandardDTO extends AuditDomain{
 
     private Long projectId;
 
+    private Integer nullFlag;
+
 }

@@ -40,4 +40,12 @@ public interface BatchPlanTableMapper extends BaseMapper<BatchPlanTable> {
      * @return
      */
     List<BatchPlanTableDTO> selectDetailList(BatchPlanTableDTO batchPlanTableDTO);
+
+    /**
+     * 根据质检项id获取编辑规则
+     *
+     * @param planBaseId
+     * @return
+     */
+    List<BatchPlanTableDTO> getPlanTable(Long planBaseId);
 }

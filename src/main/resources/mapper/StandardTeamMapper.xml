@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.StandardTeamMapper">
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.StandardTeam">
+        <result column="standard_team_id" property="standardTeamId" jdbcType="DECIMAL"/>
+        <result column="standard_team_code" property="standardTeamCode" jdbcType="VARCHAR"/>
+        <result column="standard_team_name" property="standardTeamName" jdbcType="VARCHAR"/>
+        <result column="standard_team_desc" property="standardTeamDesc" jdbcType="VARCHAR"/>
+        <result column="parent_team_id" property="parentTeamId" jdbcType="DECIMAL"/>
+        <result column="inherite_team_id" property="inheriteTeamId" jdbcType="DECIMAL"/>
+        <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
+        <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
+        <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
+        <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
+    </resultMap>
+    <select id="listAll" resultType="com.hand.hdsp.quality.api.dto.StandardTeamDTO">
+        select xst.*,
+               xst2.standard_team_code parentTeamCode,
+               xst2.standard_team_name parentTeamName,
+               iu1.login_name          creatorName,
+               iu2.login_name          updaterName
+        from xsta_standard_team xst
+        left join xsta_standard_team xst2 on xst.parent_team_id = xst2.standard_team_id
+        left join iam_user iu1 on xst.created_by = iu1.id
+        left join iam_user iu2 on xst.created_by = iu2.id
+        <where>
+            xst.tenant_id=#{tenantId}
+            <if test="standardTeamCode!=null">
+                <bind name="standardTeamCodeLike" value="'%'+standardTeamCode+'%'"/>
+                and xst.standard_team_code like #{standardTeamCodeLike}
+            </if>
+            <if test="standardTeamName!=null">
+                <bind name="standardTeamNameLike" value="'%'+standardTeamName+'%'"/>
+                and xst.standard_team_name like #{standardTeamNameLike}
+            </if>
+            <if test="standardTeamDesc!=null">
+                <bind name="standardTeamDescLike" value="'%'+standardTeamDesc+'%'"/>
+                and xst.standard_team_desc like #{standardTeamDescLike}
+            </if>
+            <if test="creatorName!=null">
+                <bind name="creatorNameLike" value="'%'+creatorName+'%'"/>
+                and iu1.login_name like #{creatorNameLike}
+            </if>
+            <if test="updaterName!=null">
+                <bind name="updaterNameLike" value="'%'+updaterName+'%'"/>
+                and iu2.login_name like #{updaterNameLike}
+            </if>
+            <if test="projectId !=null">
+                and xst.project_id =#{projectId}
+            </if>
+            <if test="curStandardTeamId !=null">
+                and xst.standard_team_id !=#{curStandardTeamId}
+            </if>
+        </where>
+        order by xst.standard_team_id desc
+    </select>
+    <select id="detail" resultType="com.hand.hdsp.quality.api.dto.StandardTeamDTO">
+        select xst.*,
+        xst2.standard_team_code parentTeamCode,
+        xst2.standard_team_name parentTeamName,
+        xst3.standard_team_code inheriteTeamCode,
+        xst3.standard_team_name inheriteTeamName
+        from xsta_standard_team xst
+        left join xsta_standard_team xst2 on xst.parent_team_id = xst2.standard_team_id
+        left join xsta_standard_team xst3 on xst.inherite_team_id = xst3.standard_team_id
+        where xst.standard_team_id=#{standardTeamId}
+    </select>
+</mapper>

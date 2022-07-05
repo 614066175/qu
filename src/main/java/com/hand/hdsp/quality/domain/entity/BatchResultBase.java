@@ -79,4 +79,7 @@ public class BatchResultBase extends AuditDomain {
     @Transient
     private String packageObjectName;
 
+    @Transient
+    private String sqlType;
+
 }

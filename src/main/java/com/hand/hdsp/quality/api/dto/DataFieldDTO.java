@@ -142,7 +142,6 @@ public class DataFieldDTO extends AuditDomain {
     private String chargeDeptName;
 
     @ApiModelProperty(value = "默认值")
-
     private String defaultValue;
 
 
@@ -166,6 +165,30 @@ public class DataFieldDTO extends AuditDomain {
     private String dataStandardName;
 
     private Long projectId;
+
+
+    //标准组id
+    @Transient
+    private Long standardTeamId;
+
+    //继承自标准组id
+    @Transient
+    private Long inheriteTeamId;
+
+
+    //是否选中，即是否是此标准组下标准（0否，1是）
+    @Transient
+    private Integer checkFlag = 0;
+
+    //是否编辑标识，继承的标准组下的标准不允许编辑（0否，1时）
+    @Transient
+    private Integer editFlag = 1;
+
+    private Integer nullFlag;
+
+    //标准组
+    @Transient
+    private List<StandardTeamDTO> standardTeamDTOList;
 
 
     public interface Group1 {

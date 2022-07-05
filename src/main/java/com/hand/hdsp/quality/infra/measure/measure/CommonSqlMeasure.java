@@ -1,9 +1,6 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.alibaba.druid.DbType;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
@@ -13,8 +10,14 @@ import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
 import com.hand.hdsp.quality.infra.measure.*;
 import io.choerodon.core.exception.CommonException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.starter.driver.core.session.DriverSession;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>通用SQL处理</p>
@@ -50,19 +53,51 @@ public class CommonSqlMeasure implements Measure {
         Map<String, String> variables = new HashMap<>(8);
         variables.put("table", batchResultBase.getPackageObjectName());
         variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
+        //维度字段
+        variables.put("dimension", StringUtils.isEmpty(param.getDimensionField()) ? Strings.EMPTY : String.format("group by %s", MeasureUtil.handleFieldName(param.getDimensionField())));
 
-        DriverSession driverSession = driverSessionService.getDriverSession(tenantId,param.getPluginDatasourceDTO().getDatasourceCode());
+        DriverSession driverSession = driverSessionService.getDriverSession(tenantId, param.getPluginDatasourceDTO().getDatasourceCode());
         List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(), MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
-        if (response.size() != 1 || response.get(0).size() != 1) {
-            throw new CommonException(ErrorCode.CHECK_ITEM_ONE_VALUE);
-        }
+        if (StringUtils.isEmpty(param.getDimensionField())) {
+            //hive执行结果可能有执行日志
+            if (!DbType.hive.equals(driverSession.getDbType())) {
+                if (response.size() != 1 || response.get(0).size() != 1) {
+                    throw new CommonException(ErrorCode.CHECK_ITEM_ONE_VALUE);
+                }
+            }
 
-        String value = response.get(0).values().toArray()[0].toString();
-        param.setCountValue(value);
-        batchResultItem.setActualValue(value);
-        batchResultItem.setCurrentValue(value);
-        Count count = countCollector.getCount(param.getCountType());
-        count.count(param);
+            String value = response.get(0).values().toArray()[0].toString();
+            param.setCountValue(value);
+            batchResultItem.setActualValue(value);
+            batchResultItem.setCurrentValue(value);
+            Count count = countCollector.getCount(param.getCountType());
+            count.count(param);
+        } else {
+            //如果有维度字段，并且有多个结果则所有结果去进行比较
+            if (response.size() != 1) {
+                for (Map<String, Object> result : response) {
+                    String value = result.values().toArray()[0].toString();
+                    param.setCountValue(value);
+                    Count count = countCollector.getCount(param.getCountType());
+                    count.count(param);
+                    //如果有异常，则记录并且将
+                    if (param.getBatchResultItem() != null
+                            && StringUtils.isNotEmpty(param.getBatchResultItem().getExceptionInfo())) {
+                        batchResultItem.setActualValue(value);
+                        batchResultItem.setCurrentValue(value);
+                        break;
+                    }
+                }
+            } else {
+                //如果只有一个结果
+                String value = response.get(0).values().toArray()[0].toString();
+                param.setCountValue(value);
+                batchResultItem.setActualValue(value);
+                batchResultItem.setCurrentValue(value);
+                Count count = countCollector.getCount(param.getCountType());
+                count.count(param);
+            }
+        }
 
         return batchResultItem;
     }

@@ -1,9 +1,5 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletResponse;
-
 import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.DataStandardService;
@@ -12,6 +8,7 @@ import com.hand.hdsp.quality.domain.entity.DataStandard;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
+import com.hand.hdsp.quality.infra.util.StandardHandler;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -25,6 +22,9 @@ import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * <p>
@@ -45,10 +45,13 @@ public class DataStandardController {
 
     private final StandardDocMapper standardDocMapper;
 
-    public DataStandardController(DataStandardService dataStandardService, DataStandardRepository dataStandardRepository, StandardDocMapper standardDocMapper) {
+    private final List<StandardHandler> standardHandlers;
+
+    public DataStandardController(DataStandardService dataStandardService, DataStandardRepository dataStandardRepository, StandardDocMapper standardDocMapper, List<StandardHandler> standardHandlers) {
         this.dataStandardService = dataStandardService;
         this.dataStandardRepository = dataStandardRepository;
         this.standardDocMapper = standardDocMapper;
+        this.standardHandlers = standardHandlers;
     }
 
 
@@ -172,8 +175,9 @@ public class DataStandardController {
         dataStandardDTOList.forEach(dataStandardDTO -> {
             dataStandardDTO.setTenantId(tenantId);
             dataStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
-            dataStandardService.publishOrOff(dataStandardDTO);
+            standardHandlers.forEach(standardHandler -> standardHandler.valid(dataStandardDTO));
         });
+        dataStandardDTOList.forEach(dataStandardService::publishOrOff);
         return Results.success(dataStandardDTOList);
     }
 

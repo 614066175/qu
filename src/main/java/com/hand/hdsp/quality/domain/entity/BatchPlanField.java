@@ -56,5 +56,6 @@ public class BatchPlanField extends AuditDomain {
 
     private Long projectId;
 
+    private Integer autoBuildFlag;
 
 }

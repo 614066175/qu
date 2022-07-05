@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.AssigneeUserDTO;
+import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import io.choerodon.core.domain.Page;
@@ -56,19 +57,22 @@ public interface DataFieldService {
 
     /**
      * 字段标准落标
+     *
      * @param tenantId
      * @param standardAimDTOList List<StandardAimDTO>
      */
-    void aim(Long tenantId,List<StandardAimDTO> standardAimDTOList, Long projectId);
+    void aim(Long tenantId, List<StandardAimDTO> standardAimDTOList, Long projectId);
 
     /**
      * 发布数字段标准
+     *
      * @param dataFieldDTO DataFieldDTO
      */
-    void publishOrOff(DataFieldDTO  dataFieldDTO);
+    void publishOrOff(DataFieldDTO dataFieldDTO);
 
     /**
      * 数据标准导出
+     *
      * @param dto
      * @param exportParam
      * @param pageRequest
@@ -78,6 +82,7 @@ public interface DataFieldService {
 
     /**
      * 上线通过事件
+     *
      * @param tenantId
      * @param fieldId
      */
@@ -85,6 +90,7 @@ public interface DataFieldService {
 
     /**
      * 上线拒绝事件
+     *
      * @param tenantId
      * @param fieldId
      */
@@ -92,6 +98,7 @@ public interface DataFieldService {
 
     /**
      * 下线通过事件
+     *
      * @param tenantId
      * @param fieldId
      */
@@ -99,6 +106,7 @@ public interface DataFieldService {
 
     /**
      * 上线拒绝事件
+     *
      * @param tenantId
      * @param fieldId
      */
@@ -106,6 +114,7 @@ public interface DataFieldService {
 
     /**
      * 上线工作流审批中
+     *
      * @param tenantId
      * @param fieldId
      */
@@ -113,6 +122,7 @@ public interface DataFieldService {
 
     /**
      * 下线工作流审批中
+     *
      * @param tenantId
      * @param fieldId
      */
@@ -120,11 +130,29 @@ public interface DataFieldService {
 
     /**
      * 查找责任人审批
+     *
      * @param tenantId
      * @param fieldId
      * @return
      */
     List<AssigneeUserDTO> findCharger(Long tenantId, Long fieldId);
+
+    /**
+     * 更新字段标准
+     *
+     * @param dataFieldDTO
+     * @return
+     */
+    DataFieldDTO update(DataFieldDTO dataFieldDTO);
+
+    /**
+     * 标准转换为规则
+     *
+     * @param standardId
+     * @param fieldType
+     * @return
+     */
+    BatchPlanFieldDTO standardToRule(Long standardId, String fieldType);
 
     /**
      * 字段落标统计

@@ -6,6 +6,8 @@ import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * <p>批数据方案-表间规则表Mapper</p>
  *
@@ -23,4 +25,12 @@ public interface BatchPlanRelTableMapper extends BaseMapper<BatchPlanRelTable> {
     int deleteByPlanBaseId(@Param("planBaseId") Long planBaseId);
 
     BatchPlanRelTableDTO selectDatasourceIdAndType(@Param("batchPlanRelTableDTO") BatchPlanRelTableDTO batchPlanRelTableDTO);
+
+    /**
+     * 根据质检项id获取表间规则
+     *
+     * @param planBaseId
+     * @return
+     */
+    List<BatchPlanRelTableDTO> getRelTable(Long planBaseId);
 }

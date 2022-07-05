@@ -18,6 +18,7 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
+        <result column="auto_build_flag" property="autoBuildFlag" jdbcType="DECIMAL"/>
     </resultMap>
 
     <sql id="baseColumn">
@@ -28,7 +29,8 @@
         ${std}.rule_desc,
         ${std}.check_type,
         ${std}.exception_block,
-        ${std}.weight
+        ${std}.weight,
+        ${std}.auto_build_flag
     </sql>
 
     <select id="selectList" resultType="com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO">
@@ -94,14 +96,22 @@
                xbptl.regular_expression,
                xbpfc.condition_id,
                xbpfc.where_condition,
-               xbpfc.compare_way,
-               xbpfc.warning_level
+        xbpfc.compare_way,
+        xbpfc.warning_level
         from xqua_batch_plan_field_con xbpfc
-                 left join xqua_batch_plan_field_line xbptl on xbpfc.plan_line_id = xbptl.plan_line_id
-                 left join xqua_batch_plan_field xbpf on xbptl.plan_rule_id = xbpf.plan_rule_id
+        left join xqua_batch_plan_field_line xbptl on xbpfc.plan_line_id = xbptl.plan_line_id
+        left join xqua_batch_plan_field xbpf on xbptl.plan_rule_id = xbpf.plan_rule_id
         where xbpf.plan_base_id = #{planBaseId}
         <if test="projectId !=null">
             and xbpfc.project_id=#{projectId}
         </if>
+    </select>
+    <select id="getPlanField" resultType="com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO">
+        SELECT *
+        FROM xqua_batch_plan_field xbpf
+                 join xqua_batch_plan_base xbpb on xbpf.plan_base_id = xbpb.plan_base_id
+                 LEFT JOIN xqua_batch_plan_field_line xbpfl ON xbpf.plan_rule_id = xbpfl.plan_rule_id
+                 LEFT JOIN xqua_batch_plan_field_con xbpfc ON xbpfl.plan_line_id = xbpfc.plan_line_id
+        WHERE xbpf.plan_base_id = #{planBaseId}
     </select>
 </mapper>

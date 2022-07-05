@@ -359,8 +359,11 @@ public class DataStandardServiceImpl implements DataStandardService {
             if (1 == dataLengthList.size()) {
                 dataStandardDTO.setDataLength(String.valueOf(dataLengthList.get(0)));
             }
+            //范围
             if (2 == dataLengthList.size()) {
-                dataStandardDTO.setDataLength(String.format("%s,%s", dataLengthList.get(0), dataLengthList.get(1)));
+                dataStandardDTO.setDataLength(String.format("%s,%s",
+                        dataLengthList.get(0) == null ? StringUtils.EMPTY : dataLengthList.get(0),
+                        dataLengthList.get(1) == null ? StringUtils.EMPTY : dataLengthList.get(0)));
             }
         }
     }

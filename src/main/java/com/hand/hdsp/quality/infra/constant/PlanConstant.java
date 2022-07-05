@@ -276,6 +276,11 @@ public interface PlanConstant {
          * 计算值比较 calculated value
          */
         String CALCULATED_VALUE = "CALCULATED_VALUE";
+
+        /**
+         * 空值个数
+         */
+        String FIELD_EMPTY="FIELD_EMPTY";
     }
 
     /**
@@ -343,10 +348,12 @@ public interface PlanConstant {
     }
 
     interface ExceptionParam {
-        String EXCEPTION_INFO="$exceptionInfo";
+        String EXCEPTION_INFO = "#exceptionInfo";
         //自定义主键用于一条数据多个异常时，进行异常合并
-        String PK="$pk";
-        String RULE_NAME="$ruleName";
-        String WARNING_LEVEL="$warningLevel";
+        String PK = "#pk";
+        String RULE_NAME = "#ruleName";
+        String WARNING_LEVEL = "#warningLevel";
+        String PLAN_BASE_ID = "#planBaseId";
+        String RESULT_BASE_ID = "#resultBaseId";
     }
 }

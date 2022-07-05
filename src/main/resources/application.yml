@@ -1,4 +1,7 @@
 spring:
+  data:
+    mongodb:
+      uri: mongodb://dba:dba@172.23.16.63:27017,172.23.16.63:27018,172.23.16.63:27019/hdsp_quality?slaveOk=true&replicaSet=test&write=1&readPreference=secondaryPreferred&connectTimeoutMS=300000
   application:
     name: ${SPRING_APPLICATION_NAME:hdsp-quality}
   datasource:
@@ -142,6 +145,8 @@ hzero:
       name: ${HZERO_SERVICE_REPORT_NAME:hzero-report}
 
 hdsp:
+  quality:
+    batch-number: 10000
   workflow:
     enabled: true
   # 提取信息

@@ -1,11 +1,5 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
-
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
@@ -23,6 +17,12 @@ import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.hzero.starter.driver.core.session.DriverSession;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * <p>
@@ -80,7 +80,7 @@ public class DataLengthMeasure implements Measure {
                                     .warningLevel(warningLevelDTO.getWarningLevel())
                                     .levelCount(Long.parseLong(maps.get(0).values().toArray()[0].toString()))
                                     .build());
-                    PlanExceptionUtil.getPlanException(param,batchResultBase.getPackageObjectName(),sql,driverSession, warningLevelDTO);
+                    PlanExceptionUtil.getPlanException(param, batchResultBase, sql, driverSession, warningLevelDTO);
                 }
             });
             AtomicLong count = new AtomicLong();
@@ -118,7 +118,7 @@ public class DataLengthMeasure implements Measure {
                                     .levelCount(Long.parseLong(maps.get(0).values().toArray()[0].toString()))
                                     .build());
                     //有异常，查询异常数据
-                    PlanExceptionUtil.getPlanException(param,batchResultBase.getPackageObjectName(),sql,driverSession, warningLevelDTO);
+                    PlanExceptionUtil.getPlanException(param, batchResultBase, sql, driverSession, warningLevelDTO);
                 }
             });
             AtomicLong count = new AtomicLong();
