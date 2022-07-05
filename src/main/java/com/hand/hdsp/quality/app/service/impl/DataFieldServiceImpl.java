@@ -10,6 +10,8 @@ import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
+import com.hand.hdsp.quality.infra.statistic.validator.StatisticValidator;
+import com.hand.hdsp.quality.infra.util.CustomThreadPool;
 import com.hand.hdsp.quality.infra.util.StandardHandler;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -33,7 +35,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
@@ -63,12 +67,11 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     private final DataStandardService dataStandardService;
 
+    private final StandardAimRepository standardAimRepository;
 
     private final ExtraVersionRepository extraVersionRepository;
 
     private final DataStandardMapper dataStandardMapper;
-
-
 
     @Value("${hdsp.workflow.enabled:false}")
     private boolean enableWorkflow;
@@ -76,9 +79,10 @@ public class DataFieldServiceImpl implements DataFieldService {
     @Autowired
     private WorkflowClient workflowClient;
 
-    private final StandardAimRepository standardAimRepository;
-
     private final DriverSessionService driverSessionService;
+
+
+    private final AimStatisticsRepository aimStatisticsRepository;
 
     private final StandardTeamRepository standardTeamRepository;
 
@@ -87,7 +91,21 @@ public class DataFieldServiceImpl implements DataFieldService {
     @Autowired
     private List<StandardHandler> handlers;
 
-    public DataFieldServiceImpl(DataFieldRepository dataFieldRepository, StandardExtraRepository standardExtraRepository, StandardApproveRepository standardApproveRepository, DataFieldVersionRepository dataFieldVersionRepository, DataFieldMapper dataFieldMapper, DataStandardService dataStandardService, ExtraVersionRepository extraVersionRepository, DataStandardMapper dataStandardMapper, StandardAimRepository standardAimRepository,DriverSessionService driverSessionService, StandardTeamRepository standardTeamRepository, StandardRelationRepository standardRelationRepository) {
+    private final List<StatisticValidator> statisticValidatorList;
+
+    //统计行数
+    private final static String COUNT_SQL = "SELECT COUNT(1) as COUNT FROM %s";
+
+    //统计非空行数
+    private final static String NOT_NULL_COUNT = "SELECT COUNT(*)  FROM %s where %s is not null";
+
+    public DataFieldServiceImpl(DataFieldRepository dataFieldRepository, StandardExtraRepository standardExtraRepository,
+                                StandardApproveRepository standardApproveRepository, DataFieldVersionRepository dataFieldVersionRepository,
+                                DataFieldMapper dataFieldMapper, DataStandardService dataStandardService, ExtraVersionRepository extraVersionRepository,
+                                DataStandardMapper dataStandardMapper, StandardAimRepository standardAimRepository,
+                                StandardTeamRepository standardTeamRepository, StandardRelationRepository standardRelationRepository,
+                                AimStatisticsRepository aimStatisticsRepository, List<StatisticValidator> statisticValidatorList,
+                                DriverSessionService driverSessionService) {
         this.dataFieldRepository = dataFieldRepository;
         this.standardExtraRepository = standardExtraRepository;
         this.standardApproveRepository = standardApproveRepository;
@@ -97,10 +115,13 @@ public class DataFieldServiceImpl implements DataFieldService {
         this.standardAimRepository = standardAimRepository;
         this.extraVersionRepository = extraVersionRepository;
         this.dataStandardMapper = dataStandardMapper;
-        this.driverSessionService=driverSessionService;
         this.standardTeamRepository = standardTeamRepository;
         this.standardRelationRepository = standardRelationRepository;
+        this.driverSessionService = driverSessionService;
+        this.aimStatisticsRepository = aimStatisticsRepository;
+        this.statisticValidatorList = statisticValidatorList;
     }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -396,36 +417,6 @@ public class DataFieldServiceImpl implements DataFieldService {
     }
 
     @Override
-    public List<FieldCountDTO> fieledCount(StandardAimDTO standardAimDTO) {
-        List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
-                .andWhere(Sqls.custom()
-                        .andEqualTo(StandardAim.FIELD_STANDARD_TYPE,standardAimDTO.getStandardType())
-                        .andEqualTo(StandardAim.FIELD_STANDARD_ID, standardAimDTO.getStandardId())
-                        .andEqualTo(StandardAim.FIELD_TENANT_ID, standardAimDTO.getTenantId()))
-                .build());
-        if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
-            throw new CommonException(ErrorCode.STANDARD_AIM_NOT_EXIST);}
-        String dataSourceType;
-        String dataSourceCode;
-        String schemaName;
-        String tableName;
-
-
-        for (StandardAimDTO aimDTO : standardAimDTOS) {
-            dataSourceType= aimDTO.getStandardType();
-            dataSourceCode= aimDTO.getDatasourceCode();
-            schemaName=aimDTO.getSchemaName();
-            tableName=aimDTO.getTableName();
-
-            DriverSession driverSession = driverSessionService.getDriverSession(aimDTO.getTenantId(), dataSourceCode);
-
-
-
-        }
-        return null;
-    }
-
-    @Override
     @Transactional(rollbackFor = Exception.class)
     public DataFieldDTO update(DataFieldDTO dataFieldDTO) {
         //更新
@@ -470,6 +461,139 @@ public class DataFieldServiceImpl implements DataFieldService {
         });
         batchPlanFieldDTO.setBatchPlanFieldLineDTOList(batchPlanFieldLineDTOList);
         return batchPlanFieldDTO;
+    }
+
+
+    @Override
+    public StandardAimDTO fieldAimStatistic(StandardAimDTO standardAimDTO) {
+        List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, standardAimDTO.getStandardType())
+                        .andEqualTo(StandardAim.FIELD_STANDARD_ID, standardAimDTO.getStandardId())
+                        .andEqualTo(StandardAim.FIELD_TENANT_ID, standardAimDTO.getTenantId()))
+                .build());
+        if (CollectionUtils.isEmpty(standardAimDTOS)) {
+            //如果表没有落标记录
+            log.info("字段标准没有落标，无需统计");
+            throw new CommonException(ErrorCode.STANDARD_NO_AIM);
+        }
+
+        List<AimStatisticsDTO> aimStatisticsDTOS = new ArrayList<>();
+        AimStatisticsDTO aimStatisticsDTO = new AimStatisticsDTO();
+
+        CountDownLatch cdl = new CountDownLatch(standardAimDTOS.size());
+        for (StandardAimDTO aimDTO : standardAimDTOS) {
+            CustomThreadPool.getExecutor().submit(() -> {
+                try {
+                    aimStatisticsDTO.setAimId(aimDTO.getAimId());
+                    String fieldName = aimDTO.getFieldName().split("\\(")[0];
+                    String dataSourceCode = aimDTO.getDatasourceCode();
+                    String schemaName = aimDTO.getSchemaName();
+                    String tableName = aimDTO.getTableName();
+
+                    DriverSession driverSession = driverSessionService.getDriverSession(aimDTO.getTenantId(), dataSourceCode);
+                    List<Map<String, Object>> countResult = driverSession.executeOneQuery(schemaName, String.format(COUNT_SQL, tableName));
+                    if (CollectionUtils.isNotEmpty(countResult)) {
+                        log.info("行数查询结果【{}】", countResult);
+                        String count = countResult.get(0).values().toArray()[0].toString();
+                        aimStatisticsDTO.setRowNum(Long.parseLong(count));
+                    }
+
+                    List<Map<String, Object>> notNullResult = driverSession.executeOneQuery(schemaName, String.format(NOT_NULL_COUNT, tableName, fieldName));
+                    if (CollectionUtils.isNotEmpty(notNullResult)) {
+                        log.info("非空行数查询结果【{}】", notNullResult);
+                        String notNullCount = countResult.get(0).values().toArray()[0].toString();
+                        aimStatisticsDTO.setNonNullRow(Long.parseLong(notNullCount));
+                    }
+
+                    // 统计合规行数 字段类型校验，字段长度、字段精度、数据格式、值域类型校验（若字段标准中维护了值）
+                    //1.查询出字段标准表，并取出对应的合规校验 字段
+                    DataFieldDTO dataFieldDTO = dataFieldRepository.selectDTOByPrimaryKey(aimDTO.getStandardId());
+                    if (Objects.isNull(dataFieldDTO)) {
+                        throw new CommonException(ErrorCode.DATA_FIELD_STANDARD_NOT_EXIST);
+                    }
+
+                    //执行验证逻辑
+                    //定义一个验证标识，是否有必要继续验证
+                    aimStatisticsDTO.setValidFlag(true);
+                    statisticValidatorList.forEach(statisticValidator -> {
+                        if (aimStatisticsDTO.isValidFlag()) {
+                            statisticValidator.valid(dataFieldDTO, standardAimDTO, aimStatisticsDTO);
+                        }
+                    });
+
+
+                    // 统计总行合规比例
+                    String compliantRatePercent = getPercent(aimStatisticsDTO.getCompliantRow(), aimStatisticsDTO.getRowNum());
+                    aimStatisticsDTO.setCompliantRate(compliantRatePercent);
+                    // 统计非空行合规比列
+                    String acompliantPercent = getPercent(aimStatisticsDTO.getNonNullRow(), aimStatisticsDTO.getRowNum());
+                    aimStatisticsDTO.setAcompliantRate(acompliantPercent);
+                    aimStatisticsDTOS.add(aimStatisticsDTO);
+                } catch (Exception e) {
+                    log.info("统计失败");
+                    e.printStackTrace();
+                } finally {
+                    // 闭锁-1
+                    cdl.countDown();
+                }
+            });
+        }
+        try {
+            //等待结果
+            cdl.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        // 落标总数统计
+        aimStatisticsRepository.batchInsertDTOSelective(aimStatisticsDTOS);
+        return null;
+    }
+
+    private void transfer(StandardAimDTO aimDTO, AimStatisticsDTO aimStatisticsDTO) {
+//        aimStatisticsDTO.setTableDesc(aimDTO.getTableDesc());
+//        aimStatisticsDTO.setDatasourceType(aimDTO.getDatasourceType());
+//        aimStatisticsDTO.setTableName(aimDTO.getTableName());
+//        aimStatisticsDTO.setFieldDesc(aimDTO.getFieldDesc());
+    }
+
+    /**
+     * 落标同属统计
+     *
+     * @param standardStatisticsDTOS
+     * @param fieldOverView
+     */
+    private void totalView(List<StandardStatisticsDTO> standardStatisticsDTOS, FieldOverView fieldOverView) {
+        Long totalRow = 0L;
+        Long totalNullRow = 0L;
+        Long totalCompliantRow = 0L;
+        for (StandardStatisticsDTO standardStatisticsDTO : standardStatisticsDTOS) {
+            totalRow += standardStatisticsDTO.getRowNum();
+            totalNullRow += standardStatisticsDTO.getNonNullRow();
+            totalCompliantRow += standardStatisticsDTO.getCompliantRow();
+        }
+        fieldOverView.setTotalRow(totalRow);
+        fieldOverView.setTotalNullRow(totalNullRow);
+        fieldOverView.setTotalCompliantRow(totalCompliantRow);
+        String compliantPercent = getPercent(totalCompliantRow, totalRow);
+        fieldOverView.setTotalAcompliantRate(compliantPercent);
+        String aCompliantpercent = getPercent(totalNullRow, totalRow);
+        fieldOverView.setTotalAcompliantRate(aCompliantpercent);
+    }
+
+
+    /**
+     * 计算百分比
+     *
+     * @param num1
+     * @param num2
+     * @return
+     */
+    private static String getPercent(Long num1, Long num2) {
+        DecimalFormat decimalFormat = new DecimalFormat("0.00%");
+        String format = decimalFormat.format((float) num1 / num2);
+        return format;
+
     }
 
     /**

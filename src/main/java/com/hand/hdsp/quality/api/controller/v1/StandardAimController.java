@@ -1,7 +1,5 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
-import java.util.List;
-
 import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import com.hand.hdsp.quality.app.service.StandardAimService;
@@ -22,6 +20,8 @@ import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+
+import java.util.List;
 
 /**
  * <p>标准落标表 管理 API</p>
@@ -90,11 +90,12 @@ public class StandardAimController extends BaseController {
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                    @RequestBody StandardAimDTO standardAimDTO) {
-        standardAimDTO.setTenantId(tenantId);
-        standardAimDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
-        this.validObject(standardAimDTO);
-        return Results.success(standardAimDTO);
+                                    @RequestBody List<StandardAimDTO> standardAimDTOList) {
+        standardAimDTOList.forEach(standardAimDTO -> {standardAimDTO.setTenantId(tenantId);
+            standardAimDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+            this.validObject(standardAimDTO);
+        });
+        return Results.success(standardAimRepository.batchInsertDTOSelective(standardAimDTOList));
     }
 
     @ApiOperation(value = "修改标准落标表")
@@ -146,4 +147,22 @@ public class StandardAimController extends BaseController {
         standardAimDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         return Results.success(standardAimService.unAimField(standardAimDTO));
     }
+
+    @ApiOperation(value = "反向落标，用于表设计发布")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/reverse-aim")
+    public ResponseEntity<?> reverseAim(@PathVariable(name = "organizationId") Long tenantId,
+                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                        @RequestBody List<StandardAimDTO> standardAimDTOList) {
+        standardAimDTOList.forEach(standardAimDTO -> standardAimDTO.setProjectId(projectId));
+        return Results.success(standardAimService.reverseAim(tenantId, standardAimDTOList));
+    }
+
+
 }

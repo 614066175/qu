@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.StandardStatisticsMapper">
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.StandardStatistics">
+        <result column="statistics_id" property="statisticsId" jdbcType="DECIMAL"/>
+        <result column="aim_id" property="aimId" jdbcType="DECIMAL"/>
+        <result column="row_num" property="rowNum" jdbcType="DECIMAL"/>
+        <result column="non_null_row" property="nonNullRow" jdbcType="DECIMAL"/>
+        <result column="compliant_row" property="compliantRow" jdbcType="DECIMAL"/>
+        <result column="compliant_rate" property="compliantRate" jdbcType="VARCHAR"/>
+        <result column="aCompliant_rate" property="acompliantRate" jdbcType="VARCHAR"/>
+        <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
+        <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
+        <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
+        <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
+
+    </resultMap>
+
+    <select id="list" resultType="com.hand.hdsp.quality.api.dto.StandardStatisticsDTO">
+        select xss.* from xsta_standard_statistics xss
+        <where>
+            xss.tenant_id=#{tenantId}
+            <if test="tableName != null and tableName !=''">
+                <bind name="tableName" value='"%" + tableName + "%"'/>
+                and xss.table_name like #{tableName}
+            </if>
+            <if test="tableDesc != null and tableDesc !=''">
+                <bind name="tableDesc" value='"%" + tableDesc + "%"'/>
+                and xss.table_esc like #{tableDesc}
+            </if>
+            <if test="fieldDesc != null and fieldDesc !=''">
+                <bind name="fieldDesc" value='"%" + fieldDesc + "%"'/>
+                and xss.fieldDesc like #{field_desc}
+            </if>
+            <if test="compliantRate != null and compliantRate !=''">
+                <bind name="compliantRate" value='"%" + compliantRate + "%"'/>
+                and xss.compliantRate like #{compliant_rate}
+            </if>
+            <if test="aCompliantRate != null and aCompliantRate !=''">
+                <bind name="aCompliantRate" value='"%" + aCompliantRate + "%"'/>
+                and xss.aCompliantRate like #{aCompliant_rate}
+            </if>
+
+
+        </where>
+    </select>
+</mapper>

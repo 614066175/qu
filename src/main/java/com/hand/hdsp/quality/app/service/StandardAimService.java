@@ -1,11 +1,11 @@
 package com.hand.hdsp.quality.app.service;
 
-import java.util.List;
-
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import com.hand.hdsp.quality.infra.vo.ColumnVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import java.util.List;
 
 /**
  * <p>标准落标表应用服务</p>
@@ -30,8 +30,9 @@ public interface StandardAimService {
     Page<StandardAimDTO> list(PageRequest pageRequest, StandardAimDTO standardAimDTO);
 
     /**
-     *
      * @param standardAimDTOList
      */
     void batchDelete(List<StandardAimDTO> standardAimDTOList, Long tenantId, Long projectId);
+
+    List<StandardAimDTO> reverseAim(Long tenantId, List<StandardAimDTO> standardAimDTOList);
 }
