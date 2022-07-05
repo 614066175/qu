@@ -10,9 +10,9 @@ import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
-import com.hand.hdsp.quality.infra.util.StandardHandler;
 import com.hand.hdsp.quality.infra.statistic.validator.StatisticValidator;
 import com.hand.hdsp.quality.infra.util.CustomThreadPool;
+import com.hand.hdsp.quality.infra.util.StandardHandler;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -78,8 +78,6 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     @Autowired
     private WorkflowClient workflowClient;
-
-    private final StandardAimRepository standardAimRepository;
 
     private final DriverSessionService driverSessionService;
 

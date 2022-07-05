@@ -1,11 +1,5 @@
 package com.hand.hdsp.quality.api.dto;
 
-import java.util.List;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
@@ -13,6 +7,12 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
+
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.List;
 
 /**
  * <p>数据标准表 数据传输对象</p>
@@ -170,7 +170,5 @@ public class DataStandardDTO extends AuditDomain{
     private String lastUpdatedByName;
 
     private Long projectId;
-
-    private Integer nullFlag;
 
 }
