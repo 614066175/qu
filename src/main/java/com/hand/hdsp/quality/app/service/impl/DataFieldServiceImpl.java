@@ -550,36 +550,6 @@ public class DataFieldServiceImpl implements DataFieldService {
         return null;
     }
 
-    private void transfer(StandardAimDTO aimDTO, AimStatisticsDTO aimStatisticsDTO) {
-//        aimStatisticsDTO.setTableDesc(aimDTO.getTableDesc());
-//        aimStatisticsDTO.setDatasourceType(aimDTO.getDatasourceType());
-//        aimStatisticsDTO.setTableName(aimDTO.getTableName());
-//        aimStatisticsDTO.setFieldDesc(aimDTO.getFieldDesc());
-    }
-
-    /**
-     * 落标同属统计
-     *
-     * @param standardStatisticsDTOS
-     * @param fieldOverView
-     */
-    private void totalView(List<StandardStatisticsDTO> standardStatisticsDTOS, FieldOverView fieldOverView) {
-        Long totalRow = 0L;
-        Long totalNullRow = 0L;
-        Long totalCompliantRow = 0L;
-        for (StandardStatisticsDTO standardStatisticsDTO : standardStatisticsDTOS) {
-            totalRow += standardStatisticsDTO.getRowNum();
-            totalNullRow += standardStatisticsDTO.getNonNullRow();
-            totalCompliantRow += standardStatisticsDTO.getCompliantRow();
-        }
-        fieldOverView.setTotalRow(totalRow);
-        fieldOverView.setTotalNullRow(totalNullRow);
-        fieldOverView.setTotalCompliantRow(totalCompliantRow);
-        String compliantPercent = getPercent(totalCompliantRow, totalRow);
-        fieldOverView.setTotalAcompliantRate(compliantPercent);
-        String aCompliantpercent = getPercent(totalNullRow, totalRow);
-        fieldOverView.setTotalAcompliantRate(aCompliantpercent);
-    }
 
 
     /**
