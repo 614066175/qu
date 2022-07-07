@@ -52,7 +52,8 @@
           ${ds}.creation_date,
           ${ds}.created_by,
           ${ds}.last_updated_by,
-          ${ds}.last_update_date
+          ${ds}.last_update_date,
+          ${ds}.null_flag
     </sql>
 
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.DataStandardDTO">
