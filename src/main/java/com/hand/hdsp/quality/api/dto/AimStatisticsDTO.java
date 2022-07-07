@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -55,6 +56,24 @@ public class AimStatisticsDTO extends AuditDomain {
     /**
      * 验证标识
      */
+    @Transient
     private boolean validFlag;
+
+    //字段标准id
+    @Transient
+    private Long fieldId;
+
+
+    @Transient
+    private String datasourceCode;
+
+    @Transient
+    private String schemaName;
+
+    @Transient
+    private String tableName;
+
+    @Transient
+    private String tableDesc;
 
 }

@@ -321,7 +321,7 @@ public class DataFieldController extends BaseController {
     }
 
 
-    @ApiOperation(value = "字段落标统计")
+    @ApiOperation(value = "字段标准落标统计")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -330,10 +330,10 @@ public class DataFieldController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/field-aim-statistic")
-    public ResponseEntity<StandardAimDTO> fieldAimStatistic(@PathVariable(name = "organizationId") Long tenantId,
-                                                            StandardAimDTO standardAimDTO) {
-        standardAimDTO.setTenantId(tenantId);
-        return Results.success(dataFieldService.fieldAimStatistic(standardAimDTO));
+    public ResponseEntity<DataFieldDTO> fieldAimStatistic(@PathVariable(name = "organizationId") Long tenantId,
+                                                          DataFieldDTO dataFieldDTO) {
+        dataFieldDTO.setTenantId(tenantId);
+        return Results.success(dataFieldService.fieldAimStatistic(dataFieldDTO));
     }
 
 
