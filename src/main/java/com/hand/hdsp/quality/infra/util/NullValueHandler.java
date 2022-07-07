@@ -18,7 +18,7 @@ public class NullValueHandler implements StandardHandler {
 
     @Override
     public BatchPlanFieldLineDTO handle(DataStandardDTO dataStandardDTO) {
-        if (dataStandardDTO.getNullFlag() == 1 || dataStandardDTO.getNullFlag() == null) {
+        if (dataStandardDTO.getNullFlag() == null || dataStandardDTO.getNullFlag() == 1) {
             return null;
         }
         BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()
@@ -50,7 +50,7 @@ public class NullValueHandler implements StandardHandler {
 
     @Override
     public BatchPlanFieldLineDTO handle(DataFieldDTO dataFieldDTO, String fieldType) {
-        if (dataFieldDTO.getNullFlag() != 0) {
+        if (dataFieldDTO.getNullFlag() == null || dataFieldDTO.getNullFlag() == 1) {
             return null;
         }
         // 创建校验项
