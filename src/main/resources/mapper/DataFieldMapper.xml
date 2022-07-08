@@ -26,6 +26,7 @@
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="null_flag" property="nullFlag" jdbcType="DECIMAL"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
 
@@ -50,7 +51,8 @@
           ${fs}.creation_date,
           ${fs}.created_by,
           ${fs}.last_updated_by,
-          ${fs}.last_update_date
+          ${fs}.last_update_date,
+          ${fs}.null_flag
     </sql>
 
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.DataFieldDTO">
