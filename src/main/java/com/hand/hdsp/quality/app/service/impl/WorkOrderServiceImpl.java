@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import com.google.common.base.Strings;
 import com.hand.hdsp.quality.api.dto.WorkOrderDTO;
 import com.hand.hdsp.quality.api.dto.WorkOrderOperationDTO;
 import com.hand.hdsp.quality.app.service.WorkOrderService;
@@ -11,6 +12,7 @@ import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.converter.WorkOrderConverter;
 import com.hand.hdsp.quality.infra.mapper.WorkOrderMapper;
 import com.hand.hdsp.quality.infra.util.CustomThreadPool;
+import com.hand.hdsp.quality.infra.util.DataSecurityUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
@@ -20,6 +22,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.message.MessageClient;
+import org.hzero.boot.message.entity.MessageSender;
 import org.hzero.boot.message.entity.Receiver;
 import org.hzero.boot.platform.code.builder.CodeRuleBuilder;
 import org.hzero.mybatis.domian.Condition;
@@ -31,6 +34,7 @@ import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.hand.hdsp.quality.infra.constant.WorkOrderConstants.*;
+import static org.apache.poi.util.LocaleID.ZH_CN;
 
 /**
  * <p>应用服务默认实现</p>
@@ -48,10 +52,21 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 
     public static final String WORK_ORDER_CODE = "XQUA.WORK_ORDER_CODE";
     private static final String GLOBAL = "GLOBAL";
-
+    /**
+     * 质量工单代办消息发送消息配置
+     */
     public static final String ORDER_LAUNCH = "HDSP.XQUA.ORDER_LAUNCH";
+    /**
+     * 质量工单提交消息发送消息配置
+     */
     public static final String ORDER_SUBMIT = "HDSP.XQUA.ORDER_SUBMIT";
+    /**
+     *质量工单拒绝消息发送消息配置
+     */
     public static final String ORDER_REFUSE = "HDSP.XQUA.ORDER_REFUSE";
+    /**
+     * 质量工单催办消息发送消息配置
+     */
     public static final String ORDER_TODO = "HDSP.XQUA.ORDER_TODO";
 
     public WorkOrderServiceImpl(WorkOrderRepository workOrderRepository, WorkOrderOperationRepository workOrderOperationRepository, CodeRuleBuilder codeRuleBuilder, WorkOrderMapper workOrderMapper, WorkOrderConverter workOrderConverter, MessageClient messageClient) {
@@ -132,16 +147,34 @@ public class WorkOrderServiceImpl implements WorkOrderService {
             //如果是发起,则接受人为处理人
             if (ORDER_LAUNCH.equals(messageTemplateCode)) {
                 receiver.setUserId(workOrderDTO.getProcessorsId());
+                receiver.setEmail(acquireEmail(workOrderDTO.getProcessorsId()));
             } else {
                 receiver.setUserId(workOrderDTO.getCreatedBy());
+                receiver.setEmail(acquireEmail(workOrderDTO.getCreatedBy()));
             }
             receiver.setTargetUserTenantId(workOrderDTO.getTenantId());
             //模板内容 您发起的${工单号}工单已被拒绝，可确认后重新提交。
             Map<String, String> args = new HashMap<>();
             args.put("workOrderCode", workOrderDTO.getWorkOrderCode());
-            //发送站内信
-            messageClient.sendWebMessage(workOrderDTO.getTenantId(), messageTemplateCode, null, Collections.singletonList(receiver), args);
+            //发送自定义消息，可设置邮件/站内消息发送开关
+            messageClient.sendMessage(MessageSender.builder()
+                            .messageCode(messageTemplateCode)
+                            .serverCode(messageTemplateCode)
+                            .tenantId(userDetails.getTenantId())
+                            .receiverAddressList(Collections.singletonList(receiver))
+                            .args(args)
+                            .lang(ZH_CN.getLanguageTag())
+                    .build());
         }
+    }
+
+    private String acquireEmail(Long processorsId) {
+        String email = "";
+        String encryptedEmail = workOrderMapper.findUserEmail(processorsId);
+        if(!Strings.isNullOrEmpty(encryptedEmail)){
+             email = DataSecurityUtil.decrypt(encryptedEmail);
+        }
+        return email;
     }
 
     @Override
@@ -377,17 +410,32 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 
     @Override
     public WorkOrderDTO orderRemind(Long workOrderId) {
+        Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         WorkOrderDTO workOrderDTO = workOrderRepository.selectDTOByPrimaryKey(workOrderId);
-
+        //处理人
+        Long processorsId = workOrderDTO.getProcessorsId();
         //接受组为发起人
         Receiver receiver = new Receiver();
-        receiver.setUserId(workOrderDTO.getProcessorsId());
-        receiver.setTargetUserTenantId(DetailsHelper.getUserDetails().getTenantId());
+        receiver.setUserId(processorsId).setTargetUserTenantId(tenantId);
+        //解密获取用户邮箱
+        String encryptedEmail = workOrderMapper.findUserEmail(processorsId);
+        if(!Strings.isNullOrEmpty(encryptedEmail)){
+            String email = DataSecurityUtil.decrypt(encryptedEmail);
+            receiver.setEmail(email);
+        }
         //模板内容 您发起的${工单号}工单已被拒绝，可确认后重新提交。
+        //您有数据质量整改工单${workOrderCode}待处理，请及时处理！！！
         Map<String, String> args = new HashMap<>();
         args.put("workOrderCode", workOrderDTO.getWorkOrderCode());
-        //发送站内信
-        messageClient.sendWebMessage(workOrderDTO.getTenantId(), ORDER_TODO, null, Collections.singletonList(receiver), args);
+        //发送自定义消息，可设置邮件/站内消息发送开关
+        messageClient.sendMessage(MessageSender.builder()
+                        .tenantId(workOrderDTO.getTenantId())
+                        .messageCode(ORDER_TODO)
+                        .serverCode(ORDER_TODO)
+                        .lang(ZH_CN.getLanguageTag())
+                        .receiverAddressList(Collections.singletonList(receiver))
+                        .args(args)
+                .build());
         return workOrderDTO;
     }
 

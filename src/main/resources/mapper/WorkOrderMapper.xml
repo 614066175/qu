@@ -113,4 +113,14 @@
                 left join iam_user iu on woo.processors_id=iu.id
         where woo.work_order_id=#{workOrderId}
     </select>
+    <select id="findUserEmail" resultType="string">
+        select
+        iu.email
+        from iam_user iu
+        <where>
+            <if test="processorsId != null ">
+                iu.id = #{processorsId}
+            </if>
+        </where>
+    </select>
 </mapper>
