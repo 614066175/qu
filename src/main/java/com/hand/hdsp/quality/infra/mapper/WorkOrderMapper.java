@@ -42,4 +42,11 @@ public interface WorkOrderMapper extends BaseMapper<WorkOrder> {
      * @return
      */
     WorkOrderDTO detail(Long workOrderId);
+
+    /**
+     * 根据id查找用户未解密邮箱
+     * @param processorsId 处理人用户id
+     * @return  未解密邮箱
+     */
+    String findUserEmail(Long processorsId);
 }
