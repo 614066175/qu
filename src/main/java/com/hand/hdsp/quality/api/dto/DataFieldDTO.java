@@ -1,12 +1,5 @@
 package com.hand.hdsp.quality.api.dto;
 
-import java.util.Date;
-import java.util.List;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
@@ -14,6 +7,13 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
+
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.Date;
+import java.util.List;
 
 /**
  * <p>字段标准表 数据传输对象</p>
@@ -44,6 +44,9 @@ public class DataFieldDTO extends AuditDomain {
 
     @ApiModelProperty("字段标准ID，主键，供其他表做外键")
     private Long fieldId;
+
+    @ApiModelProperty("数据标准ID，主键，供其他表做外键")
+    private Long dataStandardId;
 
     @ApiModelProperty(value = "分组ID")
     @NotNull
@@ -118,6 +121,9 @@ public class DataFieldDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
+    @ApiModelProperty(value = "是否可空，1可空 0 不可空")
+    private Integer nullFlag;
+
     @Transient
     private List<StandardExtraDTO> standardExtraDTOList;
 
@@ -135,6 +141,9 @@ public class DataFieldDTO extends AuditDomain {
     @ExcelColumn(zh = "责任部门", en = "chargeDeptName", groups = {Group2.class})
     private String chargeDeptName;
 
+    @ApiModelProperty(value = "默认值")
+    private String defaultValue;
+
 
     @Transient
     private List<Long> dataLengthList;
@@ -151,6 +160,9 @@ public class DataFieldDTO extends AuditDomain {
 
     @Transient
     private String lastUpdatedByName;
+
+    @Transient
+    private String dataStandardName;
 
     private Long projectId;
 
@@ -172,7 +184,6 @@ public class DataFieldDTO extends AuditDomain {
     @Transient
     private Integer editFlag = 1;
 
-    private Integer nullFlag;
 
     //标准组
     @Transient

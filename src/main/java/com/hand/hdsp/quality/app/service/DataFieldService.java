@@ -1,7 +1,5 @@
 package com.hand.hdsp.quality.app.service;
 
-import java.util.List;
-
 import com.hand.hdsp.quality.api.dto.AssigneeUserDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
@@ -9,6 +7,8 @@ import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.export.vo.ExportParam;
+
+import java.util.List;
 
 /**
  * <p>字段标准表应用服务</p>
@@ -153,4 +153,12 @@ public interface DataFieldService {
      * @return
      */
     BatchPlanFieldDTO standardToRule(Long standardId, String fieldType);
+
+    /**
+     * 字段落标统计
+     *
+     * @param standardAimDTO
+     * @return
+     */
+    StandardAimDTO fieldAimStatistic(StandardAimDTO standardAimDTO);
 }

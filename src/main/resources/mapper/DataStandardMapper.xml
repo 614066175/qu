@@ -28,6 +28,7 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
+        <result column="null_flag" property="nullFlag" jdbcType="DECIMAL"/>
     </resultMap>
 
     <sql id="baseColumn">

@@ -1,9 +1,5 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletResponse;
-
 import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.DataFieldService;
@@ -23,6 +19,9 @@ import org.hzero.export.annotation.ExcelExport;
 import org.hzero.export.vo.ExportParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * <p>字段标准表 管理 API</p>
@@ -320,5 +319,22 @@ public class DataFieldController extends BaseController {
         BatchPlanFieldDTO batchPlanFieldDTO = dataFieldService.standardToRule(standardId, columnType);
         return Results.success(batchPlanFieldDTO);
     }
+
+
+    @ApiOperation(value = "字段落标统计")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/field-aim-statistic")
+    public ResponseEntity<StandardAimDTO> fieldAimStatistic(@PathVariable(name = "organizationId") Long tenantId,
+                                                            StandardAimDTO standardAimDTO) {
+        standardAimDTO.setTenantId(tenantId);
+        return Results.success(dataFieldService.fieldAimStatistic(standardAimDTO));
+    }
+
 
 }

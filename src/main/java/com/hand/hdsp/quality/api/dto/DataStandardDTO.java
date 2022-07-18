@@ -1,11 +1,5 @@
 package com.hand.hdsp.quality.api.dto;
 
-import java.util.List;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
@@ -13,6 +7,12 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
+
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.List;
 
 /**
  * <p>数据标准表 数据传输对象</p>
@@ -31,6 +31,7 @@ public class DataStandardDTO extends AuditDomain{
 
     @ApiModelProperty("数据标准ID，主键，供其他表做外键")
     private Long standardId;
+
 
     @ApiModelProperty(value = "分组ID")
     @NotNull
@@ -53,6 +54,7 @@ public class DataStandardDTO extends AuditDomain{
     @Size(max = 50)
     @ExcelColumn(zh = "标准编码", en = "standardCode" )
     private String standardCode;
+
 
     @ApiModelProperty(value = "数据标准名称")
     @NotBlank
@@ -117,6 +119,9 @@ public class DataStandardDTO extends AuditDomain{
     @Size(max = 30)
     private String standardStatus;
 
+    @ApiModelProperty(value = "是否可空，1可空 0 不可空")
+    private Integer nullFlag;
+
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;
@@ -165,7 +170,5 @@ public class DataStandardDTO extends AuditDomain{
     private String lastUpdatedByName;
 
     private Long projectId;
-
-    private Integer nullFlag;
 
 }

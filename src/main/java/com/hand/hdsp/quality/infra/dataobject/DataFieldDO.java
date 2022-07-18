@@ -1,7 +1,10 @@
 package com.hand.hdsp.quality.infra.dataobject;
 
 import io.choerodon.mybatis.domain.AuditDomain;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+
+import javax.validation.constraints.NotBlank;
 
 /**
  * <p>字段标准表数据对象</p>
@@ -16,6 +19,8 @@ import lombok.*;
 public class DataFieldDO extends AuditDomain {
 
     private Long fieldId;
+
+    private Long standardId;
 
     private Long groupId;
 
@@ -52,4 +57,10 @@ public class DataFieldDO extends AuditDomain {
     private Long tenantId;
 
     private Long projectId;
+
+
+    private Integer notNullFlag;
+
+    private String defaultValue;
+    private Long dataStandardId;
 }

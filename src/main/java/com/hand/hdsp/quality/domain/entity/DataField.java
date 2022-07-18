@@ -3,12 +3,14 @@ package com.hand.hdsp.quality.domain.entity;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
 
 /**
  * <p>字段标准表实体</p>
@@ -39,6 +41,8 @@ public class DataField extends AuditDomain {
     private Long fieldId;
 
     private Long groupId;
+
+    private Long dataStandardId;
 
     private String fieldName;
 
@@ -75,4 +79,8 @@ public class DataField extends AuditDomain {
     private Long projectId;
 
     private Integer nullFlag;
+
+    private String defaultValue;
+
+
 }
