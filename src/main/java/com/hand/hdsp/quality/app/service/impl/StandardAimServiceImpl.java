@@ -1,8 +1,10 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimRelationDTO;
 import com.hand.hdsp.quality.app.service.StandardAimService;
+import com.hand.hdsp.quality.domain.entity.DataField;
 import com.hand.hdsp.quality.domain.entity.StandardAim;
 import com.hand.hdsp.quality.domain.entity.StandardAimRelation;
 import com.hand.hdsp.quality.domain.repository.*;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -123,23 +126,26 @@ public class StandardAimServiceImpl implements StandardAimService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public List<StandardAimDTO> reverseAim(Long tenantId, List<StandardAimDTO> standardAimDTOList) {
+        List<StandardAimDTO> dataStandardAimDTOList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(standardAimDTOList)) {
             List<StandardAimDTO> dtos = standardAimDTOList
                     .stream()
                     .filter(standardAimDTO -> {
-                        List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
-                                .andWhere(Sqls.custom()
-                                        .andEqualTo(StandardAim.FIELD_STANDARD_ID, standardAimDTO.getStandardId())
-                                        .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, standardAimDTO.getStandardType())
-                                        .andEqualTo(StandardAim.FIELD_DATASOURCE_TYPE, standardAimDTO.getDatasourceType())
-                                        .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, standardAimDTO.getDatasourceCode())
-                                        .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, standardAimDTO.getSchemaName())
-                                        .andEqualTo(StandardAim.FIELD_TABLE_NAME, standardAimDTO.getTableName())
-                                        .andEqualTo(StandardAim.FIELD_FIELD_NAME, standardAimDTO.getFieldName())
-                                        .andEqualTo(StandardAim.FIELD_TENANT_ID, standardAimDTO.getTenantId())
-                                        .andEqualTo(StandardAim.FIELD_PROJECT_ID, standardAimDTO.getProjectId()))
+                        Boolean fieldAimExistFlag = checkAimExist(standardAimDTO);
+                        //数据标准落标
+                        List<DataFieldDTO> dataFieldDTOList = dataFieldRepository.selectDTOByCondition(Condition.builder(DataField.class).andWhere(Sqls.custom()
+                                        .andEqualTo(DataField.FIELD_FIELD_ID,standardAimDTO.getStandardId()))
                                 .build());
-                        if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
+                        if(CollectionUtils.isNotEmpty(dataFieldDTOList) &&  !Objects.isNull(dataFieldDTOList.get(0).getDataStandardId())){
+                            Long dataStandardId = dataFieldDTOList.get(0).getDataStandardId();
+                            //新增数据标准落标记录
+                            standardAimDTO.setStandardId(dataStandardId);
+                            standardAimDTO.setStandardType("DATA");
+                            if(!checkAimExist(standardAimDTO)){
+                                dataStandardAimDTOList.add(standardAimDTO);
+                            }
+                        }
+                        if (fieldAimExistFlag) {
                             log.info("此字段已经落标了，不重复落标");
                             return false;
                         } else {
@@ -147,7 +153,31 @@ public class StandardAimServiceImpl implements StandardAimService {
                         }
                     }).collect(Collectors.toList());
             standardAimRepository.batchInsertDTOSelective(dtos);
+            if (CollectionUtils.isNotEmpty(dataStandardAimDTOList)) {
+                standardAimRepository.batchInsertDTOSelective(dataStandardAimDTOList);
+            }
         }
         return standardAimDTOList;
+    }
+
+    /**
+     * 判断是否有落标记录，有落标记录返回True
+     * @param standardAimDTO
+     * @return
+     */
+    private Boolean checkAimExist(StandardAimDTO standardAimDTO){
+        List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardAim.FIELD_STANDARD_ID, standardAimDTO.getStandardId())
+                        .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, standardAimDTO.getStandardType())
+                        .andEqualTo(StandardAim.FIELD_DATASOURCE_TYPE, standardAimDTO.getDatasourceType())
+                        .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, standardAimDTO.getDatasourceCode())
+                        .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, standardAimDTO.getSchemaName())
+                        .andEqualTo(StandardAim.FIELD_TABLE_NAME, standardAimDTO.getTableName())
+                        .andEqualTo(StandardAim.FIELD_FIELD_NAME, standardAimDTO.getFieldName())
+                        .andEqualTo(StandardAim.FIELD_TENANT_ID, standardAimDTO.getTenantId())
+                        .andEqualTo(StandardAim.FIELD_PROJECT_ID, standardAimDTO.getProjectId()))
+                .build());
+        return CollectionUtils.isNotEmpty(standardAimDTOS);
     }
 }
