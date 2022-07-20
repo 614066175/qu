@@ -1,5 +1,9 @@
 package com.hand.hdsp.quality.app.service;
 
+import com.hand.hdsp.quality.api.dto.AimStatisticsDTO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
 /**
  * <p>标准落标统计表应用服务</p>
  *
@@ -7,4 +11,12 @@ package com.hand.hdsp.quality.app.service;
  */
 public interface AimStatisticsService {
 
+    /**
+     * 落标统计列表查询
+     *
+     * @param pageRequest
+     * @param aimStatisticsDTO
+     * @return
+     */
+    Page<AimStatisticsDTO> list(PageRequest pageRequest, AimStatisticsDTO aimStatisticsDTO);
 }

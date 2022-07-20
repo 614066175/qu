@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.quality.api.dto.AimStatisticsDTO;
+import com.hand.hdsp.quality.app.service.AimStatisticsService;
 import com.hand.hdsp.quality.domain.entity.AimStatistics;
 import com.hand.hdsp.quality.domain.repository.AimStatisticsRepository;
 import io.choerodon.core.domain.Page;
@@ -28,10 +29,13 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/aim-statisticss")
 public class AimStatisticsController extends BaseController {
 
-    private AimStatisticsRepository aimStatisticsRepository;
+    private final AimStatisticsRepository aimStatisticsRepository;
+    private final AimStatisticsService aimStatisticsService;
 
-    public AimStatisticsController(AimStatisticsRepository aimStatisticsRepository) {
+    public AimStatisticsController(AimStatisticsRepository aimStatisticsRepository,
+                                   AimStatisticsService aimStatisticsService) {
         this.aimStatisticsRepository = aimStatisticsRepository;
+        this.aimStatisticsService = aimStatisticsService;
     }
 
     @ApiOperation(value = "标准落标统计表列表")
@@ -47,7 +51,7 @@ public class AimStatisticsController extends BaseController {
                                   AimStatisticsDTO aimStatisticsDTO, @ApiIgnore @SortDefault(value = AimStatistics.FIELD_STATISTICS_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         aimStatisticsDTO.setTenantId(tenantId);
-        Page<AimStatisticsDTO> list = aimStatisticsRepository.pageAndSortDTO(pageRequest, aimStatisticsDTO);
+        Page<AimStatisticsDTO> list = aimStatisticsService.list(pageRequest, aimStatisticsDTO);
         return Results.success(list);
     }
 
@@ -115,4 +119,5 @@ public class AimStatisticsController extends BaseController {
         aimStatisticsRepository.deleteByPrimaryKey(aimStatisticsDTO);
         return Results.success();
     }
+
 }

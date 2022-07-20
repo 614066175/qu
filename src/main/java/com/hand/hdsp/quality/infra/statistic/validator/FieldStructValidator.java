@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.infra.statistic.validator;
 import com.hand.hdsp.quality.api.dto.AimStatisticsDTO;
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
+import com.hand.hdsp.quality.infra.util.TypeUtil;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.driver.app.service.DriverSessionService;
@@ -69,6 +70,13 @@ public class FieldStructValidator implements StatisticValidator {
         }
 
         //类型校验
+        String type = TypeUtil.convertType(column.getTypeName());
+        if (!type.equals(dataFieldDTO.getFieldType())) {
+            //无需继续检验
+            aimStatisticsDTO.setValidFlag(false);
+            aimStatisticsDTO.setCompliantRow(0L);
+            return false;
+        }
 
         return false;
     }

@@ -157,8 +157,8 @@ public interface DataFieldService {
     /**
      * 字段落标统计
      *
-     * @param standardAimDTO
+     * @param dataFieldDTO
      * @return
      */
-    StandardAimDTO fieldAimStatistic(StandardAimDTO standardAimDTO);
+    DataFieldDTO fieldAimStatistic(DataFieldDTO dataFieldDTO);
 }

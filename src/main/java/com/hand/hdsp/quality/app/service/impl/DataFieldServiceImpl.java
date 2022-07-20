@@ -37,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
@@ -465,12 +466,13 @@ public class DataFieldServiceImpl implements DataFieldService {
 
 
     @Override
-    public StandardAimDTO fieldAimStatistic(StandardAimDTO standardAimDTO) {
+    public DataFieldDTO fieldAimStatistic(DataFieldDTO dataFieldDTO) {
+        //根据字段标准，查找对应落标记录
         List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
                 .andWhere(Sqls.custom()
-                        .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, standardAimDTO.getStandardType())
-                        .andEqualTo(StandardAim.FIELD_STANDARD_ID, standardAimDTO.getStandardId())
-                        .andEqualTo(StandardAim.FIELD_TENANT_ID, standardAimDTO.getTenantId()))
+                        .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, FIELD)
+                        .andEqualTo(StandardAim.FIELD_STANDARD_ID, dataFieldDTO.getFieldId())
+                        .andEqualTo(StandardAim.FIELD_TENANT_ID, dataFieldDTO.getTenantId()))
                 .build());
         if (CollectionUtils.isEmpty(standardAimDTOS)) {
             //如果表没有落标记录
@@ -478,10 +480,10 @@ public class DataFieldServiceImpl implements DataFieldService {
             throw new CommonException(ErrorCode.STANDARD_NO_AIM);
         }
 
-        List<AimStatisticsDTO> aimStatisticsDTOS = new ArrayList<>();
+        List<AimStatisticsDTO> aimStatisticsDTOS = new CopyOnWriteArrayList<>();
         AimStatisticsDTO aimStatisticsDTO = new AimStatisticsDTO();
 
-        CountDownLatch cdl = new CountDownLatch(standardAimDTOS.size());
+        CountDownLatch countDownLatch = new CountDownLatch(standardAimDTOS.size());
         for (StandardAimDTO aimDTO : standardAimDTOS) {
             CustomThreadPool.getExecutor().submit(() -> {
                 try {
@@ -508,8 +510,8 @@ public class DataFieldServiceImpl implements DataFieldService {
 
                     // 统计合规行数 字段类型校验，字段长度、字段精度、数据格式、值域类型校验（若字段标准中维护了值）
                     //1.查询出字段标准表，并取出对应的合规校验 字段
-                    DataFieldDTO dataFieldDTO = dataFieldRepository.selectDTOByPrimaryKey(aimDTO.getStandardId());
-                    if (Objects.isNull(dataFieldDTO)) {
+                    DataFieldDTO dto = dataFieldRepository.selectDTOByPrimaryKey(aimDTO.getStandardId());
+                    if (Objects.isNull(dto)) {
                         throw new CommonException(ErrorCode.DATA_FIELD_STANDARD_NOT_EXIST);
                     }
 
@@ -518,7 +520,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                     aimStatisticsDTO.setValidFlag(true);
                     statisticValidatorList.forEach(statisticValidator -> {
                         if (aimStatisticsDTO.isValidFlag()) {
-                            statisticValidator.valid(dataFieldDTO, standardAimDTO, aimStatisticsDTO);
+                            statisticValidator.valid(dto, aimDTO, aimStatisticsDTO);
                         }
                     });
 
@@ -535,21 +537,20 @@ public class DataFieldServiceImpl implements DataFieldService {
                     e.printStackTrace();
                 } finally {
                     // 闭锁-1
-                    cdl.countDown();
+                    countDownLatch.countDown();
                 }
             });
         }
         try {
             //等待结果
-            cdl.await();
+            countDownLatch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         // 落标总数统计
         aimStatisticsRepository.batchInsertDTOSelective(aimStatisticsDTOS);
-        return null;
+        return dataFieldDTO;
     }
-
 
 
     /**
