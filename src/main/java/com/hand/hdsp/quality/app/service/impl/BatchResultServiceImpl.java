@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchResultService;
 import com.hand.hdsp.quality.domain.entity.BatchPlanBase;
@@ -11,6 +13,7 @@ import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.feign.ExecutionFlowFeign;
 import com.hand.hdsp.quality.infra.mapper.BatchResultItemMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
+import com.hand.hdsp.quality.infra.util.EasyExcelUtil;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.util.TimeToString;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
@@ -35,6 +38,12 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -280,5 +289,47 @@ public class BatchResultServiceImpl implements BatchResultService {
         return list;
     }
 
+    @Override
+    @SuppressWarnings(value = "all")
+    public void exceptionDataDownload(ExceptionDataDTO exceptionDataDTO, HttpServletRequest request, HttpServletResponse response) {
+        // 查找异常数据
+        Long resultBaseId = batchResultBaseRepository.selectMaxResultBaseId(exceptionDataDTO.getPlanBaseId());
+        if (Objects.isNull(resultBaseId)) {
+            throw new CommonException(ErrorCode.BATCH_RESULT_NOT_EXIST);
+        }
+        //通过mongo来进行查询
+        Query query = new Query();
+        String collectionName = String.format("%d_%d", exceptionDataDTO.getPlanBaseId(), resultBaseId);
+        // 通过 _id 来排序
+        query.with(Sort.by(Sort.Direction.ASC, "_id"));
+        //去掉_id和#PK等返回
+        query.fields().exclude("_id","#pk","#planBaseId","#resultBaseId");
+        // 获取下载数据
+        List<Map> maps = mongoTemplate.find(query, Map.class, collectionName);
+        List<List<Object>> dataList = maps.stream().map(map -> {
+            List<Object> list = new ArrayList();
+            Set<String> set = map.keySet();
+            set.forEach(s -> list.add(map.get(s)));
+            return list;
+        }).collect(Collectors.toList());
+        // 获取excel表头
+        Set<String> set = maps.get(0).keySet();
+        List<List<String>> collect = set.stream().map(o -> {
+            List<String> list = new ArrayList<>();
+            list.add(o);
+            return list;
+        }).collect(Collectors.toList());
+        // 写入到excel
+        try (ServletOutputStream outputStream = response.getOutputStream()) {
+            request.setCharacterEncoding(StandardCharsets.UTF_8.displayName());
+            response.setContentType("multipart/form-data");
+            response.setCharacterEncoding(StandardCharsets.UTF_8.displayName());
+            response.setHeader("Content-disposition",
+                    String.format("attachment;filename=%s.xlsx", "异常数据", "UTF-8"));
+            EasyExcelUtil.writeExcel(outputStream, collect, dataList, "异常数据", 1);
+        } catch (IOException e) {
+            throw new CommonException(ErrorCode.EXCEL_WRITE_ERROR, e);
+        }
+    }
 
 }
