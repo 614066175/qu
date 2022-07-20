@@ -325,8 +325,8 @@ public class BatchResultServiceImpl implements BatchResultService {
             response.setContentType("multipart/form-data");
             response.setCharacterEncoding(StandardCharsets.UTF_8.displayName());
             response.setHeader("Content-disposition",
-                    String.format("attachment;filename=%s.xlsx", "异常数据", "UTF-8"));
-            EasyExcelUtil.writeExcel(outputStream, collect, dataList, "异常数据", 1);
+                    String.format("attachment;filename=%s.xlsx", "Exception-Data", "UTF-8"));
+            EasyExcelUtil.writeExcel(outputStream, collect, dataList, "Exception-Data", 1);
         } catch (IOException e) {
             throw new CommonException(ErrorCode.EXCEL_WRITE_ERROR, e);
         }
