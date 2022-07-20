@@ -20,6 +20,7 @@ import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.infra.meta.Column;
 import org.hzero.starter.driver.core.session.DriverSession;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -139,10 +140,12 @@ public class StandardAimServiceImpl implements StandardAimService {
                         if(CollectionUtils.isNotEmpty(dataFieldDTOList) &&  !Objects.isNull(dataFieldDTOList.get(0).getDataStandardId())){
                             Long dataStandardId = dataFieldDTOList.get(0).getDataStandardId();
                             //新增数据标准落标记录
-                            standardAimDTO.setStandardId(dataStandardId);
-                            standardAimDTO.setStandardType("DATA");
-                            if(!checkAimExist(standardAimDTO)){
-                                dataStandardAimDTOList.add(standardAimDTO);
+                            StandardAimDTO dataStandardAimDTO = new StandardAimDTO();
+                            BeanUtils.copyProperties(standardAimDTO,dataStandardAimDTO);
+                            dataStandardAimDTO.setStandardId(dataStandardId);
+                            dataStandardAimDTO.setStandardType("DATA");
+                            if(!checkAimExist(dataStandardAimDTO)){
+                                dataStandardAimDTOList.add(dataStandardAimDTO);
                             }
                         }
                         if (fieldAimExistFlag) {

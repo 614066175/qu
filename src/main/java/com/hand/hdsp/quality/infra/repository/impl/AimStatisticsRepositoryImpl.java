@@ -4,6 +4,8 @@ import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.AimStatisticsDTO;
 import com.hand.hdsp.quality.domain.entity.AimStatistics;
 import com.hand.hdsp.quality.domain.repository.AimStatisticsRepository;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,4 +16,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class AimStatisticsRepositoryImpl extends BaseRepositoryImpl<AimStatistics, AimStatisticsDTO> implements AimStatisticsRepository {
 
+    @Override
+    public Page<AimStatisticsDTO> list(PageRequest pageRequest, AimStatisticsDTO aimStatisticsDTO) {
+        return null;
+    }
 }
