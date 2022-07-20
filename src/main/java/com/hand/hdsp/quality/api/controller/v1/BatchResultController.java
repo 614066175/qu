@@ -23,6 +23,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 /**
@@ -465,6 +467,24 @@ public class BatchResultController extends BaseController {
                                                      PageRequest pageRequest) {
         exceptionDataDTO.setTenantId(tenantId);
         return Results.success(batchResultService.listExceptionDetail(exceptionDataDTO, pageRequest));
+    }
+
+    @ApiOperation(value = "异常数据下载")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/result-detail-download")
+    public ResponseEntity<?> download(@PathVariable(name = "organizationId") Long tenantId,
+                                      @RequestBody ExceptionDataDTO exceptionDataDTO,
+                                      HttpServletRequest request,
+                                      HttpServletResponse response) {
+        exceptionDataDTO.setTenantId(tenantId);
+        batchResultService.exceptionDataDownload(exceptionDataDTO, request, response);
+        return Results.success();
     }
 
     @ApiOperation(value = "问题数据趋势分析")
