@@ -1,6 +1,9 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import com.hand.hdsp.quality.api.dto.AimStatisticsDTO;
 import com.hand.hdsp.quality.app.service.AimStatisticsService;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 /**
@@ -11,4 +14,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class AimStatisticsServiceImpl implements AimStatisticsService {
 
+    @Override
+    public Page<AimStatisticsDTO> list(PageRequest pageRequest, AimStatisticsDTO aimStatisticsDTO) {
+        return null;
+    }
 }

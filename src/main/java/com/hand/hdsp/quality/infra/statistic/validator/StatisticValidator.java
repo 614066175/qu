@@ -20,7 +20,6 @@ public interface StatisticValidator {
      * @param dataFieldDTO
      * @param standardAimDTO
      * @param aimStatisticsDTO
-     * @param validFlag
      * @return
      */
     boolean valid(DataFieldDTO dataFieldDTO, StandardAimDTO standardAimDTO, AimStatisticsDTO aimStatisticsDTO);
