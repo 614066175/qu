@@ -181,4 +181,8 @@ public interface ErrorCode {
 
     String STANDARD_NO_AIM = "hdsp.xqua.err.standard_no_aim";
 
+
+    String EXCEL_WRITE_ERROR = "hdsp.xass.err.excel_write";
+    String EXCEL_READ_ERROR = "hdsp.xass.err.excel_read";
+
 }

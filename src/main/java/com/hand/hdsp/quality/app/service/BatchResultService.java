@@ -4,6 +4,8 @@ import com.hand.hdsp.quality.api.dto.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -35,8 +37,8 @@ public interface BatchResultService {
     /**
      * 评估方案评估详情-异常数据
      *
-     * @param resultId Long
-     * @param tenantId Long
+     * @param resultId    Long
+     * @param tenantId    Long
      * @param pageRequest PageRequest
      * @return
      */
@@ -51,8 +53,18 @@ public interface BatchResultService {
 
     /**
      * 使用sql查询问题趋势
+     *
      * @param timeRangeDTO 查询条件
      * @return 返回值
      */
     List<TimeRangeDTO> listProblemData(TimeRangeDTO timeRangeDTO);
+
+    /**
+     * 异常数据下载
+     *
+     * @param exceptionDataDTO dto
+     * @param request          request
+     * @param response         reponse
+     */
+    void exceptionDataDownload(ExceptionDataDTO exceptionDataDTO, HttpServletRequest request, HttpServletResponse response);
 }
