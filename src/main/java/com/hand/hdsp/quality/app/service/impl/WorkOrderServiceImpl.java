@@ -384,7 +384,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
         //异步发起发送消息（消息不影响主流程的运行）
         ThreadPoolExecutor executor = CustomThreadPool.getExecutor();
         CustomUserDetails userDetails = DetailsHelper.getUserDetails();
-        executor.submit(() -> sendMessage(Collections.singletonList(workOrderDTO), ORDER_SUBMIT, userDetails));
+        executor.submit(() -> sendMessage(Collections.singletonList(workOrderDTO), ORDER_FORWARD, userDetails));
         return workOrderDTO;
     }
 
