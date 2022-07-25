@@ -68,6 +68,10 @@ public class WorkOrderServiceImpl implements WorkOrderService {
      * 质量工单催办消息发送消息配置
      */
     public static final String ORDER_TODO = "HDSP.XQUA.ORDER_TODO";
+    /**
+     * 质量工单转交消息发送配置
+     */
+    public static final String ORDER_FORWARD = "HDSP.XQUA.ORDER_FORWARD";
 
     public WorkOrderServiceImpl(WorkOrderRepository workOrderRepository, WorkOrderOperationRepository workOrderOperationRepository, CodeRuleBuilder codeRuleBuilder, WorkOrderMapper workOrderMapper, WorkOrderConverter workOrderConverter, MessageClient messageClient) {
         this.workOrderRepository = workOrderRepository;
@@ -145,7 +149,8 @@ public class WorkOrderServiceImpl implements WorkOrderService {
             //接受组为发起人
             receiver = new Receiver();
             //如果是发起,则接受人为处理人
-            if (ORDER_LAUNCH.equals(messageTemplateCode)) {
+            //质量工单转交的接收人为处理人
+            if (ORDER_LAUNCH.equals(messageTemplateCode) || ORDER_FORWARD.equals(messageTemplateCode)) {
                 receiver.setUserId(workOrderDTO.getProcessorsId());
                 receiver.setEmail(acquireEmail(workOrderDTO.getProcessorsId()));
             } else {
@@ -375,6 +380,11 @@ public class WorkOrderServiceImpl implements WorkOrderService {
                 .build();
         workOrderRepository.updateDTOOptional(workOrderDTO, WorkOrder.FIELD_PROCESSORS_ID);
         workOrderOperationRepository.insertDTOSelective(workOrderOperationDTO);
+
+        //异步发起发送消息（消息不影响主流程的运行）
+        ThreadPoolExecutor executor = CustomThreadPool.getExecutor();
+        CustomUserDetails userDetails = DetailsHelper.getUserDetails();
+        executor.submit(() -> sendMessage(Collections.singletonList(workOrderDTO), ORDER_FORWARD, userDetails));
         return workOrderDTO;
     }
 
