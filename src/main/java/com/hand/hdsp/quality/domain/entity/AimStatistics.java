@@ -8,6 +8,7 @@ import lombok.*;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 
 /**
  * <p>标准落标统计表实体</p>
@@ -54,9 +55,9 @@ public class AimStatistics extends AuditDomain {
 
     private Long compliantRow;
 
-    private String compliantRate;
+    private BigDecimal compliantRate;
 
-    private String acompliantRate;
+    private BigDecimal acompliantRate;
 
     private Long tenantId;
 

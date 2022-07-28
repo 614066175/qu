@@ -19,4 +19,12 @@ public interface AimStatisticsService {
      * @return
      */
     Page<AimStatisticsDTO> list(PageRequest pageRequest, AimStatisticsDTO aimStatisticsDTO);
+
+    /**
+     * 落标统计总计
+     * @param tenantId
+     * @param aimStatisticsDTO
+     * @return
+     */
+    AimStatisticsDTO totalStatistic(Long tenantId, AimStatisticsDTO aimStatisticsDTO);
 }

@@ -8,6 +8,7 @@ import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
+import com.hand.hdsp.quality.infra.converter.AimStatisticsConverter;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import com.hand.hdsp.quality.infra.statistic.validator.StatisticValidator;
@@ -35,7 +36,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.DecimalFormat;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -89,6 +90,8 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     private final StandardRelationRepository standardRelationRepository;
 
+    private final AimStatisticsConverter aimStatisticsConverter;
+
     @Autowired
     private List<StandardHandler> handlers;
 
@@ -106,7 +109,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                                 DataStandardMapper dataStandardMapper, StandardAimRepository standardAimRepository,
                                 StandardTeamRepository standardTeamRepository, StandardRelationRepository standardRelationRepository,
                                 AimStatisticsRepository aimStatisticsRepository, List<StatisticValidator> statisticValidatorList,
-                                DriverSessionService driverSessionService) {
+                                DriverSessionService driverSessionService, AimStatisticsConverter aimStatisticsConverter) {
         this.dataFieldRepository = dataFieldRepository;
         this.standardExtraRepository = standardExtraRepository;
         this.standardApproveRepository = standardApproveRepository;
@@ -121,6 +124,7 @@ public class DataFieldServiceImpl implements DataFieldService {
         this.driverSessionService = driverSessionService;
         this.aimStatisticsRepository = aimStatisticsRepository;
         this.statisticValidatorList = statisticValidatorList;
+        this.aimStatisticsConverter = aimStatisticsConverter;
     }
 
 
@@ -480,7 +484,8 @@ public class DataFieldServiceImpl implements DataFieldService {
             throw new CommonException(ErrorCode.STANDARD_NO_AIM);
         }
 
-        List<AimStatisticsDTO> aimStatisticsDTOS = new CopyOnWriteArrayList<>();
+        List<AimStatisticsDTO> insertAimStatisticsDTOS = new CopyOnWriteArrayList<>();
+        List<AimStatistics> updateAimStatistics = new CopyOnWriteArrayList<>();
         AimStatisticsDTO aimStatisticsDTO = new AimStatisticsDTO();
 
         CountDownLatch countDownLatch = new CountDownLatch(standardAimDTOS.size());
@@ -524,14 +529,27 @@ public class DataFieldServiceImpl implements DataFieldService {
                         }
                     });
 
-
                     // 统计总行合规比例
-                    String compliantRatePercent = getPercent(aimStatisticsDTO.getCompliantRow(), aimStatisticsDTO.getRowNum());
+                    BigDecimal compliantRatePercent = getPercent(aimStatisticsDTO.getCompliantRow(), aimStatisticsDTO.getRowNum());
                     aimStatisticsDTO.setCompliantRate(compliantRatePercent);
                     // 统计非空行合规比列
-                    String acompliantPercent = getPercent(aimStatisticsDTO.getNonNullRow(), aimStatisticsDTO.getRowNum());
+                    BigDecimal acompliantPercent = getPercent(aimStatisticsDTO.getCompliantRow(), aimStatisticsDTO.getNonNullRow());
                     aimStatisticsDTO.setAcompliantRate(acompliantPercent);
-                    aimStatisticsDTOS.add(aimStatisticsDTO);
+                    int count = aimStatisticsRepository.selectCount(AimStatistics.builder().aimId(aimStatisticsDTO.getAimId()).build());
+                    if (count > 0) {
+                        //已经统计过，更新统计
+                        List<AimStatistics> aimStatisticList = aimStatisticsRepository.select(AimStatistics.builder().aimId(aimStatisticsDTO.getAimId()).build());
+                        if (CollectionUtils.isNotEmpty(aimStatisticList)) {
+                            AimStatistics oldAimStatistic = aimStatisticList.get(0);
+                            AimStatistics newAimStatistic = aimStatisticsConverter.dtoToEntity(aimStatisticsDTO);
+                            BeanUtils.copyProperties(oldAimStatistic, newAimStatistic, AimStatistics.FIELD_ROW_NUM,
+                                    AimStatistics.FIELD_NON_NULL_ROW, AimStatistics.FIELD_COMPLIANT_ROW,
+                                    AimStatistics.FIELD_COMPLIANT_RATE, AimStatistics.FIELD_ACOMPLIANT_RATE);
+                            updateAimStatistics.add(newAimStatistic);
+                        }
+                    } else {
+                        insertAimStatisticsDTOS.add(aimStatisticsDTO);
+                    }
                 } catch (Exception e) {
                     log.info("统计失败");
                     e.printStackTrace();
@@ -545,10 +563,15 @@ public class DataFieldServiceImpl implements DataFieldService {
             //等待结果
             countDownLatch.await();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.error("error", e);
         }
         // 落标总数统计
-        aimStatisticsRepository.batchInsertDTOSelective(aimStatisticsDTOS);
+        if (CollectionUtils.isNotEmpty(insertAimStatisticsDTOS)) {
+            aimStatisticsRepository.batchInsertDTOSelective(insertAimStatisticsDTOS);
+        }
+        if (CollectionUtils.isNotEmpty(updateAimStatistics)) {
+            aimStatisticsRepository.batchUpdateByPrimaryKey(updateAimStatistics);
+        }
         return dataFieldDTO;
     }
 
@@ -560,11 +583,12 @@ public class DataFieldServiceImpl implements DataFieldService {
      * @param num2
      * @return
      */
-    private static String getPercent(Long num1, Long num2) {
-        DecimalFormat decimalFormat = new DecimalFormat("0.00%");
-        String format = decimalFormat.format((float) num1 / num2);
-        return format;
-
+    private static BigDecimal getPercent(Long num1, Long num2) {
+        if (num2 == 0) {
+            return BigDecimal.valueOf(0);
+        } else {
+            return BigDecimal.valueOf(num1).divide(BigDecimal.valueOf(num2), 2, BigDecimal.ROUND_HALF_UP);
+        }
     }
 
     /**

@@ -8,6 +8,7 @@ import lombok.*;
 
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 
 /**
  * <p>标准落标统计表 数据传输对象</p>
@@ -40,10 +41,10 @@ public class AimStatisticsDTO extends AuditDomain {
     private Long compliantRow;
 
     @ApiModelProperty(value = "合规函数比例")
-    private String compliantRate;
+    private BigDecimal compliantRate;
 
     @ApiModelProperty(value = "非空行合规比例")
-    private String acompliantRate;
+    private BigDecimal acompliantRate;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull
@@ -75,5 +76,33 @@ public class AimStatisticsDTO extends AuditDomain {
 
     @Transient
     private String tableDesc;
+
+    @Transient
+    private String fieldName;
+
+    @Transient
+    private String fieldDesc;
+
+    @Transient
+    private String standardId;
+
+    @Transient
+    private String standardType;
+
+
+    @Transient
+    private Long totalRowNum;
+
+    @Transient
+    private Long totalNonNullRow;
+
+    @Transient
+    private Long totalCompliantRow;
+
+    @Transient
+    private BigDecimal totalCompliantRate;
+
+    @Transient
+    private BigDecimal totalAcompliantRate;
 
 }
