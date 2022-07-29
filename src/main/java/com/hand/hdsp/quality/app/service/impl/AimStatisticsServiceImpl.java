@@ -35,7 +35,9 @@ public class AimStatisticsServiceImpl implements AimStatisticsService {
     @Override
     public AimStatisticsDTO totalStatistic(Long tenantId, AimStatisticsDTO aimStatisticsDTO) {
         AimStatisticsDTO totalStatistic = aimStatisticsMapper.totalStatistic(aimStatisticsDTO);
-        totalStatistic = totalStatistic == null ? new AimStatisticsDTO() : totalStatistic;
+        if (totalStatistic == null) {
+            return new AimStatisticsDTO();
+        }
         totalStatistic.setTotalCompliantRate(getPercent(totalStatistic.getTotalCompliantRow(), totalStatistic.getTotalRowNum()));
         totalStatistic.setTotalAcompliantRate(getPercent(totalStatistic.getTotalCompliantRow(), totalStatistic.getTotalNonNullRow()));
         return totalStatistic;
