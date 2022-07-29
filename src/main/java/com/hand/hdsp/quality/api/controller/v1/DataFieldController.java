@@ -322,7 +322,7 @@ public class DataFieldController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/field-aim-statistic")
     public ResponseEntity<DataFieldDTO> fieldAimStatistic(@PathVariable(name = "organizationId") Long tenantId,
-                                                          DataFieldDTO dataFieldDTO) {
+                                                          @RequestBody  DataFieldDTO dataFieldDTO) {
         dataFieldDTO.setTenantId(tenantId);
         return Results.success(dataFieldService.fieldAimStatistic(dataFieldDTO));
     }
