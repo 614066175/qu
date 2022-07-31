@@ -234,13 +234,13 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
             batchPlanFieldRepository.insertDTOSelective(batchPlanFieldDTO);
             // 插入校验项
             for (BatchPlanFieldLineDTO batchPlanFieldLineDTO : batchPlanFieldDTO.getBatchPlanFieldLineDTOList()) {
-                batchPlanFieldLineDTO.setTenantId(batchPlanFieldLineDTO.getTenantId());
+                batchPlanFieldLineDTO.setTenantId(batchPlanBaseDTO.getTenantId());
                 batchPlanFieldLineDTO.setProjectId(batchPlanBaseDTO.getProjectId());
                 batchPlanFieldLineDTO.setPlanRuleId(batchPlanFieldDTO.getPlanRuleId());
                 batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
                 // 遍历插入字段规则条件
                 for (BatchPlanFieldConDTO batchPlanFieldConDTO : batchPlanFieldLineDTO.getBatchPlanFieldConDTOList()) {
-                    batchPlanFieldConDTO.setTenantId(batchPlanFieldLineDTO.getTenantId());
+                    batchPlanFieldConDTO.setTenantId(batchPlanBaseDTO.getTenantId());
                     batchPlanFieldConDTO.setProjectId(batchPlanBaseDTO.getProjectId());
                     batchPlanFieldConDTO.setPlanLineId(batchPlanFieldLineDTO.getPlanLineId());
                     batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
