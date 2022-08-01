@@ -5,6 +5,7 @@ import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlan;
+import com.hand.hdsp.quality.domain.entity.BatchPlanBase;
 import com.hand.hdsp.quality.domain.repository.BatchPlanBaseRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
@@ -63,6 +64,7 @@ public class PlanBaseBatchImportImpl implements IBatchImportService {
             log.error("Permission Object Read Json Error", e);
             return false;
         }
+        List<BatchPlanBaseDTO> insertBatchPlanBaseList=new ArrayList<>();
         batchPlanBaseList.forEach(batchPlanBaseDTO -> {
             List<BatchPlanDTO> batchPlanDTOList = batchPlanRepository.selectDTOByCondition(Condition.builder(BatchPlan.class)
                     .andWhere(Sqls.custom()
@@ -73,8 +75,20 @@ public class PlanBaseBatchImportImpl implements IBatchImportService {
             if (CollectionUtils.isNotEmpty(batchPlanDTOList)) {
                 batchPlanBaseDTO.setPlanId(batchPlanDTOList.get(0).getPlanId());
             }
+            BatchPlanBase batchPlanBase = batchPlanBaseRepository.selectOne(BatchPlanBase.builder()
+                    .planBaseCode(batchPlanBaseDTO.getPlanBaseCode())
+                    .tenantId(batchPlanBaseDTO.getTenantId())
+                    .projectId(batchPlanBaseDTO.getProjectId())
+                    .build());
+            if (batchPlanBase != null) {
+                batchPlanBaseDTO.setPlanBaseId(batchPlanBase.getPlanBaseId());
+                batchPlanBaseDTO.setObjectVersionNumber(batchPlanBase.getObjectVersionNumber());
+                batchPlanBaseRepository.updateByDTOPrimaryKeySelective(batchPlanBaseDTO);
+            }else{
+                insertBatchPlanBaseList.add(batchPlanBaseDTO);
+            }
         });
-        batchPlanBaseRepository.batchInsertDTOSelective(batchPlanBaseList);
+        batchPlanBaseRepository.batchInsertDTOSelective(insertBatchPlanBaseList);
         return true;
     }
 }
