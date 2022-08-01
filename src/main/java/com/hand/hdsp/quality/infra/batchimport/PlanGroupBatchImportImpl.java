@@ -7,7 +7,6 @@ import com.hand.hdsp.quality.domain.repository.PlanGroupRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 
@@ -62,7 +61,15 @@ public class PlanGroupBatchImportImpl implements IBatchImportService {
         List<PlanGroup> addPlanGroups = new ArrayList<>();
         planGroups.forEach(planGroup -> {
             //如果不存在则新建
-            if (CollectionUtils.isEmpty(planGroupRepository.select(planGroup))) {
+            PlanGroup group = planGroupRepository.selectOne(PlanGroup.builder().groupCode(planGroup.getGroupCode())
+                    .tenantId(planGroup.getTenantId())
+                    .projectId(planGroup.getProjectId())
+                    .build());
+            if (group != null) {
+                planGroup.setGroupId(group.getGroupId());
+                planGroup.setObjectVersionNumber(group.getObjectVersionNumber());
+                planGroupRepository.updateByPrimaryKeySelective(planGroup);
+            } else {
                 addPlanGroups.add(planGroup);
             }
         });

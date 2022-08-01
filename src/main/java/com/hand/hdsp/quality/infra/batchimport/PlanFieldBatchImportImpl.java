@@ -7,11 +7,16 @@ import com.hand.hdsp.quality.api.dto.BatchPlanFieldConDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanFieldLineDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanBase;
+import com.hand.hdsp.quality.domain.entity.BatchPlanField;
+import com.hand.hdsp.quality.domain.entity.BatchPlanFieldCon;
+import com.hand.hdsp.quality.domain.entity.BatchPlanFieldLine;
 import com.hand.hdsp.quality.domain.repository.BatchPlanBaseRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldConRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldLineRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanFieldRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
+import com.hand.hdsp.quality.infra.converter.BatchPlanFieldConConverter;
+import com.hand.hdsp.quality.infra.converter.BatchPlanFieldLineConverter;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -46,12 +51,18 @@ public class PlanFieldBatchImportImpl implements IBatchImportService {
 
     private final BatchPlanBaseRepository batchPlanBaseRepository;
 
-    public PlanFieldBatchImportImpl(ObjectMapper objectMapper, BatchPlanFieldRepository batchPlanFieldRepository, BatchPlanFieldLineRepository batchPlanFieldLineRepository, BatchPlanFieldConRepository batchPlanFieldConRepository, BatchPlanBaseRepository batchPlanBaseRepository) {
+    private final BatchPlanFieldLineConverter batchPlanFieldLineConverter;
+
+    private final BatchPlanFieldConConverter batchPlanFieldConConverter;
+
+    public PlanFieldBatchImportImpl(ObjectMapper objectMapper, BatchPlanFieldRepository batchPlanFieldRepository, BatchPlanFieldLineRepository batchPlanFieldLineRepository, BatchPlanFieldConRepository batchPlanFieldConRepository, BatchPlanBaseRepository batchPlanBaseRepository, BatchPlanFieldLineConverter batchPlanFieldLineConverter, BatchPlanFieldConConverter batchPlanFieldConConverter) {
         this.objectMapper = objectMapper;
         this.batchPlanFieldRepository = batchPlanFieldRepository;
         this.batchPlanFieldLineRepository = batchPlanFieldLineRepository;
         this.batchPlanFieldConRepository = batchPlanFieldConRepository;
         this.batchPlanBaseRepository = batchPlanBaseRepository;
+        this.batchPlanFieldLineConverter = batchPlanFieldLineConverter;
+        this.batchPlanFieldConConverter = batchPlanFieldConConverter;
     }
 
 
@@ -85,8 +96,25 @@ public class PlanFieldBatchImportImpl implements IBatchImportService {
             log.error("Permission Object Read Json Error", e);
             return false;
         }
-        //插入表级规则,获取返回主键
-        List<BatchPlanFieldDTO> fieldDTOS = batchPlanFieldRepository.batchInsertDTOSelective(batchPlanFieldDTOS);
+        List<BatchPlanFieldDTO> fieldDTOS=new ArrayList<>();
+        batchPlanFieldDTOS.forEach(batchPlanFieldDTO -> {
+            BatchPlanField batchPlanField = batchPlanFieldRepository.selectOne(BatchPlanField.builder()
+                    .planBaseId(batchPlanFieldDTO.getPlanBaseId())
+                    .ruleCode(batchPlanFieldDTO.getRuleCode())
+                    .build());
+            if (batchPlanField != null) {
+                //已存在则更新
+                batchPlanFieldDTO.setPlanRuleId(batchPlanField.getPlanRuleId());
+                batchPlanFieldDTO.setObjectVersionNumber(batchPlanField.getObjectVersionNumber());
+                batchPlanFieldRepository.updateByDTOPrimaryKeySelective(batchPlanFieldDTO);
+                fieldDTOS.add(batchPlanFieldDTO);
+            }else{
+                batchPlanFieldRepository.insertDTOSelective(batchPlanFieldDTO);
+                fieldDTOS.add(batchPlanFieldDTO);
+            }
+        });
+//        //插入表级规则,获取返回主键
+//        List<BatchPlanFieldDTO> fieldDTOS = batchPlanFieldRepository.batchInsertDTOSelective(batchPlanFieldDTOS);
         //插入规则行
         List<BatchPlanFieldLineDTO> fieldLineDTOList=new ArrayList<>();
         for(int i = 0; i < batchPlanFieldDTOS.size(); i++) {
@@ -104,8 +132,23 @@ public class PlanFieldBatchImportImpl implements IBatchImportService {
                     .build();
             fieldLineDTOList.add(fieldLineDTO);
         }
-        //插入规则行，获取返回主键
-        List<BatchPlanFieldLineDTO> lineList = batchPlanFieldLineRepository.batchInsertDTOSelective(fieldLineDTOList);
+        List<BatchPlanFieldLineDTO> lineList=new ArrayList<>();
+        fieldLineDTOList.forEach(lineDTO -> {
+            BatchPlanFieldLine batchPlanFieldLine = batchPlanFieldLineRepository.selectOne(batchPlanFieldLineConverter.dtoToEntity(lineDTO));
+            if (batchPlanFieldLine != null) {
+                //已存在则更新
+                lineDTO.setPlanLineId(batchPlanFieldLine.getPlanLineId());
+                lineDTO.setObjectVersionNumber(batchPlanFieldLine.getObjectVersionNumber());
+                batchPlanFieldLineRepository.updateByDTOPrimaryKeySelective(lineDTO);
+                lineList.add(lineDTO);
+            }else{
+                batchPlanFieldLineRepository.insertDTOSelective(lineDTO);
+                lineList.add(lineDTO);
+            }
+        });
+
+//        //插入规则行，获取返回主键
+//        List<BatchPlanFieldLineDTO> lineList = batchPlanFieldLineRepository.batchInsertDTOSelective(fieldLineDTOList);
         List<BatchPlanFieldConDTO> fieldConDTOList=new ArrayList<>();
         for(int i = 0; i < batchPlanFieldDTOS.size(); i++) {
             BatchPlanFieldDTO dto = batchPlanFieldDTOS.get(i);
@@ -119,8 +162,21 @@ public class PlanFieldBatchImportImpl implements IBatchImportService {
                     .build();
             fieldConDTOList.add(fieldConDTO);
         }
-        //插入告警配置
-        batchPlanFieldConRepository.batchInsertDTOSelective(fieldConDTOList);
+
+
+        fieldConDTOList.forEach(fieldConDTO -> {
+            BatchPlanFieldCon batchPlanFieldCon = batchPlanFieldConRepository.selectOne(batchPlanFieldConConverter.dtoToEntity(fieldConDTO));
+            if (batchPlanFieldCon != null) {
+                //已存在则更新
+                fieldConDTO.setConditionId(batchPlanFieldCon.getConditionId());
+                fieldConDTO.setObjectVersionNumber(batchPlanFieldCon.getObjectVersionNumber());
+                batchPlanFieldConRepository.updateByDTOPrimaryKeySelective(fieldConDTO);
+            }else{
+                batchPlanFieldConRepository.insertDTOSelective(fieldConDTO);
+            }
+        });
+//        //插入告警配置
+//        batchPlanFieldConRepository.batchInsertDTOSelective(fieldConDTOList);
         return true;
     }
 }

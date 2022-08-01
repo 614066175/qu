@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.BatchPlanDTO;
 import com.hand.hdsp.quality.api.dto.PlanGroupDTO;
+import com.hand.hdsp.quality.domain.entity.BatchPlan;
 import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.domain.repository.BatchPlanRepository;
 import com.hand.hdsp.quality.domain.repository.PlanGroupRepository;
@@ -63,6 +64,7 @@ public class PlanBatchImportImpl implements IBatchImportService {
             log.error("Permission Object Read Json Error", e);
             return false;
         }
+        List<BatchPlanDTO> insertBatchPlanDTOList = new ArrayList<>();
         plans.forEach(batchPlan -> {
             List<PlanGroupDTO> planGroupDTOList = planGroupRepository.selectDTOByCondition(Condition.builder(PlanGroup.class)
                     .andWhere(Sqls.custom()
@@ -73,8 +75,21 @@ public class PlanBatchImportImpl implements IBatchImportService {
             if (CollectionUtils.isNotEmpty(planGroupDTOList)) {
                 batchPlan.setGroupId(planGroupDTOList.get(0).getGroupId());
             }
+
+            BatchPlan plan = batchPlanRepository.selectOne(BatchPlan.builder().planCode(batchPlan.getPlanCode())
+                    .tenantId(batchPlan.getTenantId())
+                    .projectId(batchPlan.getProjectId())
+                    .build());
+            //如果评估方案已存在
+            if (plan != null) {
+                batchPlan.setPlanId(plan.getPlanId());
+                batchPlan.setObjectVersionNumber(plan.getObjectVersionNumber());
+                batchPlanRepository.updateByDTOPrimaryKey(batchPlan);
+            } else {
+                insertBatchPlanDTOList.add(batchPlan);
+            }
         });
-        batchPlanRepository.batchInsertDTOSelective(plans);
+        batchPlanRepository.batchInsertDTOSelective(insertBatchPlanDTOList);
         return true;
     }
 }
