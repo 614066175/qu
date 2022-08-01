@@ -363,7 +363,7 @@ public class DataStandardServiceImpl implements DataStandardService {
             if (2 == dataLengthList.size()) {
                 dataStandardDTO.setDataLength(String.format("%s,%s",
                         dataLengthList.get(0) == null ? StringUtils.EMPTY : dataLengthList.get(0),
-                        dataLengthList.get(1) == null ? StringUtils.EMPTY : dataLengthList.get(0)));
+                        dataLengthList.get(1) == null ? StringUtils.EMPTY : dataLengthList.get(1)));
             }
         }
     }
