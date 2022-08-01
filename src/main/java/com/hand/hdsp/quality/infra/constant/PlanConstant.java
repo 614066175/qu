@@ -280,7 +280,7 @@ public interface PlanConstant {
         /**
          * 空值个数
          */
-        String FIELD_EMPTY="FIELD_EMPTY";
+        String FIELD_EMPTY = "FIELD_EMPTY";
     }
 
     /**
@@ -337,6 +337,7 @@ public interface PlanConstant {
         String AREA = "AREA";
         String ENUM = "ENUM";
         String VALUE_SET = "VALUE_SET";
+        String LOV_VIEW = "LOV_VIEW";
 
     }
 

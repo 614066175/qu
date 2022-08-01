@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.AimStatisticsMapper">
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.AimStatistics">
+        <result column="statistics_id" property="statisticsId" jdbcType="DECIMAL"/>
+        <result column="aim_id" property="aimId" jdbcType="DECIMAL"/>
+        <result column="row_num" property="rowNum" jdbcType="DECIMAL"/>
+        <result column="non_null_row" property="nonNullRow" jdbcType="DECIMAL"/>
+        <result column="compliant_row" property="compliantRow" jdbcType="DECIMAL"/>
+        <result column="compliant_rate" property="compliantRate" jdbcType="DECIMAL"/>
+        <result column="acompliant_rate" property="acompliantRate" jdbcType="DECIMAL"/>
+        <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
+        <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
+        <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
+        <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
+    </resultMap>
+    <select id="list" resultType="com.hand.hdsp.quality.api.dto.AimStatisticsDTO">
+        SELECT
+            *
+        FROM
+            xsta_standard_aim xsa
+            LEFT JOIN xsta_aim_statistics xas ON xsa.aim_id = xas.aim_id
+        <where>
+            <if test="standardId !=null">
+                and xsa.standard_id =#{standardId}
+            </if>
+            <if test="standardType != null">
+                and xsa.standard_type =#{standardType}
+            </if>
+            <if test="tableName != null">
+                <bind name="tableNameLike" value="'%'+tableName+'%'"/>
+                and xsa.table_name like #{tableNameLike}
+            </if>
+            <if test="tableDesc != null">
+                <bind name="tableDescLike" value="'%'+tableDesc+'%'"/>
+                and xsa.table_desc like #{tableDescLike}
+            </if>
+            <if test="fieldName != null">
+                <bind name="fieldNameLike" value="'%'+fieldName+'%'"/>
+                and xsa.field_name like #{fieldNameLike}
+            </if>
+            <if test="fieldDesc != null">
+                <bind name="fieldDescLike" value="'%'+fieldDesc+'%'"/>
+                and xsa.field_desc like #{fieldDescLike}
+            </if>
+            <if test="compliantRate != null">
+                and xas.compliant_rate*100 &lt; #{compliantRate}
+            </if>
+            <if test="acompliantRate != null">
+                and xas.acompliant_rate*100 &lt; #{acompliantRate}
+            </if>
+        </where>
+    </select>
+    <select id="totalStatistic" resultType="com.hand.hdsp.quality.api.dto.AimStatisticsDTO">
+        SELECT
+            sum(row_num) totalRowNum,
+            sum(non_null_row) totalNonNullRow,
+            sum(compliant_row) totalCompliantRow
+        FROM
+            xsta_standard_aim xsa
+            LEFT JOIN xsta_aim_statistics xas ON xsa.aim_id = xas.aim_id
+        <where>
+            <if test="standardId !=null">
+                and xsa.standard_id =#{standardId}
+            </if>
+            <if test="standardType != null">
+                and xsa.standard_type =#{standardType}
+            </if>
+            <if test="tableName != null">
+                <bind name="tableNameLike" value="'%'+tableName+'%'"/>
+                and xsa.table_name like #{tableNameLike}
+            </if>
+            <if test="tableDesc != null">
+                <bind name="tableDescLike" value="'%'+tableDesc+'%'"/>
+                and xsa.table_desc like #{tableDescLike}
+            </if>
+            <if test="fieldName != null">
+                <bind name="fieldNameLike" value="'%'+fieldNameLike+'%'"/>
+                and xsa.field_name like #{fieldNameLike}
+            </if>
+            <if test="fieldDesc != null">
+                <bind name="fieldDescLike" value="'%'+fieldDesc+'%'"/>
+                and xsa.field_desc like #{fieldDescLike}
+            </if>
+            <if test="compliantRate != null">
+                and xas.compliant_rate*100 &lt; #{compliantRate}
+            </if>
+            <if test="acompliantRate != null">
+                and xas.acompliant_rate*100 &lt; #{acompliantRate}
+            </if>
+        </where>
+    </select>
+</mapper>

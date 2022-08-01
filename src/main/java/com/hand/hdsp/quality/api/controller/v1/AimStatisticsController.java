@@ -48,11 +48,28 @@ public class AimStatisticsController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  AimStatisticsDTO aimStatisticsDTO, @ApiIgnore @SortDefault(value = AimStatistics.FIELD_STATISTICS_ID,
+                                  AimStatisticsDTO aimStatisticsDTO,
+                                  @ApiIgnore @SortDefault(value = AimStatistics.FIELD_STATISTICS_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         aimStatisticsDTO.setTenantId(tenantId);
         Page<AimStatisticsDTO> list = aimStatisticsService.list(pageRequest, aimStatisticsDTO);
         return Results.success(list);
+    }
+
+    @ApiOperation(value = "落标统计总计")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/total-statistic")
+    public ResponseEntity<?> totalStatistic(@PathVariable(name = "organizationId") Long tenantId,
+                                            AimStatisticsDTO aimStatisticsDTO) {
+        aimStatisticsDTO.setTenantId(tenantId);
+        AimStatisticsDTO totalStatistic = aimStatisticsService.totalStatistic(tenantId, aimStatisticsDTO);
+        return Results.success(totalStatistic);
     }
 
     @ApiOperation(value = "标准落标统计表明细")

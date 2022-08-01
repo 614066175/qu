@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.infra.util;
 
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import io.choerodon.core.exception.CommonException;
 
 /**
@@ -18,13 +19,30 @@ public class TypeUtil {
     public static String convertType(String type) {
         switch (type.toUpperCase()) {
             case "INT":
+            case "INT4":
+            case "SERIAL":
+            case "SMALLINT":
             case "TINYINT":
-            case "BIGINT":
+            case "INT UNSIGNED":
+            case "BOOL":
                 return "INTEGER";
             case "DECIMAL":
+            case "NUMERIC":
+            case "NUMBER":
+            case "FLOAT":
                 return "DECIMAL";
+            case "VARCHAR":
+            case "VARCHAR2":
+            case "STRING":
+            case "TEXT":
+                return "STRING";
+            case "BIGINT":
+                return "BIGINTEGER";
+            case "DATETIME":
+            case "TIMESTAMP":
+                return "DATETIME";
             default:
-                throw new CommonException("未找到数据类型");
+                throw new CommonException(ErrorCode.UNKNOWN_DATATYPE);
         }
     }
 }
