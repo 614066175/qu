@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.starter.driver.core.infra.meta.Column;
 import org.hzero.starter.driver.core.session.DriverSession;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,6 +25,7 @@ import java.util.Optional;
  * @since 1.0
  */
 @Component
+@Order(1)
 public class FieldStructValidator implements StatisticValidator {
     private static final String FIELD_TYPE = "HDSP.XMOD.FIELD_TYPE";
     private final DriverSessionService driverSessionService;

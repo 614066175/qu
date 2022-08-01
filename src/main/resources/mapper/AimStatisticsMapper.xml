@@ -40,7 +40,7 @@
                 and xsa.table_desc like #{tableDescLike}
             </if>
             <if test="fieldName != null">
-                <bind name="fieldNameLike" value="'%'+fieldNameLike+'%'"/>
+                <bind name="fieldNameLike" value="'%'+fieldName+'%'"/>
                 and xsa.field_name like #{fieldNameLike}
             </if>
             <if test="fieldDesc != null">
