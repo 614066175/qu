@@ -8,6 +8,7 @@ import com.hand.hdsp.quality.app.service.MinioStorageService;
 import feign.Response;
 import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
+import org.hzero.boot.file.FileClient;
 import org.hzero.boot.file.feign.FileRemoteService;
 import org.hzero.core.util.ResponseUtils;
 import org.springframework.http.ResponseEntity;
@@ -26,38 +27,28 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 public class MinioStorageServiceImpl implements MinioStorageService {
 
-    private final FileRemoteService fileRemoteService;
+    private final FileClient fileClient;
 
-    public MinioStorageServiceImpl(FileRemoteService fileRemoteService) {
-        this.fileRemoteService = fileRemoteService;
+    public MinioStorageServiceImpl(FileClient fileClient) {
+        this.fileClient = fileClient;
     }
 
     @Override
     public String uploadFile(Long organizationId, String bucketName, String directory, String fileName, Integer docType, String storageCode, MultipartFile multipartFile) {
-        ResponseEntity<String> result = fileRemoteService.uploadFile(
+        return fileClient.uploadFile(
                 organizationId,
                 bucketName,
                 null,
                 fileName,
-                null,
-                storageCode,
                 multipartFile
         );
-        return ResponseUtils.getResponse(result, String.class,
-                (httpStatus, response) -> {
-                    log.error("标准文档上传失败，请检查hzero-file日志或者文件存储配置");
-                    throw new CommonException(response);
-                }, exceptionResponse -> {
-                    log.error("标准文档上传失败，请检查hzero-file日志或者文件存储配置");
-                    throw new CommonException(exceptionResponse.getMessage());
-                });
     }
 
 
     @Override
     public InputStream downloadByUrl(Long organizationId, String bucketName, String storageCode, String url) {
         try {
-            Response response = fileRemoteService.downloadByUrl(organizationId, bucketName, storageCode, url);
+            Response response = fileClient.downloadFileResponse(organizationId, bucketName, storageCode, url);
             return response.body().asInputStream();
         } catch (IOException e) {
             throw new CommonException(e);
@@ -66,7 +57,6 @@ public class MinioStorageServiceImpl implements MinioStorageService {
 
     @Override
     public void deleteFileByUrl(Long organizationId, String bucketName, String storageCode, List<String> urls) {
-        ResponseEntity<String> responseEntity = fileRemoteService.deleteFileByUrl(organizationId, bucketName, storageCode, urls);
-        log.info("delete files: {}, result: {}", urls, responseEntity);
+        fileClient.deleteFileByUrl(organizationId, bucketName, storageCode, urls);
     }
 }
