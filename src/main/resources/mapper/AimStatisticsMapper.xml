@@ -23,7 +23,7 @@
             *
         FROM
             xsta_standard_aim xsa
-            LEFT JOIN xsta_aim_statistics xas ON xsa.aim_id = xas.aim_id
+            JOIN xsta_aim_statistics xas ON xsa.aim_id = xas.aim_id
         <where>
             <if test="standardId !=null">
                 and xsa.standard_id =#{standardId}
