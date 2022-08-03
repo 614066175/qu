@@ -486,12 +486,12 @@ public class DataFieldServiceImpl implements DataFieldService {
 
         List<AimStatisticsDTO> insertAimStatisticsDTOS = new CopyOnWriteArrayList<>();
         List<AimStatistics> updateAimStatistics = new CopyOnWriteArrayList<>();
-        AimStatisticsDTO aimStatisticsDTO = new AimStatisticsDTO();
 
         CountDownLatch countDownLatch = new CountDownLatch(standardAimDTOS.size());
         for (StandardAimDTO aimDTO : standardAimDTOS) {
             CustomThreadPool.getExecutor().submit(() -> {
                 try {
+                    AimStatisticsDTO aimStatisticsDTO = new AimStatisticsDTO();
                     aimStatisticsDTO.setAimId(aimDTO.getAimId());
                     String fieldName = aimDTO.getFieldName().split("\\(")[0];
                     String dataSourceCode = aimDTO.getDatasourceCode();
