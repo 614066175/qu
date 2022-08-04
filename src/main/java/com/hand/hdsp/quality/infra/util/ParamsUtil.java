@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <p>
@@ -21,11 +22,14 @@ import java.util.regex.Matcher;
  */
 public class ParamsUtil {
 
+
     private ParamsUtil() {
         throw new IllegalStateException("context class");
     }
 
     private static final String PARAM_PATTERN = "\\$\\{%s\\}";
+
+    private static final Pattern NUMERIC_PATTERN = Pattern.compile("[\\-|0-9][0-9]*");
 
     /**
      * 对内置参数的处理
@@ -47,8 +51,7 @@ public class ParamsUtil {
 
             // _p_last_date_time
             if (matcher.group(1).trim().contains(PredefinedParams.LAST_DATE_TIME)) {
-                str = str.replaceAll(String.format(PARAM_PATTERN, PredefinedParams.LAST_DATE_TIME),
-                        specifiedParamsResponse.getLastDateTime());
+                str = handleLastDateTime(str, matcher.group(1).trim(), specifiedParamsResponse);
             }
 
             // _p_current_max_id
@@ -65,30 +68,83 @@ public class ParamsUtil {
         return str;
     }
 
+    private static String handleLastDateTime(String str, String matcher, SpecifiedParamsResponseDO specifiedParamsResponse) {
+        DateTimeFormatter defaultFormatter = DateTimeFormatter.ofPattern(BaseConstants.Pattern.DATETIME);
+        // 表查不到当前时间取本地时间
+        String originDataTime = Optional.ofNullable(specifiedParamsResponse.getCurrentDataTime())
+                .orElse(LocalDateTime.now().format(defaultFormatter));
+        String[] splitArr = matcher.split(PredefinedParams.SPLIT_KEY);
+        String lastDateTime;
+        if (splitArr.length == 1) {
+            // _p_last_date_time
+            lastDateTime = LocalDateTime.parse(originDataTime, defaultFormatter).format(defaultFormatter);
+        } else {
+            // xxx:xxx length>=2
+            String modeFlag = splitArr[1];
+            if (NUMERIC_PATTERN.matcher(modeFlag).matches()) {
+                if (splitArr.length < 3) {
+                    throw new IllegalArgumentException("不符合模式 _p_current_date_time:N:day");
+                } else if (splitArr.length == 3) {
+                    // 整数模式 _p_last_date_time:N:day
+                    lastDateTime = genLocalDateTime(originDataTime, defaultFormatter, Long.valueOf(modeFlag), splitArr[2]);
+                } else {
+                    // 模式升级为 _p_last_date_time:N:day:日期格式
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(matcher.split(PredefinedParams.SPLIT_KEY, 4)[3]);
+                    lastDateTime = genLocalDateTime(originDataTime, defaultFormatter, Long.valueOf(modeFlag), splitArr[2]);
+                    lastDateTime = LocalDateTime.parse(lastDateTime, defaultFormatter).format(formatter);
+                }
+            } else {
+                // 字符串模式 _p_last_date_time:yyyy-MM-dd，_p_last_date_time:yyyy-MM-dd HH:mm:ss
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern(matcher.split(PredefinedParams.SPLIT_KEY,
+                        2)[1]);
+                lastDateTime = LocalDateTime.parse(originDataTime, defaultFormatter).format(formatter);
+            }
+        }
+        // 替换多余的转义
+        String lastDateTimeTmp = lastDateTime.replace("\\","");
+        str = str.replace(String.format("${%s}", matcher), lastDateTimeTmp);
+        // 时间戳的currentDateTime需更新
+        specifiedParamsResponse.setLastDateTime(lastDateTimeTmp);
+        return str;
+    }
+
     private static String handleDateTime(String str, String matcher, SpecifiedParamsResponseDO specifiedParamsResponse) {
         DateTimeFormatter defaultFormatter = DateTimeFormatter.ofPattern(BaseConstants.Pattern.DATETIME);
         // 表查不到当前时间取本地时间
         String originDataTime = Optional.ofNullable(specifiedParamsResponse.getCurrentDataTime())
                 .orElse(LocalDateTime.now().format(defaultFormatter));
         String[] splitArr = matcher.split(PredefinedParams.SPLIT_KEY);
-        int defaultSize = 2;
         String currentDateTime;
-        if (splitArr.length > defaultSize) {
-            //  _p_current_date_time:N:day
-            currentDateTime = genLocalDateTime(originDataTime, defaultFormatter, Long.valueOf(splitArr[1]), splitArr[2]);
-            str = str.replaceAll(String.format("\\$\\{%s\\:%s\\:%s\\}", splitArr[0], splitArr[1], splitArr[2]), currentDateTime);
-        } else if (splitArr.length == defaultSize) {
-            // _p_current_date_time:yyyy-MM-dd HH:mm:ss
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(splitArr[1]);
-            currentDateTime = LocalDateTime.parse(originDataTime, formatter).format(formatter);
-            str = str.replaceAll(String.format("\\$\\{%s\\:%s\\}", splitArr[0], splitArr[1]), currentDateTime);
-        } else {
+        if (splitArr.length == 1) {
             // _p_current_date_time
             currentDateTime = LocalDateTime.parse(originDataTime, defaultFormatter).format(defaultFormatter);
-            str = str.replaceAll(String.format(PARAM_PATTERN, splitArr[0]), currentDateTime);
+        } else {
+            // xxx:xxx length>=2
+            String modeFlag = splitArr[1];
+            if (NUMERIC_PATTERN.matcher(modeFlag).matches()) {
+                if (splitArr.length < 3) {
+                    throw new IllegalArgumentException("不符合模式 _p_current_date_time:N:day");
+                } else if (splitArr.length == 3) {
+                    // 整数模式 _p_current_date_time:N:day
+                    currentDateTime = genLocalDateTime(originDataTime, defaultFormatter, Long.valueOf(modeFlag), splitArr[2]);
+                } else {
+                    // 模式升级为 _p_current_date_time:N:day:日期格式
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(matcher.split(PredefinedParams.SPLIT_KEY, 4)[3]);
+                    currentDateTime = genLocalDateTime(originDataTime, defaultFormatter, Long.valueOf(modeFlag), splitArr[2]);
+                    currentDateTime = LocalDateTime.parse(currentDateTime, defaultFormatter).format(formatter);
+                }
+            } else {
+                // 字符串模式 _p_current_date_time:yyyy-MM-dd，_p_current_date_time:yyyy-MM-dd HH:mm:ss
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern(matcher.split(PredefinedParams.SPLIT_KEY,
+                        2)[1]);
+                currentDateTime = LocalDateTime.parse(originDataTime, defaultFormatter).format(formatter);
+            }
         }
+        // 替换多余的转义
+        String currentDateTimeTmp = currentDateTime.replace("\\","");
+        str = str.replace(String.format("${%s}", matcher), currentDateTimeTmp);
         // 时间戳的currentDateTime需更新
-        specifiedParamsResponse.setCurrentDataTime(currentDateTime);
+        specifiedParamsResponse.setCurrentDataTime(currentDateTimeTmp);
         return str;
     }
 
