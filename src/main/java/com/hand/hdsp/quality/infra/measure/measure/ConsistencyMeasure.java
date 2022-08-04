@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
+import com.alibaba.druid.DbType;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
@@ -58,6 +59,12 @@ public class ConsistencyMeasure implements Measure {
         DriverSession driverSession = driverSessionService.getDriverSession(tenantId, param.getPluginDatasourceDTO().getDatasourceCode());
         String sql=MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
         List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(),sql);
+        if (DbType.hive.equals(driverSession.getDbType())&&CollectionUtils.isNotEmpty(response)) {
+            //如果是hive，判断最后结果是不是包含hive-sql执行日志，如果包含，进行移除，避免日志对于结果的影响
+            if (response.get(response.size() - 1).get("hive-sql") != null) {
+                response.remove(response.size() - 1);
+            }
+        }
 
         if (CollectionUtils.isNotEmpty(response)) {
             batchResultItem.setWarningLevel(JsonUtils.object2Json(Collections.singleton(WarningLevelVO.builder()
