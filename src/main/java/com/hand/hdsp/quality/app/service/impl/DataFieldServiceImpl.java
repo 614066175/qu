@@ -151,6 +151,8 @@ public class DataFieldServiceImpl implements DataFieldService {
             standardTeamDTOList.forEach(standardTeamDTO ->
                     standardRelationDTOList.add(StandardRelationDTO.builder().fieldStandardId(dataFieldDTO.getFieldId())
                             .standardTeamId(standardTeamDTO.getStandardTeamId())
+                            .tenantId(dataFieldDTO.getTenantId())
+                            .projectId(dataFieldDTO.getProjectId())
                             .build()));
             standardRelationRepository.batchInsertDTOSelective(standardRelationDTOList);
         }
