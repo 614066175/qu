@@ -16,6 +16,7 @@ import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -216,7 +217,9 @@ public class MeasureUtil {
         for (WarningLevelDTO warningLevelDTO : warningLevelList) {
             if (PlanConstant.CompareSymbol.EQUAL.equals(warningLevelDTO.getCompareSymbol())) {
                 // 字符串
-                if (warningLevelDTO.getExpectedValue().equals(value)) {
+                //前端传进来的只能是字符串数值 对其进行处理 转换成保留两位小数的字符串
+                String processedValue = new DecimalFormat("0.00").format(Double.parseDouble(warningLevelDTO.getExpectedValue()));
+                if (processedValue.equals(value)) {
                     batchResultItem.setWarningLevel(
                             JsonUtils.object2Json(
                                     Collections.singletonList(WarningLevelVO.builder()
@@ -262,7 +265,9 @@ public class MeasureUtil {
 
             } else if (PlanConstant.CompareSymbol.NOT_EQUAL.equals(warningLevelDTO.getCompareSymbol())) {
                 // 字符串
-                if (!warningLevelDTO.getExpectedValue().equals(value)) {
+                //前端传进来的只能是字符串数值 对其进行处理 转换成保留两位小数的字符串
+                String processedValue = new DecimalFormat("0.00").format(Double.parseDouble(warningLevelDTO.getExpectedValue()));
+                if (!processedValue.equals(value)) {
                     batchResultItem.setWarningLevel(
                             JsonUtils.object2Json(
                                     Collections.singletonList(WarningLevelVO.builder()
