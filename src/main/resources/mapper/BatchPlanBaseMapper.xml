@@ -62,10 +62,13 @@
         hfl.item_code,
         xbfv.form_value,
         xbpb.plan_id currentPlanId,
-        xbp.plan_name currentPlanName
+        xbp.plan_name currentPlanName,
+        xpg.group_name,
+        xpg.group_id
         from
         xqua_batch_plan_base xbpb
         join xqua_batch_plan xbp on xbpb.plan_id=xbp.plan_id
+        left join xqua_plan_group xpg on xbp.group_id = xpg.group_id
         left join xqua_base_form_value xbfv on xbpb.plan_base_id=xbfv.plan_base_id
         left join hpfm_form_line hfl on xbfv.form_line_id=hfl.form_line_id
         LEFT JOIN ( SELECT xbpt.plan_base_id, count(*) table_num FROM xqua_batch_plan_table xbpt GROUP BY
@@ -133,7 +136,14 @@
                 and hfl.item_code= #{baseFormValueDTO.itemCode} and xbfv.form_value like #{formValueLike}
             </foreach>
         </if>
-
+        <if test="groupName != null">
+            <bind name="groupNameLike" value="'%'+groupName+'%'"/>
+            and xpg.group_name like #{groupNameLike}
+        </if>
+        <if test="planName != null">
+            <bind name="planNameLike" value="'%'+planName+'%'"/>
+            and xbp.plan_name like #{planNameLike}
+        </if>
     </sql>
 
     <!--查询被分配的质检项 -->
@@ -157,12 +167,15 @@
         hfl.item_code,
         xbfv.form_value,
         xbp1.plan_id currentPlanId,
-        xbp1.plan_name currentPlanName
+        xbp1.plan_name currentPlanName,
+        xpg.group_name,
+        xpg.group_id
         FROM
         xqua_plan_base_assign xpba
         join xqua_batch_plan_base xbpb on xpba.plan_base_id=xbpb.plan_base_id
         join xqua_batch_plan xbp on xbpb.plan_id=xbp.plan_id
         join xqua_batch_plan xbp1 on xpba.plan_id=xbp1.plan_id
+        left join xqua_plan_group xpg on xbp.group_id = xpg.group_id
         left join xqua_base_form_value xbfv on xbpb.plan_base_id=xbfv.plan_base_id
         left join hpfm_form_line hfl on xbfv.form_line_id=hfl.form_line_id
         LEFT JOIN ( SELECT xbpt.plan_base_id, count(*) table_num FROM xqua_batch_plan_table xbpt GROUP BY
@@ -230,6 +243,14 @@
                 <bind name="formValueLike" value="'%'+baseFormValueDTO.formValue+'%'"/>
                 and hfl.item_code= #{baseFormValueDTO.itemCode} and xbfv.form_value like #{formValueLike}
             </foreach>
+        </if>
+        <if test="groupName != null">
+          <bind name="groupNameLike" value="'%'+groupName+'%'"/>
+            and xpg.group_name like #{groupNameLike}
+        </if>
+        <if test="planName != null">
+            <bind name="planNameLike" value="'%'+planName+'%'"/>
+            and xbp.plan_name like #{planNameLike}
         </if>
     </sql>
 
