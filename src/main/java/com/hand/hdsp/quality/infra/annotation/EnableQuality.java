@@ -2,7 +2,7 @@ package com.hand.hdsp.quality.infra.annotation;
 
 import io.choerodon.resource.annoation.EnableChoerodonResourceServer;
 import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 import java.lang.annotation.*;
@@ -16,7 +16,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @EnableFeignClients
-@EnableEurekaClient
+@EnableDiscoveryClient
 @EnableChoerodonResourceServer
 @MapperScan({
         "io.choerodon.**.mapper",
