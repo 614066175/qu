@@ -15,8 +15,10 @@ import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.util.PlanExceptionUtil;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
+import org.hzero.core.base.BaseConstants;
 import org.hzero.starter.driver.core.infra.meta.PrimaryKey;
 import org.hzero.starter.driver.core.session.DriverSession;
 
@@ -102,14 +104,22 @@ public class RegularMeasure implements Measure {
                 }
                 maps.forEach((map) -> map.forEach((k, v) -> list.add(new MeasureResultDO(String.valueOf(v)))));
                 List<String> noMatchList=new ArrayList<>();
+                long count = 1;
                 for (MeasureResultDO measureResultDO : list) {
                     if (!pattern.matcher(measureResultDO.getResult()).find()) {
                         noMatchList.add(String.format("'%s'",measureResultDO.getResult()));
-                        batchResultItem.setActualValue(measureResultDO.getResult());
+                        String actualValue = batchResultItem.getActualValue();
+                        if (StringUtils.isNotEmpty(actualValue)) {
+                            actualValue = actualValue + BaseConstants.Symbol.COMMA;
+                        } else {
+                            actualValue = StringUtils.EMPTY;
+                        }
+                        batchResultItem.setActualValue(actualValue + measureResultDO.getResult());
                         batchResultItem.setWarningLevel(JsonUtils.object2Json(
                                 Collections.singletonList(
                                         WarningLevelVO.builder()
                                                 .warningLevel(param.getWarningLevelList().get(0).getWarningLevel())
+                                                .levelCount(count++)
                                                 .build()
                                 )
                         ));
@@ -119,10 +129,19 @@ public class RegularMeasure implements Measure {
                     }
                 }
                 if(CollectionUtils.isNotEmpty(noMatchList)){
-                    String noMatchCondition = String.format("%s in (%s)",
-                            MeasureUtil.handleFieldName(param.getFieldName()),
-                            Strings.join(noMatchList, ',')
-                    );
+                    String noMatchCondition;
+                    // 防止mysql表字符集为utf8mb4_general_ci时，不区分大小写的情况
+                    if (DbType.mysql.equals(driverSession.getDbType())) {
+                        noMatchCondition = String.format("BINARY %s in (%s)",
+                                MeasureUtil.handleFieldName(param.getFieldName()),
+                                Strings.join(noMatchList, ',')
+                        );
+                    } else {
+                        noMatchCondition = String.format("%s in (%s)",
+                                MeasureUtil.handleFieldName(param.getFieldName()),
+                                Strings.join(noMatchList, ',')
+                        );
+                    }
                     //修改where条件
                     if(Strings.isEmpty(param.getWhereCondition())){
                         param.setWhereCondition(noMatchCondition);
