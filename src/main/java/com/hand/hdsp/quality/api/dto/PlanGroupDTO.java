@@ -76,4 +76,33 @@ public class PlanGroupDTO extends AuditDomain {
 
     private Long projectId;
 
+    @Transient
+    private String planBaseCode;
+
+    @Transient
+    private String planBaseName;
+
+    @Transient
+    private String objectName;
+
+    @Transient
+    private String description;
+
+    @Transient
+    private String datasourceSchema;
+
+    @Transient
+    private Long fieldNum;
+
+    @Transient
+    private Long tableNum;
+
+    @Transient
+    private Long relTableNum;
+
+    @Transient
+    private String planName;
+
+    @Transient
+    private String currentPlanName;
 }
