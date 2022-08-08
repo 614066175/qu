@@ -646,8 +646,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             if (TABLE.equals(batchPlanBase.getSqlType())) {
                 //保存表的数据量
                 DriverSession driverSession = driverSessionService.getDriverSession(tenantId, batchPlanBase.getDatasourceCode());
+                //避免hive进行优化配置hive.compute.query.using.stats=true，使用状态信息进行查询，返回的结果不正确
                 List<Map<String, Object>> maps = driverSession.executeOneQuery(batchPlanBase.getDatasourceSchema(),
-                        String.format("select count(*) as COUNT from %s", batchPlanBase.getObjectName()));
+                        String.format("select count(*) as COUNT from %s limit 1", batchPlanBase.getObjectName()));
                 if (CollectionUtils.isNotEmpty(maps)) {
                     log.info("查询结果：" + maps);
                     String key = maps.get(0).keySet().iterator().next();
