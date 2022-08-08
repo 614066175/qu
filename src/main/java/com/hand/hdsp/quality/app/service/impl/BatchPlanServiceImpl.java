@@ -46,7 +46,9 @@ import org.hzero.core.util.ResponseUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.session.DriverSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -134,15 +136,19 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     @Resource
     private BatchPlanBaseMapper batchPlanBaseMapper;
 
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int delete(BatchPlanDTO batchPlanDTO) {
         List<BatchPlanBaseDTO> batchPlanBaseDTOList =
                 batchPlanBaseRepository.selectDTO(BatchPlanBase.FIELD_PLAN_ID, batchPlanDTO.getPlanId());
-        if (!batchPlanBaseDTOList.isEmpty()) {
-            throw new CommonException(ErrorCode.CAN_NOT_DELETE);
-        }
+//        if (!batchPlanBaseDTOList.isEmpty()) {
+//            throw new CommonException(ErrorCode.CAN_NOT_DELETE);
+//        }
+        //删除方案下的质检项，质检项分配，检验项
         return batchPlanRepository.deleteByPrimaryKey(batchPlanDTO);
     }
 
@@ -241,6 +247,33 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         warningLevels = warningLevels.stream().distinct().collect(Collectors.toList());
         BatchResultDTO batchResultDTO = batchResultMapper.selectByPlanId(planId);
         warningLevels.forEach(warningLevel -> doSendMessage(planId, resultWaringVOS, batchResultDTO, warningLevel));
+    }
+
+    @Override
+    public void clearExceptionData(String planCode, Long tenantId, Long projectId) {
+        BatchPlan batchPlan = batchPlanRepository.selectOne(BatchPlan.builder().planName(planCode).tenantId(tenantId).projectId(projectId).build());
+        if (batchPlan == null) {
+            return;
+        }
+        List<BatchPlanBase> batchPlanBases = batchPlanBaseRepository.select(BatchPlanBase.builder().planId(batchPlan.getPlanId()).build());
+        if (CollectionUtils.isEmpty(batchPlanBases)) {
+            return;
+        }
+        List<BatchResult> batchResults = batchResultRepository.select(BatchResult.builder().planId(batchPlan.getPlanId()).build());
+        if (CollectionUtils.isEmpty(batchResults)) {
+            return;
+        }
+        for (BatchPlanBase batchPlanBase : batchPlanBases) {
+            //查询质检项的结果
+            List<BatchResultBase> batchResultBases = batchResultBaseRepository.select(BatchResultBase.builder().planBaseId(batchPlanBase.getPlanBaseId()).build());
+            if (CollectionUtils.isNotEmpty(batchPlanBases)) {
+                for (BatchResultBase batchResultBase : batchResultBases) {
+                    String collectionName = String.format("%d_%d", batchResultBase.getPlanBaseId(), batchResultBase.getResultBaseId());
+                    mongoTemplate.dropCollection(collectionName);
+                }
+            }
+        }
+
     }
 
     private void doSendMessage(Long planId, List<ResultWaringVO> resultWaringVOS, BatchResultDTO batchResultDTO,
