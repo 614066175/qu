@@ -108,13 +108,7 @@ public class RegularMeasure implements Measure {
                 for (MeasureResultDO measureResultDO : list) {
                     if (!pattern.matcher(measureResultDO.getResult()).find()) {
                         noMatchList.add(String.format("'%s'",measureResultDO.getResult()));
-                        String actualValue = batchResultItem.getActualValue();
-                        if (StringUtils.isNotEmpty(actualValue)) {
-                            actualValue = actualValue + BaseConstants.Symbol.COMMA;
-                        } else {
-                            actualValue = StringUtils.EMPTY;
-                        }
-                        batchResultItem.setActualValue(actualValue + measureResultDO.getResult());
+                        batchResultItem.setActualValue(measureResultDO.getResult());
                         batchResultItem.setWarningLevel(JsonUtils.object2Json(
                                 Collections.singletonList(
                                         WarningLevelVO.builder()
