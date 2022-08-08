@@ -16,7 +16,6 @@ import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -216,20 +215,6 @@ public class MeasureUtil {
                                           BatchResultItem batchResultItem) {
         for (WarningLevelDTO warningLevelDTO : warningLevelList) {
             if (PlanConstant.CompareSymbol.EQUAL.equals(warningLevelDTO.getCompareSymbol())) {
-                // 字符串
-                //前端传进来的只能是字符串数值 对其进行处理 转换成保留两位小数的字符串
-                String processedValue = new DecimalFormat("0.00").format(Double.parseDouble(warningLevelDTO.getExpectedValue()));
-                if (processedValue.equals(value)) {
-                    batchResultItem.setWarningLevel(
-                            JsonUtils.object2Json(
-                                    Collections.singletonList(WarningLevelVO.builder()
-                                            .warningLevel(warningLevelDTO.getWarningLevel())
-                                            .build()))
-                    );
-                    warningLevelDTO.setIfAlert(1L);
-                    batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
-                    break;
-                }
                 // 如果是数字，则用 BigDecimal.compareTo 比较
                 if (NumberUtils.isParsable(value) && NumberUtils.isParsable(warningLevelDTO.getExpectedValue())
                         && new BigDecimal(value).compareTo(new BigDecimal(warningLevelDTO.getExpectedValue())) == 0) {
@@ -262,24 +247,23 @@ public class MeasureUtil {
                     }
                 }
 
-
-            } else if (PlanConstant.CompareSymbol.NOT_EQUAL.equals(warningLevelDTO.getCompareSymbol())) {
                 // 字符串
-                //前端传进来的只能是字符串数值 对其进行处理 转换成保留两位小数的字符串
-                String processedValue = new DecimalFormat("0.00").format(Double.parseDouble(warningLevelDTO.getExpectedValue()));
-                if (!processedValue.equals(value)) {
+                if (warningLevelDTO.getExpectedValue().equals(value)) {
                     batchResultItem.setWarningLevel(
                             JsonUtils.object2Json(
                                     Collections.singletonList(WarningLevelVO.builder()
                                             .warningLevel(warningLevelDTO.getWarningLevel())
                                             .build()))
                     );
-                    batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
                     warningLevelDTO.setIfAlert(1L);
+                    batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
                     break;
                 }
+
+            } else if (PlanConstant.CompareSymbol.NOT_EQUAL.equals(warningLevelDTO.getCompareSymbol())) {
                 // 如果是数字，则用 BigDecimal.compareTo 比较
                 if (NumberUtils.isParsable(value)
+                        && NumberUtils.isParsable(warningLevelDTO.getExpectedValue())
                         && new BigDecimal(value).compareTo(new BigDecimal(warningLevelDTO.getExpectedValue())) != 0) {
                     batchResultItem.setWarningLevel(
                             JsonUtils.object2Json(
@@ -308,6 +292,19 @@ public class MeasureUtil {
                         warningLevelDTO.setIfAlert(1L);
                         break;
                     }
+                }
+
+                // 字符串
+                if (!warningLevelDTO.getExpectedValue().equals(value)) {
+                    batchResultItem.setWarningLevel(
+                            JsonUtils.object2Json(
+                                    Collections.singletonList(WarningLevelVO.builder()
+                                            .warningLevel(warningLevelDTO.getWarningLevel())
+                                            .build()))
+                    );
+                    batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
+                    warningLevelDTO.setIfAlert(1L);
+                    break;
                 }
             }
         }
