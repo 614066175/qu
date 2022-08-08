@@ -513,7 +513,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                     List<Map<String, Object>> notNullResult = driverSession.executeOneQuery(schemaName, String.format(NOT_NULL_COUNT, tableName, fieldName));
                     if (CollectionUtils.isNotEmpty(notNullResult)) {
                         log.info("非空行数查询结果【{}】", notNullResult);
-                        String notNullCount = countResult.get(0).values().toArray()[0].toString();
+                        String notNullCount = notNullResult.get(0).values().toArray()[0].toString();
                         aimStatisticsDTO.setNonNullRow(Long.parseLong(notNullCount));
                     }
 
