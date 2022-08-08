@@ -64,16 +64,17 @@ public class DataLengthMeasure implements Measure {
             warningLevelList.forEach(warningLevelDTO -> {
                 // 查询要执行的SQL
                 ItemTemplateSql itemTemplateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
-                        .checkItem(String.format("%s_%s",param.getCheckItem(),param.getCompareWay()))
+                        .checkItem(String.format("%s_%s", param.getCheckItem(), param.getCompareWay()))
                         .datasourceType(batchResultBase.getDatasourceType())
                         .build());
 
                 Map<String, String> variables = new HashMap<>(8);
                 variables.put("table", batchResultBase.getPackageObjectName());
                 variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
-                variables.put("num",warningLevelDTO.getExpectedValue());
+                variables.put("compareSymbol", PlanConstant.CompareSymbol.EQUAL.equals(warningLevelDTO.getCompareSymbol()) ? "=" : "!=");
+                variables.put("num", warningLevelDTO.getExpectedValue());
                 String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
-                List<Map<String, Object>> maps = driverSession.executeOneQuery(param.getSchema(),sql);
+                List<Map<String, Object>> maps = driverSession.executeOneQuery(param.getSchema(), sql);
                 if (Integer.parseInt(maps.get(0).values().toArray()[0].toString()) != 0) {
                     warningLevelVOList.add(
                             WarningLevelVO.builder()
@@ -110,7 +111,7 @@ public class DataLengthMeasure implements Measure {
                 variables.put("table", batchResultBase.getPackageObjectName());
                 variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
                 String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
-                List<Map<String, Object>> maps = driverSession.executeOneQuery(param.getSchema(),sql);
+                List<Map<String, Object>> maps = driverSession.executeOneQuery(param.getSchema(), sql);
                 if (Integer.parseInt(maps.get(0).values().toArray()[0].toString()) != 0) {
                     warningLevelVOList.add(
                             WarningLevelVO.builder()

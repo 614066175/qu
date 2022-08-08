@@ -66,7 +66,7 @@ public class CommonSqlMeasure implements Measure {
                 }
             }
 
-            String value = response.get(0).values().toArray()[0].toString();
+            String value = StringUtils.isEmpty(response.get(0).values().toArray()[0].toString()) ? "0" : response.get(0).values().toArray()[0].toString();
             param.setCountValue(value);
             batchResultItem.setActualValue(value);
             batchResultItem.setCurrentValue(value);
