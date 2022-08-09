@@ -19,6 +19,7 @@ import com.hand.hdsp.quality.infra.feign.TimestampFeign;
 import com.hand.hdsp.quality.infra.mapper.BatchPlanBaseMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchResultItemMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
+import com.hand.hdsp.quality.infra.mapper.PlanBaseAssignMapper;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureCollector;
 import com.hand.hdsp.quality.infra.publisher.QualityNoticePublisher;
@@ -46,7 +47,9 @@ import org.hzero.core.util.ResponseUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.session.DriverSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -134,15 +137,46 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     @Resource
     private BatchPlanBaseMapper batchPlanBaseMapper;
 
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @Autowired
+    private PlanBaseAssignRepository planBaseAssignRepository;
+
+    @Autowired
+    private PlanBaseAssignMapper planBaseAssignMapper;
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int delete(BatchPlanDTO batchPlanDTO) {
-        List<BatchPlanBaseDTO> batchPlanBaseDTOList =
-                batchPlanBaseRepository.selectDTO(BatchPlanBase.FIELD_PLAN_ID, batchPlanDTO.getPlanId());
-        if (!batchPlanBaseDTOList.isEmpty()) {
-            throw new CommonException(ErrorCode.CAN_NOT_DELETE);
+        List<BatchPlanBase> batchPlanBaseList =
+                batchPlanBaseRepository.select(BatchPlanBase.FIELD_PLAN_ID, batchPlanDTO.getPlanId());
+//        if (!batchPlanBaseDTOList.isEmpty()) {
+//            throw new CommonException(ErrorCode.CAN_NOT_DELETE);
+//        }
+
+        if (CollectionUtils.isEmpty(batchPlanBaseList)) {
+            return batchPlanRepository.deleteByPrimaryKey(batchPlanDTO);
         }
+        //删除方案下的质检项，质检项分配，检验项
+        List<Long> planBaseIds = batchPlanBaseList.stream().map(BatchPlanBase::getPlanBaseId).collect(Collectors.toList());
+        //1.删除分配，（使用一个sql进行批量删除提升效率）
+        planBaseAssignMapper.deleteAssignByPlan(planBaseIds, batchPlanDTO.getPlanId());
+        //2.删除行，再删除头
+        //表级
+        batchPlanBaseMapper.deleteTableCon(planBaseIds);
+        batchPlanBaseMapper.deleteTableLine(planBaseIds);
+        batchPlanBaseMapper.deleteTable(planBaseIds);
+        //字段级
+        batchPlanBaseMapper.deleteFieldCon(planBaseIds);
+        batchPlanBaseMapper.deleteFieldLine(planBaseIds);
+        batchPlanBaseMapper.deleteField(planBaseIds);
+        //表间
+        batchPlanBaseMapper.deleteTableRel(planBaseIds);
+        //3.删除质检项
+        batchPlanBaseRepository.batchDeleteByPrimaryKey(batchPlanBaseList);
+        //4.删除评估方案
         return batchPlanRepository.deleteByPrimaryKey(batchPlanDTO);
     }
 
@@ -241,6 +275,33 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         warningLevels = warningLevels.stream().distinct().collect(Collectors.toList());
         BatchResultDTO batchResultDTO = batchResultMapper.selectByPlanId(planId);
         warningLevels.forEach(warningLevel -> doSendMessage(planId, resultWaringVOS, batchResultDTO, warningLevel));
+    }
+
+    @Override
+    public void clearExceptionData(String planCode, Long tenantId, Long projectId) {
+        BatchPlan batchPlan = batchPlanRepository.selectOne(BatchPlan.builder().planName(planCode).tenantId(tenantId).projectId(projectId).build());
+        if (batchPlan == null) {
+            return;
+        }
+        List<BatchPlanBase> batchPlanBases = batchPlanBaseRepository.select(BatchPlanBase.builder().planId(batchPlan.getPlanId()).build());
+        if (CollectionUtils.isEmpty(batchPlanBases)) {
+            return;
+        }
+        List<BatchResult> batchResults = batchResultRepository.select(BatchResult.builder().planId(batchPlan.getPlanId()).build());
+        if (CollectionUtils.isEmpty(batchResults)) {
+            return;
+        }
+        for (BatchPlanBase batchPlanBase : batchPlanBases) {
+            //查询质检项的结果
+            List<BatchResultBase> batchResultBases = batchResultBaseRepository.select(BatchResultBase.builder().planBaseId(batchPlanBase.getPlanBaseId()).build());
+            if (CollectionUtils.isNotEmpty(batchPlanBases)) {
+                for (BatchResultBase batchResultBase : batchResultBases) {
+                    String collectionName = String.format("%d_%d", batchResultBase.getPlanBaseId(), batchResultBase.getResultBaseId());
+                    mongoTemplate.dropCollection(collectionName);
+                }
+            }
+        }
+
     }
 
     private void doSendMessage(Long planId, List<ResultWaringVO> resultWaringVOS, BatchResultDTO batchResultDTO,
@@ -482,10 +543,15 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
     @Override
     public Long exec(Long tenantId, Long planId, Long projectId) {
+        //
+        BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(planId);
+        if (batchPlan == null) {
+            throw new CommonException(ErrorCode.PLAN_NOT_EXIST);
+        }
 
         // 插入批数据方案结果表
         BatchResult batchResult = BatchResult.builder().planId(planId).startDate(new Date())
-                .planStatus(PlanConstant.PlanStatus.RUNNING).tenantId(tenantId).projectId(projectId).build();
+                .planStatus(PlanConstant.PlanStatus.RUNNING).tenantId(tenantId).projectId(projectId).planName(batchPlan.getPlanName()).build();
         batchResultRepository.insertSelective(batchResult);
 
         // 时间戳对象list

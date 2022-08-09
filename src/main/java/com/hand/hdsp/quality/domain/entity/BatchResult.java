@@ -58,4 +58,6 @@ public class BatchResult extends AuditDomain {
 
     private Long projectId;
 
+    private String planName;
+
 }

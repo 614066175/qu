@@ -111,11 +111,11 @@ public interface ErrorCode {
 
     String CONVERT_SQL = "hdsp.xqua.err.convert_sql";
 
-    String STANDARD_AIM_EXIST= "hdsp.xqua.err.standard_aim_exist";
+    String STANDARD_AIM_EXIST = "hdsp.xqua.err.standard_aim_exist";
 
-    String STANDARD_EXTRA_LIST_IS_EMPTY="hdsp.xqua.err.standard_extra_list_is_empty";
+    String STANDARD_EXTRA_LIST_IS_EMPTY = "hdsp.xqua.err.standard_extra_list_is_empty";
 
-    String STANDARD_AIM_LIST_IS_EMPTY="hdsp.xqua.err.standard_aim_list_is_empty";
+    String STANDARD_AIM_LIST_IS_EMPTY = "hdsp.xqua.err.standard_aim_list_is_empty";
 
     String DATA_STANDARD_VERSION_NOT_EXIST = "hdsp.xqua.err.data_standard_version_not_exist";
 
@@ -124,14 +124,14 @@ public interface ErrorCode {
     String STANDARD_AIM_NOT_EXIST = "hdsp.xsta.err.standard_aim_not_exist";
 
 
-    String BATCH_PLAN_FIELD_NOT_EXIST="hdsp.xqua.err.batch_plan_field_not_exist";
-    String BATCH_PLAN_BASE_NOT_EXIST="hdsp.xqua.err.batch_plan_base_not_exist";
+    String BATCH_PLAN_FIELD_NOT_EXIST = "hdsp.xqua.err.batch_plan_field_not_exist";
+    String BATCH_PLAN_BASE_NOT_EXIST = "hdsp.xqua.err.batch_plan_base_not_exist";
 
-    String LOV_CODE_NOT_EXIST="hdsp.xqua.err.lov_code_not_exist";
+    String LOV_CODE_NOT_EXIST = "hdsp.xqua.err.lov_code_not_exist";
 
-    String SQL_IS_EMPTY="hdsp.xqua.err.sql_is_empty";
+    String SQL_IS_EMPTY = "hdsp.xqua.err.sql_is_empty";
 
-    String BATCH_RESULT_NOT_EXIST="hdsp.xqua.err.batch_result_not_exist";
+    String BATCH_RESULT_NOT_EXIST = "hdsp.xqua.err.batch_result_not_exist";
     String PLAN_BASE_ID_IS_EMPTY = "hdsp.xqua.err.plan_base_id_is_empty";
     String PAGE_ERROR = "hdsp.xqua.err.page_error";
     String EXCEPTION_PARAM_ERROR = "hdsp.xqua.err.exception_param_error";
@@ -142,23 +142,23 @@ public interface ErrorCode {
 
     String UNKNOWN_DATATYPE = "hdsp.xqua.err.unknown_datatype";
 
-    String LINEAGE_ERROR="hdsp.xqua.err.lineage_error";
+    String LINEAGE_ERROR = "hdsp.xqua.err.lineage_error";
 
     String DOC_STANDARD_NAME_ALREADY_EXIST = "hdsp.xqua.err.doc_standard_name_already_exist";
 
-    String NAME_STANDARD_NAME_ALREADY_EXIST="hdsp.xqua.err.name_standard_name_already_exist";
+    String NAME_STANDARD_NAME_ALREADY_EXIST = "hdsp.xqua.err.name_standard_name_already_exist";
 
-    String GROUP_NAME_ALREADY_EXIST="hdsp.xqua.err.group_name_already_exist";
+    String GROUP_NAME_ALREADY_EXIST = "hdsp.xqua.err.group_name_already_exist";
 
-    String FILE_DOWNLOAD_FAIL="hdsp.xqua.err.file_download_fail";
+    String FILE_DOWNLOAD_FAIL = "hdsp.xqua.err.file_download_fail";
 
-    String DOC_NO_FILE="hdsp.xqua.err.doc_no_file";
+    String DOC_NO_FILE = "hdsp.xqua.err.doc_no_file";
 
-    String LOC_NO_FILE="hdsp.xqua.err.loc.is_empty";
+    String LOC_NO_FILE = "hdsp.xqua.err.loc.is_empty";
 
-    String WORK_ORDER_STATUS_ERROR="hdsp.xqua.err.work_order_status_error";
+    String WORK_ORDER_STATUS_ERROR = "hdsp.xqua.err.work_order_status_error";
 
-    String WORK_ORDER_STATUS_CAN_NOT_REVOKE="hdsp.xqua.err.work_order_status_can_not_revoke";
+    String WORK_ORDER_STATUS_CAN_NOT_REVOKE = "hdsp.xqua.err.work_order_status_can_not_revoke";
 
     String WORK_ORDER_NOT_EXIST = "hdsp.xqua.err.work_order_not_exist";
 
@@ -172,9 +172,9 @@ public interface ErrorCode {
 
     String PLAN_GROUP_NOT_EXIST = "hdsp.xqua.plan_group_not_exist";
 
-    String CORE_CUSTOMTABLE_COLUMN_LIST ="hdsp.xqua.err.feign_model_customtable_column_list";
+    String CORE_CUSTOMTABLE_COLUMN_LIST = "hdsp.xqua.err.feign_model_customtable_column_list";
 
-    String CORE_CUSTOMTABLE_LIST="hdsp.xqua.err.feign_model_customtable_list";
+    String CORE_CUSTOMTABLE_LIST = "hdsp.xqua.err.feign_model_customtable_list";
     String DATA_LENGTH_CAN_NOT_NULL = "hdsp.xsta.data_length_can_not_null";
 
     String VALUE_RANGE_CAN_NOT_NULL = "hdsp.xsta.value_range_can_not_null";
@@ -182,7 +182,9 @@ public interface ErrorCode {
     String STANDARD_NO_AIM = "hdsp.xqua.err.standard_no_aim";
 
 
-    String EXCEL_WRITE_ERROR = "hdsp.xass.err.excel_write";
-    String EXCEL_READ_ERROR = "hdsp.xass.err.excel_read";
+    String EXCEL_WRITE_ERROR = "hdsp.xqua.err.excel_write";
+    String EXCEL_READ_ERROR = "hdsp.xqua.err.excel_read";
+
+    String PLAN_NOT_EXIST = "hdsp.xqua.err.plan_not_exist";
 
 }

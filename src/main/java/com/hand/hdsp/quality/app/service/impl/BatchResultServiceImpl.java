@@ -1,12 +1,13 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchResultService;
+import com.hand.hdsp.quality.domain.entity.BatchPlan;
 import com.hand.hdsp.quality.domain.entity.BatchPlanBase;
+import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.repository.BatchPlanBaseRepository;
+import com.hand.hdsp.quality.domain.repository.BatchPlanRepository;
 import com.hand.hdsp.quality.domain.repository.BatchResultBaseRepository;
 import com.hand.hdsp.quality.domain.repository.BatchResultRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
@@ -23,6 +24,7 @@ import io.choerodon.core.domain.PageInfo;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.exception.ExceptionResponse;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
@@ -37,12 +39,12 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -56,6 +58,7 @@ import static com.hand.hdsp.quality.infra.constant.PlanConstant.ExceptionParam.W
  * @author feng.liu01@hand-china.com 2020-03-24 16:19:51
  */
 @Service
+@Slf4j
 public class BatchResultServiceImpl implements BatchResultService {
 
     private final ExecutionFlowFeign executionFlowFeign;
@@ -64,6 +67,7 @@ public class BatchResultServiceImpl implements BatchResultService {
     private final BatchResultBaseRepository batchResultBaseRepository;
     private final BatchResultRepository batchResultRepository;
     private final BatchPlanBaseRepository batchPlanBaseRepository;
+    private final BatchPlanRepository batchPlanRepository;
     private final String LEFT_Braces = "{";
     private final String INCREMENTSTRATEGY = "NONE";
 
@@ -74,13 +78,14 @@ public class BatchResultServiceImpl implements BatchResultService {
     public BatchResultServiceImpl(ExecutionFlowFeign executionFlowFeign,
                                   BatchResultMapper batchResultMapper,
                                   BatchResultItemMapper batchResultItemMapper,
-                                  BatchResultBaseRepository batchResultBaseRepository, BatchResultRepository batchResultRepository, BatchPlanBaseRepository batchPlanBaseRepository, MongoTemplate mongoTemplate) {
+                                  BatchResultBaseRepository batchResultBaseRepository, BatchResultRepository batchResultRepository, BatchPlanBaseRepository batchPlanBaseRepository, BatchPlanRepository batchPlanRepository, MongoTemplate mongoTemplate) {
         this.executionFlowFeign = executionFlowFeign;
         this.batchResultMapper = batchResultMapper;
         this.batchResultItemMapper = batchResultItemMapper;
         this.batchResultBaseRepository = batchResultBaseRepository;
         this.batchResultRepository = batchResultRepository;
         this.batchPlanBaseRepository = batchPlanBaseRepository;
+        this.batchPlanRepository = batchPlanRepository;
         this.mongoTemplate = mongoTemplate;
     }
 
@@ -308,7 +313,7 @@ public class BatchResultServiceImpl implements BatchResultService {
         // 通过 _id 来排序
         query.with(Sort.by(Sort.Direction.ASC, "_id"));
         //去掉_id和#PK等返回
-        query.fields().exclude("_id","#pk","#planBaseId","#resultBaseId");
+        query.fields().exclude("_id", "#pk", "#planBaseId", "#resultBaseId");
         // 获取下载数据
         List<Map> maps = mongoTemplate.find(query, Map.class, collectionName);
         List<List<Object>> dataList = maps.stream().map(map -> {
@@ -334,6 +339,53 @@ public class BatchResultServiceImpl implements BatchResultService {
             EasyExcelUtil.writeExcel(outputStream, collect, dataList, "Exception-Data", 1);
         } catch (IOException e) {
             throw new CommonException(ErrorCode.EXCEL_WRITE_ERROR, e);
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void resultPlanNameFix() {
+        List<BatchResult> batchResults = batchResultRepository.selectByCondition(Condition.builder(BatchResult.class)
+                .andWhere(Sqls.custom().andIsNull(BatchResult.FIELD_PLAN_NAME))
+                .build());
+        if (CollectionUtils.isNotEmpty(batchResults)) {
+            List<BatchResult> updateBatchResults = new ArrayList<>();
+            List<Long> deleteResultIds=new ArrayList<>();
+            for (BatchResult batchResult : batchResults) {
+                BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(batchResult.getPlanId());
+                if (batchPlan == null) {
+                    deleteResultIds.add(batchResult.getResultId());
+//                    batchResultRepository.deleteByPrimaryKey(batchResult);
+//                    List<BatchResultBase> resultBases = batchResultBaseRepository.select(BatchResultBase.builder().resultId(batchResult.getResultId()).build());
+//                    if(CollectionUtils.isNotEmpty(resultBases)){
+//                        for (BatchResultBase resultBase : resultBases) {
+//                            List<BatchResultRule> batchResultRules = batchResultRuleRepository.select(BatchResultRule.builder().resultBaseId(resultBase.getResultBaseId()).build());
+//                            if(CollectionUtils.isNotEmpty(batchResultRules)){
+//                                for (BatchResultRule batchResultRule : batchResultRules) {
+//                                    List<BatchResultItem> resultItems = batchResultItemRepository.select(BatchResultItem.builder().resultRuleId(batchResultRule.getResultRuleId()).build());
+//                                    batchResultItemRepository.batchDeleteByPrimaryKey(resultItems);
+//                                }
+//                                batchResultRuleRepository.batchDeleteByPrimaryKey(batchResultRules);
+//                            }
+//                        }
+//                        batchResultBaseRepository.batchDeleteByPrimaryKey(resultBases);
+//                    }
+                    continue;
+                }
+                //数据修复
+                batchResult.setPlanName(batchPlan.getPlanName());
+                updateBatchResults.add(batchResult);
+            }
+            if (CollectionUtils.isNotEmpty(updateBatchResults)) {
+                batchResultRepository.batchUpdateOptional(updateBatchResults, BatchResult.FIELD_PLAN_NAME);
+            }
+            if(CollectionUtils.isNotEmpty(deleteResultIds)){
+                log.info("进行删除");
+                batchResultMapper.deleteResultItem(deleteResultIds);
+                batchResultMapper.deleteResultRule(deleteResultIds);
+                batchResultMapper.deleteResultBase(deleteResultIds);
+                batchResultMapper.deleteResult(deleteResultIds);
+            }
         }
     }
 

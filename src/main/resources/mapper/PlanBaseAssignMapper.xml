@@ -14,4 +14,15 @@
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
+    <delete id="deleteAssignByPlan">
+        DELETE
+        FROM
+            xqua_plan_base_assign
+        WHERE
+            plan_id= #{planId}
+            or plan_base_id in
+            <foreach collection="planBaseIds" item="planBaseId" separator="," open="(" close=")">
+                #{planBaseId}
+            </foreach>
+    </delete>
 </mapper>

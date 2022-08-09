@@ -520,4 +520,19 @@ public class BatchResultController extends BaseController {
         timeRangeDTO.setProjectId(projectId);
         return Results.success(batchResultRepository.problemTrigger(timeRangeDTO));
     }
+
+    @ApiOperation(value = "方案评估结果冗余方案名称字段-供升级数据修复使用")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/result-plan-name-fix")
+    public ResponseEntity<?> resultPlanNameFix(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                               @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId) {
+        batchResultService.resultPlanNameFix();
+        return Results.success();
+    }
 }

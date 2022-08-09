@@ -67,4 +67,12 @@ public interface BatchResultService {
      * @param response         reponse
      */
     void exceptionDataDownload(ExceptionDataDTO exceptionDataDTO, HttpServletRequest request, HttpServletResponse response);
+
+    /**
+     * 结果评估方案名称修复
+     *
+     */
+    void resultPlanNameFix();
+
+
 }
