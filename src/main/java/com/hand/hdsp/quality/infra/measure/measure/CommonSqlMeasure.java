@@ -15,9 +15,12 @@ import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.starter.driver.core.session.DriverSession;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckItem.*;
 
 /**
  * <p>通用SQL处理</p>
@@ -30,6 +33,8 @@ public class CommonSqlMeasure implements Measure {
     private final ItemTemplateSqlRepository templateSqlRepository;
     private final CountCollector countCollector;
     private final DriverSessionService driverSessionService;
+
+    private final List<String> checkItemList = Arrays.asList("FIELD_UNIQUE_LINE", "FIELD_EMPTY_LINE");
 
     public CommonSqlMeasure(ItemTemplateSqlRepository templateSqlRepository,
                             CountCollector countCollector, DriverSessionService driverSessionService) {
@@ -68,6 +73,33 @@ public class CommonSqlMeasure implements Measure {
 
             String value = StringUtils.isEmpty(response.get(0).values().toArray()[0].toString()) ? "0" : response.get(0).values().toArray()[0].toString();
             param.setCountValue(value);
+            //记录真实值，如果是非空/总行数，唯一数/总行数，需要额外记录另外两个数值（倍通项目提出需求 2022/08/09 15:20:19）
+            if (checkItemList.contains(itemTemplateSql.getCheckItem())) {
+                //进行处理
+                String checkItem = itemTemplateSql.getCheckItem();
+                checkItem = checkItem.substring(0, checkItem.lastIndexOf("_"));
+                //非空数/唯一数查询
+                ItemTemplateSql templateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                        .checkItem(checkItem)
+                        .datasourceType(batchResultBase.getDatasourceType())
+                        .build());
+                List<Map<String, Object>> result = driverSession.executeOneQuery(param.getSchema(), MeasureUtil.replaceVariable(templateSql.getSqlContent(), variables, param.getWhereCondition()));
+                Long resultNum = StringUtils.isEmpty(result.get(0).values().toArray()[0].toString()) ? 0 : Long.parseLong(result.get(0).values().toArray()[0].toString());
+                if (FIELD_UNIQUE.equals(checkItem)) {
+                    batchResultItem.setUniqueNum(resultNum);
+                }
+                if (FIELD_EMPTY.equals(checkItem)) {
+                    batchResultItem.setNullNum(resultNum);
+                }
+                //表总数查询
+                ItemTemplateSql tableLineSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                        .checkItem(TABLE_LINE)
+                        .datasourceType(batchResultBase.getDatasourceType())
+                        .build());
+                List<Map<String, Object>> tableLine = driverSession.executeOneQuery(param.getSchema(), MeasureUtil.replaceVariable(templateSql.getSqlContent(), variables, param.getWhereCondition()));
+                Long tableLineNum = StringUtils.isEmpty(tableLine.get(0).values().toArray()[0].toString()) ? 0 : Long.parseLong(tableLine.get(0).values().toArray()[0].toString());
+                batchResultItem.setTableLineNum(tableLineNum);
+            }
             batchResultItem.setActualValue(value);
             batchResultItem.setCurrentValue(value);
             Count count = countCollector.getCount(param.getCountType());
