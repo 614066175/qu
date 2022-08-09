@@ -8,6 +8,7 @@ import com.hand.hdsp.quality.app.service.DataFieldService;
 import com.hand.hdsp.quality.domain.entity.BaseFormValue;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.domain.entity.PlanBaseAssign;
+import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
@@ -60,13 +61,15 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
     private final DataFieldRepository dataFieldRepository;
     private final ModelFeign modelFeign;
     private final DataFieldService dataFieldService;
+    private final PlanGroupRepository planGroupRepository;
 
-    public BatchPlanBaseServiceImpl(PlanBaseAssignRepository planBaseAssignRepository, BaseFormValueRepository baseFormValueRepository, DataFieldRepository dataFieldRepository, ModelFeign modelFeign, DataFieldService dataFieldService) {
+    public BatchPlanBaseServiceImpl(PlanBaseAssignRepository planBaseAssignRepository, BaseFormValueRepository baseFormValueRepository, DataFieldRepository dataFieldRepository, ModelFeign modelFeign, DataFieldService dataFieldService, PlanGroupRepository planGroupRepository) {
         this.planBaseAssignRepository = planBaseAssignRepository;
         this.baseFormValueRepository = baseFormValueRepository;
         this.dataFieldRepository = dataFieldRepository;
         this.modelFeign = modelFeign;
         this.dataFieldService = dataFieldService;
+        this.planGroupRepository = planGroupRepository;
     }
 
     @Override
@@ -112,6 +115,13 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
     @Override
     public BatchPlanBaseDTO detail(Long planBaseId, Long currentPlanId, Long tenantId) {
         BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseRepository.detail(planBaseId);
+        //获取方案的全路径path
+        if (batchPlanBaseDTO.getParentGroupId() != null && batchPlanBaseDTO.getParentGroupId() != 0L) {
+            String parentGroupPath = getParentGroupPath(batchPlanBaseDTO.getParentGroupId());
+            batchPlanBaseDTO.setGroupPath(String.format("%s/%s",parentGroupPath,batchPlanBaseDTO.getGroupName()));
+        }else{
+            batchPlanBaseDTO.setGroupPath(batchPlanBaseDTO.getGroupName());
+        }
         batchPlanBaseDTO.setDatasourceName(batchPlanBaseDTO.getDatasourceCode());
         //如果传了当前方案id,则判断编辑标识，当前方案和所属方案不一致，则返回不可编辑标识
         if (currentPlanId != null) {
@@ -129,6 +139,21 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
             batchPlanBaseDTO.setBaseFormValueJson(JsonUtil.toJson(map));
         }
         return batchPlanBaseDTO;
+    }
+
+    private String getParentGroupPath(Long groupId) {
+        String groupPath = "";
+        if (groupId == 0) {
+            return StringUtils.EMPTY;
+        }
+        PlanGroup planGroup = planGroupRepository.selectByPrimaryKey(groupId);
+        String parentGroupPath = getParentGroupPath(planGroup.getParentGroupId());
+        if (StringUtils.isNotEmpty(parentGroupPath)) {
+            groupPath = parentGroupPath + "/" + planGroup.getGroupName();
+        } else {
+            groupPath = planGroup.getGroupName();
+        }
+        return groupPath;
     }
 
     @Override
@@ -195,7 +220,7 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
                     if (CollectionUtils.isNotEmpty(field)) {
                         for (TableColumnDTO tableColumnDTO : field) {
                             // 将字段标准转换为规则
-                            BatchPlanFieldDTO batchPlanFieldDTO = dataFieldService.standardToRule(tableColumnDTO.getQuoteId(),tableColumnDTO.getColumnType());
+                            BatchPlanFieldDTO batchPlanFieldDTO = dataFieldService.standardToRule(tableColumnDTO.getQuoteId(), tableColumnDTO.getColumnType());
                             insert(batchPlanFieldDTO, batchPlanBaseDTO);
                         }
                     }
