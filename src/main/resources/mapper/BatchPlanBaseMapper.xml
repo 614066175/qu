@@ -34,6 +34,7 @@
         <result column="build_rule_flag" property="buildRuleFlag" jdbcType="DECIMAL"/>
         <result column="group_id" property="groupId" jdbcType="DECIMAL"/>
         <result column="group_name" property="groupName" jdbcType="VARCHAR"/>
+        <result column="parent_group_id" property="parentGroupId" jdbcType="DECIMAL"/>
         <collection property="baseFormValueDTOS" ofType="com.hand.hdsp.quality.api.dto.BaseFormValueDTO">
             <result column="item_code" property="itemCode"/>
             <result column="form_value" property="formValue"/>
@@ -456,7 +457,8 @@
                xbfv.form_value,
                xbpb.build_rule_flag,
                xbp.group_id,
-               xpg.group_name
+               xpg.group_name,
+               xpg.parent_group_id
         from xqua_batch_plan_base xbpb
                  left join xqua_batch_plan xbp on xbpb.plan_id = xbp.plan_id
                  left join xqua_plan_group xpg on xbp.group_id=xpg.group_id
