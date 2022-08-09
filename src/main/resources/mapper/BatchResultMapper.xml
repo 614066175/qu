@@ -18,6 +18,7 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
+        <result column="plan_name" property="planName" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Plan_And_Result">
@@ -69,6 +70,96 @@
             and xbpb.object_name like #{objectNameExt}
         </if>
     </sql>
+    <delete id="deleteResult">
+        DELETE
+        FROM
+            xqua_batch_result
+        WHERE
+            result_id IN
+            <foreach collection="deleteResultIds" item="resultId" separator="," open="(" close=")">
+                #{resultId}
+            </foreach>
+    </delete>
+    <delete id="deleteResultBase">
+        DELETE
+        FROM
+            xqua_batch_result_base
+        WHERE
+                result_base_id IN (
+                SELECT result_base_id
+                FROM (
+                    SELECT
+                    result_base_id
+                    FROM
+                    xqua_batch_result_base xbrb
+                    WHERE
+                    xbrb.result_id IN
+                    <foreach collection="deleteResultIds" item="resultId" separator="," open="(" close=")">
+                        #{resultId}
+                    </foreach>
+                ) a
+            )
+    </delete>
+    <delete id="deleteResultRule">
+        DELETE
+        FROM
+            xqua_batch_result_rule
+        WHERE
+                result_rule_id IN (
+                SELECT result_rule_id
+                FROM (
+                    SELECT
+                    result_rule_id
+                    FROM
+                    xqua_batch_result_rule xbrr
+                    WHERE
+                    xbrr.result_base_id IN (
+                    SELECT
+                    result_base_id
+                    FROM
+                    xqua_batch_result_base xbrb
+                    WHERE
+                    xbrb.result_id IN
+                    <foreach collection="deleteResultIds" item="resultId" separator="," open="(" close=")">
+                        #{resultId}
+                    </foreach>
+                    )
+                ) a
+            )
+    </delete>
+    <delete id="deleteResultItem">
+        DELETE
+        FROM
+            xqua_batch_result_item
+        WHERE
+                result_item_id IN (
+                SELECT result_item_id
+                FROM (
+                    SELECT
+                    result_item_id
+                    FROM
+                    xqua_batch_result_item xbri
+                    WHERE
+                    xbri.result_rule_id IN (
+                    SELECT
+                    result_rule_id
+                    FROM
+                    xqua_batch_result_rule xbrr
+                    WHERE
+                    xbrr.result_base_id IN (
+                    SELECT
+                    result_base_id
+                    FROM
+                    xqua_batch_result_base xbrb
+                    WHERE
+                    xbrb.result_id IN
+                    <foreach collection="deleteResultIds" item="resultId" separator="," open="(" close=")">
+                        #{resultId}
+                    </foreach>
+                    ))
+                ) a
+            )
+    </delete>
 
     <select id="listByGroup" resultType="com.hand.hdsp.quality.api.dto.BatchResultDTO">
         SELECT xbp.plan_id,
@@ -164,12 +255,12 @@
         xbr.exception_info,
         xbr.start_date,
         xbr.end_date,
-        xbp.plan_name,
+        case when xbp.plan_name is null then xbr.plan_name else xbp.plan_name end plan_name,
         SUM( xbrb.rule_count ) rule_count,
         SUM( xbrb.exception_rule_count ) exception_rule_count
         FROM
         xqua_batch_result xbr
-        JOIN xqua_batch_plan xbp ON xbp.plan_id = xbr.plan_id
+        LEFT JOIN xqua_batch_plan xbp ON xbp.plan_id = xbr.plan_id
         LEFT JOIN xqua_batch_result_base xbrb ON xbr.result_id = xbrb.result_id
         <where>
             <if test="groupId != null and groupId != 0">
