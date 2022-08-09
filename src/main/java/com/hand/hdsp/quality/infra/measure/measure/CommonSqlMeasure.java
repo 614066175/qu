@@ -96,7 +96,7 @@ public class CommonSqlMeasure implements Measure {
                         .checkItem(TABLE_LINE)
                         .datasourceType(batchResultBase.getDatasourceType())
                         .build());
-                List<Map<String, Object>> tableLine = driverSession.executeOneQuery(param.getSchema(), MeasureUtil.replaceVariable(templateSql.getSqlContent(), variables, param.getWhereCondition()));
+                List<Map<String, Object>> tableLine = driverSession.executeOneQuery(param.getSchema(), MeasureUtil.replaceVariable(tableLineSql.getSqlContent(), variables, param.getWhereCondition()));
                 Long tableLineNum = StringUtils.isEmpty(tableLine.get(0).values().toArray()[0].toString()) ? 0 : Long.parseLong(tableLine.get(0).values().toArray()[0].toString());
                 batchResultItem.setTableLineNum(tableLineNum);
             }
