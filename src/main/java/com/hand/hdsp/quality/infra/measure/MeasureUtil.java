@@ -175,7 +175,7 @@ public class MeasureUtil {
         for (String column : strings) {
             if (StringUtils.isNotEmpty(column) && column.contains("(")) {
                 list.add(column.substring(0, column.indexOf('(')));
-            }else{
+            } else {
                 list.add(column);
             }
         }
@@ -216,25 +216,8 @@ public class MeasureUtil {
         for (WarningLevelDTO warningLevelDTO : warningLevelList) {
             if (PlanConstant.CompareSymbol.EQUAL.equals(warningLevelDTO.getCompareSymbol())) {
                 // 如果是数字，则用 BigDecimal.compareTo 比较
-                if (NumberUtils.isParsable(value) && NumberUtils.isParsable(warningLevelDTO.getExpectedValue())
-                        && new BigDecimal(value).compareTo(new BigDecimal(warningLevelDTO.getExpectedValue())) == 0) {
-                    batchResultItem.setWarningLevel(
-                            JsonUtils.object2Json(
-                                    Collections.singletonList(WarningLevelVO.builder()
-                                            .warningLevel(warningLevelDTO.getWarningLevel())
-                                            .build()))
-                    );
-                    batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
-                    warningLevelDTO.setIfAlert(1L);
-                    break;
-                }
-
-                //日期
-                Date valueDate = parseDate(value);
-                if (valueDate != null) {
-                    Date expectedDate = parseDate(warningLevelDTO.getExpectedValue());
-                    Assert.notNull(expectedDate, ErrorCode.EXPECTED_VALUE_IS_NOT_DATE);
-                    if (DateUtils.isSameInstant(valueDate, expectedDate)) {
+                if (NumberUtils.isParsable(value) && NumberUtils.isParsable(warningLevelDTO.getExpectedValue())) {
+                    if (new BigDecimal(value).compareTo(new BigDecimal(warningLevelDTO.getExpectedValue())) == 0) {
                         batchResultItem.setWarningLevel(
                                 JsonUtils.object2Json(
                                         Collections.singletonList(WarningLevelVO.builder()
@@ -244,8 +227,34 @@ public class MeasureUtil {
                         batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
                         warningLevelDTO.setIfAlert(1L);
                         break;
+                    } else {
+                        //如果都是数字，就用数字比较
+                        continue;
                     }
                 }
+
+                //日期
+                if (parseDate(value) != null && parseDate(warningLevelDTO.getExpectedValue()) != null) {
+                    Date valueDate = parseDate(value);
+                    if (valueDate != null) {
+                        Date expectedDate = parseDate(warningLevelDTO.getExpectedValue());
+                        Assert.notNull(expectedDate, ErrorCode.EXPECTED_VALUE_IS_NOT_DATE);
+                        if (DateUtils.isSameInstant(valueDate, expectedDate)) {
+                            batchResultItem.setWarningLevel(
+                                    JsonUtils.object2Json(
+                                            Collections.singletonList(WarningLevelVO.builder()
+                                                    .warningLevel(warningLevelDTO.getWarningLevel())
+                                                    .build()))
+                            );
+                            batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
+                            warningLevelDTO.setIfAlert(1L);
+                            break;
+                        }
+                    } else {
+                        continue;
+                    }
+                }
+
 
                 // 字符串
                 if (warningLevelDTO.getExpectedValue().equals(value)) {
@@ -263,25 +272,8 @@ public class MeasureUtil {
             } else if (PlanConstant.CompareSymbol.NOT_EQUAL.equals(warningLevelDTO.getCompareSymbol())) {
                 // 如果是数字，则用 BigDecimal.compareTo 比较
                 if (NumberUtils.isParsable(value)
-                        && NumberUtils.isParsable(warningLevelDTO.getExpectedValue())
-                        && new BigDecimal(value).compareTo(new BigDecimal(warningLevelDTO.getExpectedValue())) != 0) {
-                    batchResultItem.setWarningLevel(
-                            JsonUtils.object2Json(
-                                    Collections.singletonList(WarningLevelVO.builder()
-                                            .warningLevel(warningLevelDTO.getWarningLevel())
-                                            .build()))
-                    );
-                    batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
-                    warningLevelDTO.setIfAlert(1L);
-                    break;
-                }
-
-                //日期
-                Date valueDate = parseDate(value);
-                if (valueDate != null) {
-                    Date expectedDate = parseDate(warningLevelDTO.getExpectedValue());
-                    Assert.notNull(expectedDate, ErrorCode.EXPECTED_VALUE_IS_NOT_DATE);
-                    if (!DateUtils.isSameInstant(valueDate, expectedDate)) {
+                        && NumberUtils.isParsable(warningLevelDTO.getExpectedValue())) {
+                    if (new BigDecimal(value).compareTo(new BigDecimal(warningLevelDTO.getExpectedValue())) != 0) {
                         batchResultItem.setWarningLevel(
                                 JsonUtils.object2Json(
                                         Collections.singletonList(WarningLevelVO.builder()
@@ -291,6 +283,32 @@ public class MeasureUtil {
                         batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
                         warningLevelDTO.setIfAlert(1L);
                         break;
+                    } else {
+                        //没问题，这直接下个告警等级
+                        continue;
+                    }
+
+                }
+
+                //日期
+                if (parseDate(value) != null && parseDate(warningLevelDTO.getExpectedValue()) != null) {
+                    Date valueDate = parseDate(value);
+                    if (valueDate != null) {
+                        Date expectedDate = parseDate(warningLevelDTO.getExpectedValue());
+                        Assert.notNull(expectedDate, ErrorCode.EXPECTED_VALUE_IS_NOT_DATE);
+                        if (!DateUtils.isSameInstant(valueDate, expectedDate)) {
+                            batchResultItem.setWarningLevel(
+                                    JsonUtils.object2Json(
+                                            Collections.singletonList(WarningLevelVO.builder()
+                                                    .warningLevel(warningLevelDTO.getWarningLevel())
+                                                    .build()))
+                            );
+                            batchResultItem.setExceptionInfo(FIXED_VALUE_WARNING_INFO);
+                            warningLevelDTO.setIfAlert(1L);
+                            break;
+                        } else {
+                            continue;
+                        }
                     }
                 }
 
