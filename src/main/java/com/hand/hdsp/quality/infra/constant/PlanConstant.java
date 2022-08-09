@@ -281,6 +281,11 @@ public interface PlanConstant {
          * 空值个数
          */
         String FIELD_EMPTY = "FIELD_EMPTY";
+
+        /**
+         * 空值个数
+         */
+        String FIELD_UNIQUE = "FIELD_UNIQUE";
     }
 
     /**
