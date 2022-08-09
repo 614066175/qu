@@ -41,4 +41,11 @@ public interface BatchPlanService {
      * @param resultId
      */
     void sendMessage(Long planId, Long resultId);
+
+    /**
+     * @param planCode
+     * @param tenantId
+     * @param projectId
+     */
+    void clearExceptionData(String planCode, Long tenantId, Long projectId);
 }

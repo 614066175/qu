@@ -36,4 +36,46 @@ public interface BatchPlanBaseMapper extends BaseMapper<BatchPlanBase> {
      * @return
      */
     List<BatchPlanBase> execBaseList(BatchPlanBaseDTO batchPlanBaseDTO);
+
+    /**
+     * 根据质检项Id删除
+     * @param planBaseIds
+     */
+    void deleteTableCon(List<Long> planBaseIds);
+
+    /**
+     * 根据质检项Id删除
+     * @param planBaseIds
+     */
+    void deleteTableLine(List<Long> planBaseIds);
+
+    /**
+     * 根据质检项Id删除
+     * @param planBaseIds
+     */
+    void deleteTable(List<Long> planBaseIds);
+
+    /**
+     * 根据质检项Id删除
+     * @param planBaseIds
+     */
+    void deleteFieldCon(List<Long> planBaseIds);
+
+    /**
+     * 根据质检项Id删除
+     * @param planBaseIds
+     */
+    void deleteFieldLine(List<Long> planBaseIds);
+
+    /**
+     * 根据质检项Id删除
+     * @param planBaseIds
+     */
+    void deleteField(List<Long> planBaseIds);
+
+    /**
+     * 根据质检项Id删除
+     * @param planBaseIds
+     */
+    void deleteTableRel(List<Long> planBaseIds);
 }

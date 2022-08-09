@@ -237,4 +237,21 @@ public class BatchPlanController extends BaseController {
         return Results.success();
     }
 
+    @ApiOperation(value = "清空方案异常数据-供运维使用")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @DeleteMapping("/clear-exception-data/{planCode}")
+    public ResponseEntity<?> clearExceptionData(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                          @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                          @PathVariable String planCode) {
+        batchPlanService.clearExceptionData(planCode, tenantId, projectId);
+        return Results.success();
+    }
+
+
 }

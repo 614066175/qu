@@ -1,12 +1,12 @@
 package com.hand.hdsp.quality.infra.mapper;
 
-import java.util.List;
-
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.domain.entity.BatchResult;
 import com.hand.hdsp.quality.infra.vo.*;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>批数据方案结果表Mapper</p>
@@ -194,4 +194,28 @@ public interface BatchResultMapper extends BaseMapper<BatchResult> {
      * @return 返回值
      */
     List<TimeRangeDTO> selectProblemWithIncre(TimeRangeDTO timeRangeDTO);
+
+    /**
+     * 删除结果
+     * @param deleteResultIds
+     */
+    void deleteResult(List<Long> deleteResultIds);
+
+    /**
+     * 删除质检项结果
+     * @param deleteResultIds
+     */
+    void deleteResultBase(List<Long> deleteResultIds);
+
+    /**
+     * 删除规则结果
+     * @param deleteResultIds
+     */
+    void deleteResultRule(List<Long> deleteResultIds);
+
+    /**
+     * 删除校验项结果
+     * @param deleteResultIds
+     */
+    void deleteResultItem(List<Long> deleteResultIds);
 }

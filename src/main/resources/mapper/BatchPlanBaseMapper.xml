@@ -34,6 +34,7 @@
         <result column="build_rule_flag" property="buildRuleFlag" jdbcType="DECIMAL"/>
         <result column="group_id" property="groupId" jdbcType="DECIMAL"/>
         <result column="group_name" property="groupName" jdbcType="VARCHAR"/>
+        <result column="parent_group_id" property="parentGroupId" jdbcType="DECIMAL"/>
         <collection property="baseFormValueDTOS" ofType="com.hand.hdsp.quality.api.dto.BaseFormValueDTO">
             <result column="item_code" property="itemCode"/>
             <result column="form_value" property="formValue"/>
@@ -253,6 +254,172 @@
             and xbp.plan_name like #{planNameLike}
         </if>
     </sql>
+    <delete id="deleteTableCon">
+        DELETE
+        FROM
+            xqua_batch_plan_table_con
+        WHERE
+                condition_id IN (
+                SELECT
+                    condition_id
+                FROM
+                    (
+                        SELECT
+                            condition_id
+                        FROM
+                            xqua_batch_plan_table_con xbptc
+                        WHERE
+                                xbptc.plan_line_id IN (
+                                SELECT
+                                    plan_line_id
+                                FROM
+                                    xqua_batch_plan_table_line xbptl
+                                WHERE
+                                        xbptl.plan_rule_id IN (
+                                        SELECT
+                                            plan_rule_id
+                                        FROM
+                                            xqua_batch_plan_table xbpt
+                                        WHERE
+                                            xbpt.plan_base_id IN
+                                        <foreach collection="planBaseIds" item="planBaseId" separator="," open="(" close=")">
+                                            #{planBaseId}
+                                        </foreach>
+                        ))) a
+            )
+    </delete>
+    <delete id="deleteTableLine">
+        DELETE
+        FROM
+            xqua_batch_plan_table_line
+        WHERE
+                plan_line_id IN (
+                SELECT
+                    plan_line_id
+                FROM
+                    (
+                        SELECT
+                            plan_line_id
+                        FROM
+                            xqua_batch_plan_table_line xbptl
+                        WHERE
+                                xbptl.plan_rule_id IN (
+                                SELECT
+                                    plan_rule_id
+                                FROM
+                                    xqua_batch_plan_table xbpt
+                                WHERE
+                                    xbpt.plan_base_id IN
+                                <foreach collection="planBaseIds" item="planBaseId" separator="," open="(" close=")">
+                                    #{planBaseId}
+                                </foreach>
+                        )) a
+            )
+    </delete>
+    <delete id="deleteTable">
+        DELETE
+        FROM
+            xqua_batch_plan_table
+        WHERE
+                plan_rule_id IN (
+                SELECT
+                    plan_rule_id
+                FROM
+                    (
+                        SELECT
+                            plan_rule_id
+                        FROM
+                            xqua_batch_plan_table xbpt
+                        WHERE
+                            xbpt.plan_base_id IN
+                        <foreach collection="planBaseIds" item="planBaseId" separator="," open="(" close=")">
+                            #{planBaseId}
+                        </foreach>
+                        ) a
+            )
+    </delete>
+    <delete id="deleteFieldCon">
+        DELETE
+        FROM
+        xqua_batch_plan_field_con
+        WHERE
+        condition_id IN (
+        SELECT
+        condition_id
+        FROM
+        (
+        SELECT
+        condition_id
+        FROM
+        xqua_batch_plan_field_con xbptc
+        WHERE
+        xbptc.plan_line_id IN (
+        SELECT
+        plan_line_id
+        FROM
+        xqua_batch_plan_field_line xbptl
+        WHERE
+        xbptl.plan_rule_id IN (
+        SELECT
+        plan_rule_id
+        FROM
+        xqua_batch_plan_field xbpt
+        WHERE
+        xbpt.plan_base_id IN
+        <foreach collection="planBaseIds" item="planBaseId" separator="," open="(" close=")">
+            #{planBaseId}
+        </foreach>
+        ))) a
+        )
+    </delete>
+    <delete id="deleteFieldLine">
+        DELETE
+        FROM
+        xqua_batch_plan_field_line
+        WHERE
+        plan_line_id IN (
+        SELECT
+        plan_line_id
+        FROM
+        (
+        SELECT
+        plan_line_id
+        FROM
+        xqua_batch_plan_field_line xbptl
+        WHERE
+        xbptl.plan_rule_id IN (
+        SELECT
+        plan_rule_id
+        FROM
+        xqua_batch_plan_field xbpt
+        WHERE
+        xbpt.plan_base_id IN
+        <foreach collection="planBaseIds" item="planBaseId" separator="," open="(" close=")">
+            #{planBaseId}
+        </foreach>
+        )) a
+        )
+    </delete>
+    <delete id="deleteField">
+        DELETE
+        FROM
+        xqua_batch_plan_field
+        WHERE
+        plan_base_id IN
+        <foreach collection="planBaseIds" item="planBaseId" separator="," open="(" close=")">
+            #{planBaseId}
+        </foreach>
+    </delete>
+    <delete id="deleteTableRel">
+        DELETE
+        FROM
+        xqua_batch_plan_rel_table
+        WHERE
+        plan_base_id IN
+        <foreach collection = "planBaseIds" item = "planBaseId" separator="," open= "(" close = ")" >
+             #{planBaseId}
+        </foreach >
+    </delete>
 
     <select id="list" resultMap="BaseResultMap">
         <include refid="queryOwnBase"/>
@@ -290,7 +457,8 @@
                xbfv.form_value,
                xbpb.build_rule_flag,
                xbp.group_id,
-               xpg.group_name
+               xpg.group_name,
+               xpg.parent_group_id
         from xqua_batch_plan_base xbpb
                  left join xqua_batch_plan xbp on xbpb.plan_id = xbp.plan_id
                  left join xqua_plan_group xpg on xbp.group_id=xpg.group_id

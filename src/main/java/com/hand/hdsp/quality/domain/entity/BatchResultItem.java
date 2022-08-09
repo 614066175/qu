@@ -88,4 +88,11 @@ public class BatchResultItem extends AuditDomain {
 
     private Long projectId;
 
+    private Long nullNum;
+
+    private Long uniqueNum;
+
+    //表行数，是记录空值/总行数，指的是检验的表行数
+    private Long tableLineNum;
+
 }
