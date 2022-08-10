@@ -1,9 +1,7 @@
 package com.hand.hdsp.quality.infra.validation;
 
-import java.io.IOException;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.domain.entity.Rule;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
@@ -17,6 +15,9 @@ import org.hzero.boot.imported.infra.validator.annotation.ImportValidators;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 
+import java.io.IOException;
+import java.util.List;
+
 /**
  * <p>
  * description
@@ -26,7 +27,7 @@ import org.hzero.mybatis.util.Sqls;
  * @since 1.0
  */
 @Slf4j
-@ImportValidators(value = {@ImportValidator(templateCode = TemplateCodeConstants.TEMPLATE_CODE_RULE,sheetIndex = 1)})
+@ImportValidators(value = {@ImportValidator(templateCode = TemplateCodeConstants.TEMPLATE_CODE_RULE, sheetIndex = 1)})
 public class RuleValidator extends BatchValidatorHandler {
 
     private final ObjectMapper objectMapper;
@@ -41,6 +42,7 @@ public class RuleValidator extends BatchValidatorHandler {
     public boolean validate(List<String> data) {
         // 设置租户Id
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
+        Long projectId = ProjectHelper.getProjectId();
         try {
             for (int i = 0; i < data.size(); i++) {
                 RuleDTO ruleDTO = objectMapper.readValue(data.get(i), RuleDTO.class);
@@ -48,7 +50,8 @@ public class RuleValidator extends BatchValidatorHandler {
                 List<RuleDTO> list = ruleRepository.selectDTOByCondition(Condition.builder(Rule.class)
                         .andWhere(Sqls.custom()
                                 .andEqualTo(Rule.FIELD_RULE_CODE, ruleDTO.getRuleCode())
-                                .andEqualTo(Rule.FIELD_TENANT_ID, tenantId))
+                                .andEqualTo(Rule.FIELD_TENANT_ID, tenantId)
+                                .andEqualTo(Rule.FIELD_PROJECT_ID, projectId))
                         .build());
                 //标准编码存在
                 if (CollectionUtils.isNotEmpty(list)) {

@@ -1,8 +1,5 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
@@ -20,6 +17,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>规则表资源库实现</p>
@@ -63,7 +63,8 @@ public class RuleRepositoryImpl extends BaseRepositoryImpl<Rule, RuleDTO> implem
                 List<RuleGroupDTO> ruleGroupDTOS = ruleGroupRepository.selectDTOByCondition(Condition.builder(RuleGroup.class)
                         .andWhere(Sqls.custom()
                                 .andEqualTo(RuleGroup.FIELD_GROUP_CODE, ruleDTO.getGroupCode())
-                                .andEqualTo(RuleGroup.FIELD_TENANT_ID, ruleDTO.getTenantId()))
+                                .andEqualTo(RuleGroup.FIELD_TENANT_ID, ruleDTO.getTenantId())
+                                .andEqualTo(RuleGroup.FIELD_PROJECT_ID,ruleDTO.getProjectId()))
                         .build());
                 if (CollectionUtils.isNotEmpty(ruleGroupDTOS)) {
                     ruleDTO.setGroupId(ruleGroupDTOS.get(0).getGroupId());
@@ -88,6 +89,7 @@ public class RuleRepositoryImpl extends BaseRepositoryImpl<Rule, RuleDTO> implem
                     .regularExpression(ruleDTO.getRegularExpression())
                     .warningLevel(ruleDTO.getWarningLevel())
                     .tenantId(ruleDTO.getTenantId())
+                    .projectId(ruleDTO.getProjectId())
                     .build();
             ruleLineDTOList.add(ruleLineDTO);
         }
