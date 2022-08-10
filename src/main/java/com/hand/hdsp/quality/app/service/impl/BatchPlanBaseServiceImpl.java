@@ -165,7 +165,7 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
             baseFormValueRepository.batchInsertDTOSelective(baseFormValueDTOS);
         }
         // 如果类型为数据源且开启自动生成标准
-        if ("TABLE".equals(batchPlanBaseDTO.getSqlType()) && batchPlanBaseDTO.getBuildRuleFlag() == 1) {
+        if ("TABLE".equals(batchPlanBaseDTO.getSqlType()) && batchPlanBaseDTO.getBuildRuleFlag() != null && batchPlanBaseDTO.getBuildRuleFlag() == 1) {
             // feign调用获取对应的表设计信息
             ResponseEntity<String> tableResponse = modelFeign.detailForFeign(
                     batchPlanBaseDTO.getTenantId(),
@@ -195,7 +195,7 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
                     if (CollectionUtils.isNotEmpty(field)) {
                         for (TableColumnDTO tableColumnDTO : field) {
                             // 将字段标准转换为规则
-                            BatchPlanFieldDTO batchPlanFieldDTO = dataFieldService.standardToRule(tableColumnDTO.getQuoteId(),tableColumnDTO.getColumnType());
+                            BatchPlanFieldDTO batchPlanFieldDTO = dataFieldService.standardToRule(tableColumnDTO.getQuoteId(), tableColumnDTO.getColumnType());
                             insert(batchPlanFieldDTO, batchPlanBaseDTO);
                         }
                     }
