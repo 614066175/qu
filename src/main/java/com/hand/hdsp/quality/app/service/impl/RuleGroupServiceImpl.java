@@ -1,9 +1,6 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
+import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
 import com.hand.hdsp.quality.api.dto.RuleLineDTO;
@@ -16,14 +13,17 @@ import com.hand.hdsp.quality.domain.repository.RuleLineRepository;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 规则分组表应用服务默认实现
@@ -74,14 +74,10 @@ public class RuleGroupServiceImpl implements RuleGroupService {
     }
 
     @Override
+    @ProcessLovValue(targetField = {"ruleDTOList"})
     public List<RuleGroupDTO> export(RuleDTO dto, ExportParam exportParam) {
         //此处为hzero导出功能，从上下文中获取projectId
-        long projectId = 0L;
-        Map<String, Object> additionInfo =
-                DetailsHelper.getUserDetails().getAdditionInfo();
-        if (additionInfo != null && additionInfo.get("projectId") != null) {
-            projectId = Long.parseLong(String.valueOf(additionInfo.get("projectId")));
-        }
+        Long projectId = ProjectHelper.getProjectId();
         dto.setProjectId(projectId);
         List<RuleGroupDTO> ruleGroupDTOList = ruleGroupRepository.selectDTOByCondition(Condition.builder(RuleGroup.class)
                 .andWhere(Sqls.custom()
