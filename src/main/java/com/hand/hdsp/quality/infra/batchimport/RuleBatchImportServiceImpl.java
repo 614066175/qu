@@ -1,10 +1,7 @@
 package com.hand.hdsp.quality.infra.batchimport;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
@@ -12,6 +9,10 @@ import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -35,11 +36,13 @@ public class RuleBatchImportServiceImpl implements IBatchImportService {
     @Override
     public Boolean doImport(List<String> data) {
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
+        Long projectId = ProjectHelper.getProjectId();
         List<RuleDTO> ruleDTOList = new ArrayList<>(data.size());
         try {
             for (String json : data) {
                 RuleDTO ruleDTO = objectMapper.readValue(json, RuleDTO.class);
                 ruleDTO.setTenantId(tenantId);
+                ruleDTO.setProjectId(projectId);
                 ruleDTOList.add(ruleDTO);
             }
         } catch (IOException e) {

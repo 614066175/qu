@@ -287,7 +287,7 @@
         xbr.start_date,
         xbr.end_date,
         xbr.exception_info,
-        xbp.plan_name
+        CASE WHEN xbp.plan_name IS NULL THEN xbr.plan_name ELSE xbp.plan_name end
     </select>
 
     <select id="selectScore" resultType="long">
