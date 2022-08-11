@@ -14,7 +14,6 @@ import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import com.hand.hdsp.quality.infra.mapper.StandardTeamMapper;
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.domain.PageInfo;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -368,7 +367,8 @@ public class StandardTeamServiceImpl implements StandardTeamService {
                     .filter(dto -> dto.getStandardStatus().equals(dataFieldDTO.getStandardStatus()))
                     .collect(Collectors.toList());
         }
-        return new Page<>(dataFieldDTOList, new PageInfo(pageRequest.getPage(), pageRequest.getSize()), dataFieldDTOList.size());
+        org.springframework.data.domain.Page<DataFieldDTO> page = PageUtil.doPage(dataFieldDTOList, org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize()));
+        return PageParseUtil.springPage2C7nPage(page);
     }
 
     private List<StandardTeam> getSubStandardTeam(Long standardTeamId) {
