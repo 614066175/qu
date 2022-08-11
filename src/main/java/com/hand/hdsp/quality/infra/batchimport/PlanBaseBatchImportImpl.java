@@ -12,10 +12,12 @@ import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.hzero.boot.driver.infra.context.PluginDatasourceHelper;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.starter.driver.core.infra.vo.PluginDatasourceVO;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,10 +40,13 @@ public class PlanBaseBatchImportImpl implements IBatchImportService {
 
     private final BatchPlanRepository batchPlanRepository;
 
-    public PlanBaseBatchImportImpl(ObjectMapper objectMapper, BatchPlanBaseRepository batchPlanBaseRepository, BatchPlanRepository batchPlanRepository) {
+    private final PluginDatasourceHelper pluginDatasourceHelper;
+
+    public PlanBaseBatchImportImpl(ObjectMapper objectMapper, BatchPlanBaseRepository batchPlanBaseRepository, BatchPlanRepository batchPlanRepository, PluginDatasourceHelper pluginDatasourceHelper) {
         this.objectMapper = objectMapper;
         this.batchPlanBaseRepository = batchPlanBaseRepository;
         this.batchPlanRepository = batchPlanRepository;
+        this.pluginDatasourceHelper = pluginDatasourceHelper;
     }
 
 
@@ -80,6 +85,8 @@ public class PlanBaseBatchImportImpl implements IBatchImportService {
                     .tenantId(batchPlanBaseDTO.getTenantId())
                     .projectId(batchPlanBaseDTO.getProjectId())
                     .build());
+            PluginDatasourceVO pluginDatasourceVO = pluginDatasourceHelper.getPluginDatasourceVO(tenantId, batchPlanBaseDTO.getDatasourceCode());
+            batchPlanBaseDTO.setDatasourceId(pluginDatasourceVO.getDatasourceId());
             if (batchPlanBase != null) {
                 batchPlanBaseDTO.setPlanBaseId(batchPlanBase.getPlanBaseId());
                 batchPlanBaseDTO.setObjectVersionNumber(batchPlanBase.getObjectVersionNumber());
