@@ -160,6 +160,7 @@ public class StandardTeamController extends BaseController {
                                                @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                DataFieldDTO dataFieldDTO,
                                                @ApiIgnore PageRequest pageRequest) {
+        dataFieldDTO.setTenantId(tenantId);
         dataFieldDTO.setProjectId(projectId);
         Page<DataFieldDTO> dataFieldDTOList = standardTeamService.fieldStandardList(dataFieldDTO, pageRequest);
         return Results.success(dataFieldDTOList);
