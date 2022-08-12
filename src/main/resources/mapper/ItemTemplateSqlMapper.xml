@@ -21,24 +21,42 @@
 
     <select id="selectSql" resultType="com.hand.hdsp.quality.domain.entity.ItemTemplateSql">
         <bind name="dbType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
-        select sql_id,
-               check_item,
-               datasource_type,
-               sql_content,
-               tag
-        from xqua_item_template_sql
-        where enabled_flag = 1
-          and check_item = #{checkItem}
-          and datasource_type in (#{datasourceType}, '_ALL')
-        <if test='dbType == "ORACLE"'>
-            and ROWNUM = 1
-        </if>
-            <if test="tag != null">
-                and tag = #{tag}
-            </if>
-        ORDER BY datasource_type
-        <if test='dbType != "ORACLE"'>
-            LIMIT 1
-        </if>
+        <choose>
+            <when test='dbType != "ORACLE"'>
+                select sql_id,
+                check_item,
+                datasource_type,
+                sql_content,
+                tag
+                from xqua_item_template_sql
+                where enabled_flag = 1
+                and check_item = #{checkItem}
+                and datasource_type in (#{datasourceType}, '_ALL')
+                <if test="tag != null">
+                    and tag = #{tag}
+                </if>
+                ORDER BY datasource_type
+                LIMIT 1
+            </when>
+            <otherwise>
+                select * from (
+                    select sql_id,
+                    check_item,
+                    datasource_type,
+                    sql_content,
+                    tag
+                    from xqua_item_template_sql
+                    where enabled_flag = 1
+                    and check_item = #{checkItem}
+                    and datasource_type in (#{datasourceType}, '_ALL')
+                    <if test="tag != null">
+                        and tag = #{tag}
+                    </if>
+                    ORDER BY datasource_type
+                ) a
+                where ROWNUM = 1
+            </otherwise>
+        </choose>
+
     </select>
 </mapper>
