@@ -14,15 +14,13 @@ import com.hand.hdsp.quality.infra.measure.MeasureUtil;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.util.PlanExceptionUtil;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
-import org.hzero.core.base.BaseConstants;
 import org.hzero.starter.driver.core.infra.meta.PrimaryKey;
 import org.hzero.starter.driver.core.session.DriverSession;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -35,6 +33,7 @@ import static com.hand.hdsp.quality.infra.constant.PlanConstant.ExceptionParam.*
  * @author feng.liu01@hand-china.com 2020-03-24 16:19:53
  */
 @CheckItem(PlanConstant.CheckWay.REGULAR)
+@Slf4j
 public class RegularMeasure implements Measure {
 
     private final ItemTemplateSqlRepository templateSqlRepository;
@@ -67,17 +66,20 @@ public class RegularMeasure implements Measure {
             String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
             List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(), sql);
 
-            String value = response.get(0).values().toArray(new String[0])[0];
-            BigDecimal result = new BigDecimal(value);
-            if (result.compareTo(BigDecimal.ONE) != 0) {
+            String value = response.get(0).values().toArray()[0].toString();
+            log.info("正则校验结果：{}", value);
+            if (Long.parseLong(value) > 0) {
                 batchResultItem.setWarningLevel(JsonUtils.object2Json(
                         Collections.singletonList(
                                 WarningLevelVO.builder()
                                         .warningLevel(param.getWarningLevelList().get(0).getWarningLevel())
+                                        .levelCount(Long.parseLong(value))
                                         .build()
                         )));
                 batchResultItem.setExceptionInfo("不满足正则表达式");
             }
+            //正则获取异常数据
+            param.getWarningLevelList().forEach(warningLevelDTO -> PlanExceptionUtil.getPlanException(param, batchResultBase, sql, driverSession, warningLevelDTO));
         }
         // 查询出数据在Java里校验
         else if (PlanConstant.TemplateSqlTag.JAVA.equals(itemTemplateSql.getTag())) {
@@ -96,18 +98,18 @@ public class RegularMeasure implements Measure {
                 List<Map<String, Object>> maps = driverSession.executeOneQuery(param.getSchema(), sql);
                 List<MeasureResultDO> list = new ArrayList<>();
                 //如果是hive类型，并且结果获取到了hive-sql日志，进行排除
-                if(DbType.hive.equals(driverSession.getDbType())){
+                if (DbType.hive.equals(driverSession.getDbType())) {
                     //判断最后一行是不是hive-sql的执行日志，如果是则移除，如果不是则不处理
                     if (maps.get(maps.size() - 1).get("hive-sql") != null) {
                         maps.remove(maps.size() - 1);
                     }
                 }
                 maps.forEach((map) -> map.forEach((k, v) -> list.add(new MeasureResultDO(String.valueOf(v)))));
-                List<String> noMatchList=new ArrayList<>();
+                List<String> noMatchList = new ArrayList<>();
                 long count = 1;
                 for (MeasureResultDO measureResultDO : list) {
                     if (!pattern.matcher(measureResultDO.getResult()).find()) {
-                        noMatchList.add(String.format("'%s'",measureResultDO.getResult()));
+                        noMatchList.add(String.format("'%s'", measureResultDO.getResult()));
                         batchResultItem.setActualValue(measureResultDO.getResult());
                         batchResultItem.setWarningLevel(JsonUtils.object2Json(
                                 Collections.singletonList(
@@ -122,7 +124,7 @@ public class RegularMeasure implements Measure {
 //                        break;
                     }
                 }
-                if(CollectionUtils.isNotEmpty(noMatchList)){
+                if (CollectionUtils.isNotEmpty(noMatchList)) {
                     String noMatchCondition;
                     // 防止mysql表字符集为utf8mb4_general_ci时，不区分大小写的情况
                     if (DbType.mysql.equals(driverSession.getDbType())) {
@@ -137,9 +139,9 @@ public class RegularMeasure implements Measure {
                         );
                     }
                     //修改where条件
-                    if(Strings.isEmpty(param.getWhereCondition())){
+                    if (Strings.isEmpty(param.getWhereCondition())) {
                         param.setWhereCondition(noMatchCondition);
-                    }else{
+                    } else {
                         param.setWhereCondition(String.format("%s and %s",
                                 param.getWhereCondition(),
                                 noMatchCondition
@@ -165,17 +167,17 @@ public class RegularMeasure implements Measure {
                                 List<String> keys = columns.stream().filter(columnPkList::contains).collect(Collectors.toList());
                                 List<String> values = keys.stream().map(key -> String.valueOf(map.get(key))).collect(Collectors.toList());
                                 map.put(PK, String.join("-", values));
-                            }else{
+                            } else {
                                 List<String> values = map.values().stream().map(String::valueOf).collect(Collectors.toList());
                                 //将所有的数据
-                                map.put(PK,String.join("-",values));
+                                map.put(PK, String.join("-", values));
                             }
-                            map.put(RULE_NAME,param.getBatchResultRuleDTO().getRuleName());
-                            map.put(WARNING_LEVEL,param.getWarningLevelList().get(0).getWarningLevel());
+                            map.put(RULE_NAME, param.getBatchResultRuleDTO().getRuleName());
+                            map.put(WARNING_LEVEL, param.getWarningLevelList().get(0).getWarningLevel());
                             String exceptionInfo = String.format("【%s】 不满足正则表达式【%s】",
                                     param.getFieldName(),
                                     param.getRegularExpression());
-                            map.put(EXCEPTION_INFO, String.format("%s(%s)",param.getWarningLevelList().get(0).getWarningLevel(),exceptionInfo));
+                            map.put(EXCEPTION_INFO, String.format("%s(%s)", param.getWarningLevelList().get(0).getWarningLevel(), exceptionInfo));
                         });
                     }
                     param.setExceptionMapList(exceptionMapList);
