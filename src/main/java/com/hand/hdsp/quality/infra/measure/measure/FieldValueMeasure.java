@@ -9,17 +9,17 @@ import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
-import com.hand.hdsp.quality.infra.dataobject.MeasureResultDO;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
+import com.hand.hdsp.quality.infra.util.ActualValueUtil;
 import com.hand.hdsp.quality.infra.util.EurekaUtil;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.util.PlanExceptionUtil;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import io.choerodon.core.exception.CommonException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
@@ -50,6 +50,7 @@ import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.VALUE
  * @author feng.liu01@hand-china.com 2020-06-09 10:06:43
  */
 @CheckItem("FIELD_VALUE")
+@Slf4j
 public class FieldValueMeasure implements Measure {
 
     private static final String COUNT = "COUNT";
@@ -169,69 +170,60 @@ public class FieldValueMeasure implements Measure {
                     .datasourceType(batchResultBase.getDatasourceType())
                     .build());
 
+            log.info("执行sql:{}", itemTemplateSql.getSqlContent());
             Map<String, String> variables = new HashMap<>(8);
             variables.put("table", batchResultBase.getPackageObjectName());
             variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
-            variables.put("size", PlanConstant.DEFAULT_SIZE + "");
+
             //用于统计告警规则，为后续聚合做准备
             List<WarningLevelVO> warningLevels = new ArrayList<>();
-            //开始校验
-            for (int i = 0; ; i++) {
-                int start = i * PlanConstant.DEFAULT_SIZE;
-                variables.put("start", start + "");
-                List<Map<String, Object>> maps = driverSession.executeOneQuery(param.getSchema(), MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition()));
-                List<MeasureResultDO> list = new ArrayList<>();
-                maps.forEach((map) -> map.forEach((k, v) -> list.add(new MeasureResultDO(String.valueOf(v)))));
-                for (MeasureResultDO measureResultDO : list) {
-                    MeasureUtil.fixedCompare(param.getCompareWay(), measureResultDO.getResult(), warningLevelList, batchResultItem);
-                    if (StringUtils.isNotBlank(batchResultItem.getWarningLevel())) {
-                        //统计告警等级，为后续聚合做准备
-                        warningLevels.addAll(JsonUtils.json2WarningLevelVO(batchResultItem.getWarningLevel()));
-                        //设置对应行的实际值，这里需要再讨论
-                        batchResultItem.setActualValue(measureResultDO.getResult());
-                        //将告警等级设置为null，方便下条数据的循环
-                        batchResultItem.setWarningLevel(null);
+
+            //按照告警配置去进行评估
+            warningLevelList.forEach(warn -> {
+                //固定值范围比较
+                StringBuilder condition = new StringBuilder();
+                if (RANGE.equals(param.getCompareWay())) {
+                    if (Strings.isNotEmpty(warn.getStartValue())) {
+                        condition.append(String.format(START_SQL, String.format("'%s'", warn.getStartValue())));
+                    }
+                    if (Strings.isNotEmpty(warn.getEndValue())) {
+                        condition.append(String.format(END_SQL, String.format("'%s'", warn.getEndValue())));
                     }
                 }
-
-                //第一页数据检验完成，将统计好的告警规则进行分组聚合
-                Map<String, Long> collect = warningLevels.stream().collect(Collectors.groupingBy(WarningLevelVO::getWarningLevel, Collectors.counting()));
-                batchResultItem.setWarningLevel(JsonUtils.object2Json(collect.entrySet()
-                        .stream().map(map -> WarningLevelVO.builder()
-                                .warningLevel(map.getKey())
-                                .levelCount(map.getValue()).build()
-                        ).collect(Collectors.toList())));
-
-                //查询所有的异常数据
-                warningLevelList.forEach(warn -> {
-                    //固定值范围比较
-                    StringBuilder condition = new StringBuilder();
-                    if (RANGE.equals(param.getCompareWay())) {
-                        if (Strings.isNotEmpty(warn.getStartValue())) {
-                            condition.append(String.format(START_SQL, String.format("'%s'", warn.getStartValue())));
-                        }
-                        if (Strings.isNotEmpty(warn.getEndValue())) {
-                            condition.append(String.format(END_SQL, String.format("'%s'", warn.getEndValue())));
-                        }
+                //固定值比较
+                if (VALUE.equals(param.getCompareWay())) {
+                    if (EQUAL.equals(warn.getCompareSymbol())) {
+                        condition.append(String.format(EQUAL_SQL, String.format("'%s'", warn.getExpectedValue())));
+                    } else {
+                        condition.append(String.format(NOT_EQUAL_SQL, String.format("'%s'", warn.getExpectedValue())));
                     }
-                    //固定值比较
-                    if (VALUE.equals(param.getCompareWay())) {
-                        if (EQUAL.equals(warn.getCompareSymbol())) {
-                            condition.append(String.format(EQUAL_SQL, String.format("'%s'", warn.getExpectedValue())));
-                        } else {
-                            condition.append(String.format(NOT_EQUAL_SQL, String.format("'%s'", warn.getExpectedValue())));
-                        }
-                    }
-                    String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, String.format("%s%s", Optional.ofNullable(param.getWhereCondition()).orElse("1=1"), condition));
-                    if (warn.getIfAlert() == 1L) {
-                        PlanExceptionUtil.getPlanException(param, batchResultBase, sql, driverSession, warn);
-                    }
-                });
-                //查询出来的数据量小于每页大小时（即已到最后一页了）退出
-                if (list.size() < PlanConstant.DEFAULT_SIZE) {
-                    break;
                 }
-            }
+                String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, String.format("%s%s", Optional.ofNullable(param.getWhereCondition()).orElse("1=1"), condition));
+                List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(), sql);
+                String value = response.get(0).values().toArray()[0].toString();
+                if (Long.parseLong(value) > 0) {
+                    //记录
+                    warningLevels.add(WarningLevelVO.builder()
+                            .warningLevel(warn.getWarningLevel())
+                            .levelCount(Long.parseLong(value))
+                            .build());
+                    //设置实际值
+                    String actualValue = ActualValueUtil.getActualValue(param, batchResultBase, sql, driverSession, variables);
+                    batchResultItem.setActualValue(actualValue);
+                    PlanExceptionUtil.getPlanException(param, batchResultBase, sql, driverSession, warn);
+                }
+            });
+            Map<String, Long> result = new HashMap<>();
+            Map<String, List<WarningLevelVO>> collect = warningLevels.stream().collect(Collectors.groupingBy(WarningLevelVO::getWarningLevel));
+            collect.forEach((k, v) -> {
+                Long num = v.stream().map(WarningLevelVO::getLevelCount).reduce(Long::sum).orElse(0L);
+                result.put(k, num);
+            });
+            batchResultItem.setWarningLevel(JsonUtils.object2Json(result.entrySet()
+                    .stream().map(map -> WarningLevelVO.builder()
+                            .warningLevel(map.getKey())
+                            .levelCount(map.getValue()).build()
+                    ).collect(Collectors.toList())));
 
         }
         //枚举值
