@@ -13,6 +13,7 @@ import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.boot.driver.infra.context.PluginDatasourceHelper;
+import org.hzero.boot.imported.app.service.BatchImportHandler;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.mybatis.domian.Condition;
@@ -33,7 +34,7 @@ import java.util.List;
  */
 @Slf4j
 @ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_BATCH_PLAN, sheetIndex = 2)
-public class PlanBaseBatchImportImpl implements IBatchImportService {
+public class PlanBaseBatchImportImpl extends BatchImportHandler implements IBatchImportService {
     private final ObjectMapper objectMapper;
 
     private final BatchPlanBaseRepository batchPlanBaseRepository;
@@ -70,7 +71,8 @@ public class PlanBaseBatchImportImpl implements IBatchImportService {
             return false;
         }
         List<BatchPlanBaseDTO> insertBatchPlanBaseList=new ArrayList<>();
-        batchPlanBaseList.forEach(batchPlanBaseDTO -> {
+        int index=0;
+        for (BatchPlanBaseDTO batchPlanBaseDTO : batchPlanBaseList) {
             List<BatchPlanDTO> batchPlanDTOList = batchPlanRepository.selectDTOByCondition(Condition.builder(BatchPlan.class)
                     .andWhere(Sqls.custom()
                             .andEqualTo(BatchPlan.FIELD_PLAN_CODE, batchPlanBaseDTO.getPlanCode())
@@ -79,6 +81,8 @@ public class PlanBaseBatchImportImpl implements IBatchImportService {
                     .build());
             if (CollectionUtils.isNotEmpty(batchPlanDTOList)) {
                 batchPlanBaseDTO.setPlanId(batchPlanDTOList.get(0).getPlanId());
+            } else {
+                addErrorMsg(index,String.format("评估方案【%s】不存在",batchPlanBaseDTO.getPlanCode()));
             }
             BatchPlanBase batchPlanBase = batchPlanBaseRepository.selectOne(BatchPlanBase.builder()
                     .planBaseCode(batchPlanBaseDTO.getPlanBaseCode())
@@ -91,10 +95,11 @@ public class PlanBaseBatchImportImpl implements IBatchImportService {
                 batchPlanBaseDTO.setPlanBaseId(batchPlanBase.getPlanBaseId());
                 batchPlanBaseDTO.setObjectVersionNumber(batchPlanBase.getObjectVersionNumber());
                 batchPlanBaseRepository.updateByDTOPrimaryKeySelective(batchPlanBaseDTO);
-            }else{
+            } else {
                 insertBatchPlanBaseList.add(batchPlanBaseDTO);
             }
-        });
+            index++;
+        }
         batchPlanBaseRepository.batchInsertDTOSelective(insertBatchPlanBaseList);
         return true;
     }

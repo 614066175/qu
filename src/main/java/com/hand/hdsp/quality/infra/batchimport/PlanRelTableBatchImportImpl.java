@@ -13,6 +13,7 @@ import com.hand.hdsp.quality.infra.mapper.BatchPlanRelTableMapper;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.hzero.boot.imported.app.service.BatchImportHandler;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.mybatis.domian.Condition;
@@ -32,7 +33,7 @@ import java.util.List;
  */
 @Slf4j
 @ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_BATCH_PLAN, sheetIndex = 5)
-public class PlanRelTableBatchImportImpl implements IBatchImportService {
+public class PlanRelTableBatchImportImpl extends BatchImportHandler implements IBatchImportService {
 
     private final ObjectMapper objectMapper;
 
@@ -56,6 +57,7 @@ public class PlanRelTableBatchImportImpl implements IBatchImportService {
         Long projectId = ProjectHelper.getProjectId();
         List<BatchPlanRelTableDTO> batchPlanRelTableDTOList = new ArrayList<>(data.size());
         try {
+            int index = 0;
             for (String json : data) {
                 BatchPlanRelTableDTO batchPlanRelTableDTO = objectMapper.readValue(json, BatchPlanRelTableDTO.class);
                 batchPlanRelTableDTO.setExceptionBlock("是".equals(batchPlanRelTableDTO.getExceptionBlockFlag()) ? 1 : 0);
@@ -70,12 +72,16 @@ public class PlanRelTableBatchImportImpl implements IBatchImportService {
                         .build());
                 if (CollectionUtils.isNotEmpty(batchPlanBaseDTOS)) {
                     batchPlanRelTableDTO.setPlanBaseId(batchPlanBaseDTOS.get(0).getPlanBaseId());
+                } else {
+                    addErrorMsg(index, String.format("质检项编码【%s】不存在", batchPlanRelTableDTO.getPlanBaseCode()));
+                    return false;
                 }
                 //根据datasourceCode查询datasoureId和类型
                 BatchPlanRelTableDTO dto = batchPlanRelTableMapper.selectDatasourceIdAndType(batchPlanRelTableDTO);
                 batchPlanRelTableDTO.setRelDatasourceId(dto.getRelDatasourceId());
                 batchPlanRelTableDTO.setRelDatasourceType(dto.getRelDatasourceType());
                 batchPlanRelTableDTOList.add(batchPlanRelTableDTO);
+                index++;
             }
         } catch (IOException e) {
             // 失败
