@@ -17,10 +17,7 @@ import com.hand.hdsp.quality.infra.dataobject.SpecifiedParamsResponseDO;
 import com.hand.hdsp.quality.infra.feign.DispatchJobFeign;
 import com.hand.hdsp.quality.infra.feign.LineageFeign;
 import com.hand.hdsp.quality.infra.feign.TimestampFeign;
-import com.hand.hdsp.quality.infra.mapper.BatchPlanBaseMapper;
-import com.hand.hdsp.quality.infra.mapper.BatchResultItemMapper;
-import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
-import com.hand.hdsp.quality.infra.mapper.PlanBaseAssignMapper;
+import com.hand.hdsp.quality.infra.mapper.*;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureCollector;
 import com.hand.hdsp.quality.infra.publisher.QualityNoticePublisher;
@@ -148,22 +145,34 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     private PlanBaseAssignMapper planBaseAssignMapper;
 
 
+    @Autowired
+    private BaseFormValueMapper baseFormValueMapper;
+
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int delete(BatchPlanDTO batchPlanDTO) {
+        //正在运行不允许删除
+        List<BatchResultDTO> batchResultDTOList = batchResultRepository.selectDTO(
+                BatchResult.FIELD_PLAN_ID, batchPlanDTO.getPlanId());
+        if (CollectionUtils.isNotEmpty(batchResultDTOList)
+                && PlanConstant.PlanStatus.RUNNING.equals(batchResultDTOList.get(0).getPlanStatus())) {
+            throw new CommonException(ErrorCode.CAN_NOT_DELETE);
+        }
         List<BatchPlanBase> batchPlanBaseList =
                 batchPlanBaseRepository.select(BatchPlanBase.FIELD_PLAN_ID, batchPlanDTO.getPlanId());
-//        if (!batchPlanBaseDTOList.isEmpty()) {
-//            throw new CommonException(ErrorCode.CAN_NOT_DELETE);
-//        }
-
         if (CollectionUtils.isEmpty(batchPlanBaseList)) {
             return batchPlanRepository.deleteByPrimaryKey(batchPlanDTO);
         }
+
+        // 不使用循环删除，避免质检项太多，导致删除性能太慢
+        // batchPlanBaseList.forEach(batchPlanBase -> batchPlanBaseService.delete(batchPlanBaseConverter.entityToDto(batchPlanBase)));
         //删除方案下的质检项，质检项分配，检验项
         List<Long> planBaseIds = batchPlanBaseList.stream().map(BatchPlanBase::getPlanBaseId).collect(Collectors.toList());
         //1.删除分配，（使用一个sql进行批量删除提升效率）
         planBaseAssignMapper.deleteAssignByPlan(planBaseIds, batchPlanDTO.getPlanId());
+        //删除此质检相关的所有动态表单的值
+        baseFormValueMapper.deleteFormValueByPlanBaseIds(planBaseIds);
         //2.删除行，再删除头
         //表级
         batchPlanBaseMapper.deleteTableCon(planBaseIds);

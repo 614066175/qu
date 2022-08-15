@@ -3,6 +3,8 @@ package com.hand.hdsp.quality.infra.mapper;
 import com.hand.hdsp.quality.domain.entity.BaseFormValue;
 import io.choerodon.mybatis.common.BaseMapper;
 
+import java.util.List;
+
 /**
  * <p>质检项表单值Mapper</p>
  *
@@ -10,4 +12,9 @@ import io.choerodon.mybatis.common.BaseMapper;
  */
 public interface BaseFormValueMapper extends BaseMapper<BaseFormValue> {
 
+    /**
+     * 根据质检项id批量删除表单值
+     * @param planBaseIds
+     */
+    void deleteFormValueByPlanBaseIds(List<Long> planBaseIds);
 }
