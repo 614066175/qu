@@ -72,7 +72,6 @@ public class CommonSqlMeasure implements Measure {
             }
 
             String value = StringUtils.isEmpty(response.get(0).values().toArray()[0].toString()) ? "0" : response.get(0).values().toArray()[0].toString();
-            param.setCountValue(value);
             //记录真实值，如果是非空/总行数，唯一数/总行数，需要额外记录另外两个数值（倍通项目提出需求 2022/08/09 15:20:19）
             if (checkItemList.contains(itemTemplateSql.getCheckItem())) {
                 //进行处理
@@ -99,7 +98,14 @@ public class CommonSqlMeasure implements Measure {
                 List<Map<String, Object>> tableLine = driverSession.executeOneQuery(param.getSchema(), MeasureUtil.replaceVariable(tableLineSql.getSqlContent(), variables, param.getWhereCondition()));
                 Long tableLineNum = StringUtils.isEmpty(tableLine.get(0).values().toArray()[0].toString()) ? 0 : Long.parseLong(tableLine.get(0).values().toArray()[0].toString());
                 batchResultItem.setTableLineNum(tableLineNum);
+                //如果唯一值/总行数 检验表总数为空，那么设置结果为1（空表结果语义是唯一的）
+                if (FIELD_UNIQUE.equals(checkItem)
+                        && batchResultItem.getTableLineNum() != null
+                        && batchResultItem.getTableLineNum() == 0) {
+                    value = "1";
+                }
             }
+            param.setCountValue(value);
             batchResultItem.setActualValue(value);
             batchResultItem.setCurrentValue(value);
             Count count = countCollector.getCount(param.getCountType());
