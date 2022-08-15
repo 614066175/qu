@@ -11,6 +11,7 @@ import com.hand.hdsp.quality.infra.dataobject.MeasureResultDO;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
+import com.hand.hdsp.quality.infra.util.ActualValueUtil;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.util.PlanExceptionUtil;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
@@ -76,7 +77,9 @@ public class RegularMeasure implements Measure {
                                         .levelCount(Long.parseLong(value))
                                         .build()
                         )));
-                batchResultItem.setExceptionInfo("不满足正则表达式");
+                batchResultItem.setExceptionInfo(String.format("存在%s条数据不满足正则表达式", value));
+                String actualValue = ActualValueUtil.getActualValue(param, batchResultBase, sql, driverSession, variables);
+                batchResultItem.setActualValue(actualValue);
             }
             //正则获取异常数据
             param.getWarningLevelList().forEach(warningLevelDTO -> PlanExceptionUtil.getPlanException(param, batchResultBase, sql, driverSession, warningLevelDTO));
