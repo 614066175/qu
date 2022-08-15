@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import com.alibaba.druid.DbType;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanService;
 import com.hand.hdsp.quality.domain.entity.*;
@@ -713,8 +714,14 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 //保存表的数据量
                 DriverSession driverSession = driverSessionService.getDriverSession(tenantId, batchPlanBase.getDatasourceCode());
                 //避免hive进行优化配置hive.compute.query.using.stats=true，使用状态信息进行查询，返回的结果不正确
-                List<Map<String, Object>> maps = driverSession.executeOneQuery(batchPlanBase.getDatasourceSchema(),
-                        String.format("select count(*) as COUNT from %s limit 1", batchPlanBase.getObjectName()));
+                List<Map<String, Object>> maps = null;
+                if (DbType.hive.equals(driverSession.getDbType())) {
+                    maps = driverSession.executeOneQuery(batchPlanBase.getDatasourceSchema(),
+                            String.format("select count(*) as COUNT from %s limit 1", batchPlanBase.getObjectName()));
+                } else {
+                    maps = driverSession.executeOneQuery(batchPlanBase.getDatasourceSchema(),
+                            String.format("select count(*) as COUNT from %s ", batchPlanBase.getObjectName()));
+                }
                 if (CollectionUtils.isNotEmpty(maps)) {
                     log.info("查询结果：" + maps);
                     String key = maps.get(0).keySet().iterator().next();
