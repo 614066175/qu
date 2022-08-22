@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.hand.hdsp.core.util.DiscoveryHelper;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
@@ -13,7 +14,6 @@ import com.hand.hdsp.quality.infra.dataobject.MeasureResultDO;
 import com.hand.hdsp.quality.infra.measure.CheckItem;
 import com.hand.hdsp.quality.infra.measure.Measure;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
-import com.hand.hdsp.quality.infra.util.EurekaUtil;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.util.PlanExceptionUtil;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
@@ -62,7 +62,7 @@ public class FieldValueMeasure implements Measure {
     private final DriverSessionService driverSessionService;
 
     @Autowired
-    private EurekaUtil eurekaUtil;
+    private DiscoveryHelper discoveryHelper;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -107,7 +107,7 @@ public class FieldValueMeasure implements Measure {
                 params.put("size", String.valueOf(0));
 
                 String serverCode = lovDTO.getRouteName();
-                String json = restTemplate.getForObject("http://" + eurekaUtil.getServerName(serverCode) + preProcessUrlParam(lovDTO.getCustomUrl(), params), String.class, params);
+                String json = restTemplate.getForObject("http://" + discoveryHelper.getServerName(serverCode) + preProcessUrlParam(lovDTO.getCustomUrl(), params), String.class, params);
                 List<Map<String, Object>> body = JsonUtil.toObj(json, new TypeReference<List<Map<String, Object>>>() {
                 });
 
