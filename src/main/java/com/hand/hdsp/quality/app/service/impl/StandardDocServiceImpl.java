@@ -11,25 +11,21 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 
+import com.hand.hdsp.core.util.DiscoveryHelper;
 import com.hand.hdsp.core.util.PageParseUtil;
-import com.hand.hdsp.quality.api.dto.NameStandardDTO;
 import com.hand.hdsp.quality.api.dto.StandardDocDTO;
 import com.hand.hdsp.quality.app.service.MinioStorageService;
 import com.hand.hdsp.quality.app.service.StandardDocService;
 import com.hand.hdsp.quality.domain.entity.DataStandard;
-import com.hand.hdsp.quality.domain.entity.NameStandard;
 import com.hand.hdsp.quality.domain.entity.StandardDoc;
 import com.hand.hdsp.quality.domain.repository.StandardDocRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardDocConstant;
 import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
-import com.hand.hdsp.quality.infra.util.EurekaUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -55,18 +51,19 @@ public class StandardDocServiceImpl implements StandardDocService {
     private final StandardDocMapper standardDocMapper;
     private final StandardDocRepository standardDocRepository;
     private final MinioStorageService minioStorageService;
-    private final EurekaUtil eurekaUtil;
+    private final DiscoveryHelper discoveryHelper;
     @Value("${HDSP_PREVIEW_FILE_SERVICE:hdsp-file-preview}")
     private String url;
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public StandardDocServiceImpl(StandardDocMapper standardDocMapper,
                                   StandardDocRepository standardDocRepository,
                                   MinioStorageService minioStorageService,
-                                  EurekaUtil eurekaUtil) {
+                                  DiscoveryHelper discoveryHelper) {
         this.standardDocMapper = standardDocMapper;
         this.standardDocRepository = standardDocRepository;
         this.minioStorageService = minioStorageService;
-        this.eurekaUtil = eurekaUtil;
+        this.discoveryHelper = discoveryHelper;
     }
 
     @Override
@@ -238,7 +235,7 @@ public class StandardDocServiceImpl implements StandardDocService {
     @Override
     public String previewUrl() {
         try {
-            return eurekaUtil.getAppByName(url).getHomePageUrl();
+            return discoveryHelper.getAppUrlByName(url);
         } catch (Exception e) {
             throw new CommonException("hdsp.xsta.err.file_preview_not_exist");
         }
