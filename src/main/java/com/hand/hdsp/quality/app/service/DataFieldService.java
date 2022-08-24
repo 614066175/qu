@@ -1,9 +1,7 @@
 package com.hand.hdsp.quality.app.service;
 
-import com.hand.hdsp.quality.api.dto.AssigneeUserDTO;
-import com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO;
-import com.hand.hdsp.quality.api.dto.DataFieldDTO;
-import com.hand.hdsp.quality.api.dto.StandardAimDTO;
+import com.hand.hdsp.quality.api.dto.*;
+
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.export.vo.ExportParam;
@@ -161,4 +159,19 @@ public interface DataFieldService {
      * @return
      */
     DataFieldDTO fieldAimStatistic(DataFieldDTO dataFieldDTO);
+
+    /**
+     * 字段元数据关联字段标准
+     * @param assetFieldDTO     字段元数据信息
+     * @param projectId         项目id
+     */
+    void fieldAimStandard(AssetFieldDTO assetFieldDTO, Long projectId);
+
+    /**
+     * 根据字段元数据查询字段标准
+     * @param assetFieldDTO 字段元数据信息
+     * @param projectId     项目id
+     * @return              结果
+     */
+    List<DataFieldDTO> standardByField(AssetFieldDTO assetFieldDTO, Long projectId);
 }
