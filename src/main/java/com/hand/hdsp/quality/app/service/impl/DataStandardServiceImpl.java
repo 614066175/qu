@@ -629,7 +629,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                     throw new CommonException(ErrorCode.DATA_STANDARD_NOT_EXIST);
                 }
                 assetFieldDTO.setStandardId(standardId);
-                doAim(assetFieldDTO);
+                doAim(assetFieldDTO, projectId);
             });
         }
     }
@@ -816,7 +816,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         }
     }
 
-    private void doAim(AssetFieldDTO assetFieldDTO) {
+    private void doAim(AssetFieldDTO assetFieldDTO, Long projectId) {
         StandardAimDTO standardAimDTO = StandardAimDTO.builder()
                 .standardId(assetFieldDTO.getStandardId())
                 .standardType(DATA)
@@ -827,6 +827,8 @@ public class DataStandardServiceImpl implements DataStandardService {
                 .datasourceType(assetFieldDTO.getDatasourceType())
                 .schemaName(assetFieldDTO.getDatasourceSchema())
                 .tableName(assetFieldDTO.getTableName())
+                .tenantId(assetFieldDTO.getTenantId())
+                .projectId(projectId)
                 .build();
         DriverSession driverSession = driverSessionService.getDriverSession(assetFieldDTO.getTenantId(), assetFieldDTO.getDatasourceCode());
         List<Table> tables = driverSession.tablesNameAndDesc(assetFieldDTO.getDatasourceSchema());

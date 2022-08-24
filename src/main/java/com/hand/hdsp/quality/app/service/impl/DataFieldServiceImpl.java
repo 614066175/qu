@@ -29,6 +29,7 @@ import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.starter.driver.core.infra.meta.Table;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
@@ -616,4 +618,72 @@ public class DataFieldServiceImpl implements DataFieldService {
     }
 
 
+    @Override
+    public void fieldAimStandard(AssetFieldDTO assetFieldDTO, Long projectId) {
+        // 根据字段删除 字段标准落标
+        List<StandardAim> standardAimList = standardAimRepository.select(StandardAim
+                .builder()
+                        .standardType(FIELD)
+                        .datasourceCode(assetFieldDTO.getDatasourceCode())
+                        .schemaName(assetFieldDTO.getDatasourceSchema())
+                        .tableName(assetFieldDTO.getTableName())
+                        .fieldName(assetFieldDTO.getFieldName())
+                        .tenantId(assetFieldDTO.getTenantId())
+                        .projectId(projectId)
+                .build());
+        standardAimRepository.batchDeleteByPrimaryKey(standardAimList);
+        //创建新的字段落标
+        List<Long> standardIdList = assetFieldDTO.getStandardIdList();
+        if (CollectionUtils.isNotEmpty(standardIdList)) {
+            List<StandardAimDTO> standardAimDTOList = new ArrayList<>();
+            for (Long standardId : standardIdList) {
+                DataFieldDTO dataFieldDTO = dataFieldRepository.selectDTOByPrimaryKey(standardId);
+                if (Objects.isNull(dataFieldDTO)) {
+                    throw new CommonException(ErrorCode.DATA_FIELD_STANDARD_NOT_EXIST);
+                }
+                StandardAimDTO standardAimDTO = StandardAimDTO
+                        .builder()
+                        .standardId(standardId)
+                        .standardType(FIELD)
+                        .fieldName(assetFieldDTO.getFieldName())
+                        .fieldDesc(assetFieldDTO.getFieldDesc())
+                        .datasourceId(assetFieldDTO.getDatasourceId())
+                        .datasourceCode(assetFieldDTO.getDatasourceCode())
+                        .datasourceType(assetFieldDTO.getDatasourceType())
+                        .schemaName(assetFieldDTO.getDatasourceSchema())
+                        .tableName(assetFieldDTO.getTableName())
+                        .tenantId(assetFieldDTO.getTenantId())
+                        .projectId(projectId)
+                        .build();
+                DriverSession driverSession = driverSessionService.getDriverSession(assetFieldDTO.getTenantId(), assetFieldDTO.getDatasourceCode());
+                List<Table> tables = driverSession.tablesNameAndDesc(assetFieldDTO.getDatasourceSchema());
+                Optional<Table> first = tables.stream().filter(table -> assetFieldDTO.getTableName().equals(table.getTableName())).findFirst();
+                first.ifPresent(table -> standardAimDTO.setTableDesc(table.getRemarks()));
+                standardAimRepository.insertDTOSelective(standardAimDTO);
+            }
+        }
+    }
+
+
+    @Override
+    public List<DataFieldDTO> standardByField(AssetFieldDTO assetFieldDTO, Long projectId) {
+        List<DataFieldDTO> dataFieldDTOList = new ArrayList<>();
+        List<StandardAimDTO> standardAimDTOList = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, FIELD)
+                        .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, assetFieldDTO.getDatasourceCode())
+                        .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, assetFieldDTO.getDatasourceSchema())
+                        .andEqualTo(StandardAim.FIELD_TABLE_NAME, assetFieldDTO.getTableName())
+                        .andEqualTo(StandardAim.FIELD_FIELD_NAME, assetFieldDTO.getFieldName())
+                        .andEqualTo(StandardAim.FIELD_TENANT_ID, assetFieldDTO.getTenantId())
+                        .andEqualTo(StandardAim.FIELD_PROJECT_ID, projectId))
+                .build());
+        if (CollectionUtils.isNotEmpty(standardAimDTOList)) {
+            for (StandardAimDTO standardAimDTO : standardAimDTOList) {
+                DataFieldDTO dataFieldDTO = dataFieldRepository.selectDTOByPrimaryKey(standardAimDTO.getStandardId());
+                dataFieldDTOList.add(dataFieldDTO);
+            }
+        }
+        return dataFieldDTOList;
+    }
 }

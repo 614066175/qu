@@ -337,4 +337,26 @@ public class DataFieldController extends BaseController {
         return Results.success(batchPlanFieldDTO);
     }
 
+    @ApiOperation(value = "字段元数据关联字段标准")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/field-aim-standard")
+    public ResponseEntity<Void> fieldAimStandard(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                                 @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                 @RequestBody AssetFieldDTO assetFieldDTO) {
+        assetFieldDTO.setTenantId(tenantId);
+        dataFieldService.fieldAimStandard(assetFieldDTO, projectId);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "根据字段查询数据标准")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/standard-by-field")
+    public ResponseEntity<List<DataFieldDTO>> standardByField(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                                                 @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                                 @RequestBody AssetFieldDTO assetFieldDTO) {
+        assetFieldDTO.setTenantId(tenantId);
+        List<DataFieldDTO> dataFieldDTOList = dataFieldService.standardByField(assetFieldDTO, projectId);
+        return Results.success(dataFieldDTOList);
+    }
+
 }
