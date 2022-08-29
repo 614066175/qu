@@ -230,7 +230,10 @@ public class BatchResultServiceImpl implements BatchResultService {
         if (count == 0) {
             return new Page<>();
         }
-        List<Map> content = getContent(query, collectionName, pageRequest.getPage(), pageRequest.getSize());
+        //设置分页
+        query.with(org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize()));
+        List<Map> content = mongoTemplate.find(query, Map.class, collectionName);
+//        List<Map> content = getContent(query, collectionName, pageRequest.getPage(), pageRequest.getSize());
         return new Page<>(content, new PageInfo(pageRequest.getPage(), pageRequest.getSize()), count);
     }
 
