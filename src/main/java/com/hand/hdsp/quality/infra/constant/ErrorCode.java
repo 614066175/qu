@@ -187,4 +187,9 @@ public interface ErrorCode {
 
     String PLAN_NOT_EXIST = "hdsp.xqua.err.plan_not_exist";
 
+    /**
+     * 分组下存在评估方案
+     */
+    String EXISTS_OTHER_PLAN = "hdsp.xqua.err.plan_exists_other_plan";
+
 }
