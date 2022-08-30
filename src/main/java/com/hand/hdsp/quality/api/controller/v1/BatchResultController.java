@@ -57,8 +57,7 @@ public class BatchResultController extends BaseController {
     public ResponseEntity<?> listAll(@PathVariable(name = "organizationId") Long tenantId,
                                      @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                      BatchResultDTO batchResultDTO,
-                                     @SortDefault(value = BatchResult.FIELD_LAST_UPDATE_DATE,
-                                             direction = Sort.Direction.DESC) PageRequest pageRequest) {
+                                     PageRequest pageRequest) {
         batchResultDTO.setTenantId(tenantId);
         batchResultDTO.setProjectId(projectId);
         return Results.success(batchResultRepository.listAll(batchResultDTO, pageRequest));
