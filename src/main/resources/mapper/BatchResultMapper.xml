@@ -274,7 +274,7 @@
             </if>
             <if test="planName">
                 <bind name="planName" value="'%' + planName + '%'"/>
-                and xbp.plan_name like #{planName}
+                and case when xbp.plan_name is null then xbr.plan_name else xbp.plan_name end like #{planName}
             </if>
             <if test="planStatus != null">
                 and xbr.plan_status = #{planStatus}
