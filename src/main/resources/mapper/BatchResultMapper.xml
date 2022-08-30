@@ -219,6 +219,7 @@
             <if test="planStatus == 'NOTASSESS'">
                 and xbr.plan_status is null
             </if>
+            order by xbp.last_update_date desc
         </where>
     </select>
 
