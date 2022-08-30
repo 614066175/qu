@@ -73,8 +73,9 @@ public class PlanGroupServiceImpl implements PlanGroupService {
     public int delete(PlanGroupDTO planGroupDTO) {
         List<PlanGroupDTO> planGroupDTOList = planGroupRepository.selectDTO(PlanGroup.FIELD_PARENT_GROUP_ID, planGroupDTO.getGroupId());
         List<BatchPlanDTO> batchPlanDTOList = batchPlanRepository.selectDTO(BatchPlan.FIELD_GROUP_ID, planGroupDTO.getGroupId());
+        //当前分组下存在评估方案，请删除评估方案后再执行删除操作！
         if (!planGroupDTOList.isEmpty() || !batchPlanDTOList.isEmpty()) {
-            throw new CommonException(ErrorCode.CAN_NOT_DELETE);
+            throw new CommonException(ErrorCode.EXISTS_OTHER_PLAN);
         }
         return planGroupRepository.deleteByPrimaryKey(planGroupDTO);
     }
