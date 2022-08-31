@@ -131,7 +131,7 @@ public interface DataStandardService {
      * @param workflowKey
      * @param dataStandardDTO
      */
-    void startWorkFlow(String workflowKey, DataStandardDTO dataStandardDTO);
+    void startWorkFlow(String workflowKey, DataStandardDTO dataStandardDTO, String status);
 
     /**
      * 查找标准审批人
@@ -184,5 +184,19 @@ public interface DataStandardService {
     void offlineWorkflowing(Long tenantId, String dataStandardCode);
 
 
+    /**
+     * 数据标准审批申请信息
+     * @param tenantId      租户id
+     * @param approvalId    审批记录id
+     * @return              审批信息
+     */
+    StandardApprovalDTO dataApplyInfo(Long tenantId, Long approvalId);
 
+    /**
+     * 数据标准详细信息
+     * @param tenantId      租户Id
+     * @param approvalId    审批记录id
+     * @return              详细信息
+     */
+    DataStandardDTO dataInfo(Long tenantId, Long approvalId);
 }

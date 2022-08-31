@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.StandardApprovalMapper">
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.StandardApproval">
+        <result column="approval_id" property="approvalId" jdbcType="DECIMAL"/>
+        <result column="standard_id" property="standardId" jdbcType="DECIMAL"/>
+        <result column="standard_type" property="standardType" jdbcType="VARCHAR"/>
+        <result column="applicant_id" property="applicantId" jdbcType="DECIMAL"/>
+        <result column="apply_type" property="applyType" jdbcType="VARCHAR"/>
+        <result column="apply_time" property="applyTime" jdbcType="TIMESTAMP"/>
+        <result column="approver_id" property="approverId" jdbcType="DECIMAL"/>
+        <result column="approval_status" property="approvalStatus" jdbcType="VARCHAR"/>
+        <result column="instance_id" property="instanceId" jdbcType="DECIMAL"/>
+        <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
+        <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
+        <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
+    </resultMap>
+    <select id="getEmployeeUnit" resultType="java.lang.String">
+        SELECT hu.unit_name
+        FROM hpfm_employee_assign hea
+                 JOIN hpfm_unit hu ON hea.unit_id = hu.unit_id
+        WHERE hea.employee_id = #{employeeId}
+        ORDER BY primary_position_flag desc
+    </select>
+    <select id="getUserInfo" resultType="com.hand.hdsp.quality.api.dto.UserDTO">
+        SELECT
+            iu.id,
+            iu.login_name,
+            iu.real_name,
+            iu.email,
+            iu.phone
+        FROM iam_user iu
+        WHERE iu.id = #{userId}
+    </select>
+
+</mapper>

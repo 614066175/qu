@@ -192,4 +192,6 @@ public interface ErrorCode {
      */
     String EXISTS_OTHER_PLAN = "hdsp.xqua.err.plan_exists_other_plan";
 
+    String NO_APPROVAL_INSTANCE = "hdsp.xqua.err.no_approval_instance";
+
 }

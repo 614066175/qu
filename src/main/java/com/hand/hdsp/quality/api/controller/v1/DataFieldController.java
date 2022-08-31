@@ -359,4 +359,32 @@ public class DataFieldController extends BaseController {
         return Results.success(dataFieldDTOList);
     }
 
+    @ApiOperation(value = "流程信息表单-申请信息")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/field-apply-info")
+    public ResponseEntity<StandardApprovalDTO> fieldApplyInfo(@PathVariable("organizationId") Long tenantId,
+                                                           Long approvalId) {
+        return Results.success(dataFieldService.fieldApplyInfo(tenantId, approvalId));
+    }
+
+    @ApiOperation(value = "字段标准信息-审批表单用")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/field-info")
+    public ResponseEntity<DataFieldDTO> fieldInfo(@PathVariable(name = "organizationId") Long tenantId,
+                                              Long approvalId) {
+        return Results.success(dataFieldService.fieldInfo(tenantId, approvalId));
+    }
+
 }
