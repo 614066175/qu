@@ -35,7 +35,6 @@
         <dependency>
             <groupId>org.hzero.boot</groupId>
             <artifactId>hzero-boot-workflow</artifactId>
-            <version>1.7.0.RELEASE</version>
         </dependency>
 
         <!-- hdsp starter -->

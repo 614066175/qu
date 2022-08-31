@@ -375,7 +375,7 @@ public class DataStandardController {
     public ResponseEntity<DataStandardDTO> publishByWorkflow(@PathVariable(name = "organizationId") Long tenantId,
                                                              @RequestBody DataStandardDTO dataStandardDTO) {
         dataStandardDTO.setTenantId(tenantId);
-        dataStandardService.startWorkFlow(WorkFlowConstant.DataStandard.ONLINE_WORKFLOW_KEY, dataStandardDTO);
+        dataStandardService.startWorkFlow(WorkFlowConstant.DataStandard.ONLINE_WORKFLOW_KEY, dataStandardDTO, "ONLINE");
         return Results.success(dataStandardDTO);
     }
 
@@ -463,5 +463,33 @@ public class DataStandardController {
     public ResponseEntity<DataStandardDTO> offlineWorkflowing(@PathVariable(name = "organizationId") Long tenantId, @PathVariable String dataStandardCode) {
         dataStandardService.offlineWorkflowing(tenantId, dataStandardCode);
         return Results.success();
+    }
+
+    @ApiOperation(value = "流程信息表单-申请信息")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/data-apply-info")
+    public ResponseEntity<StandardApprovalDTO> dataApplyInfo(@PathVariable("organizationId") Long tenantId,
+                                                              Long approvalId) {
+        return Results.success(dataStandardService.dataApplyInfo(tenantId, approvalId));
+    }
+
+    @ApiOperation(value = "数据标准信息-审批表单用")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/data-info")
+    public ResponseEntity<DataStandardDTO> dataInfo(@PathVariable(name = "organizationId") Long tenantId,
+                                                  Long approvalId) {
+        return Results.success(dataStandardService.dataInfo(tenantId, approvalId));
     }
 }

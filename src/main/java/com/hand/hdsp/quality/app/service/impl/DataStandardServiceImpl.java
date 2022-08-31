@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.app.service.impl;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.DataStandardService;
 import com.hand.hdsp.quality.app.service.StandardAimService;
+import com.hand.hdsp.quality.app.service.StandardApprovalService;
 import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
@@ -11,6 +12,7 @@ import com.hand.hdsp.quality.infra.constant.WarningLevel;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.feign.AssetFeign;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
+import com.hand.hdsp.quality.infra.mapper.StandardApprovalMapper;
 import com.hand.hdsp.quality.infra.util.DataLengthHandler;
 import com.hand.hdsp.quality.infra.util.DataPatternHandler;
 import com.hand.hdsp.quality.infra.util.StandardHandler;
@@ -24,7 +26,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.driver.infra.util.PageUtil;
+import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
+import org.hzero.boot.platform.plugin.hr.entity.Employee;
 import org.hzero.boot.workflow.WorkflowClient;
+import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
+import org.hzero.boot.workflow.dto.RunInstance;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
@@ -104,6 +110,12 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     private final StandardGroupRepository standardGroupRepository;
 
+    private final StandardApprovalService standardApprovalService;
+
+    private final StandardApprovalRepository standardApprovalRepository;
+
+    private final StandardApprovalMapper standardApprovalMapper;
+
     @Autowired
     private WorkflowClient workflowClient;
 
@@ -132,7 +144,11 @@ public class DataStandardServiceImpl implements DataStandardService {
                                    DataPatternHandler dataPatternHandler,
                                    DataLengthHandler dataLengthHandler,
                                    ValueRangeHandler valueRangeHandler,
-                                   DriverSessionService driverSessionService, StandardGroupRepository standardGroupRepository) {
+                                   DriverSessionService driverSessionService,
+                                   StandardGroupRepository standardGroupRepository,
+                                   StandardApprovalService standardApprovalService,
+                                   StandardApprovalRepository standardApprovalRepository,
+                                   StandardApprovalMapper standardApprovalMapper) {
         this.dataStandardRepository = dataStandardRepository;
         this.dataStandardVersionRepository = dataStandardVersionRepository;
         this.standardExtraRepository = standardExtraRepository;
@@ -150,6 +166,9 @@ public class DataStandardServiceImpl implements DataStandardService {
         this.valueRangeHandler = valueRangeHandler;
         this.driverSessionService = driverSessionService;
         this.standardGroupRepository = standardGroupRepository;
+        this.standardApprovalService = standardApprovalService;
+        this.standardApprovalRepository = standardApprovalRepository;
+        this.standardApprovalMapper = standardApprovalMapper;
     }
 
 
@@ -376,11 +395,11 @@ public class DataStandardServiceImpl implements DataStandardService {
             //根据上下线状态开启不同的工作流实例
             if (ONLINE.equals(dataStandardDTO.getStandardStatus())) {
                 this.workflowing(dataStandardDTO.getTenantId(), dataStandardDTO.getStandardCode(), ONLINE_APPROVING);
-                this.startWorkFlow(WorkFlowConstant.DataStandard.ONLINE_WORKFLOW_KEY, dataStandardDTO);
+                this.startWorkFlow(WorkFlowConstant.DataStandard.ONLINE_WORKFLOW_KEY, dataStandardDTO, ONLINE);
             }
             if (OFFLINE.equals(dataStandardDTO.getStandardStatus())) {
                 this.workflowing(dataStandardDTO.getTenantId(), dataStandardDTO.getStandardCode(), OFFLINE_APPROVING);
-                this.startWorkFlow(WorkFlowConstant.DataStandard.OFFLINE_WORKFLOW_KEY, dataStandardDTO);
+                this.startWorkFlow(WorkFlowConstant.DataStandard.OFFLINE_WORKFLOW_KEY, dataStandardDTO, OFFLINE);
             }
         } else {
             //通用上线下线
@@ -697,15 +716,31 @@ public class DataStandardServiceImpl implements DataStandardService {
     }
 
     @Override
-    public void startWorkFlow(String workflowKey, DataStandardDTO dataStandardDTO) {
+    public void startWorkFlow(String workflowKey, DataStandardDTO dataStandardDTO, String status) {
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        StandardApprovalDTO standardApprovalDTO = StandardApprovalDTO
+                .builder()
+                .standardId(dataStandardDTO.getStandardId())
+                .standardType("DATA")
+                .applicantId(userId)
+                .applyType(status)
+                .tenantId(dataStandardDTO.getTenantId())
+                .build();
+        standardApprovalDTO = standardApprovalService.createOrUpdate(standardApprovalDTO);
         //使用当前时间戳作为业务主键
         String bussinessKey = String.valueOf(System.currentTimeMillis());
         Map<String, Object> var = new HashMap<>();
         //给流程变量
         var.put("dataStandardCode", dataStandardDTO.getStandardCode());
+        var.put("approvalId", standardApprovalDTO.getApprovalId());
         //使用自研工作流客户端
-        workflowClient.startInstanceByFlowKey(dataStandardDTO.getTenantId(), workflowKey, bussinessKey, "USER", String.valueOf(DetailsHelper.getUserDetails().getUserId()), var);
+        RunInstance runInstance = workflowClient.startInstanceByFlowKey(dataStandardDTO.getTenantId(), workflowKey, bussinessKey, "USER", String.valueOf(DetailsHelper.getUserDetails().getUserId()), var);
 //        workFlowFeign.startInstanceByFlowKey(dataStandardDTO.getTenantId(), workflowKey, bussinessKey, "USER",String.valueOf(DetailsHelper.getUserDetails().getUserId()), var);
+        if (Objects.nonNull(runInstance)) {
+            standardApprovalDTO.setApplyTime(runInstance.getStartDate());
+            standardApprovalDTO.setInstanceId(runInstance.getInstanceId());
+            standardApprovalService.createOrUpdate(standardApprovalDTO);
+        }
     }
 
     @Override
@@ -1075,5 +1110,55 @@ public class DataStandardServiceImpl implements DataStandardService {
         standardAimRelationRepository.insertDTOSelective(standardAimRelationDTO);
     }
 
+    @Override
+    public StandardApprovalDTO dataApplyInfo(Long tenantId, Long approvalId) {
+        StandardApprovalDTO standardApprovalDTO = standardApprovalRepository.selectDTOByPrimaryKey(approvalId);
+        if (!(Objects.nonNull(standardApprovalDTO) && Objects.nonNull(standardApprovalDTO.getApprovalId()))) {
+            throw new CommonException(ErrorCode.NO_APPROVAL_INSTANCE);
+        }
+        ProcessInstanceDTO.ProcessInstanceViewDTO instanceView = workflowClient.getInstanceDetailByInstanceId(tenantId, standardApprovalDTO.getInstanceId());
+        List<ProcessInstanceDTO.ProcessInstanceCurrentNodeDTO> nodeDTOList = instanceView.getNodeDTOList();
+        StandardApprovalDTO approvalDTO = StandardApprovalDTO
+                .builder()
+                .flowName(instanceView.getFlowName())
+                .businessKey(instanceView.getBusinessKey())
+                .applyDate(instanceView.getStartDate())
+                .build();
+        UserDTO userInfo = standardApprovalMapper.getUserInfo(standardApprovalDTO.getApplicantId());
+        approvalDTO.setEmployeeTel(userInfo.getPhone());
+        approvalDTO.setEmployeeEmail(userInfo.getEmail());
+        approvalDTO.setEmployeeName(userInfo.getRealName());
+        Employee employee = EmployeeHelper.getEmployee(standardApprovalDTO.getApplicantId(), standardApprovalDTO.getTenantId());
+        List<String> employeeUnitList = standardApprovalMapper.getEmployeeUnit(employee);
+        if (org.apache.commons.collections.CollectionUtils.isNotEmpty(employeeUnitList)) {
+            String unitName = employeeUnitList.get(0);
+            if (DataSecurityHelper.isTenantOpen()) {
+                unitName = DataSecurityHelper.decrypt(unitName);
+            }
+            approvalDTO.setApplyUnitName(unitName);
+        }
+        if (CollectionUtils.isNotEmpty(nodeDTOList)) {
+            approvalDTO.setCurrentNode(nodeDTOList.get(0).getCurrentNode());
+        }
+        long lastVersion = 1L;
+        List<DataStandardVersionDTO> dataStandardVersionDTOList = dataStandardVersionRepository.selectDTOByCondition(Condition.builder(DataStandardVersion.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(DataStandardVersion.FIELD_STANDARD_ID, standardApprovalDTO.getStandardId()))
+                .orderByDesc(DataStandardVersion.FIELD_VERSION_NUMBER).build());
+        //不为空则取最新版本
+        if (CollectionUtils.isNotEmpty(dataStandardVersionDTOList)) {
+            lastVersion = dataStandardVersionDTOList.get(0).getVersionNumber() + 1;
+        }
+        approvalDTO.setSubmitVersion(String.format("v%s.0", lastVersion));
+        return approvalDTO;
+    }
 
+    @Override
+    public DataStandardDTO dataInfo(Long tenantId, Long approvalId) {
+        StandardApprovalDTO standardApprovalDTO = standardApprovalRepository.selectDTOByPrimaryKey(approvalId);
+        if (Objects.isNull(standardApprovalDTO)) {
+            throw new CommonException(ErrorCode.NO_APPROVAL_INSTANCE);
+        }
+        return this.detail(standardApprovalDTO.getTenantId(), standardApprovalDTO.getStandardId());
+    }
 }

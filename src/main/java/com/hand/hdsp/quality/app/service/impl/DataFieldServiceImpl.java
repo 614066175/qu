@@ -4,6 +4,7 @@ package com.hand.hdsp.quality.app.service.impl;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.DataFieldService;
 import com.hand.hdsp.quality.app.service.DataStandardService;
+import com.hand.hdsp.quality.app.service.StandardApprovalService;
 import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
@@ -11,6 +12,7 @@ import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.converter.AimStatisticsConverter;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
+import com.hand.hdsp.quality.infra.mapper.StandardApprovalMapper;
 import com.hand.hdsp.quality.infra.statistic.validator.StatisticValidator;
 import com.hand.hdsp.quality.infra.util.CustomThreadPool;
 import com.hand.hdsp.quality.infra.util.StandardHandler;
@@ -24,7 +26,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
+import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
+import org.hzero.boot.platform.plugin.hr.entity.Employee;
 import org.hzero.boot.workflow.WorkflowClient;
+import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
+import org.hzero.boot.workflow.dto.RunInstance;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
@@ -44,7 +50,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
@@ -92,6 +97,12 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     private final StandardRelationRepository standardRelationRepository;
 
+    private final StandardApprovalService standardApprovalService;
+
+    private final StandardApprovalRepository standardApprovalRepository;
+
+    private final StandardApprovalMapper standardApprovalMapper;
+
     private final AimStatisticsConverter aimStatisticsConverter;
 
     @Autowired
@@ -110,8 +121,9 @@ public class DataFieldServiceImpl implements DataFieldService {
                                 DataFieldMapper dataFieldMapper, DataStandardService dataStandardService, ExtraVersionRepository extraVersionRepository,
                                 DataStandardMapper dataStandardMapper, StandardAimRepository standardAimRepository,
                                 StandardTeamRepository standardTeamRepository, StandardRelationRepository standardRelationRepository,
-                                AimStatisticsRepository aimStatisticsRepository, List<StatisticValidator> statisticValidatorList,
-                                DriverSessionService driverSessionService, AimStatisticsConverter aimStatisticsConverter) {
+                                AimStatisticsRepository aimStatisticsRepository, StandardApprovalRepository standardApprovalRepository,
+                                StandardApprovalMapper standardApprovalMapper, List<StatisticValidator> statisticValidatorList,
+                                DriverSessionService driverSessionService, StandardApprovalService standardApprovalService, AimStatisticsConverter aimStatisticsConverter) {
         this.dataFieldRepository = dataFieldRepository;
         this.standardExtraRepository = standardExtraRepository;
         this.standardApproveRepository = standardApproveRepository;
@@ -123,9 +135,12 @@ public class DataFieldServiceImpl implements DataFieldService {
         this.dataStandardMapper = dataStandardMapper;
         this.standardTeamRepository = standardTeamRepository;
         this.standardRelationRepository = standardRelationRepository;
+        this.standardApprovalRepository = standardApprovalRepository;
+        this.standardApprovalMapper = standardApprovalMapper;
         this.driverSessionService = driverSessionService;
         this.aimStatisticsRepository = aimStatisticsRepository;
         this.statisticValidatorList = statisticValidatorList;
+        this.standardApprovalService = standardApprovalService;
         this.aimStatisticsConverter = aimStatisticsConverter;
     }
 
@@ -251,6 +266,13 @@ public class DataFieldServiceImpl implements DataFieldService {
         if (CollectionUtils.isNotEmpty(standardRelationList)) {
             standardRelationRepository.batchDeleteByPrimaryKey(standardRelationList);
         }
+
+        // 删除审批记录
+        standardApprovalService.delete(StandardApprovalDTO
+                .builder()
+                        .standardId(dataFieldDTO.getFieldId())
+                        .standardType("FIELD")
+                .build());
     }
 
     @Override
@@ -282,11 +304,11 @@ public class DataFieldServiceImpl implements DataFieldService {
             if (ONLINE.equals(dataFieldDTO.getStandardStatus())) {
                 //先修改状态再启动工作流，启动工作流需要花费一定时间,有异常回滚
                 this.workflowing(dataFieldDTO.getTenantId(), dataFieldDTO.getFieldId(), ONLINE_APPROVING);
-                this.startWorkFlow(WorkFlowConstant.FieldStandard.ONLINE_WORKFLOW_KEY, dataFieldDTO);
+                this.startWorkFlow(WorkFlowConstant.FieldStandard.ONLINE_WORKFLOW_KEY, dataFieldDTO, ONLINE);
             }
             if (OFFLINE.equals(dataFieldDTO.getStandardStatus())) {
                 this.workflowing(dataFieldDTO.getTenantId(), dataFieldDTO.getFieldId(), OFFLINE_APPROVING);
-                this.startWorkFlow(WorkFlowConstant.FieldStandard.OFFLINE_WORKFLOW_KEY, dataFieldDTO);
+                this.startWorkFlow(WorkFlowConstant.FieldStandard.OFFLINE_WORKFLOW_KEY, dataFieldDTO, OFFLINE);
             }
         } else {
             DataFieldDTO dto = dataFieldRepository.selectDTOByPrimaryKey(dataFieldDTO.getFieldId());
@@ -302,14 +324,30 @@ public class DataFieldServiceImpl implements DataFieldService {
         }
     }
 
-    private void startWorkFlow(String workflowKey, DataFieldDTO dataFieldDTO) {
+    private void startWorkFlow(String workflowKey, DataFieldDTO dataFieldDTO, String status) {
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        StandardApprovalDTO standardApprovalDTO = StandardApprovalDTO
+                .builder()
+                .standardId(dataFieldDTO.getFieldId())
+                .standardType("FIELD")
+                .applicantId(userId)
+                .applyType(status)
+                .tenantId(dataFieldDTO.getTenantId())
+                .build();
+        standardApprovalDTO = standardApprovalService.createOrUpdate(standardApprovalDTO);
         //使用当前时间戳作为业务主键
         String bussinessKey = String.valueOf(System.currentTimeMillis());
         Map<String, Object> var = new HashMap<>();
         //给流程变量
         var.put("fieldId", dataFieldDTO.getFieldId());
+        var.put("approvalId", standardApprovalDTO.getApprovalId());
         //使用自研工作流客户端
-        workflowClient.startInstanceByFlowKey(dataFieldDTO.getTenantId(), workflowKey, bussinessKey, "USER", String.valueOf(DetailsHelper.getUserDetails().getUserId()), var);
+        RunInstance runInstance = workflowClient.startInstanceByFlowKey(dataFieldDTO.getTenantId(), workflowKey, bussinessKey, "USER", String.valueOf(userId), var);
+        if (Objects.nonNull(runInstance)) {
+            standardApprovalDTO.setApplyTime(runInstance.getStartDate());
+            standardApprovalDTO.setInstanceId(runInstance.getInstanceId());
+            standardApprovalService.createOrUpdate(standardApprovalDTO);
+        }
     }
 
 
@@ -685,5 +723,57 @@ public class DataFieldServiceImpl implements DataFieldService {
             }
         }
         return dataFieldDTOList;
+    }
+
+    @Override
+    public StandardApprovalDTO fieldApplyInfo(Long tenantId, Long approvalId) {
+        StandardApprovalDTO standardApprovalDTO = standardApprovalRepository.selectDTOByPrimaryKey(approvalId);
+        if (!(Objects.nonNull(standardApprovalDTO) && Objects.nonNull(standardApprovalDTO.getApprovalId()))) {
+            throw new CommonException(ErrorCode.NO_APPROVAL_INSTANCE);
+        }
+        ProcessInstanceDTO.ProcessInstanceViewDTO instanceView = workflowClient.getInstanceDetailByInstanceId(tenantId, standardApprovalDTO.getInstanceId());
+        List<ProcessInstanceDTO.ProcessInstanceCurrentNodeDTO> nodeDTOList = instanceView.getNodeDTOList();
+        StandardApprovalDTO approvalDTO = StandardApprovalDTO
+                .builder()
+                .flowName(instanceView.getFlowName())
+                .businessKey(instanceView.getBusinessKey())
+                .applyDate(instanceView.getStartDate())
+                .build();
+        UserDTO userInfo = standardApprovalMapper.getUserInfo(standardApprovalDTO.getApplicantId());
+        approvalDTO.setEmployeeTel(userInfo.getPhone());
+        approvalDTO.setEmployeeEmail(userInfo.getEmail());
+        approvalDTO.setEmployeeName(userInfo.getRealName());
+        Employee employee = EmployeeHelper.getEmployee(standardApprovalDTO.getApplicantId(), standardApprovalDTO.getTenantId());
+        List<String> employeeUnitList = standardApprovalMapper.getEmployeeUnit(employee);
+        if (org.apache.commons.collections.CollectionUtils.isNotEmpty(employeeUnitList)) {
+            String unitName = employeeUnitList.get(0);
+            if (DataSecurityHelper.isTenantOpen()) {
+                unitName = DataSecurityHelper.decrypt(unitName);
+            }
+            approvalDTO.setApplyUnitName(unitName);
+        }
+        if (CollectionUtils.isNotEmpty(nodeDTOList)) {
+            approvalDTO.setCurrentNode(nodeDTOList.get(0).getCurrentNode());
+        }
+        long lastVersion = 1L;
+        List<DataFieldVersionDTO> dataFieldVersionDTOList = dataFieldVersionRepository.selectDTOByCondition(Condition.builder(DataFieldVersion.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(DataField.FIELD_FIELD_ID, standardApprovalDTO.getStandardId()))
+                .orderByDesc(DataFieldVersion.FIELD_VERSION_NUMBER).build());
+        //不为空则取最新版本
+        if (CollectionUtils.isNotEmpty(dataFieldVersionDTOList)) {
+            lastVersion = dataFieldVersionDTOList.get(0).getVersionNumber() + 1;
+        }
+        approvalDTO.setSubmitVersion(String.format("v%s.0", lastVersion));
+        return approvalDTO;
+    }
+
+    @Override
+    public DataFieldDTO fieldInfo(Long tenantId, Long approvalId) {
+        StandardApprovalDTO standardApprovalDTO = standardApprovalRepository.selectDTOByPrimaryKey(approvalId);
+        if (Objects.isNull(standardApprovalDTO)) {
+            throw new CommonException(ErrorCode.NO_APPROVAL_INSTANCE);
+        }
+        return this.detail(standardApprovalDTO.getTenantId(), standardApprovalDTO.getStandardId());
     }
 }
