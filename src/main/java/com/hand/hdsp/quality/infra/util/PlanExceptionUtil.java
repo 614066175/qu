@@ -4,29 +4,33 @@ import com.alibaba.druid.DbType;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.consumer.ExceptionDataConsumer;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
+import com.hand.hdsp.quality.infra.message.MessageDTO;
 import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
+import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.platform.profile.ProfileClient;
+import org.hzero.core.redis.RedisHelper;
+import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.context.ApplicationContext;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.ExceptionParam.*;
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.SqlType.SQL;
+import static com.hand.hdsp.quality.infra.constant.PlanExceptionConstants.ERROR_FLAG;
+import static com.hand.hdsp.quality.infra.constant.PlanExceptionConstants.EXCEPTION_DATA;
 
 /**
  * <p>
@@ -39,25 +43,29 @@ import static com.hand.hdsp.quality.infra.constant.PlanConstant.SqlType.SQL;
 @Slf4j
 public class PlanExceptionUtil {
 
-    public static Integer BATCH_NUMBER;
-
     public static final String COUNT_SQL = "select count (*) from (%s) a";
 
     public static MongoTemplate mongoTemplate;
 
     public static ProfileClient profileClient;
+    public static RedisHelper redisHelper;
+    public static DriverSessionService driverSessionService;
 
     public static final String EXCEPTION_NUMBER = "XQUA.EXCEPTION_NUMBER";
+    public static final String PROBLEM_BATCH_NUMBER = "XQUA.PROBLEM_BATCH_NUMBER";
+    public static String messageKey;
+    public static ApplicationContext context = ApplicationContextHelper.getContext();
 
     static {
-        ApplicationContext context = ApplicationContextHelper.getContext();
         mongoTemplate = context.getBean(MongoTemplate.class);
         profileClient = context.getBean(ProfileClient.class);
-        String batchNumber = context.getEnvironment().resolvePlaceholders("${hdsp.quality.batch-number}");
-        try {
-            BATCH_NUMBER = Integer.parseInt(batchNumber);
-        } catch (Exception e) {
-            BATCH_NUMBER = 10000;
+        redisHelper = context.getBean(RedisHelper.class);
+        driverSessionService = context.getBean(DriverSessionService.class);
+        String messagekeyConfig = context.getEnvironment().resolvePlaceholders("${hdsp.quality.message-key}");
+        if (StringUtils.isEmpty(messagekeyConfig)) {
+            messageKey = "hdsp:quality:exception-message";
+        } else {
+            messageKey = messagekeyConfig;
         }
     }
 
@@ -72,6 +80,7 @@ public class PlanExceptionUtil {
      * @param warningLevelDTO
      */
     public static void getPlanException(MeasureParamDO param, BatchResultBase batchResultBase, String sql, DriverSession driverSession, WarningLevelDTO warningLevelDTO) {
+        long start = System.currentTimeMillis();
         //给配置维护，控制获取异常数据的数量
         String exceptionNumber = profileClient.getProfileValueByOptions(batchResultBase.getTenantId(), null, null, EXCEPTION_NUMBER);
         Long limit = null;
@@ -106,46 +115,80 @@ public class PlanExceptionUtil {
         log.info("获取异常数据sql：" + sql);
         List<Map<String, Object>> countMaps = driverSession.executeOneQuery(param.getSchema(), String.format(COUNT_SQL, sql));
         int count = Integer.parseInt(countMaps.get(0).values().toArray()[0].toString());
-        if (count > BATCH_NUMBER) {
-            int threadNumber = count % BATCH_NUMBER == 0 ? count / BATCH_NUMBER : count / BATCH_NUMBER + 1;
-            ThreadPoolExecutor executor = CustomThreadPool.getExecutor();
-            List<Future> futures = new ArrayList<>();
-            for (int i = 0; i < threadNumber; i++) {
-                int finalI = i;
-                String finalSql = sql;
-                Future<?> future = executor.submit(() -> getExceptionResult(finalI, param, batchResultBase, finalSql, driverSession, warningLevelDTO));
-                futures.add(future);
+        log.info("异常数据量总量{}", count);
+        //1.如果异常数据量小于单个批次量，则无需分批，直接执行
+        //2.如果大于批次量，按照批次大小，拆分sql，发送给redis。服务阻塞消费redis中的key，当数据量过大，线程数过多，达到性能瓶颈时，可以水平扩容服务实例来增加并行度
+        //3.通过计数器来控制线程执行结果，每个服务定义固定可用线程数，避免消息被一个服务过度消费，线程资源不能得到合理利用
+
+        String batchNumberConfig = profileClient.getProfileValueByOptions(batchResultBase.getTenantId(), null, null, PROBLEM_BATCH_NUMBER);
+        int batchNumber;
+        //如果没有配置，默认为10000L
+        if (Strings.isEmpty(batchNumberConfig)) {
+            batchNumber = 10000;
+        } else {
+            try {
+                batchNumber = Integer.parseInt(batchNumberConfig);
+            } catch (Exception e) {
+                batchNumber = 10000;
             }
-            for (Future future : futures) {
+        }
+
+        //根据数据量进行一个处理，如果数据量小于一个单个批次数量，直接执行。
+        if (count > batchNumber) {
+            //根据批次大小获取要分多少页
+            int pageNumber = count % batchNumber == 0 ? count / batchNumber : count / batchNumber + 1;
+            //发送消息，到redis消息队列
+            sendSqlMessage(param, batchResultBase, sql, warningLevelDTO, driverSession, pageNumber, batchNumber);
+
+            //根据计数器判断执行情况
+            while (true) {
                 try {
-                    future.get();
-                } catch (Exception e) {
-                    //如果有一个线程失败，则删除此问题数据，并抛出异常
-                    mongoTemplate.dropCollection(String.format("%d_%d", batchResultBase.getPlanBaseId(), batchResultBase.getResultBaseId()));
+                    //休眠
+                    Thread.sleep(5000);
+                    if (("0").equals(redisHelper.strGet(EXCEPTION_DATA + batchResultBase.getResultBaseId()))) {
+                        //当计数器当0时，判断是否存在异常标识
+                        redisHelper.delKey(EXCEPTION_DATA + batchResultBase.getResultBaseId());
+                        break;
+                    }
+                } catch (InterruptedException e) {
                     e.printStackTrace();
-                    log.error("异常数据获取失败" + e.getMessage());
-                    throw new CommonException("获取异常数据失败！请重新评估");
                 }
             }
-            log.info("异常数据获取结束");
+            if (redisHelper.hasKey(ERROR_FLAG + batchResultBase.getResultBaseId())) {
+                //删除，并抛出异常
+                mongoTemplate.dropCollection(String.format("%d_%d", batchResultBase.getPlanBaseId(), batchResultBase.getResultBaseId()));
+                throw new CommonException("异常数据获取失败！");
+            }
+            long end = System.currentTimeMillis();
+            log.info("异常数据获取结束,耗时{}s",(end-start)/1000);
         } else {
             //无需分页
-            getExceptionResult(null, param, batchResultBase, sql, driverSession, warningLevelDTO);
+            getExceptionResult(param, batchResultBase, sql, driverSession, warningLevelDTO);
             log.info("异常数据获取结束");
         }
     }
 
-    private static void getExceptionResult(Integer pageNumber, MeasureParamDO param, BatchResultBase batchResultBase, String sql, DriverSession driverSession, WarningLevelDTO warningLevelDTO) {
-        List<Map<String, Object>> exceptionMapList;
-        if (pageNumber != null) {
-            //进行分页
-            Page<Map<String, Object>> maps = driverSession.executeOneQuery(param.getSchema(), sql, PageRequest.of(pageNumber, BATCH_NUMBER));
-            exceptionMapList = maps.getContent();
-        } else {
-            exceptionMapList = driverSession.executeOneQuery(param.getSchema(), sql);
+    private static void sendSqlMessage(MeasureParamDO param, BatchResultBase batchResultBase, String sql, WarningLevelDTO warningLevelDTO, DriverSession driverSession, int pageNumber, int batchNumber) {
+        //定义计数器
+        redisHelper.strIncrement(EXCEPTION_DATA + batchResultBase.getResultBaseId(), (long) pageNumber);
+        for (int i = 0; i < pageNumber; i++) {
+            try {
+                //获取分页sql
+                String pageSql = driverSession.getPageSql(sql, PageRequest.of(i, batchNumber));
+                MessageDTO messageDTO = MessageDTO.builder().param(param).batchResultBase(batchResultBase)
+                        .sql(pageSql)
+                        .warningLevelDTO(warningLevelDTO)
+                        .build();
+                redisHelper.lstLeftPush(messageKey, JsonUtil.toJson(messageDTO));
+            } catch (Exception e) {
+                // todo 如果有异常，则定义删除标识
+                redisHelper.strSet(ERROR_FLAG + batchResultBase.getResultBaseId(), "Y");
+            }
         }
-        //避免分页查询返回的是不可修改的list
-        exceptionMapList = new ArrayList<>(exceptionMapList);
+    }
+
+    public static void getExceptionResult(MeasureParamDO param, BatchResultBase batchResultBase, String sql, DriverSession driverSession, WarningLevelDTO warningLevelDTO) {
+        List<Map<String, Object>> exceptionMapList = driverSession.executeOneQuery(param.getSchema(), sql);
         if (CollectionUtils.isNotEmpty(exceptionMapList)) {
             //如果是hive，则去除最后一个结果，最后一个结果是hive-sql执行日志，并非异常数据
             if (DbType.hive.equals(driverSession.getDbType())) {
@@ -189,5 +232,31 @@ public class PlanExceptionUtil {
         mongoTemplate.insert(exceptionMapList, String.format("%d_%d", batchResultBase.getPlanBaseId(), batchResultBase.getResultBaseId()));
     }
 
+    /**
+     * 根据消息获取异常数据
+     *
+     * @param message
+     */
+    public static void getExceptionResult(String message) {
+        BatchResultBase batchResultBase = null;
+        try {
+            MessageDTO messageDTO = JsonUtil.toObj(message, MessageDTO.class);
+            MeasureParamDO param = messageDTO.getParam();
+            WarningLevelDTO warningLevelDTO = messageDTO.getWarningLevelDTO();
+            batchResultBase = messageDTO.getBatchResultBase();
+            String sql = messageDTO.getSql();
+            DriverSession driverSession = driverSessionService.getDriverSession(batchResultBase.getTenantId(), param.getPluginDatasourceDTO().getDatasourceCode());
+            getExceptionResult(param,batchResultBase,sql,driverSession,warningLevelDTO);
+        } catch (Throwable throwable) {
+            redisHelper.strSet(ERROR_FLAG + Objects.requireNonNull(batchResultBase).getResultBaseId(), "Y");
+        } finally {
+            //计数器减1
+            redisHelper.strIncrement(EXCEPTION_DATA + Objects.requireNonNull(batchResultBase).getResultBaseId(), -1L);
+
+            //线程执行完，进行回收
+            ExceptionDataConsumer exceptionDataConsumer = context.getBean(ExceptionDataConsumer.class);
+            exceptionDataConsumer.recycleThread();
+        }
+    }
 
 }
