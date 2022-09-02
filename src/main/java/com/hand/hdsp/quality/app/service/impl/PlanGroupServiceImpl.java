@@ -15,16 +15,14 @@ import com.hand.hdsp.quality.infra.mapper.BatchPlanFieldMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchPlanRelTableMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchPlanTableMapper;
 import io.choerodon.core.exception.CommonException;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
+
+import org.apache.commons.lang3.ObjectUtils;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
-import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
 
 import static com.hand.hdsp.quality.infra.constant.GroupType.BATCH;
@@ -82,6 +80,15 @@ public class PlanGroupServiceImpl implements PlanGroupService {
 
     @Override
     public List<PlanGroupDTO> export(PlanGroupDTO dto, ExportParam exportParam) {
+        if(ObjectUtils.isNotEmpty(dto.getPlanBaseId())){
+            BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseRepository.selectDTOByPrimaryKey(dto.getPlanBaseId());
+            dto.setPlanId(batchPlanBaseDTO.getPlanId());
+        }
+        //获取groupId
+        if(ObjectUtils.isNotEmpty(dto.getPlanId())){
+            BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(dto.getPlanId());
+            dto.setGroupId(batchPlan.getGroupId());
+        }
         List<PlanGroupDTO> planGroupDTOList = planGroupRepository.selectDTOByCondition(Condition.builder(PlanGroup.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(PlanGroup.FIELD_GROUP_TYPE, BATCH)
@@ -98,6 +105,7 @@ public class PlanGroupServiceImpl implements PlanGroupService {
                             .andEqualTo(BatchPlan.FIELD_GROUP_ID, planGroupDTO.getGroupId())
                             .andEqualTo(BatchPlan.FIELD_TENANT_ID, planGroupDTO.getTenantId())
                             .andEqualTo(BatchPlan.FIELD_PLAN_NAME,dto.getPlanName(),true)
+                            .andEqualTo(BatchPlan.FIELD_PLAN_ID,dto.getPlanId(),true)
                     )
                     .build());
             batchPlanDTOList.stream().parallel().forEach(batchPlanDTO -> {
@@ -112,6 +120,7 @@ public class PlanGroupServiceImpl implements PlanGroupService {
                                 .andEqualTo(BatchPlanBase.FIELD_OBJECT_NAME,dto.getObjectName(),true)
                                 .andEqualTo(BatchPlanBase.FIELD_DESCRIPTION,dto.getDescription(),true)
                                 .andEqualTo(BatchPlanBase.FIELD_DATASOURCE_SCHEMA,dto.getDatasourceSchema(),true)
+                                .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_ID,dto.getPlanBaseId(),true)
                         )
                         .build());
 

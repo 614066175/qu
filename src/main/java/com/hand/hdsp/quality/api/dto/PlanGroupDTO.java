@@ -105,4 +105,16 @@ public class PlanGroupDTO extends AuditDomain {
 
     @Transient
     private String currentPlanName;
+
+    /**
+     * 批数据评估方案表 主键
+     */
+    @Transient
+    private Long planId;
+
+    /**
+     * 批数据方案基础配置表 主键
+     */
+    @Transient
+    private Long planBaseId;
 }
