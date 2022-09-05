@@ -262,7 +262,8 @@ public class DataStandardServiceImpl implements DataStandardService {
     @Transactional(rollbackFor = Exception.class)
     public void delete(DataStandardDTO dataStandardDTO) {
         if (ONLINE.equals(dataStandardDTO.getStandardStatus())
-                || OFFLINE_APPROVING.equals(dataStandardDTO.getStandardStatus())) {
+                || OFFLINE_APPROVING.equals(dataStandardDTO.getStandardStatus())
+                || ONLINE_APPROVING.equals(dataStandardDTO.getStandardStatus())) {
             throw new CommonException(ErrorCode.DATA_STANDARD_CAN_NOT_DELETE);
         }
 

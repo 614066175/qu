@@ -237,7 +237,8 @@ public class DataFieldServiceImpl implements DataFieldService {
     @Transactional(rollbackFor = Exception.class)
     public void delete(DataFieldDTO dataFieldDTO) {
         if (ONLINE.equals(dataFieldDTO.getStandardStatus())
-                || OFFLINE_APPROVING.equals(dataFieldDTO.getStandardStatus())) {
+                || OFFLINE_APPROVING.equals(dataFieldDTO.getStandardStatus())
+                || ONLINE_APPROVING.equals(dataFieldDTO.getStandardStatus())) {
             throw new CommonException(ErrorCode.DATA_FIELD_CAN_NOT_DELETE);
         }
         dataFieldRepository.deleteByPrimaryKey(dataFieldDTO);
