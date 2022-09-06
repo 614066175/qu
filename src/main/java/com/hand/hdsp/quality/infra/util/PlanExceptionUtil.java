@@ -14,7 +14,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
+import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.boot.platform.profile.ProfileClient;
+import org.hzero.core.base.BaseConstants;
 import org.hzero.core.redis.RedisHelper;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.hzero.starter.driver.core.session.DriverSession;
@@ -22,6 +24,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,8 +32,7 @@ import java.util.stream.Collectors;
 
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.ExceptionParam.*;
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.SqlType.SQL;
-import static com.hand.hdsp.quality.infra.constant.PlanExceptionConstants.ERROR_FLAG;
-import static com.hand.hdsp.quality.infra.constant.PlanExceptionConstants.EXCEPTION_DATA;
+import static com.hand.hdsp.quality.infra.constant.PlanExceptionConstants.*;
 
 /**
  * <p>
@@ -50,6 +52,13 @@ public class PlanExceptionUtil {
     public static ProfileClient profileClient;
     public static RedisHelper redisHelper;
     public static DriverSessionService driverSessionService;
+    public static LovAdapter lovAdapter;
+
+    public static final String WARNING_LEVEL_LOV = "HDSP.XQUA.WARNING_LEVEL";
+
+    public static final String CHECK_ITEM_LOV = "HDSP.XQUA.CHECK_ITEM";
+
+    public static final String COUNT_TYPE_LOV = "HDSP.XQUA.COUNT_TYPE";
 
     public static final String EXCEPTION_NUMBER = "XQUA.EXCEPTION_NUMBER";
     public static final String PROBLEM_BATCH_NUMBER = "XQUA.PROBLEM_BATCH_NUMBER";
@@ -61,6 +70,7 @@ public class PlanExceptionUtil {
         profileClient = context.getBean(ProfileClient.class);
         redisHelper = context.getBean(RedisHelper.class);
         driverSessionService = context.getBean(DriverSessionService.class);
+        lovAdapter = context.getBean(LovAdapter.class);
         String messagekeyConfig = context.getEnvironment().resolvePlaceholders("${hdsp.quality.message-key}");
         if (StringUtils.isEmpty(messagekeyConfig)) {
             messageKey = "hdsp:quality:exception-message";
@@ -145,9 +155,11 @@ public class PlanExceptionUtil {
                 try {
                     //休眠
                     Thread.sleep(5000);
-                    if (("0").equals(redisHelper.strGet(EXCEPTION_DATA + batchResultBase.getResultBaseId()))) {
+                    if (redisHelper.hasKey(HANDLE_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId()) &&
+                            redisHelper.strGet(HANDLE_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId()).equals(redisHelper.strGet(TOTAL_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId()))) {
                         //当计数器当0时，判断是否存在异常标识
-                        redisHelper.delKey(EXCEPTION_DATA + batchResultBase.getResultBaseId());
+                        redisHelper.delKey(TOTAL_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId());
+                        redisHelper.delKey(HANDLE_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId());
                         break;
                     }
                 } catch (InterruptedException e) {
@@ -160,7 +172,7 @@ public class PlanExceptionUtil {
                 throw new CommonException("异常数据获取失败！");
             }
             long end = System.currentTimeMillis();
-            log.info("异常数据获取结束,耗时{}s",(end-start)/1000);
+            log.info("异常数据获取结束,耗时{}s", (end - start) / 1000);
         } else {
             //无需分页
             getExceptionResult(param, batchResultBase, sql, driverSession, warningLevelDTO);
@@ -170,7 +182,7 @@ public class PlanExceptionUtil {
 
     private static void sendSqlMessage(MeasureParamDO param, BatchResultBase batchResultBase, String sql, WarningLevelDTO warningLevelDTO, DriverSession driverSession, int pageNumber, int batchNumber) {
         //定义计数器
-        redisHelper.strIncrement(EXCEPTION_DATA + batchResultBase.getResultBaseId(), (long) pageNumber);
+        redisHelper.strIncrement(TOTAL_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId(), (long) pageNumber);
         for (int i = 0; i < pageNumber; i++) {
             try {
                 //获取分页sql
@@ -197,6 +209,10 @@ public class PlanExceptionUtil {
                     exceptionMapList.remove(exceptionMapList.size() - 1);
                 }
             }
+            //值集转换map
+            Map<String, String> warningLevelMap = new HashMap<>();
+            Map<String, String> checkItemMap = new HashMap<>();
+            Map<String, String> countTypeMap = new HashMap<>();
             //每一条异常数据存上规则名和异常信息
             exceptionMapList.forEach(map -> {
                 List<String> values = map.values().stream().map(String::valueOf).collect(Collectors.toList());
@@ -205,6 +221,12 @@ public class PlanExceptionUtil {
                 map.put(PLAN_BASE_ID, batchResultBase.getPlanBaseId());
                 map.put(RESULT_BASE_ID, batchResultBase.getResultBaseId());
                 map.put(RULE_NAME, param.getBatchResultRuleDTO().getRuleName());
+                String warningLevelMeaning = warningLevelMap.get(warningLevelDTO.getWarningLevel());
+                if (warningLevelMeaning == null) {
+                    warningLevelMeaning = lovAdapter.queryLovMeaning(WARNING_LEVEL_LOV, BaseConstants.DEFAULT_TENANT_ID, warningLevelDTO.getWarningLevel());
+                    warningLevelMap.put(warningLevelDTO.getWarningLevel(), warningLevelMeaning);
+                }
+
                 map.put(WARNING_LEVEL, warningLevelDTO.getWarningLevel());
                 //异常信息 name 数据长度 满足告警等级【大于5小于10】
                 StringBuilder warningCondition = new StringBuilder();
@@ -221,11 +243,23 @@ public class PlanExceptionUtil {
                         warningCondition.append(String.format("不等于%s", warningLevelDTO.getExpectedValue()));
                     }
                 }
+                String checkItemMeaning = checkItemMap.get(param.getCheckItem());
+                if (checkItemMeaning == null) {
+                    checkItemMeaning = lovAdapter.queryLovMeaning(CHECK_ITEM_LOV, BaseConstants.DEFAULT_TENANT_ID, param.getCheckItem());
+                    checkItemMap.put(param.getCheckItem(), checkItemMeaning);
+                }
+
+                String countTypeMeaning = countTypeMap.get(param.getCountType());
+                if (countTypeMeaning == null) {
+                    countTypeMeaning = lovAdapter.queryLovMeaning(COUNT_TYPE_LOV, BaseConstants.DEFAULT_TENANT_ID, param.getCountType());
+                    countTypeMap.put(param.getCountType(), countTypeMeaning);
+                }
+
                 String exception = String.format("【%s】 %s 满足告警条件 %s",
                         param.getFieldName(),
-                        String.format("%s %s", param.getCheckItem(), param.getCountType()),
+                        String.format("%s %s", checkItemMeaning, countTypeMeaning),
                         Strings.isNotEmpty(warningCondition) ? String.format("【%s】", warningCondition) : "");
-                map.put(EXCEPTION_INFO, String.format("%s(%s)", warningLevelDTO.getWarningLevel(), exception));
+                map.put(EXCEPTION_INFO, String.format("%s(%s)", warningLevelMeaning, exception));
             });
         }
         //collection 使用质检项Id_结果Id
@@ -246,12 +280,12 @@ public class PlanExceptionUtil {
             batchResultBase = messageDTO.getBatchResultBase();
             String sql = messageDTO.getSql();
             DriverSession driverSession = driverSessionService.getDriverSession(batchResultBase.getTenantId(), param.getPluginDatasourceDTO().getDatasourceCode());
-            getExceptionResult(param,batchResultBase,sql,driverSession,warningLevelDTO);
+            getExceptionResult(param, batchResultBase, sql, driverSession, warningLevelDTO);
         } catch (Throwable throwable) {
             redisHelper.strSet(ERROR_FLAG + Objects.requireNonNull(batchResultBase).getResultBaseId(), "Y");
         } finally {
-            //计数器减1
-            redisHelper.strIncrement(EXCEPTION_DATA + Objects.requireNonNull(batchResultBase).getResultBaseId(), -1L);
+            //处理计数器加1
+            redisHelper.strIncrement(HANDLE_EXCEPTION_BATCH_NUM + Objects.requireNonNull(batchResultBase).getResultBaseId(), 1L);
 
             //线程执行完，进行回收
             ExceptionDataConsumer exceptionDataConsumer = context.getBean(ExceptionDataConsumer.class);
