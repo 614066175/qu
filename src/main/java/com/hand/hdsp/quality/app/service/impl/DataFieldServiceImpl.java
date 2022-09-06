@@ -660,13 +660,14 @@ public class DataFieldServiceImpl implements DataFieldService {
     @Override
     public void fieldAimStandard(AssetFieldDTO assetFieldDTO, Long projectId) {
         // 根据字段删除 字段标准落标
+        String fieldName = String.format("%s(%s)", assetFieldDTO.getFieldName(), assetFieldDTO.getFieldType().toUpperCase());
         List<StandardAim> standardAimList = standardAimRepository.select(StandardAim
                 .builder()
                         .standardType(FIELD)
                         .datasourceCode(assetFieldDTO.getDatasourceCode())
                         .schemaName(assetFieldDTO.getDatasourceSchema())
                         .tableName(assetFieldDTO.getTableName())
-                        .fieldName(assetFieldDTO.getFieldName())
+                        .fieldName(fieldName)
                         .tenantId(assetFieldDTO.getTenantId())
                         .projectId(projectId)
                 .build());
@@ -674,7 +675,6 @@ public class DataFieldServiceImpl implements DataFieldService {
         //创建新的字段落标
         List<Long> standardIdList = assetFieldDTO.getStandardIdList();
         if (CollectionUtils.isNotEmpty(standardIdList)) {
-            List<StandardAimDTO> standardAimDTOList = new ArrayList<>();
             for (Long standardId : standardIdList) {
                 DataFieldDTO dataFieldDTO = dataFieldRepository.selectDTOByPrimaryKey(standardId);
                 if (Objects.isNull(dataFieldDTO)) {
@@ -684,7 +684,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                         .builder()
                         .standardId(standardId)
                         .standardType(FIELD)
-                        .fieldName(assetFieldDTO.getFieldName())
+                        .fieldName(fieldName)
                         .fieldDesc(assetFieldDTO.getFieldDesc())
                         .datasourceId(assetFieldDTO.getDatasourceId())
                         .datasourceCode(assetFieldDTO.getDatasourceCode())
