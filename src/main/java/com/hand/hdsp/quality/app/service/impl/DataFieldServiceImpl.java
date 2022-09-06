@@ -707,13 +707,14 @@ public class DataFieldServiceImpl implements DataFieldService {
     @Override
     public List<DataFieldDTO> standardByField(AssetFieldDTO assetFieldDTO, Long projectId) {
         List<DataFieldDTO> dataFieldDTOList = new ArrayList<>();
+        String fieldName = String.format("%s(%s)", assetFieldDTO.getFieldName(), assetFieldDTO.getFieldType().toUpperCase());
         List<StandardAimDTO> standardAimDTOList = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, FIELD)
                         .andEqualTo(StandardAim.FIELD_DATASOURCE_CODE, assetFieldDTO.getDatasourceCode())
                         .andEqualTo(StandardAim.FIELD_SCHEMA_NAME, assetFieldDTO.getDatasourceSchema())
                         .andEqualTo(StandardAim.FIELD_TABLE_NAME, assetFieldDTO.getTableName())
-                        .andEqualTo(StandardAim.FIELD_FIELD_NAME, assetFieldDTO.getFieldName())
+                        .andEqualTo(StandardAim.FIELD_FIELD_NAME, fieldName)
                         .andEqualTo(StandardAim.FIELD_TENANT_ID, assetFieldDTO.getTenantId())
                         .andEqualTo(StandardAim.FIELD_PROJECT_ID, projectId))
                 .build());
