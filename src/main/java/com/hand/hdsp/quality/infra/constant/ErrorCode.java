@@ -194,4 +194,9 @@ public interface ErrorCode {
 
     String NO_APPROVAL_INSTANCE = "hdsp.xqua.err.no_approval_instance";
 
+    /**
+     * 分组下存在规则或其他分组
+     */
+    String EXISTS_OTHER_GROUP_OR_RULE = "hdsp.xqua.err.exists_other_group_or_rule";
+
 }
