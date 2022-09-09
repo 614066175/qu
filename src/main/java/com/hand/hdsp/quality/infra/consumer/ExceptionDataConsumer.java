@@ -42,23 +42,25 @@ public class ExceptionDataConsumer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         log.info("异常数据消费线程开启");
         ThreadPoolExecutor executor = CustomThreadPool.getExecutor();
-        while (true) {
-            try{
-                //判断有没有线程资源可以使用，有的话去阻塞获取消息
-                if (runningThread.get() < exceptionThreadNum) {
-                    String message = redisHelper.lstRightPop(messageKey, 0L, TimeUnit.DAYS);
-                    //开启线程消费消息
-                    executor.submit(() -> PlanExceptionUtil.getExceptionResult(message));
-                    runningThread.incrementAndGet();
-                }else {
-                    //没有资源可用，休眠
-                    Thread.sleep(1000);
+        executor.execute(()->{
+            while (true) {
+                try{
+                    //判断有没有线程资源可以使用，有的话去阻塞获取消息
+                    if (runningThread.get() < exceptionThreadNum) {
+                        String message = redisHelper.lstRightPop(messageKey, 0L, TimeUnit.DAYS);
+                        //开启线程消费消息
+                        executor.submit(() -> PlanExceptionUtil.getExceptionResult(message));
+                        runningThread.incrementAndGet();
+                    }else {
+                        //没有资源可用，休眠
+                        Thread.sleep(1000);
+                    }
+                }catch (Exception e){
+                    //即使此处是永久的阻塞获取，但是lettuce会导致命令超时io.lettuce.core.RedisCommandTimeoutException: Command timed out
+                    log.error("消费线程 error" + e.getMessage());
                 }
-            }catch (Exception e){
-                //即使此处是永久的阻塞获取，但是lettuce会导致命令超时io.lettuce.core.RedisCommandTimeoutException: Command timed out
-                log.error("消费线程 error" + e.getMessage());
             }
-        }
+        });
 
     }
 

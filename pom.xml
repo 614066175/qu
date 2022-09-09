@@ -61,7 +61,6 @@
         <dependency>
             <groupId>org.hzero.boot</groupId>
             <artifactId>hzero-boot-import</artifactId>
-            <version>${hzero.boot.version}</version>
         </dependency>
 
         <dependency>
