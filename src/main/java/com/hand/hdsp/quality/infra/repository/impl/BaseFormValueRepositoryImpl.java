@@ -4,7 +4,10 @@ import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.BaseFormValueDTO;
 import com.hand.hdsp.quality.domain.entity.BaseFormValue;
 import com.hand.hdsp.quality.domain.repository.BaseFormValueRepository;
+import com.hand.hdsp.quality.infra.mapper.BaseFormValueMapper;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * <p>质检项表单值资源库实现</p>
@@ -14,4 +17,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class BaseFormValueRepositoryImpl extends BaseRepositoryImpl<BaseFormValue, BaseFormValueDTO> implements BaseFormValueRepository {
 
+    private final BaseFormValueMapper baseFormValueMapper;
+
+    public BaseFormValueRepositoryImpl(BaseFormValueMapper baseFormValueMapper) {
+        this.baseFormValueMapper = baseFormValueMapper;
+    }
+
+    @Override
+    public List<BaseFormValueDTO> selectByPlanBaseId(Long planBaseId) {
+        return baseFormValueMapper.selectByPlanBaseId(planBaseId);
+    }
+
+    @Override
+    public List<BaseFormValueDTO> selectFormItem() {
+        return baseFormValueMapper.selectFormItem();
+    }
 }

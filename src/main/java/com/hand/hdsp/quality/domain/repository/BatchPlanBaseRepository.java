@@ -30,4 +30,5 @@ public interface BatchPlanBaseRepository extends BaseRepository<BatchPlanBase, B
      * @return BatchPlanBaseDTO 实体类
      */
     BatchPlanBaseDTO detail(Long planBaseId);
+
 }

@@ -88,6 +88,9 @@ public class BatchPlanBaseDTO extends AuditDomain {
     @ExcelColumn(zh = "表间规则", en = "batchPlanRelTableDTOList", child = true)
     private List<BatchPlanRelTableDTO> batchPlanRelTableDTOList;
 
+    @ExcelColumn(zh = "质检项表单值", en = "baseFormValueDTOList", child = true)
+    private List<BaseFormValueDTO> baseFormValueDTOList;
+
 
     @ApiModelProperty("表ID，主键，供其他表做外键")
     private Long planBaseId;
