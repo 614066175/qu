@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.infra.mapper;
 
+import com.hand.hdsp.quality.api.dto.BaseFormValueDTO;
+import com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO;
 import com.hand.hdsp.quality.domain.entity.BaseFormValue;
 import io.choerodon.mybatis.common.BaseMapper;
 
@@ -17,4 +19,14 @@ public interface BaseFormValueMapper extends BaseMapper<BaseFormValue> {
      * @param planBaseIds
      */
     void deleteFormValueByPlanBaseIds(List<Long> planBaseIds);
+
+    /**
+     * 根据质检项id查询动态表单code和value
+     * @param planBaseId
+     * @return
+     */
+    List<BaseFormValueDTO> selectByPlanBaseId(Long planBaseId);
+
+    List<BaseFormValueDTO> selectFormItem();
+
 }
