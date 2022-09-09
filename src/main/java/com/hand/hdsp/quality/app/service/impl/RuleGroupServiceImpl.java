@@ -14,6 +14,8 @@ import com.hand.hdsp.quality.domain.repository.RuleRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
@@ -53,8 +55,8 @@ public class RuleGroupServiceImpl implements RuleGroupService {
     public int delete(RuleGroupDTO ruleGroupDTO) {
         List<RuleGroupDTO> ruleGroupList = ruleGroupRepository.selectDTO(RuleGroup.FIELD_PARENT_GROUP_ID, ruleGroupDTO.getGroupId());
         List<RuleDTO> ruleDTOList = ruleRepository.selectDTO(Rule.FIELD_GROUP_ID, ruleGroupDTO.getGroupId());
-        if (!ruleGroupList.isEmpty() || !ruleDTOList.isEmpty()) {
-            throw new CommonException(ErrorCode.CAN_NOT_DELETE);
+        if (CollectionUtils.isNotEmpty(ruleGroupList) || CollectionUtils.isNotEmpty(ruleDTOList)) {
+            throw new CommonException(ErrorCode.EXISTS_OTHER_GROUP_OR_RULE);
         }
         return ruleGroupRepository.deleteByPrimaryKey(ruleGroupDTO);
     }
