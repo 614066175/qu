@@ -1,5 +1,8 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.metadata.Sheet;
+import com.alibaba.excel.support.ExcelTypeEnum;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchResultService;
 import com.hand.hdsp.quality.domain.entity.BatchPlan;
@@ -14,7 +17,6 @@ import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.feign.ExecutionFlowFeign;
 import com.hand.hdsp.quality.infra.mapper.BatchResultItemMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchResultMapper;
-import com.hand.hdsp.quality.infra.util.EasyExcelUtil;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.util.TimeToString;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
@@ -28,12 +30,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
+import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.core.util.ResponseUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationOptions;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -49,8 +55,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.ExceptionParam.RULE_NAME;
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.ExceptionParam.WARNING_LEVEL;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.ExceptionParam.*;
 
 /**
  * <p>批数据方案结果表应用服务默认实现</p>
@@ -74,11 +79,15 @@ public class BatchResultServiceImpl implements BatchResultService {
     @Autowired
     private StringRedisTemplate redisTemplate;
     private final MongoTemplate mongoTemplate;
+    private final ProfileClient profileClient;
+
+    public static final String DOWN_EXCEPTION_NUM = "XQUA.DOWN_EXCEPTION_NUM";
+    public static final String DOWN_EXCEPTION_BATCH_SIZE = "XQUA.DOWN_EXCEPTION_BATCH_SIZE";
 
     public BatchResultServiceImpl(ExecutionFlowFeign executionFlowFeign,
                                   BatchResultMapper batchResultMapper,
                                   BatchResultItemMapper batchResultItemMapper,
-                                  BatchResultBaseRepository batchResultBaseRepository, BatchResultRepository batchResultRepository, BatchPlanBaseRepository batchPlanBaseRepository, BatchPlanRepository batchPlanRepository, MongoTemplate mongoTemplate) {
+                                  BatchResultBaseRepository batchResultBaseRepository, BatchResultRepository batchResultRepository, BatchPlanBaseRepository batchPlanBaseRepository, BatchPlanRepository batchPlanRepository, MongoTemplate mongoTemplate, ProfileClient profileClient) {
         this.executionFlowFeign = executionFlowFeign;
         this.batchResultMapper = batchResultMapper;
         this.batchResultItemMapper = batchResultItemMapper;
@@ -87,6 +96,7 @@ public class BatchResultServiceImpl implements BatchResultService {
         this.batchPlanBaseRepository = batchPlanBaseRepository;
         this.batchPlanRepository = batchPlanRepository;
         this.mongoTemplate = mongoTemplate;
+        this.profileClient = profileClient;
     }
 
 
@@ -215,26 +225,44 @@ public class BatchResultServiceImpl implements BatchResultService {
             throw new CommonException(ErrorCode.BATCH_RESULT_NOT_EXIST);
         }
         //通过mongo来进行查询
-        Query query = new Query();
+        List<Criteria> criteriaList=new ArrayList<>();
+        Criteria criteria = new Criteria();
         if (StringUtils.isNotEmpty(exceptionDataDTO.getRuleName())) {
-            query.addCriteria(Criteria.where(RULE_NAME).regex(String.format(".*%s.*", exceptionDataDTO.getRuleName())));
+            criteriaList.add(Criteria.where(RULE_NAME).regex(String.format("^.*%s.*$", exceptionDataDTO.getRuleName())));
         }
         if (StringUtils.isNotEmpty(exceptionDataDTO.getWarningLevel())) {
             //告警等级
-            query.addCriteria(Criteria.where(WARNING_LEVEL).is(exceptionDataDTO.getWarningLevel()));
+            criteriaList.add(Criteria.where(WARNING_LEVEL).is(exceptionDataDTO.getWarningLevel()));
         }
-        //排除_id字段
-        query.fields().exclude("_id");
+        if(CollectionUtils.isNotEmpty(criteriaList)){
+            Criteria[] criteriaArrary=new Criteria[criteriaList.size()];
+            criteria.andOperator(criteriaList.toArray(criteriaArrary));
+        }
         String collectionName = String.format("%d_%d", exceptionDataDTO.getPlanBaseId(), resultBaseId);
-        long count = mongoTemplate.count(query, collectionName);
-        if (count == 0) {
+        //查询总数
+        Aggregation agg = Aggregation.newAggregation(
+                Aggregation.match(criteria),
+                Aggregation.count().as("count"),
+                Aggregation.project("count")).withOptions(AggregationOptions.builder().allowDiskUse(true).build());
+        AggregationResults<Map> aggregate = mongoTemplate.aggregate(agg, collectionName, Map.class);
+        Long total;
+        if (CollectionUtils.isEmpty(aggregate.getMappedResults())) {
+            total = 0L;
+        } else {
+            List<Map> mappedResults = aggregate.getMappedResults();
+            total = Long.parseLong(mappedResults.get(0).get("count").toString());
+        }
+        if (total == 0) {
             return new Page<>();
         }
+        Query query = new Query();
+        //排除_id字段
+        query.fields().exclude("_id");
+        query.addCriteria(criteria);
         //设置分页
         query.with(org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize()));
         List<Map> content = mongoTemplate.find(query, Map.class, collectionName);
-//        List<Map> content = getContent(query, collectionName, pageRequest.getPage(), pageRequest.getSize());
-        return new Page<>(content, new PageInfo(pageRequest.getPage(), pageRequest.getSize()), count);
+        return new Page<>(content, new PageInfo(pageRequest.getPage(), pageRequest.getSize()), total);
     }
 
     @SuppressWarnings(value = "all")
@@ -307,28 +335,20 @@ public class BatchResultServiceImpl implements BatchResultService {
         if (Objects.isNull(resultBaseId)) {
             throw new CommonException(ErrorCode.BATCH_RESULT_NOT_EXIST);
         }
-        //通过mongo来进行查询
-        Query query = new Query();
         String collectionName = String.format("%d_%d", exceptionDataDTO.getPlanBaseId(), resultBaseId);
-        // 通过 _id 来排序
-        query.with(Sort.by(Sort.Direction.ASC, "_id"));
-        //去掉_id和#PK等返回
-        query.fields().exclude("_id", "#pk", "#planBaseId", "#resultBaseId");
-        // 获取下载数据
-        List<Map> maps = mongoTemplate.find(query, Map.class, collectionName);
-        List<List<Object>> dataList = maps.stream().map(map -> {
-            List<Object> list = new ArrayList();
-            Set<String> set = map.keySet();
-            set.forEach(s -> list.add(map.get(s)));
-            return list;
-        }).collect(Collectors.toList());
-        // 获取excel表头
-        Set<String> set = maps.get(0).keySet();
-        List<List<String>> collect = set.stream().map(o -> {
-            List<String> list = new ArrayList<>();
-            list.add(o);
-            return list;
-        }).collect(Collectors.toList());
+        //获取总数，分批下载
+        Aggregation agg = Aggregation.newAggregation(Aggregation.count().as("count"),
+                Aggregation.project("count")).withOptions(AggregationOptions.builder().allowDiskUse(true).build());
+        AggregationResults<Map> aggregate = mongoTemplate.aggregate(agg, collectionName, Map.class);
+        Long total;
+        if (CollectionUtils.isEmpty(aggregate.getMappedResults())) {
+            total = 0L;
+        } else {
+            List<Map> mappedResults = aggregate.getMappedResults();
+            total = Long.parseLong(mappedResults.get(0).get("count").toString());
+        }
+
+
         // 写入到excel
         try (ServletOutputStream outputStream = response.getOutputStream()) {
             request.setCharacterEncoding(StandardCharsets.UTF_8.displayName());
@@ -336,7 +356,69 @@ public class BatchResultServiceImpl implements BatchResultService {
             response.setCharacterEncoding(StandardCharsets.UTF_8.displayName());
             response.setHeader("Content-disposition",
                     String.format("attachment;filename=%s.xlsx", "Exception-Data", "UTF-8"));
-            EasyExcelUtil.writeExcel(outputStream, collect, dataList, "Exception-Data", 1);
+
+            ExcelWriter writer = new ExcelWriter(outputStream, ExcelTypeEnum.XLSX, true);
+            int batchSize = Integer.parseInt(Optional.ofNullable(profileClient.getProfileValueByOptions(exceptionDataDTO.getTenantId(), null, null, DOWN_EXCEPTION_BATCH_SIZE)).orElse("10000"));
+            //多少页，也就是分多少批
+            long pageNumber = total % batchSize == 0 ? total / batchSize : total / batchSize + 1;
+            int totalAmount = 0;
+            int sheetNo = 1;
+            Sheet sheet = new Sheet(sheetNo, 0);
+            List<List<String>> headList = null;
+            for (int i = 0; i < pageNumber; i++) {
+                //一百万分sheet页
+                if (totalAmount >= 1000000) {
+                    sheet = new Sheet(++sheetNo, 0);
+                    sheet.setSheetName("Exception-Data" + "_" + sheetNo);
+                    if (headList != null) {
+                        sheet.setHead(headList);
+                    }
+                }
+
+                //通过mongo来进行查询
+                Query query = new Query();
+
+                // 通过 _id 来排序
+                query.with(Sort.by(Sort.Direction.ASC, "_id"));
+                //去掉_id和#PK等返回
+                query.fields().exclude("_id", "#pk", "#planBaseId", "#resultBaseId");
+                //分页查询
+                query.with(org.springframework.data.domain.PageRequest.of(i, batchSize));
+
+                List<Map> maps = mongoTemplate.find(query, Map.class, collectionName);
+                List<List<Object>> dataList = maps.stream().map(map -> {
+                    List<Object> list = new ArrayList();
+                    Set<String> set = map.keySet();
+                    set.forEach(s -> list.add(map.get(s)));
+                    return list;
+                }).collect(Collectors.toList());
+
+                Set<String> set = maps.get(0).keySet();
+                if (headList == null) {
+                    headList = set.stream().map(key -> {
+                        List<String> list = new ArrayList<>();
+                        switch (key){
+                            case RULE_NAME:
+                                list.add("规则名称");
+                                break;
+                            case EXCEPTION_INFO:
+                                list.add("异常信息");
+                                break;
+                            case WARNING_LEVEL:
+                                list.add("告警等级");
+                                break;
+                            default:
+                                list.add(key);
+                        }
+                        return list;
+                    }).collect(Collectors.toList());
+                    sheet.setHead(headList);
+                }
+                writer.write1(dataList, sheet);
+                outputStream.flush();
+                totalAmount += maps.size();
+            }
+            writer.finish();
         } catch (IOException e) {
             throw new CommonException(ErrorCode.EXCEL_WRITE_ERROR, e);
         }
@@ -350,7 +432,7 @@ public class BatchResultServiceImpl implements BatchResultService {
                 .build());
         if (CollectionUtils.isNotEmpty(batchResults)) {
             List<BatchResult> updateBatchResults = new ArrayList<>();
-            List<Long> deleteResultIds=new ArrayList<>();
+            List<Long> deleteResultIds = new ArrayList<>();
             for (BatchResult batchResult : batchResults) {
                 BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(batchResult.getPlanId());
                 if (batchPlan == null) {
@@ -379,7 +461,7 @@ public class BatchResultServiceImpl implements BatchResultService {
             if (CollectionUtils.isNotEmpty(updateBatchResults)) {
                 batchResultRepository.batchUpdateOptional(updateBatchResults, BatchResult.FIELD_PLAN_NAME);
             }
-            if(CollectionUtils.isNotEmpty(deleteResultIds)){
+            if (CollectionUtils.isNotEmpty(deleteResultIds)) {
                 log.info("进行删除");
                 batchResultMapper.deleteResultItem(deleteResultIds);
                 batchResultMapper.deleteResultRule(deleteResultIds);
