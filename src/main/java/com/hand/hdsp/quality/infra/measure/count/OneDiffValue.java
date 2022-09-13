@@ -35,6 +35,8 @@ public class OneDiffValue implements Count {
                 .build());
         BatchResultItem batchResultItem = param.getBatchResultItem();
         if (resultList.isEmpty()) {
+            //清空实际值
+            batchResultItem.setActualValue(null);
             return batchResultItem;
         }
 

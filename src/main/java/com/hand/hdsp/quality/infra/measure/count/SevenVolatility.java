@@ -36,6 +36,8 @@ public class SevenVolatility implements Count {
                 .measureDate(DateUtils.addDays(new Date(), -7))
                 .build());
         if (baseList.isEmpty()) {
+            //清空实际值
+            param.getBatchResultItem().setActualValue(null);
             return param.getBatchResultItem();
         }
 
