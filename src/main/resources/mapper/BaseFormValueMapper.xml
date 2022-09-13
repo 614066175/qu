@@ -20,9 +20,25 @@
         FROM
         xqua_base_form_value
         WHERE
-         plan_base_id in
+        plan_base_id in
         <foreach collection="planBaseIds" item="planBaseId" separator="," open="(" close=")">
             #{planBaseId}
         </foreach>
     </delete>
+    <select id="selectByPlanBaseId" resultType="com.hand.hdsp.quality.api.dto.BaseFormValueDTO">
+        select hfl.item_code, xbfv.form_value,xbpb.plan_base_code
+        from xqua_base_form_value xbfv
+                 join hpfm_form_line hfl on xbfv.form_line_id = hfl.form_line_id
+        join xqua_batch_plan_base xbpb on xbpb.plan_base_id = xbfv.plan_base_id
+        where xbfv.plan_base_id = #{planBaseId}
+          and hfl.enabled_flag = 1
+    </select>
+    <select id="selectFormItem" resultType="com.hand.hdsp.quality.api.dto.BaseFormValueDTO">
+        select hfl.form_line_id, hfl.item_code
+        from hpfm_form_line hfl
+                 join hpfm_form_header hfh on hfh.form_header_id = hfl.form_header_id
+        where hfh.enabled_flag = 1
+          and hfh.form_code = 'XQUA.PLAN_BASE'
+          and hfl.enabled_flag = 1
+    </select>
 </mapper>

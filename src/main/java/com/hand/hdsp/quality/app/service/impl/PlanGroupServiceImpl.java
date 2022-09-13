@@ -14,8 +14,6 @@ import com.hand.hdsp.quality.infra.mapper.BatchPlanBaseMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchPlanFieldMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchPlanRelTableMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchPlanTableMapper;
-import io.choerodon.core.exception.CommonException;
-
 import org.apache.commons.lang3.ObjectUtils;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
@@ -26,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static com.hand.hdsp.quality.infra.constant.GroupType.BATCH;
+
+import io.choerodon.core.exception.CommonException;
 
 /**
  * <p>评估方案分组表应用服务默认实现</p>
@@ -45,6 +45,7 @@ public class PlanGroupServiceImpl implements PlanGroupService {
     private final BatchPlanRelTableRepository batchPlanRelTableRepository;
     private final BatchPlanRelTableMapper batchPlanRelTableMapper;
     private final BatchPlanBaseMapper batchPlanBaseMapper;
+    private final BaseFormValueRepository baseFormValueRepository;
 
     public PlanGroupServiceImpl(PlanGroupRepository planGroupRepository,
                                 BatchPlanRepository batchPlanRepository,
@@ -52,7 +53,7 @@ public class PlanGroupServiceImpl implements PlanGroupService {
                                 BatchPlanTableRepository batchPlanTableRepository,
                                 BatchPlanTableMapper batchPlanTableMapper, BatchPlanFieldRepository batchPlanFieldRepository,
                                 BatchPlanFieldMapper batchPlanFieldMapper, BatchPlanRelTableRepository batchPlanRelTableRepository,
-                                BatchPlanRelTableMapper batchPlanRelTableMapper, BatchPlanBaseMapper batchPlanBaseMapper) {
+                                BatchPlanRelTableMapper batchPlanRelTableMapper, BatchPlanBaseMapper batchPlanBaseMapper, BaseFormValueRepository baseFormValueRepository) {
         this.planGroupRepository = planGroupRepository;
         this.batchPlanRepository = batchPlanRepository;
         this.batchPlanBaseRepository = batchPlanBaseRepository;
@@ -63,6 +64,7 @@ public class PlanGroupServiceImpl implements PlanGroupService {
         this.batchPlanRelTableRepository = batchPlanRelTableRepository;
         this.batchPlanRelTableMapper = batchPlanRelTableMapper;
         this.batchPlanBaseMapper = batchPlanBaseMapper;
+        this.baseFormValueRepository = baseFormValueRepository;
     }
 
 
@@ -80,12 +82,12 @@ public class PlanGroupServiceImpl implements PlanGroupService {
 
     @Override
     public List<PlanGroupDTO> export(PlanGroupDTO dto, ExportParam exportParam) {
-        if(ObjectUtils.isNotEmpty(dto.getPlanBaseId())){
+        if (ObjectUtils.isNotEmpty(dto.getPlanBaseId())) {
             BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseRepository.selectDTOByPrimaryKey(dto.getPlanBaseId());
             dto.setPlanId(batchPlanBaseDTO.getPlanId());
         }
         //获取groupId
-        if(ObjectUtils.isNotEmpty(dto.getPlanId())){
+        if (ObjectUtils.isNotEmpty(dto.getPlanId())) {
             BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(dto.getPlanId());
             dto.setGroupId(batchPlan.getGroupId());
         }
@@ -94,7 +96,7 @@ public class PlanGroupServiceImpl implements PlanGroupService {
                         .andEqualTo(PlanGroup.FIELD_GROUP_TYPE, BATCH)
                         .andEqualTo(PlanGroup.FIELD_TENANT_ID, dto.getTenantId())
                         .andEqualTo(PlanGroup.FIELD_PROJECT_ID, ProjectHelper.getProjectId())
-                        .andEqualTo(PlanGroup.FIELD_GROUP_ID,dto.getGroupId(),true))
+                        .andEqualTo(PlanGroup.FIELD_GROUP_ID, dto.getGroupId(), true))
                 .build());
 
         planGroupDTOList.forEach(planGroupDTO -> {
@@ -104,8 +106,8 @@ public class PlanGroupServiceImpl implements PlanGroupService {
                             .andEqualTo(BatchPlan.FIELD_PROJECT_ID, planGroupDTO.getProjectId())
                             .andEqualTo(BatchPlan.FIELD_GROUP_ID, planGroupDTO.getGroupId())
                             .andEqualTo(BatchPlan.FIELD_TENANT_ID, planGroupDTO.getTenantId())
-                            .andEqualTo(BatchPlan.FIELD_PLAN_NAME,dto.getPlanName(),true)
-                            .andEqualTo(BatchPlan.FIELD_PLAN_ID,dto.getPlanId(),true)
+                            .andEqualTo(BatchPlan.FIELD_PLAN_NAME, dto.getPlanName(), true)
+                            .andEqualTo(BatchPlan.FIELD_PLAN_ID, dto.getPlanId(), true)
                     )
                     .build());
             batchPlanDTOList.stream().parallel().forEach(batchPlanDTO -> {
@@ -115,18 +117,19 @@ public class PlanGroupServiceImpl implements PlanGroupService {
                                 .andEqualTo(BatchPlanBase.FIELD_PROJECT_ID, batchPlanDTO.getProjectId())
                                 .andEqualTo(BatchPlanBase.FIELD_PLAN_ID, batchPlanDTO.getPlanId())
                                 .andEqualTo(BatchPlanBase.FIELD_TENANT_ID, batchPlanDTO.getTenantId())
-                                .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_CODE,dto.getPlanBaseCode(),true)
-                                .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_NAME,dto.getPlanBaseName(),true)
-                                .andEqualTo(BatchPlanBase.FIELD_OBJECT_NAME,dto.getObjectName(),true)
-                                .andEqualTo(BatchPlanBase.FIELD_DESCRIPTION,dto.getDescription(),true)
-                                .andEqualTo(BatchPlanBase.FIELD_DATASOURCE_SCHEMA,dto.getDatasourceSchema(),true)
-                                .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_ID,dto.getPlanBaseId(),true)
+                                .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_CODE, dto.getPlanBaseCode(), true)
+                                .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_NAME, dto.getPlanBaseName(), true)
+                                .andEqualTo(BatchPlanBase.FIELD_OBJECT_NAME, dto.getObjectName(), true)
+                                .andEqualTo(BatchPlanBase.FIELD_DESCRIPTION, dto.getDescription(), true)
+                                .andEqualTo(BatchPlanBase.FIELD_DATASOURCE_SCHEMA, dto.getDatasourceSchema(), true)
+                                .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_ID, dto.getPlanBaseId(), true)
                         )
                         .build());
 
-                //fieldNum tableNum relTableNum currentPlanName
+                //formValue fieldNum tableNum relTableNum currentPlanName
                 batchPlanBaseDTOList.forEach(batchPlanBaseDTO -> {
-                    //查询基础配置下的表级，字段，表间规则
+                    //查询基础配置下的动态表单列，表级，字段，表间规则
+                    getPlanFormValue(batchPlanBaseDTO);
                     getPlanTable(batchPlanBaseDTO);
                     getPlanField(batchPlanBaseDTO);
                     getPlanRelTable(batchPlanBaseDTO);
@@ -136,6 +139,10 @@ public class PlanGroupServiceImpl implements PlanGroupService {
             planGroupDTO.setBatchPlanDTOList(batchPlanDTOList);
         });
         return planGroupDTOList;
+    }
+
+    private void getPlanFormValue(BatchPlanBaseDTO batchPlanBaseDTO) {
+        batchPlanBaseDTO.setBaseFormValueDTOList(baseFormValueRepository.selectByPlanBaseId(batchPlanBaseDTO.getPlanBaseId()));
     }
 
     private void getPlanTable(BatchPlanBaseDTO batchPlanBaseDTO) {
