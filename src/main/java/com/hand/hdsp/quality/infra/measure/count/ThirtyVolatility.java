@@ -36,6 +36,8 @@ public class ThirtyVolatility implements Count {
                 .measureDate(DateUtils.addDays(new Date(), -30))
                 .build());
         if (baseList.isEmpty()) {
+            //清空实际值
+            param.getBatchResultItem().setActualValue(null);
             return param.getBatchResultItem();
         }
 

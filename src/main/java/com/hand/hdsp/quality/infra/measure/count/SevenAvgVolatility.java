@@ -39,6 +39,8 @@ public class SevenAvgVolatility implements Count {
                 .build());
 
         if (CollectionUtils.isEmpty(resultList)) {
+            //清空实际值
+            param.getBatchResultItem().setActualValue(null);
             return param.getBatchResultItem();
         }
 

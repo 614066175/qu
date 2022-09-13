@@ -36,6 +36,8 @@ public class MonthFirstVolatility implements Count {
                 .measureDate(DateUtils.setDays(new Date(), 1))
                 .build());
         if (baseList.isEmpty()) {
+            //清空实际值
+            param.getBatchResultItem().setActualValue(null);
             return param.getBatchResultItem();
         }
 
