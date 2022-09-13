@@ -122,6 +122,7 @@ public class DataFieldDTO extends AuditDomain {
     private Long tenantId;
 
     @ApiModelProperty(value = "是否可空，1可空 0 不可空")
+    @ExcelColumn(zh = "可否为空" ,en = "is null or not")
     private Integer nullFlag;
 
     @Transient
