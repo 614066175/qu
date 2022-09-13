@@ -40,8 +40,8 @@ public class DataLengthMeasure implements Measure {
     private final DriverSessionService driverSessionService;
     private final LovAdapter lovAdapter;
     public static final String COUNT = "COUNT";
-    public static final String START_VALUE = " and length(${field}) > %s";
-    public static final String END_VALUE = " and length(${field}) < %s";
+    public static final String START_VALUE = " and length(${field}) >= %s";
+    public static final String END_VALUE = " and length(${field}) <= %s";
 
     public DataLengthMeasure(ItemTemplateSqlRepository templateSqlRepository, DriverSessionService driverSessionService, LovAdapter lovAdapter) {
         this.templateSqlRepository = templateSqlRepository;

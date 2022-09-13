@@ -26,7 +26,6 @@ import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.util.ParamsUtil;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
-import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -60,6 +59,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.SqlType.TABLE;
+
+import io.choerodon.core.exception.CommonException;
 
 /**
  * <p>
@@ -951,16 +952,22 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 batchResultItem.setPlanLineId(batchPlanFieldConDO.getPlanLineId());
                 batchResultItem.setConditionId(batchPlanFieldConDO.getConditionId());
                 batchResultItem.setWhereCondition(batchPlanFieldConDO.getWhereCondition());
-                batchResultItem.setCompareWay(batchPlanFieldConDO.getCompareWay());
                 batchResultItem.setCheckWay(batchPlanFieldConDO.getCheckWay());
                 batchResultItem.setWarningLevelJson(batchPlanFieldConDO.getWarningLevel());
                 batchResultItem.setCheckWay(batchPlanFieldConDO.getCheckWay());
                 batchResultItem.setCheckItem(batchPlanFieldConDO.getCheckItem());
-                batchResultItem.setCountType(batchPlanFieldConDO.getCountType());
+                if (PlanConstant.CheckItem.CONSISTENCY.equals(batchResultItem.getCheckItem())) {
+                    batchResultItem.setCountType(null);
+                    batchResultItem.setCompareWay(null);
+                } else {
+                    batchResultItem.setCountType(batchPlanFieldConDO.getCountType());
+                    batchResultItem.setCompareWay(batchPlanFieldConDO.getCompareWay());
+                }
                 if (PlanConstant.CheckWay.REGULAR.equals(batchPlanFieldConDO.getCheckWay())) {
                     batchResultItem.setCheckItem(PlanConstant.CheckWay.REGULAR);
                     batchResultItem.setCountType(null);
                 }
+
                 batchResultItem.setFieldName(batchPlanFieldConDO.getFieldName());
                 batchResultItem.setCheckFieldName(batchPlanFieldConDO.getCheckFieldName());
                 batchResultItem.setCheckFieldName(batchPlanFieldConDO.getCheckFieldName());
