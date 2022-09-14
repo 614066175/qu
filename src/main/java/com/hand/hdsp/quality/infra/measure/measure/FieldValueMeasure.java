@@ -56,8 +56,8 @@ public class FieldValueMeasure implements Measure {
     private static final String COUNT = "COUNT";
     private static final String EQUAL_SQL = " and ${field} = (%s)";
     private static final String NOT_EQUAL_SQL = " and ${field} != (%s)";
-    private static final String START_SQL = " and ${field} > %s";
-    private static final String END_SQL = " and ${field} < %s";
+    private static final String START_SQL = " and ${field} >= %s";
+    private static final String END_SQL = " and ${field} <= %s";
     private final ItemTemplateSqlRepository templateSqlRepository;
     private final LovAdapter lovAdapter;
     private final DriverSessionService driverSessionService;
