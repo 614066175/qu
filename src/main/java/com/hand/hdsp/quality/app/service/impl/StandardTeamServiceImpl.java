@@ -4,6 +4,7 @@ import com.hand.hdsp.core.util.PageParseUtil;
 import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.StandardTeamDTO;
+import com.hand.hdsp.quality.api.dto.TableColumnDTO;
 import com.hand.hdsp.quality.app.service.StandardTeamService;
 import com.hand.hdsp.quality.domain.entity.StandardRelation;
 import com.hand.hdsp.quality.domain.entity.StandardTeam;
@@ -11,6 +12,7 @@ import com.hand.hdsp.quality.domain.repository.DataFieldRepository;
 import com.hand.hdsp.quality.domain.repository.StandardRelationRepository;
 import com.hand.hdsp.quality.domain.repository.StandardTeamRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.feign.ModelFeign;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import com.hand.hdsp.quality.infra.mapper.StandardTeamMapper;
 import io.choerodon.core.domain.Page;
@@ -46,13 +48,15 @@ public class StandardTeamServiceImpl implements StandardTeamService {
 
     private final DataFieldMapper dataFieldMapper;
     private final DataFieldRepository dataFieldRepository;
+    private final ModelFeign modelFeign;
 
-    public StandardTeamServiceImpl(StandardTeamRepository standardTeamRepository, StandardTeamMapper standardTeamMapper, StandardRelationRepository standardRelationRepository, DataFieldMapper dataFieldMapper, DataFieldRepository dataFieldRepository) {
+    public StandardTeamServiceImpl(StandardTeamRepository standardTeamRepository, StandardTeamMapper standardTeamMapper, StandardRelationRepository standardRelationRepository, DataFieldMapper dataFieldMapper, DataFieldRepository dataFieldRepository, ModelFeign modelFeign) {
         this.standardTeamRepository = standardTeamRepository;
         this.standardTeamMapper = standardTeamMapper;
         this.standardRelationRepository = standardRelationRepository;
         this.dataFieldMapper = dataFieldMapper;
         this.dataFieldRepository = dataFieldRepository;
+        this.modelFeign = modelFeign;
     }
 
     @Override
@@ -341,6 +345,14 @@ public class StandardTeamServiceImpl implements StandardTeamService {
 
     @Override
     public Page<DataFieldDTO> standardList(DataFieldDTO dataFieldDTO, PageRequest pageRequest) {
+        if (dataFieldDTO.getCustomTableId() != null) {
+            //从表设计查询标准组
+            List<TableColumnDTO> tableColumnDTOS = dataFieldMapper.selectStandardColumn(dataFieldDTO.getCustomTableId());
+            if(CollectionUtils.isNotEmpty(tableColumnDTOS)){
+                List<Long> checkFieldIds = tableColumnDTOS.stream().map(TableColumnDTO::getQuoteId).collect(Collectors.toList());
+                dataFieldDTO.setCheckFieldIds(checkFieldIds);
+            }
+        }
         if (dataFieldDTO.getStandardTeamId() == null) {
             //如果没有传递标准组参数，则就是字段标准的列表查询
             return PageHelper.doPage(pageRequest, () -> dataFieldMapper.list(dataFieldDTO));
@@ -365,6 +377,11 @@ public class StandardTeamServiceImpl implements StandardTeamService {
         if (StringUtils.isNotEmpty(dataFieldDTO.getStandardStatus())) {
             dataFieldDTOList = dataFieldDTOList.stream()
                     .filter(dto -> dto.getStandardStatus().equals(dataFieldDTO.getStandardStatus()))
+                    .collect(Collectors.toList());
+        }
+        if (CollectionUtils.isNotEmpty(dataFieldDTO.getCheckFieldIds())) {
+            dataFieldDTOList = dataFieldDTOList.stream()
+                    .filter(dto -> !dataFieldDTO.getCheckFieldIds().contains(dto.getFieldId()))
                     .collect(Collectors.toList());
         }
         org.springframework.data.domain.Page<DataFieldDTO> page = PageUtil.doPage(dataFieldDTOList, org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize()));

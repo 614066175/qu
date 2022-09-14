@@ -33,32 +33,80 @@
     </resultMap>
 
 
-
     <sql id="baseColumn">
-          ${fs}.field_id,
-          ${fs}.group_id,
-          ${fs}.field_name,
-          ${fs}.field_comment,
-          ${fs}.sys_common_name,
-          ${fs}.standard_desc,
-          ${fs}.field_type,
-          ${fs}.field_length,
-          ${fs}.data_pattern,
-          ${fs}.value_type,
-          ${fs}.value_range,
-          ${fs}.charge_dept_id,
-          ${fs}.charge_id,
-          ${fs}.standard_status,
-          ${fs}.tenant_id,
-          ${fs}.field_accuracy,
-          ${fs}.object_version_number,
-          ${fs}.creation_date,
-          ${fs}.created_by,
-          ${fs}.last_updated_by,
-          ${fs}.last_update_date,
-          ${fs}.data_standard_id,
-          ${fs}.null_flag,
-          ${fs}.default_value
+        ${fs}
+        .
+        field_id
+        ,
+        ${fs}
+        .
+        group_id,
+        ${fs}
+        .
+        field_name,
+        ${fs}
+        .
+        field_comment,
+        ${fs}
+        .
+        sys_common_name,
+        ${fs}
+        .
+        standard_desc,
+        ${fs}
+        .
+        field_type,
+        ${fs}
+        .
+        field_length,
+        ${fs}
+        .
+        data_pattern,
+        ${fs}
+        .
+        value_type,
+        ${fs}
+        .
+        value_range,
+        ${fs}
+        .
+        charge_dept_id,
+        ${fs}
+        .
+        charge_id,
+        ${fs}
+        .
+        standard_status,
+        ${fs}
+        .
+        tenant_id,
+        ${fs}
+        .
+        field_accuracy,
+        ${fs}
+        .
+        object_version_number,
+        ${fs}
+        .
+        creation_date,
+        ${fs}
+        .
+        created_by,
+        ${fs}
+        .
+        last_updated_by,
+        ${fs}
+        .
+        last_update_date,
+        ${fs}
+        .
+        data_standard_id,
+        ${fs}
+        .
+        null_flag,
+        ${fs}
+        .
+        default_value
     </sql>
 
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.DataFieldDTO">
@@ -132,43 +180,49 @@
             <if test="dataFieldDTO.projectId !=null">
                 and fs.project_id=#{dataFieldDTO.projectId}
             </if>
+            <if test="dataFieldDTO.checkFieldIds !=null">
+                and fs.field_id not in
+                <foreach collection="dataFieldDTO.checkFieldIds" item="checkFieldId" open="(" close=")" separator=",">
+                    #{checkFieldId}
+                </foreach>
+
+            </if>
         </where>
         order by fs.creation_date desc
     </select>
 
     <select id="selectIdByChargeDeptName" resultType="java.lang.Long">
-        SELECT
-            unit_id
-        FROM
-            hpfm_unit
-        WHERE
-            unit_name=#{chargeDeptName}
-          and tenant_id =#{tenantId}
+        SELECT unit_id
+        FROM hpfm_unit
+        WHERE unit_name = #{chargeDeptName}
+          and tenant_id = #{tenantId}
     </select>
 
     <select id="selectIdByChargeName" resultType="java.lang.Long">
-        SELECT
-            id
-        FROM
-            iam_user
-        WHERE
-            login_name=#{chargeName}
-          and organization_id in (#{tenantId},0)
+        SELECT id
+        FROM iam_user
+        WHERE login_name = #{chargeName}
+          and organization_id in (#{tenantId}, 0)
     </select>
     <select id="selectChargeNameById" resultType="java.lang.String">
-        SELECT
-            login_name
-        FROM
-            iam_user
-        WHERE
-            id=#{chargeId}
+        SELECT login_name
+        FROM iam_user
+        WHERE id = #{chargeId}
     </select>
     <select id="selectChargeDeptNameById" resultType="java.lang.String">
-       SELECT
-            unit_name
-        FROM
-            hpfm_unit
-        WHERE
-            unit_id=#{chargeDeptId}
+        SELECT unit_name
+        FROM hpfm_unit
+        WHERE unit_id = #{chargeDeptId}
+    </select>
+    <select id="selectStandardColumn" resultType="com.hand.hdsp.quality.api.dto.TableColumnDTO">
+        select xtc.*,
+        xfs.field_name quoteFieldName
+        from xidx_table_column xtc
+        join xsta_field_standard xfs on xtc.quote_type='FIELD' and xtc.quote_id=xfs.field_id
+        <where>
+            <if test="customTableId !=null">
+                and xtc.custom_table_id=#{customTableId}
+            </if>
+        </where>
     </select>
 </mapper>
