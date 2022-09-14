@@ -190,6 +190,13 @@ public class DataFieldDTO extends AuditDomain {
     @Transient
     private List<StandardTeamDTO> standardTeamDTOList;
 
+    @Transient
+    //用于排除显示
+    private List<Long> checkFieldIds;
+
+    @Transient
+    //表设计主键，用于排除表设计已保存字段引用的字段标准
+    private Long customTableId;
 
     public interface Group1 {
     }
