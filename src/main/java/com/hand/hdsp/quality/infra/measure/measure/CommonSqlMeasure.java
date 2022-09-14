@@ -36,6 +36,8 @@ public class CommonSqlMeasure implements Measure {
 
     private final List<String> checkItemList = Arrays.asList("FIELD_UNIQUE_LINE", "FIELD_EMPTY_LINE");
 
+    private final List<String> emptyItemList=Arrays.asList("FIELD_EMPTY","FIELD_EMPTY_LINE");
+
     public CommonSqlMeasure(ItemTemplateSqlRepository templateSqlRepository,
                             CountCollector countCollector, DriverSessionService driverSessionService) {
         this.templateSqlRepository = templateSqlRepository;
@@ -57,7 +59,13 @@ public class CommonSqlMeasure implements Measure {
 
         Map<String, String> variables = new HashMap<>(8);
         variables.put("table", batchResultBase.getPackageObjectName());
-        variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
+        //如果是有空值的校验项，需特殊处理
+        if(emptyItemList.contains(itemTemplateSql.getCheckItem())){
+            //多字段空值，需要做sql拼接
+            variables.put("field", MeasureUtil.handleEmpty(param.getFieldName()));
+        }else{
+            variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
+        }
         //维度字段
         variables.put("dimension", StringUtils.isEmpty(param.getDimensionField()) ? Strings.EMPTY : String.format("group by %s", MeasureUtil.handleFieldName(param.getDimensionField())));
 

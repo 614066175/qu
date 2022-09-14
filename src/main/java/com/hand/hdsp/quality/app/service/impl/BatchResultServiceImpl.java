@@ -225,7 +225,7 @@ public class BatchResultServiceImpl implements BatchResultService {
             throw new CommonException(ErrorCode.BATCH_RESULT_NOT_EXIST);
         }
         //通过mongo来进行查询
-        List<Criteria> criteriaList=new ArrayList<>();
+        List<Criteria> criteriaList = new ArrayList<>();
         Criteria criteria = new Criteria();
         if (StringUtils.isNotEmpty(exceptionDataDTO.getRuleName())) {
             criteriaList.add(Criteria.where(RULE_NAME).regex(String.format("^.*%s.*$", exceptionDataDTO.getRuleName())));
@@ -234,8 +234,8 @@ public class BatchResultServiceImpl implements BatchResultService {
             //告警等级
             criteriaList.add(Criteria.where(WARNING_LEVEL).is(exceptionDataDTO.getWarningLevel()));
         }
-        if(CollectionUtils.isNotEmpty(criteriaList)){
-            Criteria[] criteriaArrary=new Criteria[criteriaList.size()];
+        if (CollectionUtils.isNotEmpty(criteriaList)) {
+            Criteria[] criteriaArrary = new Criteria[criteriaList.size()];
             criteria.andOperator(criteriaList.toArray(criteriaArrary));
         }
         String collectionName = String.format("%d_%d", exceptionDataDTO.getPlanBaseId(), resultBaseId);
@@ -348,6 +348,8 @@ public class BatchResultServiceImpl implements BatchResultService {
             total = Long.parseLong(mappedResults.get(0).get("count").toString());
         }
 
+        BatchPlanBase batchPlanBase = batchPlanBaseRepository.selectByPrimaryKey(exceptionDataDTO.getPlanBaseId());
+        BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(batchPlanBase.getPlanId());
 
         // 写入到excel
         try (ServletOutputStream outputStream = response.getOutputStream()) {
@@ -355,7 +357,7 @@ public class BatchResultServiceImpl implements BatchResultService {
             response.setContentType("multipart/form-data");
             response.setCharacterEncoding(StandardCharsets.UTF_8.displayName());
             response.setHeader("Content-disposition",
-                    String.format("attachment;filename=%s.xlsx", "Exception-Data", "UTF-8"));
+                    String.format("attachment;filename=%s-%s.xlsx", batchPlan.getPlanName(), batchPlanBase.getPlanBaseName(), "UTF-8"));
 
             ExcelWriter writer = new ExcelWriter(outputStream, ExcelTypeEnum.XLSX, true);
             int batchSize = Integer.parseInt(Optional.ofNullable(profileClient.getProfileValueByOptions(exceptionDataDTO.getTenantId(), null, null, DOWN_EXCEPTION_BATCH_SIZE)).orElse("10000"));
@@ -397,7 +399,7 @@ public class BatchResultServiceImpl implements BatchResultService {
                 if (headList == null) {
                     headList = set.stream().map(key -> {
                         List<String> list = new ArrayList<>();
-                        switch (key){
+                        switch (key) {
                             case RULE_NAME:
                                 list.add("规则名称");
                                 break;

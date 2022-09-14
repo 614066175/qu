@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * <p>评估工具类</p>
@@ -37,6 +38,7 @@ public class MeasureUtil {
     private static final String FIXED_VALUE_WARNING_INFO = "固定值满足告警条件";
     private static final String FIXED_RANGE_WARNING_INFO = "固定值在告警范围内";
     private static final String VOLATILITY_WARNING_INFO = "波动率在告警范围内";
+    private static final String EMPTY_SQL=" (%s is null or %s ='') ";
 
 
     /**
@@ -180,6 +182,30 @@ public class MeasureUtil {
             }
         }
         return StringUtils.join(list, BaseConstants.Symbol.COMMA);
+    }
+
+    /**
+     * 处理空值校验
+     *
+     * @param fieldName
+     * @return
+     */
+    public static String handleEmpty(String fieldName) {
+        if (StringUtils.isBlank(fieldName)) {
+            return null;
+        }
+        String[] strings = fieldName.split(BaseConstants.Symbol.COMMA);
+        List<String> list = new ArrayList<>();
+        for (String column : strings) {
+            if (StringUtils.isNotEmpty(column) && column.contains("(")) {
+                list.add(column.substring(0, column.indexOf('(')));
+            } else {
+                list.add(column);
+            }
+        }
+        // ( a is null or a = '') and (b is null or b ='')
+        List<String> emptySqlList = list.stream().map(column -> String.format(EMPTY_SQL, column, column)).collect(Collectors.toList());
+        return StringUtils.join(emptySqlList, "and");
     }
 
     /**
