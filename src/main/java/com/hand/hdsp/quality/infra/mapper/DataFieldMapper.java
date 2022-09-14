@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.infra.mapper;
 
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
+import com.hand.hdsp.quality.api.dto.TableColumnDTO;
 import com.hand.hdsp.quality.domain.entity.DataField;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
@@ -54,4 +55,11 @@ public interface DataFieldMapper extends BaseMapper<DataField> {
      * @return String
      */
     String selectChargeDeptNameById(@Param("chargeDeptId") Long chargeDeptId);
+
+    /**
+     * 查询表设计基于标准创建的字段
+     * @param customTableId
+     * @return
+     */
+    List<TableColumnDTO> selectStandardColumn(Long customTableId);
 }

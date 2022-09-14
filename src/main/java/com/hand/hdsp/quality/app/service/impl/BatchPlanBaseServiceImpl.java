@@ -1,6 +1,5 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.core.util.JsqlParser;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanBaseService;
@@ -13,7 +12,7 @@ import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.feign.ModelFeign;
-import io.choerodon.core.domain.Page;
+import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -55,6 +54,9 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
     private BatchPlanRelTableRepository batchPlanRelTableRepository;
     @Resource
     private BatchResultRepository batchResultRepository;
+
+    @Resource
+    private DataFieldMapper dataFieldMapper;
 
     private final PlanBaseAssignRepository planBaseAssignRepository;
     private final BaseFormValueRepository baseFormValueRepository;
@@ -207,18 +209,10 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
                         throw new CommonException(exceptionResponse.getMessage());
                     });
             if (dto != null) {
-                // feign调用获取表设计对应的表字段
-                ResponseEntity<String> columnBody = modelFeign.list(dto.getTenantId(), dto.getProjectId(), dto.getCustomTableId());
-                List<TableColumnDTO> columnDTOList = ResponseUtils.getResponse(columnBody, new TypeReference<Page<TableColumnDTO>>() {
-                }, (httpStatus, response) -> {
-                    throw new CommonException(response);
-                }, exceptionResponse -> {
-                    throw new CommonException(exceptionResponse.getMessage());
-                });
+                List<TableColumnDTO> columnDTOList = dataFieldMapper.selectStandardColumn(dto.getCustomTableId());
                 if (CollectionUtils.isNotEmpty(columnDTOList)) {
-                    List<TableColumnDTO> field = columnDTOList.stream().filter(column -> "FIELD".equals(column.getQuoteType())).collect(Collectors.toList());
-                    if (CollectionUtils.isNotEmpty(field)) {
-                        for (TableColumnDTO tableColumnDTO : field) {
+                    if (CollectionUtils.isNotEmpty(columnDTOList)) {
+                        for (TableColumnDTO tableColumnDTO : columnDTOList) {
                             // 将字段标准转换为规则
                             BatchPlanFieldDTO batchPlanFieldDTO = dataFieldService.standardToRule(tableColumnDTO.getQuoteId(), tableColumnDTO.getColumnType());
                             insert(batchPlanFieldDTO, batchPlanBaseDTO);
