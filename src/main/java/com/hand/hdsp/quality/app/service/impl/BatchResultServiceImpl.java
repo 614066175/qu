@@ -404,7 +404,7 @@ public class BatchResultServiceImpl implements BatchResultService {
                                 list.add("规则名称");
                                 break;
                             case EXCEPTION_INFO:
-                                list.add("异常信息");
+                                list.add("错误信息");
                                 break;
                             case WARNING_LEVEL:
                                 list.add("告警等级");
