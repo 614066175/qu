@@ -182,6 +182,11 @@ public class BatchResultServiceImpl implements BatchResultService {
         List<BatchResultBaseDTO> batchResultBaseDTOList = page.getContent();
         if (CollectionUtils.isNotEmpty(batchResultBaseDTOList)) {
             for (BatchResultBaseDTO batchResultBaseDTO : batchResultBaseDTOList) {
+                BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseRepository.selectDTOByPrimaryKey(batchResultBaseDTO.getPlanBaseId());
+                if (batchPlanBaseDTO != null) {
+                    //设置质检项详情
+                    batchResultBaseDTO.setBatchPlanBaseDTO(batchPlanBaseDTO);
+                }
                 //获取base下所有校验项的告警等级Json
                 List<String> warningLevelJsonList = batchResultItemMapper.selectWaringLevelJson(batchResultBaseDTO);
                 //将所有告警等级Json转换合并成集合
