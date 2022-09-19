@@ -1,8 +1,5 @@
 package com.hand.hdsp.quality.api.dto;
 
-import java.util.List;
-import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import io.choerodon.mybatis.annotation.ModifyAudit;
@@ -11,6 +8,10 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+
+import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <p>批数据方案结果表-表信息 数据传输对象</p>
@@ -87,5 +88,8 @@ public class BatchResultBaseDTO extends AuditDomain {
     private List<BatchResultItemDTO> tableRelResult;
 
     private Long projectId;
+
+    @Transient
+    private BatchPlanBaseDTO batchPlanBaseDTO;
 
 }
