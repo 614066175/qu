@@ -119,8 +119,8 @@ public class DataStandardDTO extends AuditDomain{
     @Size(max = 30)
     private String standardStatus;
 
-    @ApiModelProperty(value = "是否可空，1可空 0 不可空")
-    @ExcelColumn(zh = "可否为空",en = "isNullOrNot")
+    @ApiModelProperty(value = "是否可为空，1可空 0 不可空")
+    @ExcelColumn(zh = "是否可为空",en = "Can be empty or not")
     private Integer nullFlag;
 
     @ApiModelProperty(value = "租户ID")
