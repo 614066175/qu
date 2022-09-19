@@ -1,12 +1,5 @@
 package com.hand.hdsp.quality.infra.util;
 
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.RANGE;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
@@ -38,7 +31,7 @@ public class ValueRangeHandler implements StandardHandler {
 
     @Override
     public BatchPlanFieldLineDTO handle(DataStandardDTO dataStandardDTO) {
-        if (Strings.isEmpty(dataStandardDTO.getValueRange())) {
+        if (Strings.isEmpty(dataStandardDTO.getValueRange()) || StringUtils.isEmpty(dataStandardDTO.getValueType())) {
             return null;
         }
         BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()
@@ -117,7 +110,7 @@ public class ValueRangeHandler implements StandardHandler {
 
     @Override
     public BatchPlanFieldLineDTO handle(DataFieldDTO dataFieldDTO, String fieldType) {
-        if (Strings.isEmpty(dataFieldDTO.getValueRange())) {
+        if (Strings.isEmpty(dataFieldDTO.getValueRange()) || StringUtils.isEmpty(dataFieldDTO.getValueType())) {
             return null;
         }
         BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()
@@ -129,7 +122,7 @@ public class ValueRangeHandler implements StandardHandler {
         String warningLevel = "";
         WarningLevelDTO warningLevelDTO;
         List<WarningLevelDTO> warningLevelDTOList = null;
-        if(StringUtils.isNotEmpty(dataFieldDTO.getValueType())){
+        if (StringUtils.isNotEmpty(dataFieldDTO.getValueType())) {
             switch (dataFieldDTO.getValueType()) {
                 case PlanConstant.StandardValueType.AREA:
                     batchPlanFieldLineDTO.setCountType(PlanConstant.CountType.FIXED_VALUE);
