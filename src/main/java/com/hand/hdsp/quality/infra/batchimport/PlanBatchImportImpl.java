@@ -12,6 +12,7 @@ import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.hzero.boot.imported.app.service.BatchImportHandler;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.mybatis.domian.Condition;
@@ -31,7 +32,7 @@ import java.util.List;
  */
 @Slf4j
 @ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_BATCH_PLAN, sheetIndex = 1)
-public class PlanBatchImportImpl implements IBatchImportService {
+public class PlanBatchImportImpl extends BatchImportHandler implements IBatchImportService {
     private final ObjectMapper objectMapper;
 
     private final BatchPlanRepository batchPlanRepository;
@@ -65,7 +66,8 @@ public class PlanBatchImportImpl implements IBatchImportService {
             return false;
         }
         List<BatchPlanDTO> insertBatchPlanDTOList = new ArrayList<>();
-        plans.forEach(batchPlan -> {
+        int index = 0;
+        for (BatchPlanDTO batchPlan : plans) {
             List<PlanGroupDTO> planGroupDTOList = planGroupRepository.selectDTOByCondition(Condition.builder(PlanGroup.class)
                     .andWhere(Sqls.custom()
                             .andEqualTo(PlanGroup.FIELD_GROUP_CODE, batchPlan.getGroupCode())
@@ -74,6 +76,8 @@ public class PlanBatchImportImpl implements IBatchImportService {
                     .build());
             if (CollectionUtils.isNotEmpty(planGroupDTOList)) {
                 batchPlan.setGroupId(planGroupDTOList.get(0).getGroupId());
+            } else {
+                addErrorMsg(index, String.format("方案分组【%s】不存在", batchPlan.getGroupCode()));
             }
 
             BatchPlan plan = batchPlanRepository.selectOne(BatchPlan.builder().planCode(batchPlan.getPlanCode())
@@ -88,7 +92,8 @@ public class PlanBatchImportImpl implements IBatchImportService {
             } else {
                 insertBatchPlanDTOList.add(batchPlan);
             }
-        });
+            index++;
+        }
         batchPlanRepository.batchInsertDTOSelective(insertBatchPlanDTOList);
         return true;
     }

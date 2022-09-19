@@ -20,6 +20,7 @@ import com.hand.hdsp.quality.infra.converter.BatchPlanTableLineConverter;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.hzero.boot.imported.app.service.BatchImportHandler;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.mybatis.domian.Condition;
@@ -39,7 +40,7 @@ import java.util.List;
  */
 @Slf4j
 @ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_BATCH_PLAN, sheetIndex = 3)
-public class PlanTableBatchImportImpl implements IBatchImportService {
+public class PlanTableBatchImportImpl extends BatchImportHandler implements IBatchImportService {
 
     private final ObjectMapper objectMapper;
 
@@ -72,6 +73,7 @@ public class PlanTableBatchImportImpl implements IBatchImportService {
         Long projectId = ProjectHelper.getProjectId();
         List<BatchPlanTableDTO> batchPlanTableDTOS = new ArrayList<>(data.size());
         try {
+            int index = 0;
             for (String json : data) {
                 BatchPlanTableDTO batchPlanTableDTO = objectMapper.readValue(json, BatchPlanTableDTO.class);
                 batchPlanTableDTO.setExceptionBlock("是".equals(batchPlanTableDTO.getExceptionBlockFlag()) ? 1 : 0);
@@ -86,8 +88,12 @@ public class PlanTableBatchImportImpl implements IBatchImportService {
                         .build());
                 if (CollectionUtils.isNotEmpty(batchPlanBaseDTOS)) {
                     batchPlanTableDTO.setPlanBaseId(batchPlanBaseDTOS.get(0).getPlanBaseId());
+                } else {
+                    addErrorMsg(index, String.format("质检项编码【%s】不存在", batchPlanTableDTO.getPlanBaseCode()));
+                    return false;
                 }
                 batchPlanTableDTOS.add(batchPlanTableDTO);
+                index++;
             }
         } catch (IOException e) {
             // 失败
@@ -96,7 +102,7 @@ public class PlanTableBatchImportImpl implements IBatchImportService {
             return false;
         }
         //看表级规则存不存在
-        List<BatchPlanTableDTO> tableList=new ArrayList<>();
+        List<BatchPlanTableDTO> tableList = new ArrayList<>();
         batchPlanTableDTOS.forEach(batchPlanTableDTO -> {
             BatchPlanTable batchPlanTable = batchPlanTableRepository.selectOne(BatchPlanTable.builder().planBaseId(batchPlanTableDTO.getPlanBaseId())
                     .ruleCode(batchPlanTableDTO.getRuleCode())
@@ -107,7 +113,7 @@ public class PlanTableBatchImportImpl implements IBatchImportService {
                 batchPlanTableDTO.setObjectVersionNumber(batchPlanTable.getObjectVersionNumber());
                 batchPlanTableRepository.updateByDTOPrimaryKeySelective(batchPlanTableDTO);
                 tableList.add(batchPlanTableDTO);
-            }else{
+            } else {
                 batchPlanTableRepository.insertDTOSelective(batchPlanTableDTO);
                 tableList.add(batchPlanTableDTO);
             }
@@ -129,7 +135,7 @@ public class PlanTableBatchImportImpl implements IBatchImportService {
             tableLineDTOList.add(tableLineDTO);
         }
 
-        List<BatchPlanTableLineDTO> lineList=new ArrayList<>();
+        List<BatchPlanTableLineDTO> lineList = new ArrayList<>();
         tableLineDTOList.forEach(batchPlanTableLineDTO -> {
             BatchPlanTableLine batchPlanTableLine = batchPlanTableLineRepository.selectOne(batchPlanTableLineConverter.dtoToEntity(batchPlanTableLineDTO));
             if (batchPlanTableLine != null) {
@@ -138,7 +144,7 @@ public class PlanTableBatchImportImpl implements IBatchImportService {
                 batchPlanTableLineDTO.setObjectVersionNumber(batchPlanTableLine.getObjectVersionNumber());
                 batchPlanTableLineRepository.updateByDTOPrimaryKeySelective(batchPlanTableLineDTO);
                 lineList.add(batchPlanTableLineDTO);
-            }else{
+            } else {
                 batchPlanTableLineRepository.insertDTOSelective(batchPlanTableLineDTO);
                 lineList.add(batchPlanTableLineDTO);
             }
@@ -165,7 +171,7 @@ public class PlanTableBatchImportImpl implements IBatchImportService {
                 tableConDTO.setConditionId(batchPlanTableCon.getConditionId());
                 tableConDTO.setObjectVersionNumber(batchPlanTableCon.getObjectVersionNumber());
                 batchPlanTableConRepository.updateByDTOPrimaryKeySelective(tableConDTO);
-            }else{
+            } else {
                 batchPlanTableConRepository.insertDTOSelective(tableConDTO);
             }
         });
