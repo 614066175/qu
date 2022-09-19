@@ -1,17 +1,7 @@
 package com.hand.hdsp.quality.infra.util;
 
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.LengthType.FIXED;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.LengthType.RANGE;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
-
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.constant.WarningLevel;
 import io.choerodon.core.exception.CommonException;
@@ -43,7 +33,7 @@ public class DataLengthHandler implements StandardHandler {
 
     @Override
     public BatchPlanFieldLineDTO handle(DataStandardDTO dataStandardDTO) {
-        if (Strings.isEmpty(dataStandardDTO.getDataLength())) {
+        if (StringUtils.isEmpty(dataStandardDTO.getDataLength()) || StringUtils.isEmpty(dataStandardDTO.getLengthType())) {
             return null;
         }
         BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()

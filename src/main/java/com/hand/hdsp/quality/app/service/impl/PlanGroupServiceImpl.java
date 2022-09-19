@@ -14,6 +14,8 @@ import com.hand.hdsp.quality.infra.mapper.BatchPlanBaseMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchPlanFieldMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchPlanRelTableMapper;
 import com.hand.hdsp.quality.infra.mapper.BatchPlanTableMapper;
+import io.choerodon.core.exception.CommonException;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
@@ -75,7 +77,7 @@ public class PlanGroupServiceImpl implements PlanGroupService {
         List<PlanGroupDTO> planGroupDTOList = planGroupRepository.selectDTO(PlanGroup.FIELD_PARENT_GROUP_ID, planGroupDTO.getGroupId());
         List<BatchPlanDTO> batchPlanDTOList = batchPlanRepository.selectDTO(BatchPlan.FIELD_GROUP_ID, planGroupDTO.getGroupId());
         //当前分组下存在评估方案，请删除评估方案后再执行删除操作！
-        if (!planGroupDTOList.isEmpty() || !batchPlanDTOList.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(planGroupDTOList) || CollectionUtils.isNotEmpty(batchPlanDTOList)) {
             throw new CommonException(ErrorCode.EXISTS_OTHER_PLAN);
         }
         return planGroupRepository.deleteByPrimaryKey(planGroupDTO);
