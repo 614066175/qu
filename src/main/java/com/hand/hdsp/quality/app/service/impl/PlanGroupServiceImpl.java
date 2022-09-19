@@ -23,6 +23,7 @@ import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.hand.hdsp.quality.infra.constant.GroupType.BATCH;
@@ -93,14 +94,33 @@ public class PlanGroupServiceImpl implements PlanGroupService {
             BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(dto.getPlanId());
             dto.setGroupId(batchPlan.getGroupId());
         }
-        List<PlanGroupDTO> planGroupDTOList = planGroupRepository.selectDTOByCondition(Condition.builder(PlanGroup.class)
-                .andWhere(Sqls.custom()
-                        .andEqualTo(PlanGroup.FIELD_GROUP_TYPE, BATCH)
-                        .andEqualTo(PlanGroup.FIELD_TENANT_ID, dto.getTenantId())
-                        .andEqualTo(PlanGroup.FIELD_PROJECT_ID, ProjectHelper.getProjectId())
-                        .andEqualTo(PlanGroup.FIELD_GROUP_ID, dto.getGroupId(), true))
-                .build());
-
+        List<PlanGroupDTO> planGroupDTOList = new ArrayList<>();
+        if(dto.getGroupId() == 0 && (ObjectUtils.isNotEmpty(dto.getPlanBaseCode()) || ObjectUtils.isNotEmpty(dto.getPlanBaseName()) || ObjectUtils.isNotEmpty(dto.getObjectName()))){
+            List<BatchPlanBaseDTO> batchPlanBaseDTOS = batchPlanBaseRepository.selectDTOByCondition(Condition.builder(BatchPlanBase.class).andWhere(Sqls.custom()
+                            .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_CODE, dto.getPlanBaseCode(),true)
+                            .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_NAME, dto.getPlanBaseName(),true)
+                            .andEqualTo(BatchPlanBase.FIELD_OBJECT_NAME, dto.getObjectName(),true)
+                            .andEqualTo(BatchPlanBase.FIELD_TENANT_ID,dto.getTenantId()))
+                    .build());
+            //获取质检项分组
+            List<PlanGroupDTO> finalPlanGroupDTOList = planGroupDTOList;
+            batchPlanBaseDTOS.forEach(batchPlanBaseDTO->{
+                Long planId = batchPlanBaseDTO.getPlanId();
+                BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(planId);
+                if(ObjectUtils.isNotEmpty(batchPlan)){
+                    PlanGroupDTO planGroupDTO = planGroupRepository.selectDTOByPrimaryKey(batchPlan.getGroupId());
+                    finalPlanGroupDTOList.add(planGroupDTO);
+                }
+            });
+        }else {
+            planGroupDTOList = planGroupRepository.selectDTOByCondition(Condition.builder(PlanGroup.class)
+                    .andWhere(Sqls.custom()
+                            .andEqualTo(PlanGroup.FIELD_GROUP_TYPE, BATCH)
+                            .andEqualTo(PlanGroup.FIELD_TENANT_ID, dto.getTenantId())
+                            .andEqualTo(PlanGroup.FIELD_PROJECT_ID, ProjectHelper.getProjectId())
+                            .andEqualTo(PlanGroup.FIELD_GROUP_ID,dto.getGroupId(),true))
+                    .build());
+        }
         planGroupDTOList.forEach(planGroupDTO -> {
             //查询分组下的评估方案
             List<BatchPlanDTO> batchPlanDTOList = batchPlanRepository.selectDTOByCondition(Condition.builder(BatchPlan.class)
