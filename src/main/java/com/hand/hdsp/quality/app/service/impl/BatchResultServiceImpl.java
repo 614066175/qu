@@ -30,7 +30,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
+import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.boot.platform.profile.ProfileClient;
+import org.hzero.core.base.BaseConstants;
 import org.hzero.core.util.ResponseUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
@@ -42,7 +44,6 @@ import org.springframework.data.mongodb.core.aggregation.AggregationOptions;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,13 +77,16 @@ public class BatchResultServiceImpl implements BatchResultService {
     private final String LEFT_Braces = "{";
     private final String INCREMENTSTRATEGY = "NONE";
 
-    @Autowired
-    private StringRedisTemplate redisTemplate;
     private final MongoTemplate mongoTemplate;
     private final ProfileClient profileClient;
 
+    @Autowired
+    private LovAdapter lovAdapter;
+
     public static final String DOWN_EXCEPTION_NUM = "XQUA.DOWN_EXCEPTION_NUM";
     public static final String DOWN_EXCEPTION_BATCH_SIZE = "XQUA.DOWN_EXCEPTION_BATCH_SIZE";
+
+    public static final String WARNING_LEVEL_LOV = "HDSP.XQUA.WARNING_LEVEL";
 
     public BatchResultServiceImpl(ExecutionFlowFeign executionFlowFeign,
                                   BatchResultMapper batchResultMapper,
@@ -372,6 +376,8 @@ public class BatchResultServiceImpl implements BatchResultService {
             int sheetNo = 1;
             Sheet sheet = new Sheet(sheetNo, 0);
             List<List<String>> headList = null;
+            //值集转换map
+            Map<String, String> warningLevelMap = new HashMap<>();
             for (int i = 0; i < pageNumber; i++) {
                 //一百万分sheet页
                 if (totalAmount >= 1000000) {
@@ -396,7 +402,19 @@ public class BatchResultServiceImpl implements BatchResultService {
                 List<List<Object>> dataList = maps.stream().map(map -> {
                     List<Object> list = new ArrayList();
                     Set<String> set = map.keySet();
-                    set.forEach(s -> list.add(map.get(s)));
+                    set.forEach(s -> {
+                        Object value = map.get(s);
+                        if (WARNING_LEVEL.equals(s)) {
+                            String warningLevelMeaning = warningLevelMap.get(value);
+                            if (warningLevelMeaning == null) {
+                                warningLevelMeaning = lovAdapter.queryLovMeaning(WARNING_LEVEL_LOV, BaseConstants.DEFAULT_TENANT_ID, String.valueOf(value));
+                                warningLevelMap.put(String.valueOf(value), warningLevelMeaning);
+                            }
+                            list.add(warningLevelMeaning);
+                        } else {
+                            list.add(value);
+                        }
+                    });
                     return list;
                 }).collect(Collectors.toList());
 
