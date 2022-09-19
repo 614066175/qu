@@ -1,6 +1,8 @@
 package com.hand.hdsp.quality.infra.util;
 
 import com.alibaba.druid.DbType;
+import com.alibaba.druid.sql.SQLUtils;
+import com.alibaba.druid.sql.ast.SQLStatement;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
@@ -45,7 +47,7 @@ import static com.hand.hdsp.quality.infra.constant.PlanExceptionConstants.*;
 @Slf4j
 public class PlanExceptionUtil {
 
-    public static final String COUNT_SQL = "select count (*) from (%s) a";
+    public static final String COUNT_SQL = "select count(*) from (%s) a";
 
     public static MongoTemplate mongoTemplate;
 
@@ -117,7 +119,21 @@ public class PlanExceptionUtil {
             //则使用定义的别名
             tableName = "sql_pack";
         }
-        sql = String.format("select %s.* %s", tableName, sql.substring(sql.toLowerCase().indexOf("from")));
+        //获取异常数据sql处理，sql解析来做
+        //处理最外层的SQLSelectItem
+        try {
+            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(sql, driverSession.getDbType());
+            ExceptionSqlVisitor exceptionSqlVisitor = new ExceptionSqlVisitor();
+            //设置为表名
+            exceptionSqlVisitor.setOwnerName(tableName);
+            SQLStatement sqlStatement = sqlStatements.get(0);
+            sqlStatement.accept(exceptionSqlVisitor);
+            sql = SQLUtils.toSQLString(sqlStatement);
+        } catch (Exception e) {
+            log.error("sql解析错误，使用字符截断方式处理", e);
+            sql = String.format("select %s.* %s", tableName, sql.substring(sql.toLowerCase().indexOf("from")));
+        }
+
         //获取指定条数
         if (limit != null) {
             sql = driverSession.getPageSql(sql, PageRequest.of(0, Math.toIntExact(limit)));
