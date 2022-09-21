@@ -20,6 +20,7 @@ import com.hand.hdsp.quality.infra.util.ValueRangeHandler;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -350,11 +351,11 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     @Override
     public Page<DataStandardDTO> list(PageRequest pageRequest, DataStandardDTO dataStandardDTO) {
-        List<DataStandardDTO> list = dataStandardMapper.list(dataStandardDTO);
-        for (DataStandardDTO dto : list) {
+        Page<DataStandardDTO> page = PageHelper.doPageAndSort(pageRequest, () -> dataStandardMapper.list(dataStandardDTO));
+        for (DataStandardDTO dto : page) {
             decodeForDataStandardDTO(dto);
         }
-        return PageParseUtil.springPage2C7nPage(PageUtil.doPage(list, org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize())));
+        return page;
     }
 
     @Override
