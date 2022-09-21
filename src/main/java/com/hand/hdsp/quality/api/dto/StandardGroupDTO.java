@@ -72,4 +72,8 @@ public class StandardGroupDTO extends AuditDomain {
 
     private Long projectId;
 
+    @ExcelColumn(zh = "父分组名称",en = "parentGroupName")
+    @Transient
+    private String 	parentGroupName;
+
 }

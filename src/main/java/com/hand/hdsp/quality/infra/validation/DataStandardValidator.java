@@ -5,15 +5,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
+import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.domain.entity.DataStandard;
+import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
+import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
-import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.imported.app.service.BatchValidatorHandler;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidator;
@@ -21,6 +25,8 @@ import org.hzero.boot.imported.infra.validator.annotation.ImportValidators;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
 
 /**
  * <p>
@@ -31,20 +37,22 @@ import org.hzero.mybatis.util.Sqls;
  * @since 1.0
  */
 @Slf4j
-@ImportValidators(value = {@ImportValidator(templateCode = TemplateCodeConstants.TEMPLATE_CODE_DATA_STANDARD)})
+@ImportValidators(value = {@ImportValidator(templateCode = TemplateCodeConstants.TEMPLATE_CODE_DATA_STANDARD, sheetIndex = 1)})
 public class DataStandardValidator extends BatchValidatorHandler {
     private final ObjectMapper objectMapper;
 
     private final DataStandardRepository dataStandardRepository;
 
     private final DataStandardMapper dataStandardMapper;
+    private final StandardGroupRepository standardGroupRepository;
 
     public DataStandardValidator(ObjectMapper objectMapper,
                                  DataStandardRepository dataStandardRepository,
-                                 DataStandardMapper dataStandardMapper) {
+                                 DataStandardMapper dataStandardMapper, StandardGroupRepository standardGroupRepository) {
         this.objectMapper = objectMapper;
         this.dataStandardRepository = dataStandardRepository;
         this.dataStandardMapper = dataStandardMapper;
+        this.standardGroupRepository = standardGroupRepository;
     }
 
 
@@ -53,6 +61,7 @@ public class DataStandardValidator extends BatchValidatorHandler {
         List<DataStandardDTO> dataStandardDTOList = new ArrayList<>(data.size());
         // 设置租户Id
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
+        Long projectId = ProjectHelper.getProjectId();
         try {
             for (int i = 0; i < data.size(); i++) {
                 DataStandardDTO dataStandardDTO = objectMapper.readValue(data.get(i), DataStandardDTO.class);
@@ -80,8 +89,8 @@ public class DataStandardValidator extends BatchValidatorHandler {
                 }
                 List<Long> chargeId = dataStandardMapper.selectIdByChargeName(dataStandardDTO.getChargeName(),
                         dataStandardDTO.getTenantId());
-                if(CollectionUtils.isEmpty(chargeId)){
-                    addErrorMsg(i,"未找到此责任人，请检查数据");
+                if (CollectionUtils.isEmpty(chargeId)) {
+                    addErrorMsg(i, "未找到此责任人，请检查数据");
                     return false;
                 }
                 //如果责任部门不为空时进行检验
@@ -92,9 +101,25 @@ public class DataStandardValidator extends BatchValidatorHandler {
                     }
                     List<Long> chargeDeptId = dataStandardMapper.selectIdByChargeDeptName(chargeDeptName, dataStandardDTO.getTenantId());
                     if (CollectionUtils.isEmpty(chargeDeptId)) {
-                        addErrorMsg(i,"未找到此责任人，请检查数据");
+                        addErrorMsg(i, "未找到此责任人，请检查数据");
                         return false;
                     }
+                }
+                //当sheet页”数据标准“中的分组名称在本次导入表格和系统中不存在时则不能导入，并提示”${分组}分组不存在“，并在对应单元格高亮警示
+                String groupName = dataStandardDTO.getGroupName();
+                if (StringUtils.isEmpty(groupName)) {
+                    addErrorMsg(i, String.format("表格中不存在分组%s", groupName));
+                    return false;
+                }
+                List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                                .andEqualTo(StandardGroup.FIELD_GROUP_NAME, groupName)
+                                .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, DATA)
+                                .andEqualTo(StandardGroup.FIELD_TENANT_ID,tenantId)
+                                .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId))
+                        .build());
+                if (CollectionUtils.isEmpty(standardGroupDTOS)) {
+                    addErrorMsg(i, String.format("导入环境中不存在分组%s", groupName));
+                    return false;
                 }
                 return true;
             }
