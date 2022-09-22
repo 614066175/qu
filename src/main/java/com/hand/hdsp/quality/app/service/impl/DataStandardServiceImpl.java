@@ -728,6 +728,12 @@ public class DataStandardServiceImpl implements DataStandardService {
                 .applyType(status)
                 .tenantId(dataStandardDTO.getTenantId())
                 .build();
+        // 先删除原来的审批记录
+        standardApprovalService.delete(StandardApprovalDTO
+                .builder()
+                .standardId(dataStandardDTO.getStandardId())
+                .standardType("DATA")
+                .build());
         standardApprovalDTO = standardApprovalService.createOrUpdate(standardApprovalDTO);
         //使用当前时间戳作为业务主键
         String bussinessKey = String.valueOf(System.currentTimeMillis());

@@ -138,7 +138,7 @@
             from xsta_standard_approval xsa1
             where xsa1.standard_id = fs.field_id
             and xsa1.standard_type = 'FIELD'
-            and concat(xsa1.apply_type, '_APPROVING') = fs.standard_status
+            and fs.standard_status != 'CREATE'
         )
         <where>
             <if test="dataFieldDTO.fieldId!=null">
