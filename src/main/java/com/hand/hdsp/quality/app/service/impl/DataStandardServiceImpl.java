@@ -733,6 +733,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                 .builder()
                 .standardId(dataStandardDTO.getStandardId())
                 .standardType("DATA")
+                .applicantId(userId)
                 .build());
         standardApprovalDTO = standardApprovalService.createOrUpdate(standardApprovalDTO);
         //使用当前时间戳作为业务主键
