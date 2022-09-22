@@ -335,6 +335,12 @@ public class DataFieldServiceImpl implements DataFieldService {
                 .applyType(status)
                 .tenantId(dataFieldDTO.getTenantId())
                 .build();
+        // 先删除原来的审批记录
+        standardApprovalService.delete(StandardApprovalDTO
+                .builder()
+                .standardId(dataFieldDTO.getFieldId())
+                .standardType("FIELD")
+                .build());
         standardApprovalDTO = standardApprovalService.createOrUpdate(standardApprovalDTO);
         //使用当前时间戳作为业务主键
         String bussinessKey = String.valueOf(System.currentTimeMillis());

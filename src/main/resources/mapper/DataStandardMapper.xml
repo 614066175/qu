@@ -85,7 +85,7 @@
             from xsta_standard_approval xsa1
             where xsa1.standard_id = ds.standard_id
             and xsa1.standard_type = 'DATA'
-            and concat(xsa1.apply_type, '_APPROVING') = ds.standard_status
+            and ds.standard_status != 'CREATE'
         )
         <where>
             <if test="dataStandardDTO.standardId!=null">
