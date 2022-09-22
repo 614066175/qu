@@ -340,6 +340,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                 .builder()
                 .standardId(dataFieldDTO.getFieldId())
                 .standardType("FIELD")
+                .applicantId(userId)
                 .build());
         standardApprovalDTO = standardApprovalService.createOrUpdate(standardApprovalDTO);
         //使用当前时间戳作为业务主键
