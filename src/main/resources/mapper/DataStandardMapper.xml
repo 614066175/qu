@@ -59,7 +59,6 @@
 
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.DataStandardDTO">
         <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
-        <bind name="userId" value="@io.choerodon.core.oauth.DetailsHelper@getUserDetails().getUserId()"/>
         select
         iu.login_name lastUpdateName,
         iu.login_name lastUpdatedByName,
@@ -81,10 +80,13 @@
         left join iam_user iu2 on ds.charge_id=iu2.id
         left join iam_user iu3 on ds.created_by=iu3.id
         left join hpfm_unit hu on hu.unit_id=ds.charge_dept_id
-        left join xsta_standard_approval xsa on xsa.standard_id = ds.standard_id
-            and xsa.standard_type = "DATA"
-            and xsa.applicant_id = #{userId}
-            and concat(xsa.apply_type, '_APPROVING') = ds.standard_status
+        left join xsta_standard_approval xsa on xsa.approval_id = (
+            select max(xsa1.approval_id)
+            from xsta_standard_approval xsa1
+            where xsa1.standard_id = ds.standard_id
+            and xsa1.standard_type = 'DATA'
+            and concat(xsa1.apply_type, '_APPROVING') = ds.standard_status
+        )
         <where>
             <if test="dataStandardDTO.standardId!=null">
                 ds.standard_id=#{dataStandardDTO.standardId}
