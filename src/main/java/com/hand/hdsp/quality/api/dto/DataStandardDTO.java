@@ -55,6 +55,9 @@ public class DataStandardDTO extends AuditDomain{
     @ExcelColumn(zh = "标准编码", en = "standardCode" )
     private String standardCode;
 
+    @Transient
+    private Long instanceId;
+
 
     @ApiModelProperty(value = "数据标准名称")
     @NotBlank

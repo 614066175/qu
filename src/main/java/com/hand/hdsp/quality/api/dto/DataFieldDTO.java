@@ -198,6 +198,9 @@ public class DataFieldDTO extends AuditDomain {
     //表设计主键，用于排除表设计已保存字段引用的字段标准
     private Long customTableId;
 
+    @Transient
+    private Long instanceId;
+
     public interface Group1 {
     }
 
