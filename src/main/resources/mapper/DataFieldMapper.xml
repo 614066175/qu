@@ -110,7 +110,6 @@
     </sql>
 
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.DataFieldDTO">
-        <bind name="userId" value="@io.choerodon.core.oauth.DetailsHelper@getUserDetails().getUserId()"/>
         select
         iu.login_name lastUpdateName,
         iu2.login_name chargeName,
@@ -134,10 +133,13 @@
         left join iam_user iu2 on fs.charge_id=iu2.id
         left join iam_user iu3 on fs.created_by=iu3.id
         left join hpfm_unit hu on hu.unit_id=fs.charge_dept_id
-        left join xsta_standard_approval xsa on xsa.standard_id = fs.field_id
-        and xsa.standard_type = "FIELD"
-        and xsa.applicant_id = #{userId}
-        and concat(xsa.apply_type, '_APPROVING') = fs.standard_status
+        left join xsta_standard_approval xsa on xsa.approval_id = (
+            select max(xsa1.approval_id)
+            from xsta_standard_approval xsa1
+            where xsa1.standard_id = fs.field_id
+            and xsa1.standard_type = 'FIELD'
+            and concat(xsa1.apply_type, '_APPROVING') = fs.standard_status
+        )
         <where>
             <if test="dataFieldDTO.fieldId!=null">
                 fs.field_id=#{dataFieldDTO.fieldId}
