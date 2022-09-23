@@ -80,13 +80,27 @@
         left join iam_user iu2 on ds.charge_id=iu2.id
         left join iam_user iu3 on ds.created_by=iu3.id
         left join hpfm_unit hu on hu.unit_id=ds.charge_dept_id
-        left join xsta_standard_approval xsa on xsa.approval_id = (
+        <if test='datasourceType == "ORACLE"'>
+            LEFT JOIN (
+                SELECT
+                    xsa1.standard_id,
+                    xsa1.instance_id,
+                    row_number()over(partition by xsa1.standard_id order by approval_id desc) rw
+                FROM xsta_standard_approval xsa1
+                WHERE xsa1.standard_type = 'DATA'
+            ) xsa ON xsa.standard_id = ds.standard_id
+                AND xsa.rw = 1
+                AND ds.standard_status != 'CREATE'
+        </if>
+        <if test='datasourceType == "MYSQL"'>
+            left join xsta_standard_approval xsa on xsa.approval_id = (
             select max(xsa1.approval_id)
             from xsta_standard_approval xsa1
             where xsa1.standard_id = ds.standard_id
             and xsa1.standard_type = 'DATA'
             and ds.standard_status != 'CREATE'
-        )
+            )
+        </if>
         <where>
             <if test="dataStandardDTO.standardId!=null">
                 ds.standard_id=#{dataStandardDTO.standardId}
