@@ -17,5 +17,10 @@
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
+    <select id="getProjectCodeById" resultType="java.lang.String">
+        select project_code
+        from xcor_project xp
+        where xp.project_id = #{projectId}
+    </select>
 
 </mapper>

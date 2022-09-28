@@ -26,6 +26,8 @@ import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.util.ParamsUtil;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
+import io.choerodon.core.convertor.ApplicationContextHelper;
+import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -59,8 +61,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.SqlType.TABLE;
-
-import io.choerodon.core.exception.CommonException;
 
 /**
  * <p>
@@ -149,6 +149,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     @Autowired
     private BaseFormValueMapper baseFormValueMapper;
 
+    @Autowired
+    private PlanShareRepository planShareRepository;
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -231,7 +234,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                                 .incrementStrategy(base.getIncrementStrategy())
                                 .incrementColumn(base.getIncrementColumn())
                                 .whereCondition(base.getWhereCondition())
-                                .syncType(PlanConstant.JOB_CLASS).build());
+                                .syncType(PlanConstant.JOB_CLASS)
+                                .projectId(projectId)
+                                .build());
                 ResponseUtils.getResponse(timestampResult, TimestampControlDTO.class);
             }
 
@@ -259,7 +264,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 .append("rest.uri=/" + serviceShort + "/v1/")
                 .append(batchPlanDTO.getTenantId())
                 .append("/batch-plans/exec/")
-                .append(batchPlanDTO.getPlanId() + String.format("?projectId=%d", batchPlanDTO.getProjectId()) + "\n")
+                //不写死projectId，项目共享支持跨项目支持
+                .append(batchPlanDTO.getPlanId() + String.format("?projectId=${projectId}") + "\n")
                 .append("rest.method=GET\n")
                 .append("rest.contentType=application/json\n")
                 .append("rest.body={}\n")
@@ -554,15 +560,38 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
     @Override
     public Long exec(Long tenantId, Long planId, Long projectId) {
-        //
+        //考虑任务流那边项目共享，导致的跨项目执行，判断如果没有进行评估方案的共享，先进行方案的共享
         BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(planId);
         if (batchPlan == null) {
             throw new CommonException(ErrorCode.PLAN_NOT_EXIST);
         }
+        //如果项目的id和当前方案的项目id不一致
+        if (!projectId.equals(batchPlan.getProjectId())) {
+            //共享方案分组。不然无法看到层级结构
+            sharePlanGroup(batchPlan, projectId);
+            //判断是否进行了项目共享，没有则将方案共享到此执行项目下
+            int exist = planShareRepository.selectCount(PlanShare.builder()
+                    .shareObjectType("PLAN")
+                    .shareObjectId(planId)
+                    .shareToProjectId(projectId)
+                    .build());
+            if (exist == 0) {
+                //如果没有共享，则将此方案共享到执行项目下去
+                planShareRepository.insert(PlanShare.builder()
+                        .shareObjectType("PLAN")
+                        .shareObjectId(planId)
+                        .shareFromProjectId(batchPlan.getProjectId())
+                        .shareToProjectId(projectId)
+                        .tenantId(tenantId)
+                        .projectId(batchPlan.getProjectId())
+                        .build());
+            }
+        }
 
         // 插入批数据方案结果表
         BatchResult batchResult = BatchResult.builder().planId(planId).startDate(new Date())
-                .planStatus(PlanConstant.PlanStatus.RUNNING).tenantId(tenantId).projectId(projectId).planName(batchPlan.getPlanName()).build();
+                .planStatus(PlanConstant.PlanStatus.RUNNING).tenantId(tenantId)
+                .projectId(projectId).planName(batchPlan.getPlanName()).build();
         batchResultRepository.insertSelective(batchResult);
 
         // 时间戳对象list
@@ -606,6 +635,58 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         executor.submit(() -> qualityLineage(batchResult));
         return batchResult.getResultId();
     }
+
+    /**
+     * 共享方案分组
+     *
+     * @param batchPlan
+     * @param projectId
+     */
+    private void sharePlanGroup(BatchPlan batchPlan, Long projectId) {
+        //获取方案的分组，一直找到根路径
+        List<PlanGroup> allGroups = getParentGroup(batchPlan.getGroupId());
+        if (CollectionUtils.isNotEmpty(allGroups)) {
+            //分享这个方案所在的分组
+            allGroups.forEach(planGroup -> {
+                int exist = planShareRepository.selectCount(PlanShare.builder()
+                        .shareObjectType("GROUP")
+                        .shareObjectId(planGroup.getGroupId())
+                        .shareToProjectId(projectId)
+                        .build());
+                //分组没有共享给这个项目，则进行共享
+                if (exist == 0) {
+                    PlanShare groupShare = PlanShare.builder()
+                            .shareObjectType("GROUP")
+                            .shareObjectId(planGroup.getGroupId())
+                            .shareFromProjectId(planGroup.getProjectId())
+                            .shareToProjectId(projectId)
+                            .tenantId(planGroup.getTenantId())
+                            .projectId(planGroup.getProjectId())
+                            .build();
+                    planShareRepository.insert(groupShare);
+                }
+            });
+        }
+    }
+
+    /**
+     * 获取所有父分组
+     *
+     * @param groupId
+     * @return
+     */
+    public List<PlanGroup> getParentGroup(Long groupId) {
+        PlanGroupRepository planGroupRepository = ApplicationContextHelper.getContext().getBean(PlanGroupRepository.class);
+        PlanGroup planGroup = planGroupRepository.selectByPrimaryKey(groupId);
+        List<PlanGroup> allGroupList = new ArrayList<>();
+        allGroupList.add(planGroup);
+        if (planGroup.getParentGroupId() != null && planGroup.getParentGroupId() != 0) {
+            List<PlanGroup> parentGroups = getParentGroup(planGroup.getParentGroupId());
+            allGroupList.addAll(parentGroups);
+        }
+        return allGroupList;
+    }
+
 
     private void qualityLineage(BatchResult batchResult) {
         try {
@@ -770,7 +851,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(planId);
             String timestampType = String.format(PlanConstant.TIMESTAMP_TYPE, tenantId, batchPlan.getPlanCode(),
                     batchPlanBase.getPlanBaseId());
-            ResponseEntity<String> incrementParam = timestampFeign.getIncrementParam(tenantId, timestampType);
+            ResponseEntity<String> incrementParam = timestampFeign.getIncrementParam(tenantId, timestampType, batchResultBase.getProjectId());
             SpecifiedParamsResponseDO specifiedParamsResponseDO =
                     ResponseUtils.getResponse(incrementParam, SpecifiedParamsResponseDO.class);
             batchResultBase.setWhereCondition(ParamsUtil.handlePredefinedParams(batchPlanBase.getWhereCondition(),
@@ -781,7 +862,12 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     .currentDateTime(specifiedParamsResponseDO.getCurrentDataTime())
                     .lastDateTime(specifiedParamsResponseDO.getLastDateTime())
                     .currentMaxId(specifiedParamsResponseDO.getCurrentMaxId())
-                    .lastMaxId(specifiedParamsResponseDO.getLastMaxId()).success(true).build());
+                    .lastMaxId(specifiedParamsResponseDO.getLastMaxId())
+                    .projectId(batchResultBase.getProjectId())
+                    .success(true).build());
+        } else {
+            //无增量，设置数据过滤
+            batchResultBase.setWhereCondition(ParamsUtil.handlePredefinedParams(batchPlanBase.getWhereCondition(), batchResultBase));
         }
     }
 

@@ -167,7 +167,7 @@ public class BatchPlanBaseRepositoryImpl extends BaseRepositoryImpl<BatchPlanBas
      * @param groupId
      * @return
      */
-    private List<PlanGroup> getSubGroup(Long groupId) {
+    public List<PlanGroup> getSubGroup(Long groupId) {
         PlanGroupRepository planGroupRepository = ApplicationContextHelper.getContext().getBean(PlanGroupRepository.class);
         List<PlanGroup> subGroupList = planGroupRepository.select(PlanGroup.builder()
                 .parentGroupId(groupId).build());

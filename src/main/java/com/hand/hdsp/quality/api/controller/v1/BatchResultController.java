@@ -463,8 +463,10 @@ public class BatchResultController extends BaseController {
     @GetMapping("/exception-detail")
     public ResponseEntity<Page<Map>> exceptionDetail(@PathVariable(name = "organizationId") Long tenantId,
                                                      ExceptionDataDTO exceptionDataDTO,
+                                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                      PageRequest pageRequest) {
         exceptionDataDTO.setTenantId(tenantId);
+        exceptionDataDTO.setProjectId(projectId);
         return Results.success(batchResultService.listExceptionDetail(exceptionDataDTO, pageRequest));
     }
 
@@ -479,9 +481,11 @@ public class BatchResultController extends BaseController {
     @PostMapping("/result-detail-download")
     public ResponseEntity<?> download(@PathVariable(name = "organizationId") Long tenantId,
                                       @RequestBody ExceptionDataDTO exceptionDataDTO,
+                                      @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                       HttpServletRequest request,
                                       HttpServletResponse response) {
         exceptionDataDTO.setTenantId(tenantId);
+        exceptionDataDTO.setProjectId(projectId);
         batchResultService.exceptionDataDownload(exceptionDataDTO, request, response);
         return Results.success();
     }

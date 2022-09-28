@@ -1,8 +1,12 @@
 package com.hand.hdsp.quality.infra.util;
 
+import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.infra.constant.PredefinedParams;
 import com.hand.hdsp.quality.infra.constant.SimpleTimeUnitEnum;
 import com.hand.hdsp.quality.infra.dataobject.SpecifiedParamsResponseDO;
+import com.hand.hdsp.quality.infra.mapper.BatchPlanMapper;
+import io.choerodon.core.convertor.ApplicationContextHelper;
+import io.choerodon.core.oauth.DetailsHelper;
 import org.hzero.core.base.BaseConstants;
 import org.springframework.util.StringUtils;
 
@@ -30,6 +34,52 @@ public class ParamsUtil {
     private static final String PARAM_PATTERN = "\\$\\{%s\\}";
 
     private static final Pattern NUMERIC_PATTERN = Pattern.compile("[\\-|0-9][0-9]*");
+
+
+    public static String handlePredefinedParams(String str, BatchResultBase batchResultBase) {
+        if (StringUtils.isEmpty(str)) {
+            return str;
+        }
+        Matcher matcher = PredefinedParams.PREDEFINED_PARAM_REGEX.matcher(str);
+        while (matcher.find()) {
+            // _p_current_user_id
+            if (matcher.group(1).trim().contains(PredefinedParams.CURRENT_USER_ID)) {
+                //如果是任务流执行，token都是admin的token怎么考虑？
+                str = str.replaceAll(String.format(PARAM_PATTERN, PredefinedParams.CURRENT_USER_ID),
+                        String.valueOf(DetailsHelper.getUserDetails().getUserId()));
+            }
+
+            //_p_current_role_id
+            if (matcher.group(1).trim().contains(PredefinedParams.CURRENT_ROLE_ID)) {
+                str = str.replaceAll(String.format(PARAM_PATTERN, PredefinedParams.CURRENT_ROLE_ID),
+                        String.valueOf(DetailsHelper.getUserDetails().getRoleId()));
+            }
+
+            // _p_current_tenant_id
+            if (matcher.group(1).trim().contains(PredefinedParams.CURRENT_TENANT_ID)) {
+                str = str.replaceAll(String.format(PARAM_PATTERN, PredefinedParams.CURRENT_TENANT_ID),
+                        String.valueOf(DetailsHelper.getUserDetails().getTenantId()));
+            }
+            // _p_current_project_id
+            if (matcher.group(1).trim().contains(PredefinedParams.CURRENT_PROJECT_ID)) {
+                str = str.replaceAll(String.format(PARAM_PATTERN, PredefinedParams.CURRENT_PROJECT_ID),
+                        String.valueOf(batchResultBase.getProjectId()));
+            }
+            // _p_current_project_code
+            if (matcher.group(1).trim().contains(PredefinedParams.CURRENT_PROJECT_CODE)) {
+                //通过项目id获取项目编码
+                BatchPlanMapper planMapper = ApplicationContextHelper.getContext().getBean(BatchPlanMapper.class);
+                String projectCode = planMapper.getProjectCodeById(batchResultBase.getProjectId());
+                str = str.replaceAll(String.format(PARAM_PATTERN, PredefinedParams.CURRENT_PROJECT_CODE),
+                        String.valueOf(projectCode));
+            }
+            // _p_current_data_time
+            if (matcher.group(1).trim().contains(PredefinedParams.CURRENT_DATE_TIME)) {
+                str = handleDateTime(str, matcher.group(1).trim(), new SpecifiedParamsResponseDO());
+            }
+        }
+        return str;
+    }
 
     /**
      * 对内置参数的处理
@@ -101,7 +151,7 @@ public class ParamsUtil {
             }
         }
         // 替换多余的转义
-        String lastDateTimeTmp = lastDateTime.replace("\\","");
+        String lastDateTimeTmp = lastDateTime.replace("\\", "");
         str = str.replace(String.format("${%s}", matcher), lastDateTimeTmp);
         // 时间戳的currentDateTime需更新
         specifiedParamsResponse.setLastDateTime(lastDateTimeTmp);
@@ -141,7 +191,7 @@ public class ParamsUtil {
             }
         }
         // 替换多余的转义
-        String currentDateTimeTmp = currentDateTime.replace("\\","");
+        String currentDateTimeTmp = currentDateTime.replace("\\", "");
         str = str.replace(String.format("${%s}", matcher), currentDateTimeTmp);
         // 时间戳的currentDateTime需更新
         specifiedParamsResponse.setCurrentDataTime(currentDateTimeTmp);

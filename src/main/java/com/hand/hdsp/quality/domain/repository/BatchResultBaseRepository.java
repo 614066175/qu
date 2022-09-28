@@ -1,13 +1,13 @@
 package com.hand.hdsp.quality.domain.repository;
 
-import java.util.List;
-
 import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.BatchResultBaseDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import java.util.List;
 
 /**
  * <p>批数据方案结果表-表信息资源库</p>
@@ -32,9 +32,11 @@ public interface BatchResultBaseRepository extends BaseRepository<BatchResultBas
     List<BatchResultBaseDTO> listResultBaseAll(BatchResultBaseDTO batchResultBaseDTO);
 
     /**
-     * 根据planBaseId获取最大结果Id
-     * @param planBaseId 查询条件
+     * 根据planBaseId,projectId获取最大结果Id
+     *
+     * @param planBaseId
+     * @param projectId 查询条件
      * @return 返回值
      */
-    Long selectMaxResultBaseId(Long planBaseId);
+    Long selectMaxResultBaseId(Long planBaseId,Long projectId);
 }

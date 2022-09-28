@@ -1,10 +1,5 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.BatchResultBaseDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
@@ -18,6 +13,11 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>批数据方案结果表-表信息资源库实现</p>
@@ -97,7 +97,7 @@ public class BatchResultBaseRepositoryImpl extends BaseRepositoryImpl<BatchResul
     }
 
     @Override
-    public Long selectMaxResultBaseId(Long planBaseId) {
-        return batchResultItemMapper.selectMaxResultBaseId(planBaseId);
+    public Long selectMaxResultBaseId(Long planBaseId, Long projectId) {
+        return batchResultItemMapper.selectMaxResultBaseId(planBaseId,projectId);
     }
 }
