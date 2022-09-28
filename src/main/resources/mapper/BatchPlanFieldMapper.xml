@@ -41,6 +41,7 @@
         xbpfl.field_name
         from
         xqua_batch_plan_field xbpf
+        join xqua_batch_plan_base xbpb on xbpf.plan_base_id=xbpb.plan_base_id
         join xqua_batch_plan_field_line xbpfl on xbpf.plan_rule_id = xbpfl.plan_rule_id
         <where>
             xbpfl.field_name is not null
@@ -49,10 +50,15 @@
                 and field_name like #{fieldName}
             </if>
             <if test="planBaseId != null">
-                and plan_base_id = #{planBaseId}
+                and xbpf.plan_base_id = #{planBaseId}
             </if>
             <if test="projectId != null">
-                and xbpf.project_id = #{projectId}
+                <!--项目共享-->
+                AND (xbpf.project_id= #{projectId} or xbpf.project_id in (select share_from_project_id
+                from xqua_plan_share xps
+                where
+                xps.share_object_id=xbpb.plan_id and xps.share_object_type='PLAN' and
+                xps.share_to_project_id =#{projectId}))
             </if>
         </where>
 

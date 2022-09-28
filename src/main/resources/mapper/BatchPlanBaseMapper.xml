@@ -90,7 +90,12 @@
             </foreach>
         </if>
         <if test="projectId !=null">
-            and xbpb.project_id=#{projectId}
+          <!--项目共享-->
+            AND (xbp.project_id= #{projectId} or xbp.project_id in (select share_from_project_id
+            from xqua_plan_share xps
+            where
+            xps.share_object_id=xbp.plan_id and xps.share_object_type='PLAN' and
+            xps.share_to_project_id =#{projectId}))
         </if>
         <if test="planId !=null">
             and xbpb.plan_id = #{planId}
@@ -197,7 +202,12 @@
             </foreach>
         </if>
         <if test="projectId !=null">
-            and xbpb.project_id=#{projectId}
+            <!--项目共享-->
+            AND (xbp.project_id= #{projectId} or xbp.project_id in (select share_from_project_id
+            from xqua_plan_share xps
+            where
+            xps.share_object_id=xbp.plan_id and xps.share_object_type='PLAN' and
+            xps.share_to_project_id =#{projectId}))
         </if>
         <if test="planId != null">
             and xpba.plan_id = #{planId}

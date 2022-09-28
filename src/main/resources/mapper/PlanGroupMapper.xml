@@ -92,4 +92,17 @@
         </if>
     </where>
     </select>
+    <select id="ownAndShareGroup" resultType="com.hand.hdsp.quality.domain.entity.PlanGroup">
+        SELECT
+            xpg.*
+        FROM
+            xqua_plan_group xpg
+        where tenant_id =#{tenantId}
+          and xpg.group_type= #{groupType}
+          and (xpg.project_id= #{projectId}
+                   OR xpg.project_id IN (SELECT share_from_project_id
+                                        FROM xqua_plan_share xps WHERE xps.share_object_id =xpg.group_id
+                                       AND xps.share_object_type = 'GROUP'
+                                       AND xps.share_to_project_id = #{projectId} ))
+    </select>
 </mapper>

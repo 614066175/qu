@@ -39,7 +39,8 @@ public interface TimestampFeign {
      */
     @GetMapping("/v2/{organizationId}/timestamp-controls/get-increment-param")
     ResponseEntity<String> getIncrementParam(@PathVariable(name = "organizationId") Long tenantId,
-                                             @RequestParam("timestampType") String timestampType);
+                                             @RequestParam("timestampType") String timestampType,
+                                             @RequestParam("projectId") Long projectId);
 
     /**
      * 更新增量参数

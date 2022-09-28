@@ -1,11 +1,5 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.validation.constraints.NotNull;
-
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.BatchPlanDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlan;
@@ -13,11 +7,18 @@ import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.domain.repository.BatchPlanRepository;
 import com.hand.hdsp.quality.domain.repository.PlanGroupRepository;
 import com.hand.hdsp.quality.infra.constant.GroupType;
+import com.hand.hdsp.quality.infra.mapper.PlanGroupMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Component;
+
+import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>批数据评估方案表资源库实现</p>
@@ -28,9 +29,11 @@ import org.springframework.stereotype.Component;
 public class BatchPlanRepositoryImpl extends BaseRepositoryImpl<BatchPlan, BatchPlanDTO> implements BatchPlanRepository {
 
     private final PlanGroupRepository planGroupRepository;
+    private final PlanGroupMapper planGroupMapper;
 
-    public BatchPlanRepositoryImpl(PlanGroupRepository planGroupRepository) {
+    public BatchPlanRepositoryImpl(PlanGroupRepository planGroupRepository, PlanGroupMapper planGroupMapper) {
         this.planGroupRepository = planGroupRepository;
+        this.planGroupMapper = planGroupMapper;
     }
 
     @Override
@@ -38,10 +41,13 @@ public class BatchPlanRepositoryImpl extends BaseRepositoryImpl<BatchPlan, Batch
         @NotNull Long tenantId = batchPlanDTO.getTenantId();
         Long projectId = batchPlanDTO.getProjectId();
         if (StringUtils.isEmpty(batchPlanDTO.getPlanName())) {
-            List<PlanGroup> all = planGroupRepository.select(PlanGroup.builder()
+            //查询这个项目下的以及共享到这个项目下的分组
+            List<PlanGroup> planGroups = planGroupMapper.ownAndShareGroup(PlanGroup.builder()
                     .groupType(GroupType.BATCH).projectId(projectId).tenantId(tenantId).build());
-            all.add(PlanGroup.ROOT_PLAN_GROUP);
-            return all;
+//            List<PlanGroup> all = planGroupRepository.select(PlanGroup.builder()
+//                    .groupType(GroupType.BATCH).projectId(projectId).tenantId(tenantId).build());
+            planGroups.add(PlanGroup.ROOT_PLAN_GROUP);
+            return planGroups;
         }
         List<BatchPlan> batchPlans = this.selectByCondition(
                 Condition.builder(BatchPlan.class)
@@ -54,13 +60,11 @@ public class BatchPlanRepositoryImpl extends BaseRepositoryImpl<BatchPlan, Batch
             return Collections.emptyList();
         }
         List<Long> groupIds = batchPlans.stream().map(BatchPlan::getGroupId).collect(Collectors.toList());
+        //通过主键查即可
         List<PlanGroup> planGroups = planGroupRepository.selectByCondition(
                 Condition.builder(PlanGroup.class)
                         .where(Sqls.custom()
-                                .andIn(PlanGroup.FIELD_GROUP_ID, groupIds)
-                                .andEqualTo(PlanGroup.FIELD_GROUP_TYPE, GroupType.BATCH)
-                                .andEqualTo(PlanGroup.FIELD_PROJECT_ID, projectId)
-                                .andEqualTo(PlanGroup.FIELD_TENANT_ID, tenantId))
+                                .andIn(PlanGroup.FIELD_GROUP_ID, groupIds))
                         .build()
         );
         List<PlanGroup> groups = new ArrayList<>();

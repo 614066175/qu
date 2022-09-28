@@ -117,6 +117,10 @@ public class BatchResultServiceImpl implements BatchResultService {
 
     @Override
     public BatchResultDTO listResultDetail(BatchResultDTO batchResultDTO) {
+        //获取执行的评估方案
+        Long resultId = batchResultDTO.getResultId();
+        BatchResult batchResult = batchResultRepository.selectByPrimaryKey(resultId);
+        batchResultDTO.setPlanId(batchResult.getPlanId());
         List<BatchResultMarkDTO> batchResultMarkDTOS = batchResultMapper.listResultDetail(batchResultDTO);
         batchResultDTO.setBatchResultMarkDTOList(batchResultMarkDTOS.stream()
                 .filter(Objects::nonNull).collect(Collectors.toList()));
@@ -229,7 +233,8 @@ public class BatchResultServiceImpl implements BatchResultService {
             throw new CommonException(ErrorCode.PLAN_BASE_ID_IS_EMPTY);
         }
 
-        Long resultBaseId = batchResultBaseRepository.selectMaxResultBaseId(exceptionDataDTO.getPlanBaseId());
+        //根据项目id获取项目下最新执行结果
+        Long resultBaseId = batchResultBaseRepository.selectMaxResultBaseId(exceptionDataDTO.getPlanBaseId(),exceptionDataDTO.getProjectId());
         if (Objects.isNull(resultBaseId)) {
             throw new CommonException(ErrorCode.BATCH_RESULT_NOT_EXIST);
         }
@@ -340,7 +345,7 @@ public class BatchResultServiceImpl implements BatchResultService {
     @SuppressWarnings(value = "all")
     public void exceptionDataDownload(ExceptionDataDTO exceptionDataDTO, HttpServletRequest request, HttpServletResponse response) {
         // 查找异常数据
-        Long resultBaseId = batchResultBaseRepository.selectMaxResultBaseId(exceptionDataDTO.getPlanBaseId());
+        Long resultBaseId = batchResultBaseRepository.selectMaxResultBaseId(exceptionDataDTO.getPlanBaseId(), exceptionDataDTO.getProjectId());
         if (Objects.isNull(resultBaseId)) {
             throw new CommonException(ErrorCode.BATCH_RESULT_NOT_EXIST);
         }

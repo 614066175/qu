@@ -1,10 +1,5 @@
 package com.hand.hdsp.quality.api.dto;
 
-import java.util.Date;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -12,6 +7,11 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import lombok.experimental.FieldNameConstants;
+
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.util.Date;
 
 /**
  * description
@@ -77,4 +77,7 @@ public class TimestampControlDTO extends AuditDomain {
 
     @Transient
     private String lastDateTime;
+
+    @ApiModelProperty(value = "项目ID")
+    private Long projectId;
 }
