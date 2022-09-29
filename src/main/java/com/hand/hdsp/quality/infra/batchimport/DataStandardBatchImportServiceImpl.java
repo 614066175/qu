@@ -65,6 +65,7 @@ public class DataStandardBatchImportServiceImpl implements IBatchImportService {
                 ).build());
                 if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
                     dataStandardDTO.setGroupId(standardGroupDTOList.get(0).getGroupId());
+                    dataStandardDTO.setGroupCode(standardGroupDTOList.get(0).getGroupCode());
                 }
                 dataStandardDTO.setTenantId(tenantId);
                 dataStandardDTO.setProjectId(projectId);

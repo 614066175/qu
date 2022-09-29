@@ -111,16 +111,6 @@ public class DataStandardValidator extends BatchValidatorHandler {
                     addErrorMsg(i, String.format("表格中不存在分组%s", groupName));
                     return false;
                 }
-                List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
-                                .andEqualTo(StandardGroup.FIELD_GROUP_NAME, groupName)
-                                .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, DATA)
-                                .andEqualTo(StandardGroup.FIELD_TENANT_ID,tenantId)
-                                .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId))
-                        .build());
-                if (CollectionUtils.isEmpty(standardGroupDTOS)) {
-                    addErrorMsg(i, String.format("导入环境中不存在分组%s", groupName));
-                    return false;
-                }
                 return true;
             }
         } catch (IOException e) {
