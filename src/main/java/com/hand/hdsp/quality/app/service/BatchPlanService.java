@@ -48,4 +48,10 @@ public interface BatchPlanService {
      * @param projectId
      */
     void clearExceptionData(String planCode, Long tenantId, Long projectId);
+
+    /**
+     * 修复项目共享接口
+     *
+     */
+    void fixProjectShare();
 }

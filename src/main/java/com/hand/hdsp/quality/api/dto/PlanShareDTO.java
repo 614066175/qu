@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
+import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -49,5 +50,8 @@ public class PlanShareDTO extends AuditDomain {
     @ApiModelProperty(value = "项目id(默认为0)")
     @NotNull
     private Long projectId;
+
+    @Transient
+    private String projectName;
 
 }

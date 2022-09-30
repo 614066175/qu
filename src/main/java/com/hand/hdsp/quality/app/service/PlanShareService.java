@@ -1,5 +1,9 @@
 package com.hand.hdsp.quality.app.service;
 
+import com.hand.hdsp.quality.api.dto.PlanShareDTO;
+
+import java.util.List;
+
 /**
  * <p>应用服务</p>
  *
@@ -7,4 +11,10 @@ package com.hand.hdsp.quality.app.service;
  */
 public interface PlanShareService {
 
+    /**
+     * 查询方案共享的项目
+     * @param planId
+     * @return
+     */
+    List<PlanShareDTO> shareProjects(Long planId);
 }

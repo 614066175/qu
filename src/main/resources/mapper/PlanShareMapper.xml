@@ -16,4 +16,15 @@
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
+    <select id="shareProjects" resultType="com.hand.hdsp.quality.api.dto.PlanShareDTO">
+        SELECT
+            xps.* ,
+            xp.project_name
+        FROM
+            xqua_plan_share xps
+            join xcor_project xp on xps.share_to_project_id=xp.project_id
+        WHERE
+            xps.share_object_type = 'PLAN'
+          AND xps.share_object_id = #{planId}
+    </select>
 </mapper>

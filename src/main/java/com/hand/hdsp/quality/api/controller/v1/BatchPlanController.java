@@ -247,9 +247,23 @@ public class BatchPlanController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping("/clear-exception-data/{planCode}")
     public ResponseEntity<?> clearExceptionData(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                          @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                          @PathVariable String planCode) {
+                                                @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                @PathVariable String planCode) {
         batchPlanService.clearExceptionData(planCode, tenantId, projectId);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "质量任务项目共享修复接口")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/fix-project-share")
+    public ResponseEntity<?> fixProjectShare(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId) {
+        batchPlanService.fixProjectShare();
         return Results.success();
     }
 

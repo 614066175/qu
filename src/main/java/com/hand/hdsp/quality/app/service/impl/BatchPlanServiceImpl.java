@@ -321,6 +321,17 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
     }
 
+    @Override
+    public void fixProjectShare() {
+        //查询已经生成任务的质检方案
+        List<BatchPlan> batchPlans = batchPlanRepository.selectByCondition(Condition.builder(BatchPlan.class)
+                .andWhere(Sqls.custom().andIsNotNull(BatchPlan.FIELD_PLAN_JOB_NAME))
+                .build());
+        if (CollectionUtils.isNotEmpty(batchPlans)) {
+            batchPlans.forEach(batchPlan -> this.generate(batchPlan.getTenantId(), batchPlan.getProjectId(), batchPlan.getPlanId()));
+        }
+    }
+
     private void doSendMessage(Long planId, List<ResultWaringVO> resultWaringVOS, BatchResultDTO batchResultDTO,
                                String warningLevel) {
         HashMap<String, String> labels = new HashMap<>();
