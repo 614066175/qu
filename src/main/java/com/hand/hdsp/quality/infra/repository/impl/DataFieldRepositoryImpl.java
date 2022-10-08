@@ -85,9 +85,4 @@ public class DataFieldRepositoryImpl extends BaseRepositoryImpl<DataField, DataF
         batchInsertDTOSelective(importDataFieldDTOList);
         return true;
     }
-
-    @Override
-    public boolean isEnableDataSecurity(Long tenantId) {
-        return dataStandardMapper.isEncrypt(tenantId) == 1;
-    }
 }
