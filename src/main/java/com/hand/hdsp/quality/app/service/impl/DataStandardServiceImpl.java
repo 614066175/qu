@@ -226,7 +226,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         }
         DataStandardDTO dataStandardDTO = dataStandardDTOList.get(0);
         //判断当前租户是否启用安全加密
-        if (dataStandardMapper.isEncrypt(tenantId) == 1) {
+        if (DataSecurityHelper.isTenantOpen()) {
             //解密邮箱，电话
             if (Strings.isNotEmpty(dataStandardDTO.getChargeTel())) {
                 dataStandardDTO.setChargeTel(DataSecurityHelper.decrypt(dataStandardDTO.getChargeTel()));
@@ -712,6 +712,12 @@ public class DataStandardServiceImpl implements DataStandardService {
                 dataStandardDTO.setNameLevelPath(String.format("%s/%s",
                         standardGroups.get(0).getGroupName(),
                         dataStandardDTO.getNameLevelPath()));
+            }
+        }
+        //解密责任部门
+        if (DataSecurityHelper.isTenantOpen()) {
+            if (Strings.isNotEmpty(dataStandardDTO.getChargeDeptName())) {
+                dataStandardDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeDeptName()));
             }
         }
         return dataStandardDTO;

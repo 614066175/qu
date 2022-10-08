@@ -203,10 +203,5 @@
             iam_user iu
         where iu.id=#{chargeId}
     </select>
-    <select id="isEncrypt" resultType="java.lang.Long">
-        select enable_data_security
-        from oauth_password_policy
-        where organization_id=#{tenantId}
-    </select>
 
 </mapper>
