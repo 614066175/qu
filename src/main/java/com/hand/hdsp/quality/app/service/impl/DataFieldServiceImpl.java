@@ -201,7 +201,7 @@ public class DataFieldServiceImpl implements DataFieldService {
         }
         DataFieldDTO dataFieldDTO = dataFieldDTOList.get(0);
         //判断当前租户是否启用安全加密
-        if (dataStandardMapper.isEncrypt(tenantId) == 1) {
+        if (DataSecurityHelper.isTenantOpen()) {
             //解密邮箱，电话
             if (Strings.isNotEmpty(dataFieldDTO.getChargeTel())) {
                 dataFieldDTO.setChargeTel(DataSecurityHelper.decrypt(dataFieldDTO.getChargeTel()));
@@ -367,7 +367,7 @@ public class DataFieldServiceImpl implements DataFieldService {
         }
         for (DataFieldDTO dataFieldDTO : list) {
             // 如果开启了数据加密
-            if (dataStandardMapper.isEncrypt(dataFieldDTO.getTenantId()) == 1) {
+            if (DataSecurityHelper.isTenantOpen()) {
                 decodeForDataFieldDTO(dataFieldDTO);
             }
         }
