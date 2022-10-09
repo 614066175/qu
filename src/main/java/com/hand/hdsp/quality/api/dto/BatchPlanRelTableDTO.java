@@ -8,6 +8,7 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+import org.hzero.boot.platform.lov.annotation.LovValue;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
 
@@ -54,8 +55,12 @@ public class BatchPlanRelTableDTO extends AuditDomain {
 
 
     @ApiModelProperty(value = "评估指标 HDSP.XQUA.CHECK_TYPE")
-    @ExcelColumn(zh = "评估指标", en = "check type")
+//    @ExcelColumn(zh = "评估指标", en = "check type")
+    @LovValue(lovCode = "HDSP.XQUA.CHECK_TYPE", meaningField = "checkTypeMeaning")
     private String checkType;
+
+    @ExcelColumn(zh = "评估指标", en = "check type")
+    private String checkTypeMeaning;
 
     @ApiModelProperty(value = "是否异常阻断")
     @NotNull
@@ -71,9 +76,12 @@ public class BatchPlanRelTableDTO extends AuditDomain {
     private String ruleDesc;
 
     @ApiModelProperty(value = "校验项")
-    @ExcelColumn(zh = "检验项", en = "checkItem")
+//    @ExcelColumn(zh = "检验项", en = "checkItem")
+    @LovValue(lovCode = "HDSP.XQUA.CHECK_ITEM", meaningField = "checkItemMeaning")
     private String checkItem;
 
+    @ExcelColumn(zh = "检验项", en = "checkItem")
+    private String checkItemMeaning;
 
     @ApiModelProperty("表ID，主键，供其他表做外键")
     private Long planRuleId;

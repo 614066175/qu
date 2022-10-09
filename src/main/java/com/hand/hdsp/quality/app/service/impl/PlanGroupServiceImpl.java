@@ -17,6 +17,7 @@ import com.hand.hdsp.quality.infra.mapper.BatchPlanTableMapper;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
@@ -84,6 +85,7 @@ public class PlanGroupServiceImpl implements PlanGroupService {
     }
 
     @Override
+    @ProcessLovValue(targetField = {"","batchPlanDTOList","batchPlanDTOList.batchPlanBaseDTOList","batchPlanDTOList.batchPlanBaseDTOList.batchPlanTableDTOList","batchPlanDTOList.batchPlanBaseDTOList.batchPlanFieldDTOList","batchPlanDTOList.batchPlanBaseDTOList.batchPlanRelTableDTOList"})
     public List<PlanGroupDTO> export(PlanGroupDTO dto, ExportParam exportParam) {
         if (ObjectUtils.isNotEmpty(dto.getPlanBaseId())) {
             BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseRepository.selectDTOByPrimaryKey(dto.getPlanBaseId());
@@ -95,7 +97,7 @@ public class PlanGroupServiceImpl implements PlanGroupService {
             dto.setGroupId(batchPlan.getGroupId());
         }
         List<PlanGroupDTO> planGroupDTOList = new ArrayList<>();
-        if(dto.getGroupId() == 0 && (ObjectUtils.isNotEmpty(dto.getPlanBaseCode()) || ObjectUtils.isNotEmpty(dto.getPlanBaseName()) || ObjectUtils.isNotEmpty(dto.getObjectName()))){
+        if(ObjectUtils.isNotEmpty(dto.getGroupId()) && dto.getGroupId() == 0 && (ObjectUtils.isNotEmpty(dto.getPlanBaseCode()) || ObjectUtils.isNotEmpty(dto.getPlanBaseName()) || ObjectUtils.isNotEmpty(dto.getObjectName()))){
             List<BatchPlanBaseDTO> batchPlanBaseDTOS = batchPlanBaseRepository.selectDTOByCondition(Condition.builder(BatchPlanBase.class).andWhere(Sqls.custom()
                             .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_CODE, dto.getPlanBaseCode(),true)
                             .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_NAME, dto.getPlanBaseName(),true)

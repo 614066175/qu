@@ -7,6 +7,7 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+import org.hzero.boot.platform.lov.annotation.LovValue;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
 
@@ -56,8 +57,12 @@ public class BatchPlanBaseDTO extends AuditDomain {
     private String datasourceSchema;
 
     @ApiModelProperty(value = "类型 HDSP.XQUA.SQL_TYPE (TABLE/VIEW/SQL)")
-    @ExcelColumn(zh = "类型", en = "sqlType")
+//    @ExcelColumn(zh = "类型", en = "sqlType")
+    @LovValue(lovCode = "HDSP.XQUA.SQL_TYPE",meaningField = "sqlTypeMeaning")
     private String sqlType;
+
+    @ExcelColumn(zh = "类型", en = "sqlType")
+    private String sqlTypeMeaning;
 
     @ApiModelProperty(value = "表名/视图名/自定义SQL")
     @ExcelColumn(zh = "表名称/视图名称/查询语句", en = "objectName")
@@ -68,8 +73,12 @@ public class BatchPlanBaseDTO extends AuditDomain {
     private String description;
 
     @ApiModelProperty(value = "增量校验策略")
-    @ExcelColumn(zh = "增量同步策略", en = "incrementStrategy")
+//    @ExcelColumn(zh = "增量同步策略", en = "incrementStrategy")
+    @LovValue(lovCode = "HDSP.XFAC.INCREMENT_STRATEGY",meaningField = "incrementStrategyMeaning")
     private String incrementStrategy;
+
+    @ExcelColumn(zh = "增量同步策略", en = "incrementStrategy")
+    private String incrementStrategyMeaning;
 
     @ApiModelProperty(value = "增量字段")
     @ExcelColumn(zh = "增量字段", en = "incrementColumn")
