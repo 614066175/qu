@@ -7,6 +7,7 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+import org.hzero.boot.platform.lov.annotation.LovValue;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
 
@@ -53,8 +54,12 @@ public class PlanGroupDTO extends AuditDomain {
     private String groupDesc;
 
     @ApiModelProperty(value = "分组类型BATCH/STREAMING")
-    @ExcelColumn(zh = "分组类型", en = "group type")
+//    @ExcelColumn(zh = "分组类型", en = "group type")
+    @LovValue(lovCode = "HDSP.XQUA.GROUP_TYPE",meaningField = "groupTypeMeaning")
     private String groupType;
+
+    @ExcelColumn(zh = "分组类型", en = "group type")
+    private String groupTypeMeaning;
 
     @Transient
     @ExcelColumn(zh = "评估方案列表", en = "batchPlanDTOList", child = true)
