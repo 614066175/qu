@@ -102,6 +102,16 @@ public class RuleGroupServiceImpl implements RuleGroupService {
                             .andEqualTo(Rule.FIELD_EXCEPTION_BLOCK, dto.getExceptionBlock(), true)
                             .andEqualTo(Rule.FIELD_WEIGHT, dto.getWeight(), true))
                     .build());
+            //设置分组的父分组编码
+            if(ObjectUtils.isNotEmpty(ruleGroupDTO.getParentGroupId())){
+                if(ruleGroupDTO.getParentGroupId() != 0){
+                    RuleGroupDTO parentRuleGroupDTO = ruleGroupRepository.selectDTOByPrimaryKey(ruleGroupDTO.getParentGroupId());
+                    ruleGroupDTO.setParentGroupCode(parentRuleGroupDTO.getGroupCode());
+                }else {
+                    //0目录：所有分组
+                    ruleGroupDTO.setParentGroupCode(RuleGroup.ROOT_RULE_GROUP.getGroupCode());
+                }
+            }
             //查询标准规则的告警配置
             ruleDTOList.forEach(ruleDTO -> {
                 List<RuleLineDTO> ruleLineDTOList = ruleLineRepository.selectDTOByCondition(Condition.builder(RuleLine.class)

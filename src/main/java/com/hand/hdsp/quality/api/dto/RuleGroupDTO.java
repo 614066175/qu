@@ -49,10 +49,6 @@ public class RuleGroupDTO extends AuditDomain {
     @ExcelColumn(zh = "分组编码",en = "group code",showInChildren = true)
     private String groupCode;
 
-    @Transient
-    @ExcelColumn(zh = "父分组编码",en = "parentGroupCode")
-    private String parentGroupCode;
-
     @ApiModelProperty(value = "分组名称")
     @NotBlank
     @ExcelColumn(zh = "分组名称",en = "group name")
@@ -62,50 +58,16 @@ public class RuleGroupDTO extends AuditDomain {
     @ExcelColumn(zh = "分组描述",en = "group desc")
     private String groupDesc;
 
+    @Transient
+    @ExcelColumn(zh = "父分组编码",en = "parentGroupCode")
+    private String parentGroupCode;
+
     /**
      * 标准规则列表
      */
     @Transient
     @ExcelColumn(zh = "标准规则列表", en = "ruleDTOList", child = true)
     private List<RuleDTO> ruleDTOList;
-
-
-
-    /**
-     *字段标准列表
-     */
-    @Transient
-    @ExcelColumn(zh = "字段标准列表",en = "dataFieldDTOList",child = true)
-    private List<DataFieldDTO> dataFieldDTOList;
-
-    /**
-     *命名标准列表
-     */
-    @Transient
-    @ExcelColumn(zh = "命名标准列表",en = "nameStandardDTOList",child = true)
-    private List<NameStandardDTO> nameStandardDTOList;
-
-    /**
-     *标准文档列表
-     */
-    @Transient
-    @ExcelColumn(zh = "标准文档列表",en = "standardDocDTOList",child = true)
-    private List<StandardDocDTO> standardDocDTOList;
-
-
-    /**
-     *批处理评估方案列表
-     */
-    @Transient
-    @ExcelColumn(zh = "批处理评估方案列表",en = "batchPlanDTOList",child = true)
-    private List<BatchPlanDTO> batchPlanDTOList;
-
-    /**
-     *批处理评估方案列表
-     */
-    @Transient
-    @ExcelColumn(zh = "流处理评估方案列表",en = "streamingPlanDTOList",child = true)
-    private List<StreamingPlanDTO> streamingPlanDTOList;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull
