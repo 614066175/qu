@@ -159,8 +159,11 @@
             <if test="dataFieldDTO.fieldId!=null">
                 fs.field_id=#{dataFieldDTO.fieldId}
             </if>
-            <if test="dataFieldDTO.groupId!=null">
-                and fs.group_id=#{dataFieldDTO.groupId}
+            <if test="dataFieldDTO.groupArrays!=null and dataFieldDTO.groupArrays.length>0">
+                and fs.group_id in
+                <foreach collection="dataFieldDTO.groupArrays" item="arr" index="no" open="("     separator="," close=")">
+                    #{arr}
+                </foreach>
             </if>
             <if test="dataFieldDTO.fieldName!=null">
                 <bind name="fieldName" value="'%'+ dataFieldDTO.fieldName +'%'"/>

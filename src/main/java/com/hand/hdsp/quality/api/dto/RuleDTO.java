@@ -13,6 +13,7 @@ import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
 
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -136,4 +137,10 @@ public class RuleDTO extends AuditDomain {
     private String warningLevel;
 
     private Long projectId;
+
+    /**
+     * 分组集合
+     */
+    @Transient
+    private Long[] groupArrays;
 }

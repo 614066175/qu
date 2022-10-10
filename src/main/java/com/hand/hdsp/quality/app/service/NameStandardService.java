@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.app.service;
 import java.util.List;
 
 import com.hand.hdsp.quality.api.dto.NameStandardDTO;
+import com.hand.hdsp.quality.api.dto.NameStandardGroupDTO;
 import com.hand.hdsp.quality.domain.entity.NameStandard;
 import com.hand.hdsp.quality.infra.vo.NameStandardDatasourceVO;
 import com.hand.hdsp.quality.infra.vo.NameStandardTableVO;
@@ -54,13 +55,12 @@ public interface NameStandardService {
     void batchExecuteStandard(List<Long> standardIdList);
 
     /**
-     * 命名标准导出
+     * 命名标准按分组导出
      * @param dto 命名标准
      * @param exportParam 导出参数
-     * @param pageRequest 分页参数
      * @return Page<NameStandardDTO>
      */
-    Page<NameStandardDTO> export(NameStandardDTO dto, ExportParam exportParam, PageRequest pageRequest);
+    List<NameStandardGroupDTO> export(NameStandardDTO dto, ExportParam exportParam);
 
     /**
      * 获取表
@@ -76,4 +76,14 @@ public interface NameStandardService {
      * @return
      */
     NameStandardDTO create(NameStandardDTO nameStandardDTO);
+
+
+    /**
+     * 分页查询命名标准
+     *
+     * @param nameStandardDTO
+     * @param pageRequest
+     * @return
+     */
+    Page<NameStandardDTO> pageNameStandards(NameStandardDTO nameStandardDTO, PageRequest pageRequest);
 }

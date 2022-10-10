@@ -3,6 +3,8 @@ package com.hand.hdsp.quality.app.service;
 import java.util.List;
 
 import com.hand.hdsp.quality.api.dto.RuleDTO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.export.vo.ExportParam;
 
 /**
@@ -57,4 +59,12 @@ public interface RuleService {
      * @return
      */
     List<RuleDTO> export(RuleDTO dto, ExportParam exportParam);
+
+    /**
+     * 分页查询标准规则
+     * @param pageRequest 分页参数
+     * @param ruleDTO 查询参数
+     * @return 标准规则分页结果
+     */
+    Page<RuleDTO> pageRules(PageRequest pageRequest, RuleDTO ruleDTO);
 }

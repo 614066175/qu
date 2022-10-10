@@ -40,15 +40,15 @@ public class StandardDocDTO extends AuditDomain {
     private Long groupId;
 
     @Transient
-    @ExcelColumn(zh = "分组编码", en = "groupCode", order = 1)
+//    @ExcelColumn(zh = "分组编码", en = "groupCode", order = 1)
     private String groupCode;
 
     @Transient
-    @ExcelColumn(zh = "分组名称", en = "groupName", order = 2)
+//    @ExcelColumn(zh = "分组名称", en = "groupName", order = 2)
     private String groupName;
 
     @Transient
-    @ExcelColumn(zh = "分组描述", en = "groupDesc", order = 3)
+//    @ExcelColumn(zh = "分组描述", en = "groupDesc", order = 3)
     private String groupDesc;
 
     @ApiModelProperty(value = "数据标准编码")
@@ -67,6 +67,22 @@ public class StandardDocDTO extends AuditDomain {
     @ExcelColumn(zh = "标准描述", en = "标准描述", order = 6)
     private String standardDesc;
 
+    @Transient
+    @ExcelColumn(zh = "责任部门", en = "chargeDeptName", order = 7)
+    private String chargeDeptName;
+
+    @Transient
+    @ExcelColumn(zh = "责任人", en = "chargeName", order = 8)
+    private String chargeName;
+
+    @ApiModelProperty(value = "责任人电话")
+    @ExcelColumn(zh = "责任人电话", en = "chargeTel", order = 9)
+    private String chargeTel;
+
+    @ExcelColumn(zh = "责任人邮箱", en = "chargeEmail", order = 10)
+    @ApiModelProperty(value = "责任人邮箱")
+    private String chargeEmail;
+
     @ApiModelProperty(value = "数据标准文档名称")
     private String docName;
 
@@ -84,28 +100,18 @@ public class StandardDocDTO extends AuditDomain {
     private Long chargeId;
 
     @Transient
-    @ExcelColumn(zh = "责任部门", en = "chargeDeptName", order = 7)
-    private String chargeDeptName;
-
-    @Transient
-    @ExcelColumn(zh = "责任人", en = "chargeName", order = 8)
-    private String chargeName;
-
-    @ApiModelProperty(value = "责任人电话")
-    @ExcelColumn(zh = "责任人电话", en = "chargeTel", order = 9)
-    private String chargeTel;
-
-    @ExcelColumn(zh = "责任人邮箱", en = "chargeEmail", order = 10)
-    @ApiModelProperty(value = "责任人邮箱")
-    private String chargeEmail;
-
-    @Transient
     private String createdByName;
 
     @Transient
     private String lastUpdatedByName;
 
     private Long projectId;
+
+    /**
+     * 分组集合
+     */
+    @Transient
+    private Long[] groupArrays;
 
     public interface Group1 {
     }
