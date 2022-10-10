@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.hand.hdsp.quality.api.dto.*;
@@ -64,18 +65,29 @@ public class StandardGroupServiceImpl implements StandardGroupService {
 
     @Override
     public void delete(StandardGroupDTO standardGroupDTO) {
-        //判断目录是否包含子目录
+        //目录或子目录存在标准不可删除;不存在或存在空的分组则删除，并同时删除空的分组
+        //遍历获取子目录集合
+        List<StandardGroupDTO> groupLists = new ArrayList<>();
+        findChildGroups(standardGroupDTO, groupLists);
+        groupLists.add(standardGroupDTO);
+        //判断是否包含标准
+        groupLists.forEach(this::existStandard);
+        standardGroupRepository.batchDTODeleteByPrimaryKey(groupLists);
+    }
+
+    private void findChildGroups(StandardGroupDTO standardGroupDTO, List<StandardGroupDTO> list) {
         List<StandardGroupDTO> standardGroups = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID, standardGroupDTO.getGroupId())
-                        .andEqualTo(StandardGroup.FIELD_TENANT_ID, standardGroupDTO.getTenantId()))
+                        .andEqualTo(StandardGroup.FIELD_TENANT_ID, standardGroupDTO.getTenantId())
+                        .andEqualTo(StandardGroup.FIELD_PROJECT_ID, standardGroupDTO.getProjectId()))
                 .build());
         if (CollectionUtils.isNotEmpty(standardGroups)) {
-            throw new CommonException(ErrorCode.GROUP_HAS_CHILD_GROUP);
+            list.addAll(standardGroups);
+            standardGroups.forEach(standardGroupDto -> {
+                findChildGroups(standardGroupDto, list);
+            });
         }
-        //判断是否包含标准
-        existStandard(standardGroupDTO);
-        standardGroupRepository.deleteByPrimaryKey(standardGroupDTO);
     }
 
     private void existStandard(StandardGroupDTO standardGroupDTO) {
@@ -119,7 +131,7 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                         .andWhere(Sqls.custom()
                                 .andEqualTo(StandardDoc.FIELD_GROUP_ID, standardGroupDTO.getGroupId())
                                 .andEqualTo(StandardDoc.FIELD_TENANT_ID, standardGroupDTO.getTenantId())
-                                .andEqualTo(StandardDoc.FIELD_PROJECT_ID,standardGroupDTO.getProjectId()))
+                                .andEqualTo(StandardDoc.FIELD_PROJECT_ID, standardGroupDTO.getProjectId()))
                         .build());
                 if (CollectionUtils.isNotEmpty(standardDocDTOS)) {
                     throw new CommonException(ErrorCode.GROUP_HAS_STANDARD);

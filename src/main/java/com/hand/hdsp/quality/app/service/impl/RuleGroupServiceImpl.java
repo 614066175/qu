@@ -24,6 +24,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -53,12 +54,38 @@ public class RuleGroupServiceImpl implements RuleGroupService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int delete(RuleGroupDTO ruleGroupDTO) {
-        List<RuleGroupDTO> ruleGroupList = ruleGroupRepository.selectDTO(RuleGroup.FIELD_PARENT_GROUP_ID, ruleGroupDTO.getGroupId());
-        List<RuleDTO> ruleDTOList = ruleRepository.selectDTO(Rule.FIELD_GROUP_ID, ruleGroupDTO.getGroupId());
-        if (CollectionUtils.isNotEmpty(ruleGroupList) || CollectionUtils.isNotEmpty(ruleDTOList)) {
-            throw new CommonException(ErrorCode.EXISTS_OTHER_GROUP_OR_RULE);
+        //分组或子分组存在标准规则不可删除;不存在或存在空的分组则删除，并同时删除空的分组
+        //遍历获取子目录集合
+        Long projectId = ProjectHelper.getProjectId();
+        List<RuleGroupDTO> ruleGroups = new ArrayList<>();
+        findChildGroups(ruleGroupDTO, ruleGroups);
+        ruleGroups.add(ruleGroupDTO);
+        //校验分组和子分组下是否有标准规则
+        ruleGroups.forEach(ruleGroupDto -> {
+            List<RuleDTO> ruleDTOList = ruleRepository.selectDTOByCondition(Condition.builder(Rule.class).andWhere(Sqls.custom()).andWhere(Sqls.custom()
+                    .andEqualTo(Rule.FIELD_TENANT_ID, ruleGroupDTO.getTenantId())
+                    .andEqualTo(Rule.FIELD_PROJECT_ID, projectId)
+                    .andEqualTo(Rule.FIELD_GROUP_ID, ruleGroupDto.getGroupId())
+            ).build());
+            if (CollectionUtils.isNotEmpty(ruleDTOList)) {
+                throw new CommonException(ErrorCode.EXISTS_OTHER_GROUP_OR_RULE);
+            }
+        });
+        return ruleGroupRepository.batchDTODeleteByPrimaryKey(ruleGroups);
+    }
+
+    private void findChildGroups(RuleGroupDTO ruleGroupDTO, List<RuleGroupDTO> ruleGroups) {
+        List<RuleGroupDTO> ruleGroupDTOList = ruleGroupRepository.selectDTOByCondition(Condition.builder(RuleGroup.class).andWhere(Sqls.custom()
+                        .andEqualTo(RuleGroup.FIELD_PROJECT_ID, ruleGroupDTO.getProjectId())
+                        .andEqualTo(RuleGroup.FIELD_TENANT_ID, ruleGroupDTO.getTenantId())
+                        .andEqualTo(RuleGroup.FIELD_PARENT_GROUP_ID, ruleGroupDTO.getGroupId()))
+                .build());
+        if (CollectionUtils.isNotEmpty(ruleGroupDTOList)) {
+            ruleGroups.addAll(ruleGroupDTOList);
+            ruleGroupDTOList.forEach(ruleGroupDto -> {
+                findChildGroups(ruleGroupDto, ruleGroups);
+            });
         }
-        return ruleGroupRepository.deleteByPrimaryKey(ruleGroupDTO);
     }
 
     @Override
@@ -103,11 +130,11 @@ public class RuleGroupServiceImpl implements RuleGroupService {
                             .andEqualTo(Rule.FIELD_WEIGHT, dto.getWeight(), true))
                     .build());
             //设置分组的父分组编码
-            if(ObjectUtils.isNotEmpty(ruleGroupDTO.getParentGroupId())){
-                if(ruleGroupDTO.getParentGroupId() != 0){
+            if (ObjectUtils.isNotEmpty(ruleGroupDTO.getParentGroupId())) {
+                if (ruleGroupDTO.getParentGroupId() != 0) {
                     RuleGroupDTO parentRuleGroupDTO = ruleGroupRepository.selectDTOByPrimaryKey(ruleGroupDTO.getParentGroupId());
                     ruleGroupDTO.setParentGroupCode(parentRuleGroupDTO.getGroupCode());
-                }else {
+                } else {
                     //0目录：所有分组
                     ruleGroupDTO.setParentGroupCode(RuleGroup.ROOT_RULE_GROUP.getGroupCode());
                 }
