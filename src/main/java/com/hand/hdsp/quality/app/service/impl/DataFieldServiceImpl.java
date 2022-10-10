@@ -286,7 +286,28 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     @Override
     public Page<DataFieldDTO> list(PageRequest pageRequest, DataFieldDTO dataFieldDTO) {
+        //分组查询时同时查询当前分组和当前分组子分组的数据标准
+        Long groupId = dataFieldDTO.getGroupId();
+        if(ObjectUtils.isNotEmpty(groupId)){
+            List<StandardGroupDTO> standardGroupDTOList = new ArrayList<>();
+            //查询子分组
+            findChildGroups(groupId,standardGroupDTOList);
+            //添加当前分组
+            standardGroupDTOList.add(StandardGroupDTO.builder().groupId(groupId).build());
+            Long[] groupIds = standardGroupDTOList.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
+            dataFieldDTO.setGroupArrays(groupIds);
+        }
         return PageHelper.doPageAndSort(pageRequest, () -> dataFieldMapper.list(dataFieldDTO));
+    }
+
+    private void findChildGroups(Long groupId, List<StandardGroupDTO> standardGroups) {
+        List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                        .andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID,groupId))
+                .build());
+        if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
+            standardGroups.addAll(standardGroupDTOList);
+            standardGroupDTOList.forEach(standardGroupDTO -> findChildGroups(standardGroupDTO.getGroupId(),standardGroups));
+        }
     }
 
     @Override

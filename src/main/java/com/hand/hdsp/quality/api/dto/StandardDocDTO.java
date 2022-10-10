@@ -107,6 +107,12 @@ public class StandardDocDTO extends AuditDomain {
 
     private Long projectId;
 
+    /**
+     * 分组集合
+     */
+    @Transient
+    private Long[] groupArrays;
+
     public interface Group1 {
     }
 

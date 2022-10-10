@@ -66,7 +66,7 @@ public class NameStandardController extends BaseController {
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         nameStandardDTO.setTenantId(tenantId);
         nameStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
-        Page<NameStandardDTO> list = PageHelper.doPageAndSort(pageRequest, () -> nameStandardRepository.list(nameStandardDTO));
+        Page<NameStandardDTO> list = nameStandardService.pageNameStandards(nameStandardDTO,pageRequest);
         return Results.success(list);
     }
 

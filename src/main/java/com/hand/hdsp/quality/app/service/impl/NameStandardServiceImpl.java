@@ -9,6 +9,7 @@ import com.hand.hdsp.quality.app.service.NameStandardService;
 import com.hand.hdsp.quality.domain.entity.NameAim;
 import com.hand.hdsp.quality.domain.entity.NameExecHistory;
 import com.hand.hdsp.quality.domain.entity.NameStandard;
+import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.NameStandardStatusEnum;
@@ -16,8 +17,11 @@ import com.hand.hdsp.quality.infra.converter.NameStandardConverter;
 import com.hand.hdsp.quality.infra.util.DataSecurityUtil;
 import com.hand.hdsp.quality.infra.vo.NameStandardDatasourceVO;
 import com.hand.hdsp.quality.infra.vo.NameStandardTableVO;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -354,4 +358,29 @@ public class NameStandardServiceImpl implements NameStandardService {
         return aimTableList;
     }
 
+    @Override
+    public Page<NameStandardDTO> pageNameStandards(NameStandardDTO nameStandardDTO, PageRequest pageRequest) {
+        //分组查询时同时查询当前分组和当前分组子分组的数据标准
+        Long groupId = nameStandardDTO.getGroupId();
+        if(ObjectUtils.isNotEmpty(groupId)){
+            List<StandardGroupDTO> standardGroups = new ArrayList<>();
+            //查询子分组
+            findChildGroups(groupId, standardGroups);
+            //添加当前分组
+            standardGroups.add(StandardGroupDTO.builder().groupId(groupId).build());
+            Long[] groupIds = standardGroups.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
+            nameStandardDTO.setGroupArrays(groupIds);
+        }
+        return PageHelper.doPageAndSort(pageRequest, () -> nameStandardRepository.list(nameStandardDTO));
+    }
+
+    private void findChildGroups(Long groupId, List<StandardGroupDTO> standardGroups) {
+        List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                        .andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID,groupId))
+                .build());
+        if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
+            standardGroups.addAll(standardGroupDTOList);
+            standardGroupDTOList.forEach(standardGroupDTO -> findChildGroups(standardGroupDTO.getGroupId(),standardGroups));
+        }
+    }
 }

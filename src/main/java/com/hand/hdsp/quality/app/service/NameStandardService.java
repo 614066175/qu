@@ -76,4 +76,14 @@ public interface NameStandardService {
      * @return
      */
     NameStandardDTO create(NameStandardDTO nameStandardDTO);
+
+
+    /**
+     * 分页查询命名标准
+     *
+     * @param nameStandardDTO
+     * @param pageRequest
+     * @return
+     */
+    Page<NameStandardDTO> pageNameStandards(NameStandardDTO nameStandardDTO, PageRequest pageRequest);
 }

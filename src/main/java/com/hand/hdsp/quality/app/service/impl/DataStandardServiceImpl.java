@@ -362,11 +362,32 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     @Override
     public Page<DataStandardDTO> list(PageRequest pageRequest, DataStandardDTO dataStandardDTO) {
+        //分组查询时同时查询当前分组和当前分组子分组的数据标准
+        Long groupId = dataStandardDTO.getGroupId();
+        if (ObjectUtils.isNotEmpty(groupId)) {
+            List<StandardGroupDTO> standardGroups = new ArrayList<>();
+            //查询子分组
+            findChildGroups(groupId, standardGroups);
+            //添加当前分组
+            standardGroups.add(StandardGroupDTO.builder().groupId(groupId).build());
+            Long[] groupIds = standardGroups.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
+            dataStandardDTO.setGroupArrays(groupIds);
+        }
         List<DataStandardDTO> list = dataStandardMapper.list(dataStandardDTO);
         for (DataStandardDTO dto : list) {
             decodeForDataStandardDTO(dto);
         }
         return PageParseUtil.springPage2C7nPage(PageUtil.doPage(list, org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize())));
+    }
+
+    private void findChildGroups(Long groupId, List<StandardGroupDTO> standardGroups) {
+        List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                        .andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID, groupId))
+                .build());
+        if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
+            standardGroups.addAll(standardGroupDTOList);
+            standardGroupDTOList.forEach(standardGroupDTO -> findChildGroups(standardGroupDTO.getGroupId(),standardGroups));
+        }
     }
 
     @Override

@@ -83,8 +83,11 @@
             <if test="dataStandardDTO.standardId!=null">
                 ds.standard_id=#{dataStandardDTO.standardId}
             </if>
-            <if test="dataStandardDTO.groupId!=null">
-                and ds.group_id=#{dataStandardDTO.groupId}
+            <if test="dataStandardDTO.groupArrays !=null and dataStandardDTO.groupArrays.length>0 ">
+                and ds.group_id in
+                <foreach collection="dataStandardDTO.groupArrays" item="arr" index="no" open="("      separator="," close=")">
+                    #{arr}
+                </foreach>
             </if>
             <if test="dataStandardDTO.standardCode!=null">
                 <bind name="standardCode" value="'%'+ dataStandardDTO.standardCode +'%'"/>

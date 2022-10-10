@@ -74,10 +74,7 @@ public class RuleController extends BaseController {
                                         @ApiIgnore @SortDefault(value = Rule.FIELD_RULE_ID, direction = Sort.Direction.DESC) PageRequest pageRequest) {
         ruleDTO.setTenantId(tenantId);
         ruleDTO.setProjectId(projectId);
-        if (ruleDTO.getGroupId() != null && ruleDTO.getGroupId() == 0) {
-            ruleDTO.setGroupId(null);
-        }
-        Page<RuleDTO> list = ruleRepository.listTenant(pageRequest, ruleDTO);
+        Page<RuleDTO> list = ruleService.pageRules(pageRequest, ruleDTO);
         return Results.success(list);
     }
 
