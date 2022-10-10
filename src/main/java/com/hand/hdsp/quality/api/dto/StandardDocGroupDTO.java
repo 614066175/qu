@@ -1,33 +1,26 @@
 package com.hand.hdsp.quality.api.dto;
 
-import java.util.List;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
 
-/**
- * <p>标准分组表 数据传输对象</p>
- *
- * @author guoliangli01@hand-china.com 2020-11-27 14:36:44
- */
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@ApiModel("标准分组表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ExcelSheet(zh = "标准分组",en = "Standard Group")
-public class StandardGroupDTO extends AuditDomain {
+@ExcelSheet(zh = "分组",en = "StandardDoc Group")
+public class StandardDocGroupDTO extends AuditDomain {
 
     @ApiModelProperty("分组ID，主键，供其他表做外键")
     private Long groupId;
@@ -52,6 +45,10 @@ public class StandardGroupDTO extends AuditDomain {
     @ExcelColumn(zh = "分组描述",en = "groupDesc")
     private String groupDesc;
 
+    @ExcelColumn(zh = "父分组编码",en = "parentGroupCode")
+    @Transient
+    private String parentGroupCode;
+
     @ApiModelProperty(value = "标准类型(快码：HDSP.XSTA.STANDARD_TYPE：DATA/数据标准，FIELD/字段标准，NAME/命名标准)")
     @NotBlank
     @Size(max = 30)
@@ -65,19 +62,9 @@ public class StandardGroupDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
-
     @Transient
-    @ExcelColumn(zh = "数据标准列表", en = "dataStandardDTOList", child = true)
-    private List<DataStandardDTO> dataStandardDTOList;
+    @ExcelColumn(zh = "标准文档列表", en = "standardDocDTOList", child = true)
+    private List<StandardDocDTO> standardDocDTOList;
 
     private Long projectId;
-
-    @ExcelColumn(zh = "父分组名称",en = "parentGroupName")
-    @Transient
-    private String 	parentGroupName;
-
-    @ExcelColumn(zh = "父分组编码",en = "parentGroupCode")
-    @Transient
-    private String parentGroupCode;
-
 }

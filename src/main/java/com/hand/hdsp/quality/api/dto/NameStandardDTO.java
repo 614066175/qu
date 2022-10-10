@@ -71,13 +71,6 @@ public class NameStandardDTO extends AuditDomain {
     @NotNull
     private Integer ignoreCaseFlag;
 
-    @ApiModelProperty(value = "责任人ID")
-    @NotNull
-    private Long chargeId;
-
-    @ApiModelProperty(value = "责任部门ID")
-    private Long chargeDeptId;
-
     @ExcelColumn(zh = "责任人电话",en="chargeTel",order = 11)
     @ApiModelProperty(value = "责任人电话")
     private String chargeTel;
@@ -85,6 +78,13 @@ public class NameStandardDTO extends AuditDomain {
     @ExcelColumn(zh = "责任人邮箱",en="chargeEmail",order = 12)
     @ApiModelProperty(value = "责任人邮箱")
     private String chargeEmail;
+
+    @ApiModelProperty(value = "责任人ID")
+    @NotNull
+    private Long chargeId;
+
+    @ApiModelProperty(value = "责任部门ID")
+    private Long chargeDeptId;
 
     @LovValue(lovCode = "HDSP.XSTA.EXEC_STATUS",meaningField = "latestCheckedStatusMeaning")
     @ApiModelProperty(value = "最新稽核状态，值集：HDSP.XSTA.EXEC_STATUS")
@@ -140,7 +140,7 @@ public class NameStandardDTO extends AuditDomain {
     /**
      * 分组编码
      */
-    @ExcelColumn(zh = "分组编码",en="groupCode",order = 2)
+//    @ExcelColumn(zh = "分组编码",en="groupCode",order = 2)
     @Transient
     private String groupCode;
 

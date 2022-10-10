@@ -267,18 +267,17 @@ public class DataStandardController {
     @ApiOperation(value = "导出数据标准")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/export")
-    @ExcelExport(value = DataStandardDTO.class)
-    public ResponseEntity<List<DataStandardDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+    @ExcelExport(value = DataStandardGroupDTO.class)
+    public ResponseEntity<List<DataStandardGroupDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                                         @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                         DataStandardDTO dto,
                                                         ExportParam exportParam,
-                                                        HttpServletResponse response,
-                                                        PageRequest pageRequest) {
+                                                        HttpServletResponse response) {
 
         dto.setTenantId(tenantId);
         dto.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
-        List<DataStandardDTO> dtoList =
-                dataStandardService.export(dto, exportParam, pageRequest);
+        List<DataStandardGroupDTO> dtoList =
+                dataStandardService.export(dto, exportParam);
         return Results.success(dtoList);
     }
 

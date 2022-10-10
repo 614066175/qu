@@ -23,6 +23,7 @@ import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
@@ -104,6 +105,7 @@ public class DataFieldServiceImpl implements DataFieldService {
     private final StandardApprovalMapper standardApprovalMapper;
 
     private final AimStatisticsConverter aimStatisticsConverter;
+    private final StandardGroupRepository standardGroupRepository;
 
     @Autowired
     private List<StandardHandler> handlers;
@@ -123,7 +125,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                                 StandardTeamRepository standardTeamRepository, StandardRelationRepository standardRelationRepository,
                                 AimStatisticsRepository aimStatisticsRepository, StandardApprovalRepository standardApprovalRepository,
                                 StandardApprovalMapper standardApprovalMapper, List<StatisticValidator> statisticValidatorList,
-                                DriverSessionService driverSessionService, StandardApprovalService standardApprovalService, AimStatisticsConverter aimStatisticsConverter) {
+                                DriverSessionService driverSessionService, StandardApprovalService standardApprovalService, AimStatisticsConverter aimStatisticsConverter, StandardGroupRepository standardGroupRepository) {
         this.dataFieldRepository = dataFieldRepository;
         this.standardExtraRepository = standardExtraRepository;
         this.standardApproveRepository = standardApproveRepository;
@@ -142,6 +144,7 @@ public class DataFieldServiceImpl implements DataFieldService {
         this.statisticValidatorList = statisticValidatorList;
         this.standardApprovalService = standardApprovalService;
         this.aimStatisticsConverter = aimStatisticsConverter;
+        this.standardGroupRepository = standardGroupRepository;
     }
 
 
@@ -277,6 +280,11 @@ public class DataFieldServiceImpl implements DataFieldService {
     }
 
     @Override
+    public List<DataFieldDTO> findDataFieldDtoList(DataFieldDTO dataFieldDTO) {
+        return dataFieldMapper.list(dataFieldDTO);
+    }
+
+    @Override
     public Page<DataFieldDTO> list(PageRequest pageRequest, DataFieldDTO dataFieldDTO) {
         return PageHelper.doPageAndSort(pageRequest, () -> dataFieldMapper.list(dataFieldDTO));
     }
@@ -353,18 +361,58 @@ public class DataFieldServiceImpl implements DataFieldService {
 
 
     @Override
-    public List<DataFieldDTO> export(DataFieldDTO dto, ExportParam exportParam, PageRequest pageRequest) {
-        Page<DataFieldDTO> list = list(pageRequest, dto);
-        if (list == null) {
-            return new ArrayList<>();
+    public List<DataFieldGroupDTO> export(DataFieldDTO dto, ExportParam exportParam) {
+        List<DataFieldGroupDTO> dataFieldGroupDTOList = new ArrayList<>();
+        DataFieldGroupDTO dataFieldGroupDTO = new DataFieldGroupDTO();
+        //分组导出字段标准
+        List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                        .andEqualTo(StandardGroup.FIELD_TENANT_ID, dto.getTenantId())
+                        .andEqualTo(StandardGroup.FIELD_PROJECT_ID, dto.getProjectId())
+                        .andEqualTo(StandardGroup.FIELD_GROUP_ID, dto.getGroupId(), true))
+                .build());
+        if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
+            standardGroupDTOList.forEach(standardGroupDTO -> {
+                //查询设置父目录
+                if(ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())){
+                    StandardGroupDTO parentStandGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
+                    standardGroupDTO.setParentGroupCode(parentStandGroupDTO.getGroupCode());
+                }
+                BeanUtils.copyProperties(standardGroupDTO,dataFieldGroupDTO);
+                dataFieldGroupDTOList.add(dataFieldGroupDTO);
+            });
+            dataFieldGroupDTOList.forEach(standardGroupDTO -> {
+                //条件查询
+                List<DataFieldDTO> dataFieldDTOList = findDataFieldDtoList(dto);
+                for (DataFieldDTO dataFieldDTO : dataFieldDTOList) {
+                    // 如果开启了数据加密
+                    if (dataStandardMapper.isEncrypt(dataFieldDTO.getTenantId()) == 1) {
+                        decodeForDataFieldDTO(dataFieldDTO);
+                    }
+                }
+                standardGroupDTO.setDataFieldDTOList(dataFieldDTOList);
+            });
+            return dataFieldGroupDTOList;
         }
-        for (DataFieldDTO dataFieldDTO : list) {
-            // 如果开启了数据加密
-            if (dataStandardMapper.isEncrypt(dataFieldDTO.getTenantId()) == 1) {
-                decodeForDataFieldDTO(dataFieldDTO);
-            }
-        }
-        return list;
+        return dataFieldGroupDTOList;
+
+
+
+//        Page<DataFieldDTO> list = list(pageRequest, dto);
+////        List<DataFieldDTO> dataFieldDTOList = list.getContent();
+//
+//
+//
+//
+//        if (list == null) {
+//            return new ArrayList<>();
+//        }
+//        for (DataFieldDTO dataFieldDTO : list) {
+//            // 如果开启了数据加密
+//            if (dataStandardMapper.isEncrypt(dataFieldDTO.getTenantId()) == 1) {
+//                decodeForDataFieldDTO(dataFieldDTO);
+//            }
+//        }
+//        return list;
     }
 
     /**

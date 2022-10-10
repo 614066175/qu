@@ -191,22 +191,21 @@ public class DataFieldController extends BaseController {
         return Results.success(dataFieldDTOList);
     }
 
-    @ApiOperation(value = "导出字段标准")
+    @ApiOperation(value = "分组导出字段标准")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/export")
-    @ExcelExport(value = DataFieldDTO.class)
-    public ResponseEntity<List<DataFieldDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+    @ExcelExport(value = DataFieldGroupDTO.class)
+    public ResponseEntity<List<DataFieldGroupDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                                      @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                      DataFieldDTO dto,
                                                      ExportParam exportParam,
-                                                     HttpServletResponse response,
-                                                     PageRequest pageRequest) {
+                                                     HttpServletResponse response) {
 
         response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
         dto.setTenantId(tenantId);
         dto.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
-        List<DataFieldDTO> dtoList =
-                dataFieldService.export(dto, exportParam, pageRequest);
+        List<DataFieldGroupDTO> dtoList =
+                dataFieldService.export(dto, exportParam);
         return Results.success(dtoList);
     }
 

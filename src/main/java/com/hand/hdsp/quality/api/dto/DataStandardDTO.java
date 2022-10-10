@@ -26,7 +26,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 @ApiModel("数据标准表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ExcelSheet(zh = "数据标准", en = "Data Standard")
+@ExcelSheet(zh = "数据标准", en = "Data Standard",rowOffset = 3)
 public class DataStandardDTO extends AuditDomain{
 
     @ApiModelProperty("数据标准ID，主键，供其他表做外键")
@@ -38,15 +38,15 @@ public class DataStandardDTO extends AuditDomain{
     private Long groupId;
 
     @Transient
-    @ExcelColumn(zh = "分组编码", en = "groupCode")
+//    @ExcelColumn(zh = "分组编码", en = "groupCode")
     private String groupCode;
 
     @Transient
-    @ExcelColumn(zh = "分组名称", en = "groupName")
+//    @ExcelColumn(zh = "分组名称", en = "groupName")
     private String groupName;
 
     @Transient
-    @ExcelColumn(zh = "分组描述", en = "groupDesc")
+//    @ExcelColumn(zh = "分组描述", en = "groupDesc")
     private String groupDesc;
 
     @ApiModelProperty(value = "数据标准编码")
@@ -100,11 +100,17 @@ public class DataStandardDTO extends AuditDomain{
     @ExcelColumn(zh = "依据内容",en = "accordContent")
     private String accordContent;
 
-    @ApiModelProperty(value = "责任部门ID")
-    private Long chargeDeptId;
+    @ApiModelProperty(value = "是否可为空，1可空 0 不可空")
+    @ExcelColumn(zh = "是否可为空",en = "Can be empty or not")
+    private Integer nullFlag;
 
-    @ApiModelProperty(value = "责任人ID")
-    private Long chargeId;
+    @Transient
+    @ExcelColumn(zh = "责任部门", en = "chargeDeptName")
+    private String chargeDeptName;
+
+    @Transient
+    @ExcelColumn(zh = "责任人",en = "chargeName")
+    private String chargeName;
 
     @ApiModelProperty(value = "责任人电话")
     @ExcelColumn(zh = "责任人电话",en = "chargeTel")
@@ -114,14 +120,16 @@ public class DataStandardDTO extends AuditDomain{
     @ApiModelProperty(value = "责任人邮箱")
     private String chargeEmail;
 
+    @ApiModelProperty(value = "责任部门ID")
+    private Long chargeDeptId;
+
+    @ApiModelProperty(value = "责任人ID")
+    private Long chargeId;
+
     @ApiModelProperty(value = "数据标准状态(快码HSDP.XSTA.STANDARD_STATUS)")
     @NotBlank
     @Size(max = 30)
     private String standardStatus;
-
-    @ApiModelProperty(value = "是否可为空，1可空 0 不可空")
-    @ExcelColumn(zh = "是否可为空",en = "Can be empty or not")
-    private Integer nullFlag;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull
@@ -135,14 +143,6 @@ public class DataStandardDTO extends AuditDomain{
 
     @Transient
     private String lastUpdateName;
-
-    @Transient
-    @ExcelColumn(zh = "责任人",en = "chargeName")
-    private String chargeName;
-
-    @Transient
-    @ExcelColumn(zh = "责任部门", en = "chargeDeptName")
-    private String chargeDeptName;
 
     @Transient
     private Long parentGroupId;

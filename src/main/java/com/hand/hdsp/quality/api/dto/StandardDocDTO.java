@@ -40,15 +40,15 @@ public class StandardDocDTO extends AuditDomain {
     private Long groupId;
 
     @Transient
-    @ExcelColumn(zh = "分组编码", en = "groupCode", order = 1)
+//    @ExcelColumn(zh = "分组编码", en = "groupCode", order = 1)
     private String groupCode;
 
     @Transient
-    @ExcelColumn(zh = "分组名称", en = "groupName", order = 2)
+//    @ExcelColumn(zh = "分组名称", en = "groupName", order = 2)
     private String groupName;
 
     @Transient
-    @ExcelColumn(zh = "分组描述", en = "groupDesc", order = 3)
+//    @ExcelColumn(zh = "分组描述", en = "groupDesc", order = 3)
     private String groupDesc;
 
     @ApiModelProperty(value = "数据标准编码")
@@ -67,22 +67,6 @@ public class StandardDocDTO extends AuditDomain {
     @ExcelColumn(zh = "标准描述", en = "标准描述", order = 6)
     private String standardDesc;
 
-    @ApiModelProperty(value = "数据标准文档名称")
-    private String docName;
-
-    @ApiModelProperty(value = "数据标准文档路径")
-    private String docPath;
-
-    @ApiModelProperty(value = "租户ID")
-    @NotNull
-    private Long tenantId;
-
-    @ApiModelProperty(value = "责任部门ID")
-    private Long chargeDeptId;
-
-    @ApiModelProperty(value = "责任人ID")
-    private Long chargeId;
-
     @Transient
     @ExcelColumn(zh = "责任部门", en = "chargeDeptName", order = 7)
     private String chargeDeptName;
@@ -98,6 +82,22 @@ public class StandardDocDTO extends AuditDomain {
     @ExcelColumn(zh = "责任人邮箱", en = "chargeEmail", order = 10)
     @ApiModelProperty(value = "责任人邮箱")
     private String chargeEmail;
+
+    @ApiModelProperty(value = "数据标准文档名称")
+    private String docName;
+
+    @ApiModelProperty(value = "数据标准文档路径")
+    private String docPath;
+
+    @ApiModelProperty(value = "租户ID")
+    @NotNull
+    private Long tenantId;
+
+    @ApiModelProperty(value = "责任部门ID")
+    private Long chargeDeptId;
+
+    @ApiModelProperty(value = "责任人ID")
+    private Long chargeId;
 
     @Transient
     private String createdByName;

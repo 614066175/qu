@@ -58,6 +58,13 @@ public interface DataStandardService {
     Page<DataStandardDTO> list(PageRequest pageRequest, DataStandardDTO dataStandardDTO);
 
     /**
+     * 查询并解密获取数据标准集合信息
+     * @param dataStandardDTO
+     * @return
+     */
+    List<DataStandardDTO> findDataStandards(DataStandardDTO dataStandardDTO);
+
+    /**
      * 修改数据标准
      *
      * @param dataStandardDTO
@@ -86,14 +93,13 @@ public interface DataStandardService {
     void batchRelatePlan(Long tenantId, List<StandardAimDTO> standardAimDTOList,Long projectId);
 
     /**
-     * 数据标准导出
+     * 从分组导出数据标准
      *
-     * @param dto
-     * @param exportParam
-     * @param pageRequest
-     * @return
+     * @param dto 导出的查询参数
+     * @param exportParam 导出参数
+     * @return 分组的数据标准
      */
-    List<DataStandardDTO> export(DataStandardDTO dto, ExportParam exportParam, PageRequest pageRequest);
+    List<DataStandardGroupDTO> export(DataStandardDTO dto, ExportParam exportParam);
 
     /**
      * 标准转换为规则

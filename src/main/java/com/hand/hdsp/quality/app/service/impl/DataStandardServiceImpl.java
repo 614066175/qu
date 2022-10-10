@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.DataStandardService;
 import com.hand.hdsp.quality.app.service.StandardAimService;
@@ -22,6 +23,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
@@ -348,6 +350,16 @@ public class DataStandardServiceImpl implements DataStandardService {
 //        assetFeign.create(approvalLineDTO.getTenantId(),approvalLineDTO);
     }
 
+
+    @Override
+    public List<DataStandardDTO> findDataStandards(DataStandardDTO dataStandardDTO) {
+        List<DataStandardDTO> list = dataStandardMapper.list(dataStandardDTO);
+        for (DataStandardDTO dto : list) {
+            decodeForDataStandardDTO(dto);
+        }
+        return list;
+    }
+
     @Override
     public Page<DataStandardDTO> list(PageRequest pageRequest, DataStandardDTO dataStandardDTO) {
         List<DataStandardDTO> list = dataStandardMapper.list(dataStandardDTO);
@@ -581,8 +593,32 @@ public class DataStandardServiceImpl implements DataStandardService {
     }
 
     @Override
-    public List<DataStandardDTO> export(DataStandardDTO dto, ExportParam exportParam, PageRequest pageRequest) {
-        return list(pageRequest, dto);
+    public List<DataStandardGroupDTO> export(DataStandardDTO dto, ExportParam exportParam) {
+        List<DataStandardGroupDTO> dataStandardGroupDTOList = new ArrayList<>();
+        DataStandardGroupDTO dataStandardGroupDTO = new DataStandardGroupDTO();
+        Long projectId = ProjectHelper.getProjectId();
+        //获取分组
+        List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                .andEqualTo(StandardGroup.FIELD_TENANT_ID,dto.getTenantId())
+                .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId)
+                .andEqualTo(StandardGroup.FIELD_GROUP_ID,dto.getGroupId(),true)
+        ).build());
+        //获取每个分组的父分组编码
+        standardGroupDTOList.forEach(standardGroupDTO -> {
+            if(ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())){
+                StandardGroupDTO parentGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
+                standardGroupDTO.setParentGroupCode(parentGroupDTO.getGroupCode());
+            }
+            BeanUtils.copyProperties(standardGroupDTO,dataStandardGroupDTO);
+            dataStandardGroupDTOList.add(dataStandardGroupDTO);
+        });
+        dataStandardGroupDTOList.forEach(standardGroupDTO -> {
+            //导出分组下条件筛选后的数据标准
+            List<DataStandardDTO> dataStandardDTOList = findDataStandards(dto);
+            standardGroupDTO.setDataStandardDTOList(dataStandardDTOList);
+        });
+        //todo 电话邮箱未导出
+        return dataStandardGroupDTOList;
     }
 
     /**

@@ -31,15 +31,15 @@ import java.util.List;
 public class DataFieldDTO extends AuditDomain {
 
     @Transient
-    @ExcelColumn(zh = "分组名称", en = "groupName", groups = {Group1.class})
+//    @ExcelColumn(zh = "分组名称", en = "groupName", groups = {Group1.class})
     private String groupName;
 
     @Transient
-    @ExcelColumn(zh = "分组编码", en = "groupCode", groups = {Group1.class})
+//    @ExcelColumn(zh = "分组编码", en = "groupCode", groups = {Group1.class})
     private String groupCode;
 
     @Transient
-    @ExcelColumn(zh = "分组描述", en = "groupDesc", groups = {Group1.class})
+//    @ExcelColumn(zh = "分组描述", en = "groupDesc", groups = {Group1.class})
     private String groupDesc;
 
     @ApiModelProperty("字段标准ID，主键，供其他表做外键")
@@ -93,13 +93,17 @@ public class DataFieldDTO extends AuditDomain {
     @ExcelColumn(zh = "值域范围", en = "valueRange", groups = {Group1.class})
     private String valueRange;
 
-    @ApiModelProperty(value = "责任部门ID")
-    @NotNull
-    private Long chargeDeptId;
+    @ApiModelProperty(value = "是否可为空，1可空 0 不可空")
+    @ExcelColumn(zh = "是否可为空" ,en = "Can be empty or not")
+    private Integer nullFlag;
 
-    @ApiModelProperty(value = "责任人ID")
-    @NotNull
-    private Long chargeId;
+    @Transient
+    @ExcelColumn(zh = "责任人", en = "chargeName", groups = {Group2.class})
+    private String chargeName;
+
+    @Transient
+    @ExcelColumn(zh = "责任部门", en = "chargeDeptName", groups = {Group2.class})
+    private String chargeDeptName;
 
     @ApiModelProperty(value = "责任人电话")
     @ExcelColumn(zh = "责任人电话", en = "chargeTel", groups = {Group2.class})
@@ -108,6 +112,14 @@ public class DataFieldDTO extends AuditDomain {
     @ApiModelProperty(value = "责任人邮箱")
     @ExcelColumn(zh = "责任人邮箱", en = "chargeEmail", groups = {Group2.class})
     private String chargeEmail;
+
+    @ApiModelProperty(value = "责任部门ID")
+    @NotNull
+    private Long chargeDeptId;
+
+    @ApiModelProperty(value = "责任人ID")
+    @NotNull
+    private Long chargeId;
 
     @ApiModelProperty(value = "字段标准状态(快码HSDP.XSTA.STANDARD_STATUS)")
     @NotBlank
@@ -121,10 +133,6 @@ public class DataFieldDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
-    @ApiModelProperty(value = "是否可为空，1可空 0 不可空")
-    @ExcelColumn(zh = "是否可为空" ,en = "Can be empty or not")
-    private Integer nullFlag;
-
     @Transient
     private List<StandardExtraDTO> standardExtraDTOList;
 
@@ -133,14 +141,6 @@ public class DataFieldDTO extends AuditDomain {
 
     @Transient
     private String lastUpdateName;
-
-    @Transient
-    @ExcelColumn(zh = "责任人", en = "chargeName", groups = {Group2.class})
-    private String chargeName;
-
-    @Transient
-    @ExcelColumn(zh = "责任部门", en = "chargeDeptName", groups = {Group2.class})
-    private String chargeDeptName;
 
     @ApiModelProperty(value = "默认值")
     private String defaultValue;
