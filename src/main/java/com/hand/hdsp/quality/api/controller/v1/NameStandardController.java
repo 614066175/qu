@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.NameStandardDTO;
+import com.hand.hdsp.quality.api.dto.NameStandardGroupDTO;
 import com.hand.hdsp.quality.app.service.NameStandardService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.NameStandard;
@@ -65,7 +66,7 @@ public class NameStandardController extends BaseController {
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         nameStandardDTO.setTenantId(tenantId);
         nameStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
-        Page<NameStandardDTO> list = PageHelper.doPageAndSort(pageRequest, () -> nameStandardRepository.list(nameStandardDTO));
+        Page<NameStandardDTO> list = nameStandardService.pageNameStandards(nameStandardDTO,pageRequest);
         return Results.success(list);
     }
 
@@ -161,17 +162,16 @@ public class NameStandardController extends BaseController {
     @ApiOperation(value = "命名标准导出")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/export")
-    @ExcelExport(value = NameStandardDTO.class)
-    public ResponseEntity<List<NameStandardDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+    @ExcelExport(value = NameStandardGroupDTO.class)
+    public ResponseEntity<List<NameStandardGroupDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                                         @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                         NameStandardDTO dto,
                                                         ExportParam exportParam,
-                                                        HttpServletResponse response,
-                                                        PageRequest pageRequest) {
+                                                        HttpServletResponse response) {
 
         dto.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         dto.setTenantId(tenantId);
-        Page<NameStandardDTO> dtoList = nameStandardService.export(dto, exportParam, pageRequest);
+        List<NameStandardGroupDTO> dtoList = nameStandardService.export(dto, exportParam);
         response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
         return Results.success(dtoList);
     }

@@ -8,6 +8,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -16,11 +17,15 @@ import javax.servlet.http.HttpServletResponse;
 import com.hand.hdsp.core.util.DiscoveryHelper;
 import com.hand.hdsp.core.util.PageParseUtil;
 import com.hand.hdsp.quality.api.dto.StandardDocDTO;
+import com.hand.hdsp.quality.api.dto.StandardDocGroupDTO;
+import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.app.service.MinioStorageService;
 import com.hand.hdsp.quality.app.service.StandardDocService;
 import com.hand.hdsp.quality.domain.entity.DataStandard;
 import com.hand.hdsp.quality.domain.entity.StandardDoc;
+import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.StandardDocRepository;
+import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardDocConstant;
 import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
@@ -28,12 +33,14 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.driver.infra.util.PageUtil;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -52,6 +59,7 @@ public class StandardDocServiceImpl implements StandardDocService {
     private final StandardDocRepository standardDocRepository;
     private final MinioStorageService minioStorageService;
     private final DiscoveryHelper discoveryHelper;
+    private final StandardGroupRepository standardGroupRepository;
     @Value("${HDSP_PREVIEW_FILE_SERVICE:hdsp-file-preview}")
     private String url;
 
@@ -59,20 +67,52 @@ public class StandardDocServiceImpl implements StandardDocService {
     public StandardDocServiceImpl(StandardDocMapper standardDocMapper,
                                   StandardDocRepository standardDocRepository,
                                   MinioStorageService minioStorageService,
-                                  DiscoveryHelper discoveryHelper) {
+                                  DiscoveryHelper discoveryHelper,
+                                  StandardGroupRepository standardGroupRepository) {
         this.standardDocMapper = standardDocMapper;
         this.standardDocRepository = standardDocRepository;
         this.minioStorageService = minioStorageService;
         this.discoveryHelper = discoveryHelper;
+        this.standardGroupRepository = standardGroupRepository;
+    }
+
+    @Override
+    public List<StandardDocDTO> findLists(StandardDocDTO standardDocDTO) {
+        List<StandardDocDTO> list = standardDocMapper.list(standardDocDTO);
+        for (StandardDocDTO docDTO : list) {
+            decodeForStandardDocDTO(docDTO);
+        }
+        return list;
     }
 
     @Override
     public Page<StandardDocDTO> list(PageRequest pageRequest, StandardDocDTO standardDocDTO) {
+        //分组查询时同时查询当前分组和当前分组子分组的数据标准
+        Long groupId = standardDocDTO.getGroupId();
+        if(ObjectUtils.isNotEmpty(groupId)){
+            List<StandardGroupDTO> standardGroupDTOList = new ArrayList<>();
+            //查询子分组
+            findChildGroups(groupId,standardGroupDTOList);
+            //添加当前分组
+            standardGroupDTOList.add(StandardGroupDTO.builder().groupId(groupId).build());
+            Long[] groupIds = standardGroupDTOList.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
+            standardDocDTO.setGroupArrays(groupIds);
+        }
         List<StandardDocDTO> list = standardDocMapper.list(standardDocDTO);
         for (StandardDocDTO docDTO : list) {
             decodeForStandardDocDTO(docDTO);
         }
         return PageParseUtil.springPage2C7nPage(PageUtil.doPage(list, org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize())));
+    }
+
+    private void findChildGroups(Long groupId, List<StandardGroupDTO> standardGroups) {
+        List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                        .andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID,groupId))
+                .build());
+        if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
+            standardGroups.addAll(standardGroupDTOList);
+            standardGroupDTOList.forEach(standardGroupDTO -> findChildGroups(standardGroupDTO.getGroupId(),standardGroups));
+        }
     }
 
     @Override
@@ -121,12 +161,12 @@ public class StandardDocServiceImpl implements StandardDocService {
         }
         if (Objects.nonNull(multipartFile)) {
             handleStandardDocUpload(standardDocDTO, multipartFile);
-        }else{
+        } else {
             //没有上传文件，清除文件
             standardDocDTO.setDocPath(null);
             standardDocDTO.setDocName(null);
         }
-        standardDocRepository.updateDTOAllColumnWhereTenant(standardDocDTO,standardDocDTO.getTenantId());
+        standardDocRepository.updateDTOAllColumnWhereTenant(standardDocDTO, standardDocDTO.getTenantId());
         return standardDocRepository.selectDTOByPrimaryKeyAndTenant(standardDocDTO);
     }
 
@@ -205,8 +245,30 @@ public class StandardDocServiceImpl implements StandardDocService {
     }
 
     @Override
-    public List<StandardDocDTO> export(StandardDocDTO dto, ExportParam exportParam, PageRequest pageRequest) {
-        return list(pageRequest, dto);
+    public List<StandardDocGroupDTO> export(StandardDocDTO dto, ExportParam exportParam) {
+        List<StandardDocGroupDTO> standardDocGroupDTOList = new ArrayList<>();
+        StandardDocGroupDTO standardDocGroupDTO = new StandardDocGroupDTO();
+        //分组导出标准文档
+        List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                        .andEqualTo(StandardGroup.FIELD_TENANT_ID, dto.getTenantId())
+                        .andEqualTo(StandardGroup.FIELD_PROJECT_ID, dto.getProjectId())
+                        .andEqualTo(StandardGroup.FIELD_GROUP_ID, dto.getGroupId(),true))
+                .build());
+        //设置父分组编码
+        standardGroupDTOList.forEach(standardGroupDTO -> {
+            if (ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())) {
+                StandardGroupDTO parentStandardGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
+                standardGroupDTO.setParentGroupCode(parentStandardGroupDTO.getGroupCode());
+            }
+            BeanUtils.copyProperties(standardGroupDTO,standardDocGroupDTO);
+            standardDocGroupDTOList.add(standardDocGroupDTO);
+        });
+        //条件筛选
+        standardDocGroupDTOList.forEach(standardDocGroupDto -> {
+            List<StandardDocDTO> standardDocDTOList = findLists(dto);
+            standardDocGroupDto.setStandardDocDTOList(standardDocDTOList);
+        });
+        return standardDocGroupDTOList;
     }
 
     private void decodeForStandardDocDTO(StandardDocDTO dto) {

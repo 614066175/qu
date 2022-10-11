@@ -68,8 +68,11 @@
             <if test="standardDocDTO.docId!=null">
                 sd.doc_id=#{standardDocDTO.docId}
             </if>
-            <if test="standardDocDTO.groupId!=null">
-                and sd.group_id=#{standardDocDTO.groupId}
+            <if test="standardDocDTO.groupArrays!=null and standardDocDTO.groupArrays.length>0">
+                and sd.group_id in
+                <foreach collection="standardDocDTO.groupArrays" item="arr" index="no" open="("     separator="," close=")">
+                    #{arr}
+                </foreach>
             </if>
             <if test="standardDocDTO.tenantId!=null">
                 and sd.tenant_id=#{standardDocDTO.tenantId}

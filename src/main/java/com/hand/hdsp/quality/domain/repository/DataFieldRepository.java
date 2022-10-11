@@ -20,12 +20,4 @@ public interface DataFieldRepository extends BaseRepository<DataField, DataField
      * @param dataFieldDTOList DataFieldDTO
      */
     boolean batchImport(List<DataFieldDTO> dataFieldDTOList);
-
-    /**
-     * 查询是否开启了数据加密
-     *
-     * @param tenantId 租户id
-     * @return 该租户是否开启了数据加密
-     */
-    boolean isEnableDataSecurity(Long tenantId);
 }

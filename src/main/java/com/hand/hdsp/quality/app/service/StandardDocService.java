@@ -4,6 +4,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.hand.hdsp.quality.api.dto.StandardDocDTO;
+import com.hand.hdsp.quality.api.dto.StandardDocGroupDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.export.vo.ExportParam;
@@ -24,6 +25,13 @@ public interface StandardDocService {
      * @return List<StandardDocDTO>
      */
     Page<StandardDocDTO> list(PageRequest pageRequest, StandardDocDTO standardDocDTO);
+
+    /**
+     * 查询标准文档集合
+     * @param standardDocDTO 查询条件
+     * @return 标准文档集合
+     */
+    List<StandardDocDTO> findLists(StandardDocDTO standardDocDTO);
 
     /**
      * 创建标准文档
@@ -64,10 +72,9 @@ public interface StandardDocService {
      *
      * @param dto         StandardDocDTO
      * @param exportParam ExportParam
-     * @param pageRequest PageRequest
      * @return List<StandardDocDTO>
      */
-    List<StandardDocDTO> export(StandardDocDTO dto, ExportParam exportParam, PageRequest pageRequest);
+    List<StandardDocGroupDTO> export(StandardDocDTO dto, ExportParam exportParam);
 
     /**
      * 获取预览接口url

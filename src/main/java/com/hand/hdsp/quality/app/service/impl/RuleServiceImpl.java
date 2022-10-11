@@ -1,18 +1,28 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.hand.hdsp.quality.api.dto.RuleDTO;
+import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
 import com.hand.hdsp.quality.api.dto.RuleLineDTO;
 import com.hand.hdsp.quality.app.service.RuleService;
 import com.hand.hdsp.quality.domain.entity.Rule;
+import com.hand.hdsp.quality.domain.entity.RuleGroup;
+import com.hand.hdsp.quality.domain.repository.RuleGroupRepository;
 import com.hand.hdsp.quality.domain.repository.RuleLineRepository;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
 import com.hand.hdsp.quality.infra.converter.RuleConverter;
 import com.hand.hdsp.quality.infra.converter.RuleLineConverter;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
+import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.domain.AuditDomain;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.hzero.export.vo.ExportParam;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,15 +38,18 @@ public class RuleServiceImpl implements RuleService {
     private final RuleLineRepository ruleLineRepository;
     private final RuleConverter ruleConverter;
     private final RuleLineConverter ruleLineConverter;
+    private final RuleGroupRepository ruleGroupRepository;
 
     public RuleServiceImpl(RuleRepository ruleRepository,
                            RuleLineRepository ruleLineRepository,
                            RuleConverter ruleConverter,
-                           RuleLineConverter ruleLineConverter) {
+                           RuleLineConverter ruleLineConverter,
+                           RuleGroupRepository ruleGroupRepository) {
         this.ruleRepository = ruleRepository;
         this.ruleLineRepository = ruleLineRepository;
         this.ruleConverter = ruleConverter;
         this.ruleLineConverter = ruleLineConverter;
+        this.ruleGroupRepository = ruleGroupRepository;
     }
 
 
@@ -130,5 +143,34 @@ public class RuleServiceImpl implements RuleService {
     @Override
     public List<RuleDTO> export(RuleDTO dto, ExportParam exportParam) {
        return ruleRepository.listAll(dto);
+    }
+
+    @Override
+    public Page<RuleDTO> pageRules(PageRequest pageRequest, RuleDTO ruleDTO) {
+        //分组查询时同时查询当前分组和当前分组子分组的数据标准
+        Long groupId = ruleDTO.getGroupId();
+        if(ObjectUtils.isNotEmpty(groupId)){
+            List<RuleGroupDTO> ruleGroupDTOList = new ArrayList<>();
+            if (groupId == 0) {
+                ruleDTO.setGroupId(null);
+            }
+            //查询子分组
+            findChildGroups(groupId,ruleGroupDTOList);
+            //添加当前分组
+            ruleGroupDTOList.add(RuleGroupDTO.builder().groupId(groupId).build());
+            Long[] groupIds = ruleGroupDTOList.stream().map(RuleGroupDTO::getGroupId).toArray(Long[]::new);
+            ruleDTO.setGroupArrays(groupIds);
+        }
+        return ruleRepository.listTenant(pageRequest, ruleDTO);
+    }
+
+    private void findChildGroups(Long groupId, List<RuleGroupDTO> ruleGroupDTOList) {
+        List<RuleGroupDTO> standardGroupDTOList = ruleGroupRepository.selectDTOByCondition(Condition.builder(RuleGroup.class).andWhere(Sqls.custom()
+                        .andEqualTo(RuleGroup.FIELD_PARENT_GROUP_ID,groupId))
+                .build());
+        if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
+            ruleGroupDTOList.addAll(standardGroupDTOList);
+            standardGroupDTOList.forEach(standardGroupDTO -> findChildGroups(standardGroupDTO.getGroupId(),ruleGroupDTOList));
+        }
     }
 }

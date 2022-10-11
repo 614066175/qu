@@ -79,7 +79,7 @@ public class NameStandardRepositoryImpl extends BaseRepositoryImpl<NameStandard,
     public NameStandardDTO detail(Long standardId) {
         NameStandardDTO nameStandardDTO = nameStandardMapper.detail(standardId);
         //判断当前租户是否启用安全加密
-        if (dataStandardMapper.isEncrypt(nameStandardDTO.getTenantId()) == 1) {
+        if (DataSecurityHelper.isTenantOpen()) {
             //解密邮箱，电话
             if (Strings.isNotEmpty(nameStandardDTO.getChargeTel())) {
                 nameStandardDTO.setChargeTel(DataSecurityHelper.decrypt(nameStandardDTO.getChargeTel()));

@@ -17,6 +17,7 @@ import com.hand.hdsp.quality.infra.mapper.BatchPlanTableMapper;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
@@ -74,16 +75,41 @@ public class PlanGroupServiceImpl implements PlanGroupService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int delete(PlanGroupDTO planGroupDTO) {
-        List<PlanGroupDTO> planGroupDTOList = planGroupRepository.selectDTO(PlanGroup.FIELD_PARENT_GROUP_ID, planGroupDTO.getGroupId());
-        List<BatchPlanDTO> batchPlanDTOList = batchPlanRepository.selectDTO(BatchPlan.FIELD_GROUP_ID, planGroupDTO.getGroupId());
-        //当前分组下存在评估方案，请删除评估方案后再执行删除操作！
-        if (CollectionUtils.isNotEmpty(planGroupDTOList) || CollectionUtils.isNotEmpty(batchPlanDTOList)) {
-            throw new CommonException(ErrorCode.EXISTS_OTHER_PLAN);
+        //分组或子分组存在评估方案不可删除;不存在或存在空的分组则删除，并同时删除空的分组
+        //遍历获取子目录集合
+        List<PlanGroupDTO> planGroupDTOList = new ArrayList<>();
+        findChildGroups(planGroupDTO,planGroupDTOList);
+        planGroupDTOList.add(planGroupDTO);
+        planGroupDTOList.forEach(planGroupDto -> {
+            //校验分组下是否存在评估方案
+            List<BatchPlan> batchPlans = batchPlanRepository.selectByCondition(Condition.builder(BatchPlan.class).andWhere(Sqls.custom()
+                            .andEqualTo(BatchPlan.FIELD_TENANT_ID,planGroupDto.getTenantId())
+                            .andEqualTo(BatchPlan.FIELD_PROJECT_ID,planGroupDto.getProjectId())
+                            .andEqualTo(BatchPlan.FIELD_GROUP_ID,planGroupDto.getGroupId()))
+                    .build());
+            if (CollectionUtils.isNotEmpty(batchPlans)) {
+                throw new CommonException(ErrorCode.EXISTS_OTHER_PLAN);
+            }
+        });
+        return planGroupRepository.batchDTODeleteByPrimaryKey(planGroupDTOList);
+    }
+
+    private void findChildGroups(PlanGroupDTO planGroupDTO, List<PlanGroupDTO> planGroupDTOList) {
+        List<PlanGroupDTO> planGroupDTOS = planGroupRepository.selectDTOByCondition(Condition.builder(PlanGroup.class).andWhere(Sqls.custom()
+                        .andEqualTo(PlanGroup.FIELD_PARENT_GROUP_ID,planGroupDTO.getGroupId())
+                        .andEqualTo(PlanGroup.FIELD_TENANT_ID,planGroupDTO.getTenantId())
+                        .andEqualTo(PlanGroup.FIELD_PROJECT_ID,planGroupDTO.getProjectId()))
+                .build());
+        if(CollectionUtils.isNotEmpty(planGroupDTOS)){
+            planGroupDTOList.addAll(planGroupDTOS);
+            planGroupDTOS.forEach(planGroupDto -> {
+                findChildGroups(planGroupDto,planGroupDTOList);
+            });
         }
-        return planGroupRepository.deleteByPrimaryKey(planGroupDTO);
     }
 
     @Override
+    @ProcessLovValue(targetField = {"","batchPlanDTOList","batchPlanDTOList.batchPlanBaseDTOList","batchPlanDTOList.batchPlanBaseDTOList.batchPlanTableDTOList","batchPlanDTOList.batchPlanBaseDTOList.batchPlanFieldDTOList","batchPlanDTOList.batchPlanBaseDTOList.batchPlanRelTableDTOList"})
     public List<PlanGroupDTO> export(PlanGroupDTO dto, ExportParam exportParam) {
         if (ObjectUtils.isNotEmpty(dto.getPlanBaseId())) {
             BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseRepository.selectDTOByPrimaryKey(dto.getPlanBaseId());
@@ -95,7 +121,7 @@ public class PlanGroupServiceImpl implements PlanGroupService {
             dto.setGroupId(batchPlan.getGroupId());
         }
         List<PlanGroupDTO> planGroupDTOList = new ArrayList<>();
-        if(dto.getGroupId() == 0 && (ObjectUtils.isNotEmpty(dto.getPlanBaseCode()) || ObjectUtils.isNotEmpty(dto.getPlanBaseName()) || ObjectUtils.isNotEmpty(dto.getObjectName()))){
+        if(ObjectUtils.isNotEmpty(dto.getGroupId()) && dto.getGroupId() == 0 && (ObjectUtils.isNotEmpty(dto.getPlanBaseCode()) || ObjectUtils.isNotEmpty(dto.getPlanBaseName()) || ObjectUtils.isNotEmpty(dto.getObjectName()))){
             List<BatchPlanBaseDTO> batchPlanBaseDTOS = batchPlanBaseRepository.selectDTOByCondition(Condition.builder(BatchPlanBase.class).andWhere(Sqls.custom()
                             .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_CODE, dto.getPlanBaseCode(),true)
                             .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_NAME, dto.getPlanBaseName(),true)

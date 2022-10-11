@@ -40,5 +40,11 @@ public interface RuleGroupService {
      */
     List<RuleGroup> listNoPage(RuleGroup ruleGroup);
 
+    /**
+     * 从分组开始导出标准规则
+     * @param dto 导出的查询条件
+     * @param exportParam 导出参数
+     * @return 导出的标准规则
+     */
     List<RuleGroupDTO> export(RuleDTO dto, ExportParam exportParam);
 }

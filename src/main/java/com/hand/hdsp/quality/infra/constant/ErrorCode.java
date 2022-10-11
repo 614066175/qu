@@ -188,14 +188,14 @@ public interface ErrorCode {
     String PLAN_NOT_EXIST = "hdsp.xqua.err.plan_not_exist";
 
     /**
-     * 分组下存在评估方案
+     * 分组或子分组下存在评估方案
      */
     String EXISTS_OTHER_PLAN = "hdsp.xqua.err.plan_exists_other_plan";
 
     String NO_APPROVAL_INSTANCE = "hdsp.xqua.err.no_approval_instance";
 
     /**
-     * 分组下存在规则或其他分组
+     * 分组或子分组下存在标准规则
      */
     String EXISTS_OTHER_GROUP_OR_RULE = "hdsp.xqua.err.exists_other_group_or_rule";
 

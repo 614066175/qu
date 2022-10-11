@@ -8,6 +8,7 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+import org.hzero.boot.platform.lov.annotation.LovValue;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
 
@@ -53,8 +54,12 @@ public class BatchPlanFieldDTO extends AuditDomain {
     private String ruleName;
 
     @ApiModelProperty(value = "评估指标 HDSP.XQUA.CHECK_TYPE")
-    @ExcelColumn(zh = "评估指标", en = "check type")
+//    @ExcelColumn(zh = "评估指标", en = "check type")
+    @LovValue(lovCode = "HDSP.XQUA.CHECK_TYPE", meaningField = "checkTypeMeaning")
     private String checkType;
+
+    @ExcelColumn(zh = "评估指标", en = "check type")
+    private String checkTypeMeaning;
 
 
     @ApiModelProperty(value = "是否异常阻断")
@@ -87,16 +92,28 @@ public class BatchPlanFieldDTO extends AuditDomain {
     private Long tenantId;
 
     @ApiModelProperty(value = "校验方式 HDSP.XQUA.CHECK_WAY")
-    @ExcelColumn(zh = "校验方式", en = "check way")
+//    @ExcelColumn(zh = "校验方式", en = "check way")
+    @LovValue(lovCode = "HDSP.XQUA.CHECK_WAY", meaningField = "checkWayMeaning")
     private String checkWay;
 
+    @ExcelColumn(zh = "校验方式", en = "check way")
+    private String checkWayMeaning;
+
     @ApiModelProperty(value = "校验项 HDSP.XQUA.CHECK_ITEM")
-    @ExcelColumn(zh = "校验项", en = "check item")
+//    @ExcelColumn(zh = "校验项", en = "check item")
+    @LovValue(lovCode = "HDSP.XQUA.CHECK_ITEM", meaningField = "checkItemMeaning")
     private String checkItem;
 
+    @ExcelColumn(zh = "校验项", en = "check item")
+    private String checkItemMeaning;
+
     @ApiModelProperty(value = "校验类型 HDSP.XQUA.COUNT_TYPE")
-    @ExcelColumn(zh = "校验类型", en = "count type")
+//    @ExcelColumn(zh = "校验类型", en = "count type")
+    @LovValue(lovCode = "HDSP.XQUA.COUNT_TYPE", meaningField = "countTypeMeaning")
     private String countType;
+
+    @ExcelColumn(zh = "校验类型", en = "count type")
+    private String countTypeMeaning;
 
     @ApiModelProperty(value = "规则字段，多个列逗号拼接")
     @ExcelColumn(zh = "规则字段", en = "field name")
@@ -120,8 +137,12 @@ public class BatchPlanFieldDTO extends AuditDomain {
     private String whereCondition;
 
     @ApiModelProperty(value = "比较方式 HDSP.XQUA.COMPARE_WAY")
-    @ExcelColumn(zh = "比较方式", en = "compareWay")
+//    @ExcelColumn(zh = "比较方式", en = "compareWay")
+    @LovValue(lovCode = "HDSP.XQUA.COMPARE_WAY", meaningField = "compareWayMeaning")
     private String compareWay;
+
+    @ExcelColumn(zh = "比较方式", en = "compareWay")
+    private String compareWayMeaning;
 
     @ApiModelProperty(value = "告警等级json")
     @ExcelColumn(zh = "告警规则", en = "warningLevel")
