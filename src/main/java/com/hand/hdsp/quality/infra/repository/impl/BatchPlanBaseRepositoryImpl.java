@@ -68,7 +68,7 @@ public class BatchPlanBaseRepositoryImpl extends BaseRepositoryImpl<BatchPlanBas
             BatchPlanRepository batchPlanRepository = ApplicationContextHelper.getContext().getBean(BatchPlanRepository.class);
             List<BatchPlanDTO> batchPlanDTOS = batchPlanRepository.selectDTOByCondition(Condition.builder(BatchPlan.class)
                     .andWhere(Sqls.custom()
-                            .andIn(BatchPlan.FIELD_GROUP_ID, groupIds)
+                            .andIn(BatchPlan.FIELD_GROUP_ID, groupIds,true)
                             .andEqualTo(BatchPlan.FIELD_TENANT_ID, batchPlanBaseDTO.getTenantId())
                             .andEqualTo(BatchPlan.FIELD_PROJECT_ID, batchPlanBaseDTO.getProjectId()))
                     .build());
