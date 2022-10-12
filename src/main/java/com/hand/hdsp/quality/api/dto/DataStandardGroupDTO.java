@@ -70,4 +70,10 @@ public class DataStandardGroupDTO extends AuditDomain {
     @Transient
     @ExcelColumn(zh = "数据标准列表", en = "dataStandardDTOList", child = true)
     private List<DataStandardDTO> dataStandardDTOList;
+
+    /**
+     * 分组层级，用于导出分组时排序
+     */
+    @Transient
+    private int groupLevel;
 }

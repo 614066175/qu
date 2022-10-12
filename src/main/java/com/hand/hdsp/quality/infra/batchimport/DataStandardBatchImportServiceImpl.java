@@ -12,6 +12,7 @@ import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -56,9 +57,8 @@ public class DataStandardBatchImportServiceImpl implements IBatchImportService {
             for (String json : data) {
                 DataStandardDTO dataStandardDTO = objectMapper.readValue(json, DataStandardDTO.class);
                 //导入分组id
-                String groupName = dataStandardDTO.getGroupName();
                 List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
-                        .andEqualTo(StandardGroup.FIELD_GROUP_NAME, groupName)
+                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE, dataStandardDTO.getGroupCode())
                         .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, DATA)
                         .andEqualTo(StandardGroup.FIELD_TENANT_ID,tenantId)
                         .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId)

@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.driver.infra.util.PageUtil;
+import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
 import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
 import org.hzero.boot.platform.plugin.hr.entity.Employee;
 import org.hzero.boot.workflow.WorkflowClient;
@@ -373,10 +374,7 @@ public class DataStandardServiceImpl implements DataStandardService {
             Long[] groupIds = standardGroups.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
             dataStandardDTO.setGroupArrays(groupIds);
         }
-        List<DataStandardDTO> list = dataStandardMapper.list(dataStandardDTO);
-        for (DataStandardDTO dto : list) {
-            decodeForDataStandardDTO(dto);
-        }
+        List<DataStandardDTO> list = findDataStandards(dataStandardDTO);
         return PageParseUtil.springPage2C7nPage(PageUtil.doPage(list, org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize())));
     }
 
@@ -384,9 +382,9 @@ public class DataStandardServiceImpl implements DataStandardService {
         List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
                         .andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID, groupId))
                 .build());
-        if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
+        if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
             standardGroups.addAll(standardGroupDTOList);
-            standardGroupDTOList.forEach(standardGroupDTO -> findChildGroups(standardGroupDTO.getGroupId(),standardGroups));
+            standardGroupDTOList.forEach(standardGroupDTO -> findChildGroups(standardGroupDTO.getGroupId(), standardGroups));
         }
     }
 
@@ -614,32 +612,120 @@ public class DataStandardServiceImpl implements DataStandardService {
     }
 
     @Override
+    @ProcessLovValue(targetField = {"dataStandardDTOList"})
     public List<DataStandardGroupDTO> export(DataStandardDTO dto, ExportParam exportParam) {
         List<DataStandardGroupDTO> dataStandardGroupDTOList = new ArrayList<>();
         DataStandardGroupDTO dataStandardGroupDTO = new DataStandardGroupDTO();
         Long projectId = ProjectHelper.getProjectId();
-        //获取分组
-        List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
-                .andEqualTo(StandardGroup.FIELD_TENANT_ID,dto.getTenantId())
-                .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId)
-                .andEqualTo(StandardGroup.FIELD_GROUP_ID,dto.getGroupId(),true)
-        ).build());
-        //获取每个分组的父分组编码
-        standardGroupDTOList.forEach(standardGroupDTO -> {
-            if(ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())){
-                StandardGroupDTO parentGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
-                standardGroupDTO.setParentGroupCode(parentGroupDTO.getGroupCode());
+        int level = 1;
+        if (ObjectUtils.isNotEmpty(dto.getGroupId())) {
+            //分组条件导出
+            StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                    .andEqualTo(StandardGroup.FIELD_TENANT_ID, dto.getTenantId())
+                    .andEqualTo(StandardGroup.FIELD_PROJECT_ID, projectId)
+                    .andEqualTo(StandardGroup.FIELD_GROUP_ID, dto.getGroupId(), true)
+            ).build()).get(0);
+            //获取设置当前分组的父分组编码
+            if (ObjectUtils.isNotEmpty(groupDTO.getParentGroupId())) {
+                StandardGroupDTO parentGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(groupDTO.getParentGroupId());
+                groupDTO.setParentGroupCode(parentGroupDTO.getGroupCode());
             }
-            BeanUtils.copyProperties(standardGroupDTO,dataStandardGroupDTO);
-            dataStandardGroupDTOList.add(dataStandardGroupDTO);
-        });
-        dataStandardGroupDTOList.forEach(standardGroupDTO -> {
+            BeanUtils.copyProperties(groupDTO, dataStandardGroupDTO);
+            List<StandardGroupDTO> standardGroups = new ArrayList<>();
             //导出分组下条件筛选后的数据标准
-            List<DataStandardDTO> dataStandardDTOList = findDataStandards(dto);
-            standardGroupDTO.setDataStandardDTOList(dataStandardDTOList);
-        });
-        //todo 电话邮箱未导出
-        return dataStandardGroupDTOList;
+            Long groupId = dataStandardGroupDTO.getGroupId();
+            if (ObjectUtils.isNotEmpty(groupId)) {
+                //添加当前分组
+                standardGroups.add(StandardGroupDTO.builder().groupId(groupId).build());
+                Long[] groupIds = standardGroups.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
+                dto.setGroupArrays(groupIds);
+            }
+            //当前目录和子目录的数据标准的集合，与查询保持一致
+            List<DataStandardDTO> dataStandards = findDataStandards(dto);
+            dataStandardGroupDTO.setDataStandardDTOList(dataStandards);
+            dataStandardGroupDTO.setGroupLevel(level);
+            dataStandardGroupDTOList.add(dataStandardGroupDTO);
+            //添加查询父分组 并排序导出保证导入准确性
+            List<DataStandardGroupDTO> dataStandardGroupDTOS = new ArrayList<>();
+            if (ObjectUtils.isNotEmpty(groupDTO.getParentGroupId())) {
+                findParentGroups(groupDTO.getParentGroupId(), dataStandardGroupDTOS, level);
+            }
+            dataStandardGroupDTOList.addAll(dataStandardGroupDTOS);
+            return dataStandardGroupDTOList.stream().sorted(Comparator.comparing(DataStandardGroupDTO::getGroupLevel).reversed()).collect(Collectors.toList());
+        } else {
+            //全部分组条件导出
+            //添加查询所有父分组 并排序导出保证导入准确性
+            List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                            .andEqualTo(StandardGroup.FIELD_TENANT_ID, dto.getTenantId())
+                            .andEqualTo(StandardGroup.FIELD_PROJECT_ID, dto.getProjectId())
+                            .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE,DATA))
+                    .build());
+            standardGroupDTOList.forEach(standardGroupDTO -> {
+                if(ObjectUtils.isEmpty(standardGroupDTO.getParentGroupId())){
+                    //从所有的根目录 向下查询
+                    DataStandardGroupDTO dataStandardGroupDto = new DataStandardGroupDTO();
+                    BeanUtils.copyProperties(standardGroupDTO, dataStandardGroupDto);
+                    //根目录数据标准列表
+                    List<DataStandardDTO> dataStandardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class).andWhere(Sqls.custom()
+                                    .andEqualTo(DataStandard.FIELD_GROUP_ID,standardGroupDTO.getGroupId()))
+                            .build());
+                    dataStandardGroupDto.setDataStandardDTOList(dataStandardDTOList);
+                    dataStandardGroupDto.setGroupLevel(level);
+                    dataStandardGroupDTOList.add(dataStandardGroupDto);
+                    findSortedChildGroups(standardGroupDTO,level,dataStandardGroupDTOList);
+                }
+            });
+            return dataStandardGroupDTOList.stream().sorted(Comparator.comparing(DataStandardGroupDTO::getGroupLevel)).collect(Collectors.toList());
+        }
+    }
+
+    private void findSortedChildGroups(StandardGroupDTO parentStandardGroupDTO, int level,  List<DataStandardGroupDTO> dataStandardGroupDTOList) {
+        level++;
+        List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                        .andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID,parentStandardGroupDTO.getGroupId()))
+                .build());
+        if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
+            int finalLevel = level;
+            standardGroupDTOList.forEach(standardGroupDTO -> {
+                DataStandardGroupDTO dataStandardGroupDTO = new DataStandardGroupDTO();
+                BeanUtils.copyProperties(standardGroupDTO,dataStandardGroupDTO);
+                dataStandardGroupDTO.setGroupLevel(finalLevel);
+                //子目录数据标准列表
+                List<DataStandardDTO> dataStandardList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class).andWhere(Sqls.custom()
+                                .andEqualTo(DataStandard.FIELD_GROUP_ID,parentStandardGroupDTO.getGroupId()))
+                        .build());
+                dataStandardGroupDTO.setDataStandardDTOList(dataStandardList);
+                //设置父分组code
+                dataStandardGroupDTO.setParentGroupCode(parentStandardGroupDTO.getGroupCode());
+                dataStandardGroupDTOList.add(dataStandardGroupDTO);
+                findSortedChildGroups(standardGroupDTO,finalLevel,dataStandardGroupDTOList);
+            });
+        }
+    }
+
+    private void findParentGroups(Long groupId, List<DataStandardGroupDTO> standardGroups, int level) {
+        DataStandardGroupDTO dataStandardGroupDTO = new DataStandardGroupDTO();
+        List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                        .andEqualTo(StandardGroup.FIELD_GROUP_ID, groupId))
+                .build());
+        level++;
+        if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
+            int finalLevel = level;
+            standardGroupDTOList.forEach(parentStandardGroupDTO -> {
+                BeanUtils.copyProperties(parentStandardGroupDTO, dataStandardGroupDTO);
+                //获取设置当前分组的父分组编码
+                if (ObjectUtils.isNotEmpty(dataStandardGroupDTO.getGroupId())) {
+                    StandardGroupDTO parentGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(dataStandardGroupDTO.getGroupId());
+                    dataStandardGroupDTO.setGroupLevel(finalLevel);
+                    standardGroups.add(dataStandardGroupDTO);
+                    if (ObjectUtils.isNotEmpty(parentGroupDTO.getParentGroupId())) {
+                        StandardGroup group = standardGroupRepository.selectByPrimaryKey(parentGroupDTO.getParentGroupId());
+                        dataStandardGroupDTO.setParentGroupCode(group.getGroupCode());
+                        findParentGroups(parentGroupDTO.getParentGroupId(), standardGroups, finalLevel);
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -650,17 +736,17 @@ public class DataStandardServiceImpl implements DataStandardService {
     private void decodeForDataStandardDTO(DataStandardDTO dto) {
         if (DataSecurityHelper.isTenantOpen()) {
             // 解密电话号码
-            if (StringUtils.isNotEmpty(dto.getChargeTel())) {
-                dto.setChargeTel(DataSecurityHelper.decrypt(dto.getChargeTel()));
-            }
+//            if (StringUtils.isNotEmpty(dto.getChargeTel())) {
+//                dto.setChargeTel(DataSecurityHelper.decrypt(dto.getChargeTel()));
+//            }
             // 解密邮箱地址
-            if (StringUtils.isNotEmpty(dto.getChargeEmail())) {
-                dto.setChargeEmail(DataSecurityHelper.decrypt(dto.getChargeEmail()));
-            }
+//            if (StringUtils.isNotEmpty(dto.getChargeEmail())) {
+//                dto.setChargeEmail(DataSecurityHelper.decrypt(dto.getChargeEmail()));
+//            }
             // 解密部门名称
-            if (StringUtils.isNotEmpty(dto.getChargeDeptName())) {
-                dto.setChargeDeptName(DataSecurityHelper.decrypt(dto.getChargeDeptName()));
-            }
+//            if (StringUtils.isNotEmpty(dto.getChargeDeptName())) {
+//                dto.setChargeDeptName(DataSecurityHelper.decrypt(dto.getChargeDeptName()));
+//            }
         }
     }
 
