@@ -3,12 +3,17 @@ package com.hand.hdsp.quality.infra.batchimport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
+import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
@@ -32,6 +37,7 @@ public class DataStandardGroupBatchImportServiceImpl implements IBatchImportServ
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean doImport(List<String> data) {
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         Long projectId = ProjectHelper.getProjectId();
@@ -39,11 +45,22 @@ public class DataStandardGroupBatchImportServiceImpl implements IBatchImportServ
         for (String json:data){
             try {
                 StandardGroupDTO standardGroupDTO = objectMapper.readValue(json, StandardGroupDTO.class);
-                //因为校验过了就直接导入
-                standardGroupDTO.setTenantId(tenantId);
-                standardGroupDTO.setProjectId(projectId);
-                standardGroupDTO.setStandardType(DATA);
-                standardGroupRepository.insertDTOSelective(standardGroupDTO);
+                //根据分组Code在目标环境是否存在，若存在则更新
+                List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                                .andEqualTo(StandardGroup.FIELD_TENANT_ID,tenantId)
+                                .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId)
+                                .andEqualTo(StandardGroup.FIELD_GROUP_CODE,standardGroupDTO.getGroupCode()))
+                        .build());
+                if(ObjectUtils.isNotEmpty(standardGroupDTOS)){
+                    standardGroupDTO.setGroupId(standardGroupDTOS.get(0).getGroupId());
+                    standardGroupDTO.setObjectVersionNumber(standardGroupDTOS.get(0).getObjectVersionNumber());
+                    standardGroupRepository.updateByDTOPrimaryKeySelective(standardGroupDTO);
+                }else {
+                    standardGroupDTO.setTenantId(tenantId);
+                    standardGroupDTO.setProjectId(projectId);
+                    standardGroupDTO.setStandardType(DATA);
+                    standardGroupRepository.insertDTOSelective(standardGroupDTO);
+                }
             } catch (IOException e) {
                 log.error("导入分组失败");
                 return false;

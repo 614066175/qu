@@ -5,6 +5,7 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+import org.hzero.boot.platform.lov.annotation.LovValue;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
 
@@ -72,32 +73,48 @@ public class DataStandardDTO extends AuditDomain{
     @ApiModelProperty(value = "数据类型 (HDSP.XMOD.FIELD_TYPE)")
     @NotBlank
     @Size(max = 30)
-    @ExcelColumn(zh = "数据类型",en="dataType")
+    @LovValue(lovCode = "HDSP.XMOD.FIELD_TYPE",meaningField = "dataTypeMeaning")
+//    @ExcelColumn(zh = "数据类型",en="dataType")
     private String dataType;
+
+    @ExcelColumn(zh = "数据类型",en="dataType")
+    private String dataTypeMeaning;
 
     @ApiModelProperty(value = "数据格式")
     @ExcelColumn(zh = "数据格式",en = "dataPattern")
     private String dataPattern;
 
     @ApiModelProperty(value = "长度类型（快码HSDP.XSTA.LENGTH_TYPE）")
-    @ExcelColumn(zh = "数据长度-类型",en ="lengthType")
+    @LovValue(lovCode = "HDSP.XSTA.LENGTH_TYPE",meaningField = "lengthTypeMeaning")
+//    @ExcelColumn(zh = "数据长度-类型",en ="lengthType")
     private String lengthType;
+
+    @ExcelColumn(zh = "数据长度-类型",en ="lengthType")
+    private String lengthTypeMeaning;
 
     @ApiModelProperty(value = "数据长度")
     @ExcelColumn(zh = "数据长度",en = "dataLength")
     private String dataLength;
 
     @ApiModelProperty(value = "值域类型（快码HDSP.XSTA.VALUE_TYPE）")
-    @ExcelColumn(zh = "值域类型",en="valueType")
+    @LovValue(lovCode = "HDSP.XSTA.VALUE_TYPE",meaningField = "valueTypeMeaning")
+//    @ExcelColumn(zh = "值域类型",en="valueType")
     private String valueType;
+
+    @ExcelColumn(zh = "值域类型",en="valueType")
+    private String valueTypeMeaning;
 
     @ApiModelProperty(value = "值域")
     @ExcelColumn(zh = "值域范围",en = "valueRange")
     private String valueRange;
 
     @ApiModelProperty(value = "标准依据（快码HDSP.XSTA.STANDARD_ACCORD）")
-    @ExcelColumn(zh = "标准依据" ,en="standardAccord")
+    @LovValue(lovCode = "HDSP.XSTA.STANDARD_ACCORD",meaningField = "standardAccordMeaning")
+//    @ExcelColumn(zh = "标准依据" ,en="standardAccord")
     private String standardAccord;
+
+    @ExcelColumn(zh = "标准依据" ,en="standardAccord")
+    private String standardAccordMeaning;
 
     @ApiModelProperty(value = "依据内容")
     @ExcelColumn(zh = "依据内容",en = "accordContent")
