@@ -641,7 +641,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                 dto.setGroupArrays(groupIds);
             }
             //当前目录和子目录的数据标准的集合，与查询保持一致
-            List<DataStandardDTO> dataStandards = findDataStandards(dto);
+            List<DataStandardDTO> dataStandards = dataStandardMapper.list(dto);
             dataStandardGroupDTO.setDataStandardDTOList(dataStandards);
             dataStandardGroupDTO.setGroupLevel(level);
             dataStandardGroupDTOList.add(dataStandardGroupDTO);
@@ -736,17 +736,17 @@ public class DataStandardServiceImpl implements DataStandardService {
     private void decodeForDataStandardDTO(DataStandardDTO dto) {
         if (DataSecurityHelper.isTenantOpen()) {
             // 解密电话号码
-//            if (StringUtils.isNotEmpty(dto.getChargeTel())) {
-//                dto.setChargeTel(DataSecurityHelper.decrypt(dto.getChargeTel()));
-//            }
+            if (StringUtils.isNotEmpty(dto.getChargeTel())) {
+                dto.setChargeTel(DataSecurityHelper.decrypt(dto.getChargeTel()));
+            }
             // 解密邮箱地址
-//            if (StringUtils.isNotEmpty(dto.getChargeEmail())) {
-//                dto.setChargeEmail(DataSecurityHelper.decrypt(dto.getChargeEmail()));
-//            }
+            if (StringUtils.isNotEmpty(dto.getChargeEmail())) {
+                dto.setChargeEmail(DataSecurityHelper.decrypt(dto.getChargeEmail()));
+            }
             // 解密部门名称
-//            if (StringUtils.isNotEmpty(dto.getChargeDeptName())) {
-//                dto.setChargeDeptName(DataSecurityHelper.decrypt(dto.getChargeDeptName()));
-//            }
+            if (StringUtils.isNotEmpty(dto.getChargeDeptName())) {
+                dto.setChargeDeptName(DataSecurityHelper.decrypt(dto.getChargeDeptName()));
+            }
         }
     }
 
