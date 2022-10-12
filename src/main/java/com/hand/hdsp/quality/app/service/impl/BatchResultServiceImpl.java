@@ -371,7 +371,8 @@ public class BatchResultServiceImpl implements BatchResultService {
             response.setContentType("multipart/form-data");
             response.setCharacterEncoding(StandardCharsets.UTF_8.displayName());
             response.setHeader("Content-disposition",
-                    String.format("attachment;filename=%s-%s.xlsx", batchPlan.getPlanName(), batchPlanBase.getPlanBaseName(), "UTF-8"));
+                    String.format("attachment;filename=%s.xlsx",
+                            java.net.URLEncoder.encode(String.format("%s-%s",batchPlan.getPlanName(),batchPlanBase.getPlanBaseName()), "UTF-8")));
 
             ExcelWriter writer = new ExcelWriter(outputStream, ExcelTypeEnum.XLSX, true);
             int batchSize = Integer.parseInt(Optional.ofNullable(profileClient.getProfileValueByOptions(exceptionDataDTO.getTenantId(), null, null, DOWN_EXCEPTION_BATCH_SIZE)).orElse("10000"));
