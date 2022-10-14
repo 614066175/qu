@@ -196,12 +196,11 @@
     </select>
     <select id="selectAssigneeUser" resultType="com.hand.hdsp.quality.api.dto.AssigneeUserDTO">
         SELECT
-            id,
-            login_name,
-            real_name
+            name as employeeName,
+            employee_num as employeeNum
         FROM
-            iam_user iu
-        where iu.id=#{chargeId}
+            hpfm_employee he
+        where he.employee_id=#{chargeId}
     </select>
 
 </mapper>

@@ -22,7 +22,12 @@ import org.hzero.export.annotation.ExcelSheet;
 @EqualsAndHashCode(callSuper = false)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AssigneeUserDTO {
-    private String id;
-    private String loginName;
-    private String realName;
+    /**
+     * 员工名称
+     */
+    private String employeeName;
+    /**
+     * 员工编码
+     */
+    private String employeeNum;
 }
