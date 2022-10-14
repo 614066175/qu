@@ -917,8 +917,8 @@ public class DataStandardServiceImpl implements DataStandardService {
                 .build());
         if (CollectionUtils.isNotEmpty(standardDTOS)) {
             Long chargeId = standardDTOS.get(0).getChargeId();
-            //查询用户
-            return Arrays.asList(dataStandardMapper.selectAssigneeUser(chargeId));
+            //查询员工责任人
+            return Collections.singletonList(dataStandardMapper.selectAssigneeUser(chargeId));
         } else {
             throw new CommonException(ErrorCode.NOT_FIND_VALUE);
         }

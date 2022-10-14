@@ -557,10 +557,8 @@ public class DataFieldServiceImpl implements DataFieldService {
                 DataFieldDTO.builder().fieldId(fieldId).tenantId(tenantId).build()
         );
         if (dataFieldDTO != null) {
-            //查询责任人
-            //chargeId为员工id
-            Long chargeId = dataFieldDTO.getChargeId();
-            return Arrays.asList(dataStandardMapper.selectAssigneeUser(dataFieldDTO.getChargeId()));
+            //查询员工责任人
+            return Collections.singletonList(dataStandardMapper.selectAssigneeUser(dataFieldDTO.getChargeId()));
         } else {
             throw new CommonException(ErrorCode.NOT_FIND_VALUE);
         }
