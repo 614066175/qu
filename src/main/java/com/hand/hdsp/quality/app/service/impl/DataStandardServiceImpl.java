@@ -775,7 +775,16 @@ public class DataStandardServiceImpl implements DataStandardService {
         if (CollectionUtils.isNotEmpty(standardDTOS)) {
             Long chargeId = standardDTOS.get(0).getChargeId();
             //查询员工责任人
-            return Collections.singletonList(dataStandardMapper.selectAssigneeUser(chargeId));
+            AssigneeUserDTO assigneeUserDTO = dataStandardMapper.selectAssigneeUser(chargeId);
+            if(DataSecurityHelper.isTenantOpen()){
+                if(StringUtils.isNotEmpty(assigneeUserDTO.getEmployeeName())){
+                    assigneeUserDTO.setEmployeeName(DataSecurityHelper.decrypt(assigneeUserDTO.getEmployeeName()));
+                }
+                if(StringUtils.isNotEmpty(assigneeUserDTO.getEmployeeNum())){
+                    assigneeUserDTO.setEmployeeNum(DataSecurityHelper.decrypt(assigneeUserDTO.getEmployeeNum()));
+                }
+            }
+            return Collections.singletonList(assigneeUserDTO);
         } else {
             throw new CommonException(ErrorCode.NOT_FIND_VALUE);
         }
