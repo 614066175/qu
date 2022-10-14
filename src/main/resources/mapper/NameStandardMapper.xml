@@ -126,11 +126,14 @@
     <select id="list" resultMap="DtoResultMap">
         SELECT
         iu1.login_name AS lastUpdateName,
-        iu2.login_name AS chargeName,
         iu1.login_name as lastUpdatedByName,
         iu3.login_name as createdByName,
-        iu2.phone chargeTel,
-        iu2.email chargeEmail,
+--         iu2.login_name AS chargeName,
+--         iu2.phone chargeTel,
+--         iu2.email chargeEmail,
+        he.name chargeName,
+        he.mobile chargeTel,
+        he.email chargeEmail,
         hu.unit_name AS chargeDeptName,
         xsg.group_code AS groupCode,
         xsg.group_name AS groupName,
@@ -140,10 +143,11 @@
         FROM
         xsta_name_standard xns
         LEFT JOIN iam_user iu1 ON (xns.last_updated_by = iu1.id)
-        LEFT JOIN iam_user iu2 ON (xns.charge_id = iu2.id)
+--         LEFT JOIN iam_user iu2 ON (xns.charge_id = iu2.id)
         left join iam_user iu3 on xns.created_by=iu3.id
         LEFT JOIN hpfm_unit hu ON (hu.unit_id=xns.charge_dept_id)
         LEFT JOIN xsta_standard_group xsg ON (xsg.group_id=xns.group_id)
+        LEFT JOIN hpfm_employee he on he.employee_id=xns.charge_id
         <include refid="BaseWhere">
             <property name="prefix" value="xns"/>
         </include>
@@ -164,9 +168,12 @@
     <select id="detail" resultMap="DtoResultMap">
         SELECT
         iu1.login_name AS lastUpdateName,
-        iu2.login_name AS chargeName,
-        iu2.phone chargeTel,
-        iu2.email chargeEmail,
+--         iu2.login_name AS chargeName,
+--         iu2.phone chargeTel,
+--         iu2.email chargeEmail,
+        he.name chargeName,
+        he.mobile chargeTel,
+        he.email chargeEmail,
         hu.unit_name AS chargeDeptName,
         xsg.group_code AS groupCode,
         xsg.group_name AS groupName,
@@ -176,9 +183,10 @@
         FROM
         xsta_name_standard xns
         LEFT JOIN iam_user iu1 ON (xns.last_updated_by = iu1.id)
-        LEFT JOIN iam_user iu2 ON (xns.charge_id = iu2.id)
+--         LEFT JOIN iam_user iu2 ON (xns.charge_id = iu2.id)
         LEFT JOIN hpfm_unit hu ON (hu.unit_id=xns.charge_dept_id)
         LEFT JOIN xsta_standard_group xsg ON (xsg.group_id=xns.group_id)
+        LEFT JOIN hpfm_employee he ON (he.employee_id=xns.charge_id)
         WHERE xns.standard_id=#{standardId}
     </select>
 

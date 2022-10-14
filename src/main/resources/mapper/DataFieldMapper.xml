@@ -113,9 +113,12 @@
         <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         select
         iu.login_name lastUpdateName,
-        iu2.login_name chargeName,
-        iu2.phone chargeTel,
-        iu2.email chargeEmail,
+--         iu2.login_name chargeName,
+--         iu2.phone chargeTel,
+--         iu2.email chargeEmail,
+        he.email chargeEmail,
+        he.mobile chargeTel,
+        he.name chargeName,
         hu.unit_name chargeDeptName,
         xsg.group_name,
         xsg.group_code,
@@ -131,9 +134,10 @@
         left join xsta_data_standard xds on fs.data_standard_id = xds.standard_id
         left join xsta_standard_group xsg on xsg.group_id=fs.group_id
         left join iam_user iu on fs.last_updated_by=iu.id
-        left join iam_user iu2 on fs.charge_id=iu2.id
+--         left join iam_user iu2 on fs.charge_id=iu2.id
         left join iam_user iu3 on fs.created_by=iu3.id
         left join hpfm_unit hu on hu.unit_id=fs.charge_dept_id
+        left join hpfm_employee he on he.employee_id=fs.charge_id
         <if test='datasourceType == "ORACLE"'>
             LEFT JOIN (
             SELECT
@@ -185,7 +189,7 @@
                 and fs.standard_status=#{dataFieldDTO.standardStatus}
             </if>
             <if test="dataFieldDTO.chargeId!=null">
-                and iu2.id=#{dataFieldDTO.chargeId}
+                and he.employee_id=#{dataFieldDTO.chargeId}
             </if>
             <if test="dataFieldDTO.lastUpdateName!=null">
                 <bind name="lastUpdateName" value="'%'+ dataFieldDTO.lastUpdateName +'%'"/>
