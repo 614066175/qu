@@ -488,8 +488,17 @@ public class DataFieldServiceImpl implements DataFieldService {
                 DataFieldDTO.builder().fieldId(fieldId).tenantId(tenantId).build()
         );
         if (dataFieldDTO != null) {
-            //查询员工责任人
-            return Collections.singletonList(dataStandardMapper.selectAssigneeUser(dataFieldDTO.getChargeId()));
+            AssigneeUserDTO assigneeUserDTO = dataStandardMapper.selectAssigneeUser(dataFieldDTO.getChargeId());
+            //查询员工责任人并解密
+            if(DataSecurityHelper.isTenantOpen()){
+                if(StringUtils.isNotEmpty(assigneeUserDTO.getEmployeeName())){
+                    assigneeUserDTO.setEmployeeName(DataSecurityHelper.decrypt(assigneeUserDTO.getEmployeeName()));
+                }
+                if(StringUtils.isNotEmpty(assigneeUserDTO.getEmployeeNum())){
+                    assigneeUserDTO.setEmployeeNum(DataSecurityHelper.decrypt(assigneeUserDTO.getEmployeeNum()));
+                }
+            }
+            return Collections.singletonList(assigneeUserDTO);
         } else {
             throw new CommonException(ErrorCode.NOT_FIND_VALUE);
         }
