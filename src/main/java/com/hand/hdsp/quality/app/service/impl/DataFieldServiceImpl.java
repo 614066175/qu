@@ -27,6 +27,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
+import org.hzero.boot.driver.infra.util.PageUtil;
 import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
 import org.hzero.boot.platform.plugin.hr.entity.Employee;
 import org.hzero.boot.workflow.WorkflowClient;
@@ -37,6 +38,7 @@ import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.infra.meta.Table;
+import org.hzero.starter.driver.core.infra.util.PageParseUtil;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -215,6 +217,10 @@ public class DataFieldServiceImpl implements DataFieldService {
             if (Strings.isNotEmpty(dataFieldDTO.getChargeDeptName())) {
                 dataFieldDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeDeptName()));
             }
+            if (StringUtils.isNotEmpty(dataFieldDTO.getChargeName())) {
+                dataFieldDTO.setChargeName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeName()));
+            }
+
         }
         List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
                 .andWhere(Sqls.custom()
@@ -297,7 +303,25 @@ public class DataFieldServiceImpl implements DataFieldService {
             Long[] groupIds = standardGroupDTOList.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
             dataFieldDTO.setGroupArrays(groupIds);
         }
-        return PageHelper.doPageAndSort(pageRequest, () -> dataFieldMapper.list(dataFieldDTO));
+        List<DataFieldDTO> dataFieldDTOList = dataFieldMapper.list(dataFieldDTO);
+        dataFieldDTOList.forEach(dataFieldDto -> {
+            if (DataSecurityHelper.isTenantOpen()) {
+                //解密邮箱，电话
+                if (Strings.isNotEmpty(dataFieldDto.getChargeTel())) {
+                    dataFieldDto.setChargeTel(DataSecurityHelper.decrypt(dataFieldDto.getChargeTel()));
+                }
+                if (Strings.isNotEmpty(dataFieldDto.getChargeEmail())) {
+                    dataFieldDto.setChargeEmail(DataSecurityHelper.decrypt(dataFieldDto.getChargeEmail()));
+                }
+                if (Strings.isNotEmpty(dataFieldDto.getChargeDeptName())) {
+                    dataFieldDto.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldDto.getChargeDeptName()));
+                }
+                if (StringUtils.isNotEmpty(dataFieldDto.getChargeName())) {
+                    dataFieldDto.setChargeName(DataSecurityHelper.decrypt(dataFieldDto.getChargeName()));
+                }
+            }
+        });
+        return PageParseUtil.springPage2C7nPage(PageUtil.doPage(dataFieldDTOList, org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize())));
     }
 
     private void findChildGroups(Long groupId, List<StandardGroupDTO> standardGroups) {
@@ -534,6 +558,8 @@ public class DataFieldServiceImpl implements DataFieldService {
         );
         if (dataFieldDTO != null) {
             //查询责任人
+            //chargeId为员工id
+            Long chargeId = dataFieldDTO.getChargeId();
             return Arrays.asList(dataStandardMapper.selectAssigneeUser(dataFieldDTO.getChargeId()));
         } else {
             throw new CommonException(ErrorCode.NOT_FIND_VALUE);

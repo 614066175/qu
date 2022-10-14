@@ -285,6 +285,9 @@ public class StandardDocServiceImpl implements StandardDocService {
             if (StringUtils.isNotEmpty(dto.getChargeDeptName())) {
                 dto.setChargeDeptName(DataSecurityHelper.decrypt(dto.getChargeDeptName()));
             }
+            if (StringUtils.isNotEmpty(dto.getChargeName())) {
+                dto.setChargeName(DataSecurityHelper.decrypt(dto.getChargeName()));
+            }
         }
 
     }

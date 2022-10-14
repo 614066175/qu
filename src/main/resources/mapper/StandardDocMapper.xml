@@ -51,9 +51,12 @@
         xsg.group_desc,
         iu1.login_name createdByName,
         iu3.login_name lastUpdatedByName,
-        iu2.login_name chargeName,
-        iu2.phone chargeTel,
-        iu2.email chargeEmail,
+--         iu2.login_name chargeName,
+--         iu2.phone chargeTel,
+--         iu2.email chargeEmail,
+        he.name chargeName,
+        he.mobile chargeTel,
+        he.email chargeEmail,
         hu.unit_name chargeDeptName,
         <include refid="baseColumn">
             <property name="sd" value="sd"/>
@@ -62,8 +65,9 @@
         left join xsta_standard_group xsg on xsg.group_id=sd.group_id
         left join iam_user iu1 on iu1.id=sd.created_by
         left join iam_user iu3 on iu3.id=sd.last_updated_by
-        left join iam_user iu2 on sd.charge_id=iu2.id
+--         left join iam_user iu2 on sd.charge_id=iu2.id
         left join hpfm_unit hu on hu.unit_id=sd.charge_dept_id
+        left join hpfm_employee he on he.employee_id=sd.charge_id
         <where>
             <if test="standardDocDTO.docId!=null">
                 sd.doc_id=#{standardDocDTO.docId}
