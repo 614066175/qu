@@ -75,11 +75,14 @@ public class PlanGroupServiceImpl implements PlanGroupService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int delete(PlanGroupDTO planGroupDTO) {
-        List<PlanGroupDTO> planGroupDTOList = planGroupRepository.selectDTO(PlanGroup.FIELD_PARENT_GROUP_ID, planGroupDTO.getGroupId());
         List<BatchPlanDTO> batchPlanDTOList = batchPlanRepository.selectDTO(BatchPlan.FIELD_GROUP_ID, planGroupDTO.getGroupId());
         //当前分组下存在评估方案，请删除评估方案后再执行删除操作！
-        if (CollectionUtils.isNotEmpty(planGroupDTOList) || CollectionUtils.isNotEmpty(batchPlanDTOList)) {
-            throw new CommonException(ErrorCode.EXISTS_OTHER_PLAN);
+        if (CollectionUtils.isNotEmpty(batchPlanDTOList)) {
+            throw new CommonException(ErrorCode.EXISTS_OTHER_PLAN,planGroupDTO.getGroupName());
+        }
+        List<PlanGroupDTO> planGroupDTOList = planGroupRepository.selectDTO(PlanGroup.FIELD_PARENT_GROUP_ID, planGroupDTO.getGroupId());
+        if(CollectionUtils.isNotEmpty(planGroupDTOList)){
+            planGroupDTOList.forEach(this::delete);
         }
         return planGroupRepository.deleteByPrimaryKey(planGroupDTO);
     }
