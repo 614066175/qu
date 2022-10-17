@@ -75,16 +75,37 @@ public class PlanGroupServiceImpl implements PlanGroupService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int delete(PlanGroupDTO planGroupDTO) {
-        List<BatchPlanDTO> batchPlanDTOList = batchPlanRepository.selectDTO(BatchPlan.FIELD_GROUP_ID, planGroupDTO.getGroupId());
-        //当前分组下存在评估方案，请删除评估方案后再执行删除操作！
-        if (CollectionUtils.isNotEmpty(batchPlanDTOList)) {
-            throw new CommonException(ErrorCode.EXISTS_OTHER_PLAN,planGroupDTO.getGroupName());
+        //分组或子分组存在评估方案不可删除;不存在或存在空的分组则删除，并同时删除空的分组
+        //遍历获取子目录集合
+        List<PlanGroupDTO> planGroupDTOList = new ArrayList<>();
+        findChildGroups(planGroupDTO,planGroupDTOList);
+        planGroupDTOList.add(planGroupDTO);
+        planGroupDTOList.forEach(planGroupDto -> {
+            //校验分组下是否存在评估方案
+            List<BatchPlan> batchPlans = batchPlanRepository.selectByCondition(Condition.builder(BatchPlan.class).andWhere(Sqls.custom()
+                            .andEqualTo(BatchPlan.FIELD_TENANT_ID,planGroupDto.getTenantId())
+                            .andEqualTo(BatchPlan.FIELD_PROJECT_ID,planGroupDto.getProjectId())
+                            .andEqualTo(BatchPlan.FIELD_GROUP_ID,planGroupDto.getGroupId()))
+                    .build());
+            if (CollectionUtils.isNotEmpty(batchPlans)) {
+                throw new CommonException(ErrorCode.EXISTS_OTHER_PLAN);
+            }
+        });
+        return planGroupRepository.batchDTODeleteByPrimaryKey(planGroupDTOList);
+    }
+
+    private void findChildGroups(PlanGroupDTO planGroupDTO, List<PlanGroupDTO> planGroupDTOList) {
+        List<PlanGroupDTO> planGroupDTOS = planGroupRepository.selectDTOByCondition(Condition.builder(PlanGroup.class).andWhere(Sqls.custom()
+                        .andEqualTo(PlanGroup.FIELD_PARENT_GROUP_ID,planGroupDTO.getGroupId())
+                        .andEqualTo(PlanGroup.FIELD_TENANT_ID,planGroupDTO.getTenantId())
+                        .andEqualTo(PlanGroup.FIELD_PROJECT_ID,planGroupDTO.getProjectId()))
+                .build());
+        if(CollectionUtils.isNotEmpty(planGroupDTOS)){
+            planGroupDTOList.addAll(planGroupDTOS);
+            planGroupDTOS.forEach(planGroupDto -> {
+                findChildGroups(planGroupDto,planGroupDTOList);
+            });
         }
-        List<PlanGroupDTO> planGroupDTOList = planGroupRepository.selectDTO(PlanGroup.FIELD_PARENT_GROUP_ID, planGroupDTO.getGroupId());
-        if(CollectionUtils.isNotEmpty(planGroupDTOList)){
-            planGroupDTOList.forEach(this::delete);
-        }
-        return planGroupRepository.deleteByPrimaryKey(planGroupDTO);
     }
 
     @Override
