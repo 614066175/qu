@@ -154,8 +154,8 @@ public class PlanGroupServiceImpl implements PlanGroupService {
                             .andEqualTo(BatchPlan.FIELD_PROJECT_ID, planGroupDTO.getProjectId())
                             .andEqualTo(BatchPlan.FIELD_GROUP_ID, planGroupDTO.getGroupId())
                             .andEqualTo(BatchPlan.FIELD_TENANT_ID, planGroupDTO.getTenantId())
-                            .andEqualTo(BatchPlan.FIELD_PLAN_NAME,dto.getPlanName(),true)
-                            .andEqualTo(BatchPlan.FIELD_PLAN_ID,dto.getPlanId(),true)
+                            .andEqualTo(BatchPlan.FIELD_PLAN_NAME, dto.getPlanName(), true)
+                            .andEqualTo(BatchPlan.FIELD_PLAN_ID, dto.getPlanId(), true)
                     )
                     .build());
             batchPlanDTOList.stream().parallel().forEach(batchPlanDTO -> {
@@ -165,12 +165,12 @@ public class PlanGroupServiceImpl implements PlanGroupService {
                                 .andEqualTo(BatchPlanBase.FIELD_PROJECT_ID, batchPlanDTO.getProjectId())
                                 .andEqualTo(BatchPlanBase.FIELD_PLAN_ID, batchPlanDTO.getPlanId())
                                 .andEqualTo(BatchPlanBase.FIELD_TENANT_ID, batchPlanDTO.getTenantId())
-                                .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_CODE,dto.getPlanBaseCode(),true)
-                                .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_NAME,dto.getPlanBaseName(),true)
-                                .andEqualTo(BatchPlanBase.FIELD_OBJECT_NAME,dto.getObjectName(),true)
-                                .andEqualTo(BatchPlanBase.FIELD_DESCRIPTION,dto.getDescription(),true)
-                                .andEqualTo(BatchPlanBase.FIELD_DATASOURCE_SCHEMA,dto.getDatasourceSchema(),true)
-                                .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_ID,dto.getPlanBaseId(),true)
+                                .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_CODE, dto.getPlanBaseCode(), true)
+                                .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_NAME, dto.getPlanBaseName(), true)
+                                .andEqualTo(BatchPlanBase.FIELD_OBJECT_NAME, dto.getObjectName(), true)
+                                .andEqualTo(BatchPlanBase.FIELD_DESCRIPTION, dto.getDescription(), true)
+                                .andEqualTo(BatchPlanBase.FIELD_DATASOURCE_SCHEMA, dto.getDatasourceSchema(), true)
+                                .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_ID, dto.getPlanBaseId(), true)
                         )
                         .build());
 
