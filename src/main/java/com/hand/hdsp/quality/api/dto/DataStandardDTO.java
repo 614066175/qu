@@ -5,6 +5,7 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+import org.hzero.boot.platform.lov.annotation.LovValue;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
 
@@ -26,7 +27,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 @ApiModel("数据标准表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ExcelSheet(zh = "数据标准", en = "Data Standard")
+@ExcelSheet(zh = "数据标准", en = "Data Standard",rowOffset = 3)
 public class DataStandardDTO extends AuditDomain{
 
     @ApiModelProperty("数据标准ID，主键，供其他表做外键")
@@ -38,15 +39,15 @@ public class DataStandardDTO extends AuditDomain{
     private Long groupId;
 
     @Transient
-    @ExcelColumn(zh = "分组编码", en = "groupCode")
+//    @ExcelColumn(zh = "分组编码", en = "groupCode")
     private String groupCode;
 
     @Transient
-    @ExcelColumn(zh = "分组名称", en = "groupName")
+//    @ExcelColumn(zh = "分组名称", en = "groupName")
     private String groupName;
 
     @Transient
-    @ExcelColumn(zh = "分组描述", en = "groupDesc")
+//    @ExcelColumn(zh = "分组描述", en = "groupDesc")
     private String groupDesc;
 
     @ApiModelProperty(value = "数据标准编码")
@@ -72,42 +73,64 @@ public class DataStandardDTO extends AuditDomain{
     @ApiModelProperty(value = "数据类型 (HDSP.XMOD.FIELD_TYPE)")
     @NotBlank
     @Size(max = 30)
-    @ExcelColumn(zh = "数据类型",en="dataType")
+    @LovValue(lovCode = "HDSP.XMOD.FIELD_TYPE",meaningField = "dataTypeMeaning")
+//    @ExcelColumn(zh = "数据类型",en="dataType")
     private String dataType;
+
+    @ExcelColumn(zh = "数据类型",en="dataType")
+    private String dataTypeMeaning;
 
     @ApiModelProperty(value = "数据格式")
     @ExcelColumn(zh = "数据格式",en = "dataPattern")
     private String dataPattern;
 
     @ApiModelProperty(value = "长度类型（快码HSDP.XSTA.LENGTH_TYPE）")
-    @ExcelColumn(zh = "数据长度-类型",en ="lengthType")
+    @LovValue(lovCode = "HDSP.XSTA.LENGTH_TYPE",meaningField = "lengthTypeMeaning")
+//    @ExcelColumn(zh = "数据长度-类型",en ="lengthType")
     private String lengthType;
+
+    @ExcelColumn(zh = "数据长度-类型",en ="lengthType")
+    private String lengthTypeMeaning;
 
     @ApiModelProperty(value = "数据长度")
     @ExcelColumn(zh = "数据长度",en = "dataLength")
     private String dataLength;
 
     @ApiModelProperty(value = "值域类型（快码HDSP.XSTA.VALUE_TYPE）")
-    @ExcelColumn(zh = "值域类型",en="valueType")
+    @LovValue(lovCode = "HDSP.XSTA.VALUE_TYPE",meaningField = "valueTypeMeaning")
+//    @ExcelColumn(zh = "值域类型",en="valueType")
     private String valueType;
+
+    @ExcelColumn(zh = "值域类型",en="valueType")
+    private String valueTypeMeaning;
 
     @ApiModelProperty(value = "值域")
     @ExcelColumn(zh = "值域范围",en = "valueRange")
     private String valueRange;
 
     @ApiModelProperty(value = "标准依据（快码HDSP.XSTA.STANDARD_ACCORD）")
-    @ExcelColumn(zh = "标准依据" ,en="standardAccord")
+    @LovValue(lovCode = "HDSP.XSTA.STANDARD_ACCORD",meaningField = "standardAccordMeaning")
+//    @ExcelColumn(zh = "标准依据" ,en="standardAccord")
     private String standardAccord;
+
+    @ExcelColumn(zh = "标准依据" ,en="standardAccord")
+    private String standardAccordMeaning;
 
     @ApiModelProperty(value = "依据内容")
     @ExcelColumn(zh = "依据内容",en = "accordContent")
     private String accordContent;
 
-    @ApiModelProperty(value = "责任部门ID")
-    private Long chargeDeptId;
+    @ApiModelProperty(value = "是否可为空，1可空 0 不可空")
+    @ExcelColumn(zh = "是否可为空",en = "Can be empty or not")
+    private Integer nullFlag;
 
-    @ApiModelProperty(value = "责任人ID")
-    private Long chargeId;
+    @Transient
+    @ExcelColumn(zh = "责任部门", en = "chargeDeptName")
+    private String chargeDeptName;
+
+    @Transient
+    @ExcelColumn(zh = "责任人",en = "chargeName")
+    private String chargeName;
 
     @ApiModelProperty(value = "责任人电话")
     @ExcelColumn(zh = "责任人电话",en = "chargeTel")
@@ -117,14 +140,16 @@ public class DataStandardDTO extends AuditDomain{
     @ApiModelProperty(value = "责任人邮箱")
     private String chargeEmail;
 
+    @ApiModelProperty(value = "责任部门ID")
+    private Long chargeDeptId;
+
+    @ApiModelProperty(value = "责任人ID")
+    private Long chargeId;
+
     @ApiModelProperty(value = "数据标准状态(快码HSDP.XSTA.STANDARD_STATUS)")
     @NotBlank
     @Size(max = 30)
     private String standardStatus;
-
-    @ApiModelProperty(value = "是否可为空，1可空 0 不可空")
-    @ExcelColumn(zh = "是否可为空",en = "Can be empty or not")
-    private Integer nullFlag;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull
@@ -138,14 +163,6 @@ public class DataStandardDTO extends AuditDomain{
 
     @Transient
     private String lastUpdateName;
-
-    @Transient
-    @ExcelColumn(zh = "责任人",en = "chargeName")
-    private String chargeName;
-
-    @Transient
-    @ExcelColumn(zh = "责任部门", en = "chargeDeptName")
-    private String chargeDeptName;
 
     @Transient
     private Long parentGroupId;
@@ -174,5 +191,11 @@ public class DataStandardDTO extends AuditDomain{
     private String lastUpdatedByName;
 
     private Long projectId;
+
+    /**
+     * 分组集合
+     */
+    @Transient
+    private Long[] groupArrays;
 
 }

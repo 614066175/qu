@@ -59,6 +59,13 @@ public class RuleGroupDTO extends AuditDomain {
     private String groupDesc;
 
     @Transient
+    @ExcelColumn(zh = "父分组编码",en = "parentGroupCode")
+    private String parentGroupCode;
+
+    /**
+     * 标准规则列表
+     */
+    @Transient
     @ExcelColumn(zh = "标准规则列表", en = "ruleDTOList", child = true)
     private List<RuleDTO> ruleDTOList;
 

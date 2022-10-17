@@ -47,6 +47,13 @@ public interface DataFieldService {
     Page<DataFieldDTO> list(PageRequest pageRequest, DataFieldDTO dataFieldDTO);
 
     /**
+     * 条件查询字段标准集合
+     * @param dataFieldDTO 查询条件
+     * @return 字段标准集合
+     */
+    List<DataFieldDTO> findDataFieldDtoList(DataFieldDTO dataFieldDTO);
+
+    /**
      * 字段标准状态更新
      *
      * @param dataFieldDTO DataFieldDTO
@@ -73,10 +80,9 @@ public interface DataFieldService {
      *
      * @param dto
      * @param exportParam
-     * @param pageRequest
      * @return
      */
-    List<DataFieldDTO> export(DataFieldDTO dto, ExportParam exportParam, PageRequest pageRequest);
+    List<DataFieldGroupDTO> export(DataFieldDTO dto, ExportParam exportParam);
 
     /**
      * 上线通过事件

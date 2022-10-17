@@ -75,7 +75,6 @@ public class DataStandardValidator extends BatchValidatorHandler {
                 //标准编码存在
                 if (CollectionUtils.isNotEmpty(dataStandardDTOList)) {
                     addErrorMsg(i, "标准编码已存在");
-                    return false;
                 }
                 dataStandardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                         .andWhere(Sqls.custom()
@@ -85,13 +84,11 @@ public class DataStandardValidator extends BatchValidatorHandler {
                 //标准名称存在
                 if (CollectionUtils.isNotEmpty(dataStandardDTOList)) {
                     addErrorMsg(i, "标准名称已存在");
-                    return false;
                 }
                 List<Long> chargeId = dataStandardMapper.selectIdByChargeName(dataStandardDTO.getChargeName(),
                         dataStandardDTO.getTenantId());
                 if (CollectionUtils.isEmpty(chargeId)) {
                     addErrorMsg(i, "未找到此责任人，请检查数据");
-                    return false;
                 }
                 //如果责任部门不为空时进行检验
                 if (Strings.isNotEmpty(dataStandardDTO.getChargeDeptName())) {
@@ -102,18 +99,16 @@ public class DataStandardValidator extends BatchValidatorHandler {
                     List<Long> chargeDeptId = dataStandardMapper.selectIdByChargeDeptName(chargeDeptName, dataStandardDTO.getTenantId());
                     if (CollectionUtils.isEmpty(chargeDeptId)) {
                         addErrorMsg(i, "未找到此责任人，请检查数据");
-                        return false;
                     }
                 }
-                //当sheet页”数据标准“中的分组名称在本次导入表格和系统中不存在时则不能导入，并提示”${分组}分组不存在“，并在对应单元格高亮警示
-                String groupName = dataStandardDTO.getGroupName();
-                if (StringUtils.isEmpty(groupName)) {
-                    addErrorMsg(i, String.format("表格中不存在分组%s", groupName));
-                    return false;
+                //当sheet页”数据标准“中的分组code在本次导入表格和系统中不存在时则不能导入，并提示”${分组}分组不存在“，并在对应单元格高亮警示
+                String groupCode = dataStandardDTO.getGroupCode();
+                if (StringUtils.isEmpty(groupCode)) {
+                    addErrorMsg(i, "当前行中没有分组");
                 }
-                return true;
             }
         } catch (IOException e) {
+            log.info(e.getMessage());
             return false;
         }
         return true;
