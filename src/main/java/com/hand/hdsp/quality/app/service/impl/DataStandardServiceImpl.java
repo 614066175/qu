@@ -227,7 +227,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         DataStandardDTO dataStandardDTO = dataStandardDTOList.get(0);
         //判断当前租户是否启用安全加密
         if (DataSecurityHelper.isTenantOpen()) {
-            //解密邮箱，电话
+            //解密邮箱，电话，员工姓名
             if (Strings.isNotEmpty(dataStandardDTO.getChargeTel())) {
                 dataStandardDTO.setChargeTel(DataSecurityHelper.decrypt(dataStandardDTO.getChargeTel()));
             }
@@ -236,6 +236,9 @@ public class DataStandardServiceImpl implements DataStandardService {
             }
             if (Strings.isNotEmpty(dataStandardDTO.getChargeDeptName())) {
                 dataStandardDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeDeptName()));
+            }
+            if (StringUtils.isNotEmpty(dataStandardDTO.getChargeName())) {
+                dataStandardDTO.setChargeName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeName()));
             }
         }
 
@@ -605,6 +608,10 @@ public class DataStandardServiceImpl implements DataStandardService {
             if (StringUtils.isNotEmpty(dto.getChargeDeptName())) {
                 dto.setChargeDeptName(DataSecurityHelper.decrypt(dto.getChargeDeptName()));
             }
+            //解密员工姓名
+            if(StringUtils.isNotEmpty(dto.getChargeName())){
+                dto.setChargeName(DataSecurityHelper.decrypt(dto.getChargeName()));
+            }
         }
     }
 
@@ -767,8 +774,17 @@ public class DataStandardServiceImpl implements DataStandardService {
                 .build());
         if (CollectionUtils.isNotEmpty(standardDTOS)) {
             Long chargeId = standardDTOS.get(0).getChargeId();
-            //查询用户
-            return Arrays.asList(dataStandardMapper.selectAssigneeUser(chargeId));
+            //查询员工责任人
+            AssigneeUserDTO assigneeUserDTO = dataStandardMapper.selectAssigneeUser(chargeId);
+            if(DataSecurityHelper.isTenantOpen()){
+                if(StringUtils.isNotEmpty(assigneeUserDTO.getEmployeeName())){
+                    assigneeUserDTO.setEmployeeName(DataSecurityHelper.decrypt(assigneeUserDTO.getEmployeeName()));
+                }
+                if(StringUtils.isNotEmpty(assigneeUserDTO.getEmployeeNum())){
+                    assigneeUserDTO.setEmployeeNum(DataSecurityHelper.decrypt(assigneeUserDTO.getEmployeeNum()));
+                }
+            }
+            return Collections.singletonList(assigneeUserDTO);
         } else {
             throw new CommonException(ErrorCode.NOT_FIND_VALUE);
         }

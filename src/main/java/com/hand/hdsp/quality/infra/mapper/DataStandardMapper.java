@@ -54,5 +54,10 @@ public interface DataStandardMapper extends BaseMapper<DataStandard> {
      */
     String selectChargeDeptNameById(@Param("chargeDeptId") Long chargeDeptId);
 
+    /**
+     * 根据责任人id查询责任人信息
+     * @param chargeId 责任人id 即员工id
+     * @return  责任人信息
+     */
     AssigneeUserDTO selectAssigneeUser(@Param("chargeId") Long chargeId);
 }

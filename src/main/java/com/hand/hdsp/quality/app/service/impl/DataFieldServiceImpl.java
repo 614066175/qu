@@ -26,6 +26,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
+import org.hzero.boot.driver.infra.util.PageUtil;
 import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
 import org.hzero.boot.platform.plugin.hr.entity.Employee;
 import org.hzero.boot.workflow.WorkflowClient;
@@ -36,6 +37,7 @@ import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.infra.meta.Table;
+import org.hzero.starter.driver.core.infra.util.PageParseUtil;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -212,6 +214,10 @@ public class DataFieldServiceImpl implements DataFieldService {
             if (Strings.isNotEmpty(dataFieldDTO.getChargeDeptName())) {
                 dataFieldDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeDeptName()));
             }
+            if (StringUtils.isNotEmpty(dataFieldDTO.getChargeName())) {
+                dataFieldDTO.setChargeName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeName()));
+            }
+
         }
         List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
                 .andWhere(Sqls.custom()
@@ -278,7 +284,25 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     @Override
     public Page<DataFieldDTO> list(PageRequest pageRequest, DataFieldDTO dataFieldDTO) {
-        return PageHelper.doPageAndSort(pageRequest, () -> dataFieldMapper.list(dataFieldDTO));
+        List<DataFieldDTO> dataFieldDTOList = dataFieldMapper.list(dataFieldDTO);
+        dataFieldDTOList.forEach(dataFieldDto -> {
+            if (DataSecurityHelper.isTenantOpen()) {
+                //解密邮箱，电话
+                if (Strings.isNotEmpty(dataFieldDto.getChargeTel())) {
+                    dataFieldDto.setChargeTel(DataSecurityHelper.decrypt(dataFieldDto.getChargeTel()));
+                }
+                if (Strings.isNotEmpty(dataFieldDto.getChargeEmail())) {
+                    dataFieldDto.setChargeEmail(DataSecurityHelper.decrypt(dataFieldDto.getChargeEmail()));
+                }
+                if (Strings.isNotEmpty(dataFieldDto.getChargeDeptName())) {
+                    dataFieldDto.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldDto.getChargeDeptName()));
+                }
+                if (StringUtils.isNotEmpty(dataFieldDto.getChargeName())) {
+                    dataFieldDto.setChargeName(DataSecurityHelper.decrypt(dataFieldDto.getChargeName()));
+                }
+            }
+        });
+        return PageParseUtil.springPage2C7nPage(PageUtil.doPage(dataFieldDTOList, org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize())));
     }
 
     @Override
@@ -464,8 +488,17 @@ public class DataFieldServiceImpl implements DataFieldService {
                 DataFieldDTO.builder().fieldId(fieldId).tenantId(tenantId).build()
         );
         if (dataFieldDTO != null) {
-            //查询责任人
-            return Arrays.asList(dataStandardMapper.selectAssigneeUser(dataFieldDTO.getChargeId()));
+            AssigneeUserDTO assigneeUserDTO = dataStandardMapper.selectAssigneeUser(dataFieldDTO.getChargeId());
+            //查询员工责任人并解密
+            if(DataSecurityHelper.isTenantOpen()){
+                if(StringUtils.isNotEmpty(assigneeUserDTO.getEmployeeName())){
+                    assigneeUserDTO.setEmployeeName(DataSecurityHelper.decrypt(assigneeUserDTO.getEmployeeName()));
+                }
+                if(StringUtils.isNotEmpty(assigneeUserDTO.getEmployeeNum())){
+                    assigneeUserDTO.setEmployeeNum(DataSecurityHelper.decrypt(assigneeUserDTO.getEmployeeNum()));
+                }
+            }
+            return Collections.singletonList(assigneeUserDTO);
         } else {
             throw new CommonException(ErrorCode.NOT_FIND_VALUE);
         }

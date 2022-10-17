@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.infra.repository.impl;
 import java.util.List;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
+import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.NameStandardDTO;
 import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.domain.entity.NameStandard;
@@ -14,8 +15,11 @@ import com.hand.hdsp.quality.infra.mapper.NameStandardMapper;
 import com.hand.hdsp.quality.infra.util.ImportUtil;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
+import org.hzero.boot.driver.infra.util.PageUtil;
 import org.hzero.mybatis.helper.DataSecurityHelper;
+import org.hzero.starter.driver.core.infra.util.PageParseUtil;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +48,26 @@ public class NameStandardRepositoryImpl extends BaseRepositoryImpl<NameStandard,
 
     @Override
     public List<NameStandardDTO> list(NameStandardDTO nameStandardDTO) {
-        return nameStandardMapper.list(nameStandardDTO);
+        List<NameStandardDTO> nameStandardDTOList = nameStandardMapper.list(nameStandardDTO);
+        //解密
+        nameStandardDTOList.forEach(nameStandardDto -> {
+            if (DataSecurityHelper.isTenantOpen()) {
+                //解密邮箱，电话
+                if (Strings.isNotEmpty(nameStandardDto.getChargeTel())) {
+                    nameStandardDto.setChargeTel(DataSecurityHelper.decrypt(nameStandardDto.getChargeTel()));
+                }
+                if (Strings.isNotEmpty(nameStandardDto.getChargeEmail())) {
+                    nameStandardDto.setChargeEmail(DataSecurityHelper.decrypt(nameStandardDto.getChargeEmail()));
+                }
+                if (Strings.isNotEmpty(nameStandardDto.getChargeDeptName())) {
+                    nameStandardDto.setChargeDeptName(DataSecurityHelper.decrypt(nameStandardDto.getChargeDeptName()));
+                }
+                if (StringUtils.isNotEmpty(nameStandardDto.getChargeName())) {
+                    nameStandardDto.setChargeName(DataSecurityHelper.decrypt(nameStandardDto.getChargeName()));
+                }
+            }
+        });
+        return nameStandardDTOList;
     }
 
 
@@ -89,6 +112,9 @@ public class NameStandardRepositoryImpl extends BaseRepositoryImpl<NameStandard,
             }
             if (Strings.isNotEmpty(nameStandardDTO.getChargeDeptName())) {
                 nameStandardDTO.setChargeDeptName(DataSecurityHelper.decrypt(nameStandardDTO.getChargeDeptName()));
+            }
+            if (StringUtils.isNotEmpty(nameStandardDTO.getChargeName())) {
+                nameStandardDTO.setChargeName(DataSecurityHelper.decrypt(nameStandardDTO.getChargeName()));
             }
         }
         return nameStandardDTO;

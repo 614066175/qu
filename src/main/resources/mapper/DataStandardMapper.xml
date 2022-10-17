@@ -63,9 +63,9 @@
         iu.login_name lastUpdateName,
         iu.login_name lastUpdatedByName,
         iu3.login_name createdByName,
-        ( case when iu2.login_name is null then '' else iu2.login_name end ) chargeName,
-        iu2.phone chargeTel,
-        iu2.email chargeEmail,
+        he.email chargeEmail,
+        he.mobile chargeTel,
+        he.name chargeName,
         hu.unit_name chargeDeptName,
         xsg.group_name,
         xsg.group_code,
@@ -77,9 +77,9 @@
         from xsta_data_standard ds
         left join xsta_standard_group xsg on xsg.group_id=ds.group_id
         left join iam_user iu on ds.last_updated_by=iu.id
-        left join iam_user iu2 on ds.charge_id=iu2.id
         left join iam_user iu3 on ds.created_by=iu3.id
         left join hpfm_unit hu on hu.unit_id=ds.charge_dept_id
+        left join hpfm_employee he on ds.charge_id=he.employee_id
         <if test='datasourceType == "ORACLE"'>
             LEFT JOIN (
                 SELECT
@@ -124,7 +124,7 @@
                 and ds.standard_status=#{dataStandardDTO.standardStatus}
             </if>
             <if test="dataStandardDTO.chargeId!=null">
-                and iu2.id=#{dataStandardDTO.chargeId}
+                and he.employee_id=#{dataStandardDTO.chargeId}
             </if>
             <if test="dataStandardDTO.lastUpdateName!=null">
                 <bind name="lastUpdateName" value="'%'+ dataStandardDTO.lastUpdateName +'%'"/>
@@ -196,12 +196,11 @@
     </select>
     <select id="selectAssigneeUser" resultType="com.hand.hdsp.quality.api.dto.AssigneeUserDTO">
         SELECT
-            id,
-            login_name,
-            real_name
+            name as employeeName,
+            employee_num as employeeNum
         FROM
-            iam_user iu
-        where iu.id=#{chargeId}
+            hpfm_employee he
+        where he.employee_id=#{chargeId}
     </select>
 
 </mapper>
