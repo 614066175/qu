@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
+import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.PlanShareDTO;
 import com.hand.hdsp.quality.app.service.PlanShareService;
 import com.hand.hdsp.quality.domain.entity.PlanShare;
@@ -19,6 +20,8 @@ import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+
+import java.util.List;
 
 /**
  * <p> 管理 API</p>
@@ -113,10 +116,11 @@ public class PlanShareController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/batch-share/{planId}")
     public ResponseEntity<?> batchShare(@PathVariable("organizationId") Long tenantId,
-                                        @RequestBody PlanShareDTO planShareDTO) {
-        planShareDTO.setTenantId(tenantId);
-        planShareRepository.insertDTOSelective(planShareDTO);
-        return Results.success(planShareDTO);
+                                        @PathVariable("planId") Long planId,
+                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                        @RequestBody List<PlanShareDTO> planShareDTOList) {
+        List<PlanShareDTO> planShareDTOS = planShareService.batchShare(tenantId, projectId, planId, planShareDTOList);
+        return Results.success(planShareDTOS);
     }
 
     @ApiOperation(value = "修改")

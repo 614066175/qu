@@ -27,12 +27,18 @@
     parent_group_id parent_id,
     group_code,
     group_name,
-    'group' type
-    from xqua_plan_group
+    'group' type,
+    xpg.project_id
+    from xqua_plan_group xpg
     where group_type = 'BATCH'
         and tenant_id = #{tenantId}
         <if test="projectId != null">
-            and project_id=#{projectId}
+            and (xpg.project_id=#{projectId} OR xpg.project_id IN (
+                SELECT share_from_project_id
+                FROM xqua_plan_share xps WHERE xps.share_object_id =xpg.group_id
+                                           AND xps.share_object_type = 'GROUP'
+                                           AND xps.share_to_project_id = #{projectId} )
+            )
         </if>
     union
     select
@@ -42,12 +48,17 @@
     group_id parent_id,
     plan_code group_code,
     plan_name group_name,
-    'plan' type
+    'plan' type,
+    xbp.project_id
     from xqua_batch_plan xbp
     <where>
     and tenant_id = #{tenantId}
         <if test="projectId != null">
-            and xbp.project_id=#{projectId}
+            and (xbp.project_id=#{projectId} or xbp.project_id in (select share_from_project_id
+            from xqua_plan_share xps
+            where
+            xps.share_object_id=xbp.plan_id and xps.share_object_type='PLAN' and
+            xps.share_to_project_id =#{projectId}))
         </if>
         <if test="planName != null">
             <bind name="planName" value="'%' + planName + '%'"/>
