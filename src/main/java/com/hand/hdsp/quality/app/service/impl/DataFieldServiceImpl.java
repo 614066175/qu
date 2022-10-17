@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 
+import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.DataFieldService;
 import com.hand.hdsp.quality.app.service.DataStandardService;
@@ -28,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.driver.infra.util.PageUtil;
+import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
 import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
 import org.hzero.boot.platform.plugin.hr.entity.Employee;
 import org.hzero.boot.workflow.WorkflowClient;
@@ -53,6 +55,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
@@ -280,8 +283,8 @@ public class DataFieldServiceImpl implements DataFieldService {
         // 删除审批记录
         standardApprovalService.delete(StandardApprovalDTO
                 .builder()
-                        .standardId(dataFieldDTO.getFieldId())
-                        .standardType("FIELD")
+                .standardId(dataFieldDTO.getFieldId())
+                .standardType("FIELD")
                 .build());
     }
 
@@ -294,10 +297,10 @@ public class DataFieldServiceImpl implements DataFieldService {
     public Page<DataFieldDTO> list(PageRequest pageRequest, DataFieldDTO dataFieldDTO) {
         //分组查询时同时查询当前分组和当前分组子分组的数据标准
         Long groupId = dataFieldDTO.getGroupId();
-        if(ObjectUtils.isNotEmpty(groupId)){
+        if (ObjectUtils.isNotEmpty(groupId)) {
             List<StandardGroupDTO> standardGroupDTOList = new ArrayList<>();
             //查询子分组
-            findChildGroups(groupId,standardGroupDTOList);
+            findChildGroups(groupId, standardGroupDTOList);
             //添加当前分组
             standardGroupDTOList.add(StandardGroupDTO.builder().groupId(groupId).build());
             Long[] groupIds = standardGroupDTOList.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
@@ -326,11 +329,11 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     private void findChildGroups(Long groupId, List<StandardGroupDTO> standardGroups) {
         List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
-                        .andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID,groupId))
+                        .andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID, groupId))
                 .build());
-        if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
+        if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
             standardGroups.addAll(standardGroupDTOList);
-            standardGroupDTOList.forEach(standardGroupDTO -> findChildGroups(standardGroupDTO.getGroupId(),standardGroups));
+            standardGroupDTOList.forEach(standardGroupDTO -> findChildGroups(standardGroupDTO.getGroupId(), standardGroups));
         }
     }
 
@@ -413,58 +416,149 @@ public class DataFieldServiceImpl implements DataFieldService {
 
 
     @Override
+    @ProcessLovValue(targetField = "dataFieldDTOList")
     public List<DataFieldGroupDTO> export(DataFieldDTO dto, ExportParam exportParam) {
         List<DataFieldGroupDTO> dataFieldGroupDTOList = new ArrayList<>();
         DataFieldGroupDTO dataFieldGroupDTO = new DataFieldGroupDTO();
-        //分组导出字段标准
+        Long projectId = ProjectHelper.getProjectId();
+        int level = 1;
+        if (ObjectUtils.isNotEmpty(dto.getGroupId())) {
+            //分组条件导出
+            StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                    .andEqualTo(StandardGroup.FIELD_TENANT_ID, dto.getTenantId())
+                    .andEqualTo(StandardGroup.FIELD_PROJECT_ID, projectId)
+                    .andEqualTo(StandardGroup.FIELD_GROUP_ID, dto.getGroupId(), true)
+            ).build()).get(0);
+            //获取设置当前分组的父分组编码
+            if (ObjectUtils.isNotEmpty(groupDTO.getParentGroupId())) {
+                StandardGroupDTO parentGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(groupDTO.getParentGroupId());
+                groupDTO.setParentGroupCode(parentGroupDTO.getGroupCode());
+            }
+            BeanUtils.copyProperties(groupDTO, dataFieldGroupDTO);
+            List<StandardGroupDTO> standardGroups = new ArrayList<>();
+            //导出分组下条件筛选后的数据标准
+            Long groupId = dataFieldGroupDTO.getGroupId();
+            if (ObjectUtils.isNotEmpty(groupId)) {
+                //添加当前分组
+                standardGroups.add(StandardGroupDTO.builder().groupId(groupId).build());
+                Long[] groupIds = standardGroups.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
+                dto.setGroupArrays(groupIds);
+            }
+            //当前目录和子目录的数据标准的集合，与查询保持一致
+//            List<DataStandardDTO> dataStandards = dataStandardMapper.list(dto);
+            List<DataFieldDTO> dataFields = dataFieldMapper.list(dto);
+            dataFieldGroupDTO.setDataFieldDTOList(dataFields);
+            dataFieldGroupDTO.setGroupLevel(level);
+            dataFieldGroupDTOList.add(dataFieldGroupDTO);
+            //添加查询父分组 并排序导出保证导入准确性
+            List<DataFieldGroupDTO> dataFieldGroupDTOS = new ArrayList<>();
+            if (ObjectUtils.isNotEmpty(groupDTO.getParentGroupId())) {
+                findParentGroups(groupDTO.getParentGroupId(), dataFieldGroupDTOS, level);
+            }
+            dataFieldGroupDTOList.addAll(dataFieldGroupDTOS);
+            return dataFieldGroupDTOList.stream().sorted(Comparator.comparing(DataFieldGroupDTO::getGroupLevel).reversed()).collect(Collectors.toList());
+        } else {
+            //全部分组条件导出
+            //添加查询所有父分组 并排序导出保证导入准确性
+            List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                            .andEqualTo(StandardGroup.FIELD_TENANT_ID, dto.getTenantId())
+                            .andEqualTo(StandardGroup.FIELD_PROJECT_ID, dto.getProjectId())
+                            .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, FIELD))
+                    .build());
+            standardGroupDTOList.forEach(standardGroupDTO -> {
+                if (ObjectUtils.isEmpty(standardGroupDTO.getParentGroupId())) {
+                    //从所有的根目录 向下查询
+                    DataFieldGroupDTO dataFieldGroupDto = new DataFieldGroupDTO();
+                    BeanUtils.copyProperties(standardGroupDTO, dataFieldGroupDto);
+                    //根目录数据标准列表
+                    List<DataFieldDTO> dataFieldDTOList = dataFieldMapper.list(DataFieldDTO.builder().groupArrays(new Long[]{dataFieldGroupDto.getGroupId()}).build());
+                    if (DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(dataFieldDTOList)) {
+                        dataFieldDTOList.forEach(dataFieldDTO -> {
+                            if (StringUtils.isNotEmpty(dataFieldDTO.getChargeName())) {
+                                dataFieldDTO.setChargeName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeName()));
+                            }
+                            if (StringUtils.isNotEmpty(dataFieldDTO.getChargeTel())) {
+                                dataFieldDTO.setChargeTel(DataSecurityHelper.decrypt(dataFieldDTO.getChargeTel()));
+                            }
+                            if (StringUtils.isNotEmpty(dataFieldDTO.getChargeEmail())) {
+                                dataFieldDTO.setChargeEmail(DataSecurityHelper.decrypt(dataFieldDTO.getChargeEmail()));
+                            }
+                            if (StringUtils.isNotEmpty(dataFieldDTO.getChargeDeptName())) {
+                                dataFieldDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeDeptName()));
+                            }
+                        });
+                    }
+                    dataFieldGroupDto.setDataFieldDTOList(dataFieldDTOList);
+                    dataFieldGroupDto.setGroupLevel(level);
+                    dataFieldGroupDTOList.add(dataFieldGroupDto);
+                    findSortedChildGroups(dataFieldGroupDto, level, dataFieldGroupDTOList);
+                }
+            });
+            return dataFieldGroupDTOList.stream().sorted(Comparator.comparing(DataFieldGroupDTO::getGroupLevel)).collect(Collectors.toList());
+        }
+    }
+
+    private void findSortedChildGroups(DataFieldGroupDTO parentDataFieldGroupDTO, int level, List<DataFieldGroupDTO> dataFieldGroupDTOList) {
+        level++;
         List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
-                        .andEqualTo(StandardGroup.FIELD_TENANT_ID, dto.getTenantId())
-                        .andEqualTo(StandardGroup.FIELD_PROJECT_ID, dto.getProjectId())
-                        .andEqualTo(StandardGroup.FIELD_GROUP_ID, dto.getGroupId(), true))
+                        .andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID, parentDataFieldGroupDTO.getGroupId()))
                 .build());
         if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
+            int finalLevel = level;
             standardGroupDTOList.forEach(standardGroupDTO -> {
-                //查询设置父目录
-                if(ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())){
-                    StandardGroupDTO parentStandGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
-                    standardGroupDTO.setParentGroupCode(parentStandGroupDTO.getGroupCode());
+                DataFieldGroupDTO dataFieldGroupDTO = new DataFieldGroupDTO();
+                BeanUtils.copyProperties(standardGroupDTO, dataFieldGroupDTO);
+                dataFieldGroupDTO.setGroupLevel(finalLevel);
+                //子目录数据标准列表
+                List<DataFieldDTO> dataFieldDTOList = dataFieldMapper.list(DataFieldDTO.builder().groupArrays(new Long[]{dataFieldGroupDTO.getGroupId()}).build());
+                if (DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(dataFieldDTOList)) {
+                    dataFieldDTOList.forEach(dataFieldDTO -> {
+                        if (StringUtils.isNotEmpty(dataFieldDTO.getChargeName())) {
+                            dataFieldDTO.setChargeName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeName()));
+                        }
+                        if (StringUtils.isNotEmpty(dataFieldDTO.getChargeTel())) {
+                            dataFieldDTO.setChargeTel(DataSecurityHelper.decrypt(dataFieldDTO.getChargeTel()));
+                        }
+                        if (StringUtils.isNotEmpty(dataFieldDTO.getChargeEmail())) {
+                            dataFieldDTO.setChargeEmail(DataSecurityHelper.decrypt(dataFieldDTO.getChargeEmail()));
+                        }
+                        if (StringUtils.isNotEmpty(dataFieldDTO.getChargeDeptName())) {
+                            dataFieldDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeDeptName()));
+                        }
+                    });
                 }
-                BeanUtils.copyProperties(standardGroupDTO,dataFieldGroupDTO);
+                dataFieldGroupDTO.setDataFieldDTOList(dataFieldDTOList);
+                //设置父分组code
+                dataFieldGroupDTO.setParentGroupCode(parentDataFieldGroupDTO.getGroupCode());
                 dataFieldGroupDTOList.add(dataFieldGroupDTO);
+                findSortedChildGroups(dataFieldGroupDTO, finalLevel, dataFieldGroupDTOList);
             });
-            dataFieldGroupDTOList.forEach(standardGroupDTO -> {
-                //条件查询
-                List<DataFieldDTO> dataFieldDTOList = findDataFieldDtoList(dto);
-                for (DataFieldDTO dataFieldDTO : dataFieldDTOList) {
-                    // 如果开启了数据加密
-                    if (DataSecurityHelper.isTenantOpen()) {
-                        decodeForDataFieldDTO(dataFieldDTO);
+        }
+    }
+
+    private void findParentGroups(Long groupId, List<DataFieldGroupDTO> standardGroups, int level) {
+        DataFieldGroupDTO dataFieldGroupDTO = new DataFieldGroupDTO();
+        List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                        .andEqualTo(StandardGroup.FIELD_GROUP_ID, groupId))
+                .build());
+        level++;
+        if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
+            int finalLevel = level;
+            standardGroupDTOList.forEach(parentStandardGroupDTO -> {
+                BeanUtils.copyProperties(parentStandardGroupDTO, dataFieldGroupDTO);
+                //获取设置当前分组的父分组编码
+                if (ObjectUtils.isNotEmpty(dataFieldGroupDTO.getGroupId())) {
+                    StandardGroupDTO parentGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(dataFieldGroupDTO.getGroupId());
+                    dataFieldGroupDTO.setGroupLevel(finalLevel);
+                    standardGroups.add(dataFieldGroupDTO);
+                    if (ObjectUtils.isNotEmpty(parentGroupDTO.getParentGroupId())) {
+                        StandardGroup group = standardGroupRepository.selectByPrimaryKey(parentGroupDTO.getParentGroupId());
+                        dataFieldGroupDTO.setParentGroupCode(group.getGroupCode());
+                        findParentGroups(parentGroupDTO.getParentGroupId(), standardGroups, finalLevel);
                     }
                 }
-                standardGroupDTO.setDataFieldDTOList(dataFieldDTOList);
             });
-            return dataFieldGroupDTOList;
         }
-        return dataFieldGroupDTOList;
-
-
-
-//        Page<DataFieldDTO> list = list(pageRequest, dto);
-////        List<DataFieldDTO> dataFieldDTOList = list.getContent();
-//
-//
-//
-//
-//        if (list == null) {
-//            return new ArrayList<>();
-//        }
-//        for (DataFieldDTO dataFieldDTO : list) {
-//            // 如果开启了数据加密
-//            if (dataStandardMapper.isEncrypt(dataFieldDTO.getTenantId()) == 1) {
-//                decodeForDataFieldDTO(dataFieldDTO);
-//            }
-//        }
-//        return list;
     }
 
     /**
@@ -559,11 +653,11 @@ public class DataFieldServiceImpl implements DataFieldService {
         if (dataFieldDTO != null) {
             AssigneeUserDTO assigneeUserDTO = dataStandardMapper.selectAssigneeUser(dataFieldDTO.getChargeId());
             //查询员工责任人并解密
-            if(DataSecurityHelper.isTenantOpen()){
-                if(StringUtils.isNotEmpty(assigneeUserDTO.getEmployeeName())){
+            if (DataSecurityHelper.isTenantOpen()) {
+                if (StringUtils.isNotEmpty(assigneeUserDTO.getEmployeeName())) {
                     assigneeUserDTO.setEmployeeName(DataSecurityHelper.decrypt(assigneeUserDTO.getEmployeeName()));
                 }
-                if(StringUtils.isNotEmpty(assigneeUserDTO.getEmployeeNum())){
+                if (StringUtils.isNotEmpty(assigneeUserDTO.getEmployeeNum())) {
                     assigneeUserDTO.setEmployeeNum(DataSecurityHelper.decrypt(assigneeUserDTO.getEmployeeNum()));
                 }
             }
@@ -772,13 +866,13 @@ public class DataFieldServiceImpl implements DataFieldService {
         String fieldName = String.format("%s(%s)", assetFieldDTO.getFieldName(), assetFieldDTO.getFieldType().toUpperCase());
         List<StandardAim> standardAimList = standardAimRepository.select(StandardAim
                 .builder()
-                        .standardType(FIELD)
-                        .datasourceCode(assetFieldDTO.getDatasourceCode())
-                        .schemaName(assetFieldDTO.getDatasourceSchema())
-                        .tableName(assetFieldDTO.getTableName())
-                        .fieldName(fieldName)
-                        .tenantId(assetFieldDTO.getTenantId())
-                        .projectId(projectId)
+                .standardType(FIELD)
+                .datasourceCode(assetFieldDTO.getDatasourceCode())
+                .schemaName(assetFieldDTO.getDatasourceSchema())
+                .tableName(assetFieldDTO.getTableName())
+                .fieldName(fieldName)
+                .tenantId(assetFieldDTO.getTenantId())
+                .projectId(projectId)
                 .build());
         standardAimRepository.batchDeleteByPrimaryKey(standardAimList);
         //创建新的字段落标

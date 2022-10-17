@@ -19,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ExcelSheet(zh = "分组",en = "DataField Group")
+@ExcelSheet(zh = "分组",en = "DataField Group",rowOffset = 3)
 public class DataFieldGroupDTO extends AuditDomain {
 
     @ApiModelProperty("分组ID，主键，供其他表做外键")
@@ -67,4 +67,7 @@ public class DataFieldGroupDTO extends AuditDomain {
     private List<DataFieldDTO> dataFieldDTOList;
 
     private Long projectId;
+
+    @Transient
+    private int groupLevel;
 }
