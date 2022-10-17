@@ -27,7 +27,7 @@ import org.hzero.export.annotation.ExcelSheet;
 @EqualsAndHashCode(callSuper = false)
 @ApiModel("命名标准表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ExcelSheet(zh = "命名标准", en = "Name Standard")
+@ExcelSheet(zh = "命名标准", en = "Name Standard",rowOffset = 3)
 public class NameStandardDTO extends AuditDomain {
 
     @ApiModelProperty("命名标准ID，主键，供其他表做外键")
@@ -53,7 +53,7 @@ public class NameStandardDTO extends AuditDomain {
     @ApiModelProperty(value = "命名标准描述")
     private String standardDesc;
 
-    @ExcelColumn(zh = "命名标准类型",en="standardType",order = 6)
+//    @ExcelColumn(zh = "命名标准类型",en="standardType",order = 6)
     @LovValue(lovCode = "HDSP.XSTA.NAME_STANDARD_TYPE",meaningField = "standardTypeMeaning")
     @ApiModelProperty(value = "命名标准类型，快码：HDSP.XSTA.NAME_STANDARD_TYPE <TABLE:表名称>")
     @NotBlank
@@ -114,6 +114,7 @@ public class NameStandardDTO extends AuditDomain {
     /**
      * 标准类型值集意义
      */
+    @ExcelColumn(zh = "命名标准类型",en="standardType",order = 6)
     @Transient
     private String standardTypeMeaning;
 

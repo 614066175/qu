@@ -5,6 +5,7 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+import org.hzero.boot.platform.lov.annotation.LovValue;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
 
@@ -27,7 +28,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 @ApiModel("字段标准表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ExcelSheet(zh = "字段标准", en = "Field Standard")
+@ExcelSheet(zh = "字段标准", en = "Field Standard",rowOffset = 3)
 public class DataFieldDTO extends AuditDomain {
 
     @Transient
@@ -74,8 +75,12 @@ public class DataFieldDTO extends AuditDomain {
 
     @ApiModelProperty(value = "字段类型 (HDSP.XMOD.FIELD_TYPE)")
     @NotBlank
-    @ExcelColumn(zh = "字段类型", en = "fieldType", groups = {Group1.class})
+    @LovValue(lovCode = "HDSP.XMOD.FIELD_TYPE",meaningField = "fieldTypeMeaning")
+//    @ExcelColumn(zh = "字段类型", en = "fieldType", groups = {Group1.class})
     private String fieldType;
+
+    @ExcelColumn(zh = "字段类型", en = "fieldType", groups = {Group1.class})
+    private String fieldTypeMeaning;
 
     @ApiModelProperty(value = "字段长度")
     @ExcelColumn(zh = "字段长度", en = "fieldLength", groups = {Group1.class})
@@ -86,8 +91,12 @@ public class DataFieldDTO extends AuditDomain {
     private String dataPattern;
 
     @ApiModelProperty(value = "值域类型（快码HDSP.XSTA.VALUE_TYPE）")
-    @ExcelColumn(zh = "值域类型", en = "valueType", groups = {Group1.class})
+    @LovValue(lovCode = "HDSP.XSTA.VALUE_TYPE",meaningField = "valueTypeMeaning")
+//    @ExcelColumn(zh = "值域类型", en = "valueType", groups = {Group1.class})
     private String valueType;
+
+    @ExcelColumn(zh = "值域类型", en = "valueType", groups = {Group1.class})
+    private String valueTypeMeaning;
 
     @ApiModelProperty(value = "值域范围")
     @ExcelColumn(zh = "值域范围", en = "valueRange", groups = {Group1.class})

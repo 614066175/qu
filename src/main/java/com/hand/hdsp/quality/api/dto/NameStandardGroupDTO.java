@@ -19,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ExcelSheet(zh = "分组",en = "NameStandard Group")
+@ExcelSheet(zh = "分组",en = "NameStandard Group",rowOffset = 3)
 public class NameStandardGroupDTO extends AuditDomain {
 
     @ApiModelProperty("分组ID，主键，供其他表做外键")
@@ -65,6 +65,9 @@ public class NameStandardGroupDTO extends AuditDomain {
     @Transient
     @ExcelColumn(zh = "命名标准列表", en = "nameStandardDTOList", child = true)
     private List<NameStandardDTO> nameStandardDTOList;
+
+    @Transient
+    private int groupLevel;
 
     private Long projectId;
 }

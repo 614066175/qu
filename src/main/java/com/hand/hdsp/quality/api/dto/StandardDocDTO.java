@@ -29,7 +29,7 @@ import org.hzero.export.annotation.ExcelSheet;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @VersionAudit
 @ModifyAudit
-@ExcelSheet(zh = "标准文档", en = "Standard Doc")
+@ExcelSheet(zh = "标准文档", en = "Standard Doc",rowOffset = 3)
 public class StandardDocDTO extends AuditDomain {
 
     @ApiModelProperty("标准ID")
