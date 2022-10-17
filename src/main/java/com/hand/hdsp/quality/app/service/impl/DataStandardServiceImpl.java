@@ -662,47 +662,75 @@ public class DataStandardServiceImpl implements DataStandardService {
             List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
                             .andEqualTo(StandardGroup.FIELD_TENANT_ID, dto.getTenantId())
                             .andEqualTo(StandardGroup.FIELD_PROJECT_ID, dto.getProjectId())
-                            .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE,DATA))
+                            .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, DATA))
                     .build());
             standardGroupDTOList.forEach(standardGroupDTO -> {
-                if(ObjectUtils.isEmpty(standardGroupDTO.getParentGroupId())){
+                if (ObjectUtils.isEmpty(standardGroupDTO.getParentGroupId())) {
                     //从所有的根目录 向下查询
                     DataStandardGroupDTO dataStandardGroupDto = new DataStandardGroupDTO();
                     BeanUtils.copyProperties(standardGroupDTO, dataStandardGroupDto);
                     //根目录数据标准列表
-                    List<DataStandardDTO> dataStandardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class).andWhere(Sqls.custom()
-                                    .andEqualTo(DataStandard.FIELD_GROUP_ID,standardGroupDTO.getGroupId()))
-                            .build());
+                    List<DataStandardDTO> dataStandardDTOList = dataStandardMapper.list(DataStandardDTO.builder().groupArrays(new Long[]{dataStandardGroupDto.getGroupId()}).build());
+                    if (DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(dataStandardDTOList)) {
+                        dataStandardDTOList.forEach(dataStandardDTO -> {
+                            if (StringUtils.isNotEmpty(dataStandardDTO.getChargeName())) {
+                                dataStandardDTO.setChargeName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeName()));
+                            }
+                            if (StringUtils.isNotEmpty(dataStandardDTO.getChargeTel())) {
+                                dataStandardDTO.setChargeTel(DataSecurityHelper.decrypt(dataStandardDTO.getChargeTel()));
+                            }
+                            if (StringUtils.isNotEmpty(dataStandardDTO.getChargeEmail())) {
+                                dataStandardDTO.setChargeEmail(DataSecurityHelper.decrypt(dataStandardDTO.getChargeEmail()));
+                            }
+                            if (StringUtils.isNotEmpty(dataStandardDTO.getChargeDeptName())) {
+                                dataStandardDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeDeptName()));
+                            }
+                        });
+                    }
                     dataStandardGroupDto.setDataStandardDTOList(dataStandardDTOList);
                     dataStandardGroupDto.setGroupLevel(level);
                     dataStandardGroupDTOList.add(dataStandardGroupDto);
-                    findSortedChildGroups(standardGroupDTO,level,dataStandardGroupDTOList);
+                    findSortedChildGroups(dataStandardGroupDto, level, dataStandardGroupDTOList);
                 }
             });
             return dataStandardGroupDTOList.stream().sorted(Comparator.comparing(DataStandardGroupDTO::getGroupLevel)).collect(Collectors.toList());
         }
     }
 
-    private void findSortedChildGroups(StandardGroupDTO parentStandardGroupDTO, int level,  List<DataStandardGroupDTO> dataStandardGroupDTOList) {
+    private void findSortedChildGroups(DataStandardGroupDTO parentDataStandardGroupDTO, int level, List<DataStandardGroupDTO> dataStandardGroupDTOList) {
         level++;
         List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
-                        .andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID,parentStandardGroupDTO.getGroupId()))
+                        .andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID, parentDataStandardGroupDTO.getGroupId()))
                 .build());
-        if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
+        if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
             int finalLevel = level;
             standardGroupDTOList.forEach(standardGroupDTO -> {
                 DataStandardGroupDTO dataStandardGroupDTO = new DataStandardGroupDTO();
-                BeanUtils.copyProperties(standardGroupDTO,dataStandardGroupDTO);
+                BeanUtils.copyProperties(standardGroupDTO, dataStandardGroupDTO);
                 dataStandardGroupDTO.setGroupLevel(finalLevel);
                 //子目录数据标准列表
-                List<DataStandardDTO> dataStandardList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class).andWhere(Sqls.custom()
-                                .andEqualTo(DataStandard.FIELD_GROUP_ID,parentStandardGroupDTO.getGroupId()))
-                        .build());
+                List<DataStandardDTO> dataStandardList = dataStandardMapper.list(DataStandardDTO.builder().groupArrays(new Long[]{dataStandardGroupDTO.getGroupId()}).build());
+                if (DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(dataStandardList)) {
+                    dataStandardList.forEach(dataStandardDTO -> {
+                        if (StringUtils.isNotEmpty(dataStandardDTO.getChargeName())) {
+                            dataStandardDTO.setChargeName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeName()));
+                        }
+                        if (StringUtils.isNotEmpty(dataStandardDTO.getChargeTel())) {
+                            dataStandardDTO.setChargeTel(DataSecurityHelper.decrypt(dataStandardDTO.getChargeTel()));
+                        }
+                        if (StringUtils.isNotEmpty(dataStandardDTO.getChargeEmail())) {
+                            dataStandardDTO.setChargeEmail(DataSecurityHelper.decrypt(dataStandardDTO.getChargeEmail()));
+                        }
+                        if (StringUtils.isNotEmpty(dataStandardDTO.getChargeDeptName())) {
+                            dataStandardDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeDeptName()));
+                        }
+                    });
+                }
                 dataStandardGroupDTO.setDataStandardDTOList(dataStandardList);
                 //设置父分组code
-                dataStandardGroupDTO.setParentGroupCode(parentStandardGroupDTO.getGroupCode());
+                dataStandardGroupDTO.setParentGroupCode(parentDataStandardGroupDTO.getGroupCode());
                 dataStandardGroupDTOList.add(dataStandardGroupDTO);
-                findSortedChildGroups(standardGroupDTO,finalLevel,dataStandardGroupDTOList);
+                findSortedChildGroups(dataStandardGroupDTO, finalLevel, dataStandardGroupDTOList);
             });
         }
     }
@@ -752,7 +780,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                 dto.setChargeDeptName(DataSecurityHelper.decrypt(dto.getChargeDeptName()));
             }
             //解密员工姓名
-            if(StringUtils.isNotEmpty(dto.getChargeName())){
+            if (StringUtils.isNotEmpty(dto.getChargeName())) {
                 dto.setChargeName(DataSecurityHelper.decrypt(dto.getChargeName()));
             }
         }
@@ -919,11 +947,11 @@ public class DataStandardServiceImpl implements DataStandardService {
             Long chargeId = standardDTOS.get(0).getChargeId();
             //查询员工责任人
             AssigneeUserDTO assigneeUserDTO = dataStandardMapper.selectAssigneeUser(chargeId);
-            if(DataSecurityHelper.isTenantOpen()){
-                if(StringUtils.isNotEmpty(assigneeUserDTO.getEmployeeName())){
+            if (DataSecurityHelper.isTenantOpen()) {
+                if (StringUtils.isNotEmpty(assigneeUserDTO.getEmployeeName())) {
                     assigneeUserDTO.setEmployeeName(DataSecurityHelper.decrypt(assigneeUserDTO.getEmployeeName()));
                 }
-                if(StringUtils.isNotEmpty(assigneeUserDTO.getEmployeeNum())){
+                if (StringUtils.isNotEmpty(assigneeUserDTO.getEmployeeNum())) {
                     assigneeUserDTO.setEmployeeNum(DataSecurityHelper.decrypt(assigneeUserDTO.getEmployeeNum()));
                 }
             }
