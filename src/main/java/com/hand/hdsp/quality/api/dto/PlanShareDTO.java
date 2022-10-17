@@ -29,11 +29,11 @@ public class PlanShareDTO extends AuditDomain {
 
     @ApiModelProperty(value = "分享对象类型")
     @NotBlank
-    private Long shareObjectType;
+    private String shareObjectType;
 
     @ApiModelProperty(value = "分享对象ID")
     @NotNull
-    private String shareObjectId;
+    private Long shareObjectId;
 
     @ApiModelProperty(value = "分享来源的项目ID")
     @NotNull

@@ -17,4 +17,14 @@ public interface PlanShareService {
      * @return
      */
     List<PlanShareDTO> shareProjects(Long planId);
+
+    /**
+     * 方案共享
+     * @param tenantId
+     * @param projectId
+     * @param planId
+     * @param planShareDTOList
+     * @return
+     */
+    List<PlanShareDTO> batchShare(Long tenantId, Long projectId, Long planId, List<PlanShareDTO> planShareDTOList);
 }

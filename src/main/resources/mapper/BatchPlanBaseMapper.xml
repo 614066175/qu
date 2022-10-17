@@ -35,6 +35,7 @@
         <result column="group_id" property="groupId" jdbcType="DECIMAL"/>
         <result column="group_name" property="groupName" jdbcType="VARCHAR"/>
         <result column="parent_group_id" property="parentGroupId" jdbcType="DECIMAL"/>
+        <result column="project_name" property="projectName" jdbcType="VARCHAR"/>
         <collection property="baseFormValueDTOS" ofType="com.hand.hdsp.quality.api.dto.BaseFormValueDTO">
             <result column="item_code" property="itemCode"/>
             <result column="form_value" property="formValue"/>
@@ -65,10 +66,13 @@
         xbpb.plan_id currentPlanId,
         xbp.plan_name currentPlanName,
         xpg.group_name,
-        xpg.group_id
+        xpg.group_id,
+        xp.project_id,
+        xp.project_name
         from
         xqua_batch_plan_base xbpb
         join xqua_batch_plan xbp on xbpb.plan_id=xbp.plan_id
+        join xcor_project xp on xbp.project_id=xp.project_id
         left join xqua_plan_group xpg on xbp.group_id = xpg.group_id
         left join xqua_base_form_value xbfv on xbpb.plan_base_id=xbfv.plan_base_id
         left join hpfm_form_line hfl on xbfv.form_line_id=hfl.form_line_id
@@ -175,11 +179,14 @@
         xbp1.plan_id currentPlanId,
         xbp1.plan_name currentPlanName,
         xpg.group_name,
-        xpg.group_id
+        xpg.group_id,
+        xp.project_id,
+        xp.project_name
         FROM
         xqua_plan_base_assign xpba
         join xqua_batch_plan_base xbpb on xpba.plan_base_id=xbpb.plan_base_id
         join xqua_batch_plan xbp on xbpb.plan_id=xbp.plan_id
+        join xcor_project xp on xbp.project_id=xp.project_id
         join xqua_batch_plan xbp1 on xpba.plan_id=xbp1.plan_id
         left join xqua_plan_group xpg on xbp.group_id = xpg.group_id
         left join xqua_base_form_value xbfv on xbpb.plan_base_id=xbfv.plan_base_id

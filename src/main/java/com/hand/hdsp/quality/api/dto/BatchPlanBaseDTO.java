@@ -161,4 +161,7 @@ public class BatchPlanBaseDTO extends AuditDomain {
 
     @Transient
     private String groupPath;
+
+    @Transient
+    private String projectName;
 }
