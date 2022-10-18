@@ -24,6 +24,16 @@ spec:
       annotations:
 {{ include "service.monitoring.pod.annotations" . | indent 8 }}
     spec:
+{{- if .Values.hostAliases }}
+      hostAliases:
+{{- range .Values.hostAliases }}
+        - ip: {{ .ip | quote }}
+          hostnames:
+{{- range .hostnames }}
+            - {{ . | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
       containers:
         - name: {{ .Release.Name }}
           image: "{{ .Values.image.repository }}:{{ .Chart.Version }}"

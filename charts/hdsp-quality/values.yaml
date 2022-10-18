@@ -110,3 +110,7 @@ hzero:
   HZERO_PRODUCT_VERSION_CODE: DEFAULT
   HZERO_PRODUCT_ENV_CODE: DEFAULT
   HZERO_SERVICE_VERSION_CODE: DEFAULT
+
+hostAliases:
+  - ip: 172.23.16.145
+    hostnames: [gateway.test.hdsp.org]
