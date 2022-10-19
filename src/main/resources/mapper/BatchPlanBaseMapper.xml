@@ -475,7 +475,8 @@
                xbpb.build_rule_flag,
                xbp.group_id,
                xpg.group_name,
-               xpg.parent_group_id
+               xpg.parent_group_id,
+               xbpb.project_id
         from xqua_batch_plan_base xbpb
                  left join xqua_batch_plan xbp on xbpb.plan_id = xbp.plan_id
                  left join xqua_plan_group xpg on xbp.group_id=xpg.group_id
