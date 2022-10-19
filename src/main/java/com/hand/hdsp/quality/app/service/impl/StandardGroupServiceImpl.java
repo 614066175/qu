@@ -101,7 +101,8 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                                 .andEqualTo(DataStandard.FIELD_PROJECT_ID, standardGroupDTO.getProjectId()))
                         .build());
                 if (CollectionUtils.isNotEmpty(dataStandardDTOS)) {
-                    throw new CommonException(ErrorCode.GROUP_HAS_STANDARD);
+                    StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByPrimaryKey(dataStandardDTOS.get(0).getGroupId());
+                    throw new CommonException(ErrorCode.GROUP_HAS_STANDARD,groupDTO.getGroupName());
                 }
                 break;
             case StandardConstant.StandardType.FIELD:
@@ -112,7 +113,8 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                                 .andEqualTo(DataField.FIELD_PROJECT_ID, standardGroupDTO.getProjectId()))
                         .build());
                 if (CollectionUtils.isNotEmpty(dataFieldDTOS)) {
-                    throw new CommonException(ErrorCode.GROUP_HAS_STANDARD);
+                    StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByPrimaryKey(dataFieldDTOS.get(0).getGroupId());
+                    throw new CommonException(ErrorCode.GROUP_HAS_STANDARD,groupDTO.getGroupName());
                 }
                 break;
             case StandardConstant.StandardType.NAME:
@@ -123,7 +125,8 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                                 .andEqualTo(NameStandard.FIELD_PROJECT_ID, standardGroupDTO.getProjectId()))
                         .build());
                 if (CollectionUtils.isNotEmpty(nameStandardDTOS)) {
-                    throw new CommonException(ErrorCode.GROUP_HAS_STANDARD);
+                    StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByPrimaryKey(nameStandardDTOS.get(0).getGroupId());
+                    throw new CommonException(ErrorCode.GROUP_HAS_STANDARD,groupDTO.getGroupName());
                 }
                 break;
             case StandardConstant.StandardType.DOC:
@@ -134,7 +137,8 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                                 .andEqualTo(StandardDoc.FIELD_PROJECT_ID, standardGroupDTO.getProjectId()))
                         .build());
                 if (CollectionUtils.isNotEmpty(standardDocDTOS)) {
-                    throw new CommonException(ErrorCode.GROUP_HAS_STANDARD);
+                    StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardDocDTOS.get(0).getGroupId());
+                    throw new CommonException(ErrorCode.GROUP_HAS_STANDARD,groupDTO.getGroupName());
                 }
                 break;
             default:
@@ -234,7 +238,7 @@ public class StandardGroupServiceImpl implements StandardGroupService {
         if (dtoList.size() > 1 || (dtoList.size() == 1 && !dtoList.get(0).getGroupCode().equals(standardGroupDTO.getGroupCode()))) {
             throw new CommonException(ErrorCode.GROUP_NAME_ALREADY_EXIST);
         }
-        standardGroupRepository.updateByDTOPrimaryKeySelective(standardGroupDTO);
+        standardGroupRepository.updateDTOAllColumnWhereTenant(standardGroupDTO,standardGroupDTO.getTenantId());
         return standardGroupRepository.selectDTOByPrimaryKeyAndTenant(standardGroupDTO);
     }
 }
