@@ -25,7 +25,6 @@ import com.hand.hdsp.quality.domain.repository.StandardDocRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardDocConstant;
-import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -34,6 +33,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.driver.infra.util.PageUtil;
+import org.hzero.boot.file.FileClient;
 import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
@@ -46,7 +46,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DOC;
 
 /**
@@ -62,6 +61,7 @@ public class StandardDocServiceImpl implements StandardDocService {
     private final MinioStorageService minioStorageService;
     private final DiscoveryHelper discoveryHelper;
     private final StandardGroupRepository standardGroupRepository;
+    private final FileClient fileClient;
     @Value("${HDSP_PREVIEW_FILE_SERVICE:hdsp-file-preview}")
     private String url;
 
@@ -70,12 +70,14 @@ public class StandardDocServiceImpl implements StandardDocService {
                                   StandardDocRepository standardDocRepository,
                                   MinioStorageService minioStorageService,
                                   DiscoveryHelper discoveryHelper,
-                                  StandardGroupRepository standardGroupRepository) {
+                                  StandardGroupRepository standardGroupRepository,
+                                  FileClient fileClient) {
         this.standardDocMapper = standardDocMapper;
         this.standardDocRepository = standardDocRepository;
         this.minioStorageService = minioStorageService;
         this.discoveryHelper = discoveryHelper;
         this.standardGroupRepository = standardGroupRepository;
+        this.fileClient = fileClient;
     }
 
     @Override
@@ -181,12 +183,14 @@ public class StandardDocServiceImpl implements StandardDocService {
         standardDocRepository.batchDTODeleteByPrimaryKey(standardDocDTOList);
         // 删minio
         for (StandardDocDTO s : standardDocDTOList) {
-            minioStorageService.deleteFileByUrl(
-                    tenantId,
-                    StandardDocConstant.STANDARD_DOC_MINIO_BUCKET,
-                    null,
-                    Collections.singletonList(s.getDocPath())
-            );
+            if(StringUtils.isNotEmpty(s.getDocPath())){
+                fileClient.deleteFileByUrl(
+                        tenantId,
+                        StandardDocConstant.STANDARD_DOC_MINIO_BUCKET,
+                        null,
+                        Collections.singletonList(s.getDocPath())
+                );
+            }
         }
     }
 
