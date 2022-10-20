@@ -139,6 +139,10 @@ public class PlanGroupServiceImpl implements PlanGroupService {
                 }
             });
         }else {
+            //选中所有分组时传入groupId为0
+            if(ObjectUtils.isNotEmpty(dto.getGroupId()) &&  dto.getGroupId()==0L){
+                dto.setGroupId(null);
+            }
             planGroupDTOList = planGroupRepository.selectDTOByCondition(Condition.builder(PlanGroup.class)
                     .andWhere(Sqls.custom()
                             .andEqualTo(PlanGroup.FIELD_GROUP_TYPE, BATCH)

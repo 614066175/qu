@@ -8,7 +8,9 @@ import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.mybatis.domian.Condition;
@@ -53,12 +55,30 @@ public class DataStandardGroupBatchImportServiceImpl implements IBatchImportServ
                         .build());
                 if(ObjectUtils.isNotEmpty(standardGroupDTOS)){
                     standardGroupDTO.setGroupId(standardGroupDTOS.get(0).getGroupId());
+                    //查询并设置父分组id
+                    if(StringUtils.isNotEmpty(standardGroupDTO.getParentGroupCode())){
+                        StandardGroupDTO parentStandardGroupDTO = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                                        .andEqualTo(StandardGroup.FIELD_TENANT_ID,tenantId)
+                                        .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId)
+                                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE,standardGroupDTO.getParentGroupCode()))
+                                .build()).get(0);
+                        standardGroupDTO.setParentGroupId(parentStandardGroupDTO.getGroupId());
+                    }
                     standardGroupDTO.setObjectVersionNumber(standardGroupDTOS.get(0).getObjectVersionNumber());
                     standardGroupRepository.updateByDTOPrimaryKeySelective(standardGroupDTO);
                 }else {
                     standardGroupDTO.setTenantId(tenantId);
                     standardGroupDTO.setProjectId(projectId);
                     standardGroupDTO.setStandardType(DATA);
+                    //查询并设置父分组id
+                    if(StringUtils.isNotEmpty(standardGroupDTO.getParentGroupCode())){
+                        StandardGroupDTO parentStandardGroupDTO = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                                        .andEqualTo(StandardGroup.FIELD_TENANT_ID,tenantId)
+                                        .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId)
+                                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE,standardGroupDTO.getParentGroupId()))
+                                .build()).get(0);
+                        standardGroupDTO.setParentGroupId(parentStandardGroupDTO.getTenantId());
+                    }
                     standardGroupRepository.insertDTOSelective(standardGroupDTO);
                 }
             } catch (IOException e) {

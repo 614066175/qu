@@ -17,6 +17,7 @@ import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.imported.app.service.BatchValidatorHandler;
@@ -85,9 +86,14 @@ public class DataStandardValidator extends BatchValidatorHandler {
                 if (CollectionUtils.isNotEmpty(dataStandardDTOList)) {
                     addErrorMsg(i, "标准名称已存在");
                 }
-                List<Long> chargeId = dataStandardMapper.selectIdByChargeName(dataStandardDTO.getChargeName(),
-                        dataStandardDTO.getTenantId());
-                if (CollectionUtils.isEmpty(chargeId)) {
+                //校验的责任人名称为员工姓名
+                if(DataSecurityHelper.isTenantOpen()){
+                    //加密后查询
+                    String chargeName = DataSecurityHelper.encrypt(dataStandardDTO.getChargeName());
+                    dataStandardDTO.setChargeName(chargeName);
+                }
+                Long chargeId = dataStandardMapper.checkCharger(dataStandardDTO.getChargeName(), dataStandardDTO.getTenantId());
+                if (ObjectUtils.isEmpty(chargeId)) {
                     addErrorMsg(i, "未找到此责任人，请检查数据");
                 }
                 //如果责任部门不为空时进行检验
