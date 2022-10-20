@@ -12,16 +12,18 @@ import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
-import io.choerodon.core.exception.CommonException;
+import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.CREATE;
 
 /**
  * <p>
@@ -39,12 +41,15 @@ public class DataStandardBatchImportServiceImpl implements IBatchImportService {
 
     private final DataStandardRepository dataStandardRepository;
     private final StandardGroupRepository standardGroupRepository;
+    private final DataStandardMapper dataStandardMapper;
 
     public DataStandardBatchImportServiceImpl(ObjectMapper objectMapper, DataStandardRepository dataStandardRepository,
-                                              StandardGroupRepository standardGroupRepository) {
+                                              StandardGroupRepository standardGroupRepository,
+                                              DataStandardMapper dataStandardMapper) {
         this.objectMapper = objectMapper;
         this.dataStandardRepository = dataStandardRepository;
         this.standardGroupRepository = standardGroupRepository;
+        this.dataStandardMapper = dataStandardMapper;
     }
 
     @Override
@@ -65,10 +70,18 @@ public class DataStandardBatchImportServiceImpl implements IBatchImportService {
                 ).build());
                 if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
                     dataStandardDTO.setGroupId(standardGroupDTOList.get(0).getGroupId());
-                    dataStandardDTO.setGroupCode(standardGroupDTOList.get(0).getGroupCode());
                 }
                 dataStandardDTO.setTenantId(tenantId);
                 dataStandardDTO.setProjectId(projectId);
+                dataStandardDTO.setStandardStatus(CREATE);
+                //设置责任人
+                if(DataSecurityHelper.isTenantOpen()){
+                    //加密后查询
+                    String chargeName = DataSecurityHelper.encrypt(dataStandardDTO.getChargeName());
+                    dataStandardDTO.setChargeName(chargeName);
+                }
+                Long chargeId = dataStandardMapper.checkCharger(dataStandardDTO.getChargeName(), dataStandardDTO.getTenantId());
+                dataStandardDTO.setChargeId(chargeId);
                 dataStandardDTOList.add(dataStandardDTO);
             }
         } catch (IOException e) {
@@ -77,6 +90,7 @@ public class DataStandardBatchImportServiceImpl implements IBatchImportService {
             log.error("Permission Object Read Json Error", e);
             return false;
         }
-        return dataStandardRepository.batchImport(dataStandardDTOList);
+        dataStandardRepository.batchInsertDTOSelective(dataStandardDTOList);
+        return true;
     }
 }
