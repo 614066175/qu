@@ -1,18 +1,18 @@
 package com.hand.hdsp.quality.infra.validation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.NameStandardDTO;
 import com.hand.hdsp.quality.domain.entity.NameStandard;
 import com.hand.hdsp.quality.domain.repository.NameStandardRepository;
-import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import com.hand.hdsp.quality.infra.mapper.NameStandardMapper;
-import com.hand.hdsp.quality.infra.util.ImportUtil;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.logging.log4j.util.Strings;
-import org.hzero.boot.imported.app.service.ValidatorHandler;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.hzero.boot.imported.app.service.BatchValidatorHandler;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidator;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidators;
 import org.hzero.mybatis.domian.Condition;
@@ -28,62 +28,65 @@ import java.util.List;
  * @author 29713 2021/08/26 14:13
  */
 @Slf4j
-@ImportValidators(value = {@ImportValidator(templateCode = TemplateCodeConstants.TEMPLATE_CODE_NAME_STANDARD)})
-public class NameStandardValidator extends ValidatorHandler {
+@ImportValidators(value = {@ImportValidator(templateCode = TemplateCodeConstants.TEMPLATE_CODE_NAME_STANDARD, sheetIndex = 1)})
+public class NameStandardValidator extends BatchValidatorHandler {
 
     private final ObjectMapper objectMapper;
     private final NameStandardRepository nameStandardRepository;
     private final NameStandardMapper nameStandardMapper;
-    private final StandardGroupRepository standardGroupRepository;
-    private final ImportUtil importUtil;
 
     public NameStandardValidator(ObjectMapper objectMapper,
                                  NameStandardRepository nameStandardRepository,
-                                 NameStandardMapper nameStandardMapper,
-                                 StandardGroupRepository standardGroupRepository, ImportUtil importUtil) {
+                                 NameStandardMapper nameStandardMapper) {
         this.objectMapper = objectMapper;
         this.nameStandardRepository = nameStandardRepository;
         this.nameStandardMapper = nameStandardMapper;
-        this.standardGroupRepository = standardGroupRepository;
-        this.importUtil = importUtil;
     }
 
     @Override
-    public boolean validate(String data) {
+    public boolean validate(List<String> data) {
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
-        NameStandardDTO nameStandardDTO;
-        try{
-            nameStandardDTO=objectMapper.readValue(data, NameStandardDTO.class);
-            nameStandardDTO.setTenantId(tenantId);
-        }catch (IOException e) {
-            log.error("data:{}", data);
-            log.error("Read Json Error", e);
-            // 失败
-            return false;
-        }
-        List<NameStandardDTO> nameStandards = nameStandardRepository.selectDTOByCondition(Condition
-                .builder(NameStandard.class)
-                .andWhere(Sqls.custom()
-                        .andEqualTo(NameStandard.FIELD_STANDARD_CODE, nameStandardDTO.getStandardCode())
-                        .andEqualTo(NameStandard.FIELD_TENANT_ID, nameStandardDTO.getTenantId()))
-                .build());
-        if(CollectionUtils.isNotEmpty(nameStandards)){
-            getContext().addErrorMsg("该标准编码已存在！");
-            return false;
-        }
-        try{
-            importUtil.getChargerId(nameStandardDTO.getChargeName(),nameStandardDTO.getTenantId());
-        }catch (Exception e){
-            addErrorMsg("未找到此责任人，请检查数据");
-            return false;
-        }
-
-        //如果责任部门不为空时进行检验
-        if (Strings.isNotEmpty(nameStandardDTO.getChargeDeptName())) {
-            try{
-                importUtil.getChargeDeptId(nameStandardDTO.getChargeDeptName(),nameStandardDTO.getTenantId());
-            }catch (Exception e){
-                addErrorMsg("未找到此责任部门，请检查数据");
+        Long projectId = ProjectHelper.getProjectId();
+        for (int i = 0; i < data.size(); i++) {
+            try {
+                NameStandardDTO nameStandardDTO = objectMapper.readValue(data.get(i), NameStandardDTO.class);
+                nameStandardDTO.setTenantId(tenantId);
+                String standardCode = nameStandardDTO.getStandardCode();
+                if(StringUtils.isEmpty(standardCode)){
+                    addErrorMsg(i,"导入表格中字段命名标准不存在");
+                    return false;
+                }
+                List<NameStandardDTO> nameStandardDTOList = nameStandardRepository.selectDTOByCondition(Condition.builder(NameStandard.class).andWhere(Sqls.custom()
+                                .andEqualTo(NameStandard.FIELD_STANDARD_CODE, standardCode)
+                                .andEqualTo(NameStandard.FIELD_TENANT_ID, tenantId)
+                                .andEqualTo(NameStandard.FIELD_PROJECT_ID, projectId)
+                        )
+                        .build());
+                if(CollectionUtils.isNotEmpty(nameStandardDTOList)){
+                    addErrorMsg(i,"命名标准：" + nameStandardDTO.getStandardName() + "已存在;");
+                    return false;
+                }
+                //如果有责任人，则进行验证
+                //校验的责任人名称为员工姓名
+                if(DataSecurityHelper.isTenantOpen()){
+                    //加密后查询
+                    String chargeName = DataSecurityHelper.encrypt(nameStandardDTO.getChargeName());
+                    nameStandardDTO.setChargeName(chargeName);
+                }
+                Long chargeId = nameStandardMapper.checkCharger(nameStandardDTO.getChargeName(), nameStandardDTO.getTenantId());
+                if (ObjectUtils.isEmpty(chargeId)) {
+                    addErrorMsg(i, "未找到此责任人，请检查数据");
+                    return false;
+                }
+                //当sheet页”数据标准“中的“分组名称”字段在本次导入表格和系统中不存在时则不能导入，并提示”${分组}分组不存在“，并在对应单元格高亮警示
+                String groupCode = nameStandardDTO.getGroupCode();
+                if (StringUtils.isEmpty(groupCode)) {
+                    addErrorMsg(i, String.format("表格中不存在分组%s", groupCode));
+                    return false;
+                }
+            } catch (IOException e) {
+                log.info(e.getMessage());
+                addErrorMsg(i, e.getMessage());
                 return false;
             }
         }

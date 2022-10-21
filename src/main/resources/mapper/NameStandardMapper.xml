@@ -192,5 +192,14 @@
         LEFT JOIN hpfm_employee he ON (he.employee_id=xns.charge_id)
         WHERE xns.standard_id=#{standardId}
     </select>
+    <select id="checkCharger" resultType="java.lang.Long">
+        SELECT
+            employee_id
+        FROM
+            hpfm_employee
+        WHERE
+            name=#{chargeName}
+          and tenant_id  = #{tenantId}
+    </select>
 
 </mapper>

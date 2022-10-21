@@ -38,4 +38,9 @@ public interface NameStandardMapper extends BaseMapper<NameStandard> {
      */
     NameStandardDTO detail(Long standardId);
 
+    /**
+     * 根据责任人名称去查找员工id
+     * @return 员工id
+     */
+    Long checkCharger(String chargeName, Long tenantId);
 }

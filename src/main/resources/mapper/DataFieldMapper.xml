@@ -255,4 +255,13 @@
             </if>
         </where>
     </select>
+    <select id="checkCharger" resultType="java.lang.Long">
+        SELECT
+            employee_id
+        FROM
+            hpfm_employee
+        WHERE
+            name=#{chargeName}
+          and tenant_id  = #{tenantId}
+    </select>
 </mapper>

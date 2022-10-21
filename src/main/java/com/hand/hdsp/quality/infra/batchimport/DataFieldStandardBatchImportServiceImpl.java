@@ -12,15 +12,18 @@ import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.DataFieldRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
+import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.CREATE;
 
 /**
  * @author wsl
@@ -32,13 +35,16 @@ public class DataFieldStandardBatchImportServiceImpl implements IBatchImportServ
     private final ObjectMapper objectMapper;
     private final DataFieldRepository dataFieldRepository;
     private final StandardGroupRepository standardGroupRepository;
+    private final DataFieldMapper dataFieldMapper;
 
-    public DataFieldStandardBatchImportServiceImpl(ObjectMapper objectMapper
-            , DataFieldRepository dataFieldRepository
-            , StandardGroupRepository standardGroupRepository) {
+    public DataFieldStandardBatchImportServiceImpl(ObjectMapper objectMapper,
+                                                   DataFieldRepository dataFieldRepository,
+                                                   StandardGroupRepository standardGroupRepository,
+                                                   DataFieldMapper dataFieldMapper) {
         this.objectMapper = objectMapper;
         this.dataFieldRepository = dataFieldRepository;
         this.standardGroupRepository = standardGroupRepository;
+        this.dataFieldMapper = dataFieldMapper;
     }
 
     @Override
@@ -51,9 +57,9 @@ public class DataFieldStandardBatchImportServiceImpl implements IBatchImportServ
             for (String json : data) {
                 DataFieldDTO dataFieldDTO = objectMapper.readValue(json, DataFieldDTO.class);
                 //导入分组id
-                String groupName = dataFieldDTO.getGroupName();
+                String groupCode = dataFieldDTO.getGroupCode();
                 List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
-                        .andEqualTo(StandardGroup.FIELD_GROUP_NAME, groupName)
+                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE, groupCode)
                         .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, FIELD)
                         .andEqualTo(StandardGroup.FIELD_TENANT_ID,tenantId)
                         .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId)
@@ -63,6 +69,15 @@ public class DataFieldStandardBatchImportServiceImpl implements IBatchImportServ
                 }
                 dataFieldDTO.setTenantId(tenantId);
                 dataFieldDTO.setProjectId(projectId);
+                dataFieldDTO.setStandardStatus(CREATE);
+                //设置责任人
+                if(DataSecurityHelper.isTenantOpen()){
+                    //加密后查询
+                    String chargeName = DataSecurityHelper.encrypt(dataFieldDTO.getChargeName());
+                    dataFieldDTO.setChargeName(chargeName);
+                }
+                Long chargeId = dataFieldMapper.checkCharger(dataFieldDTO.getChargeName(), dataFieldDTO.getTenantId());
+                dataFieldDTO.setChargeId(chargeId);
                 dataFieldDTOList.add(dataFieldDTO);
             }
         } catch (IOException e) {
@@ -71,6 +86,7 @@ public class DataFieldStandardBatchImportServiceImpl implements IBatchImportServ
             log.error("StandardDoc Object Read Json Error", e);
             return false;
         }
-        return dataFieldRepository.batchImport(dataFieldDTOList);
+        dataFieldRepository.batchInsertDTOSelective(dataFieldDTOList);
+        return true;
     }
 }

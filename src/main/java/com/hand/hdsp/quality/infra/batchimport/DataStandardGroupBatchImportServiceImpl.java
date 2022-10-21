@@ -77,7 +77,7 @@ public class DataStandardGroupBatchImportServiceImpl implements IBatchImportServ
                                         .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId)
                                         .andEqualTo(StandardGroup.FIELD_GROUP_CODE,standardGroupDTO.getParentGroupId()))
                                 .build()).get(0);
-                        standardGroupDTO.setParentGroupId(parentStandardGroupDTO.getTenantId());
+                        standardGroupDTO.setParentGroupId(parentStandardGroupDTO.getGroupId());
                     }
                     standardGroupRepository.insertDTOSelective(standardGroupDTO);
                 }
