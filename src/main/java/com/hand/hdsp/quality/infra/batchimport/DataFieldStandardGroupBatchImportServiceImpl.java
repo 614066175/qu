@@ -73,7 +73,7 @@ public class DataFieldStandardGroupBatchImportServiceImpl implements IBatchImpor
                         List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
                                         .andEqualTo(StandardGroup.FIELD_TENANT_ID, tenantId)
                                         .andEqualTo(StandardGroup.FIELD_PROJECT_ID, projectId)
-                                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE, standardGroupDTO.getParentGroupId()))
+                                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE, standardGroupDTO.getParentGroupCode()))
                                 .build());
                         if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
                             StandardGroupDTO parentStandardGroupDTO = standardGroupDTOList.get(0);
