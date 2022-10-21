@@ -445,8 +445,24 @@ public class DataFieldServiceImpl implements DataFieldService {
                 dto.setGroupArrays(groupIds);
             }
             //当前目录和子目录的数据标准的集合，与查询保持一致
-//            List<DataStandardDTO> dataStandards = dataStandardMapper.list(dto);
             List<DataFieldDTO> dataFields = dataFieldMapper.list(dto);
+            //导出解密责任人信息
+            if(DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(dataFields)){
+                dataFields.forEach(dataFieldDTO -> {
+                    if(StringUtils.isNotEmpty(dataFieldDTO.getChargeName())){
+                        dataFieldDTO.setChargeName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeName()));
+                    }
+                    if(StringUtils.isNotEmpty(dataFieldDTO.getChargeDeptName())){
+                        dataFieldDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeDeptName()));
+                    }
+                    if(StringUtils.isNotEmpty(dataFieldDTO.getChargeTel())){
+                        dataFieldDTO.setChargeTel(DataSecurityHelper.decrypt(dataFieldDTO.getChargeTel()));
+                    }
+                    if(StringUtils.isNotEmpty(dataFieldDTO.getChargeEmail())){
+                        dataFieldDTO.setChargeEmail(DataSecurityHelper.decrypt(dataFieldDTO.getChargeEmail()));
+                    }
+                });
+            }
             dataFieldGroupDTO.setDataFieldDTOList(dataFields);
             dataFieldGroupDTO.setGroupLevel(level);
             dataFieldGroupDTOList.add(dataFieldGroupDTO);

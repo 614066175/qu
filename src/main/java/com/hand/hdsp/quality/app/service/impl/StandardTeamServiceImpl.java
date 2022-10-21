@@ -25,6 +25,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.driver.infra.util.PageUtil;
 import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -216,7 +217,23 @@ public class StandardTeamServiceImpl implements StandardTeamService {
                 }
             }
         }
-
+        //若责任人信息加密则解密
+        if(DataSecurityHelper.isTenantOpen()){
+            allDataFieldDTOList.forEach(dataFieldDto -> {
+                if (StringUtils.isNotEmpty(dataFieldDto.getChargeName())) {
+                    dataFieldDto.setChargeName(DataSecurityHelper.decrypt(dataFieldDto.getChargeName()));
+                }
+                if (StringUtils.isNotEmpty(dataFieldDto.getChargeTel())) {
+                    dataFieldDto.setChargeTel(DataSecurityHelper.decrypt(dataFieldDto.getChargeTel()));
+                }
+                if (StringUtils.isNotEmpty(dataFieldDto.getChargeEmail())) {
+                    dataFieldDto.setChargeEmail(DataSecurityHelper.decrypt(dataFieldDto.getChargeEmail()));
+                }
+                if (StringUtils.isNotEmpty(dataFieldDto.getChargeDeptName())) {
+                    dataFieldDto.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldDto.getChargeDeptName()));
+                }
+            });
+        }
         //先按是否选中降序，再按是否可编辑升序（继承的放前面），再按字段主键降序
         List<DataFieldDTO> sortedList = allDataFieldDTOList.stream()
                 .sorted(Comparator.comparing(DataFieldDTO::getCheckFlag, Comparator.reverseOrder())

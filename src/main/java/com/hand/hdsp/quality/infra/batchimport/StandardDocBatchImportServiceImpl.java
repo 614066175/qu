@@ -12,15 +12,18 @@ import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.StandardDocRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
+import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DOC;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.CREATE;
 
 /**
  * @author StoneHell
@@ -32,13 +35,16 @@ public class StandardDocBatchImportServiceImpl implements IBatchImportService {
     private final ObjectMapper objectMapper;
     private final StandardDocRepository standardDocRepository;
     private final StandardGroupRepository standardGroupRepository;
+    private final StandardDocMapper standardDocMapper;
 
-    public StandardDocBatchImportServiceImpl(ObjectMapper objectMapper
-            , StandardDocRepository standardDocRepository
-            , StandardGroupRepository standardGroupRepository) {
+    public StandardDocBatchImportServiceImpl(ObjectMapper objectMapper,
+                                             StandardDocRepository standardDocRepository,
+                                             StandardGroupRepository standardGroupRepository,
+                                             StandardDocMapper standardDocMapper) {
         this.objectMapper = objectMapper;
         this.standardDocRepository = standardDocRepository;
         this.standardGroupRepository = standardGroupRepository;
+        this.standardDocMapper = standardDocMapper;
     }
 
     @Override
@@ -63,6 +69,14 @@ public class StandardDocBatchImportServiceImpl implements IBatchImportService {
                 }
                 standardDocDTO.setTenantId(tenantId);
                 standardDocDTO.setProjectId(projectId);
+                //设置责任人
+                if(DataSecurityHelper.isTenantOpen()){
+                    //加密后查询
+                    String chargeName = DataSecurityHelper.encrypt(standardDocDTO.getChargeName());
+                    standardDocDTO.setChargeName(chargeName);
+                }
+                Long chargeId = standardDocMapper.checkCharger(standardDocDTO.getChargeName(), standardDocDTO.getTenantId());
+                standardDocDTO.setChargeId(chargeId);
                 standardDocDTOList.add(standardDocDTO);
             }
         } catch (IOException e) {
@@ -71,7 +85,7 @@ public class StandardDocBatchImportServiceImpl implements IBatchImportService {
             log.error("StandardDoc Object Read Json Error", e);
             return false;
         }
-        standardDocRepository.batchImport(standardDocDTOList);
+        standardDocRepository.batchInsertDTOSelective(standardDocDTOList);
         return true;
     }
 }

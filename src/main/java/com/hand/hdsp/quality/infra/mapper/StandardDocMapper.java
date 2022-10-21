@@ -53,4 +53,9 @@ public interface StandardDocMapper extends BaseMapper<StandardDoc> {
      * @return Long
      */
     List<Long> selectIdByChargeName(@Param("chargeName") String chargeName, @Param("tenantId") Long tenantId);
+    /**
+     * 根据责任人名称去查找员工id
+     * @return 员工id
+     */
+    Long checkCharger(String chargeName, Long tenantId);
 }
