@@ -107,12 +107,12 @@ public class DataFieldDTO extends AuditDomain {
     private Integer nullFlag;
 
     @Transient
-    @ExcelColumn(zh = "责任人", en = "chargeName", groups = {Group2.class})
-    private String chargeName;
-
-    @Transient
     @ExcelColumn(zh = "责任部门", en = "chargeDeptName", groups = {Group2.class})
     private String chargeDeptName;
+
+    @Transient
+    @ExcelColumn(zh = "责任人", en = "chargeName", groups = {Group2.class})
+    private String chargeName;
 
     @ApiModelProperty(value = "责任人电话")
     @ExcelColumn(zh = "责任人电话", en = "chargeTel", groups = {Group2.class})

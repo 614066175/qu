@@ -251,6 +251,22 @@ public class NameStandardServiceImpl implements NameStandardService {
             }
             //当前目录和子目录的数据标准的集合，与查询保持一致
             List<NameStandardDTO> nameStandards = nameStandardMapper.list(dto);
+            if (DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(nameStandards)) {
+                nameStandards.forEach(nameStandardDTO -> {
+                    if (StringUtils.isNotEmpty(nameStandardDTO.getChargeName())) {
+                        nameStandardDTO.setChargeName(DataSecurityHelper.decrypt(nameStandardDTO.getChargeName()));
+                    }
+                    if (StringUtils.isNotEmpty(nameStandardDTO.getChargeTel())) {
+                        nameStandardDTO.setChargeTel(DataSecurityHelper.decrypt(nameStandardDTO.getChargeTel()));
+                    }
+                    if (StringUtils.isNotEmpty(nameStandardDTO.getChargeEmail())) {
+                        nameStandardDTO.setChargeEmail(DataSecurityHelper.decrypt(nameStandardDTO.getChargeEmail()));
+                    }
+                    if (StringUtils.isNotEmpty(nameStandardDTO.getChargeDeptName())) {
+                        nameStandardDTO.setChargeDeptName(DataSecurityHelper.decrypt(nameStandardDTO.getChargeDeptName()));
+                    }
+                });
+            }
             nameStandardGroupDTO.setNameStandardDTOList(nameStandards);
             nameStandardGroupDTO.setGroupLevel(level);
             nameStandardGroupDTOList.add(nameStandardGroupDTO);

@@ -13,6 +13,7 @@ import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.imported.app.service.BatchValidatorHandler;
@@ -45,13 +46,11 @@ public class DataFieldValidator extends BatchValidatorHandler {
     private final DataFieldRepository dataFieldRepository;
 
     private final DataFieldMapper dataFieldMapper;
-    private final StandardGroupRepository standardGroupRepository;
 
-    public DataFieldValidator(ObjectMapper objectMapper, DataFieldRepository dataFieldRepository, StandardGroupRepository standardGroupRepository, DataFieldMapper dataFieldMapper) {
+    public DataFieldValidator(ObjectMapper objectMapper, DataFieldRepository dataFieldRepository, DataFieldMapper dataFieldMapper) {
         this.objectMapper = objectMapper;
         this.dataFieldRepository = dataFieldRepository;
         this.dataFieldMapper = dataFieldMapper;
-        this.standardGroupRepository = standardGroupRepository;
     }
 
     @Override
@@ -77,38 +76,22 @@ public class DataFieldValidator extends BatchValidatorHandler {
                     addErrorMsg(i,"标准字段名称：" + dataFieldDTO.getFieldName() + "已存在;");
                     return false;
                 }
-                //如果有责任人部门，则进行验证
-                if (Strings.isNotEmpty(dataFieldDTO.getChargeDeptName())) {
-                    String chargeDeptName = dataFieldDTO.getChargeDeptName();
-                    if (DataSecurityHelper.isTenantOpen()) {
-                        chargeDeptName = DataSecurityHelper.encrypt(chargeDeptName);
-                    }
-                    List<Long> chargeDeptId = dataFieldMapper.selectIdByChargeDeptName(chargeDeptName, tenantId);
-                    if (CollectionUtils.isEmpty(chargeDeptId)) {
-                        addErrorMsg(i, "未找到此责任部门，请检查数据");
-                        return false;
-                    }
-
-                    List<Long> chargeId = dataFieldMapper.selectIdByChargeName(dataFieldDTO.getChargeName(), tenantId);
-                    if (CollectionUtils.isEmpty(chargeId)) {
-                        addErrorMsg(i, "未找到此责任人，请检查数据");
-                        return false;
-                    }
+                //如果有责任人，则进行验证
+                //校验的责任人名称为员工姓名
+                if(DataSecurityHelper.isTenantOpen()){
+                    //加密后查询
+                    String chargeName = DataSecurityHelper.encrypt(dataFieldDTO.getChargeName());
+                    dataFieldDTO.setChargeName(chargeName);
                 }
-                //当sheet页”数据标准“中的“分组名称”字段在本次导入表格和系统中不存在时则不能导入，并提示”${分组}分组不存在“，并在对应单元格高亮警示
-                String groupName = dataFieldDTO.getGroupName();
-                if (StringUtils.isEmpty(groupName)) {
-                    addErrorMsg(i, String.format("表格中不存在分组%s", groupName));
+                Long chargeId = dataFieldMapper.checkCharger(dataFieldDTO.getChargeName(), dataFieldDTO.getTenantId());
+                if (ObjectUtils.isEmpty(chargeId)) {
+                    addErrorMsg(i, "未找到此责任人，请检查数据");
                     return false;
                 }
-                List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
-                                .andEqualTo(StandardGroup.FIELD_GROUP_NAME, groupName)
-                                .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, FIELD)
-                                .andEqualTo(StandardGroup.FIELD_TENANT_ID,tenantId)
-                                .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId))
-                        .build());
-                if (CollectionUtils.isEmpty(standardGroupDTOS)) {
-                    addErrorMsg(i, String.format("导入环境中不存在分组%s", groupName));
+                //当sheet页”数据标准“中的“分组名称”字段在本次导入表格和系统中不存在时则不能导入，并提示”${分组}分组不存在“，并在对应单元格高亮警示
+                String groupCode = dataFieldDTO.getGroupCode();
+                if (StringUtils.isEmpty(groupCode)) {
+                    addErrorMsg(i, String.format("表格中不存在分组%s", groupCode));
                     return false;
                 }
             } catch (IOException e) {

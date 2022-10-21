@@ -21,16 +21,17 @@ import java.io.IOException;
 import java.util.List;
 
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.NAME;
 
 @Slf4j
-@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_FIELD_STANDARD, sheetIndex = 0)
-public class DataFieldStandardGroupBatchImportServiceImpl implements IBatchImportService {
+@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_NAME_STANDARD, sheetIndex = 0)
+public class NameStandardGroupBatchImportServiceImpl implements IBatchImportService {
 
     private final ObjectMapper objectMapper;
     private final StandardGroupRepository standardGroupRepository;
 
-    public DataFieldStandardGroupBatchImportServiceImpl(ObjectMapper objectMapper,
-                                                        StandardGroupRepository standardGroupRepository) {
+    public NameStandardGroupBatchImportServiceImpl(ObjectMapper objectMapper,
+                                                   StandardGroupRepository standardGroupRepository) {
         this.objectMapper = objectMapper;
         this.standardGroupRepository = standardGroupRepository;
     }
@@ -67,7 +68,7 @@ public class DataFieldStandardGroupBatchImportServiceImpl implements IBatchImpor
                     //不存在，进行新增
                     standardGroupDTO.setTenantId(tenantId);
                     standardGroupDTO.setProjectId(projectId);
-                    standardGroupDTO.setStandardType(FIELD);
+                    standardGroupDTO.setStandardType(NAME);
                     //查询并设置父分组id
                     if(StringUtils.isNotEmpty(standardGroupDTO.getParentGroupCode())){
                         List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
