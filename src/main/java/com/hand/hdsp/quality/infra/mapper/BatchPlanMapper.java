@@ -11,4 +11,10 @@ import io.choerodon.mybatis.common.BaseMapper;
  */
 public interface BatchPlanMapper extends BaseMapper<BatchPlan> {
 
+    /**
+     * 根据项目id获取项目编码
+     * @param projectId
+     */
+    String getProjectCodeById(Long projectId);
+
 }

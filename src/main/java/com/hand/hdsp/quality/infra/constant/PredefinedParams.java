@@ -54,4 +54,15 @@ public interface PredefinedParams {
     String LAST_MAX_ID = "_p_last_max_id";
 
     String SPLIT_KEY = ":";
+
+
+    String CURRENT_USER_ID="_p_current_user_id";
+
+    String CURRENT_ROLE_ID="_p_current_role_id";
+
+    String CURRENT_TENANT_ID="_p_current_tenant_id";
+
+    String CURRENT_PROJECT_ID="_p_current_project_id";
+
+    String CURRENT_PROJECT_CODE="_p_current_project_code";
 }

@@ -1,16 +1,14 @@
 package com.hand.hdsp.quality.infra.mapper;
 
-import java.util.List;
-
-import org.apache.ibatis.annotations.Param;
-
 import com.hand.hdsp.quality.api.dto.BatchResultBaseDTO;
 import com.hand.hdsp.quality.api.dto.BatchResultItemDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.infra.dataobject.BatchResultItemDO;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
-
 import io.choerodon.mybatis.common.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>批数据方案结果表-校验项信息Mapper</p>
@@ -93,7 +91,8 @@ public interface BatchResultItemMapper extends BaseMapper<BatchResultItem> {
     /**
      * 根据planBaseId查询最大结果值
      * @param planBaseId 查询条件
+     * @param projectId
      * @return 返回值
      */
-    Long selectMaxResultBaseId(@Param("planBaseId") Long planBaseId);
+    Long selectMaxResultBaseId(@Param("planBaseId") Long planBaseId, @Param("projectId") Long projectId);
 }

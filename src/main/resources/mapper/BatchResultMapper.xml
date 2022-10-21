@@ -187,8 +187,8 @@
         LEFT JOIN (
         SELECT *
         FROM xqua_batch_result
-        WHERE result_id IN (SELECT MAX(result_id) FROM xqua_batch_result GROUP BY plan_id)) xbr
-        ON xbr.plan_id = xbp.plan_id
+        WHERE result_id IN (SELECT MAX(result_id) FROM xqua_batch_result GROUP BY plan_id,project_id)) xbr
+        ON xbr.plan_id = xbp.plan_id and xbr.project_id=#{projectId}
         LEFT JOIN xqua_plan_group xpg ON xbp.group_id = xpg.group_id
         --关联最新整改工单
         left join (
@@ -203,8 +203,17 @@
             <if test="groupId != null and groupId != 0">
                 xpg.group_id = #{groupId}
             </if>
+            <!--查询当前项目下的方案，或者被其他项目下分配给此项目的方案-->
             <if test="projectId !=null ">
-                and xbp.project_id=#{projectId}
+                and (
+                xbp.project_id=#{projectId}
+                or
+                xbp.project_id in (select share_from_project_id
+                                    from xqua_plan_share xps
+                                    where
+                                    xps.share_object_id=xbp.plan_id and  xps.share_object_type='PLAN'
+                                    and xps.share_to_project_id =#{projectId})
+                )
             </if>
             <if test="tenantId != null">
                 and xbp.tenant_id = #{tenantId}
@@ -1041,7 +1050,7 @@
                 </if>
                 MAX(result_base_id) lastId
             from xqua_batch_result_base xbrb
-            where xbrb.plan_base_id = #{planBaseId}
+            where xbrb.plan_base_id = #{planBaseId} and xbrb.project_id=#{projectId}
             <if test='datasourceType == "MYSQL"'>
                 <if test="startDate != null and startDate != ''">
                     and xbrb.last_update_date &gt;= #{startDate}
@@ -1085,7 +1094,7 @@
             LEFT JOIN xqua_batch_result_rule xbrr ON xbrr.result_base_id = xbrb.result_base_id
             LEFT JOIN xqua_batch_result_item xbri ON xbri.result_rule_id = xbrr.result_rule_id
         WHERE
-            xbrb.plan_base_id = #{planBaseId}
+            xbrb.plan_base_id = #{planBaseId} and xbrb.project_id= #{projectId}
             <if test='datasourceType == "MYSQL"'>
                 <if test="startDate != null and startDate != ''">
                     and xbrb.last_update_date &gt;= #{startDate}

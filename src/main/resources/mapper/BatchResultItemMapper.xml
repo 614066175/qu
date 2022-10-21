@@ -290,6 +290,6 @@
             MAX( result_base_id )
         FROM
             xqua_batch_result_base
-        where plan_base_id = #{planBaseId}
+        where plan_base_id = #{planBaseId} and project_id=#{projectId}
     </select>
 </mapper>

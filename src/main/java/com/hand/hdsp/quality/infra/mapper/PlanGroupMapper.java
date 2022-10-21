@@ -28,4 +28,12 @@ public interface PlanGroupMapper extends BaseMapper<PlanGroup> {
      * @return
      */
     List<PlanGroupTreeVO> treeStream(PlanGroupTreeVO planGroupTreeVO);
+
+
+    /**
+     * 查询自己的和被分享的分组
+     * @return
+     * @param planGroup
+     */
+    List<PlanGroup> ownAndShareGroup(PlanGroup planGroup);
 }
