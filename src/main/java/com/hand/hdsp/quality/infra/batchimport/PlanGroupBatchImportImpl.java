@@ -2,11 +2,14 @@ package com.hand.hdsp.quality.infra.batchimport;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hdsp.core.util.ProjectHelper;
+import com.hand.hdsp.quality.api.dto.PlanGroupDTO;
 import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.domain.repository.PlanGroupRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.hzero.boot.imported.app.service.BatchImportHandler;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 
@@ -26,7 +29,7 @@ import static com.hand.hdsp.quality.infra.constant.GroupType.BATCH;
  */
 @Slf4j
 @ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_BATCH_PLAN, sheetIndex = 0)
-public class PlanGroupBatchImportImpl implements IBatchImportService {
+public class PlanGroupBatchImportImpl extends BatchImportHandler implements IBatchImportService {
     private final ObjectMapper objectMapper;
 
     private final PlanGroupRepository planGroupRepository;
@@ -42,13 +45,12 @@ public class PlanGroupBatchImportImpl implements IBatchImportService {
         // 设置租户Id
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         Long projectId = ProjectHelper.getProjectId();
-        List<PlanGroup> planGroups = new ArrayList<>(data.size());
+        List<PlanGroupDTO> planGroups = new ArrayList<>(data.size());
         try {
             for (String json : data) {
-                PlanGroup planGroup = objectMapper.readValue(json, PlanGroup.class);
+                PlanGroupDTO planGroup = objectMapper.readValue(json, PlanGroupDTO.class);
                 planGroup.setTenantId(tenantId);
                 planGroup.setGroupType(BATCH);
-                planGroup.setParentGroupId(0L);
                 planGroup.setProjectId(projectId);
                 planGroups.add(planGroup);
             }
@@ -58,23 +60,39 @@ public class PlanGroupBatchImportImpl implements IBatchImportService {
             log.error("Permission Object Read Json Error", e);
             return false;
         }
-        List<PlanGroup> addPlanGroups = new ArrayList<>();
-        planGroups.forEach(planGroup -> {
+
+        int i = 0;
+        for (PlanGroupDTO planGroup : planGroups) {
             //如果不存在则新建
             PlanGroup group = planGroupRepository.selectOne(PlanGroup.builder().groupCode(planGroup.getGroupCode())
                     .tenantId(planGroup.getTenantId())
                     .projectId(planGroup.getProjectId())
                     .build());
-            if (group != null) {
-                planGroup.setGroupId(group.getGroupId());
-                planGroup.setObjectVersionNumber(group.getObjectVersionNumber());
-                planGroupRepository.updateByPrimaryKeySelective(planGroup);
-            } else {
-                addPlanGroups.add(planGroup);
-            }
-        });
 
-        planGroupRepository.batchInsertSelective(addPlanGroups);
+            if (StringUtils.isNotEmpty(planGroup.getParentGroupCode())) {
+                //如果存在父编码
+                PlanGroup parentGroup = planGroupRepository.selectOne(PlanGroup.builder().groupCode(planGroup.getParentGroupCode())
+                        .tenantId(planGroup.getTenantId())
+                        .projectId(planGroup.getProjectId())
+                        .build());
+                if (parentGroup == null) {
+                    addErrorMsg(i, planGroup.getParentGroupCode() + "父分组不存在");
+                    return false;
+                }
+                planGroup.setParentGroupId(parentGroup.getGroupId());
+            }
+            if (group != null) {
+                //修改分组名称分组描述父分组编码
+                group.setGroupName(planGroup.getGroupName());
+                group.setGroupDesc(planGroup.getGroupDesc());
+                group.setParentGroupId(planGroup.getParentGroupId());
+                planGroupRepository.updateAllColumnWhereTenant(group, group.getTenantId());
+            } else {
+                planGroupRepository.insertDTOSelective(planGroup);
+            }
+            i++;
+        }
+
         return true;
     }
 }

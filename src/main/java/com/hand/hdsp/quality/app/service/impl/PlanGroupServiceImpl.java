@@ -10,10 +10,7 @@ import com.hand.hdsp.quality.domain.entity.BatchPlanBase;
 import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
-import com.hand.hdsp.quality.infra.mapper.BatchPlanBaseMapper;
-import com.hand.hdsp.quality.infra.mapper.BatchPlanFieldMapper;
-import com.hand.hdsp.quality.infra.mapper.BatchPlanRelTableMapper;
-import com.hand.hdsp.quality.infra.mapper.BatchPlanTableMapper;
+import com.hand.hdsp.quality.infra.mapper.*;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -25,11 +22,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import static com.hand.hdsp.quality.infra.constant.GroupType.BATCH;
-
-import io.choerodon.core.exception.CommonException;
 
 /**
  * <p>评估方案分组表应用服务默认实现</p>
@@ -50,6 +46,7 @@ public class PlanGroupServiceImpl implements PlanGroupService {
     private final BatchPlanRelTableMapper batchPlanRelTableMapper;
     private final BatchPlanBaseMapper batchPlanBaseMapper;
     private final BaseFormValueRepository baseFormValueRepository;
+    private final PlanGroupMapper planGroupMapper;
 
     public PlanGroupServiceImpl(PlanGroupRepository planGroupRepository,
                                 BatchPlanRepository batchPlanRepository,
@@ -57,7 +54,7 @@ public class PlanGroupServiceImpl implements PlanGroupService {
                                 BatchPlanTableRepository batchPlanTableRepository,
                                 BatchPlanTableMapper batchPlanTableMapper, BatchPlanFieldRepository batchPlanFieldRepository,
                                 BatchPlanFieldMapper batchPlanFieldMapper, BatchPlanRelTableRepository batchPlanRelTableRepository,
-                                BatchPlanRelTableMapper batchPlanRelTableMapper, BatchPlanBaseMapper batchPlanBaseMapper, BaseFormValueRepository baseFormValueRepository) {
+                                BatchPlanRelTableMapper batchPlanRelTableMapper, BatchPlanBaseMapper batchPlanBaseMapper, BaseFormValueRepository baseFormValueRepository, PlanGroupMapper planGroupMapper) {
         this.planGroupRepository = planGroupRepository;
         this.batchPlanRepository = batchPlanRepository;
         this.batchPlanBaseRepository = batchPlanBaseRepository;
@@ -69,6 +66,7 @@ public class PlanGroupServiceImpl implements PlanGroupService {
         this.batchPlanRelTableMapper = batchPlanRelTableMapper;
         this.batchPlanBaseMapper = batchPlanBaseMapper;
         this.baseFormValueRepository = baseFormValueRepository;
+        this.planGroupMapper = planGroupMapper;
     }
 
 
@@ -78,14 +76,14 @@ public class PlanGroupServiceImpl implements PlanGroupService {
         //分组或子分组存在评估方案不可删除;不存在或存在空的分组则删除，并同时删除空的分组
         //遍历获取子目录集合
         List<PlanGroupDTO> planGroupDTOList = new ArrayList<>();
-        findChildGroups(planGroupDTO,planGroupDTOList);
+        findChildGroups(planGroupDTO, planGroupDTOList);
         planGroupDTOList.add(planGroupDTO);
         planGroupDTOList.forEach(planGroupDto -> {
             //校验分组下是否存在评估方案
             List<BatchPlan> batchPlans = batchPlanRepository.selectByCondition(Condition.builder(BatchPlan.class).andWhere(Sqls.custom()
-                            .andEqualTo(BatchPlan.FIELD_TENANT_ID,planGroupDto.getTenantId())
-                            .andEqualTo(BatchPlan.FIELD_PROJECT_ID,planGroupDto.getProjectId())
-                            .andEqualTo(BatchPlan.FIELD_GROUP_ID,planGroupDto.getGroupId()))
+                            .andEqualTo(BatchPlan.FIELD_TENANT_ID, planGroupDto.getTenantId())
+                            .andEqualTo(BatchPlan.FIELD_PROJECT_ID, planGroupDto.getProjectId())
+                            .andEqualTo(BatchPlan.FIELD_GROUP_ID, planGroupDto.getGroupId()))
                     .build());
             if (CollectionUtils.isNotEmpty(batchPlans)) {
                 throw new CommonException(ErrorCode.EXISTS_OTHER_PLAN);
@@ -96,20 +94,20 @@ public class PlanGroupServiceImpl implements PlanGroupService {
 
     private void findChildGroups(PlanGroupDTO planGroupDTO, List<PlanGroupDTO> planGroupDTOList) {
         List<PlanGroupDTO> planGroupDTOS = planGroupRepository.selectDTOByCondition(Condition.builder(PlanGroup.class).andWhere(Sqls.custom()
-                        .andEqualTo(PlanGroup.FIELD_PARENT_GROUP_ID,planGroupDTO.getGroupId())
-                        .andEqualTo(PlanGroup.FIELD_TENANT_ID,planGroupDTO.getTenantId())
-                        .andEqualTo(PlanGroup.FIELD_PROJECT_ID,planGroupDTO.getProjectId()))
+                        .andEqualTo(PlanGroup.FIELD_PARENT_GROUP_ID, planGroupDTO.getGroupId())
+                        .andEqualTo(PlanGroup.FIELD_TENANT_ID, planGroupDTO.getTenantId())
+                        .andEqualTo(PlanGroup.FIELD_PROJECT_ID, planGroupDTO.getProjectId()))
                 .build());
-        if(CollectionUtils.isNotEmpty(planGroupDTOS)){
+        if (CollectionUtils.isNotEmpty(planGroupDTOS)) {
             planGroupDTOList.addAll(planGroupDTOS);
             planGroupDTOS.forEach(planGroupDto -> {
-                findChildGroups(planGroupDto,planGroupDTOList);
+                findChildGroups(planGroupDto, planGroupDTOList);
             });
         }
     }
 
     @Override
-    @ProcessLovValue(targetField = {"","batchPlanDTOList","batchPlanDTOList.batchPlanBaseDTOList","batchPlanDTOList.batchPlanBaseDTOList.batchPlanTableDTOList","batchPlanDTOList.batchPlanBaseDTOList.batchPlanFieldDTOList","batchPlanDTOList.batchPlanBaseDTOList.batchPlanRelTableDTOList"})
+    @ProcessLovValue(targetField = {"", "batchPlanDTOList", "batchPlanDTOList.batchPlanBaseDTOList", "batchPlanDTOList.batchPlanBaseDTOList.batchPlanTableDTOList", "batchPlanDTOList.batchPlanBaseDTOList.batchPlanFieldDTOList", "batchPlanDTOList.batchPlanBaseDTOList.batchPlanRelTableDTOList"})
     public List<PlanGroupDTO> export(PlanGroupDTO dto, ExportParam exportParam) {
         if (ObjectUtils.isNotEmpty(dto.getPlanBaseId())) {
             BatchPlanBaseDTO batchPlanBaseDTO = batchPlanBaseRepository.selectDTOByPrimaryKey(dto.getPlanBaseId());
@@ -121,26 +119,26 @@ public class PlanGroupServiceImpl implements PlanGroupService {
             dto.setGroupId(batchPlan.getGroupId());
         }
         List<PlanGroupDTO> planGroupDTOList = new ArrayList<>();
-        if(ObjectUtils.isNotEmpty(dto.getGroupId()) && dto.getGroupId() == 0 && (ObjectUtils.isNotEmpty(dto.getPlanBaseCode()) || ObjectUtils.isNotEmpty(dto.getPlanBaseName()) || ObjectUtils.isNotEmpty(dto.getObjectName()))){
+        if (ObjectUtils.isNotEmpty(dto.getGroupId()) && dto.getGroupId() == 0 && (ObjectUtils.isNotEmpty(dto.getPlanBaseCode()) || ObjectUtils.isNotEmpty(dto.getPlanBaseName()) || ObjectUtils.isNotEmpty(dto.getObjectName()))) {
             List<BatchPlanBaseDTO> batchPlanBaseDTOS = batchPlanBaseRepository.selectDTOByCondition(Condition.builder(BatchPlanBase.class).andWhere(Sqls.custom()
-                            .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_CODE, dto.getPlanBaseCode(),true)
-                            .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_NAME, dto.getPlanBaseName(),true)
-                            .andEqualTo(BatchPlanBase.FIELD_OBJECT_NAME, dto.getObjectName(),true)
-                            .andEqualTo(BatchPlanBase.FIELD_TENANT_ID,dto.getTenantId()))
+                            .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_CODE, dto.getPlanBaseCode(), true)
+                            .andEqualTo(BatchPlanBase.FIELD_PLAN_BASE_NAME, dto.getPlanBaseName(), true)
+                            .andEqualTo(BatchPlanBase.FIELD_OBJECT_NAME, dto.getObjectName(), true)
+                            .andEqualTo(BatchPlanBase.FIELD_TENANT_ID, dto.getTenantId()))
                     .build());
             //获取质检项分组
             List<PlanGroupDTO> finalPlanGroupDTOList = planGroupDTOList;
-            batchPlanBaseDTOS.forEach(batchPlanBaseDTO->{
+            batchPlanBaseDTOS.forEach(batchPlanBaseDTO -> {
                 Long planId = batchPlanBaseDTO.getPlanId();
                 BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(planId);
-                if(ObjectUtils.isNotEmpty(batchPlan)){
+                if (ObjectUtils.isNotEmpty(batchPlan)) {
                     PlanGroupDTO planGroupDTO = planGroupRepository.selectDTOByPrimaryKey(batchPlan.getGroupId());
                     finalPlanGroupDTOList.add(planGroupDTO);
                 }
             });
-        }else {
+        } else {
             //选中所有分组时传入groupId为0
-            if(ObjectUtils.isNotEmpty(dto.getGroupId()) &&  dto.getGroupId()==0L){
+            if (ObjectUtils.isNotEmpty(dto.getGroupId()) && dto.getGroupId() == 0L) {
                 dto.setGroupId(null);
             }
             planGroupDTOList = planGroupRepository.selectDTOByCondition(Condition.builder(PlanGroup.class)
@@ -148,10 +146,20 @@ public class PlanGroupServiceImpl implements PlanGroupService {
                             .andEqualTo(PlanGroup.FIELD_GROUP_TYPE, BATCH)
                             .andEqualTo(PlanGroup.FIELD_TENANT_ID, dto.getTenantId())
                             .andEqualTo(PlanGroup.FIELD_PROJECT_ID, ProjectHelper.getProjectId())
-                            .andEqualTo(PlanGroup.FIELD_GROUP_ID,dto.getGroupId(),true))
+                            .andEqualTo(PlanGroup.FIELD_GROUP_ID, dto.getGroupId(), true))
                     .build());
         }
+        //获取导出的分组，获取分组下的评估方案，以及质检项
+        //递归获取分组的层级
+        LinkedHashSet<PlanGroupDTO> exportPlanGroupDTOList = new LinkedHashSet<>();
+
         planGroupDTOList.forEach(planGroupDTO -> {
+            List<PlanGroupDTO> parentGroup = getParentGroup(planGroupDTO.getParentGroupId());
+            exportPlanGroupDTOList.addAll(parentGroup);
+            if(CollectionUtils.isNotEmpty(parentGroup)){
+                //设置当前分组的父分组编码为最后一个结果的值
+                planGroupDTO.setParentGroupCode(parentGroup.get(parentGroup.size()-1).getGroupCode());
+            }
             //查询分组下的评估方案
             List<BatchPlanDTO> batchPlanDTOList = batchPlanRepository.selectDTOByCondition(Condition.builder(BatchPlan.class)
                     .andWhere(Sqls.custom()
@@ -189,8 +197,22 @@ public class PlanGroupServiceImpl implements PlanGroupService {
                 batchPlanDTO.setBatchPlanBaseDTOList(batchPlanBaseDTOList);
             });
             planGroupDTO.setBatchPlanDTOList(batchPlanDTOList);
+            exportPlanGroupDTOList.add(planGroupDTO);
         });
-        return planGroupDTOList;
+        return new ArrayList<>(exportPlanGroupDTOList);
+    }
+
+    private List<PlanGroupDTO> getParentGroup(Long parentGroupId) {
+        List<PlanGroupDTO> planGroupDTOS = new ArrayList<>();
+        if (parentGroupId != 0) {
+            PlanGroupDTO planGroupDTO = planGroupMapper.selectWithParentCode(parentGroupId);
+            if (planGroupDTO != null) {
+                List<PlanGroupDTO> parentGroup = getParentGroup(planGroupDTO.getParentGroupId());
+                planGroupDTOS.addAll(parentGroup);
+                planGroupDTOS.add(planGroupDTO);
+            }
+        }
+        return planGroupDTOS;
     }
 
     private void getPlanFormValue(BatchPlanBaseDTO batchPlanBaseDTO) {

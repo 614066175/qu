@@ -62,6 +62,10 @@ public class PlanGroupDTO extends AuditDomain {
     private String groupTypeMeaning;
 
     @Transient
+    @ExcelColumn(zh = "父分组编码", en = "parent group code")
+    private String parentGroupCode;
+
+    @Transient
     @ExcelColumn(zh = "评估方案列表", en = "batchPlanDTOList", child = true)
     private List<BatchPlanDTO> batchPlanDTOList;
 
@@ -122,4 +126,6 @@ public class PlanGroupDTO extends AuditDomain {
      */
     @Transient
     private Long planBaseId;
+
+
 }

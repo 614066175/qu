@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.infra.mapper;
 
+import com.hand.hdsp.quality.api.dto.PlanGroupDTO;
 import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.infra.vo.PlanGroupTreeVO;
 import io.choerodon.mybatis.common.BaseMapper;
@@ -36,4 +37,11 @@ public interface PlanGroupMapper extends BaseMapper<PlanGroup> {
      * @param planGroup
      */
     List<PlanGroup> ownAndShareGroup(PlanGroup planGroup);
+
+    /**
+     * 获取父分组信息，包含父分组的父分组编码
+     * @param parentGroupId
+     * @return
+     */
+    PlanGroupDTO selectWithParentCode(Long parentGroupId);
 }
