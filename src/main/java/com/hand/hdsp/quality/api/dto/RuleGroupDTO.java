@@ -33,7 +33,7 @@ import org.hzero.export.annotation.ExcelSheet;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @VersionAudit
 @ModifyAudit
-@ExcelSheet(zh = "规则分组",en = "rule group")
+@ExcelSheet(zh = "规则分组",en = "rule group",rowOffset = 2)
 public class RuleGroupDTO extends AuditDomain {
 
     @ApiModelProperty("表ID，主键，供其他表做外键")
@@ -74,4 +74,7 @@ public class RuleGroupDTO extends AuditDomain {
     private Long tenantId;
 
     private Long projectId;
+
+    @Transient
+    private Integer groupLevel;
 }
