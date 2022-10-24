@@ -715,7 +715,7 @@ public class DataFieldServiceImpl implements DataFieldService {
         DataFieldDTO dataFieldDTO = dataFieldRepository.selectDTOByPrimaryKey(standardId);
         BatchPlanFieldDTO batchPlanFieldDTO = BatchPlanFieldDTO.builder()
                 .ruleCode(dataFieldDTO.getFieldName() + "_auto")
-                .ruleName(dataFieldDTO.getFieldComment() + "自生成规则")
+                .ruleName(dataFieldDTO.getFieldComment() + "自动生成规则")
                 .ruleDesc(dataFieldDTO.getStandardDesc())
                 .checkType(STANDARD)
                 .autoBuildFlag(1)
