@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 import com.hand.hdsp.core.util.ProjectHelper;
+import com.hand.hdsp.quality.api.dto.DataFieldGroupDTO;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
 import com.hand.hdsp.quality.api.dto.RuleLineDTO;
@@ -24,9 +25,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 规则分组表应用服务默认实现
@@ -82,9 +82,9 @@ public class RuleGroupServiceImpl implements RuleGroupService {
                 .build());
         if (CollectionUtils.isNotEmpty(ruleGroupDTOList)) {
             ruleGroups.addAll(ruleGroupDTOList);
-            ruleGroupDTOList.forEach(ruleGroupDto -> {
+            for (RuleGroupDTO ruleGroupDto : ruleGroupDTOList) {
                 findChildGroups(ruleGroupDto, ruleGroups);
-            });
+            }
         }
     }
 
@@ -108,12 +108,38 @@ public class RuleGroupServiceImpl implements RuleGroupService {
         //此处为hzero导出功能，从上下文中获取projectId
         Long projectId = ProjectHelper.getProjectId();
         dto.setProjectId(projectId);
+        Long groupId = dto.getGroupId();
+        //0分组是所有分组
+        if(ObjectUtils.isNotEmpty(groupId) && groupId.equals(0L)){
+            groupId = null;
+        }
         List<RuleGroupDTO> ruleGroupDTOList = ruleGroupRepository.selectDTOByCondition(Condition.builder(RuleGroup.class)
                 .andWhere(Sqls.custom()
-                        .andEqualTo(RuleGroup.FIELD_GROUP_ID, dto.getGroupId(), true)
+                        .andEqualTo(RuleGroup.FIELD_GROUP_ID, groupId, true)
                         .andIn(RuleGroup.FIELD_TENANT_ID, Arrays.asList(0, dto.getTenantId()))
                         .andEqualTo(RuleGroup.FIELD_PROJECT_ID, dto.getProjectId()))
                 .build());
+        if(ObjectUtils.isNotEmpty(groupId)){
+            int level = 1;
+            ruleGroupDTOList.forEach(ruleGroupDTO -> {
+                ruleGroupDTO.setGroupLevel(level);
+            });
+            Long parentGroupId = ruleGroupDTOList.get(0).getParentGroupId();
+            if(ObjectUtils.isNotEmpty(parentGroupId)){
+                findParentGroups(parentGroupId,ruleGroupDTOList,level);
+            }
+            ruleGroupDTOList = ruleGroupDTOList.stream().sorted(Comparator.comparing(RuleGroupDTO::getGroupLevel).reversed()).collect(Collectors.toList());
+        }else {
+            //全量导出
+            List<RuleGroupDTO> parentRuleGroupDTOS = ruleGroupDTOList.stream()
+                    .filter(ruleGroupDTO -> (ruleGroupDTO.getParentGroupId().equals(0L)))
+                    .peek(ruleGroupDTO -> ruleGroupDTO.setParentGroupCode(null))
+                    .collect(Collectors.toList());
+            Iterator<RuleGroupDTO> iterator = parentRuleGroupDTOS.iterator();
+            if(iterator.hasNext()){
+                findChildGroups(iterator.next(),parentRuleGroupDTOS);
+            }
+        }
         ruleGroupDTOList.forEach(ruleGroupDTO -> {
             //查询某一分组下的，筛选后的标准规则
             List<RuleDTO> ruleDTOList = ruleRepository.selectDTOByCondition(Condition.builder(Rule.class)
@@ -150,5 +176,29 @@ public class RuleGroupServiceImpl implements RuleGroupService {
             ruleGroupDTO.setRuleDTOList(ruleDTOList);
         });
         return ruleGroupDTOList;
+    }
+
+    private void findParentGroups(Long parentGroupId, List<RuleGroupDTO> ruleGroupDTOList, int level) {
+        List<RuleGroupDTO> ruleGroupDTOS = ruleGroupRepository.selectDTOByCondition(Condition.builder(RuleGroup.class).andWhere(Sqls.custom()
+                        .andEqualTo(RuleGroup.FIELD_GROUP_ID, parentGroupId))
+                .build());
+        level++;
+        if(CollectionUtils.isNotEmpty(ruleGroupDTOS)){
+            //存在父分组
+            int finalLevel = level;
+            ruleGroupDTOS.forEach(ruleGroupDTO -> {
+                if(ObjectUtils.isNotEmpty(ruleGroupDTO.getParentGroupId())){
+                    ruleGroupDTO.setGroupLevel(finalLevel);
+                    if(0 == ruleGroupDTO.getParentGroupId()){
+                        //父分组为所有分组
+                        ruleGroupDTO.setParentGroupCode("root");
+                        ruleGroupDTOList.add(ruleGroupDTO);
+                        return;
+                    }
+                    ruleGroupDTOList.add(ruleGroupDTO);
+                    findParentGroups(ruleGroupDTO.getParentGroupId(),ruleGroupDTOList, finalLevel);
+                }
+            });
+        }
     }
 }

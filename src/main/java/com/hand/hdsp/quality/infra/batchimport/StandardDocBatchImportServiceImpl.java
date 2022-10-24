@@ -57,9 +57,9 @@ public class StandardDocBatchImportServiceImpl implements IBatchImportService {
             for (String json : data) {
                 StandardDocDTO standardDocDTO = objectMapper.readValue(json, StandardDocDTO.class);
                 //导入分组id
-                String groupName = standardDocDTO.getGroupName();
+                String getGroupCode = standardDocDTO.getGroupCode();
                 List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
-                        .andEqualTo(StandardGroup.FIELD_GROUP_NAME, groupName)
+                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE, getGroupCode)
                         .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, DOC)
                         .andEqualTo(StandardGroup.FIELD_TENANT_ID,tenantId)
                         .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId)
