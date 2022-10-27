@@ -29,12 +29,9 @@ import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType
 public class DataStandardGroupValidator extends BatchValidatorHandler {
 
     private final ObjectMapper objectMapper;
-    private final StandardGroupRepository standardGroupRepository;
 
-    public DataStandardGroupValidator(ObjectMapper objectMapper,
-                                      StandardGroupRepository standardGroupRepository) {
+    public DataStandardGroupValidator(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        this.standardGroupRepository = standardGroupRepository;
     }
 
     @Override

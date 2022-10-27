@@ -27,7 +27,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 @ApiModel("数据标准表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ExcelSheet(zh = "数据标准", en = "Data Standard",rowOffset = 3)
+@ExcelSheet(zh = "数据标准", en = "Data Standard",rowOffset = 2)
 public class DataStandardDTO extends AuditDomain{
 
     @ApiModelProperty("数据标准ID，主键，供其他表做外键")
