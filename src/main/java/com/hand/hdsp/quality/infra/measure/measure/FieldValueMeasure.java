@@ -155,12 +155,14 @@ public class FieldValueMeasure implements Measure {
             variables.put("listValue", lovValueString);
             String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
             List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(), sql);
-            if (CollectionUtils.isNotEmpty(response)) {
+            if (CollectionUtils.isNotEmpty(response) && Integer.parseInt(response.get(0).values().toArray()[0].toString()) != 0) {
+                long levelCount = Long.parseLong(String.valueOf(response.get(0).values().toArray()[0].toString()));
                 batchResultItem.setWarningLevel(JsonUtils.object2Json(Collections.singletonList(WarningLevelVO.builder()
                         .warningLevel(warningLevelDTO.getWarningLevel())
+                        .levelCount(levelCount)
                         .build())));
                 PlanExceptionUtil.getPlanException(param, batchResultBase, sql, driverSession, warningLevelDTO);
-                batchResultItem.setExceptionInfo("存在字段值满足值集校验配置");
+                batchResultItem.setExceptionInfo(String.format("存在%d条数据字段值满足值集校验配置", levelCount));
             }
 
         } else if (PlanConstant.CountType.FIXED_VALUE.equals(countType)) {
