@@ -8,6 +8,7 @@ import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.imported.app.service.IBatchImportService;
@@ -44,18 +45,22 @@ public class StandardDocGroupBatchImportServiceImpl implements IBatchImportServi
                 List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
                                 .andEqualTo(StandardGroup.FIELD_TENANT_ID,tenantId)
                                 .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId)
-                                .andEqualTo(StandardGroup.FIELD_GROUP_CODE,standardGroupDTO.getGroupCode()))
+                                .andEqualTo(StandardGroup.FIELD_GROUP_CODE,standardGroupDTO.getGroupCode())
+                                .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE,DOC))
                         .build());
                 if(ObjectUtils.isNotEmpty(standardGroupDTOS)){
                     standardGroupDTO.setGroupId(standardGroupDTOS.get(0).getGroupId());
                     //查询并设置父分组id
                     if(StringUtils.isNotEmpty(standardGroupDTO.getParentGroupCode())){
-                        StandardGroupDTO parentStandardGroupDTO = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                        List<StandardGroupDTO> parentStandardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
                                         .andEqualTo(StandardGroup.FIELD_TENANT_ID,tenantId)
                                         .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId)
-                                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE,standardGroupDTO.getParentGroupCode()))
-                                .build()).get(0);
-                        standardGroupDTO.setParentGroupId(parentStandardGroupDTO.getGroupId());
+                                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE,standardGroupDTO.getParentGroupCode())
+                                        .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE,DOC))
+                                .build());
+                        if(CollectionUtils.isNotEmpty(parentStandardGroupDTOList)){
+                            standardGroupDTO.setParentGroupId(parentStandardGroupDTOList.get(0).getGroupId());
+                        }
                     }
                     standardGroupDTO.setObjectVersionNumber(standardGroupDTOS.get(0).getObjectVersionNumber());
                     standardGroupRepository.updateByDTOPrimaryKeySelective(standardGroupDTO);
@@ -65,12 +70,15 @@ public class StandardDocGroupBatchImportServiceImpl implements IBatchImportServi
                     standardGroupDTO.setStandardType(DOC);
                     //查询并设置父分组id
                     if(StringUtils.isNotEmpty(standardGroupDTO.getParentGroupCode())){
-                        StandardGroupDTO parentStandardGroupDTO = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                        List<StandardGroupDTO> parentStandardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
                                         .andEqualTo(StandardGroup.FIELD_TENANT_ID,tenantId)
                                         .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId)
-                                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE,standardGroupDTO.getParentGroupCode()))
-                                .build()).get(0);
-                        standardGroupDTO.setParentGroupId(parentStandardGroupDTO.getGroupId());
+                                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE,standardGroupDTO.getParentGroupCode())
+                                        .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE,DOC))
+                                .build());
+                        if(CollectionUtils.isNotEmpty(parentStandardGroupDTOList)){
+                            standardGroupDTO.setParentGroupId(parentStandardGroupDTOList.get(0).getGroupId());
+                        }
                     }
                     standardGroupRepository.insertDTOSelective(standardGroupDTO);
                 }

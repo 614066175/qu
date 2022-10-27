@@ -91,7 +91,7 @@ public class StandardDocValidator extends BatchValidatorHandler {
                         String chargeName = DataSecurityHelper.encrypt(standardDocDTO.getChargeName());
                         standardDocDTO.setChargeName(chargeName);
                     }
-                    Long chargeId = standardDocMapper.checkCharger(standardDocDTO.getChargeName(), standardDocDTO.getTenantId());
+                    Long chargeId = standardDocMapper.checkCharger(standardDocDTO.getChargeName(), tenantId);
                     if (ObjectUtils.isEmpty(chargeId)) {
                         addErrorMsg(i, "未找到此责任人，请检查数据");
                         return false;

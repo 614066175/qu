@@ -19,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ExcelSheet(zh = "分组",en = "StandardDoc Group",rowOffset = 3)
+@ExcelSheet(zh = "分组",en = "StandardDoc Group",rowOffset = 2)
 public class StandardDocGroupDTO extends AuditDomain {
 
     @ApiModelProperty("分组ID，主键，供其他表做外键")

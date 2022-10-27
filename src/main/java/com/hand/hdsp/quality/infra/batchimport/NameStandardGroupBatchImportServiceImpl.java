@@ -48,19 +48,23 @@ public class NameStandardGroupBatchImportServiceImpl implements IBatchImportServ
                 List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
                                 .andEqualTo(StandardGroup.FIELD_TENANT_ID,tenantId)
                                 .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId)
-                                .andEqualTo(StandardGroup.FIELD_GROUP_CODE,standardGroupDTO.getGroupCode()))
+                                .andEqualTo(StandardGroup.FIELD_GROUP_CODE,standardGroupDTO.getGroupCode())
+                                .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE,NAME))
                         .build());
                 if(ObjectUtils.isNotEmpty(standardGroupDTOS)){
                     //存在，进行更新
                     standardGroupDTO.setGroupId(standardGroupDTOS.get(0).getGroupId());
                     //查询并设置父分组id
                     if(StringUtils.isNotEmpty(standardGroupDTO.getParentGroupCode())){
-                        StandardGroupDTO parentStandardGroupDTO = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                        List<StandardGroupDTO> parentStandardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
                                         .andEqualTo(StandardGroup.FIELD_TENANT_ID,tenantId)
                                         .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId)
-                                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE,standardGroupDTO.getParentGroupCode()))
-                                .build()).get(0);
-                        standardGroupDTO.setParentGroupId(parentStandardGroupDTO.getGroupId());
+                                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE,standardGroupDTO.getParentGroupCode())
+                                        .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE,NAME))
+                                .build());
+                        if(CollectionUtils.isNotEmpty(parentStandardGroupDTOList)){
+                            standardGroupDTO.setParentGroupId(parentStandardGroupDTOList.get(0).getGroupId());
+                        }
                     }
                     standardGroupDTO.setObjectVersionNumber(standardGroupDTOS.get(0).getObjectVersionNumber());
                     standardGroupRepository.updateByDTOPrimaryKeySelective(standardGroupDTO);
@@ -74,7 +78,8 @@ public class NameStandardGroupBatchImportServiceImpl implements IBatchImportServ
                         List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
                                         .andEqualTo(StandardGroup.FIELD_TENANT_ID, tenantId)
                                         .andEqualTo(StandardGroup.FIELD_PROJECT_ID, projectId)
-                                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE, standardGroupDTO.getParentGroupCode()))
+                                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE, standardGroupDTO.getParentGroupCode())
+                                        .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE,NAME))
                                 .build());
                         if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
                             StandardGroupDTO parentStandardGroupDTO = standardGroupDTOList.get(0);

@@ -281,6 +281,8 @@ public class StandardDocServiceImpl implements StandardDocService {
             }
             //当前目录和子目录的数据标准的集合，与查询保持一致
             List<StandardDocDTO> standardDocs = standardDocMapper.list(dto);
+            //解密责任人
+            decryptChargers(standardDocs);
             standardDocGroupDTO.setStandardDocDTOList(standardDocs);
             standardDocGroupDTO.setGroupLevel(level);
             standardDocGroupDTOList.add(standardDocGroupDTO);
@@ -306,22 +308,8 @@ public class StandardDocServiceImpl implements StandardDocService {
                     BeanUtils.copyProperties(standardGroupDTO, standardDocGroupDto);
                     //根目录数据标准列表
                     List<StandardDocDTO> dataStandardDTOList = standardDocMapper.list(StandardDocDTO.builder().groupArrays(new Long[]{standardDocGroupDto.getGroupId()}).build());
-                    if (DataSecurityHelper.isTenantOpen() && org.apache.commons.collections4.CollectionUtils.isNotEmpty(dataStandardDTOList)) {
-                        dataStandardDTOList.forEach(dataStandardDTO -> {
-                            if (StringUtils.isNotEmpty(dataStandardDTO.getChargeName())) {
-                                dataStandardDTO.setChargeName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeName()));
-                            }
-                            if (StringUtils.isNotEmpty(dataStandardDTO.getChargeTel())) {
-                                dataStandardDTO.setChargeTel(DataSecurityHelper.decrypt(dataStandardDTO.getChargeTel()));
-                            }
-                            if (StringUtils.isNotEmpty(dataStandardDTO.getChargeEmail())) {
-                                dataStandardDTO.setChargeEmail(DataSecurityHelper.decrypt(dataStandardDTO.getChargeEmail()));
-                            }
-                            if (StringUtils.isNotEmpty(dataStandardDTO.getChargeDeptName())) {
-                                dataStandardDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeDeptName()));
-                            }
-                        });
-                    }
+                    //解密责任人
+                    decryptChargers(dataStandardDTOList);
                     standardDocGroupDto.setStandardDocDTOList(dataStandardDTOList);
                     standardDocGroupDto.setGroupLevel(level);
                     standardDocGroupDTOList.add(standardDocGroupDto);
@@ -332,6 +320,25 @@ public class StandardDocServiceImpl implements StandardDocService {
         }
     }
 
+    private void decryptChargers (List<StandardDocDTO> dataStandardDTOList){
+        if (DataSecurityHelper.isTenantOpen() && org.apache.commons.collections4.CollectionUtils.isNotEmpty(dataStandardDTOList)) {
+            dataStandardDTOList.forEach(dataStandardDTO -> {
+                if (StringUtils.isNotEmpty(dataStandardDTO.getChargeName())) {
+                    dataStandardDTO.setChargeName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeName()));
+                }
+                if (StringUtils.isNotEmpty(dataStandardDTO.getChargeTel())) {
+                    dataStandardDTO.setChargeTel(DataSecurityHelper.decrypt(dataStandardDTO.getChargeTel()));
+                }
+                if (StringUtils.isNotEmpty(dataStandardDTO.getChargeEmail())) {
+                    dataStandardDTO.setChargeEmail(DataSecurityHelper.decrypt(dataStandardDTO.getChargeEmail()));
+                }
+                if (StringUtils.isNotEmpty(dataStandardDTO.getChargeDeptName())) {
+                    dataStandardDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeDeptName()));
+                }
+            });
+        }
+
+    }
     private void findSortedChildGroups(StandardDocGroupDTO parentStandardDocGroupDTO, int level, List<StandardDocGroupDTO> standardDocGroupDTOList) {
         level++;
         List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()

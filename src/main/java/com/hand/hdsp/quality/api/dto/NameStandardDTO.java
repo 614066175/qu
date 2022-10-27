@@ -27,7 +27,7 @@ import org.hzero.export.annotation.ExcelSheet;
 @EqualsAndHashCode(callSuper = false)
 @ApiModel("命名标准表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ExcelSheet(zh = "命名标准", en = "Name Standard",rowOffset = 3)
+@ExcelSheet(zh = "命名标准", en = "Name Standard",rowOffset = 2)
 public class NameStandardDTO extends AuditDomain {
 
     @ApiModelProperty("命名标准ID，主键，供其他表做外键")
