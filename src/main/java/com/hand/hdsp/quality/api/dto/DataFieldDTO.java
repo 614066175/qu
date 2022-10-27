@@ -28,7 +28,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 @ApiModel("字段标准表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ExcelSheet(zh = "字段标准", en = "Field Standard",rowOffset = 3)
+@ExcelSheet(zh = "字段标准", en = "Field Standard",rowOffset = 2)
 public class DataFieldDTO extends AuditDomain {
 
     @Transient

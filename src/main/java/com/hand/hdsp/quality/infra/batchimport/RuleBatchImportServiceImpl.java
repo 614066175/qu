@@ -3,7 +3,9 @@ package com.hand.hdsp.quality.infra.batchimport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
+import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
 import com.hand.hdsp.quality.domain.entity.Rule;
+import com.hand.hdsp.quality.domain.entity.RuleGroup;
 import com.hand.hdsp.quality.domain.repository.RuleGroupRepository;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
@@ -51,13 +53,13 @@ public class RuleBatchImportServiceImpl implements IBatchImportService {
             for (String json : data) {
                 RuleDTO ruleDTO = objectMapper.readValue(json, RuleDTO.class);
                 //导入分组id
-                List<RuleDTO> ruleDTOS = ruleRepository.selectDTOByCondition(Condition.builder(Rule.class).andWhere(Sqls.custom()
-                        .andEqualTo(Rule.FIELD_TENANT_ID,tenantId)
-                        .andEqualTo(Rule.FIELD_PROJECT_ID,projectId)
-                        .andEqualTo(Rule.FIELD_RULE_CODE,ruleDTO.getGroupCode())
+                List<RuleGroupDTO> ruleGroupDTOS = ruleGroupRepository.selectDTOByCondition(Condition.builder(RuleGroup.class).andWhere(Sqls.custom()
+                        .andEqualTo(RuleGroup.FIELD_TENANT_ID,tenantId)
+                        .andEqualTo(RuleGroup.FIELD_PROJECT_ID,projectId)
+                        .andEqualTo(RuleGroup.FIELD_GROUP_CODE,ruleDTO.getGroupCode())
                 ).build());
-                if(CollectionUtils.isNotEmpty(ruleDTOS)){
-                    ruleDTO.setGroupId(ruleDTOS.get(0).getGroupId());
+                if(CollectionUtils.isNotEmpty(ruleGroupDTOS)){
+                    ruleDTO.setGroupId(ruleGroupDTOS.get(0).getGroupId());
                 }
                 ruleDTO.setTenantId(tenantId);
                 ruleDTO.setProjectId(projectId);
@@ -69,7 +71,7 @@ public class RuleBatchImportServiceImpl implements IBatchImportService {
             log.error("Permission Object Read Json Error", e);
             return false;
         }
-        ruleRepository.batchImport(ruleDTOList);
+        ruleRepository.batchInsertDTOSelective(ruleDTOList);
         return true;
     }
 }
