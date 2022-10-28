@@ -646,6 +646,8 @@ public class DataStandardServiceImpl implements DataStandardService {
             }
             //当前目录和子目录的数据标准的集合，与查询保持一致
             List<DataStandardDTO> dataStandards = dataStandardMapper.list(dto);
+            //解密责任人相关信息
+            decryptCharger(dataStandards);
             dataStandardGroupDTO.setDataStandardDTOList(dataStandards);
             dataStandardGroupDTO.setGroupLevel(level);
             dataStandardGroupDTOList.add(dataStandardGroupDTO);
@@ -671,22 +673,8 @@ public class DataStandardServiceImpl implements DataStandardService {
                     BeanUtils.copyProperties(standardGroupDTO, dataStandardGroupDto);
                     //根目录数据标准列表
                     List<DataStandardDTO> dataStandardDTOList = dataStandardMapper.list(DataStandardDTO.builder().groupArrays(new Long[]{dataStandardGroupDto.getGroupId()}).build());
-                    if (DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(dataStandardDTOList)) {
-                        dataStandardDTOList.forEach(dataStandardDTO -> {
-                            if (StringUtils.isNotEmpty(dataStandardDTO.getChargeName())) {
-                                dataStandardDTO.setChargeName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeName()));
-                            }
-                            if (StringUtils.isNotEmpty(dataStandardDTO.getChargeTel())) {
-                                dataStandardDTO.setChargeTel(DataSecurityHelper.decrypt(dataStandardDTO.getChargeTel()));
-                            }
-                            if (StringUtils.isNotEmpty(dataStandardDTO.getChargeEmail())) {
-                                dataStandardDTO.setChargeEmail(DataSecurityHelper.decrypt(dataStandardDTO.getChargeEmail()));
-                            }
-                            if (StringUtils.isNotEmpty(dataStandardDTO.getChargeDeptName())) {
-                                dataStandardDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeDeptName()));
-                            }
-                        });
-                    }
+                    //解密责任人信息
+                    decryptCharger(dataStandardDTOList);
                     dataStandardGroupDto.setDataStandardDTOList(dataStandardDTOList);
                     dataStandardGroupDto.setGroupLevel(level);
                     dataStandardGroupDTOList.add(dataStandardGroupDto);
@@ -697,6 +685,25 @@ public class DataStandardServiceImpl implements DataStandardService {
         }
     }
 
+    private void decryptCharger(List<DataStandardDTO> dataStandards){
+        //解密责任人相关信息
+        if(DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(dataStandards)){
+            dataStandards.forEach(dataStandardDTO -> {
+                if(StringUtils.isNotEmpty(dataStandardDTO.getChargeName())){
+                    dataStandardDTO.setChargeName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeName()));
+                }
+                if(StringUtils.isNotEmpty(dataStandardDTO.getChargeEmail())){
+                    dataStandardDTO.setChargeEmail(DataSecurityHelper.decrypt(dataStandardDTO.getChargeEmail()));
+                }
+                if(StringUtils.isNotEmpty(dataStandardDTO.getChargeTel())){
+                    dataStandardDTO.setChargeTel(DataSecurityHelper.decrypt(dataStandardDTO.getChargeTel()));
+                }
+                if(StringUtils.isNotEmpty(dataStandardDTO.getChargeDeptName())){
+                    dataStandardDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeDeptName()));
+                }
+            });
+        }
+    }
     private void findSortedChildGroups(DataStandardGroupDTO parentDataStandardGroupDTO, int level, List<DataStandardGroupDTO> dataStandardGroupDTOList) {
         level++;
         List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
@@ -710,22 +717,8 @@ public class DataStandardServiceImpl implements DataStandardService {
                 dataStandardGroupDTO.setGroupLevel(finalLevel);
                 //子目录数据标准列表
                 List<DataStandardDTO> dataStandardList = dataStandardMapper.list(DataStandardDTO.builder().groupArrays(new Long[]{dataStandardGroupDTO.getGroupId()}).build());
-                if (DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(dataStandardList)) {
-                    dataStandardList.forEach(dataStandardDTO -> {
-                        if (StringUtils.isNotEmpty(dataStandardDTO.getChargeName())) {
-                            dataStandardDTO.setChargeName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeName()));
-                        }
-                        if (StringUtils.isNotEmpty(dataStandardDTO.getChargeTel())) {
-                            dataStandardDTO.setChargeTel(DataSecurityHelper.decrypt(dataStandardDTO.getChargeTel()));
-                        }
-                        if (StringUtils.isNotEmpty(dataStandardDTO.getChargeEmail())) {
-                            dataStandardDTO.setChargeEmail(DataSecurityHelper.decrypt(dataStandardDTO.getChargeEmail()));
-                        }
-                        if (StringUtils.isNotEmpty(dataStandardDTO.getChargeDeptName())) {
-                            dataStandardDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeDeptName()));
-                        }
-                    });
-                }
+                //解密责任人信息
+                decryptCharger(dataStandardList);
                 dataStandardGroupDTO.setDataStandardDTOList(dataStandardList);
                 //设置父分组code
                 dataStandardGroupDTO.setParentGroupCode(parentDataStandardGroupDTO.getGroupCode());

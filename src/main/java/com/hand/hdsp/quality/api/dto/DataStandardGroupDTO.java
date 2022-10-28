@@ -19,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ExcelSheet(zh = "分组",en = "DataStandard Group",rowOffset = 3)
+@ExcelSheet(zh = "分组",en = "DataStandard Group",rowOffset = 2)
 public class DataStandardGroupDTO extends AuditDomain {
 
 

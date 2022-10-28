@@ -70,7 +70,7 @@ public class RuleGroupBatchImportServiceImpl implements IBatchImportService {
                         }
                     }
                     //查询并设置父分组id
-                    if(ruleGroupDTO.getParentGroupCode().equals("ROOT")){
+                    if(ruleGroupDTO.getParentGroupCode().equalsIgnoreCase("root")){
                         ruleGroupDTO.setParentGroupId(0L);
                     }
 
@@ -89,12 +89,12 @@ public class RuleGroupBatchImportServiceImpl implements IBatchImportService {
                             ruleGroupDTO.setParentGroupId(parentRuleGroupDTOList.get(0).getGroupId());
                         }
                         //查询并设置父分组id
-                        if(ruleGroupDTO.getParentGroupCode().equals("root") || StringUtils.isEmpty(ruleGroupDTO.getParentGroupCode())){
+                        if(ruleGroupDTO.getParentGroupCode().equalsIgnoreCase("root") || StringUtils.isEmpty(ruleGroupDTO.getParentGroupCode())){
                             ruleGroupDTO.setParentGroupId(0L);
                         }
                     }
+                    ruleGroupRepository.insertDTOSelective(ruleGroupDTO);
                 }
-                ruleGroupRepository.insertDTOSelective(ruleGroupDTO);
             }
         } catch (IOException e) {
             // 失败

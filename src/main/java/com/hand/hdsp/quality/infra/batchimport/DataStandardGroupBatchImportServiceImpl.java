@@ -51,7 +51,8 @@ public class DataStandardGroupBatchImportServiceImpl implements IBatchImportServ
                 List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
                                 .andEqualTo(StandardGroup.FIELD_TENANT_ID,tenantId)
                                 .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId)
-                                .andEqualTo(StandardGroup.FIELD_GROUP_CODE,standardGroupDTO.getGroupCode()))
+                                .andEqualTo(StandardGroup.FIELD_GROUP_CODE,standardGroupDTO.getGroupCode())
+                                .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE,DATA))
                         .build());
                 if(ObjectUtils.isNotEmpty(standardGroupDTOS)){
                     standardGroupDTO.setGroupId(standardGroupDTOS.get(0).getGroupId());
@@ -60,7 +61,8 @@ public class DataStandardGroupBatchImportServiceImpl implements IBatchImportServ
                         StandardGroupDTO parentStandardGroupDTO = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
                                         .andEqualTo(StandardGroup.FIELD_TENANT_ID,tenantId)
                                         .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId)
-                                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE,standardGroupDTO.getParentGroupCode()))
+                                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE,standardGroupDTO.getParentGroupCode())
+                                        .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE,DATA))
                                 .build()).get(0);
                         standardGroupDTO.setParentGroupId(parentStandardGroupDTO.getGroupId());
                     }
