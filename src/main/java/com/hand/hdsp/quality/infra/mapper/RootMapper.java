@@ -1,7 +1,9 @@
 package com.hand.hdsp.quality.infra.mapper;
 
+import com.hand.hdsp.quality.api.dto.AssigneeUserDTO;
 import com.hand.hdsp.quality.api.dto.RootDTO;
 import com.hand.hdsp.quality.domain.entity.Root;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -32,4 +34,11 @@ public interface RootMapper extends BaseMapper<Root> {
      * @return
      */
     List<Root> getUnitByEmployeeId(Root root);
+
+    /**
+     * 根据责任人id查询责任人信息
+     * @param chargeId 责任人id 即员工id
+     * @return  责任人信息
+     */
+    AssigneeUserDTO getAssigneeUser(Long chargeId);
 }

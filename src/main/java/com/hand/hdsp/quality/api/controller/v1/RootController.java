@@ -5,6 +5,7 @@ import org.hzero.core.base.BaseController;
 
 import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.core.util.DataSecurityUtil;
+import com.hand.hdsp.quality.api.dto.AssigneeUserDTO;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.api.dto.RootGroupDTO;
 import com.hand.hdsp.quality.app.service.RootService;
@@ -216,5 +217,18 @@ public class RootController extends BaseController {
     public ResponseEntity<Root> offlineWorkflowing(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long rootId) {
         rootService.offlineWorkflowing(rootId);
         return Results.success();
+    }
+
+    @ApiOperation(value = "根据词根ID查询责任人，用于审批规则")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/find-charger/{rootId}")
+    public ResponseEntity<List<AssigneeUserDTO>> findCharger(@PathVariable Long rootId) {
+        return Results.success(rootService.findCharger(rootId));
     }
 }
