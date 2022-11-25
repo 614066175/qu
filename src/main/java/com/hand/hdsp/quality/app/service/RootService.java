@@ -64,4 +64,53 @@ public interface RootService {
      */
 
     List<RootGroupDTO> export(Root root, ExportParam exportParam);
+
+    /**
+     * 发布
+     *
+     * @param root
+     */
+    void publishOrOff(Root root);
+
+    /**
+     * 上线通过事件
+     *
+     * @param rootId
+     */
+    void onlineWorkflowSuccess(Long rootId);
+
+    /**
+     * 上线拒绝事件
+     *
+     * @param rootId
+     */
+    void onlineWorkflowFail(Long rootId);
+
+    /**
+     * 下线通过事件
+     *
+     * @param rootId
+     */
+    void offlineWorkflowSuccess(Long rootId);
+
+    /**
+     * 下线拒绝事件
+     *
+     * @param rootId
+     */
+    void offlineWorkflowFail(Long rootId);
+
+    /**
+     * 上线工作流审批中
+     *
+     * @param rootId
+     */
+    void onlineWorkflowing(Long rootId);
+
+    /**
+     * 下线工作流审批中
+     *
+     * @param rootId
+     */
+    void offlineWorkflowing(Long rootId);
 }

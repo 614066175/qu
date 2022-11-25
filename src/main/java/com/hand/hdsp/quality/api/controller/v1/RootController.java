@@ -5,11 +5,14 @@ import org.hzero.core.base.BaseController;
 
 import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.core.util.DataSecurityUtil;
+import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.api.dto.RootGroupDTO;
 import com.hand.hdsp.quality.app.service.RootService;
 import com.hand.hdsp.quality.domain.entity.Root;
 import com.hand.hdsp.quality.domain.repository.RootRepository;
 import com.hand.hdsp.quality.infra.mapper.RootMapper;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -111,4 +114,107 @@ public class RootController extends BaseController {
         return Results.success(rootService.export(root,exportParam));
     }
 
+    @ApiOperation(value = "发布 下线")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/publish-off")
+    public ResponseEntity<List<Root>> publishOrOff(@PathVariable(name = "organizationId") Long tenantId,
+                                                           @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                           @RequestBody List<Root> rootList) {
+        rootList.forEach(root -> {
+            root.setTenantId(tenantId);
+            root.setProjectId(projectId);
+            rootService.publishOrOff(root);
+        });
+        return Results.success(rootList);
+    }
+
+    @ApiOperation(value = "词根发布工作流通过事件接口")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/online-workflow-success/{rootId}")
+    public ResponseEntity<Root> onlineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long rootId) {
+        rootService.onlineWorkflowSuccess(rootId);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "词根发布工作流拒绝事件接口")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/online-workflow-fail/{rootId}")
+    public ResponseEntity<Root> onlineWorkflowFail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long rootId) {
+        rootService.onlineWorkflowFail(rootId);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "词根下线工作流通过事件接口")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/offline-workflow-success/{rootId}")
+    public ResponseEntity<Root> offlineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long rootId) {
+        rootService.offlineWorkflowSuccess(rootId);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "词根下线工作流拒绝事件接口")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/offline-workflow-fail/{rootId}")
+    public ResponseEntity<Root> offlineWorkflowFail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long rootId) {
+        rootService.offlineWorkflowFail(rootId);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "上线审批中事件")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/online-workflowing/{rootId}")
+    public ResponseEntity<Root> onlineWorkflowing(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long rootId) {
+        rootService.onlineWorkflowing(rootId);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "下线审批中事件")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/offline-workflowing/{rootId}")
+    public ResponseEntity<Root> offlineWorkflowing(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long rootId) {
+        rootService.offlineWorkflowing(rootId);
+        return Results.success();
+    }
 }

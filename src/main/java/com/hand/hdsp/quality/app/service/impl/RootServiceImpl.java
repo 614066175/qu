@@ -2,26 +2,24 @@ package com.hand.hdsp.quality.app.service.impl;
 
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.RootService;
-import com.hand.hdsp.quality.domain.entity.Root;
-import com.hand.hdsp.quality.domain.entity.RootLine;
-import com.hand.hdsp.quality.domain.entity.RootVersion;
-import com.hand.hdsp.quality.domain.entity.StandardGroup;
+import com.hand.hdsp.quality.app.service.StandardApprovalService;
+import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.RootLineRepository;
 import com.hand.hdsp.quality.domain.repository.RootRepository;
 import com.hand.hdsp.quality.domain.repository.RootVersionRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardConstant;
+import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -30,9 +28,12 @@ import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
+import org.hzero.boot.workflow.WorkflowClient;
+import org.hzero.boot.workflow.dto.RunInstance;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
@@ -49,14 +50,24 @@ public class RootServiceImpl implements RootService {
     private final RootVersionRepository rootVersionRepository;
     private final RootLineRepository rootLineRepository;
     private final StandardGroupRepository standardGroupRepository;
+    private final StandardApprovalService standardApprovalService;
 
-    private final String PATTERN = "^[A-Za-z][A-Za-z0-9]{0,63}$";
+    @Autowired
+    private WorkflowClient workflowClient;
 
-    public RootServiceImpl(RootRepository rootRepository, RootVersionRepository rootVersionRepository, RootLineRepository rootLineRepository, StandardGroupRepository standardGroupRepository) {
+    @Value("${hdsp.workflow.enabled:false}")
+    private boolean enableWorkflow;
+
+    private static final String PATTERN = "^[A-Za-z][A-Za-z0-9]{0,63}$";
+
+    private static final Long DEFAULT_VERSION = 1L;
+
+    public RootServiceImpl(RootRepository rootRepository, RootVersionRepository rootVersionRepository, RootLineRepository rootLineRepository, StandardGroupRepository standardGroupRepository, StandardApprovalService standardApprovalService) {
         this.rootRepository = rootRepository;
         this.rootVersionRepository = rootVersionRepository;
         this.rootLineRepository = rootLineRepository;
         this.standardGroupRepository = standardGroupRepository;
+        this.standardApprovalService = standardApprovalService;
     }
 
     @Override
@@ -236,6 +247,65 @@ public class RootServiceImpl implements RootService {
         }
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void publishOrOff(Root root) {
+        if (enableWorkflow) {
+            //开启工作流
+            //根据上下线状态开启不同的工作流实例
+            if (ONLINE.equals(root.getReleaseStatus())) {
+                //先修改状态再启动工作流，启动工作流需要花费一定时间,有异常回滚
+                this.workflowing(root.getId(), ONLINE_APPROVING);
+                this.startWorkFlow(WorkFlowConstant.FieldStandard.ONLINE_WORKFLOW_KEY, root, ONLINE);
+            }
+            if (OFFLINE.equals(root.getReleaseStatus())) {
+                this.workflowing(root.getId(), OFFLINE_APPROVING);
+                this.startWorkFlow(WorkFlowConstant.FieldStandard.OFFLINE_WORKFLOW_KEY, root, OFFLINE);
+            }
+        } else {
+            Root rootTmp = rootRepository.selectByPrimaryKey(root.getId());
+            if (Objects.isNull(rootTmp)) {
+                throw new CommonException(ErrorCode.ROOT_NOT_EXIST);
+            }
+            root.setObjectVersionNumber(rootTmp.getObjectVersionNumber());
+            rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS);
+            if (ONLINE.equals(root.getReleaseStatus())) {
+                //存版本表
+                doVersion(root);
+            }
+        }
+    }
+
+    @Override
+    public void onlineWorkflowSuccess(Long rootId) {
+        workflowing(rootId, ONLINE);
+    }
+
+    @Override
+    public void onlineWorkflowFail(Long rootId) {
+        workflowing(rootId, OFFLINE);
+    }
+
+    @Override
+    public void offlineWorkflowSuccess(Long rootId) {
+        workflowing(rootId, OFFLINE);
+    }
+
+    @Override
+    public void offlineWorkflowFail(Long rootId) {
+        workflowing(rootId, ONLINE);
+    }
+
+    @Override
+    public void onlineWorkflowing(Long rootId) {
+        workflowing(rootId, ONLINE_APPROVING);
+    }
+
+    @Override
+    public void offlineWorkflowing(Long rootId) {
+        workflowing(rootId, OFFLINE_APPROVING);
+    }
+
     private void findParentGroups(Long groupId, List<RootGroupDTO> rootGroupDTOs, int level) {
         RootGroupDTO rootGroupDTO = new RootGroupDTO();
         StandardGroupDTO  standardGroupDTO= standardGroupRepository.selectDTOByPrimaryKey(groupId);
@@ -269,6 +339,76 @@ public class RootServiceImpl implements RootService {
                 rootGroupDTOs.add(rootGroupDTO);
                 findChildGroups(rootGroupDTO,rootGroupDTOs, finalLevel);
             });
+        }
+    }
+
+    /**
+     * 修改词根状态，供审批中，审批结束任务状态变更
+     *
+     * @param id
+     * @param status
+     */
+    private void workflowing(Long id, String status) {
+        Root  root = rootRepository.selectByPrimaryKey(id);
+        if (root != null) {
+            root.setReleaseStatus(status);
+            rootRepository.updateOptional(root,Root.FIELD_RELEASE_STATUS);
+            if (ONLINE.equals(status)) {
+                doVersion(root);
+            }
+        }
+    }
+
+    /**
+     * 版本记录
+     * @param root
+     */
+    private void doVersion(Root root){
+        Long versionNum= DEFAULT_VERSION;
+        List<RootVersion> rootVersions = rootVersionRepository.selectByCondition(Condition.builder(RootVersion.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(RootVersion.FIELD_ROOT_ID,root.getId()))
+                .orderByDesc(RootVersion.FIELD_VERSION_NUMBER)
+                .build());
+        if(CollectionUtils.isNotEmpty(rootVersions)){
+            versionNum = rootVersions.get(0).getVersionNumber()+1;
+        }
+        RootVersion rootVersion = new RootVersion();
+        BeanUtils.copyProperties(root, rootVersion);
+        rootVersion.setVersionNumber(versionNum);
+        rootVersionRepository.insert(rootVersion);
+    }
+
+    private void startWorkFlow(String workflowKey, Root root, String status) {
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        StandardApprovalDTO standardApprovalDTO = StandardApprovalDTO
+                .builder()
+                .standardId(root.getId())
+                .standardType("ROOT")
+                .applicantId(userId)
+                .applyType(status)
+                .tenantId(root.getTenantId())
+                .build();
+        // 先删除原来的审批记录
+        standardApprovalService.delete(StandardApprovalDTO
+                .builder()
+                .standardId(root.getId())
+                .standardType("ROOT")
+                .applicantId(userId)
+                .build());
+        standardApprovalDTO = standardApprovalService.createOrUpdate(standardApprovalDTO);
+        //使用当前时间戳作为业务主键
+        String bussinessKey = String.valueOf(System.currentTimeMillis());
+        Map<String, Object> var = new HashMap<>();
+        //给流程变量
+        var.put("rootId", root.getId());
+        var.put("approvalId", standardApprovalDTO.getApprovalId());
+        //使用自研工作流客户端
+        RunInstance runInstance = workflowClient.startInstanceByFlowKey(root.getTenantId(), workflowKey, bussinessKey, "USER", String.valueOf(userId), var);
+        if (Objects.nonNull(runInstance)) {
+            standardApprovalDTO.setApplyTime(runInstance.getStartDate());
+            standardApprovalDTO.setInstanceId(runInstance.getInstanceId());
+            standardApprovalService.createOrUpdate(standardApprovalDTO);
         }
     }
 }

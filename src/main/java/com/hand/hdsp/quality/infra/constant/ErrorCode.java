@@ -199,6 +199,7 @@ public interface ErrorCode {
      */
     String EXISTS_OTHER_GROUP_OR_RULE = "hdsp.xqua.err.exists_other_group_or_rule";
 
+
     String ROOT_EN_SHORT_EXIST = "hdsp.xqua.err.root_en_short_exist";
 
     String ROOT_NAME_EXIST = "hdsp.xqua.err.root_name_exist";
@@ -206,4 +207,6 @@ public interface ErrorCode {
     String ROOT_NOT_DELETE = "hdsp.xsta.err.root_can_not_delete";
 
     String ROOT_EN_SHORT_ERROR = "hdps.xsta.err.root_en_short_error";
+
+    String ROOT_NOT_EXIST = "hdsp.xqua.err.root_not_exists";
 }
