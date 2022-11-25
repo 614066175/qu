@@ -13,6 +13,7 @@ import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +37,7 @@ import org.hzero.boot.workflow.WorkflowClient;
 import org.hzero.boot.workflow.dto.RunInstance;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 
 /**
@@ -304,6 +306,17 @@ public class RootServiceImpl implements RootService {
     @Override
     public void offlineWorkflowing(Long rootId) {
         workflowing(rootId, OFFLINE_APPROVING);
+    }
+
+    @Override
+    public List<AssigneeUserDTO> findCharger(Long rootId) {
+        Root root = rootRepository.selectByPrimaryKey(rootId);
+        if (root != null) {
+            AssigneeUserDTO assigneeUserDTO = rootRepository.getAssigneeUser(root.getChargeId());
+            return Collections.singletonList(assigneeUserDTO);
+        } else {
+            throw new CommonException(ErrorCode.NOT_FIND_VALUE);
+        }
     }
 
     private void findParentGroups(Long groupId, List<RootGroupDTO> rootGroupDTOs, int level) {

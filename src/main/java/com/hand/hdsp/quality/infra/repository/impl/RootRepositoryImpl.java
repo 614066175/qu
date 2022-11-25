@@ -2,6 +2,7 @@ package com.hand.hdsp.quality.infra.repository.impl;
 
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.core.util.DataSecurityUtil;
+import com.hand.hdsp.quality.api.dto.AssigneeUserDTO;
 import com.hand.hdsp.quality.api.dto.RootDTO;
 import com.hand.hdsp.quality.domain.entity.Root;
 import com.hand.hdsp.quality.domain.entity.RootLine;
@@ -9,6 +10,7 @@ import com.hand.hdsp.quality.domain.repository.RootLineRepository;
 import com.hand.hdsp.quality.domain.repository.RootRepository;
 import com.hand.hdsp.quality.infra.mapper.RootMapper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -66,5 +68,20 @@ public class RootRepositoryImpl extends BaseRepositoryImpl<Root, RootDTO> implem
             }
         }
         return rootList;
+    }
+
+    @Override
+    public AssigneeUserDTO getAssigneeUser(Long chargeId) {
+        AssigneeUserDTO assigneeUserDTO = rootMapper.getAssigneeUser(chargeId);
+        //查询员工责任人并解密
+        if (DataSecurityHelper.isTenantOpen()) {
+            if (StringUtils.isNotEmpty(assigneeUserDTO.getEmployeeName())) {
+                assigneeUserDTO.setEmployeeName(DataSecurityHelper.decrypt(assigneeUserDTO.getEmployeeName()));
+            }
+            if (StringUtils.isNotEmpty(assigneeUserDTO.getEmployeeNum())) {
+                assigneeUserDTO.setEmployeeNum(DataSecurityHelper.decrypt(assigneeUserDTO.getEmployeeNum()));
+            }
+        }
+        return assigneeUserDTO;
     }
 }

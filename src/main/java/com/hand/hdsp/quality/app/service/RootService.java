@@ -1,9 +1,6 @@
 package com.hand.hdsp.quality.app.service;
 
-import com.hand.hdsp.quality.api.dto.DataFieldDTO;
-import com.hand.hdsp.quality.api.dto.DataFieldGroupDTO;
-import com.hand.hdsp.quality.api.dto.RootDTO;
-import com.hand.hdsp.quality.api.dto.RootGroupDTO;
+import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.domain.entity.Root;
 
 import java.util.List;
@@ -113,4 +110,12 @@ public interface RootService {
      * @param rootId
      */
     void offlineWorkflowing(Long rootId);
+
+    /**
+     * 查找责任人审批
+     *
+     * @param rootId
+     * @return
+     */
+    List<AssigneeUserDTO> findCharger(Long rootId);
 }

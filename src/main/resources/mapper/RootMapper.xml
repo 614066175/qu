@@ -145,4 +145,13 @@
             and hea.employee_id = #{chargeId}
         order by hea.primary_position_flag desc
     </select>
+
+    <select id="getAssigneeUser" resultType="com.hand.hdsp.quality.api.dto.AssigneeUserDTO">
+        SELECT
+            name as employeeName,
+            employee_num as employeeNum
+        FROM
+            hpfm_employee he
+        where he.employee_id=#{chargeId}
+    </select>
 </mapper>
