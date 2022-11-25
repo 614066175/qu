@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.RootVersionMapper">
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.RootVersion">
+        <result column="id" property="id" jdbcType="DECIMAL"/>
+        <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
+        <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
+        <result column="creation_date" property="creationDate" jdbcType="DATE"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="DATE"/>
+        <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
+        <result column="root_id" property="rootId" jdbcType="DECIMAL"/>
+        <result column="root_en" property="rootEn" jdbcType="VARCHAR"/>
+        <result column="root_en_short" property="rootEnShort" jdbcType="VARCHAR"/>
+        <result column="root_name" property="rootName" jdbcType="VARCHAR"/>
+        <result column="root_desc" property="rootDesc" jdbcType="VARCHAR"/>
+        <result column="charge_dept_id" property="chargeDeptId" jdbcType="DECIMAL"/>
+        <result column="charge_id" property="chargeId" jdbcType="DECIMAL"/>
+        <result column="group_id" property="groupId" jdbcType="DECIMAL"/>
+        <result column="version_number" property="versionNumber" jdbcType="DECIMAL"/>
+    </resultMap>
+</mapper>
