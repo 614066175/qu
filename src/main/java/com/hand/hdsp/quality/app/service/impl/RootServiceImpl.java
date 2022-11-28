@@ -443,6 +443,7 @@ public class RootServiceImpl implements RootService {
         if(CollectionUtils.isNotEmpty(rootVersions)){
             versionNum = rootVersions.get(0).getVersionNumber()+1;
         }
+        root = rootRepository.list(root).get(0);
         RootVersion rootVersion = new RootVersion();
         BeanUtils.copyProperties(root, rootVersion);
         rootVersion.setRootId(root.getId());
