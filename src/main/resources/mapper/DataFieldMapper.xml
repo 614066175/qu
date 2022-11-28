@@ -126,6 +126,7 @@
         iu.login_name lastUpdatedByName,
         iu3.login_name createdByName,
         xds.standard_name dataStandardName,
+        xds.standard_code dataStandardCode,
         xsa.instance_id,
         <include refid="baseColumn">
             <property name="fs" value="fs"/>
