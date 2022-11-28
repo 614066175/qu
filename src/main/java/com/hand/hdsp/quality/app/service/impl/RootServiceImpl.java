@@ -9,7 +9,6 @@ import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.mapper.StandardApprovalMapper;
-import com.hand.hdsp.quality.infra.validation.RootValidator;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.BeanUtils;
@@ -446,6 +445,7 @@ public class RootServiceImpl implements RootService {
         }
         RootVersion rootVersion = new RootVersion();
         BeanUtils.copyProperties(root, rootVersion);
+        rootVersion.setRootId(root.getId());
         rootVersion.setVersionNumber(versionNum);
         rootVersionRepository.insert(rootVersion);
     }

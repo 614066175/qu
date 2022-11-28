@@ -2,9 +2,8 @@ package com.hand.hdsp.quality.infra.batchimport;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hdsp.core.util.ProjectHelper;
-import com.hand.hdsp.quality.api.dto.RootDTO;
-import com.hand.hdsp.quality.api.dto.RootLineDTO;
 import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
+import com.hand.hdsp.quality.app.service.RootService;
 import com.hand.hdsp.quality.domain.entity.Root;
 import com.hand.hdsp.quality.domain.entity.RootLine;
 import com.hand.hdsp.quality.domain.entity.StandardGroup;
@@ -44,13 +43,15 @@ public class RootBatchImportServiceImpl implements IBatchImportService {
     private final ObjectMapper objectMapper;
     private final RootMapper rootMapper;
     private final RootRepository rootRepository;
+    private final RootService rootService;
     private final RootLineRepository rootLineRepository;
     private final StandardGroupRepository standardGroupRepository;
 
-    public RootBatchImportServiceImpl(ObjectMapper objectMapper, RootMapper rootMapper, RootRepository rootRepository, RootLineRepository rootLineRepository, StandardGroupRepository standardGroupRepository) {
+    public RootBatchImportServiceImpl(ObjectMapper objectMapper, RootMapper rootMapper, RootRepository rootRepository, RootService rootService, RootLineRepository rootLineRepository, StandardGroupRepository standardGroupRepository) {
         this.objectMapper = objectMapper;
         this.rootMapper = rootMapper;
         this.rootRepository = rootRepository;
+        this.rootService = rootService;
         this.rootLineRepository = rootLineRepository;
         this.standardGroupRepository = standardGroupRepository;
     }
@@ -117,7 +118,7 @@ public class RootBatchImportServiceImpl implements IBatchImportService {
                     rootLines.add(rootLine);
                 }
                 rootLineRepository.batchInsertSelective(rootLines);
-
+                rootService.publishOrOff(root);
             }
         }catch (Exception e){
             // 失败
