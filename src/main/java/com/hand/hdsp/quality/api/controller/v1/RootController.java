@@ -144,7 +144,7 @@ public class RootController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping("/online-workflow-success/{rootId}")
+    @GetMapping("/online-workflow-success/{rootId}")
     public ResponseEntity<Root> onlineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long rootId) {
         rootService.onlineWorkflowSuccess(rootId);
         return Results.success();
@@ -158,7 +158,7 @@ public class RootController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping("/online-workflow-fail/{rootId}")
+    @GetMapping("/online-workflow-fail/{rootId}")
     public ResponseEntity<Root> onlineWorkflowFail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long rootId) {
         rootService.onlineWorkflowFail(rootId);
         return Results.success();
@@ -172,7 +172,7 @@ public class RootController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping("/offline-workflow-success/{rootId}")
+    @GetMapping("/offline-workflow-success/{rootId}")
     public ResponseEntity<Root> offlineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long rootId) {
         rootService.offlineWorkflowSuccess(rootId);
         return Results.success();
@@ -186,7 +186,7 @@ public class RootController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping("/offline-workflow-fail/{rootId}")
+    @GetMapping("/offline-workflow-fail/{rootId}")
     public ResponseEntity<Root> offlineWorkflowFail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long rootId) {
         rootService.offlineWorkflowFail(rootId);
         return Results.success();
@@ -200,7 +200,7 @@ public class RootController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping("/online-workflowing/{rootId}")
+    @GetMapping("/online-workflowing/{rootId}")
     public ResponseEntity<Root> onlineWorkflowing(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long rootId) {
         rootService.onlineWorkflowing(rootId);
         return Results.success();
@@ -214,7 +214,7 @@ public class RootController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping("/offline-workflowing/{rootId}")
+    @GetMapping("/offline-workflowing/{rootId}")
     public ResponseEntity<Root> offlineWorkflowing(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long rootId) {
         rootService.offlineWorkflowing(rootId);
         return Results.success();
