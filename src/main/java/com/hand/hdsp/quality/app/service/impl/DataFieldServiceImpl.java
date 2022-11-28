@@ -446,6 +446,18 @@ public class DataFieldServiceImpl implements DataFieldService {
             }
             //当前目录和子目录的数据标准的集合，与查询保持一致
             List<DataFieldDTO> dataFields = dataFieldMapper.list(dto);
+            dataFields.forEach(dataFieldDTO -> {
+                //查询标准组
+                List<StandardRelation> standardRelations = standardRelationRepository.select(StandardRelation.builder().fieldStandardId(dataFieldDTO.getFieldId()).build());
+                List<Long> standardTeamIds = standardRelations.stream()
+                        .map(StandardRelation::getStandardTeamId)
+                        .collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(standardTeamIds)) {
+                    List<StandardTeamDTO> standardTeamDTOS = standardTeamRepository.selectDTOByIds(standardTeamIds);
+                    //标准组导出
+                    dataFieldDTO.setStandardTeamCode(StringUtils.join(standardTeamDTOS.stream().map(StandardTeamDTO::getStandardTeamCode).toArray(), ","));
+                }
+            });
             //导出解密责任人信息
             if(DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(dataFields)){
                 dataFields.forEach(dataFieldDTO -> {
@@ -488,6 +500,18 @@ public class DataFieldServiceImpl implements DataFieldService {
                     BeanUtils.copyProperties(standardGroupDTO, dataFieldGroupDto);
                     //根目录数据标准列表
                     List<DataFieldDTO> dataFieldDTOList = dataFieldMapper.list(DataFieldDTO.builder().groupArrays(new Long[]{dataFieldGroupDto.getGroupId()}).build());
+                    dataFieldDTOList.forEach(dataFieldDTO -> {
+                        //查询标准组
+                        List<StandardRelation> standardRelations = standardRelationRepository.select(StandardRelation.builder().fieldStandardId(dataFieldDTO.getFieldId()).build());
+                        List<Long> standardTeamIds = standardRelations.stream()
+                                .map(StandardRelation::getStandardTeamId)
+                                .collect(Collectors.toList());
+                        if (CollectionUtils.isNotEmpty(standardTeamIds)) {
+                            List<StandardTeamDTO> standardTeamDTOS = standardTeamRepository.selectDTOByIds(standardTeamIds);
+                            //标准组导出
+                            dataFieldDTO.setStandardTeamCode(StringUtils.join(standardTeamDTOS.stream().map(StandardTeamDTO::getStandardTeamCode).toArray(), ","));
+                        }
+                    });
                     if (DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(dataFieldDTOList)) {
                         dataFieldDTOList.forEach(dataFieldDTO -> {
                             if (StringUtils.isNotEmpty(dataFieldDTO.getChargeName())) {
@@ -527,6 +551,18 @@ public class DataFieldServiceImpl implements DataFieldService {
                 dataFieldGroupDTO.setGroupLevel(finalLevel);
                 //子目录数据标准列表
                 List<DataFieldDTO> dataFieldDTOList = dataFieldMapper.list(DataFieldDTO.builder().groupArrays(new Long[]{dataFieldGroupDTO.getGroupId()}).build());
+                dataFieldDTOList.forEach(dataFieldDTO -> {
+                    //查询标准组
+                    List<StandardRelation> standardRelations = standardRelationRepository.select(StandardRelation.builder().fieldStandardId(dataFieldDTO.getFieldId()).build());
+                    List<Long> standardTeamIds = standardRelations.stream()
+                            .map(StandardRelation::getStandardTeamId)
+                            .collect(Collectors.toList());
+                    if (CollectionUtils.isNotEmpty(standardTeamIds)) {
+                        List<StandardTeamDTO> standardTeamDTOS = standardTeamRepository.selectDTOByIds(standardTeamIds);
+                        //标准组导出
+                        dataFieldDTO.setStandardTeamCode(StringUtils.join(standardTeamDTOS.stream().map(StandardTeamDTO::getStandardTeamCode).toArray(), ","));
+                    }
+                });
                 if (DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(dataFieldDTOList)) {
                     dataFieldDTOList.forEach(dataFieldDTO -> {
                         if (StringUtils.isNotEmpty(dataFieldDTO.getChargeName())) {
