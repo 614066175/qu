@@ -39,7 +39,7 @@
         ${prefix}.last_updated_by,
         ${prefix}.creation_date,
         ${prefix}.last_update_date,
-        ${prefix}.object_version_number,
+        ${prefix}.object_version_number
     </sql>
 
     <select id="list" resultType="com.hand.hdsp.quality.domain.entity.RootVersion">
@@ -51,7 +51,7 @@
         he.email chargeEmail,
         he.mobile chargeTel,
         he.name chargeName,
-        hu.unit_name chargeDept,
+        hu.unit_name chargeDept
         from
         xsta_root_version xrv
         left join hpfm_employee he on xrv.charge_id=he.employee_id
