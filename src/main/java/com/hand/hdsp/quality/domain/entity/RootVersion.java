@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.domain.entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -17,6 +18,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import org.hzero.export.annotation.ExcelColumn;
 
 /**
  * 词根版本
@@ -94,4 +97,27 @@ public class RootVersion extends AuditDomain {
     // 非数据库字段
     // ------------------------------------------------------------------------------
 
+    /**
+     * 责任人部门
+     */
+    @Transient
+    private String chargeDept;
+
+    /**
+     * 责任人名
+     */
+    @Transient
+    private String chargeName;
+
+    /**
+     * 责任人电话
+     */
+    @Transient
+    private String chargeTel;
+
+    /**
+     * 责任人电话
+     */
+    @Transient
+    private String chargeEmail;
 }

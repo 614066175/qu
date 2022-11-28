@@ -118,4 +118,19 @@ public interface RootService {
      * @return
      */
     List<AssigneeUserDTO> findCharger(Long rootId);
+
+    /**
+     * 词根申请信息
+     * @param tenantId      租户
+     * @param approvalId    审批id
+     * @return              申请信息
+     */
+    StandardApprovalDTO rootApplyInfo(Long tenantId, Long approvalId);
+
+    /**
+     * 词根信息租户
+     * @param approvalId    审批id
+     * @return              字段标准信息
+     */
+    Root rootInfo(Long approvalId);
 }
