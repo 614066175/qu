@@ -2,9 +2,10 @@ package com.hand.hdsp.quality.api.controller.v1;
 
 import org.hzero.core.util.Results;
 import org.hzero.core.base.BaseController;
+
+import com.hand.hdsp.quality.app.service.RootVersionService;
 import com.hand.hdsp.quality.domain.entity.RootVersion;
 import com.hand.hdsp.quality.domain.repository.RootVersionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.hzero.mybatis.helper.SecurityTokenHelper;
@@ -27,16 +28,20 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/{organizationId}/root-versions")
 public class RootVersionController extends BaseController {
 
-    @Autowired
-    private RootVersionRepository rootVersionRepository;
+    private final RootVersionRepository rootVersionRepository;
+    private final RootVersionService rootVersionService;
+
+    public RootVersionController(RootVersionRepository rootVersionRepository, RootVersionService rootVersionService) {
+        this.rootVersionRepository = rootVersionRepository;
+        this.rootVersionService = rootVersionService;
+    }
 
     @ApiOperation(value = "词根版本列表")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<Page<RootVersion>> list(RootVersion rootVersion, @ApiIgnore @SortDefault(value = RootVersion.FIELD_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
-        Page<RootVersion> list = rootVersionRepository.pageAndSort(pageRequest, rootVersion);
-        return Results.success(list);
+        return Results.success(rootVersionService.list(pageRequest,rootVersion));
     }
 
     @ApiOperation(value = "词根版本明细")

@@ -8,6 +8,7 @@ import com.hand.hdsp.core.util.DataSecurityUtil;
 import com.hand.hdsp.quality.api.dto.AssigneeUserDTO;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.api.dto.RootGroupDTO;
+import com.hand.hdsp.quality.api.dto.StandardApprovalDTO;
 import com.hand.hdsp.quality.app.service.RootService;
 import com.hand.hdsp.quality.domain.entity.Root;
 import com.hand.hdsp.quality.domain.repository.RootRepository;
@@ -230,5 +231,33 @@ public class RootController extends BaseController {
     @GetMapping("/find-charger/{rootId}")
     public ResponseEntity<List<AssigneeUserDTO>> findCharger(@PathVariable Long rootId) {
         return Results.success(rootService.findCharger(rootId));
+    }
+
+    @ApiOperation(value = "申请信息-审批表单用")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/root-apply-info")
+    public ResponseEntity<StandardApprovalDTO> rootApplyInfo(@PathVariable("organizationId") Long tenantId,
+                                                              Long approvalId) {
+        return Results.success(rootService.rootApplyInfo(tenantId, approvalId));
+    }
+
+    @ApiOperation(value = "词根信息-审批表单用")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/root-info")
+    public ResponseEntity<Root> rootInfo(@PathVariable(name = "organizationId") Long tenantId,
+                                                  Long approvalId) {
+        return Results.success(rootService.rootInfo(approvalId));
     }
 }

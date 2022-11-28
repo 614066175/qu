@@ -4,16 +4,14 @@ import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.RootService;
 import com.hand.hdsp.quality.app.service.StandardApprovalService;
 import com.hand.hdsp.quality.domain.entity.*;
-import com.hand.hdsp.quality.domain.repository.RootLineRepository;
-import com.hand.hdsp.quality.domain.repository.RootRepository;
-import com.hand.hdsp.quality.domain.repository.RootVersionRepository;
-import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
+import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
+import com.hand.hdsp.quality.infra.mapper.StandardApprovalMapper;
+import com.hand.hdsp.quality.infra.validation.RootValidator;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +31,10 @@ import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
+import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
+import org.hzero.boot.platform.plugin.hr.entity.Employee;
 import org.hzero.boot.workflow.WorkflowClient;
+import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
 import org.hzero.boot.workflow.dto.RunInstance;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
@@ -53,6 +54,8 @@ public class RootServiceImpl implements RootService {
     private final RootLineRepository rootLineRepository;
     private final StandardGroupRepository standardGroupRepository;
     private final StandardApprovalService standardApprovalService;
+    private final StandardApprovalRepository standardApprovalRepository;
+    private final StandardApprovalMapper standardApprovalMapper;
 
     @Autowired
     private WorkflowClient workflowClient;
@@ -64,12 +67,14 @@ public class RootServiceImpl implements RootService {
 
     private static final Long DEFAULT_VERSION = 1L;
 
-    public RootServiceImpl(RootRepository rootRepository, RootVersionRepository rootVersionRepository, RootLineRepository rootLineRepository, StandardGroupRepository standardGroupRepository, StandardApprovalService standardApprovalService) {
+    public RootServiceImpl(RootRepository rootRepository, RootVersionRepository rootVersionRepository, RootLineRepository rootLineRepository, StandardGroupRepository standardGroupRepository, StandardApprovalService standardApprovalService, StandardApprovalRepository standardApprovalRepository, StandardApprovalMapper standardApprovalMapper) {
         this.rootRepository = rootRepository;
         this.rootVersionRepository = rootVersionRepository;
         this.rootLineRepository = rootLineRepository;
         this.standardGroupRepository = standardGroupRepository;
         this.standardApprovalService = standardApprovalService;
+        this.standardApprovalRepository = standardApprovalRepository;
+        this.standardApprovalMapper = standardApprovalMapper;
     }
 
     @Override
@@ -258,11 +263,11 @@ public class RootServiceImpl implements RootService {
             if (ONLINE.equals(root.getReleaseStatus())) {
                 //先修改状态再启动工作流，启动工作流需要花费一定时间,有异常回滚
                 this.workflowing(root.getId(), ONLINE_APPROVING);
-                this.startWorkFlow(WorkFlowConstant.FieldStandard.ONLINE_WORKFLOW_KEY, root, ONLINE);
+                this.startWorkFlow(WorkFlowConstant.Root.ONLINE_WORKFLOW_KEY, root, ONLINE);
             }
             if (OFFLINE.equals(root.getReleaseStatus())) {
                 this.workflowing(root.getId(), OFFLINE_APPROVING);
-                this.startWorkFlow(WorkFlowConstant.FieldStandard.OFFLINE_WORKFLOW_KEY, root, OFFLINE);
+                this.startWorkFlow(WorkFlowConstant.Root.OFFLINE_WORKFLOW_KEY, root, OFFLINE);
             }
         } else {
             Root rootTmp = rootRepository.selectByPrimaryKey(root.getId());
@@ -317,6 +322,59 @@ public class RootServiceImpl implements RootService {
         } else {
             throw new CommonException(ErrorCode.NOT_FIND_VALUE);
         }
+    }
+
+    @Override
+    public StandardApprovalDTO rootApplyInfo(Long tenantId, Long approvalId) {
+        StandardApprovalDTO standardApprovalDTO = standardApprovalRepository.selectDTOByPrimaryKey(approvalId);
+        if (!(Objects.nonNull(standardApprovalDTO) && Objects.nonNull(standardApprovalDTO.getApprovalId()))) {
+            throw new CommonException(ErrorCode.NO_APPROVAL_INSTANCE);
+        }
+        ProcessInstanceDTO.ProcessInstanceViewDTO instanceView = workflowClient.getInstanceDetailByInstanceId(tenantId, standardApprovalDTO.getInstanceId());
+        List<ProcessInstanceDTO.ProcessInstanceCurrentNodeDTO> nodeDTOList = instanceView.getNodeDTOList();
+        StandardApprovalDTO approvalDTO = StandardApprovalDTO
+                .builder()
+                .flowName(instanceView.getFlowName())
+                .businessKey(instanceView.getBusinessKey())
+                .applyDate(instanceView.getStartDate())
+                .build();
+        UserDTO userInfo = standardApprovalMapper.getUserInfo(standardApprovalDTO.getApplicantId());
+        approvalDTO.setEmployeeTel(userInfo.getPhone());
+        approvalDTO.setEmployeeEmail(userInfo.getEmail());
+        approvalDTO.setEmployeeName(userInfo.getRealName());
+        Employee employee = EmployeeHelper.getEmployee(standardApprovalDTO.getApplicantId(), standardApprovalDTO.getTenantId());
+        List<String> employeeUnitList = standardApprovalMapper.getEmployeeUnit(employee);
+        if (org.apache.commons.collections.CollectionUtils.isNotEmpty(employeeUnitList)) {
+            String unitName = employeeUnitList.get(0);
+            if (DataSecurityHelper.isTenantOpen()) {
+                unitName = DataSecurityHelper.decrypt(unitName);
+            }
+            approvalDTO.setApplyUnitName(unitName);
+        }
+        if (CollectionUtils.isNotEmpty(nodeDTOList)) {
+            approvalDTO.setCurrentNode(nodeDTOList.get(0).getCurrentNode());
+        }
+        long lastVersion = 1L;
+        List<RootVersion> rootVersions = rootVersionRepository.selectByCondition(Condition.builder(RootVersion.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(RootVersion.FIELD_ROOT_ID,standardApprovalDTO.getStandardId()))
+                        .orderByDesc(RootVersion.FIELD_VERSION_NUMBER)
+                .build());
+        //不为空则取最新版本
+        if (CollectionUtils.isNotEmpty(rootVersions)) {
+            lastVersion = rootVersions .get(0).getVersionNumber() + 1;
+        }
+        approvalDTO.setSubmitVersion(String.format("v%s.0", lastVersion));
+        return approvalDTO;
+    }
+
+    @Override
+    public Root rootInfo(Long approvalId) {
+        StandardApprovalDTO standardApprovalDTO = standardApprovalRepository.selectDTOByPrimaryKey(approvalId);
+        if (Objects.isNull(standardApprovalDTO)) {
+            throw new CommonException(ErrorCode.NO_APPROVAL_INSTANCE);
+        }
+        return this.detail(standardApprovalDTO.getStandardId());
     }
 
     private void findParentGroups(Long groupId, List<RootGroupDTO> rootGroupDTOs, int level) {
