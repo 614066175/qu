@@ -27,6 +27,8 @@ import org.hzero.mybatis.util.Sqls;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <p>
@@ -97,9 +99,30 @@ public class DataFieldValidator extends BatchValidatorHandler {
                     addErrorMsg(i, String.format("表格中不存在分组%s", groupCode));
                     return false;
                 }
+
+                if(StringUtils.isEmpty(dataFieldDTO.getFieldType())){
+                    addErrorMsg(i, "字段类型不能为空");
+                    return false;
+                }else {
+                    if("DECIMAL".equals(dataFieldDTO.getFieldType())){
+                        //校验字段精度
+                        if(ObjectUtils.isNotEmpty(dataFieldDTO.getFieldAccuracy())){
+                            //字段精度为正整数
+                            if (!isNumeric(dataFieldDTO.getFieldAccuracy().toString())){
+                                addErrorMsg(i,"浮点型字段精度需要为正整数");
+                                return false;
+                            }
+                        }
+                    }else {
+                        if(ObjectUtils.isNotEmpty(dataFieldDTO.getFieldAccuracy())){
+                            addErrorMsg(i,"非浮点型字段不应设置字段精度");
+                            return false;
+                        }
+                    }
+                }
                 //校验目标环境字段标准组
                 if (StringUtils.isNotEmpty(dataFieldDTO.getStandardTeamCode())) {
-                    String[] standardTeamCodeList = dataFieldDTO.getStandardTeamCode().split(",");
+                    String[] standardTeamCodeList = dataFieldDTO.getStandardTeamCode().split(";");
                     for (String standardTeamCode : standardTeamCodeList) {
                         List<StandardTeamDTO> standardTeamDTOS = standardTeamRepository.selectDTOByCondition(Condition.builder(StandardTeam.class).andWhere(Sqls.custom()
                                         .andEqualTo(StandardTeam.FIELD_STANDARD_TEAM_CODE, standardTeamCode))
@@ -133,5 +156,11 @@ public class DataFieldValidator extends BatchValidatorHandler {
             }
         }
         return true;
+    }
+
+
+    public static boolean isNumeric(String string){
+        Pattern pattern = Pattern.compile("[0-9]*");
+        return pattern.matcher(string).matches();
     }
 }

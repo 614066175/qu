@@ -105,7 +105,7 @@ public class DataFieldStandardBatchImportServiceImpl implements IBatchImportServ
                 dataFieldRepository.insertDTOSelective(dataFieldDTO);
                 //设置字段标准组
                 if (StringUtils.isNotEmpty(dataFieldDTO.getStandardTeamCode())) {
-                    String[] standardTeamCodeList = dataFieldDTO.getStandardTeamCode().split(",");
+                    String[] standardTeamCodeList = dataFieldDTO.getStandardTeamCode().split(";");
                     Long fieldId = dataFieldDTO.getFieldId();
                     for (String standardTeamCode : standardTeamCodeList) {
                         List<StandardTeamDTO> standardTeamDTOS = standardTeamRepository.selectDTOByCondition(Condition.builder(StandardTeam.class).andWhere(Sqls.custom()

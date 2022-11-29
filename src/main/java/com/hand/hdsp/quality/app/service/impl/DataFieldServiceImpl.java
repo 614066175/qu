@@ -455,7 +455,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                 if (CollectionUtils.isNotEmpty(standardTeamIds)) {
                     List<StandardTeamDTO> standardTeamDTOS = standardTeamRepository.selectDTOByIds(standardTeamIds);
                     //标准组导出
-                    dataFieldDTO.setStandardTeamCode(StringUtils.join(standardTeamDTOS.stream().map(StandardTeamDTO::getStandardTeamCode).toArray(), ","));
+                    dataFieldDTO.setStandardTeamCode(StringUtils.join(standardTeamDTOS.stream().map(StandardTeamDTO::getStandardTeamCode).toArray(), ";"));
                 }
             });
             //导出解密责任人信息
@@ -509,7 +509,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                         if (CollectionUtils.isNotEmpty(standardTeamIds)) {
                             List<StandardTeamDTO> standardTeamDTOS = standardTeamRepository.selectDTOByIds(standardTeamIds);
                             //标准组导出
-                            dataFieldDTO.setStandardTeamCode(StringUtils.join(standardTeamDTOS.stream().map(StandardTeamDTO::getStandardTeamCode).toArray(), ","));
+                            dataFieldDTO.setStandardTeamCode(StringUtils.join(standardTeamDTOS.stream().map(StandardTeamDTO::getStandardTeamCode).toArray(), ";"));
                         }
                     });
                     if (DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(dataFieldDTOList)) {
@@ -560,7 +560,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                     if (CollectionUtils.isNotEmpty(standardTeamIds)) {
                         List<StandardTeamDTO> standardTeamDTOS = standardTeamRepository.selectDTOByIds(standardTeamIds);
                         //标准组导出
-                        dataFieldDTO.setStandardTeamCode(StringUtils.join(standardTeamDTOS.stream().map(StandardTeamDTO::getStandardTeamCode).toArray(), ","));
+                        dataFieldDTO.setStandardTeamCode(StringUtils.join(standardTeamDTOS.stream().map(StandardTeamDTO::getStandardTeamCode).toArray(), ";"));
                     }
                 });
                 if (DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(dataFieldDTOList)) {
