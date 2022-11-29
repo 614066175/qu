@@ -3,11 +3,14 @@ package com.hand.hdsp.quality.infra.validation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
-import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
+import com.hand.hdsp.quality.api.dto.DataStandardDTO;
+import com.hand.hdsp.quality.api.dto.StandardTeamDTO;
 import com.hand.hdsp.quality.domain.entity.DataField;
-import com.hand.hdsp.quality.domain.entity.StandardGroup;
+import com.hand.hdsp.quality.domain.entity.DataStandard;
+import com.hand.hdsp.quality.domain.entity.StandardTeam;
 import com.hand.hdsp.quality.domain.repository.DataFieldRepository;
-import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
+import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
+import com.hand.hdsp.quality.domain.repository.StandardTeamRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -15,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.imported.app.service.BatchValidatorHandler;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidator;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidators;
@@ -25,10 +27,8 @@ import org.hzero.mybatis.util.Sqls;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
-
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <p>
@@ -47,10 +47,15 @@ public class DataFieldValidator extends BatchValidatorHandler {
 
     private final DataFieldMapper dataFieldMapper;
 
-    public DataFieldValidator(ObjectMapper objectMapper, DataFieldRepository dataFieldRepository, DataFieldMapper dataFieldMapper) {
+    private final DataStandardRepository dataStandardRepository;
+    private final StandardTeamRepository standardTeamRepository;
+
+    public DataFieldValidator(ObjectMapper objectMapper, DataFieldRepository dataFieldRepository, DataFieldMapper dataFieldMapper, DataStandardRepository dataStandardRepository, StandardTeamRepository standardTeamRepository) {
         this.objectMapper = objectMapper;
         this.dataFieldRepository = dataFieldRepository;
         this.dataFieldMapper = dataFieldMapper;
+        this.dataStandardRepository = dataStandardRepository;
+        this.standardTeamRepository = standardTeamRepository;
     }
 
     @Override
@@ -94,6 +99,56 @@ public class DataFieldValidator extends BatchValidatorHandler {
                     addErrorMsg(i, String.format("表格中不存在分组%s", groupCode));
                     return false;
                 }
+
+                if(StringUtils.isEmpty(dataFieldDTO.getFieldType())){
+                    addErrorMsg(i, "字段类型不能为空");
+                    return false;
+                }else {
+                    if("DECIMAL".equals(dataFieldDTO.getFieldType())){
+                        //校验字段精度
+                        if(ObjectUtils.isNotEmpty(dataFieldDTO.getFieldAccuracy())){
+                            //字段精度为正整数
+                            if (!isNumeric(dataFieldDTO.getFieldAccuracy().toString())){
+                                addErrorMsg(i,"浮点型字段精度需要为正整数");
+                                return false;
+                            }
+                        }
+                    }else {
+                        if(ObjectUtils.isNotEmpty(dataFieldDTO.getFieldAccuracy())){
+                            addErrorMsg(i,"非浮点型字段不应设置字段精度");
+                            return false;
+                        }
+                    }
+                }
+                //校验目标环境字段标准组
+                if (StringUtils.isNotEmpty(dataFieldDTO.getStandardTeamCode())) {
+                    String[] standardTeamCodeList = dataFieldDTO.getStandardTeamCode().split(";");
+                    for (String standardTeamCode : standardTeamCodeList) {
+                        List<StandardTeamDTO> standardTeamDTOS = standardTeamRepository.selectDTOByCondition(Condition.builder(StandardTeam.class).andWhere(Sqls.custom()
+                                        .andEqualTo(StandardTeam.FIELD_STANDARD_TEAM_CODE, standardTeamCode))
+                                .build());
+                        if (CollectionUtils.isNotEmpty(standardTeamDTOS)) {
+                            Long standardTeamId = standardTeamDTOS.get(0).getStandardTeamId();
+                            if (ObjectUtils.isEmpty(standardTeamId)) {
+                                addErrorMsg(i, String.format("导入环境字段标准组：%s不存在", standardTeamCode));
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                //校验目标环境引用数据标准
+                if(StringUtils.isNotEmpty(dataFieldDTO.getDataStandardCode())){
+                    List<DataStandardDTO> dataStandardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class).andWhere(Sqls.custom()
+                                    .andEqualTo(DataStandard.FIELD_TENANT_ID,tenantId)
+                                    .andEqualTo(DataStandard.FIELD_PROJECT_ID,projectId)
+                                    .andEqualTo(DataStandard.FIELD_STANDARD_CODE,dataFieldDTO.getDataStandardCode()))
+                            .build());
+                    if(CollectionUtils.isEmpty(dataStandardDTOList)){
+                        addErrorMsg(i, String.format("导入环境引用的数据标准：%s不存在", dataFieldDTO.getDataStandardCode()));
+                        return false;
+                    }
+                }
             } catch (IOException e) {
                 log.info(e.getMessage());
                 addErrorMsg(i, e.getMessage());
@@ -101,5 +156,11 @@ public class DataFieldValidator extends BatchValidatorHandler {
             }
         }
         return true;
+    }
+
+
+    public static boolean isNumeric(String string){
+        Pattern pattern = Pattern.compile("[0-9]*");
+        return pattern.matcher(string).matches();
     }
 }

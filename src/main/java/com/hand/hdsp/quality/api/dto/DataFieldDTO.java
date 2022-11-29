@@ -65,19 +65,30 @@ public class DataFieldDTO extends AuditDomain {
     @ExcelColumn(zh = "字段注释", en = "fieldComment", groups = {Group1.class})
     private String fieldComment;
 
-    @ApiModelProperty(value = "系统常用名")
-    @ExcelColumn(zh = "标准常用名", en = "sysCommonName", groups = {Group1.class})
-    private String sysCommonName;
-
     @ApiModelProperty(value = "标准描述")
     @ExcelColumn(zh = "标准描述", en = "standardDesc", groups = {Group1.class})
     private String standardDesc;
+
+    //字段标准组：支持填写多个值，可用;区分
+    @Transient
+    @ExcelColumn(zh = "字段标准组", en = "standardTeamCode", groups = {Group1.class})
+    private String standardTeamCode;
+
+    //引用数据标准
+    @Transient
+    @ExcelColumn(zh = "引用数据标准",en = "dataStandardCode",groups = {Group1.class})
+    private String dataStandardCode;
 
     @ApiModelProperty(value = "字段类型 (HDSP.XMOD.FIELD_TYPE)")
     @NotBlank
     @LovValue(lovCode = "HDSP.XMOD.FIELD_TYPE",meaningField = "fieldTypeMeaning")
 //    @ExcelColumn(zh = "字段类型", en = "fieldType", groups = {Group1.class})
     private String fieldType;
+
+    //字段精度
+    @ApiModelProperty(value = "字段精度")
+    @ExcelColumn(zh = "字段精度", en = "fieldAccuracy", groups = {Group1.class})
+    private Integer fieldAccuracy;
 
     @ExcelColumn(zh = "字段类型", en = "fieldType", groups = {Group1.class})
     private String fieldTypeMeaning;
@@ -105,6 +116,16 @@ public class DataFieldDTO extends AuditDomain {
     @ApiModelProperty(value = "是否可为空，1可空 0 不可空")
     @ExcelColumn(zh = "是否可为空" ,en = "Can be empty or not")
     private Integer nullFlag;
+
+    //默认值
+    @ApiModelProperty(value = "默认值")
+    @ExcelColumn(zh = "默认值" ,en = "defaultValue")
+    private String defaultValue;
+
+    //系统常用名
+    @ApiModelProperty(value = "系统常用名")
+    @ExcelColumn(zh = "系统常用名", en = "sysCommonName", groups = {Group1.class})
+    private String sysCommonName;
 
     @Transient
     @ExcelColumn(zh = "责任部门", en = "chargeDeptName", groups = {Group2.class})
@@ -135,9 +156,6 @@ public class DataFieldDTO extends AuditDomain {
     @Size(max = 50)
     private String standardStatus;
 
-    @ApiModelProperty(value = "字段精度")
-    private Integer fieldAccuracy;
-
     @ApiModelProperty(value = "租户ID")
     @NotNull
     private Long tenantId;
@@ -150,10 +168,6 @@ public class DataFieldDTO extends AuditDomain {
 
     @Transient
     private String lastUpdateName;
-
-    @ApiModelProperty(value = "默认值")
-    private String defaultValue;
-
 
     @Transient
     private List<Long> dataLengthList;
