@@ -127,12 +127,9 @@ public class DataFieldValidator extends BatchValidatorHandler {
                         List<StandardTeamDTO> standardTeamDTOS = standardTeamRepository.selectDTOByCondition(Condition.builder(StandardTeam.class).andWhere(Sqls.custom()
                                         .andEqualTo(StandardTeam.FIELD_STANDARD_TEAM_CODE, standardTeamCode))
                                 .build());
-                        if (CollectionUtils.isNotEmpty(standardTeamDTOS)) {
-                            Long standardTeamId = standardTeamDTOS.get(0).getStandardTeamId();
-                            if (ObjectUtils.isEmpty(standardTeamId)) {
-                                addErrorMsg(i, String.format("导入环境字段标准组：%s不存在", standardTeamCode));
-                                return false;
-                            }
+                        if (CollectionUtils.isEmpty(standardTeamDTOS)) {
+                            addErrorMsg(i, String.format("导入环境字段标准组：%s不存在", standardTeamCode));
+                            return false;
                         }
                     }
                 }
