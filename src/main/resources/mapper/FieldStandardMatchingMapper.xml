@@ -4,6 +4,7 @@
 	<!-- 可根据自己的需求，是否要使用 -->
     <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.FieldStandardMatching">
         <result column="id" property="id" jdbcType="DECIMAL"/>
+        <result column="batch_number" property="batchNumber" jdbcType="VARCHAR"/>
         <result column="field_name" property="fieldName" jdbcType="VARCHAR"/>
         <result column="field_type" property="fieldType" jdbcType="VARCHAR"/>
         <result column="field_comment" property="fieldComment" jdbcType="VARCHAR"/>
@@ -20,6 +21,7 @@
     </resultMap>
     <sql id="Base_Columns">
         ${prefix}.id,
+        ${prefix}.batch_number,
         ${prefix}.field_name,
         ${prefix}.field_type,
         ${prefix}.field_comment,

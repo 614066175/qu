@@ -34,6 +34,9 @@ public class FieldStandardMatchingDTO extends AuditDomain {
     @ApiModelProperty("主键")
     private Long id;
 
+    @ApiModelProperty("批次号")
+    private String batchNumber;
+
     @ApiModelProperty(value = "字段名称")
     private String fieldName;
 

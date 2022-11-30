@@ -30,6 +30,7 @@ import lombok.*;
 public class FieldStandardMatching extends AuditDomain {
 
     public static final String FIELD_ID = "id";
+    public static final String FIELD_BATCH_NUMBER = "batch_number";
     public static final String FIELD_FIELD_NAME = "fieldName";
     public static final String FIELD_FIELD_TYPE = "fieldType";
     public static final String FIELD_FIELD_COMMENT = "fieldComment";
@@ -50,6 +51,8 @@ public class FieldStandardMatching extends AuditDomain {
     @Id
     @GeneratedValue
     private Long id;
+
+    private String batchNumber;
 
     private String fieldName;
 

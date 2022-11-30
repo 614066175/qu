@@ -198,5 +198,9 @@ public interface ErrorCode {
      * 分组或子分组下存在标准规则
      */
     String EXISTS_OTHER_GROUP_OR_RULE = "hdsp.xqua.err.exists_other_group_or_rule";
+    /**
+     * 文件格式不支持
+     */
+    String FILE_TYPE_NOT_SUPPORTED = "hdsp.xqua.err.file_type_not_supported";
 
 }

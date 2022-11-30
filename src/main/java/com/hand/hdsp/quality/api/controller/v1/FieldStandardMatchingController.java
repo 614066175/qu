@@ -20,7 +20,11 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiParam;
+import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * <p>字段标准匹配表 管理 API</p>
@@ -129,6 +133,45 @@ public class FieldStandardMatchingController extends BaseController {
         fieldStandardMatchingDTO.setTenantId(tenantId);
         fieldStandardMatchingDTO.setProjectId(projectId);
         fieldStandardMatchingRepository.deleteByPrimaryKey(fieldStandardMatchingDTO);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "导入excel")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/upload")
+    public ResponseEntity<?> upload(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    FieldStandardMatchingDTO fieldStandardMatchingDTO,
+                                    @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
+        fieldStandardMatchingDTO.setTenantId(tenantId);
+        fieldStandardMatchingDTO.setProjectId(projectId);
+        fieldStandardMatchingService.upload(fieldStandardMatchingDTO,file);
+        return Results.success();
+    }
+
+
+    @ApiOperation(value = "导出excel")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/{exportType}")
+    public ResponseEntity<?> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                    @PathVariable String exportType,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    FieldStandardMatchingDTO fieldStandardMatchingDTO) {
+        fieldStandardMatchingDTO.setProjectId(projectId);
+        fieldStandardMatchingDTO.setTenantId(tenantId);
+        List<FieldStandardMatchingDTO> fieldStandardMatchingDTOList= fieldStandardMatchingService.export(fieldStandardMatchingDTO,exportType);
         return Results.success();
     }
 }
