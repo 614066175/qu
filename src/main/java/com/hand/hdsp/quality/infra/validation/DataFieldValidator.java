@@ -104,7 +104,7 @@ public class DataFieldValidator extends BatchValidatorHandler {
                     addErrorMsg(i, "字段类型不能为空");
                     return false;
                 }else {
-                    if("DECIMAL".equals(dataFieldDTO.getFieldType())){
+                    if("DECIMAL".equals(dataFieldDTO.getFieldType() ) || "INTEGER".equals(dataFieldDTO.getFieldType())){
                         //校验字段精度
                         if(ObjectUtils.isNotEmpty(dataFieldDTO.getFieldAccuracy())){
                             //字段精度为正整数
