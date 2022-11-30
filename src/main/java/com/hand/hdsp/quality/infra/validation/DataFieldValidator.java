@@ -104,7 +104,7 @@ public class DataFieldValidator extends BatchValidatorHandler {
                     addErrorMsg(i, "字段类型不能为空");
                     return false;
                 }else {
-                    if("DECIMAL".equals(dataFieldDTO.getFieldType())){
+                    if("DECIMAL".equals(dataFieldDTO.getFieldType() ) || "INTEGER".equals(dataFieldDTO.getFieldType())){
                         //校验字段精度
                         if(ObjectUtils.isNotEmpty(dataFieldDTO.getFieldAccuracy())){
                             //字段精度为正整数
@@ -127,12 +127,9 @@ public class DataFieldValidator extends BatchValidatorHandler {
                         List<StandardTeamDTO> standardTeamDTOS = standardTeamRepository.selectDTOByCondition(Condition.builder(StandardTeam.class).andWhere(Sqls.custom()
                                         .andEqualTo(StandardTeam.FIELD_STANDARD_TEAM_CODE, standardTeamCode))
                                 .build());
-                        if (CollectionUtils.isNotEmpty(standardTeamDTOS)) {
-                            Long standardTeamId = standardTeamDTOS.get(0).getStandardTeamId();
-                            if (ObjectUtils.isEmpty(standardTeamId)) {
-                                addErrorMsg(i, String.format("导入环境字段标准组：%s不存在", standardTeamCode));
-                                return false;
-                            }
+                        if (CollectionUtils.isEmpty(standardTeamDTOS)) {
+                            addErrorMsg(i, String.format("导入环境字段标准组：%s不存在", standardTeamCode));
+                            return false;
                         }
                     }
                 }
