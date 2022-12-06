@@ -9,27 +9,20 @@ import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.mapper.StandardApprovalMapper;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.ROOT;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
-
+import com.hand.hdsp.quality.infra.util.AnsjUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
+import lombok.extern.slf4j.Slf4j;
+import org.ansj.domain.Result;
+import org.ansj.domain.Term;
+import org.ansj.splitWord.analysis.DicAnalysis;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
 import org.hzero.boot.platform.plugin.hr.entity.Employee;
 import org.hzero.boot.workflow.WorkflowClient;
@@ -39,12 +32,28 @@ import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+import org.nlpcn.commons.lang.tire.domain.Forest;
+import org.nlpcn.commons.lang.tire.library.Library;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.File;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.ROOT;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
 /**
  * 词根应用服务默认实现
  *
  * @author xin.sheng01@china-hand.com 2022-11-21 14:28:19
  */
+@Slf4j
 @Service
 public class RootServiceImpl implements RootService {
 
@@ -64,9 +73,20 @@ public class RootServiceImpl implements RootService {
 
     private static final String PATTERN = "^[A-Za-z][A-Za-z0-9]{0,63}$";
 
+    private static final String NO_MATCH = "{未匹配}";
+
+    @Value("${hdsp.root_dic_parent:library}")
+    public String dicParent;
+
+    public static final String DIC_NAME_FORMAT = "rootLibrary_%d_%d.dic";
+
     private static final Long DEFAULT_VERSION = 1L;
 
-    public RootServiceImpl(RootRepository rootRepository, RootVersionRepository rootVersionRepository, RootLineRepository rootLineRepository, StandardGroupRepository standardGroupRepository, StandardApprovalService standardApprovalService, StandardApprovalRepository standardApprovalRepository, StandardApprovalMapper standardApprovalMapper) {
+    private final AnsjUtil ansjUtil;
+
+    private final RootDicRepository rootDicRepository;
+
+    public RootServiceImpl(RootRepository rootRepository, RootVersionRepository rootVersionRepository, RootLineRepository rootLineRepository, StandardGroupRepository standardGroupRepository, StandardApprovalService standardApprovalService, StandardApprovalRepository standardApprovalRepository, StandardApprovalMapper standardApprovalMapper, AnsjUtil ansjUtil, RootDicRepository rootDicRepository) {
         this.rootRepository = rootRepository;
         this.rootVersionRepository = rootVersionRepository;
         this.rootLineRepository = rootLineRepository;
@@ -74,18 +94,20 @@ public class RootServiceImpl implements RootService {
         this.standardApprovalService = standardApprovalService;
         this.standardApprovalRepository = standardApprovalRepository;
         this.standardApprovalMapper = standardApprovalMapper;
+        this.ansjUtil = ansjUtil;
+        this.rootDicRepository = rootDicRepository;
     }
 
     @Override
     public Page<Root> list(PageRequest pageRequest, Root root) {
-        return PageHelper.doPageAndSort(pageRequest,()->rootRepository.list(root));
+        return PageHelper.doPageAndSort(pageRequest, () -> rootRepository.list(root));
     }
 
     @Override
     public Root detail(Long id) {
         List<Root> list = rootRepository.list(Root.builder().id(id).build());
         Root root = null;
-        if(CollectionUtils.isNotEmpty(list)){
+        if (CollectionUtils.isNotEmpty(list)) {
             root = list.get(0);
         }
         return root;
@@ -94,42 +116,42 @@ public class RootServiceImpl implements RootService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void create(Root root) {
-        if(!Pattern.matches(PATTERN, root.getRootEn())){
+        if (!Pattern.matches(PATTERN, root.getRootEn())) {
             throw new CommonException(ErrorCode.ROOT_EN_SHORT_ERROR);
         }
 
         List<Root> rootList = rootRepository.selectByCondition(Condition.builder(Root.class)
                 .andWhere(Sqls.custom()
-                        .andEqualTo(Root.FIELD_ROOT_EN_SHORT,root.getRootEnShort())
-                        .andEqualTo(Root.FIELD_PROJECT_ID,root.getProjectId())
-                        .andEqualTo(Root.FIELD_TENANT_ID,root.getTenantId())
+                        .andEqualTo(Root.FIELD_ROOT_EN_SHORT, root.getRootEnShort())
+                        .andEqualTo(Root.FIELD_PROJECT_ID, root.getProjectId())
+                        .andEqualTo(Root.FIELD_TENANT_ID, root.getTenantId())
                 ).build());
-        if(CollectionUtils.isNotEmpty(rootList)){
+        if (CollectionUtils.isNotEmpty(rootList)) {
             throw new CommonException(ErrorCode.ROOT_EN_SHORT_EXIST);
         }
 
         //词根中文校验
-        String[] rootName =  root.getRootName().split(StandardConstant.RootName.SEPARATOR);
+        String[] rootName = root.getRootName().split(StandardConstant.RootName.SEPARATOR);
 
         List<RootLine> rootLines = rootLineRepository.selectByCondition(Condition.builder(RootLine.class)
-                .andWhere(Sqls.custom().andIn(RootLine.FIELD_ROOT_NAME,Arrays.asList(rootName))
-                        .andEqualTo(RootLine.FIELD_PROJECT_ID,root.getProjectId())
-                        .andEqualTo(RootLine.FIELD_TENANT_ID,root.getTenantId())
+                .andWhere(Sqls.custom().andIn(RootLine.FIELD_ROOT_NAME, Arrays.asList(rootName))
+                        .andEqualTo(RootLine.FIELD_PROJECT_ID, root.getProjectId())
+                        .andEqualTo(RootLine.FIELD_TENANT_ID, root.getTenantId())
                 ).build());
 
-        if(CollectionUtils.isNotEmpty(rootLines)){
+        if (CollectionUtils.isNotEmpty(rootLines)) {
             StringBuffer rootNameStr = new StringBuffer();
-            for (RootLine rootLine: rootLines){
+            for (RootLine rootLine : rootLines) {
                 rootNameStr.append(rootLine.getRootName()).append(" ");
             }
-            throw new CommonException(ErrorCode.ROOT_NAME_EXIST,rootNameStr);
+            throw new CommonException(ErrorCode.ROOT_NAME_EXIST, rootNameStr);
         }
 
         root.setReleaseStatus(StandardConstant.Status.CREATE);
         rootRepository.insertSelective(root);
         rootLines = new ArrayList<>();
         RootLine rootLine;
-        for(int i=0;i<rootName.length;i++){
+        for (int i = 0; i < rootName.length; i++) {
             rootLine = RootLine.builder()
                     .rootId(root.getId())
                     .rootName(rootName[i])
@@ -149,15 +171,15 @@ public class RootServiceImpl implements RootService {
         //删除行表数据，重新插入
         List<RootLine> rootLines = rootLineRepository.selectByCondition(Condition.builder(RootLine.class)
                 .andWhere(Sqls.custom()
-                        .andEqualTo(RootLine.FIELD_ROOT_ID,root.getId())
-                        .andEqualTo(RootLine.FIELD_PROJECT_ID,root.getProjectId())
-                        .andEqualTo(RootLine.FIELD_TENANT_ID,root.getTenantId())
+                        .andEqualTo(RootLine.FIELD_ROOT_ID, root.getId())
+                        .andEqualTo(RootLine.FIELD_PROJECT_ID, root.getProjectId())
+                        .andEqualTo(RootLine.FIELD_TENANT_ID, root.getTenantId())
                 ).build());
         rootLineRepository.batchDelete(rootLines);
 
-        String[] rootName =  root.getRootName().split(StandardConstant.RootName.SEPARATOR);
+        String[] rootName = root.getRootName().split(StandardConstant.RootName.SEPARATOR);
         rootLines = new ArrayList<>();
-        for(int i=0;i<rootName.length;i++){
+        for (int i = 0; i < rootName.length; i++) {
             RootLine rootLine = RootLine.builder()
                     .rootId(root.getId())
                     .rootName(rootName[i])
@@ -182,20 +204,20 @@ public class RootServiceImpl implements RootService {
         //删除行表数据
         List<RootLine> rootLines = rootLineRepository.selectByCondition(Condition.builder(RootLine.class)
                 .andWhere(Sqls.custom()
-                        .andEqualTo(RootLine.FIELD_ROOT_ID,root.getId())
-                        .andEqualTo(RootLine.FIELD_PROJECT_ID,root.getProjectId())
-                        .andEqualTo(RootLine.FIELD_TENANT_ID,root.getTenantId())
+                        .andEqualTo(RootLine.FIELD_ROOT_ID, root.getId())
+                        .andEqualTo(RootLine.FIELD_PROJECT_ID, root.getProjectId())
+                        .andEqualTo(RootLine.FIELD_TENANT_ID, root.getTenantId())
                 ).build());
         rootLineRepository.batchDelete(rootLines);
 
         //删除版本表数据
         List<RootVersion> rootVersions = rootVersionRepository.selectByCondition(Condition.builder(RootVersion.class)
                 .andWhere(Sqls.custom()
-                        .andEqualTo(RootVersion.FIELD_ROOT_ID,root.getId())
-                        .andEqualTo(RootVersion.FIELD_PROJECT_ID,root.getProjectId())
-                        .andEqualTo(RootVersion.FIELD_TENANT_ID,root.getTenantId())
+                        .andEqualTo(RootVersion.FIELD_ROOT_ID, root.getId())
+                        .andEqualTo(RootVersion.FIELD_PROJECT_ID, root.getProjectId())
+                        .andEqualTo(RootVersion.FIELD_TENANT_ID, root.getTenantId())
                 ).build());
-        if(CollectionUtils.isNotEmpty(rootVersions)){
+        if (CollectionUtils.isNotEmpty(rootVersions)) {
             rootVersionRepository.batchDelete(rootVersions);
         }
     }
@@ -204,7 +226,7 @@ public class RootServiceImpl implements RootService {
     public List<RootGroupDTO> export(Root root, ExportParam exportParam) {
         List<RootGroupDTO> rootGroupDTOS = new ArrayList<>();
         int level = 1;
-        if(ObjectUtils.isNotEmpty(root.getGroupId())){
+        if (ObjectUtils.isNotEmpty(root.getGroupId())) {
             //分组条件导出
             StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
                     .andEqualTo(StandardGroup.FIELD_TENANT_ID, root.getTenantId())
@@ -227,9 +249,9 @@ public class RootServiceImpl implements RootService {
             if (ObjectUtils.isNotEmpty(groupDTO.getParentGroupId())) {
                 findParentGroups(groupDTO.getParentGroupId(), rootGroupDTOS, level);
             }
-            findChildGroups(dto,rootGroupDTOS,level);
+            findChildGroups(dto, rootGroupDTOS, level);
             return rootGroupDTOS.stream().sorted(Comparator.comparing(RootGroupDTO::getGroupLevel)).collect(Collectors.toList());
-        }else {
+        } else {
             //全部分组条件导出
             //添加查询所有父分组 并排序导出保证导入准确性
             List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
@@ -247,7 +269,7 @@ public class RootServiceImpl implements RootService {
                 dto.setRoots(roots);
                 dto.setGroupLevel(level);
                 rootGroupDTOS.add(dto);
-                findChildGroups(dto,rootGroupDTOS,level);
+                findChildGroups(dto, rootGroupDTOS, level);
             });
             return rootGroupDTOS.stream().sorted(Comparator.comparing(RootGroupDTO::getGroupLevel)).collect(Collectors.toList());
         }
@@ -356,12 +378,12 @@ public class RootServiceImpl implements RootService {
         long lastVersion = 1L;
         List<RootVersion> rootVersions = rootVersionRepository.selectByCondition(Condition.builder(RootVersion.class)
                 .andWhere(Sqls.custom()
-                        .andEqualTo(RootVersion.FIELD_ROOT_ID,standardApprovalDTO.getStandardId()))
-                        .orderByDesc(RootVersion.FIELD_VERSION_NUMBER)
+                        .andEqualTo(RootVersion.FIELD_ROOT_ID, standardApprovalDTO.getStandardId()))
+                .orderByDesc(RootVersion.FIELD_VERSION_NUMBER)
                 .build());
         //不为空则取最新版本
         if (CollectionUtils.isNotEmpty(rootVersions)) {
-            lastVersion = rootVersions .get(0).getVersionNumber() + 1;
+            lastVersion = rootVersions.get(0).getVersionNumber() + 1;
         }
         approvalDTO.setSubmitVersion(String.format("v%s.0", lastVersion));
         return approvalDTO;
@@ -376,13 +398,86 @@ public class RootServiceImpl implements RootService {
         return this.detail(standardApprovalDTO.getStandardId());
     }
 
+    @Override
+    public String analyzerWord(Long tenantId, Long projectId, String word) {
+        //判断词库是否存在
+        RootDic rootDic = rootDicRepository.selectOne(RootDic.builder().tenantId(tenantId).projectId(projectId).build());
+        if (rootDic == null) {
+            return StringUtils.EMPTY;
+        }
+        //获取dic词库
+        File rootLibrary = ansjUtil.getDic(tenantId, projectId);
+        List<Term> terms;
+        if (!rootLibrary.exists()) {
+            return StringUtils.EMPTY;
+        }
+        try {
+            Forest forest = Library.makeForest(rootLibrary.getAbsolutePath());
+            Result result = DicAnalysis.parse(word, forest);
+            terms = result.getTerms();
+            if (CollectionUtils.isEmpty(terms)) {
+                throw new CommonException("输入内容不合法,无法分词分析");
+            }
+        } catch (Exception e) {
+            throw new CommonException("词根分析失败", e);
+        }
+        List<String> roots = new ArrayList<>();
+        terms.forEach(term -> {
+            //获取每个term对应的词根
+            String name = term.getName();
+            RootLine rootLine = rootLineRepository.selectOne(RootLine.builder().rootName(name).tenantId(tenantId).projectId(projectId).build());
+            if (rootLine == null) {
+                roots.add(NO_MATCH);
+            } else {
+                Root root = rootRepository.selectByPrimaryKey(rootLine.getRootId());
+                roots.add(root.getRootEnShort());
+            }
+        });
+        return StringUtils.join(roots, "_");
+    }
+
+    @Override
+    public Map<String, List<String>> rootTranslate(Long tenantId, Long projectId, String word) {
+        Map<String, List<String>> result = new HashMap<>();
+        if (StringUtils.isBlank(word)) {
+            return new HashMap<>();
+        }
+        String[] words = word.split("_");
+        if (words.length <= 0) {
+            return new HashMap<>();
+        }
+        for (String rootEnShort : words) {
+            //根据rootEn找到对应词根对应的中文
+            List<Root> roots = rootRepository.selectByCondition(Condition.builder(Root.class)
+                    .andWhere(Sqls.custom()
+                            .andEqualTo(Root.FIELD_ROOT_EN_SHORT, rootEnShort)
+                            .andEqualTo(Root.FIELD_TENANT_ID, tenantId)
+                            .andEqualTo(Root.FIELD_PROJECT_ID, projectId)
+                            .andIn(Root.FIELD_RELEASE_STATUS, Arrays.asList(ONLINE, OFFLINE_APPROVING)))
+                    .build());
+            if (CollectionUtils.isEmpty(roots)) {
+                result.put(rootEnShort, Arrays.asList(NO_MATCH));
+            } else {
+                Root root = roots.get(0);
+                List<RootLine> rootLines = rootLineRepository.select(RootLine.builder().rootId(root.getId()).build());
+                if (CollectionUtils.isEmpty(rootLines)) {
+                    result.put(rootEnShort, Arrays.asList(NO_MATCH));
+                } else {
+                    List<String> rootNames = rootLines.stream().map(RootLine::getRootName).distinct().collect(Collectors.toList());
+                    result.put(rootEnShort, rootNames);
+                }
+            }
+        }
+        return result;
+    }
+
     private void findParentGroups(Long groupId, List<RootGroupDTO> rootGroupDTOs, int level) {
         RootGroupDTO rootGroupDTO = new RootGroupDTO();
-        StandardGroupDTO  standardGroupDTO= standardGroupRepository.selectDTOByPrimaryKey(groupId);
+        StandardGroupDTO standardGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(groupId);
         level--;
 
-        if(ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())){
-            StandardGroupDTO parentGroupDTO= standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
+        if (ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())) {
+            StandardGroupDTO parentGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
             standardGroupDTO.setParentGroupCode(parentGroupDTO.getGroupCode());
             findParentGroups(standardGroupDTO.getParentGroupId(), rootGroupDTOs, level);
         }
@@ -391,7 +486,7 @@ public class RootServiceImpl implements RootService {
         rootGroupDTOs.add(rootGroupDTO);
     }
 
-    private void findChildGroups(RootGroupDTO parentRootGroupDTO,List<RootGroupDTO> rootGroupDTOs, int level) {
+    private void findChildGroups(RootGroupDTO parentRootGroupDTO, List<RootGroupDTO> rootGroupDTOs, int level) {
         List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID, parentRootGroupDTO.getGroupId()))
@@ -407,7 +502,7 @@ public class RootServiceImpl implements RootService {
                 List<Root> roots = rootRepository.list(Root.builder().groupId(rootGroupDTO.getGroupId()).build());
                 rootGroupDTO.setRoots(roots);
                 rootGroupDTOs.add(rootGroupDTO);
-                findChildGroups(rootGroupDTO,rootGroupDTOs, finalLevel);
+                findChildGroups(rootGroupDTO, rootGroupDTOs, finalLevel);
             });
         }
     }
@@ -419,33 +514,48 @@ public class RootServiceImpl implements RootService {
      * @param status
      */
     private void workflowing(Long id, String status) {
-        Root  root = rootRepository.selectByPrimaryKey(id);
+        Root root = rootRepository.selectByPrimaryKey(id);
         if (root != null) {
             root.setReleaseStatus(status);
-            rootRepository.updateOptional(root,Root.FIELD_RELEASE_STATUS);
+            rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS);
             if (ONLINE.equals(status)) {
                 doVersion(root);
+                //上线后词库追加词根对应的中文
+                List<RootLine> rootLines = rootLineRepository.select(RootLine.builder().rootId(id).build());
+                if (CollectionUtils.isNotEmpty(rootLines)) {
+                    List<String> addWords = rootLines.stream()
+                            .filter(rootLine -> Strings.isNotBlank(rootLine.getRootName()))
+                            .map(RootLine::getRootName)
+                            .distinct()
+                            .collect(Collectors.toList());
+                    ansjUtil.addWord(root.getTenantId(), root.getProjectId(), addWords);
+                }
+            } else {
+                //下线词库中进行移除,基于当前在线和下线中的词根重新生成文件
+                ansjUtil.rebuildDic(root.getTenantId(), root.getProjectId());
             }
         }
     }
 
     /**
      * 版本记录
+     *
      * @param root
      */
-    private void doVersion(Root root){
-        Long versionNum= DEFAULT_VERSION;
+    private void doVersion(Root root) {
+        Long versionNum = DEFAULT_VERSION;
         List<RootVersion> rootVersions = rootVersionRepository.selectByCondition(Condition.builder(RootVersion.class)
                 .andWhere(Sqls.custom()
-                        .andEqualTo(RootVersion.FIELD_ROOT_ID,root.getId()))
+                        .andEqualTo(RootVersion.FIELD_ROOT_ID, root.getId()))
                 .orderByDesc(RootVersion.FIELD_VERSION_NUMBER)
                 .build());
-        if(CollectionUtils.isNotEmpty(rootVersions)){
-            versionNum = rootVersions.get(0).getVersionNumber()+1;
+        if (CollectionUtils.isNotEmpty(rootVersions)) {
+            versionNum = rootVersions.get(0).getVersionNumber() + 1;
         }
         root = rootRepository.list(root).get(0);
         RootVersion rootVersion = new RootVersion();
         BeanUtils.copyProperties(root, rootVersion);
+        rootVersion.setId(null);
         rootVersion.setRootId(root.getId());
         rootVersion.setVersionNumber(versionNum);
         rootVersionRepository.insert(rootVersion);

@@ -7,28 +7,27 @@ import com.hand.hdsp.quality.api.dto.StandardApprovalDTO;
 import com.hand.hdsp.quality.app.service.RootService;
 import com.hand.hdsp.quality.domain.entity.Root;
 import com.hand.hdsp.quality.domain.repository.RootRepository;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
-
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
-
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
-
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.hzero.export.annotation.ExcelExport;
 import org.hzero.export.vo.ExportParam;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 词根 管理 API
@@ -51,12 +50,12 @@ public class RootController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<Page<Root>> list(@PathVariable(name = "organizationId") Long tenantId,
-                                              @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                              @ApiIgnore @SortDefault(value = Root.FIELD_ID, direction = Sort.Direction.DESC) PageRequest pageRequest,
-                                              Root root) {
+                                           @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                           @ApiIgnore @SortDefault(value = Root.FIELD_ID, direction = Sort.Direction.DESC) PageRequest pageRequest,
+                                           Root root) {
         root.setTenantId(tenantId);
         root.setProjectId(projectId);
-        Page<Root> list = rootService.list(pageRequest,root);
+        Page<Root> list = rootService.list(pageRequest, root);
         return Results.success(list);
     }
 
@@ -101,14 +100,14 @@ public class RootController extends BaseController {
     @GetMapping("/export")
     @ExcelExport(value = RootGroupDTO.class)
     public ResponseEntity<List<RootGroupDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                                          @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                                          Root root,
-                                                          ExportParam exportParam,
-                                                          HttpServletResponse response) {
+                                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                     Root root,
+                                                     ExportParam exportParam,
+                                                     HttpServletResponse response) {
         response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
         root.setTenantId(tenantId);
         root.setProjectId(projectId);
-        return Results.success(rootService.export(root,exportParam));
+        return Results.success(rootService.export(root, exportParam));
     }
 
     @ApiOperation(value = "发布 下线")
@@ -121,8 +120,8 @@ public class RootController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/publish-off")
     public ResponseEntity<List<Root>> publishOrOff(@PathVariable(name = "organizationId") Long tenantId,
-                                                           @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                                           @RequestBody List<Root> rootList) {
+                                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                   @RequestBody List<Root> rootList) {
         rootList.forEach(root -> {
             root.setTenantId(tenantId);
             root.setProjectId(projectId);
@@ -238,7 +237,7 @@ public class RootController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/root-apply-info")
     public ResponseEntity<StandardApprovalDTO> rootApplyInfo(@PathVariable("organizationId") Long tenantId,
-                                                              Long approvalId) {
+                                                             Long approvalId) {
         return Results.success(rootService.rootApplyInfo(tenantId, approvalId));
     }
 
@@ -252,7 +251,37 @@ public class RootController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/root-info")
     public ResponseEntity<Root> rootInfo(@PathVariable(name = "organizationId") Long tenantId,
-                                                  Long approvalId) {
+                                         Long approvalId) {
         return Results.success(rootService.rootInfo(approvalId));
+    }
+
+    @ApiOperation(value = "词根匹配")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/analyzer-word")
+    public ResponseEntity<String> analyzerWord(@PathVariable(name = "organizationId") Long tenantId,
+                                               @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                               String word) {
+        return Results.success(rootService.analyzerWord(tenantId, projectId, word));
+    }
+
+    @ApiOperation(value = "词根翻译")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/root-translate")
+    public ResponseEntity<Map> rootTranslate(@PathVariable(name = "organizationId") Long tenantId,
+                                             @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                             String word) {
+        return Results.success(rootService.rootTranslate(tenantId, projectId, word));
     }
 }
