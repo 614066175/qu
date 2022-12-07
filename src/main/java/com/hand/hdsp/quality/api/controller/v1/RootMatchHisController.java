@@ -1,12 +1,13 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.core.constant.HdspConstant;
-import com.hand.hdsp.quality.app.service.FieldStandardMatchsService;
+import com.hand.hdsp.quality.app.service.RootMatchHisService;
+import com.hand.hdsp.quality.app.service.RootMatchService;
 import org.hzero.core.util.Results;
 import org.hzero.core.base.BaseController;
-import com.hand.hdsp.quality.domain.entity.FieldStandardMatchs;
-import com.hand.hdsp.quality.api.dto.FieldStandardMatchsDTO;
-import com.hand.hdsp.quality.domain.repository.FieldStandardMatchsRepository;
+import com.hand.hdsp.quality.domain.entity.RootMatchHis;
+import com.hand.hdsp.quality.api.dto.RootMatchHisDTO;
+import com.hand.hdsp.quality.domain.repository.RootMatchHisRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,22 +26,22 @@ import springfox.documentation.annotations.ApiIgnore;
 /**
  * <p>字段标准匹配记录表 管理 API</p>
  *
- * @author SHIJIE.GAO@HAND-CHINA.COM 2022-11-22 17:55:57
+ * @author shijie.gao@hand-china.com 2022-12-07 10:42:30
  */
-@RestController("fieldStandardMatchsController.v1")
-@RequestMapping("/v1/{organizationId}/field-standard-matchss")
-public class FieldStandardMatchsController extends BaseController {
+@RestController("rootMatchHisController.v1")
+@RequestMapping("/v1/{organizationId}/root-match-hiss")
+public class RootMatchHisController extends BaseController {
 
-    private final FieldStandardMatchsRepository fieldStandardMatchsRepository;
-    private final FieldStandardMatchsService fieldStandardMatchsService;
+    private final RootMatchHisRepository rootMatchHisRepository;
+    private final RootMatchHisService rootMatchHisService;
 
-    public FieldStandardMatchsController(FieldStandardMatchsRepository fieldStandardMatchsRepository,
-                                         FieldStandardMatchsService fieldStandardMatchsService) {
-        this.fieldStandardMatchsRepository = fieldStandardMatchsRepository;
-        this.fieldStandardMatchsService = fieldStandardMatchsService;
+    public RootMatchHisController(RootMatchHisRepository rootMatchHisRepository,
+                                  RootMatchHisService rootMatchHisService) {
+        this.rootMatchHisRepository = rootMatchHisRepository;
+        this.rootMatchHisService = rootMatchHisService;
     }
 
-    @ApiOperation(value = "分页查询字段标准匹配记录列表")
+    @ApiOperation(value = "字段标准匹配记录表列表")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -51,11 +52,11 @@ public class FieldStandardMatchsController extends BaseController {
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                  FieldStandardMatchsDTO fieldStandardMatchsDTO,
-                                  @ApiIgnore @SortDefault(value = FieldStandardMatchs.FIELD_ID, direction = Sort.Direction.DESC) PageRequest pageRequest) {
-        fieldStandardMatchsDTO.setTenantId(tenantId);
-        fieldStandardMatchsDTO.setProjectId(projectId);
-        Page<FieldStandardMatchsDTO> list = fieldStandardMatchsService.pageAll(pageRequest,fieldStandardMatchsDTO);
+                                  RootMatchHisDTO rootMatchHisDTO,
+                                  @ApiIgnore @SortDefault(value = RootMatchHis.FIELD_ID, direction = Sort.Direction.DESC) PageRequest pageRequest) {
+        rootMatchHisDTO.setTenantId(tenantId);
+        rootMatchHisDTO.setProjectId(projectId);
+        Page<RootMatchHisDTO> list = rootMatchHisService.pageAll(pageRequest,rootMatchHisDTO);
         return Results.success(list);
     }
 
@@ -73,10 +74,9 @@ public class FieldStandardMatchsController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{id}")
-    public ResponseEntity<?> detail(@PathVariable Long id,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId) {
-        FieldStandardMatchsDTO fieldStandardMatchsDTO = fieldStandardMatchsRepository.selectDTOByPrimaryKeyAndTenant(id);
-        return Results.success(fieldStandardMatchsDTO);
+    public ResponseEntity<?> detail(@PathVariable Long id) {
+        RootMatchHisDTO rootMatchHisDTO = rootMatchHisRepository.selectDTOByPrimaryKeyAndTenant(id);
+        return Results.success(rootMatchHisDTO);
     }
 
     @ApiOperation(value = "创建字段标准匹配记录表")
@@ -90,12 +90,12 @@ public class FieldStandardMatchsController extends BaseController {
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                    @RequestBody FieldStandardMatchsDTO fieldStandardMatchsDTO) {
-        fieldStandardMatchsDTO.setTenantId(tenantId);
-        fieldStandardMatchsDTO.setProjectId(projectId);
-        this.validObject(fieldStandardMatchsDTO);
-        fieldStandardMatchsRepository.insertDTOSelective(fieldStandardMatchsDTO);
-        return Results.success(fieldStandardMatchsDTO);
+                                    @RequestBody RootMatchHisDTO rootMatchHisDTO) {
+        rootMatchHisDTO.setTenantId(tenantId);
+        rootMatchHisDTO.setProjectId(projectId);
+        this.validObject(rootMatchHisDTO);
+        rootMatchHisRepository.insertDTOSelective(rootMatchHisDTO);
+        return Results.success(rootMatchHisDTO);
     }
 
     @ApiOperation(value = "修改字段标准匹配记录表")
@@ -108,11 +108,9 @@ public class FieldStandardMatchsController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                    @RequestBody FieldStandardMatchsDTO fieldStandardMatchsDTO) {
-        fieldStandardMatchsDTO.setProjectId(projectId);
-        fieldStandardMatchsRepository.updateDTOWhereTenant(fieldStandardMatchsDTO, tenantId);
-        return Results.success(fieldStandardMatchsDTO);
+                                    @RequestBody RootMatchHisDTO rootMatchHisDTO) {
+        rootMatchHisRepository.updateDTOWhereTenant(rootMatchHisDTO, tenantId);
+        return Results.success(rootMatchHisDTO);
     }
 
     @ApiOperation(value = "删除字段标准匹配记录表")
@@ -126,10 +124,10 @@ public class FieldStandardMatchsController extends BaseController {
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                    @RequestBody FieldStandardMatchsDTO fieldStandardMatchsDTO) {
-        fieldStandardMatchsDTO.setTenantId(tenantId);
-        fieldStandardMatchsDTO.setProjectId(projectId);
-        fieldStandardMatchsRepository.deleteByPrimaryKey(fieldStandardMatchsDTO);
+                                    @RequestBody RootMatchHisDTO rootMatchHisDTO) {
+        rootMatchHisDTO.setTenantId(tenantId);
+        rootMatchHisDTO.setProjectId(projectId);
+        rootMatchHisRepository.deleteByPrimaryKey(rootMatchHisDTO);
         return Results.success();
     }
 }

@@ -11,14 +11,14 @@ import lombok.*;
 /**
  * <p>字段标准匹配记录表数据对象</p>
  *
- * @author SHIJIE.GAO@HAND-CHINA.COM 2022-11-22 17:55:57
+ * @author shijie.gao@hand-china.com 2022-12-07 10:42:30
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class FieldStandardMatchsDO extends AuditDomain {
+public class RootMatchHisDO extends AuditDomain {
 
     private Long id;
 

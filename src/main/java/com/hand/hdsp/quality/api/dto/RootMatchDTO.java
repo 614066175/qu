@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 /**
  * <p>字段标准匹配表 数据传输对象</p>
  *
- * @author shijie.gao@hand-china.com 2022-11-30 10:31:02
+ * @author shijie.gao@hand-china.com 2022-12-07 10:42:30
  */
 @Data
 @Builder
@@ -29,33 +29,37 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @EqualsAndHashCode(callSuper = false)
 @ApiModel("字段标准匹配表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class FieldStandardMatchingDTO extends AuditDomain {
+public class RootMatchDTO extends AuditDomain {
 
     @ApiModelProperty("主键")
     private Long id;
 
-    @ApiModelProperty("批次号")
+    @ApiModelProperty(value = "批次号")
+    @NotBlank
+    @Size(max = 120)
     private String batchNumber;
 
-    @ApiModelProperty(value = "字段名称")
-    private String fieldName;
-
-    @ApiModelProperty(value = "字段类型")
-    private String fieldType;
-
     @ApiModelProperty(value = "字段注释")
+    @NotBlank
+    @Size(max = 120)
     private String fieldComment;
-
-    @ApiModelProperty(value = "字段描述")
-    private String fieldDescription;
 
     @ApiModelProperty(value = "匹配状态:( 匹配中,匹配成功,匹配失败)")
     @NotBlank
     @Size(max = 120)
     private String matchingStatus;
 
+    @ApiModelProperty(value = "字段名称")
+    private String fieldName;
+
     @ApiModelProperty(value = "来源：(词根翻译 , 字段标准)")
     private String source;
+
+    @ApiModelProperty(value = "字段描述")
+    private String fieldDescription;
+
+    @ApiModelProperty(value = "字段类型")
+    private String fieldType;
 
     @ApiModelProperty(value = "项目id")
     private Long projectId;
