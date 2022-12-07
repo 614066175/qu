@@ -1,21 +1,14 @@
 package com.hand.hdsp.quality.api.dto;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
-import java.util.Date;
-import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiModel;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 /**
  * <p>字段标准匹配表 数据传输对象</p>
@@ -67,4 +60,6 @@ public class RootMatchDTO extends AuditDomain {
     @ApiModelProperty(value = "租户id")
     private Long tenantId;
 
+    @Transient
+    private Integer reMatchFlag;
 }

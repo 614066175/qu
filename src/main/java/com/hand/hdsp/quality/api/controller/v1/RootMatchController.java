@@ -1,25 +1,24 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.core.constant.HdspConstant;
-import com.hand.hdsp.quality.app.service.RootMatchService;
-import org.hzero.core.util.Results;
-import org.hzero.core.base.BaseController;
-import com.hand.hdsp.quality.domain.entity.RootMatch;
 import com.hand.hdsp.quality.api.dto.RootMatchDTO;
+import com.hand.hdsp.quality.app.service.RootMatchService;
+import com.hand.hdsp.quality.domain.entity.RootMatch;
 import com.hand.hdsp.quality.domain.repository.RootMatchRepository;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.core.base.BaseController;
+import org.hzero.core.util.Results;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 /**
@@ -129,5 +128,23 @@ public class RootMatchController extends BaseController {
         rootMatchDTO.setProjectId(projectId);
         rootMatchRepository.deleteByPrimaryKey(rootMatchDTO);
         return Results.success();
+    }
+
+
+    @ApiOperation(value = "智能匹配/重新匹配")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/smart-match")
+    public ResponseEntity<?> smartMatch(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                        @RequestBody RootMatchDTO rootMatchDTO) {
+        rootMatchDTO.setProjectId(projectId);
+        rootMatchDTO.setTenantId(tenantId);
+        return Results.success(rootMatchService.smartMatch(rootMatchDTO));
     }
 }

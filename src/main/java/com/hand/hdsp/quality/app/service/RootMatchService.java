@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.RootMatchDTO;
+import com.hand.hdsp.quality.domain.entity.RootMatch;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,4 +39,10 @@ public interface RootMatchService {
      */
     List<RootMatchDTO> export(RootMatchDTO rootMatchDTO, String exportType);
 
+    /**
+     * 智能匹配
+     * @param rootMatchDTO
+     * @return
+     */
+    List<RootMatch> smartMatch(RootMatchDTO rootMatchDTO);
 }
