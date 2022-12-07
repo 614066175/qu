@@ -2,16 +2,15 @@ package com.hand.hdsp.quality.app.service.impl;
 
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.RootMatchDTO;
+import com.hand.hdsp.quality.api.dto.RootMatchHisDTO;
 import com.hand.hdsp.quality.api.dto.StandardTeamDTO;
 import com.hand.hdsp.quality.app.service.RootMatchService;
 import com.hand.hdsp.quality.app.service.RootService;
 import com.hand.hdsp.quality.domain.entity.DataField;
 import com.hand.hdsp.quality.domain.entity.RootMatch;
+import com.hand.hdsp.quality.domain.entity.RootMatchHis;
 import com.hand.hdsp.quality.domain.entity.StandardRelation;
-import com.hand.hdsp.quality.domain.repository.DataFieldRepository;
-import com.hand.hdsp.quality.domain.repository.RootMatchRepository;
-import com.hand.hdsp.quality.domain.repository.StandardRelationRepository;
-import com.hand.hdsp.quality.domain.repository.StandardTeamRepository;
+import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
@@ -36,7 +35,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.starter.driver.core.infra.util.UUIDUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -66,16 +67,18 @@ public class RootMatchServiceImpl implements RootMatchService {
     private final DataFieldMapper dataFieldMapper;
     private final StandardRelationRepository standardRelationRepository;
     private final StandardTeamRepository standardTeamRepository;
+    private final RootMatchHisRepository rootMatchHisRepository;
 
     private static final String NO_MATCH = "{未匹配}";
 
-    public RootMatchServiceImpl(RootMatchRepository rootMatchRepository, DataFieldRepository dataFieldRepository, RootService rootService, DataFieldMapper dataFieldMapper, StandardRelationRepository standardRelationRepository, StandardTeamRepository standardTeamRepository) {
+    public RootMatchServiceImpl(RootMatchRepository rootMatchRepository, DataFieldRepository dataFieldRepository, RootService rootService, DataFieldMapper dataFieldMapper, StandardRelationRepository standardRelationRepository, StandardTeamRepository standardTeamRepository, RootMatchHisRepository rootMatchHisRepository) {
         this.rootMatchRepository = rootMatchRepository;
         this.dataFieldRepository = dataFieldRepository;
         this.rootService = rootService;
         this.dataFieldMapper = dataFieldMapper;
         this.standardRelationRepository = standardRelationRepository;
         this.standardTeamRepository = standardTeamRepository;
+        this.rootMatchHisRepository = rootMatchHisRepository;
     }
 
     /**
@@ -93,7 +96,22 @@ public class RootMatchServiceImpl implements RootMatchService {
      * @param file         文件
      */
     @Override
-    public void upload(RootMatchDTO rootMatchDTO, MultipartFile file) throws IOException {
+    @Transactional(rollbackFor = Exception.class)
+    public void upload(RootMatchDTO rootMatchDTO, MultipartFile file) {
+        List<RootMatchHis> rootMatchHis = new ArrayList<>();
+        Long importRowCount = 0L;
+        //生成批次号
+        if (StringUtils.isEmpty(rootMatchDTO.getBatchNumber())) {
+            rootMatchDTO.setBatchNumber("XSTA.ROOT_MATCH." + UUIDUtils.generateShortUUID() + System.currentTimeMillis());
+        } else {
+            //记录数据数量
+            rootMatchHis = rootMatchHisRepository.selectByCondition(Condition.builder(RootMatch.class).andWhere(Sqls.custom()
+                            .andEqualTo(RootMatch.FIELD_BATCH_NUMBER, rootMatchDTO.getBatchNumber()))
+                    .build());
+            if (CollectionUtils.isNotEmpty(rootMatchHis)) {
+                importRowCount = rootMatchHis.get(0).getDataCount();
+            }
+        }
         Workbook wb;
         String fileName = file.getOriginalFilename();
         try {
@@ -115,13 +133,31 @@ public class RootMatchServiceImpl implements RootMatchService {
                 Row row = sheet.getRow(i + 1);
                 Cell cell = row.getCell(0);
                 if (StringUtils.isNotEmpty(cell.getStringCellValue())) {
+                    //存匹配表
                     rootMatchRepository.insertDTOSelective(RootMatchDTO.builder()
-                            .fieldName(cell.getStringCellValue())
+                            .batchNumber(rootMatchDTO.getBatchNumber())
+                            .fieldComment(cell.getStringCellValue())
                             .tenantId(rootMatchDTO.getTenantId())
                             .projectId(rootMatchDTO.getProjectId())
                             .matchingStatus(IMPORT)
                             .build());
                 }
+            }
+            //存匹配记录表
+            if (importRowCount == 0) {
+                rootMatchHisRepository.insertDTOSelective(RootMatchHisDTO.builder()
+                        .batchNumber(rootMatchDTO.getBatchNumber())
+                        .dataCount((long) (rowCount - 2))
+                        .status("UPLOADED")
+                        .tenantId(rootMatchDTO.getTenantId())
+                        .projectId(rootMatchDTO.getProjectId())
+                        .build());
+            } else {
+                RootMatchHis matchHis = rootMatchHis.get(0);
+                matchHis.setTenantId(rootMatchDTO.getTenantId());
+                matchHis.setProjectId(rootMatchDTO.getProjectId());
+                matchHis.setDataCount(rowCount - 2 + importRowCount);
+                rootMatchHisRepository.updateByPrimaryKeySelective(matchHis);
             }
         } catch (IOException e) {
             log.info(e.getMessage());
@@ -135,11 +171,11 @@ public class RootMatchServiceImpl implements RootMatchService {
     @Override
     public void export(RootMatchDTO rootMatchDTO, String exportType, HttpServletResponse response) {
         List<RootMatchDTO> rootMatchDTOList = rootMatchRepository.selectDTOByCondition(Condition.builder(RootMatch.class).andWhere(Sqls.custom()
-                        .andEqualTo(RootMatch.FIELD_BATCH_NUMBER,rootMatchDTO.getBatchNumber()))
+                        .andEqualTo(RootMatch.FIELD_BATCH_NUMBER, rootMatchDTO.getBatchNumber()))
                 .build());
         List<DataFieldDTO> result = new ArrayList<>();
         //筛选字段标准来源的
-        List<RootMatchDTO> sortRootMatchDTOList = rootMatchDTOList.stream().filter(dto ->dto.getFieldType().equals(STANDARD) && ObjectUtils.isNotEmpty(dto.getFieldId())).collect(Collectors.toList());
+        List<RootMatchDTO> sortRootMatchDTOList = rootMatchDTOList.stream().filter(dto -> dto.getFieldType().equals(STANDARD) && ObjectUtils.isNotEmpty(dto.getFieldId())).collect(Collectors.toList());
         for (RootMatchDTO matchDTO : sortRootMatchDTOList) {
             List<DataFieldDTO> list = dataFieldMapper.list(DataFieldDTO.builder().fieldId(matchDTO.getFieldId()).build());
             //查询标准组
@@ -161,17 +197,17 @@ public class RootMatchServiceImpl implements RootMatchService {
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet("Match");
         int rowNum = 0;
-        Row row =  sheet.createRow(rowNum);
+        Row row = sheet.createRow(rowNum);
         Cell cell;
         int cellNum = 0;
-        for (String name:fieldMap.values()){
+        for (String name : fieldMap.values()) {
             cell = row.createCell(cellNum);
             cell.setCellValue(name);
             cellNum++;
         }
-        if("excel".equals(exportType)){
+        if ("excel".equals(exportType)) {
             exportType = ".xlsx";
-        }else{
+        } else {
             exportType = ".csv";
         }
         createCells(result, sheet);
@@ -214,33 +250,33 @@ public class RootMatchServiceImpl implements RootMatchService {
 
     private void createCells(List<DataFieldDTO> result, XSSFSheet sheet) {
         int rows = 1;
-        for (DataFieldDTO dto: result){
+        for (DataFieldDTO dto : result) {
             Row row = sheet.createRow(rows);
             int col = 0;
             row.createCell(col).setCellValue(dto.getFieldComment());
-            row.createCell(col+1).setCellValue(dto.getFieldName());
-            row.createCell(col+2).setCellValue(dto.getGroupName());
-            row.createCell(col+3).setCellValue(dto.getStandardDesc());
-            row.createCell(col+4).setCellValue(dto.getStandardTeamCodes());
-            row.createCell(col+5).setCellValue(dto.getDataStandardName());
-            row.createCell(col+6).setCellValue(dto.getFieldAccuracy());
-            row.createCell(col+7).setCellValue(dto.getFieldType());
-            row.createCell(col+8).setCellValue(dto.getFieldLength());
-            row.createCell(col+9).setCellValue(dto.getDataPattern());
-            row.createCell(col+10).setCellValue(dto.getValueType());
-            row.createCell(col+11).setCellValue(dto.getValueRange());
-            row.createCell(col+12).setCellValue(dto.getNullFlag());
-            row.createCell(col+13).setCellValue(dto.getDefaultValue());
-            row.createCell(col+14).setCellValue(dto.getSysCommonName());
+            row.createCell(col + 1).setCellValue(dto.getFieldName());
+            row.createCell(col + 2).setCellValue(dto.getGroupName());
+            row.createCell(col + 3).setCellValue(dto.getStandardDesc());
+            row.createCell(col + 4).setCellValue(dto.getStandardTeamCodes());
+            row.createCell(col + 5).setCellValue(dto.getDataStandardName());
+            row.createCell(col + 6).setCellValue(dto.getFieldAccuracy());
+            row.createCell(col + 7).setCellValue(dto.getFieldType());
+            row.createCell(col + 8).setCellValue(dto.getFieldLength());
+            row.createCell(col + 9).setCellValue(dto.getDataPattern());
+            row.createCell(col + 10).setCellValue(dto.getValueType());
+            row.createCell(col + 11).setCellValue(dto.getValueRange());
+            row.createCell(col + 12).setCellValue(dto.getNullFlag());
+            row.createCell(col + 13).setCellValue(dto.getDefaultValue());
+            row.createCell(col + 14).setCellValue(dto.getSysCommonName());
             //加密租户则解密
-            if(DataSecurityHelper.isTenantOpen()){
-                row.createCell(col+15).setCellValue(DataSecurityHelper.decrypt(dto.getChargeDeptName()));
-                row.createCell(col+16).setCellValue(DataSecurityHelper.decrypt(dto.getChargeTel()));
-                row.createCell(col+17).setCellValue(DataSecurityHelper.decrypt(dto.getChargeEmail()));
-            }else {
-                row.createCell(col+15).setCellValue(dto.getChargeDeptName());
-                row.createCell(col+16).setCellValue(dto.getChargeTel());
-                row.createCell(col+17).setCellValue(dto.getChargeEmail());
+            if (DataSecurityHelper.isTenantOpen()) {
+                row.createCell(col + 15).setCellValue(DataSecurityHelper.decrypt(dto.getChargeDeptName()));
+                row.createCell(col + 16).setCellValue(DataSecurityHelper.decrypt(dto.getChargeTel()));
+                row.createCell(col + 17).setCellValue(DataSecurityHelper.decrypt(dto.getChargeEmail()));
+            } else {
+                row.createCell(col + 15).setCellValue(dto.getChargeDeptName());
+                row.createCell(col + 16).setCellValue(dto.getChargeTel());
+                row.createCell(col + 17).setCellValue(dto.getChargeEmail());
             }
             rows++;
         }
