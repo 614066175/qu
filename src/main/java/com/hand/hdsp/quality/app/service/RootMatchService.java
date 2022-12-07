@@ -6,6 +6,7 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
@@ -37,7 +38,7 @@ public interface RootMatchService {
      * @param exportType 导出类型
      * @return 导出excel
      */
-    List<RootMatchDTO> export(RootMatchDTO rootMatchDTO, String exportType);
+    void export(RootMatchDTO rootMatchDTO, String exportType, HttpServletResponse response);
 
     /**
      * 智能匹配

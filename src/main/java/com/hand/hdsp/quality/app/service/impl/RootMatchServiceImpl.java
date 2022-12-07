@@ -1,14 +1,20 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.RootMatchDTO;
+import com.hand.hdsp.quality.api.dto.StandardTeamDTO;
 import com.hand.hdsp.quality.app.service.RootMatchService;
 import com.hand.hdsp.quality.app.service.RootService;
 import com.hand.hdsp.quality.domain.entity.DataField;
 import com.hand.hdsp.quality.domain.entity.RootMatch;
+import com.hand.hdsp.quality.domain.entity.StandardRelation;
 import com.hand.hdsp.quality.domain.repository.DataFieldRepository;
 import com.hand.hdsp.quality.domain.repository.RootMatchRepository;
+import com.hand.hdsp.quality.domain.repository.StandardRelationRepository;
+import com.hand.hdsp.quality.domain.repository.StandardTeamRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardConstant;
+import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import com.hand.hdsp.quality.infra.util.CustomThreadPool;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -17,6 +23,7 @@ import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
@@ -24,16 +31,19 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
+import java.io.OutputStream;
+import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
@@ -53,13 +63,19 @@ public class RootMatchServiceImpl implements RootMatchService {
     private final RootMatchRepository rootMatchRepository;
     private final DataFieldRepository dataFieldRepository;
     private final RootService rootService;
+    private final DataFieldMapper dataFieldMapper;
+    private final StandardRelationRepository standardRelationRepository;
+    private final StandardTeamRepository standardTeamRepository;
 
     private static final String NO_MATCH = "{未匹配}";
 
-    public RootMatchServiceImpl(RootMatchRepository rootMatchRepository, DataFieldRepository dataFieldRepository, RootService rootService) {
+    public RootMatchServiceImpl(RootMatchRepository rootMatchRepository, DataFieldRepository dataFieldRepository, RootService rootService, DataFieldMapper dataFieldMapper, StandardRelationRepository standardRelationRepository, StandardTeamRepository standardTeamRepository) {
         this.rootMatchRepository = rootMatchRepository;
         this.dataFieldRepository = dataFieldRepository;
         this.rootService = rootService;
+        this.dataFieldMapper = dataFieldMapper;
+        this.standardRelationRepository = standardRelationRepository;
+        this.standardTeamRepository = standardTeamRepository;
     }
 
     /**
@@ -115,15 +131,119 @@ public class RootMatchServiceImpl implements RootMatchService {
     /**
      * @param rootMatchDTO 条件参数
      * @param exportType   导出类型
-     * @return 字段标准匹配集合
      */
     @Override
-    public List<RootMatchDTO> export(RootMatchDTO rootMatchDTO, String exportType) {
+    public void export(RootMatchDTO rootMatchDTO, String exportType, HttpServletResponse response) {
         List<RootMatchDTO> rootMatchDTOList = rootMatchRepository.selectDTOByCondition(Condition.builder(RootMatch.class).andWhere(Sqls.custom()
-                        .andEqualTo(RootMatch.FIELD_BATCH_NUMBER, rootMatchDTO.getBatchNumber()))
+                        .andEqualTo(RootMatch.FIELD_BATCH_NUMBER,rootMatchDTO.getBatchNumber()))
                 .build());
-        //
-        return rootMatchDTOList;
+        List<DataFieldDTO> result = new ArrayList<>();
+        //筛选字段标准来源的
+        List<RootMatchDTO> sortRootMatchDTOList = rootMatchDTOList.stream().filter(dto ->dto.getFieldType().equals(STANDARD) && ObjectUtils.isNotEmpty(dto.getFieldId())).collect(Collectors.toList());
+        for (RootMatchDTO matchDTO : sortRootMatchDTOList) {
+            List<DataFieldDTO> list = dataFieldMapper.list(DataFieldDTO.builder().fieldId(matchDTO.getFieldId()).build());
+            //查询标准组
+            List<StandardRelation> standardRelations = standardRelationRepository.select(StandardRelation.builder().fieldStandardId(matchDTO.getFieldId()).build());
+            List<Long> standardTeamIds = standardRelations.stream()
+                    .map(StandardRelation::getStandardTeamId)
+                    .collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(standardTeamIds)) {
+                List<StandardTeamDTO> standardTeamDTOS = standardTeamRepository.selectDTOByIds(standardTeamIds);
+                String standardTeamCodes = standardTeamDTOS.stream().map(StandardTeamDTO::getStandardTeamCode).collect(Collectors.joining(","));
+                list.forEach(dataFieldDTO -> {
+                    dataFieldDTO.setStandardTeamCodes(standardTeamCodes);
+                });
+            }
+            result.addAll(list);
+        }
+        Map<String, String> fieldMap = new LinkedHashMap<>();
+        createHead(fieldMap);
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Match");
+        int rowNum = 0;
+        Row row =  sheet.createRow(rowNum);
+        Cell cell;
+        int cellNum = 0;
+        for (String name:fieldMap.values()){
+            cell = row.createCell(cellNum);
+            cell.setCellValue(name);
+            cellNum++;
+        }
+        if("excel".equals(exportType)){
+            exportType = ".xlsx";
+        }else{
+            exportType = ".csv";
+        }
+        createCells(result, sheet);
+        String fileName = "RootMatch";
+        OutputStream out;
+        try {
+            out = response.getOutputStream();
+            response.reset();
+            response.addHeader("Content-Disposition", "attachment; filename=" + fileName + exportType);
+            response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            workbook.write(out);
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void createHead(Map<String, String> fieldMap) {
+        fieldMap.put("fieldComment", "字段注释");
+        fieldMap.put("fieldName", "字段名称");
+        fieldMap.put("groupName", "分组名称");
+        fieldMap.put("standardDesc", "标准描述");
+        fieldMap.put("standardTeamCodes", "字段标准组");
+        fieldMap.put("dataStandardName", "引用数据标准");
+        fieldMap.put("fieldAccuracy", "字段精度");
+        fieldMap.put("fieldType", "字段类型");
+        fieldMap.put("fieldLength", "字段长度");
+        fieldMap.put("dataPattern", "数据格式");
+        fieldMap.put("valueType", "值域类型");
+        fieldMap.put("valueRange", "值域范围");
+        fieldMap.put("nullFlag", "是否可为空");
+        fieldMap.put("defaultValue", "默认值");
+        fieldMap.put("sysCommonName", "系统常用名");
+        fieldMap.put("chargeDeptName", "责任部门");
+        fieldMap.put("chargeName", "责任人");
+        fieldMap.put("chargeTel", "责任人电话");
+        fieldMap.put("chargeEmail", "责任人邮箱");
+    }
+
+    private void createCells(List<DataFieldDTO> result, XSSFSheet sheet) {
+        int rows = 1;
+        for (DataFieldDTO dto: result){
+            Row row = sheet.createRow(rows);
+            int col = 0;
+            row.createCell(col).setCellValue(dto.getFieldComment());
+            row.createCell(col+1).setCellValue(dto.getFieldName());
+            row.createCell(col+2).setCellValue(dto.getGroupName());
+            row.createCell(col+3).setCellValue(dto.getStandardDesc());
+            row.createCell(col+4).setCellValue(dto.getStandardTeamCodes());
+            row.createCell(col+5).setCellValue(dto.getDataStandardName());
+            row.createCell(col+6).setCellValue(dto.getFieldAccuracy());
+            row.createCell(col+7).setCellValue(dto.getFieldType());
+            row.createCell(col+8).setCellValue(dto.getFieldLength());
+            row.createCell(col+9).setCellValue(dto.getDataPattern());
+            row.createCell(col+10).setCellValue(dto.getValueType());
+            row.createCell(col+11).setCellValue(dto.getValueRange());
+            row.createCell(col+12).setCellValue(dto.getNullFlag());
+            row.createCell(col+13).setCellValue(dto.getDefaultValue());
+            row.createCell(col+14).setCellValue(dto.getSysCommonName());
+            //加密租户则解密
+            if(DataSecurityHelper.isTenantOpen()){
+                row.createCell(col+15).setCellValue(DataSecurityHelper.decrypt(dto.getChargeDeptName()));
+                row.createCell(col+16).setCellValue(DataSecurityHelper.decrypt(dto.getChargeTel()));
+                row.createCell(col+17).setCellValue(DataSecurityHelper.decrypt(dto.getChargeEmail()));
+            }else {
+                row.createCell(col+15).setCellValue(dto.getChargeDeptName());
+                row.createCell(col+16).setCellValue(dto.getChargeTel());
+                row.createCell(col+17).setCellValue(dto.getChargeEmail());
+            }
+            rows++;
+        }
     }
 
     @Override

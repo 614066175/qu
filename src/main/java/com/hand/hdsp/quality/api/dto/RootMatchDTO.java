@@ -54,6 +54,9 @@ public class RootMatchDTO extends AuditDomain {
     @ApiModelProperty(value = "字段类型")
     private String fieldType;
 
+    @ApiModelProperty(value = "字段标准id")
+    private Long fieldId;
+
     @ApiModelProperty(value = "项目id")
     private Long projectId;
 

@@ -16,6 +16,7 @@
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
         <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="field_id" property="fieldId" javaType="DECIMAL"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
@@ -28,6 +29,7 @@
         ${prefix}.field_description,
         ${prefix}.matching_status,
         ${prefix}.source,
+        ${prefix}.field_id,
         ${prefix}.project_id,
         ${prefix}.tenant_id,
         ${prefix}.object_version_number,

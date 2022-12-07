@@ -15,11 +15,15 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * <p>字段标准匹配表 管理 API</p>
@@ -146,5 +150,45 @@ public class RootMatchController extends BaseController {
         rootMatchDTO.setProjectId(projectId);
         rootMatchDTO.setTenantId(tenantId);
         return Results.success(rootMatchService.smartMatch(rootMatchDTO));
+    }
+
+    @ApiOperation(value = "导入excel")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/upload")
+    public ResponseEntity<?> upload(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    RootMatchDTO rootMatchDTO,
+                                    @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
+        rootMatchDTO.setTenantId(tenantId);
+        rootMatchDTO.setProjectId(projectId);
+        rootMatchService.upload(rootMatchDTO,file);
+        return Results.success();
+    }
+
+
+    @ApiOperation(value = "导出excel")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/export/{exportType}")
+    public ResponseEntity<?> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                    @PathVariable String exportType,
+                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    RootMatchDTO rootMatchDTO,
+                                    HttpServletResponse response) {
+        rootMatchDTO.setProjectId(projectId);
+        rootMatchDTO.setTenantId(tenantId);
+        rootMatchService.export(rootMatchDTO,exportType,response);
+        return Results.success();
     }
 }
