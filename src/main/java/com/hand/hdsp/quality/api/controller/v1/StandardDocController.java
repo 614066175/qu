@@ -119,7 +119,7 @@ public class StandardDocController extends BaseController {
                                                  @RequestPart StandardDocDTO standardDocDTO,
                                                  @RequestPart(value = "file", required = false) MultipartFile multipartFile) {
         standardDocDTO.setTenantId(tenantId);
-        standardDocDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        standardDocDTO.setProjectId(projectId);
         return Results.success(standardDocService.update(standardDocDTO, multipartFile));
     }
 
