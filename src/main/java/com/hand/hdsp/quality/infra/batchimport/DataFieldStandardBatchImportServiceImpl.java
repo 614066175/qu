@@ -98,7 +98,9 @@ public class DataFieldStandardBatchImportServiceImpl implements IBatchImportServ
                         chargeDeptName = DataSecurityHelper.encrypt(dataFieldDTO.getChargeDeptName());
                     }
                     List<Long> chargeDeptId = dataFieldMapper.selectIdByChargeDeptName(chargeDeptName, dataFieldDTO.getTenantId());
-                    dataFieldDTO.setChargeDeptId(chargeDeptId.get(0));
+                    if(CollectionUtils.isNotEmpty(chargeDeptId)){
+                        dataFieldDTO.setChargeDeptId(chargeDeptId.get(0));
+                    }
                 }
                 //设置目标环境引用数据标准
                 if (StringUtils.isNotEmpty(dataFieldDTO.getDataStandardCode())) {
