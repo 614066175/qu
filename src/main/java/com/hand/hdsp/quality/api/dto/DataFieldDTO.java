@@ -230,6 +230,12 @@ public class DataFieldDTO extends AuditDomain {
     @Transient
     private Long[] groupArrays;
 
+    /**
+     * 关联的标准组code，逗号分隔
+     */
+    @Transient
+    private String standardTeamCodes;
+
     public interface Group1 {
     }
 

@@ -1,47 +1,46 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
 import com.hand.hdsp.core.constant.HdspConstant;
-import com.hand.hdsp.quality.app.service.FieldStandardMatchingService;
-import org.hzero.core.util.Results;
-import org.hzero.core.base.BaseController;
-import com.hand.hdsp.quality.domain.entity.FieldStandardMatching;
-import com.hand.hdsp.quality.api.dto.FieldStandardMatchingDTO;
-import com.hand.hdsp.quality.domain.repository.FieldStandardMatchingRepository;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
+import com.hand.hdsp.quality.api.dto.RootMatchDTO;
+import com.hand.hdsp.quality.app.service.RootMatchService;
+import com.hand.hdsp.quality.domain.entity.RootMatch;
+import com.hand.hdsp.quality.domain.repository.RootMatchRepository;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.hzero.core.base.BaseController;
+import org.hzero.core.util.Results;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * <p>字段标准匹配表 管理 API</p>
  *
- * @author shijie.gao@hand-china.com 2022-11-30 10:31:02
+ * @author shijie.gao@hand-china.com 2022-12-07 10:42:30
  */
-@RestController("fieldStandardMatchingController.v1")
-@RequestMapping("/v1/{organizationId}/field-standard-matchings")
-public class FieldStandardMatchingController extends BaseController {
+@RestController("rootMatchController.v1")
+@RequestMapping("/v1/{organizationId}/root-matchs")
+public class RootMatchController extends BaseController {
 
-    private final FieldStandardMatchingRepository fieldStandardMatchingRepository;
-    private final FieldStandardMatchingService fieldStandardMatchingService;
+    private final RootMatchRepository rootMatchRepository;
+    private final RootMatchService rootMatchService;
 
-    public FieldStandardMatchingController(FieldStandardMatchingRepository fieldStandardMatchingRepository,
-                                           FieldStandardMatchingService fieldStandardMatchingService) {
-        this.fieldStandardMatchingRepository = fieldStandardMatchingRepository;
-        this.fieldStandardMatchingService = fieldStandardMatchingService;
+    public RootMatchController(RootMatchRepository rootMatchRepository,
+                               RootMatchService rootMatchService) {
+        this.rootMatchRepository = rootMatchRepository;
+        this.rootMatchService = rootMatchService;
     }
 
     @ApiOperation(value = "字段标准匹配表列表")
@@ -55,11 +54,11 @@ public class FieldStandardMatchingController extends BaseController {
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                FieldStandardMatchingDTO fieldStandardMatchingDTO, @ApiIgnore @SortDefault(value = FieldStandardMatching.FIELD_ID,
-            direction = Sort.Direction.DESC) PageRequest pageRequest) {
-        fieldStandardMatchingDTO.setTenantId(tenantId);
-        fieldStandardMatchingDTO.setProjectId(projectId);
-        Page<FieldStandardMatchingDTO> list = fieldStandardMatchingService.pageFieldStandardMatching(pageRequest,fieldStandardMatchingDTO);
+                                  RootMatchDTO rootMatchDTO,
+                                  @ApiIgnore @SortDefault(value = RootMatch.FIELD_ID, direction = Sort.Direction.DESC) PageRequest pageRequest) {
+        rootMatchDTO.setTenantId(tenantId);
+        rootMatchDTO.setProjectId(projectId);
+        Page<RootMatchDTO> list = rootMatchService.pageRootMatch(pageRequest, rootMatchDTO);
         return Results.success(list);
     }
 
@@ -78,8 +77,8 @@ public class FieldStandardMatchingController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{id}")
     public ResponseEntity<?> detail(@PathVariable Long id) {
-        FieldStandardMatchingDTO fieldStandardMatchingDTO = fieldStandardMatchingRepository.selectDTOByPrimaryKeyAndTenant(id);
-        return Results.success(fieldStandardMatchingDTO);
+        RootMatchDTO rootMatchDTO = rootMatchRepository.selectDTOByPrimaryKeyAndTenant(id);
+        return Results.success(rootMatchDTO);
     }
 
     @ApiOperation(value = "创建字段标准匹配表")
@@ -93,12 +92,12 @@ public class FieldStandardMatchingController extends BaseController {
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                    @RequestBody FieldStandardMatchingDTO fieldStandardMatchingDTO) {
-        fieldStandardMatchingDTO.setTenantId(tenantId);
-        fieldStandardMatchingDTO.setProjectId(projectId);
-        this.validObject(fieldStandardMatchingDTO);
-        fieldStandardMatchingRepository.insertDTOSelective(fieldStandardMatchingDTO);
-        return Results.success(fieldStandardMatchingDTO);
+                                    @RequestBody RootMatchDTO rootMatchDTO) {
+        rootMatchDTO.setTenantId(tenantId);
+        rootMatchDTO.setProjectId(projectId);
+        this.validObject(rootMatchDTO);
+        rootMatchRepository.insertDTOSelective(rootMatchDTO);
+        return Results.success(rootMatchDTO);
     }
 
     @ApiOperation(value = "修改字段标准匹配表")
@@ -112,10 +111,9 @@ public class FieldStandardMatchingController extends BaseController {
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                    @RequestBody FieldStandardMatchingDTO fieldStandardMatchingDTO) {
-        fieldStandardMatchingDTO.setProjectId(projectId);
-        fieldStandardMatchingRepository.updateDTOWhereTenant(fieldStandardMatchingDTO, tenantId);
-        return Results.success(fieldStandardMatchingDTO);
+                                    @RequestBody RootMatchDTO rootMatchDTO) {
+        rootMatchRepository.updateDTOWhereTenant(rootMatchDTO, tenantId);
+        return Results.success(rootMatchDTO);
     }
 
     @ApiOperation(value = "删除字段标准匹配表")
@@ -129,11 +127,29 @@ public class FieldStandardMatchingController extends BaseController {
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                    @RequestBody FieldStandardMatchingDTO fieldStandardMatchingDTO) {
-        fieldStandardMatchingDTO.setTenantId(tenantId);
-        fieldStandardMatchingDTO.setProjectId(projectId);
-        fieldStandardMatchingRepository.deleteByPrimaryKey(fieldStandardMatchingDTO);
+                                    @RequestBody RootMatchDTO rootMatchDTO) {
+        rootMatchDTO.setTenantId(tenantId);
+        rootMatchDTO.setProjectId(projectId);
+        rootMatchRepository.deleteByPrimaryKey(rootMatchDTO);
         return Results.success();
+    }
+
+
+    @ApiOperation(value = "智能匹配/重新匹配")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/smart-match")
+    public ResponseEntity<?> smartMatch(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                        @RequestBody RootMatchDTO rootMatchDTO) {
+        rootMatchDTO.setProjectId(projectId);
+        rootMatchDTO.setTenantId(tenantId);
+        return Results.success(rootMatchService.smartMatch(rootMatchDTO));
     }
 
     @ApiOperation(value = "导入excel")
@@ -147,11 +163,11 @@ public class FieldStandardMatchingController extends BaseController {
     @PostMapping("/upload")
     public ResponseEntity<?> upload(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                    FieldStandardMatchingDTO fieldStandardMatchingDTO,
+                                    RootMatchDTO rootMatchDTO,
                                     @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
-        fieldStandardMatchingDTO.setTenantId(tenantId);
-        fieldStandardMatchingDTO.setProjectId(projectId);
-        fieldStandardMatchingService.upload(fieldStandardMatchingDTO,file);
+        rootMatchDTO.setTenantId(tenantId);
+        rootMatchDTO.setProjectId(projectId);
+        rootMatchService.upload(rootMatchDTO,file);
         return Results.success();
     }
 
@@ -164,14 +180,15 @@ public class FieldStandardMatchingController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PostMapping("/{exportType}")
+    @PostMapping("/export/{exportType}")
     public ResponseEntity<?> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @PathVariable String exportType,
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                    FieldStandardMatchingDTO fieldStandardMatchingDTO) {
-        fieldStandardMatchingDTO.setProjectId(projectId);
-        fieldStandardMatchingDTO.setTenantId(tenantId);
-        List<FieldStandardMatchingDTO> fieldStandardMatchingDTOList= fieldStandardMatchingService.export(fieldStandardMatchingDTO,exportType);
+                                    RootMatchDTO rootMatchDTO,
+                                    HttpServletResponse response) {
+        rootMatchDTO.setProjectId(projectId);
+        rootMatchDTO.setTenantId(tenantId);
+        rootMatchService.export(rootMatchDTO,exportType,response);
         return Results.success();
     }
 }

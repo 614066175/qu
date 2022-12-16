@@ -1,6 +1,5 @@
 package com.hand.hdsp.quality.api.dto;
 
-import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -21,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 /**
  * <p>字段标准匹配记录表 数据传输对象</p>
  *
- * @author SHIJIE.GAO@HAND-CHINA.COM 2022-11-22 17:55:57
+ * @author shijie.gao@hand-china.com 2022-12-07 10:42:30
  */
 @Data
 @Builder
@@ -30,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @EqualsAndHashCode(callSuper = false)
 @ApiModel("字段标准匹配记录表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class FieldStandardMatchsDTO extends AuditDomain {
+public class RootMatchHisDTO extends AuditDomain {
 
     @ApiModelProperty("主键")
     private Long id;
@@ -53,17 +52,5 @@ public class FieldStandardMatchsDTO extends AuditDomain {
 
     @ApiModelProperty(value = "租户id")
     private Long tenantId;
-
-    /**
-     * 最近更新时间查询 起
-     */
-    @Transient
-    private String startDate;
-
-    /**
-     * 最近更新时间查询 止
-     */
-    @Transient
-    private String endDate;
 
 }

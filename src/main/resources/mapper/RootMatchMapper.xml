@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.FieldStandardMatchingMapper">
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.RootMatchMapper">
 	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.FieldStandardMatching">
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.RootMatch">
         <result column="id" property="id" jdbcType="DECIMAL"/>
         <result column="batch_number" property="batchNumber" jdbcType="VARCHAR"/>
-        <result column="field_name" property="fieldName" jdbcType="VARCHAR"/>
-        <result column="field_type" property="fieldType" jdbcType="VARCHAR"/>
         <result column="field_comment" property="fieldComment" jdbcType="VARCHAR"/>
-        <result column="field_description" property="fieldDescription" jdbcType="VARCHAR"/>
         <result column="matching_status" property="matchingStatus" jdbcType="VARCHAR"/>
+        <result column="field_name" property="fieldName" jdbcType="VARCHAR"/>
         <result column="source" property="source" jdbcType="VARCHAR"/>
+        <result column="field_description" property="fieldDescription" jdbcType="VARCHAR"/>
+        <result column="field_type" property="fieldType" jdbcType="VARCHAR"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
         <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
         <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="field_id" property="fieldId" javaType="DECIMAL"/>
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
     </resultMap>
@@ -28,6 +29,7 @@
         ${prefix}.field_description,
         ${prefix}.matching_status,
         ${prefix}.source,
+        ${prefix}.field_id,
         ${prefix}.project_id,
         ${prefix}.tenant_id,
         ${prefix}.object_version_number,
@@ -36,7 +38,7 @@
         ${prefix}.last_updated_by,
         ${prefix}.last_update_date
     </sql>
-    <select id="findAllMatchings" resultType="com.hand.hdsp.quality.api.dto.FieldStandardMatchingDTO">
+    <select id="findAllMatch" resultType="com.hand.hdsp.quality.api.dto.RootMatchDTO">
         select
         <include refid="Base_Columns">
             <property name="prefix" value="xfsm"/>
@@ -61,7 +63,7 @@
                 AND xfsm.field_type = #{fieldType}
             </if>
             <if test="fieldDescription != null and fieldDescription != ''">
-            <bind name="fieldDescriptionLike" value="'%' + fieldDescription + '%'"/>
+                <bind name="fieldDescriptionLike" value="'%' + fieldDescription + '%'"/>
                 AND xfsm.field_description like #{fieldDescriptionLike}
             </if>
         </where>

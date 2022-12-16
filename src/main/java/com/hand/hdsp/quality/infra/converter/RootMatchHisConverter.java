@@ -1,8 +1,8 @@
 package com.hand.hdsp.quality.infra.converter;
 
-import com.hand.hdsp.quality.domain.entity.FieldStandardMatchs;
-import com.hand.hdsp.quality.infra.dataobject.FieldStandardMatchsDO;
-import com.hand.hdsp.quality.api.dto.FieldStandardMatchsDTO;
+import com.hand.hdsp.quality.domain.entity.RootMatchHis;
+import com.hand.hdsp.quality.infra.dataobject.RootMatchHisDO;
+import com.hand.hdsp.quality.api.dto.RootMatchHisDTO;
 
 import io.choerodon.core.convertor.ConvertorI;
 import org.apache.commons.lang3.StringUtils;
@@ -16,27 +16,27 @@ import java.util.Optional;
 /**
  * <p>字段标准匹配记录表转换器</p>
  *
- * @author SHIJIE.GAO@HAND-CHINA.COM 2022-11-22 17:55:57
+ * @author shijie.gao@hand-china.com 2022-12-07 10:42:30
  */
 @Component
-public class FieldStandardMatchsConverter implements ConvertorI<FieldStandardMatchs, FieldStandardMatchsDO, FieldStandardMatchsDTO> {
+public class RootMatchHisConverter implements ConvertorI<RootMatchHis, RootMatchHisDO, RootMatchHisDTO> {
 
     @Override
-    public FieldStandardMatchs dtoToEntity( FieldStandardMatchsDTO dto) {
+    public RootMatchHis dtoToEntity( RootMatchHisDTO dto) {
         return Optional.ofNullable(dto)
                 .map(o -> {
-                    FieldStandardMatchs entity = FieldStandardMatchs.builder().build();
+                    RootMatchHis entity = RootMatchHis.builder().build();
                     BeanUtils.copyProperties(dto, entity);
                     return entity;
                 }).orElseThrow(IllegalArgumentException::new);
     }
 
     @Override
-    public FieldStandardMatchsDTO entityToDto(FieldStandardMatchs entity) {
+    public RootMatchHisDTO entityToDto(RootMatchHis entity) {
 
         return Optional.ofNullable(entity)
                 .map(o -> {
-                    FieldStandardMatchsDTO dto= FieldStandardMatchsDTO.builder().build();
+                    RootMatchHisDTO dto= RootMatchHisDTO.builder().build();
                     BeanUtils.copyProperties(entity,dto);
                     return dto;
                 }).orElseThrow(IllegalArgumentException::new);

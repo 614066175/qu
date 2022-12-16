@@ -1,7 +1,11 @@
 package com.hand.hdsp.quality.infra.constant;
 
-public interface FieldMatchingConstants {
-    interface MatchingStatus {
+/**
+ * @author lgl
+ */
+public interface RootMatchConstants {
+
+    interface MatchStatus {
         /**
          * 匹配中
          */
@@ -11,7 +15,7 @@ public interface FieldMatchingConstants {
          */
         String SUCCESS = "SUCCESS";
         /**
-         *  匹配失败
+         * 匹配失败
          */
         String FAILED = "FAILED";
         /**
@@ -19,5 +23,14 @@ public interface FieldMatchingConstants {
          */
         String IMPORT = "IMPORT";
 
+        /**
+         * 部分匹配
+         */
+        String PART_MATCH = "PART_MATCH";
+    }
+
+    interface SourceType {
+        String STANDARD = "STANDARD";
+        String ROOT = "ROOT";
     }
 }

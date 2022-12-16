@@ -17,7 +17,7 @@ import lombok.*;
 /**
  * <p>字段标准匹配记录表实体</p>
  *
- * @author SHIJIE.GAO@HAND-CHINA.COM 2022-11-22 17:55:57
+ * @author shijie.gao@hand-china.com 2022-12-07 10:42:30
  */
 @Data
 @Builder
@@ -26,8 +26,8 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = false)
 @VersionAudit
 @ModifyAudit
-@Table(name = "xsta_field_standard_matchs")
-public class FieldStandardMatchs extends AuditDomain {
+@Table(name = "xsta_root_match_his")
+public class RootMatchHis extends AuditDomain {
 
     public static final String FIELD_ID = "id";
     public static final String FIELD_BATCH_NUMBER = "batchNumber";

@@ -1,14 +1,15 @@
 package com.hand.hdsp.quality.app.service;
 
-import com.hand.hdsp.quality.api.dto.*;
+import com.hand.hdsp.quality.api.dto.AssigneeUserDTO;
+import com.hand.hdsp.quality.api.dto.RootGroupDTO;
+import com.hand.hdsp.quality.api.dto.StandardApprovalDTO;
 import com.hand.hdsp.quality.domain.entity.Root;
-
-import java.util.List;
-
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
 import org.hzero.export.vo.ExportParam;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 词根应用服务
@@ -63,53 +64,26 @@ public interface RootService {
     List<RootGroupDTO> export(Root root, ExportParam exportParam);
 
     /**
-     * 发布
+     * 发布 下线
      *
      * @param root
      */
     void publishOrOff(Root root);
 
     /**
-     * 上线通过事件
+     * 上线回调事件
      *
      * @param rootId
      */
-    void onlineWorkflowSuccess(Long rootId);
+    void onlineWorkflowSuccess(Long rootId,String nodeApproveResult);
+
 
     /**
-     * 上线拒绝事件
+     * 下线回调事件
      *
      * @param rootId
      */
-    void onlineWorkflowFail(Long rootId);
-
-    /**
-     * 下线通过事件
-     *
-     * @param rootId
-     */
-    void offlineWorkflowSuccess(Long rootId);
-
-    /**
-     * 下线拒绝事件
-     *
-     * @param rootId
-     */
-    void offlineWorkflowFail(Long rootId);
-
-    /**
-     * 上线工作流审批中
-     *
-     * @param rootId
-     */
-    void onlineWorkflowing(Long rootId);
-
-    /**
-     * 下线工作流审批中
-     *
-     * @param rootId
-     */
-    void offlineWorkflowing(Long rootId);
+    void offlineWorkflowSuccess(Long rootId, String nodeApproveResult);
 
     /**
      * 查找责任人审批
@@ -133,4 +107,24 @@ public interface RootService {
      * @return              字段标准信息
      */
     Root rootInfo(Long approvalId);
+
+    /**
+     * 词根匹配
+     *
+     *
+     * @param tenantId
+     * @param projectId
+     * @param word
+     * @return
+     */
+    String analyzerWord(Long tenantId, Long projectId, String word);
+
+    /**
+     * 词根翻译
+     * @param tenantId
+     * @param projectId
+     * @param word
+     * @return
+     */
+    Map<String,List<String>> rootTranslate(Long tenantId, Long projectId, String word);
 }
