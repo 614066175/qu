@@ -25,7 +25,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
 import org.hzero.boot.platform.plugin.hr.entity.Employee;
+import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.boot.workflow.WorkflowClient;
+import org.hzero.boot.workflow.constant.WorkflowConstant;
 import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
 import org.hzero.boot.workflow.dto.RunInstance;
 import org.hzero.export.vo.ExportParam;
@@ -35,7 +37,6 @@ import org.hzero.mybatis.util.Sqls;
 import org.nlpcn.commons.lang.tire.domain.Forest;
 import org.nlpcn.commons.lang.tire.library.Library;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,12 +65,8 @@ public class RootServiceImpl implements RootService {
     private final StandardApprovalService standardApprovalService;
     private final StandardApprovalRepository standardApprovalRepository;
     private final StandardApprovalMapper standardApprovalMapper;
-
-    @Autowired
-    private WorkflowClient workflowClient;
-
-    @Value("${hdsp.workflow.enabled:false}")
-    private boolean enableWorkflow;
+    private final ProfileClient profileClient;
+    private final WorkflowClient workflowClient;
 
     private static final String PATTERN = "^[A-Za-z][A-Za-z0-9]{0,63}$";
 
@@ -86,7 +83,7 @@ public class RootServiceImpl implements RootService {
 
     private final RootDicRepository rootDicRepository;
 
-    public RootServiceImpl(RootRepository rootRepository, RootVersionRepository rootVersionRepository, RootLineRepository rootLineRepository, StandardGroupRepository standardGroupRepository, StandardApprovalService standardApprovalService, StandardApprovalRepository standardApprovalRepository, StandardApprovalMapper standardApprovalMapper, AnsjUtil ansjUtil, RootDicRepository rootDicRepository) {
+    public RootServiceImpl(RootRepository rootRepository, RootVersionRepository rootVersionRepository, RootLineRepository rootLineRepository, StandardGroupRepository standardGroupRepository, StandardApprovalService standardApprovalService, StandardApprovalRepository standardApprovalRepository, StandardApprovalMapper standardApprovalMapper, ProfileClient profileClient, WorkflowClient workflowClient, AnsjUtil ansjUtil, RootDicRepository rootDicRepository) {
         this.rootRepository = rootRepository;
         this.rootVersionRepository = rootVersionRepository;
         this.rootLineRepository = rootLineRepository;
@@ -94,6 +91,8 @@ public class RootServiceImpl implements RootService {
         this.standardApprovalService = standardApprovalService;
         this.standardApprovalRepository = standardApprovalRepository;
         this.standardApprovalMapper = standardApprovalMapper;
+        this.profileClient = profileClient;
+        this.workflowClient = workflowClient;
         this.ansjUtil = ansjUtil;
         this.rootDicRepository = rootDicRepository;
     }
@@ -278,26 +277,27 @@ public class RootServiceImpl implements RootService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void publishOrOff(Root root) {
-        if (enableWorkflow) {
-            //开启工作流
-            //根据上下线状态开启不同的工作流实例
-            if (ONLINE.equals(root.getReleaseStatus())) {
-                //先修改状态再启动工作流，启动工作流需要花费一定时间,有异常回滚
-                this.workflowing(root.getId(), ONLINE_APPROVING);
-                this.startWorkFlow(WorkFlowConstant.Root.ONLINE_WORKFLOW_KEY, root, ONLINE);
-            }
-            if (OFFLINE.equals(root.getReleaseStatus())) {
-                this.workflowing(root.getId(), OFFLINE_APPROVING);
-                this.startWorkFlow(WorkFlowConstant.Root.OFFLINE_WORKFLOW_KEY, root, OFFLINE);
-            }
-        } else {
+        String onlineFlag = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(),null,null,WorkFlowConstant.ROOT_ONLINE);
+        String offlineFlag = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(),null,null,WorkFlowConstant.ROOT_OFFLINE);
+        if("true".equals(onlineFlag) && ONLINE.equals(root.getReleaseStatus())){
+            //先修改状态再启动工作流，启动工作流需要花费一定时间,有异常回滚
+            this.workflowing(root.getId(), ONLINE_APPROVING);
+            this.startWorkFlow(WorkFlowConstant.Root.ONLINE_WORKFLOW_KEY, root, ONLINE);
+        }
+        if("true".equals(offlineFlag) && OFFLINE.equals(root.getReleaseStatus())){
+            //先修改状态再启动工作流，启动工作流需要花费一定时间,有异常回滚
+            this.workflowing(root.getId(), OFFLINE_APPROVING);
+            this.startWorkFlow(WorkFlowConstant.Root.OFFLINE_WORKFLOW_KEY, root, OFFLINE);
+        }
+
+        if("false".equals(offlineFlag)&&"false".equals(onlineFlag)){
             Root rootTmp = rootRepository.selectByPrimaryKey(root.getId());
             if (Objects.isNull(rootTmp)) {
                 throw new CommonException(ErrorCode.ROOT_NOT_EXIST);
             }
             root.setObjectVersionNumber(rootTmp.getObjectVersionNumber());
             rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS);
-            if (ONLINE.equals(root.getReleaseStatus())) {
+            if(ONLINE.equals(root.getReleaseStatus())){
                 //存版本表
                 doVersion(root);
             }
@@ -305,33 +305,22 @@ public class RootServiceImpl implements RootService {
     }
 
     @Override
-    public void onlineWorkflowSuccess(Long rootId) {
-        workflowing(rootId, ONLINE);
+    public void onlineWorkflowSuccess(Long rootId,String nodeApproveResult) {
+        if(WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)){
+            workflowing(rootId, ONLINE);
+        }else{
+            workflowing(rootId, OFFLINE);
+        }
+
     }
 
     @Override
-    public void onlineWorkflowFail(Long rootId) {
-        workflowing(rootId, OFFLINE);
-    }
-
-    @Override
-    public void offlineWorkflowSuccess(Long rootId) {
-        workflowing(rootId, OFFLINE);
-    }
-
-    @Override
-    public void offlineWorkflowFail(Long rootId) {
-        workflowing(rootId, ONLINE);
-    }
-
-    @Override
-    public void onlineWorkflowing(Long rootId) {
-        workflowing(rootId, ONLINE_APPROVING);
-    }
-
-    @Override
-    public void offlineWorkflowing(Long rootId) {
-        workflowing(rootId, OFFLINE_APPROVING);
+    public void offlineWorkflowSuccess(Long rootId, String nodeApproveResult) {
+        if(WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)){
+            workflowing(rootId, OFFLINE);
+        }else{
+            workflowing(rootId, ONLINE);
+        }
     }
 
     @Override

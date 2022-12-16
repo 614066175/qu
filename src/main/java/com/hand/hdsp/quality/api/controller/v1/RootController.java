@@ -130,7 +130,7 @@ public class RootController extends BaseController {
         return Results.success(rootList);
     }
 
-    @ApiOperation(value = "词根发布工作流通过事件接口")
+    @ApiOperation(value = "词根发布工作流回调事件接口")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -138,13 +138,14 @@ public class RootController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/online-workflow-success/{rootId}")
-    public ResponseEntity<Root> onlineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long rootId) {
-        rootService.onlineWorkflowSuccess(rootId);
+    @PutMapping("/online-workflow-success/{rootId}")
+    public ResponseEntity<Root> onlineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId,
+                                                      @PathVariable Long rootId,@RequestParam String nodeApproveResult) {
+        rootService.onlineWorkflowSuccess(rootId,nodeApproveResult);
         return Results.success();
     }
 
-    @ApiOperation(value = "词根发布工作流拒绝事件接口")
+    @ApiOperation(value = "词根下线工作流回调事件接口")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -152,65 +153,10 @@ public class RootController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/online-workflow-fail/{rootId}")
-    public ResponseEntity<Root> onlineWorkflowFail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long rootId) {
-        rootService.onlineWorkflowFail(rootId);
-        return Results.success();
-    }
-
-    @ApiOperation(value = "词根下线工作流通过事件接口")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/offline-workflow-success/{rootId}")
-    public ResponseEntity<Root> offlineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long rootId) {
-        rootService.offlineWorkflowSuccess(rootId);
-        return Results.success();
-    }
-
-    @ApiOperation(value = "词根下线工作流拒绝事件接口")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/offline-workflow-fail/{rootId}")
-    public ResponseEntity<Root> offlineWorkflowFail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long rootId) {
-        rootService.offlineWorkflowFail(rootId);
-        return Results.success();
-    }
-
-    @ApiOperation(value = "上线审批中事件")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/online-workflowing/{rootId}")
-    public ResponseEntity<Root> onlineWorkflowing(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long rootId) {
-        rootService.onlineWorkflowing(rootId);
-        return Results.success();
-    }
-
-    @ApiOperation(value = "下线审批中事件")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/offline-workflowing/{rootId}")
-    public ResponseEntity<Root> offlineWorkflowing(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long rootId) {
-        rootService.offlineWorkflowing(rootId);
+    @PutMapping("/offline-workflow-success/{rootId}")
+    public ResponseEntity<Root> offlineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId,
+                                                       @PathVariable Long rootId,@RequestParam String nodeApproveResult) {
+        rootService.offlineWorkflowSuccess(rootId,nodeApproveResult);
         return Results.success();
     }
 

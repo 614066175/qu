@@ -64,53 +64,26 @@ public interface RootService {
     List<RootGroupDTO> export(Root root, ExportParam exportParam);
 
     /**
-     * 发布
+     * 发布 下线
      *
      * @param root
      */
     void publishOrOff(Root root);
 
     /**
-     * 上线通过事件
+     * 上线回调事件
      *
      * @param rootId
      */
-    void onlineWorkflowSuccess(Long rootId);
+    void onlineWorkflowSuccess(Long rootId,String nodeApproveResult);
+
 
     /**
-     * 上线拒绝事件
+     * 下线回调事件
      *
      * @param rootId
      */
-    void onlineWorkflowFail(Long rootId);
-
-    /**
-     * 下线通过事件
-     *
-     * @param rootId
-     */
-    void offlineWorkflowSuccess(Long rootId);
-
-    /**
-     * 下线拒绝事件
-     *
-     * @param rootId
-     */
-    void offlineWorkflowFail(Long rootId);
-
-    /**
-     * 上线工作流审批中
-     *
-     * @param rootId
-     */
-    void onlineWorkflowing(Long rootId);
-
-    /**
-     * 下线工作流审批中
-     *
-     * @param rootId
-     */
-    void offlineWorkflowing(Long rootId);
+    void offlineWorkflowSuccess(Long rootId, String nodeApproveResult);
 
     /**
      * 查找责任人审批
