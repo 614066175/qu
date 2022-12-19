@@ -72,18 +72,18 @@ public interface RootService {
 
     /**
      * 上线回调事件
-     *
      * @param rootId
+     * @param nodeApproveResult
      */
-    void onlineWorkflowSuccess(Long rootId,String nodeApproveResult);
+    void onlineWorkflowCallback(Long rootId,String nodeApproveResult);
 
 
     /**
      * 下线回调事件
-     *
      * @param rootId
+     * @param nodeApproveResult
      */
-    void offlineWorkflowSuccess(Long rootId, String nodeApproveResult);
+    void offlineWorkflowCallback(Long rootId, String nodeApproveResult);
 
     /**
      * 查找责任人审批

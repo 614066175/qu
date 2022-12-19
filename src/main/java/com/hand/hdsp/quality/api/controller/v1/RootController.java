@@ -138,10 +138,10 @@ public class RootController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/online-workflow-success/{rootId}")
-    public ResponseEntity<Root> onlineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId,
+    @GetMapping("/online-workflow-callback/{rootId}")
+    public ResponseEntity<Root> onlineWorkflowCallback(@PathVariable(name = "organizationId") Long tenantId,
                                                       @PathVariable Long rootId,@RequestParam String nodeApproveResult) {
-        rootService.onlineWorkflowSuccess(rootId,nodeApproveResult);
+        rootService.onlineWorkflowCallback(rootId,nodeApproveResult);
         return Results.success();
     }
 
@@ -153,10 +153,10 @@ public class RootController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/offline-workflow-success/{rootId}")
-    public ResponseEntity<Root> offlineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId,
+    @GetMapping("/offline-workflow-callback/{rootId}")
+    public ResponseEntity<Root> offlineWorkflowCallback(@PathVariable(name = "organizationId") Long tenantId,
                                                        @PathVariable Long rootId,@RequestParam String nodeApproveResult) {
-        rootService.offlineWorkflowSuccess(rootId,nodeApproveResult);
+        rootService.offlineWorkflowCallback(rootId,nodeApproveResult);
         return Results.success();
     }
 

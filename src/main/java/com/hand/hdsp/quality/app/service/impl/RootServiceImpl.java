@@ -305,7 +305,7 @@ public class RootServiceImpl implements RootService {
     }
 
     @Override
-    public void onlineWorkflowSuccess(Long rootId,String nodeApproveResult) {
+    public void onlineWorkflowCallback(Long rootId,String nodeApproveResult) {
         if(WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)){
             workflowing(rootId, ONLINE);
         }else{
@@ -315,7 +315,7 @@ public class RootServiceImpl implements RootService {
     }
 
     @Override
-    public void offlineWorkflowSuccess(Long rootId, String nodeApproveResult) {
+    public void offlineWorkflowCallback(Long rootId, String nodeApproveResult) {
         if(WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)){
             workflowing(rootId, OFFLINE);
         }else{
