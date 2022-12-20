@@ -8,6 +8,7 @@ import com.hand.hdsp.quality.domain.entity.Root;
 import com.hand.hdsp.quality.domain.entity.RootLine;
 import com.hand.hdsp.quality.domain.repository.RootLineRepository;
 import com.hand.hdsp.quality.domain.repository.RootRepository;
+import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.mapper.RootMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -62,9 +63,9 @@ public class RootRepositoryImpl extends BaseRepositoryImpl<Root, RootDTO> implem
             if(CollectionUtils.isNotEmpty(rootLines)){
                 StringBuffer rootNameStr = new StringBuffer();
                 rootLines.forEach(rootLine->{
-                    rootNameStr.append(rootLine.getRootName()).append(" ");
+                    rootNameStr.append(rootLine.getRootName()).append(StandardConstant.RootName.SEPARATOR);
                 });
-                tmp.setRootName(rootNameStr.toString());
+                tmp.setRootName(rootNameStr.substring(0,rootNameStr.length()-1));
             }
         }
         return rootList;

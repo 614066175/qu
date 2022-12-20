@@ -89,7 +89,12 @@
                 <bind name="lastUpdatedNameLike" value="'%'+lastUpdatedName+'%'"/>
                 and iu.real_name like #{lastUpdatedNameLike}
             </if>
-
+            <if test="chargeId != null">
+                and he.employee_id = #{chargeId}
+            </if>
+            <if test="lastUpdatedBy != null">
+                and iu.id = #{lastUpdatedBy}
+            </if>
             <if test='datasourceType == "MYSQL"'>
                 <if test="startCreateDate != null and startCreateDate != ''">
                     and xr.creation_date &gt;= str_to_date(#{startCreateDate},'%Y-%m-%d %H:%i:%s')

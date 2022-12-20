@@ -222,6 +222,35 @@ public class RootServiceImpl implements RootService {
     }
 
     @Override
+    public void batchDelete(List<Root> rootList) {
+        rootList.forEach(root->{
+            if (ONLINE.equals(root.getReleaseStatus())
+                    || OFFLINE_APPROVING.equals(root.getReleaseStatus())
+                    || ONLINE_APPROVING.equals(root.getReleaseStatus())) {
+                throw new CommonException(ErrorCode.ROOT_NOT_DELETE);
+            }
+        });
+        rootRepository.batchDelete(rootList);
+
+        //删除行表数据
+        List<Long> ids = rootList.stream().map(Root::getId).collect(Collectors.toList());
+        List<RootLine> rootLines= rootLineRepository.selectByCondition(Condition.builder(RootLine.class)
+                .andWhere(Sqls.custom()
+                        .andIn(RootLine.FIELD_ROOT_ID,ids)
+                ).build());
+        rootLineRepository.batchDelete(rootLines);
+
+        //删除版本表数据
+        List<RootVersion> rootVersions= rootVersionRepository.selectByCondition(Condition.builder(RootVersion.class)
+                .andWhere(Sqls.custom()
+                        .andIn(RootVersion.FIELD_ROOT_ID,ids)
+                ).build());
+        if (CollectionUtils.isNotEmpty(rootVersions)) {
+            rootVersionRepository.batchDelete(rootVersions);
+        }
+    }
+
+    @Override
     public List<RootGroupDTO> export(Root root, ExportParam exportParam) {
         List<RootGroupDTO> rootGroupDTOS = new ArrayList<>();
         int level = 1;

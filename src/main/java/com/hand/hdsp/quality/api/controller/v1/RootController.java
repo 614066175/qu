@@ -95,6 +95,14 @@ public class RootController extends BaseController {
         return Results.success();
     }
 
+    @ApiOperation(value = "批量删除词根")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @DeleteMapping("/batch-delete")
+    public ResponseEntity<?> batchDelete(@RequestBody List<Root> rootList) {
+        rootService.batchDelete(rootList);
+        return Results.success();
+    }
+
     @ApiOperation(value = "导出")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/export")

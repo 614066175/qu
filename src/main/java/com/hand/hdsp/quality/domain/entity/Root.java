@@ -127,6 +127,11 @@ public class Root extends AuditDomain {
     @Transient
     private String lastUpdatedName;
 
+    /**
+     * 最后更新人id
+     */
+    private Long lastUpdatedBy;
+
 
     @Transient
     private String startUpdateDate;
@@ -140,9 +145,4 @@ public class Root extends AuditDomain {
     @Transient
     private String endCreateDate;
 
-//    public interface Group1 {
-//    }
-//
-//    public interface Group2 {
-//    }
 }
