@@ -118,8 +118,12 @@ public class Root extends AuditDomain {
     /**
      * 分组编码
      */
-    @Transient
     private String groupCode;
+
+    /**
+     * 分组编码
+     */
+    private String groupName;
 
     /**
      * 最后更新人
