@@ -115,7 +115,7 @@ public class RootServiceImpl implements RootService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void create(Root root) {
-        if (!Pattern.matches(PATTERN, root.getRootEn())) {
+        if (!Pattern.matches(PATTERN, root.getRootEnShort())) {
             throw new CommonException(ErrorCode.ROOT_EN_SHORT_ERROR);
         }
 
