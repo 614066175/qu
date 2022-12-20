@@ -55,6 +55,13 @@ public interface RootService {
     void delete(Root root);
 
     /**
+     * 删除
+     * @param rootList
+     * @return
+     */
+    void batchDelete(List<Root> rootList);
+
+    /**
      * 导出
      * @param root
      * @param exportParam
