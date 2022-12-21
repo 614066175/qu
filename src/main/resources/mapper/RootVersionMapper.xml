@@ -43,7 +43,6 @@
     </sql>
 
     <select id="list" resultType="com.hand.hdsp.quality.domain.entity.RootVersion">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         select
         <include refid="baseColum">
             <property name="prefix" value="xrv"/>
@@ -51,11 +50,13 @@
         he.email chargeEmail,
         he.mobile chargeTel,
         he.name chargeName,
-        hu.unit_name chargeDept
+        hu.unit_name chargeDept,
+        iu.real_name updaterName
         from
         xsta_root_version xrv
         left join hpfm_employee he on xrv.charge_id=he.employee_id
         left join hpfm_unit hu on xrv.charge_dept_id=hu.unit_id
+        left join iam_user iu on xrv.last_updated_by=iu.id
         <where>
             <if test="tenantId != null">
                 and xrv.tenant_id = #{tenantId}
@@ -72,7 +73,32 @@
             <if test="versionNumber != null">
                 and xrv.version_number = #{versionNumber}
             </if>
+        </where>
+    </select>
 
+
+    <select id="detail" resultType="com.hand.hdsp.quality.domain.entity.RootVersion">
+        select
+        <include refid="baseColum">
+            <property name="prefix" value="xrv"/>
+        </include>,
+        he.email chargeEmail,
+        he.mobile chargeTel,
+        he.name chargeName,
+        hu.unit_name chargeDept,
+        xsg.group_name,
+        xsg.group_code
+        from
+        xsta_root_version xrv
+        left join hpfm_employee he on xrv.charge_id=he.employee_id
+        left join hpfm_unit hu on xrv.charge_dept_id=hu.unit_id
+        left join iam_user iu on xrv.last_updated_by=iu.id
+        left join xsta_root_line xrl on xrv.id = xrl.root_id
+        left join xsta_standard_group xsg on xrv.group_id = xsg.group_id
+        <where>
+            <if test="id != null">
+                and xrv.id = #{id}
+            </if>
         </where>
     </select>
 </mapper>

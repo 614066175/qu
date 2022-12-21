@@ -109,7 +109,7 @@ public class Root extends AuditDomain {
     private String chargeTel;
 
     /**
-     * 责任人电话
+     * 责任人邮箱
      */
     @ExcelColumn(zh = "责任人电话", en = "chargeEmail")
     @Transient
@@ -138,6 +138,8 @@ public class Root extends AuditDomain {
      */
     private Long lastUpdatedBy;
 
+    @Transient
+    private Long instanceId;
 
     @Transient
     private String startUpdateDate;

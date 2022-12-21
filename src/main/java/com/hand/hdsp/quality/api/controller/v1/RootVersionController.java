@@ -48,7 +48,7 @@ public class RootVersionController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{id}")
     public ResponseEntity<RootVersion> detail(@PathVariable Long id) {
-        RootVersion rootVersion = rootVersionRepository.selectByPrimaryKey(id);
+        RootVersion rootVersion = rootVersionRepository.detail(id);
         return Results.success(rootVersion);
     }
 
