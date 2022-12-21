@@ -574,7 +574,7 @@ public class RootServiceImpl implements RootService {
         if (CollectionUtils.isNotEmpty(rootVersions)) {
             versionNum = rootVersions.get(0).getVersionNumber() + 1;
         }
-        root = rootRepository.list(root).get(0);
+        root = rootRepository.list(Root.builder().id(root.getId()).build()).get(0);
         RootVersion rootVersion = new RootVersion();
         BeanUtils.copyProperties(root, rootVersion);
         rootVersion.setId(null);

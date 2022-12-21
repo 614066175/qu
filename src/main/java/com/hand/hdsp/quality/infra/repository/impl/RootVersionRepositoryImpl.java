@@ -41,4 +41,16 @@ public class RootVersionRepositoryImpl extends BaseRepositoryImpl<RootVersion, R
         }
         return list;
     }
+
+    @Override
+    public RootVersion detail(Long id) {
+        RootVersion result = rootVersionMapper.detail(id);
+        if(DataSecurityHelper.isTenantOpen()){
+            result.setChargeDept(DataSecurityUtil.decrypt(result.getChargeDept()));
+            result.setChargeTel(DataSecurityUtil.decrypt(result.getChargeTel()));
+            result.setChargeEmail(DataSecurityUtil.decrypt(result.getChargeEmail()));
+            result.setChargeName(DataSecurityUtil.decrypt(result.getChargeName()));
+        }
+        return result;
+    }
 }

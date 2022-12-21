@@ -16,4 +16,6 @@ public interface RootVersionMapper extends BaseMapper<RootVersion> {
 
     List<RootVersion> list(RootVersion rootVersion);
 
+    RootVersion detail(Long id);
+
 }

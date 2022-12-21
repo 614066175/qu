@@ -15,4 +15,6 @@ import java.util.List;
  */
 public interface RootVersionRepository extends BaseRepository<RootVersion, RootVersionDTO>, ProxySelf<RootVersionRepository> {
     List<RootVersion> list(RootVersion rootVersion);
+
+    RootVersion detail(Long id);
 }

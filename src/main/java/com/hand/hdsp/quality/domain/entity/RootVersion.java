@@ -116,8 +116,26 @@ public class RootVersion extends AuditDomain {
     private String chargeTel;
 
     /**
-     * 责任人电话
+     * 责任人邮箱
      */
     @Transient
     private String chargeEmail;
+
+    /**
+     * 分组编码
+     */
+    @Transient
+    private String groupCode;
+
+    /**
+     * 分组编码
+     */
+    @Transient
+    private String groupName;
+
+    /**
+     * 修改人名
+     */
+    @Transient
+    private  String updaterName;
 }
