@@ -1,6 +1,9 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import com.hand.hdsp.quality.api.dto.*;
+import com.hand.hdsp.quality.api.dto.AssigneeUserDTO;
+import com.hand.hdsp.quality.api.dto.RootGroupDTO;
+import com.hand.hdsp.quality.api.dto.StandardApprovalDTO;
+import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.app.service.RootService;
 import com.hand.hdsp.quality.app.service.StandardApprovalService;
 import com.hand.hdsp.quality.domain.entity.*;
@@ -10,11 +13,6 @@ import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.mapper.StandardApprovalMapper;
 import com.hand.hdsp.quality.infra.util.AnsjUtil;
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.ansj.domain.Result;
 import org.ansj.domain.Term;
@@ -23,17 +21,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
-import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
-import org.hzero.boot.platform.plugin.hr.entity.Employee;
-import org.hzero.boot.platform.profile.ProfileClient;
-import org.hzero.boot.workflow.WorkflowClient;
-import org.hzero.boot.workflow.constant.WorkflowConstant;
-import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
-import org.hzero.boot.workflow.dto.RunInstance;
-import org.hzero.export.vo.ExportParam;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.helper.DataSecurityHelper;
-import org.hzero.mybatis.util.Sqls;
 import org.nlpcn.commons.lang.tire.domain.Forest;
 import org.nlpcn.commons.lang.tire.library.Library;
 import org.springframework.beans.BeanUtils;
@@ -48,6 +35,24 @@ import java.util.stream.Collectors;
 
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.ROOT;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
+
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
+import org.hzero.boot.platform.plugin.hr.entity.Employee;
+import org.hzero.boot.platform.profile.ProfileClient;
+import org.hzero.boot.workflow.WorkflowClient;
+import org.hzero.boot.workflow.constant.WorkflowConstant;
+import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
+import org.hzero.boot.workflow.dto.RunInstance;
+import org.hzero.export.vo.ExportParam;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
+import org.hzero.mybatis.util.Sqls;
 
 /**
  * 词根应用服务默认实现
@@ -377,11 +382,10 @@ public class RootServiceImpl implements RootService {
                 .businessKey(instanceView.getBusinessKey())
                 .applyDate(instanceView.getStartDate())
                 .build();
-        UserDTO userInfo = standardApprovalMapper.getUserInfo(standardApprovalDTO.getApplicantId());
-        approvalDTO.setEmployeeTel(userInfo.getPhone());
-        approvalDTO.setEmployeeEmail(userInfo.getEmail());
-        approvalDTO.setEmployeeName(userInfo.getRealName());
         Employee employee = EmployeeHelper.getEmployee(standardApprovalDTO.getApplicantId(), standardApprovalDTO.getTenantId());
+        approvalDTO.setEmployeeTel(employee.getMobile());
+        approvalDTO.setEmployeeEmail(employee.getEmail());
+        approvalDTO.setEmployeeName(employee.getName());
         List<String> employeeUnitList = standardApprovalMapper.getEmployeeUnit(employee);
         if (org.apache.commons.collections.CollectionUtils.isNotEmpty(employeeUnitList)) {
             String unitName = employeeUnitList.get(0);
