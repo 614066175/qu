@@ -73,7 +73,6 @@ public class AnsjUtil {
      * @param words
      */
     public void addWord(Long tenantId, Long projectId, List<String> words) {
-
         //上传文件服务器,多实例时保证各个服务文件统一性
         //获取当前目录下对应词库
         File library = new File(dicParent);
@@ -134,6 +133,75 @@ public class AnsjUtil {
         dicChangeNoticePublisher.sendDicChangeNotice(dicName);
     }
 
+
+    /**
+     * 自定义词库动态追加词
+     *
+     * @param tenantId
+     * @param projectId
+     * @param words
+     */
+    public void rebuildDic(Long tenantId, Long projectId, List<String> words) {
+        if (CollectionUtils.isEmpty(words)) {
+            log.info("词未空，无需构建词库文件");
+            return;
+        }
+        //上传文件服务器,多实例时保证各个服务文件统一性
+        //获取当前目录下对应词库
+        File library = new File(dicParent);
+        if (!library.exists()) {
+            library.mkdir();
+        }
+        String dicName = String.format(DIC_NAME_FORMAT, tenantId, projectId);
+        //词典操作上锁,避免数据不一致
+        redisLockHelper.execute(dicName, 30L, TimeUnit.SECONDS, () -> {
+            File rootLibrary = new File(library, dicName);
+            //删除本地可能存在的旧词库文件
+            org.apache.commons.io.FileUtils.deleteQuietly(rootLibrary);
+            //重新创建dic文件
+            if (!rootLibrary.exists()) {
+                //直接创建当前词库文件
+                try {
+                    rootLibrary.createNewFile();
+                } catch (IOException e) {
+                    throw new CommonException("自定义词库创建失败", e);
+                }
+            }
+            try (FileWriter fileWriter = new FileWriter(rootLibrary, true)) {
+                for (String word : words) {
+                    //文件追加
+                    fileWriter.write(String.format(DIC_FORMAT, word));
+                    fileWriter.flush();
+                }
+            } catch (IOException e) {
+                throw new CommonException("字典追加失败");
+            }
+            //上传minio
+            try (FileInputStream inputStream = new FileInputStream(rootLibrary)) {
+                String dicUrl = fileClient.uploadFile(tenantId, DIC_BUCKET, null, rootLibrary.getName(), FileUtils.inputStreamToByteArray(inputStream));
+                RootDic rootDic = rootDicRepository.selectOne(RootDic.builder().tenantId(tenantId).projectId(projectId).build());
+                if (rootDic != null) {
+                    String oldUrl = rootDic.getDicUrl();
+                    fileClient.deleteFileByUrl(tenantId, DIC_BUCKET, Collections.singletonList(oldUrl));
+                    rootDic.setDicUrl(dicUrl);
+                    rootDicRepository.updateOptional(rootDic, RootDic.FIELD_DIC_URL);
+                } else {
+                    RootDic newDic = RootDic.builder()
+                            .dicName(rootLibrary.getName())
+                            .dicUrl(dicUrl)
+                            .tenantId(tenantId)
+                            .projectId(projectId)
+                            .build();
+                    rootDicRepository.insertSelective(newDic);
+                }
+            } catch (Exception e) {
+                throw new CommonException("字典文件上传失败");
+            }
+        });
+        //通知各服务删除此变化的词库文件,等到下次使用时去下载最新的
+        dicChangeNoticePublisher.sendDicChangeNotice(dicName);
+    }
+
     public void rebuildDic(Long tenantId, Long projectId) {
         //查询在线,下线中的词根
         List<Root> roots = rootRepository.selectByCondition(Condition.builder(Root.class)
@@ -143,6 +211,13 @@ public class AnsjUtil {
                         .andIn(Root.FIELD_RELEASE_STATUS, Arrays.asList(ONLINE, OFFLINE_APPROVING)))
                 .build());
         if (CollectionUtils.isEmpty(roots)) {
+            //没有词根，删除词库文件
+            RootDic rootDic = rootDicRepository.selectOne(RootDic.builder().tenantId(tenantId).projectId(projectId).build());
+            if (rootDic != null) {
+                //删除minio文件
+                fileClient.deleteFileByUrl(tenantId, DIC_BUCKET, Arrays.asList(rootDic.getDicUrl()));
+                rootDicRepository.deleteByPrimaryKey(rootDic);
+            }
             return;
         }
         List<Long> rootIds = roots.stream().map(Root::getId).collect(Collectors.toList());
@@ -151,6 +226,7 @@ public class AnsjUtil {
                         .andIn(RootLine.FIELD_ROOT_ID, rootIds))
                 .build());
         if (CollectionUtils.isEmpty(rootLines)) {
+            //词根中文是必填项，此不会为空，健壮性判断
             return;
         }
         List<String> words = rootLines.stream()
@@ -158,7 +234,7 @@ public class AnsjUtil {
                 .map(RootLine::getRootName)
                 .distinct()
                 .collect(Collectors.toList());
-        addWord(tenantId, projectId, words);
+        rebuildDic(tenantId, projectId, words);
     }
 
     public void downloadDic(Long tenantId, Long projectId, File dic) {

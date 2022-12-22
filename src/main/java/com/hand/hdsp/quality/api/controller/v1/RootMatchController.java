@@ -15,11 +15,11 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.springframework.web.multipart.MultipartFile;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
@@ -112,8 +112,9 @@ public class RootMatchController extends BaseController {
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody RootMatchDTO rootMatchDTO) {
-        rootMatchRepository.updateDTOWhereTenant(rootMatchDTO, tenantId);
-        return Results.success(rootMatchDTO);
+        rootMatchDTO.setTenantId(tenantId);
+        rootMatchDTO.setProjectId(projectId);
+        return Results.success(rootMatchService.update(rootMatchDTO));
     }
 
     @ApiOperation(value = "删除字段标准匹配表")
@@ -135,7 +136,7 @@ public class RootMatchController extends BaseController {
     }
 
 
-    @ApiOperation(value = "智能匹配/重新匹配")
+    @ApiOperation(value = "智能匹配")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -167,7 +168,7 @@ public class RootMatchController extends BaseController {
                                     @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
         rootMatchDTO.setTenantId(tenantId);
         rootMatchDTO.setProjectId(projectId);
-        rootMatchService.upload(rootMatchDTO,file);
+        rootMatchService.upload(rootMatchDTO, file);
         return Results.success();
     }
 
@@ -188,7 +189,7 @@ public class RootMatchController extends BaseController {
                                     HttpServletResponse response) {
         rootMatchDTO.setProjectId(projectId);
         rootMatchDTO.setTenantId(tenantId);
-        rootMatchService.export(rootMatchDTO,exportType,response);
+        rootMatchService.export(rootMatchDTO, exportType, response);
         return Results.success();
     }
 }
