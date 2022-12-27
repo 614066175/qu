@@ -93,7 +93,7 @@ public class DataFieldStandardBatchImportServiceImpl implements IBatchImportServ
                 dataFieldDTO.setChargeId(chargeId);
                 //导入责任部门
                 if(StringUtils.isNotEmpty(dataFieldDTO.getChargeDeptName())){
-                    String chargeDeptName = "";
+                    String chargeDeptName = dataFieldDTO.getChargeDeptName();
                     if (DataSecurityHelper.isTenantOpen()) {
                         chargeDeptName = DataSecurityHelper.encrypt(dataFieldDTO.getChargeDeptName());
                     }
