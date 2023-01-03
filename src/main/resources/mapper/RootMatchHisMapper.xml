@@ -52,26 +52,12 @@
             <if test="status != null">
                 AND xrmh.status = #{status}
             </if>
-            <choose>
-                <when test="datasourceType == 'ORACLE'">
-                    <if test="startDate!=null">
-                        <![CDATA[   and xrmh.creation_date >=  to_date(#{startDate}, 'yyyy-mm-dd hh24:mi:ss')   ]]>
-                    </if>
-                    <if test="endDate !=null">
-                        <![CDATA[   and xrmh.creation_date <=  to_date(#{endDate}, 'yyyy-mm-dd hh24:mi:ss')   ]]>
-                    </if>
-                </when>
-                <when test="datasourceType == 'MYSQL'">
-                    <if test="startDate!=null">
-                        <![CDATA[  and xrmh.creation_date >=
-                        DATE_FORMAT(#{startDate}, '%Y-%m-%d %H:%T:%s')   ]]>
-                    </if>
-                    <if test="endDate!=null">
-                        <![CDATA[  and xrmh.creation_date <=
-                        DATE_FORMAT(#{endDate} , '%Y-%m-%d %H:%T:%s')    ]]>
-                    </if>
-                </when>
-            </choose>
+            <if test="startDate!=null">
+                and xrmh.creation_date >= #{startDate}
+            </if>
+            <if test="endDate !=null">
+                and xrmh.creation_date &lt;= #{endDate}
+            </if>
         </where>
     </select>
 </mapper>
