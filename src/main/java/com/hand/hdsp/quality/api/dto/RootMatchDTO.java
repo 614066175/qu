@@ -65,4 +65,8 @@ public class RootMatchDTO extends AuditDomain {
 
     @Transient
     private Integer reMatchFlag;
+
+    //导出类型 excel/csv
+    @Transient
+    private String exportType;
 }

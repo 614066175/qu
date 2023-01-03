@@ -41,30 +41,33 @@
     <select id="findAllMatch" resultType="com.hand.hdsp.quality.api.dto.RootMatchDTO">
         select
         <include refid="Base_Columns">
-            <property name="prefix" value="xfsm"/>
+            <property name="prefix" value="xrm"/>
         </include>
-        from xsta_field_standard_matching xfsm
+        from xsta_root_match xrm
         <where>
             <if test="fieldDescription != null and fieldDescription != ''">
                 <bind name="fieldDescriptionLike" value="'%' + fieldDescription + '%'"/>
-                AND xfsm.field_description like #{fieldDescriptionLike}
+                AND xrm.field_description like #{fieldDescriptionLike}
             </if>
             <if test="matchingStatus != null and matchingStatus != ''">
-                AND xfsm.matching_status = #{matchingStatus}
+                AND xrm.matching_status = #{matchingStatus}
             </if>
             <if test="fieldName != null and fieldName != ''">
                 <bind name="fieldNameLike" value="'%' + fieldName + '%'"/>
-                AND xfsm.field_name = #{fieldNameLike}
+                AND xrm.field_name = #{fieldNameLike}
             </if>
             <if test="source != null and source != ''">
-                AND xfsm.source = #{source}
+                AND xrm.source = #{source}
             </if>
             <if test="fieldType != null and fieldType != ''">
-                AND xfsm.field_type = #{fieldType}
+                AND xrm.field_type = #{fieldType}
             </if>
             <if test="fieldDescription != null and fieldDescription != ''">
                 <bind name="fieldDescriptionLike" value="'%' + fieldDescription + '%'"/>
-                AND xfsm.field_description like #{fieldDescriptionLike}
+                AND xrm.field_description like #{fieldDescriptionLike}
+            </if>
+            <if test="batchNumber != null and batchNumber != ''">
+                AND xrm.batch_number =#{batchNumber}
             </if>
         </where>
     </select>

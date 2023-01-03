@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.dto;
 
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -52,5 +53,11 @@ public class RootMatchHisDTO extends AuditDomain {
 
     @ApiModelProperty(value = "租户id")
     private Long tenantId;
+
+    @Transient
+    private Date startDate;
+
+    @Transient
+    private Date endDate;
 
 }
