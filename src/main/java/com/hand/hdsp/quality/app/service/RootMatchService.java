@@ -46,4 +46,11 @@ public interface RootMatchService {
      * @return
      */
     List<RootMatch> smartMatch(RootMatchDTO rootMatchDTO);
+
+    /**
+     *
+     * @param rootMatchDTO
+     * @return
+     */
+    RootMatchDTO update(RootMatchDTO rootMatchDTO);
 }

@@ -19,14 +19,26 @@ public interface RootMatchConstants {
          */
         String FAILED = "FAILED";
         /**
-         * excel导入
+         * 未匹配
          */
-        String IMPORT = "IMPORT";
+        String UN_MATCH = "UN_MATCH";
 
         /**
          * 部分匹配
          */
         String PART_MATCH = "PART_MATCH";
+
+        /**
+         * 手动维护
+         */
+        String MANUAL_MATCH = "MANUAL_MATCH";
+    }
+
+    interface HisStatus {
+        String UPLOADED = "UPLOADED";
+        String UPLOADING = "UPLOADING";
+        String MATCHED = "MATCHED";
+        String MATCHING = "MATCHING";
     }
 
     interface SourceType {
