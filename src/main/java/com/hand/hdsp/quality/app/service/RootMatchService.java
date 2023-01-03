@@ -30,7 +30,7 @@ public interface RootMatchService {
      * @param rootMatchDTO 条件参数
      * @param file 文件
      */
-    void upload(RootMatchDTO rootMatchDTO, MultipartFile file) throws IOException;
+    String upload(RootMatchDTO rootMatchDTO, MultipartFile file) throws IOException;
 
     /**
      * 导出excel

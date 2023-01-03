@@ -168,8 +168,7 @@ public class RootMatchController extends BaseController {
                                     @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
         rootMatchDTO.setTenantId(tenantId);
         rootMatchDTO.setProjectId(projectId);
-        rootMatchService.upload(rootMatchDTO, file);
-        return Results.success();
+        return Results.success(rootMatchService.upload(rootMatchDTO, file));
     }
 
 

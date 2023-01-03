@@ -103,7 +103,7 @@ public class RootMatchServiceImpl implements RootMatchService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void upload(RootMatchDTO rootMatchDTO, MultipartFile file) {
+    public String upload(RootMatchDTO rootMatchDTO, MultipartFile file) {
         List<RootMatchHis> rootMatchHis = new ArrayList<>();
         Long importRowCount = 0L;
         //生成批次号
@@ -169,6 +169,7 @@ public class RootMatchServiceImpl implements RootMatchService {
         } catch (IOException e) {
             throw new CommonException("上传失败");
         }
+        return rootMatchDTO.getBatchNumber();
     }
 
     /**
@@ -182,7 +183,7 @@ public class RootMatchServiceImpl implements RootMatchService {
         String exportType = "";
         List<DataFieldDTO> result = new ArrayList<>();
         //筛选字段标准来源的
-        List<RootMatchDTO> sortRootMatchDTOList = rootMatchDTOList.stream().filter(dto -> dto.getFieldType().equals(STANDARD) && ObjectUtils.isNotEmpty(dto.getFieldId())).collect(Collectors.toList());
+        List<RootMatchDTO> sortRootMatchDTOList = rootMatchDTOList.stream().filter(dto -> STANDARD.equals(dto.getSource()) && ObjectUtils.isNotEmpty(dto.getFieldId())).collect(Collectors.toList());
         for (RootMatchDTO matchDTO : sortRootMatchDTOList) {
             List<DataFieldDTO> list = dataFieldMapper.list(DataFieldDTO.builder().fieldId(matchDTO.getFieldId()).build());
             //查询标准组
