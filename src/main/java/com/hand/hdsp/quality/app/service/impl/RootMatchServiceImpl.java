@@ -420,11 +420,11 @@ public class RootMatchServiceImpl implements RootMatchService {
         if (analyzerWord.contains(NO_MATCH)) {
             //部分匹配
             importMatch.setMatchingStatus(PART_MATCH);
-            importMatch.setFieldName(ROOT);
         } else {
             importMatch.setMatchingStatus(SUCCESS);
-            importMatch.setFieldName(ROOT);
         }
+        importMatch.setFieldName(analyzerWord);
+        importMatch.setSource(ROOT);
         rootMatchRepository.updateByPrimaryKey(importMatch);
     }
 }
