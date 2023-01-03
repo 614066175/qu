@@ -173,13 +173,13 @@ public class RootMatchServiceImpl implements RootMatchService {
 
     /**
      * @param rootMatchDTO 条件参数
-     * @param exportType   导出类型
      */
     @Override
-    public void export(RootMatchDTO rootMatchDTO, String exportType, HttpServletResponse response) {
+    public void export(RootMatchDTO rootMatchDTO, HttpServletResponse response) {
         List<RootMatchDTO> rootMatchDTOList = rootMatchRepository.selectDTOByCondition(Condition.builder(RootMatch.class).andWhere(Sqls.custom()
                         .andEqualTo(RootMatch.FIELD_BATCH_NUMBER, rootMatchDTO.getBatchNumber()))
                 .build());
+        String exportType = "";
         List<DataFieldDTO> result = new ArrayList<>();
         //筛选字段标准来源的
         List<RootMatchDTO> sortRootMatchDTOList = rootMatchDTOList.stream().filter(dto -> dto.getFieldType().equals(STANDARD) && ObjectUtils.isNotEmpty(dto.getFieldId())).collect(Collectors.toList());
@@ -212,9 +212,9 @@ public class RootMatchServiceImpl implements RootMatchService {
             cell.setCellValue(name);
             cellNum++;
         }
-        if ("excel".equals(exportType)) {
+        if(ObjectUtils.isEmpty(rootMatchDTO.getExportType())){
             exportType = ".xlsx";
-        } else {
+        }  else if ("csv".equals(rootMatchDTO.getExportType())) {
             exportType = ".csv";
         }
         createCells(result, sheet);
