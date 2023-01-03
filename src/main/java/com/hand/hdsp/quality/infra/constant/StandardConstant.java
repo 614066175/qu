@@ -39,6 +39,7 @@ public interface StandardConstant {
         String FIELD="FIELD";
         String NAME="NAME";
         String DOC="DOC";
+        String ROOT="ROOT";
    }
 
     interface AimType{
@@ -51,4 +52,7 @@ public interface StandardConstant {
         String RANGE="RANGE";
     }
 
+    interface RootName{
+        String SEPARATOR = ",";
+    }
 }

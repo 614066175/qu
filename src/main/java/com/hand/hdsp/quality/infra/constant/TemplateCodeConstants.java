@@ -33,4 +33,8 @@ public interface TemplateCodeConstants {
      * 评估方案导入模板
      */
     String TEMPLATE_CODE_BATCH_PLAN="HDSP.XQUA.BATCH_PLAN";
+    /**
+     * 词根-导入模板
+     */
+    String TEMPLATE_CODE_ROOT="HDSP.XQUA.ROOT";
 }

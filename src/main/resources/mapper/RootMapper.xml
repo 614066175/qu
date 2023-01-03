@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.RootMapper">
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.Root">
+        <result column="id" property="id" jdbcType="DECIMAL"/>
+        <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
+        <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
+        <result column="creation_date" property="creationDate" jdbcType="DATE"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="DATE"/>
+        <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
+        <result column="root_en" property="rootEn" jdbcType="VARCHAR"/>
+        <result column="root_en_short" property="rootEnShort" jdbcType="VARCHAR"/>
+        <result column="root_desc" property="rootDesc" jdbcType="VARCHAR"/>
+        <result column="charge_dept_id" property="chargeDeptId" jdbcType="DECIMAL"/>
+        <result column="charge_id" property="chargeId" jdbcType="DECIMAL"/>
+        <result column="release_status" property="releaseStatus" jdbcType="VARCHAR"/>
+        <result column="group_id" property="groupId" jdbcType="DECIMAL"/>
+    </resultMap>
+
+    <sql id="baseColum">
+        ${prefix}.id,
+        ${prefix}.tenant_id,
+        ${prefix}.project_id,
+        ${prefix}.created_by,
+        ${prefix}.last_updated_by,
+        ${prefix}.creation_date,
+        ${prefix}.last_update_date,
+        ${prefix}.object_version_number,
+        ${prefix}.root_en,
+        ${prefix}.root_en_short,
+        ${prefix}.root_desc,
+        ${prefix}.charge_dept_id,
+        ${prefix}.charge_id,
+        ${prefix}.release_status,
+        ${prefix}.group_id
+    </sql>
+
+    <select id="list" resultType="com.hand.hdsp.quality.domain.entity.Root">
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+        select DISTINCT
+        <include refid="baseColum">
+            <property name="prefix" value="xr"/>
+        </include>,
+        he.email chargeEmail,
+        he.mobile chargeTel,
+        he.name chargeName,
+        hu.unit_name chargeDept,
+        iu.real_name lastUpdatedName,
+        xsg.group_name,
+        xsg.group_code,
+        xsa.instance_id
+        from
+            xsta_root xr
+        left join hpfm_employee he on xr.charge_id=he.employee_id
+        left join hpfm_unit hu on xr.charge_dept_id=hu.unit_id
+        left join iam_user iu on xr.last_updated_by=iu.id
+        left join xsta_root_line xrl on xr.id = xrl.root_id
+        left join xsta_standard_group xsg on xr.group_id = xsg.group_id
+        <if test='datasourceType == "ORACLE"'>
+            LEFT JOIN (
+            SELECT
+            xsa.standard_id,
+            xsa.instance_id,
+            row_number()over(partition by xsa.standard_id order by approval_id desc) rw
+            FROM xsta_standard_approval xsa
+            WHERE xsa.standard_type = 'ROOT'
+            ) xsa ON xsa.standard_id = xr.id
+            AND xsa.rw = 1
+            AND xr.release_status != 'CREATE'
+        </if>
+        <if test='datasourceType == "MYSQL"'>
+            left join xsta_standard_approval xsa on xsa.approval_id = (
+            select max(xsa.approval_id)
+            from xsta_standard_approval xsa
+            where xsa.standard_id = xr.id
+            and xsa.standard_type = 'ROOT'
+            and xr.release_status != 'CREATE'
+            )
+        </if>
+        <where>
+            <if test="tenantId != null">
+                and xr.tenant_id = #{tenantId}
+            </if>
+            <if test="projectId != null">
+                and xr.project_id = #{projectId}
+            </if>
+            <if test="id != null">
+                and xr.id = #{id}
+            </if>
+            <if test="groupId != null">
+                and xr.group_id = #{groupId}
+            </if>
+            <if test="rootName != null and rootName !=''">
+                <bind name="rootNameLike" value='"%"+rootName+"%"'/>
+                and xrl.root_name like #{rootNameLike}
+            </if>
+            <if test="rootEnShort != null and rootEnShort !=''">
+                <bind name="rootEnShortLike" value='"%"+rootEnShort+"%"'/>
+                and xr.root_en_short like #{rootEnShortLike}
+            </if>
+            <if test="rootEn != null and rootEn !=''">
+                <bind name="rootEnLike" value='"%"+rootEn+"%"'/>
+                and xr.root_en like #{rootEnLike}
+            </if>
+            <if test="rootDesc != null and rootDesc !=''">
+                <bind name="rootDescLike" value='"%"+rootDesc+"%"'/>
+                and xr.root_desc like #{rootDescLike}
+            </if>
+            <if test="releaseStatus != null and releaseStatus !=''">
+                and xr.release_status = #{releaseStatus}
+            </if>
+            <if test="chargeName != null and chargeName !=''">
+                and he.name = #{chargeName}
+            </if>
+            <if test="lastUpdatedName != null and lastUpdatedName !=''">
+                <bind name="lastUpdatedNameLike" value='"%"+lastUpdatedName+"%"'/>
+                and iu.real_name like #{lastUpdatedNameLike}
+            </if>
+            <if test="chargeId != null">
+                and he.employee_id = #{chargeId}
+            </if>
+            <if test="lastUpdatedBy != null">
+                and iu.id = #{lastUpdatedBy}
+            </if>
+            <if test='datasourceType == "MYSQL"'>
+                <if test="startCreateDate != null and startCreateDate != ''">
+                    and xr.creation_date &gt;= str_to_date(#{startCreateDate},'%Y-%m-%d %H:%i:%s')
+                </if>
+                <if test="endCreateDate != null and endCreateDate != ''">
+                    and xr.creation_date &lt;= str_to_date(#{endCreateDate},'%Y-%m-%d %H:%i:%s')
+                </if>
+
+                <if test="startUpdateDate != null and startUpdateDate != ''">
+                    and xr.last_update_date &gt;= str_to_date(#{startUpdateDate},'%Y-%m-%d %H:%i:%s')
+                </if>
+                <if test="endUpdateDate != null and endUpdateDate != ''">
+                    and xr.last_update_date &lt;= str_to_date(#{endUpdateDate},'%Y-%m-%d %H:%i:%s')
+                </if>
+            </if>
+            <if test='datasourceType == "ORACLE"'>
+                <if test="startCreateDate != null and startCreateDate != ''">
+                    and xr.creation_date &gt;= to_date( #{startCreateDate},'yyyy-MM-dd HH24:mi:ss')
+                </if>
+                <if test="endCreateDate != null and endCreateDate != ''">
+                    and xr.creation_date &lt;= to_date( #{endCreateDate},'yyyy-MM-dd HH24:mi:ss')
+                </if>
+
+                <if test="startUpdateDate != null and startUpdateDate != ''">
+                    and xr.last_update_date &gt;= to_date( #{startUpdateDate},'yyyy-MM-dd HH24:mi:ss')
+                </if>
+                <if test="endUpdateDate != null and endUpdateDate != ''">
+                    and xr.last_update_date &lt;= to_date( #{endUpdateDate},'yyyy-MM-dd HH24:mi:ss')
+                </if>
+            </if>
+        </where>
+    </select>
+
+    <select id="checkCharger" resultType="java.lang.Long">
+        SELECT
+            employee_id
+        FROM
+            hpfm_employee
+        WHERE
+            name=#{chargeName}
+          and tenant_id  = #{tenantId}
+    </select>
+
+    <select id="getUnitByEmployeeId" resultType="com.hand.hdsp.quality.domain.entity.Root">
+        select
+            hu.unit_id chargeDeptId,
+            hu.unit_name chargeDept
+        from
+            hpfm_employee_assign hea
+        left join hpfm_unit hu on hu.unit_id = hea.unit_id
+        where
+            hea.tenant_id = #{tenantId}
+            and hea.employee_id = #{chargeId}
+        order by hea.primary_position_flag desc
+    </select>
+
+    <select id="getAssigneeUser" resultType="com.hand.hdsp.quality.api.dto.AssigneeUserDTO">
+        SELECT
+            name as employeeName,
+            employee_num as employeeNum
+        FROM
+            hpfm_employee he
+        where he.employee_id=#{chargeId}
+    </select>
+</mapper>

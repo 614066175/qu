@@ -198,5 +198,19 @@ public interface ErrorCode {
      * 分组或子分组下存在标准规则
      */
     String EXISTS_OTHER_GROUP_OR_RULE = "hdsp.xqua.err.exists_other_group_or_rule";
+    /**
+     * 文件格式不支持
+     */
+    String FILE_TYPE_NOT_SUPPORTED = "hdsp.xqua.err.file_type_not_supported";
 
+
+    String ROOT_EN_SHORT_EXIST = "hdsp.xqua.err.root_en_short_exist";
+
+    String ROOT_NAME_EXIST = "hdsp.xqua.err.root_name_exist";
+
+    String ROOT_NOT_DELETE = "hdsp.xsta.err.root_can_not_delete";
+
+    String ROOT_EN_SHORT_ERROR = "hdps.xsta.err.root_en_short_error";
+
+    String ROOT_NOT_EXIST = "hdsp.xqua.err.root_not_exists";
 }

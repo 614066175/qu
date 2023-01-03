@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.RootVersionMapper">
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.RootVersion">
+        <result column="id" property="id" jdbcType="DECIMAL"/>
+        <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
+        <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
+        <result column="creation_date" property="creationDate" jdbcType="DATE"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="DATE"/>
+        <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
+        <result column="root_id" property="rootId" jdbcType="DECIMAL"/>
+        <result column="root_en" property="rootEn" jdbcType="VARCHAR"/>
+        <result column="root_en_short" property="rootEnShort" jdbcType="VARCHAR"/>
+        <result column="root_name" property="rootName" jdbcType="VARCHAR"/>
+        <result column="root_desc" property="rootDesc" jdbcType="VARCHAR"/>
+        <result column="charge_dept_id" property="chargeDeptId" jdbcType="DECIMAL"/>
+        <result column="charge_id" property="chargeId" jdbcType="DECIMAL"/>
+        <result column="group_id" property="groupId" jdbcType="DECIMAL"/>
+        <result column="version_number" property="versionNumber" jdbcType="DECIMAL"/>
+    </resultMap>
+
+    <sql id="baseColum">
+        ${prefix}.id,
+        ${prefix}.group_id,
+        ${prefix}.root_id,
+        ${prefix}.root_en_short,
+        ${prefix}.root_name,
+        ${prefix}.root_en,
+        ${prefix}.root_desc,
+        ${prefix}.charge_dept_id,
+        ${prefix}.charge_id,
+        ${prefix}.version_number,
+        ${prefix}.tenant_id,
+        ${prefix}.project_id,
+        ${prefix}.created_by,
+        ${prefix}.last_updated_by,
+        ${prefix}.creation_date,
+        ${prefix}.last_update_date,
+        ${prefix}.object_version_number
+    </sql>
+
+    <select id="list" resultType="com.hand.hdsp.quality.domain.entity.RootVersion">
+        select
+        <include refid="baseColum">
+            <property name="prefix" value="xrv"/>
+        </include>,
+        he.email chargeEmail,
+        he.mobile chargeTel,
+        he.name chargeName,
+        hu.unit_name chargeDept,
+        iu.real_name updaterName
+        from
+        xsta_root_version xrv
+        left join hpfm_employee he on xrv.charge_id=he.employee_id
+        left join hpfm_unit hu on xrv.charge_dept_id=hu.unit_id
+        left join iam_user iu on xrv.last_updated_by=iu.id
+        <where>
+            <if test="tenantId != null">
+                and xrv.tenant_id = #{tenantId}
+            </if>
+            <if test="projectId != null">
+                and xrv.project_id = #{projectId}
+            </if>
+            <if test="id != null">
+                and xrv.id = #{id}
+            </if>
+            <if test="rootId != null">
+                and xrv.root_id = #{rootId}
+            </if>
+            <if test="versionNumber != null">
+                and xrv.version_number = #{versionNumber}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="detail" resultType="com.hand.hdsp.quality.domain.entity.RootVersion">
+        select
+        <include refid="baseColum">
+            <property name="prefix" value="xrv"/>
+        </include>,
+        he.email chargeEmail,
+        he.mobile chargeTel,
+        he.name chargeName,
+        hu.unit_name chargeDept,
+        xsg.group_name,
+        xsg.group_code
+        from
+        xsta_root_version xrv
+        left join hpfm_employee he on xrv.charge_id=he.employee_id
+        left join hpfm_unit hu on xrv.charge_dept_id=hu.unit_id
+        left join iam_user iu on xrv.last_updated_by=iu.id
+        left join xsta_root_line xrl on xrv.id = xrl.root_id
+        left join xsta_standard_group xsg on xrv.group_id = xsg.group_id
+        <where>
+            <if test="id != null">
+                and xrv.id = #{id}
+            </if>
+        </where>
+    </select>
+</mapper>
