@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
@@ -61,11 +62,9 @@ public class RootRepositoryImpl extends BaseRepositoryImpl<Root, RootDTO> implem
                             .andEqualTo(RootLine.FIELD_TENANT_ID,tmp.getTenantId())
                     ).build());
             if(CollectionUtils.isNotEmpty(rootLines)){
-                StringBuffer rootNameStr = new StringBuffer();
-                rootLines.forEach(rootLine->{
-                    rootNameStr.append(rootLine.getRootName()).append(StandardConstant.RootName.SEPARATOR);
-                });
-                tmp.setRootName(rootNameStr.substring(0,rootNameStr.length()-1));
+                List<String> str = rootLines.stream().map(RootLine::getRootName).collect(Collectors.toList());
+                String rootNameStr = StringUtils.join(str,StandardConstant.RootName.SEPARATOR);
+                tmp.setRootName(rootNameStr);
             }
         }
         return rootList;
