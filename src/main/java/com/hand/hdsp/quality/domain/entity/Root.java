@@ -16,7 +16,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import org.hzero.core.base.BaseConstants;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
 
@@ -142,15 +144,19 @@ public class Root extends AuditDomain {
     private Long instanceId;
 
     @Transient
-    private String startUpdateDate;
+    @DateTimeFormat(pattern = BaseConstants.Pattern.DATETIME)
+    private Date startUpdateDate;
 
     @Transient
-    private String endUpdateDate;
+    @DateTimeFormat(pattern = BaseConstants.Pattern.DATETIME)
+    private Date endUpdateDate;
 
     @Transient
-    private String startCreateDate;
+    @DateTimeFormat(pattern = BaseConstants.Pattern.DATETIME)
+    private Date startCreateDate;
 
     @Transient
-    private String endCreateDate;
+    @DateTimeFormat(pattern = BaseConstants.Pattern.DATETIME)
+    private Date endCreateDate;
 
 }

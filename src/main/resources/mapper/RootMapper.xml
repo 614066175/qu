@@ -125,35 +125,18 @@
             <if test="lastUpdatedBy != null">
                 and iu.id = #{lastUpdatedBy}
             </if>
-            <if test='datasourceType == "MYSQL"'>
-                <if test="startCreateDate != null and startCreateDate != ''">
-                    and xr.creation_date &gt;= str_to_date(#{startCreateDate},'%Y-%m-%d %H:%i:%s')
-                </if>
-                <if test="endCreateDate != null and endCreateDate != ''">
-                    and xr.creation_date &lt;= str_to_date(#{endCreateDate},'%Y-%m-%d %H:%i:%s')
-                </if>
-
-                <if test="startUpdateDate != null and startUpdateDate != ''">
-                    and xr.last_update_date &gt;= str_to_date(#{startUpdateDate},'%Y-%m-%d %H:%i:%s')
-                </if>
-                <if test="endUpdateDate != null and endUpdateDate != ''">
-                    and xr.last_update_date &lt;= str_to_date(#{endUpdateDate},'%Y-%m-%d %H:%i:%s')
-                </if>
+            <if test="startCreateDate != null">
+                and xr.creation_date &gt;= #{startCreateDate}
             </if>
-            <if test='datasourceType == "ORACLE"'>
-                <if test="startCreateDate != null and startCreateDate != ''">
-                    and xr.creation_date &gt;= to_date( #{startCreateDate},'yyyy-MM-dd HH24:mi:ss')
-                </if>
-                <if test="endCreateDate != null and endCreateDate != ''">
-                    and xr.creation_date &lt;= to_date( #{endCreateDate},'yyyy-MM-dd HH24:mi:ss')
-                </if>
+            <if test="endCreateDate != null">
+                and xr.creation_date &lt;= #{endCreateDate}
+            </if>
 
-                <if test="startUpdateDate != null and startUpdateDate != ''">
-                    and xr.last_update_date &gt;= to_date( #{startUpdateDate},'yyyy-MM-dd HH24:mi:ss')
-                </if>
-                <if test="endUpdateDate != null and endUpdateDate != ''">
-                    and xr.last_update_date &lt;= to_date( #{endUpdateDate},'yyyy-MM-dd HH24:mi:ss')
-                </if>
+            <if test="startUpdateDate != null">
+                and xr.last_update_date &gt;= #{startUpdateDate}
+            </if>
+            <if test="endUpdateDate != null">
+                and xr.last_update_date &lt;=#{endUpdateDate}
             </if>
         </where>
     </select>
