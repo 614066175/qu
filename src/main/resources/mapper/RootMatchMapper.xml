@@ -66,6 +66,9 @@
                 <bind name="fieldDescriptionLike" value="'%' + fieldDescription + '%'"/>
                 AND xrm.field_description like #{fieldDescriptionLike}
             </if>
+            <if test="batchNumber != null and batchNumber != ''">
+                AND xrm.batch_number =#{batchNumber}
+            </if>
         </where>
     </select>
 </mapper>
