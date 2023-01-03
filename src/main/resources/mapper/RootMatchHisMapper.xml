@@ -32,42 +32,42 @@
         <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         select
         <include refid="Base_Columns">
-            <property name="prefix" value="xfsm"/>
+            <property name="prefix" value="xrmh"/>
         </include>
-        from xsta_field_standard_matchs xfsm
+        from xsta_root_match_his xrmh
         <where>
             <if test="tenantId != null">
-                AND xfsm.tenant_id = #{tenantId}
+                AND xrmh.tenant_id = #{tenantId}
             </if>
             <if test="projectId !=null">
-                AND xfsm.project_id = #{projectId}
+                AND xrmh.project_id = #{projectId}
             </if>
             <if test="batchNumber !=null and batchNumber != ''">
                 <bind name="batchNumberLike" value="'%' + batchNumber + '%'"/>
-                AND xfsm.batch_number like #{batchNumberLike}
+                AND xrmh.batch_number like #{batchNumberLike}
             </if>
             <if test="dataCount != null">
-                AND xfsm.data_count = #{dataCount}
+                AND xrmh.data_count = #{dataCount}
             </if>
             <if test="status != null">
-                AND xfsm.status = #{status}
+                AND xrmh.status = #{status}
             </if>
             <choose>
                 <when test="datasourceType == 'ORACLE'">
                     <if test="startDate!=null">
-                        <![CDATA[   and xfsm.creation_date >=  to_date(#{startDate}, 'yyyy-mm-dd hh24:mi:ss')   ]]>
+                        <![CDATA[   and xrmh.creation_date >=  to_date(#{startDate}, 'yyyy-mm-dd hh24:mi:ss')   ]]>
                     </if>
                     <if test="endDate !=null">
-                        <![CDATA[   and xfsm.creation_date <=  to_date(#{endDate}, 'yyyy-mm-dd hh24:mi:ss')   ]]>
+                        <![CDATA[   and xrmh.creation_date <=  to_date(#{endDate}, 'yyyy-mm-dd hh24:mi:ss')   ]]>
                     </if>
                 </when>
                 <when test="datasourceType == 'MYSQL'">
                     <if test="startDate!=null">
-                        <![CDATA[  and xfsm.creation_date >=
+                        <![CDATA[  and xrmh.creation_date >=
                         DATE_FORMAT(#{startDate}, '%Y-%m-%d %H:%T:%s')   ]]>
                     </if>
                     <if test="endDate!=null">
-                        <![CDATA[  and xfsm.creation_date <=
+                        <![CDATA[  and xrmh.creation_date <=
                         DATE_FORMAT(#{endDate} , '%Y-%m-%d %H:%T:%s')    ]]>
                     </if>
                 </when>
