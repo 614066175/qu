@@ -213,9 +213,9 @@ public class RootMatchServiceImpl implements RootMatchService {
             cell.setCellValue(name);
             cellNum++;
         }
-        if(ObjectUtils.isEmpty(rootMatchDTO.getExportType())){
+        if (ObjectUtils.isEmpty(rootMatchDTO.getExportType())) {
             exportType = ".xlsx";
-        }  else if ("csv".equals(rootMatchDTO.getExportType())) {
+        } else if ("csv".equals(rootMatchDTO.getExportType())) {
             exportType = ".csv";
         }
         createCells(result, sheet);
@@ -393,6 +393,7 @@ public class RootMatchServiceImpl implements RootMatchService {
         if (CollectionUtils.isNotEmpty(dataFields)) {
             DataField dataField = dataFields.get(0);
             importMatch.setMatchingStatus(SUCCESS);
+            importMatch.setFieldId(dataField.getFieldId());
             importMatch.setFieldType(dataField.getFieldType());
             importMatch.setFieldName(dataField.getFieldName());
             importMatch.setFieldDescription(dataField.getFieldComment());
@@ -416,13 +417,24 @@ public class RootMatchServiceImpl implements RootMatchService {
             rootMatchRepository.updateByPrimaryKey(importMatch);
             return;
         }
-
+        String[] split = analyzerWord.split("_");
+        List<String> matchTerms = Arrays.asList(split).stream()
+                .filter(term -> !term.equals(NO_MATCH)).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(matchTerms)) {
+            importMatch.setFieldId(null);
+            importMatch.setFieldName(null);
+            importMatch.setSource(null);
+            importMatch.setMatchingStatus(FAILED);
+            rootMatchRepository.updateByPrimaryKey(importMatch);
+            return;
+        }
         if (analyzerWord.contains(NO_MATCH)) {
             //部分匹配
             importMatch.setMatchingStatus(PART_MATCH);
         } else {
             importMatch.setMatchingStatus(SUCCESS);
         }
+        importMatch.setFieldId(null);
         importMatch.setFieldName(analyzerWord);
         importMatch.setSource(ROOT);
         rootMatchRepository.updateByPrimaryKey(importMatch);
