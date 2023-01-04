@@ -148,6 +148,7 @@
     </select>
 
     <select id="checkCharger" resultType="java.lang.Long">
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         SELECT
             employee_id
         FROM
@@ -155,6 +156,12 @@
         WHERE
             name=#{chargeName}
           and tenant_id  = #{tenantId}
+        <if test='datasourceType == "ORACLE"'>
+            and rownum = 1
+        </if>
+        <if test='datasourceType == "MYSQL"'>
+            LIMIT 1
+        </if>
     </select>
 
     <select id="getUnitByEmployeeId" resultType="com.hand.hdsp.quality.domain.entity.Root">
