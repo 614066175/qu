@@ -93,6 +93,12 @@
             <if test="groupId != null">
                 and xr.group_id = #{groupId}
             </if>
+            <if test="groupArrays!=null and groupArrays.length>0">
+                and xr.group_id in
+                <foreach collection="groupArrays" item="arr" index="no" open="("     separator="," close=")">
+                    #{arr}
+                </foreach>
+            </if>
             <if test="rootName != null and rootName !=''">
                 <bind name="rootNameLike" value='"%"+rootName+"%"'/>
                 and xrl.root_name like #{rootNameLike}

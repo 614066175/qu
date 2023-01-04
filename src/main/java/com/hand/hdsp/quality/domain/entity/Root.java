@@ -159,4 +159,10 @@ public class Root extends AuditDomain {
     @DateTimeFormat(pattern = BaseConstants.Pattern.DATETIME)
     private Date endCreateDate;
 
+    /**
+     * 分组集合
+     */
+    @Transient
+    private Long[] groupArrays;
+
 }
