@@ -48,12 +48,6 @@ public class RootMatchDTO extends AuditDomain {
     @ApiModelProperty(value = "来源：(词根翻译 , 字段标准)")
     private String source;
 
-    @ApiModelProperty(value = "字段描述")
-    private String fieldDescription;
-
-    @ApiModelProperty(value = "字段类型")
-    private String fieldType;
-
     @ApiModelProperty(value = "字段标准id")
     private Long fieldId;
 
@@ -69,4 +63,12 @@ public class RootMatchDTO extends AuditDomain {
     //导出类型 excel/csv
     @Transient
     private String exportType;
+
+    //字段描述
+    @Transient
+    private String fieldDescription;
+
+    //字段类型
+    @Transient
+    private String fieldType;
 }

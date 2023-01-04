@@ -9,8 +9,6 @@
         <result column="matching_status" property="matchingStatus" jdbcType="VARCHAR"/>
         <result column="field_name" property="fieldName" jdbcType="VARCHAR"/>
         <result column="source" property="source" jdbcType="VARCHAR"/>
-        <result column="field_description" property="fieldDescription" jdbcType="VARCHAR"/>
-        <result column="field_type" property="fieldType" jdbcType="VARCHAR"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
@@ -24,9 +22,7 @@
         ${prefix}.id,
         ${prefix}.batch_number,
         ${prefix}.field_name,
-        ${prefix}.field_type,
         ${prefix}.field_comment,
-        ${prefix}.field_description,
         ${prefix}.matching_status,
         ${prefix}.source,
         ${prefix}.field_id,
@@ -42,8 +38,12 @@
         select
         <include refid="Base_Columns">
             <property name="prefix" value="xrm"/>
-        </include>
+        </include>,
+        xfs.field_comment as fieldDescription,
+        xfs.field_type
         from xsta_root_match xrm
+        left join xsta_field_standard xfs
+        on xrm.field_id = xfs.field_id
         <where>
             <if test="fieldDescription != null and fieldDescription != ''">
                 <bind name="fieldDescriptionLike" value="'%' + fieldDescription + '%'"/>

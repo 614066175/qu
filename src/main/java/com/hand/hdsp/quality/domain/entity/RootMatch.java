@@ -35,8 +35,6 @@ public class RootMatch extends AuditDomain {
     public static final String FIELD_MATCHING_STATUS = "matchingStatus";
     public static final String FIELD_FIELD_NAME = "fieldName";
     public static final String FIELD_SOURCE = "source";
-    public static final String FIELD_FIELD_DESCRIPTION = "fieldDescription";
-    public static final String FIELD_FIELD_TYPE = "fieldType";
     public static final String FIELD_FIELD_ID = "fieldId";
     public static final String FIELD_PROJECT_ID = "projectId";
     public static final String FIELD_TENANT_ID = "tenantId";
@@ -62,10 +60,6 @@ public class RootMatch extends AuditDomain {
     private String fieldName;
 
     private String source;
-
-    private String fieldDescription;
-
-    private String fieldType;
 
     private Long fieldId;
 
