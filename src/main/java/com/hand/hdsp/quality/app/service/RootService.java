@@ -9,7 +9,6 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.export.vo.ExportParam;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 词根应用服务
@@ -133,5 +132,5 @@ public interface RootService {
      * @param word
      * @return
      */
-    Map<String,List<String>> rootTranslate(Long tenantId, Long projectId, String word);
+    List<String> rootTranslate(Long tenantId, Long projectId, String word);
 }
