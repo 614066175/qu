@@ -102,6 +102,17 @@ public class RootServiceImpl implements RootService {
 
     @Override
     public Page<Root> list(PageRequest pageRequest, Root root) {
+        Long groupId = root.getGroupId();
+        if(ObjectUtils.isNotEmpty(groupId)){
+            List<StandardGroupDTO> standardGroupDTOList = new ArrayList<>();
+            //查询子分组
+            findChildGroups(groupId, standardGroupDTOList);
+            //添加当前分组
+            standardGroupDTOList.add(StandardGroupDTO.builder().groupId(groupId).build());
+            Long[] groupIds = standardGroupDTOList.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
+            root.setGroupArrays(groupIds);
+            root.setGroupId(null);
+        }
         return PageHelper.doPageAndSort(pageRequest, () -> rootRepository.list(root));
     }
 
@@ -620,6 +631,18 @@ public class RootServiceImpl implements RootService {
             standardApprovalDTO.setApplyTime(runInstance.getStartDate());
             standardApprovalDTO.setInstanceId(runInstance.getInstanceId());
             standardApprovalService.createOrUpdate(standardApprovalDTO);
+        }
+    }
+
+    private void findChildGroups(Long groupId, List<StandardGroupDTO> standardGroups) {
+        List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(
+                Condition.builder(StandardGroup.class)
+                        .andWhere(Sqls.custom()
+                                .andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID, groupId))
+                        .build());
+        if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
+            standardGroups.addAll(standardGroupDTOList);
+            standardGroupDTOList.forEach(standardGroupDTO -> findChildGroups(standardGroupDTO.getGroupId(), standardGroups));
         }
     }
 }
