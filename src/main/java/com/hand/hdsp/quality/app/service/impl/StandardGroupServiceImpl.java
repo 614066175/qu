@@ -153,7 +153,7 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                         .build());
                 if (CollectionUtils.isNotEmpty(rootList)) {
                     StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByPrimaryKey(rootList.get(0).getGroupId());
-                    throw new CommonException(ErrorCode.GROUP_HAS_STANDARD,groupDTO.getGroupName());
+                    throw new CommonException(ErrorCode.GROUP_HAS_ROOT,groupDTO.getGroupName());
                 }
                 break;
             default:
