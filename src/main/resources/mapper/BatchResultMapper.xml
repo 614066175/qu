@@ -359,25 +359,21 @@
     </select>
 
     <select id="listSuccessTypeCount" resultType="com.hand.hdsp.quality.infra.vo.CheckTypePercentageVO">
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         SELECT
         xbrr.check_type,
-        COUNT(*) count_sum
+        <choose>
+            <when test='datasourceType == "ORACLE"'>
+                COUNT(distinct xbrr.rule_type||xbrr.plan_rule_id) count_sum
+            </when>
+            <otherwise>
+                COUNT(distinct xbrr.rule_type,xbrr.plan_rule_id) count_sum
+            </otherwise>
+        </choose>
         FROM
         xqua_batch_result_rule xbrr
-        JOIN xqua_batch_result_base xbrb ON xbrr.result_base_id = xbrb.result_base_id
-        JOIN xqua_batch_plan_base xbpb ON xbrb.plan_base_id = xbpb.plan_base_id
         WHERE
         result_flag = 1
-        AND NOT EXISTS (
-        SELECT
-        1
-        FROM
-        xqua_batch_result_rule a
-        WHERE
-        a.rule_type = xbrr.rule_type
-        AND a.plan_rule_id = xbrr.plan_rule_id
-        AND a.creation_date > xbrr.creation_date
-        )
         <include refid="custom_where">
             <property name="mt" value="xbrr"/>
         </include>
@@ -386,26 +382,24 @@
     </select>
 
     <select id="listAllTypeCount" resultType="com.hand.hdsp.quality.infra.vo.CheckTypePercentageVO">
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         SELECT
         xbrr.check_type,
-        COUNT(*) count_sum
+        <choose>
+            <when test='datasourceType == "ORACLE"'>
+                COUNT(distinct xbrr.rule_type||xbrr.plan_rule_id) count_sum
+            </when>
+            <otherwise>
+                COUNT(distinct xbrr.rule_type,xbrr.plan_rule_id) count_sum
+            </otherwise>
+        </choose>
         FROM
         xqua_batch_result_rule xbrr
-        JOIN xqua_batch_result_base xbrb ON xbrr.result_base_id = xbrb.result_base_id
-        JOIN xqua_batch_plan_base xbpb ON xbrb.plan_base_id = xbpb.plan_base_id
-        WHERE NOT EXISTS (
-            SELECT
-            1
-            FROM
-            xqua_batch_result_rule a
-            WHERE
-            a.rule_type = xbrr.rule_type
-            AND a.plan_rule_id = xbrr.plan_rule_id
-            AND a.creation_date > xbrr.creation_date
-        )
-        <include refid="custom_where">
-            <property name="mt" value="xbrr"/>
-        </include>
+        <where>
+            <include refid="custom_where">
+                <property name="mt" value="xbrr"/>
+            </include>
+        </where>
         GROUP BY
         xbrr.check_type
     </select>
