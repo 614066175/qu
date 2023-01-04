@@ -1,6 +1,5 @@
 package com.hand.hdsp.quality.infra.converttype;
-import com.hand.hdsp.quality.infra.constant.ErrorCode;
-import io.choerodon.core.exception.CommonException;
+
 import java.util.List;
 
 /**
@@ -10,10 +9,11 @@ import java.util.List;
  */
 public class ConvertTypeBase {
 
-    public List<String> typeConvert(String type,List<String> list){
+    public List<String> typeConvert(String type, List<String> list) {
         switch (type) {
             case "VARCHAR":
             case "TEXT":
+            case "STRING":
                 list.add("STRING");
                 break;
             case "BIGINT":
@@ -37,7 +37,9 @@ public class ConvertTypeBase {
                 list.add("DATE");
                 break;
             default:
-                throw new CommonException(ErrorCode.UNKNOWN_DATATYPE);
+                //默认不做处理
+                list.add(type);
+//                throw new CommonException(ErrorCode.UNKNOWN_DATATYPE);
         }
         return list;
     }
