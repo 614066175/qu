@@ -182,7 +182,7 @@ public class RootMatchServiceImpl implements RootMatchService {
                 .build());
         List<DataFieldDTO> result = new ArrayList<>();
         for (RootMatchDTO matchDTO : rootMatchDTOList) {
-            if(ObjectUtils.isNotEmpty(matchDTO.getFieldId())){
+            if (ObjectUtils.isNotEmpty(matchDTO.getFieldId())) {
                 List<DataFieldDTO> list = dataFieldMapper.list(DataFieldDTO.builder().fieldId(matchDTO.getFieldId()).build());
                 //查询标准组
                 List<StandardRelation> standardRelations = standardRelationRepository.select(StandardRelation.builder().fieldStandardId(matchDTO.getFieldId()).build());
@@ -197,7 +197,7 @@ public class RootMatchServiceImpl implements RootMatchService {
                     });
                 }
                 result.addAll(list);
-            }else {
+            } else {
                 //字段注释 fieldComment 字段名称 fieldName
                 result.add(DataFieldDTO.builder().fieldComment(matchDTO.getFieldComment()).fieldName(matchDTO.getFieldName()).build());
             }
@@ -261,43 +261,43 @@ public class RootMatchServiceImpl implements RootMatchService {
             int col = 0;
             row.createCell(col).setCellValue(dto.getFieldComment());
             row.createCell(col + 1).setCellValue(dto.getFieldName());
-            if(StringUtils.isNotEmpty(dto.getGroupName())){
+            if (StringUtils.isNotEmpty(dto.getGroupName())) {
                 row.createCell(col + 2).setCellValue(dto.getGroupName());
             }
-            if(StringUtils.isNotEmpty(dto.getStandardDesc())){
+            if (StringUtils.isNotEmpty(dto.getStandardDesc())) {
                 row.createCell(col + 3).setCellValue(dto.getStandardDesc());
             }
-            if(StringUtils.isNotEmpty(dto.getStandardDesc())){
+            if (StringUtils.isNotEmpty(dto.getStandardDesc())) {
                 row.createCell(col + 4).setCellValue(dto.getStandardTeamCodes());
             }
-            if(StringUtils.isNotEmpty(dto.getDataStandardName())){
+            if (StringUtils.isNotEmpty(dto.getDataStandardName())) {
                 row.createCell(col + 5).setCellValue(dto.getDataStandardName());
             }
-            if(ObjectUtils.isNotEmpty(dto.getFieldAccuracy())){
+            if (ObjectUtils.isNotEmpty(dto.getFieldAccuracy())) {
                 row.createCell(col + 6).setCellValue(dto.getFieldAccuracy());
             }
-            if(StringUtils.isNotEmpty(dto.getFieldType())){
+            if (StringUtils.isNotEmpty(dto.getFieldType())) {
                 row.createCell(col + 7).setCellValue(dto.getFieldType());
             }
-            if(StringUtils.isNotEmpty(dto.getFieldLength())){
+            if (StringUtils.isNotEmpty(dto.getFieldLength())) {
                 row.createCell(col + 8).setCellValue(dto.getFieldLength());
             }
-            if(StringUtils.isNotEmpty(dto.getDataPattern())){
+            if (StringUtils.isNotEmpty(dto.getDataPattern())) {
                 row.createCell(col + 9).setCellValue(dto.getDataPattern());
             }
-            if(StringUtils.isNotEmpty(dto.getValueType())){
+            if (StringUtils.isNotEmpty(dto.getValueType())) {
                 row.createCell(col + 10).setCellValue(dto.getValueType());
             }
-            if(StringUtils.isNotEmpty(dto.getValueRange())){
+            if (StringUtils.isNotEmpty(dto.getValueRange())) {
                 row.createCell(col + 11).setCellValue(dto.getValueRange());
             }
-            if(ObjectUtils.isNotEmpty(dto.getNullFlag())){
+            if (ObjectUtils.isNotEmpty(dto.getNullFlag())) {
                 row.createCell(col + 12).setCellValue(dto.getNullFlag());
             }
-            if(StringUtils.isNotEmpty(dto.getDefaultValue())){
+            if (StringUtils.isNotEmpty(dto.getDefaultValue())) {
                 row.createCell(col + 13).setCellValue(dto.getDefaultValue());
             }
-            if(StringUtils.isNotEmpty(dto.getSysCommonName())){
+            if (StringUtils.isNotEmpty(dto.getSysCommonName())) {
                 row.createCell(col + 14).setCellValue(dto.getSysCommonName());
             }
             //加密租户则解密
@@ -363,6 +363,7 @@ public class RootMatchServiceImpl implements RootMatchService {
             rootMatchHisRepository.updateByPrimaryKey(rootMatchHis);
             //匹配完成，进行通知
             Receiver receiver = new Receiver();
+            receiver.setUserId(DetailsHelper.getUserDetails().getUserId());
             receiver.setTargetUserTenantId(rootMatchDTO.getTenantId());
             //模板内容 智能标准匹配【${batchNumber}】${successNum}条数据匹配成功，${partMatchNum}条数据部分匹配，${failNum}条数据匹配失败!
             Map<String, String> args = new HashMap<>();
@@ -390,8 +391,8 @@ public class RootMatchServiceImpl implements RootMatchService {
         if (rootMatchDTO.getFieldId() == null) {
             rootMatchDTO.setMatchingStatus(UN_MATCH);
             rootMatchDTO.setFieldId(null);
+            rootMatchDTO.setFieldName(null);
             rootMatchDTO.setSource(null);
-            rootMatchRepository.updateDTOAllColumnWhereTenant(rootMatchDTO, rootMatchDTO.getTenantId());
         } else {
             rootMatchDTO.setMatchingStatus(MANUAL_MATCH);
             rootMatchDTO.setSource(STANDARD);
@@ -418,9 +419,7 @@ public class RootMatchServiceImpl implements RootMatchService {
             DataField dataField = dataFields.get(0);
             importMatch.setMatchingStatus(SUCCESS);
             importMatch.setFieldId(dataField.getFieldId());
-//            importMatch.setFieldType(dataField.getFieldType());
             importMatch.setFieldName(dataField.getFieldName());
-//            importMatch.setFieldDescription(dataField.getFieldComment());
             importMatch.setSource(STANDARD);
             rootMatchRepository.updateByPrimaryKey(importMatch);
             return;
@@ -442,7 +441,7 @@ public class RootMatchServiceImpl implements RootMatchService {
             return;
         }
         String[] split = analyzerWord.split("_");
-        List<String> matchTerms = Arrays.asList(split).stream()
+        List<String> matchTerms = Arrays.stream(split)
                 .filter(term -> !term.equals(NO_MATCH)).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(matchTerms)) {
             importMatch.setFieldId(null);
