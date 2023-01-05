@@ -79,6 +79,9 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
                 ).build());
                 if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
                     root.setGroupId(standardGroupDTOList.get(0).getGroupId());
+                }else {
+                    addErrorMsg(i, String.format("未找到分组%s，请检查数据",root.getGroupCode()));
+                    return false;
                 }
 
                 //责任人id
