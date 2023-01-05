@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.ROOT;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.ONLINE;
 
 import io.choerodon.core.oauth.DetailsHelper;
 
@@ -79,6 +80,9 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
                 ).build());
                 if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
                     root.setGroupId(standardGroupDTOList.get(0).getGroupId());
+                }else {
+                    addErrorMsg(i, String.format("未找到分组%s，请检查数据",root.getGroupCode()));
+                    return false;
                 }
 
                 //责任人id
@@ -142,6 +146,7 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
                     rootLines.add(rootLine);
                 }
                 rootLineRepository.batchInsertSelective(rootLines);
+                root.setReleaseStatus(ONLINE);
                 rootService.publishOrOff(root);
             }
         }catch (Exception e){

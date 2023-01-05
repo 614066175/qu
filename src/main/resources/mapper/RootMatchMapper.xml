@@ -54,7 +54,7 @@
             </if>
             <if test="fieldName != null and fieldName != ''">
                 <bind name="fieldNameLike" value="'%' + fieldName + '%'"/>
-                AND xrm.field_name = #{fieldNameLike}
+                AND xrm.field_name like #{fieldNameLike}
             </if>
             <if test="source != null and source != ''">
                 AND xrm.source = #{source}
@@ -68,6 +68,10 @@
             </if>
             <if test="batchNumber != null and batchNumber != ''">
                 AND xrm.batch_number =#{batchNumber}
+            </if>
+            <if test="fieldComment != null and fieldComment != ''">
+                <bind name="fieldCommentLike" value="'%' + fieldComment + '%'"/>
+                AND xrm.field_comment like #{fieldCommentLike}
             </if>
         </where>
     </select>
