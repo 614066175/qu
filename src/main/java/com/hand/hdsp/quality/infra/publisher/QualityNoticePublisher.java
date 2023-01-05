@@ -14,7 +14,7 @@ import org.hzero.boot.admin.bus.publisher.annotation.NoticeTopic;
 @NoticePublisher
 public interface QualityNoticePublisher {
 
-    String QUALITY_EXEC_TOPIC = "XUQA.QUALITY_EXEC-28152";
+    String QUALITY_EXEC_TOPIC = "XUQA.QUALITY_EXEC";
 
     /**
      * 模型上线通知
