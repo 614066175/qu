@@ -69,6 +69,10 @@
             <if test="batchNumber != null and batchNumber != ''">
                 AND xrm.batch_number =#{batchNumber}
             </if>
+            <if test="fieldComment != null and fieldComment != ''">
+                <bind name="fieldCommentLike" value="'%' + fieldComment + '%'"/>
+                AND xrm.field_comment like #{fieldCommentLike}
+            </if>
         </where>
     </select>
 </mapper>
