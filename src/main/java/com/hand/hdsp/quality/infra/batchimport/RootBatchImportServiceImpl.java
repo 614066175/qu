@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.ROOT;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.ONLINE;
 
 import io.choerodon.core.oauth.DetailsHelper;
 
@@ -145,6 +146,7 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
                     rootLines.add(rootLine);
                 }
                 rootLineRepository.batchInsertSelective(rootLines);
+                root.setReleaseStatus(ONLINE);
                 rootService.publishOrOff(root);
             }
         }catch (Exception e){
