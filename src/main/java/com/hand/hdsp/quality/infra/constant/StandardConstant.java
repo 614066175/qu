@@ -53,6 +53,6 @@ public interface StandardConstant {
     }
 
     interface RootName{
-        String SEPARATOR = " ";
+        String SEPARATOR = ",";
     }
 }
