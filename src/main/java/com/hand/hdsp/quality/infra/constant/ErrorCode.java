@@ -213,4 +213,6 @@ public interface ErrorCode {
     String ROOT_EN_SHORT_ERROR = "hdps.xsta.err.root_en_short_error";
 
     String ROOT_NOT_EXIST = "hdsp.xqua.err.root_not_exists";
+
+    String GROUP_HAS_ROOT = "hdsp.xqua.err.group_has_root";
 }

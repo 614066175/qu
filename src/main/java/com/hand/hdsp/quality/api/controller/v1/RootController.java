@@ -27,7 +27,6 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 词根 管理 API
@@ -233,9 +232,11 @@ public class RootController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/root-translate")
-    public ResponseEntity<Map> rootTranslate(@PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<List<String>> rootTranslate(@PathVariable(name = "organizationId") Long tenantId,
                                              @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                              String word) {
         return Results.success(rootService.rootTranslate(tenantId, projectId, word));
     }
+
+
 }

@@ -13,6 +13,11 @@ import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.mapper.StandardApprovalMapper;
 import com.hand.hdsp.quality.infra.util.AnsjUtil;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.ansj.domain.Result;
 import org.ansj.domain.Term;
@@ -21,6 +26,17 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
+import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
+import org.hzero.boot.platform.plugin.hr.entity.Employee;
+import org.hzero.boot.platform.profile.ProfileClient;
+import org.hzero.boot.workflow.WorkflowClient;
+import org.hzero.boot.workflow.constant.WorkflowConstant;
+import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
+import org.hzero.boot.workflow.dto.RunInstance;
+import org.hzero.export.vo.ExportParam;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
+import org.hzero.mybatis.util.Sqls;
 import org.nlpcn.commons.lang.tire.domain.Forest;
 import org.nlpcn.commons.lang.tire.library.Library;
 import org.springframework.beans.BeanUtils;
@@ -35,24 +51,6 @@ import java.util.stream.Collectors;
 
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.ROOT;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
-
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
-import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
-import org.hzero.boot.platform.plugin.hr.entity.Employee;
-import org.hzero.boot.platform.profile.ProfileClient;
-import org.hzero.boot.workflow.WorkflowClient;
-import org.hzero.boot.workflow.constant.WorkflowConstant;
-import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
-import org.hzero.boot.workflow.dto.RunInstance;
-import org.hzero.export.vo.ExportParam;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.helper.DataSecurityHelper;
-import org.hzero.mybatis.util.Sqls;
 
 /**
  * 词根应用服务默认实现
@@ -104,6 +102,17 @@ public class RootServiceImpl implements RootService {
 
     @Override
     public Page<Root> list(PageRequest pageRequest, Root root) {
+        Long groupId = root.getGroupId();
+        if (ObjectUtils.isNotEmpty(groupId)) {
+            List<StandardGroupDTO> standardGroupDTOList = new ArrayList<>();
+            //查询子分组
+            findChildGroups(groupId, standardGroupDTOList);
+            //添加当前分组
+            standardGroupDTOList.add(StandardGroupDTO.builder().groupId(groupId).build());
+            Long[] groupIds = standardGroupDTOList.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
+            root.setGroupArrays(groupIds);
+            root.setGroupId(null);
+        }
         return PageHelper.doPageAndSort(pageRequest, () -> rootRepository.list(root));
     }
 
@@ -144,10 +153,8 @@ public class RootServiceImpl implements RootService {
                 ).build());
 
         if (CollectionUtils.isNotEmpty(rootLines)) {
-            StringBuffer rootNameStr = new StringBuffer();
-            for (RootLine rootLine : rootLines) {
-                rootNameStr.append(rootLine.getRootName()).append(" ");
-            }
+            List<String> str = rootLines.stream().map(RootLine::getRootName).collect(Collectors.toList());
+            String rootNameStr = StringUtils.join(str, StandardConstant.RootName.SEPARATOR);
             throw new CommonException(ErrorCode.ROOT_NAME_EXIST, rootNameStr);
         }
 
@@ -179,7 +186,7 @@ public class RootServiceImpl implements RootService {
                         .andEqualTo(RootLine.FIELD_PROJECT_ID, root.getProjectId())
                         .andEqualTo(RootLine.FIELD_TENANT_ID, root.getTenantId())
                 ).build());
-        rootLineRepository.batchDelete(rootLines);
+        rootLineRepository.batchDeleteByPrimaryKey(rootLines);
 
         String[] rootName = root.getRootName().split(StandardConstant.RootName.SEPARATOR);
         rootLines = new ArrayList<>();
@@ -212,7 +219,7 @@ public class RootServiceImpl implements RootService {
                         .andEqualTo(RootLine.FIELD_PROJECT_ID, root.getProjectId())
                         .andEqualTo(RootLine.FIELD_TENANT_ID, root.getTenantId())
                 ).build());
-        rootLineRepository.batchDelete(rootLines);
+        rootLineRepository.batchDeleteByPrimaryKey(rootLines);
 
         //删除版本表数据
         List<RootVersion> rootVersions = rootVersionRepository.selectByCondition(Condition.builder(RootVersion.class)
@@ -222,36 +229,37 @@ public class RootServiceImpl implements RootService {
                         .andEqualTo(RootVersion.FIELD_TENANT_ID, root.getTenantId())
                 ).build());
         if (CollectionUtils.isNotEmpty(rootVersions)) {
-            rootVersionRepository.batchDelete(rootVersions);
+            rootVersionRepository.batchDeleteByPrimaryKey(rootVersions);
         }
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void batchDelete(List<Root> rootList) {
-        rootList.forEach(root->{
+        rootList.forEach(root -> {
             if (ONLINE.equals(root.getReleaseStatus())
                     || OFFLINE_APPROVING.equals(root.getReleaseStatus())
                     || ONLINE_APPROVING.equals(root.getReleaseStatus())) {
                 throw new CommonException(ErrorCode.ROOT_NOT_DELETE);
             }
         });
-        rootRepository.batchDelete(rootList);
+        rootRepository.batchDeleteByPrimaryKey(rootList);
 
         //删除行表数据
         List<Long> ids = rootList.stream().map(Root::getId).collect(Collectors.toList());
-        List<RootLine> rootLines= rootLineRepository.selectByCondition(Condition.builder(RootLine.class)
+        List<RootLine> rootLines = rootLineRepository.selectByCondition(Condition.builder(RootLine.class)
                 .andWhere(Sqls.custom()
-                        .andIn(RootLine.FIELD_ROOT_ID,ids)
+                        .andIn(RootLine.FIELD_ROOT_ID, ids)
                 ).build());
-        rootLineRepository.batchDelete(rootLines);
+        rootLineRepository.batchDeleteByPrimaryKey(rootLines);
 
         //删除版本表数据
-        List<RootVersion> rootVersions= rootVersionRepository.selectByCondition(Condition.builder(RootVersion.class)
+        List<RootVersion> rootVersions = rootVersionRepository.selectByCondition(Condition.builder(RootVersion.class)
                 .andWhere(Sqls.custom()
-                        .andIn(RootVersion.FIELD_ROOT_ID,ids)
+                        .andIn(RootVersion.FIELD_ROOT_ID, ids)
                 ).build());
         if (CollectionUtils.isNotEmpty(rootVersions)) {
-            rootVersionRepository.batchDelete(rootVersions);
+            rootVersionRepository.batchDeleteByPrimaryKey(rootVersions);
         }
     }
 
@@ -272,7 +280,10 @@ public class RootServiceImpl implements RootService {
                 groupDTO.setParentGroupCode(parentGroupDTO.getGroupCode());
             }
             //查询当前分组数据
-            List<Root> roots = rootRepository.list(Root.builder().groupId(groupDTO.getGroupId()).build());
+            Root builder = Root.builder().build();
+            BeanUtils.copyProperties(root, builder);
+            builder.setGroupId(groupDTO.getGroupId());
+            List<Root> roots = rootRepository.list(builder);
             RootGroupDTO dto = new RootGroupDTO();
             BeanUtils.copyProperties(groupDTO, dto);
             dto.setRoots(roots);
@@ -282,7 +293,7 @@ public class RootServiceImpl implements RootService {
             if (ObjectUtils.isNotEmpty(groupDTO.getParentGroupId())) {
                 findParentGroups(groupDTO.getParentGroupId(), rootGroupDTOS, level);
             }
-            findChildGroups(dto, rootGroupDTOS, level);
+            findChildGroups(dto, root, rootGroupDTOS, level);
             return rootGroupDTOS.stream().sorted(Comparator.comparing(RootGroupDTO::getGroupLevel)).collect(Collectors.toList());
         } else {
             //全部分组条件导出
@@ -298,11 +309,14 @@ public class RootServiceImpl implements RootService {
                 RootGroupDTO dto = new RootGroupDTO();
                 BeanUtils.copyProperties(standardGroupDTO, dto);
                 //查询当前分组数据
-                List<Root> roots = rootRepository.list(Root.builder().groupId(standardGroupDTO.getGroupId()).build());
+                Root builder = Root.builder().build();
+                BeanUtils.copyProperties(root, builder);
+                builder.setGroupId(standardGroupDTO.getGroupId());
+                List<Root> roots = rootRepository.list(builder);
                 dto.setRoots(roots);
                 dto.setGroupLevel(level);
                 rootGroupDTOS.add(dto);
-                findChildGroups(dto, rootGroupDTOS, level);
+                findChildGroups(dto, root, rootGroupDTOS, level);
             });
             return rootGroupDTOS.stream().sorted(Comparator.comparing(RootGroupDTO::getGroupLevel)).collect(Collectors.toList());
         }
@@ -311,27 +325,28 @@ public class RootServiceImpl implements RootService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void publishOrOff(Root root) {
-        String onlineFlag = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(),null,null,WorkFlowConstant.ROOT_ONLINE);
-        String offlineFlag = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(),null,null,WorkFlowConstant.ROOT_OFFLINE);
-        if("true".equals(onlineFlag) && ONLINE.equals(root.getReleaseStatus())){
+        String onlineFlag = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.ROOT_ONLINE);
+        String offlineFlag = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.ROOT_OFFLINE);
+        if ("true".equals(onlineFlag) && ONLINE.equals(root.getReleaseStatus())) {
             //先修改状态再启动工作流，启动工作流需要花费一定时间,有异常回滚
             this.workflowing(root.getId(), ONLINE_APPROVING);
             this.startWorkFlow(WorkFlowConstant.Root.ONLINE_WORKFLOW_KEY, root, ONLINE);
         }
-        if("true".equals(offlineFlag) && OFFLINE.equals(root.getReleaseStatus())){
+        if ("true".equals(offlineFlag) && OFFLINE.equals(root.getReleaseStatus())) {
             //先修改状态再启动工作流，启动工作流需要花费一定时间,有异常回滚
             this.workflowing(root.getId(), OFFLINE_APPROVING);
             this.startWorkFlow(WorkFlowConstant.Root.OFFLINE_WORKFLOW_KEY, root, OFFLINE);
         }
 
-        if("false".equals(offlineFlag)&&"false".equals(onlineFlag)){
+        if (("false".equals(offlineFlag) && ONLINE.equals(root.getReleaseStatus())) ||
+                ("false".equals(onlineFlag) && OFFLINE.equals(root.getReleaseStatus()))) {
             Root rootTmp = rootRepository.selectByPrimaryKey(root.getId());
             if (Objects.isNull(rootTmp)) {
                 throw new CommonException(ErrorCode.ROOT_NOT_EXIST);
             }
             root.setObjectVersionNumber(rootTmp.getObjectVersionNumber());
             rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS);
-            if(ONLINE.equals(root.getReleaseStatus())){
+            if (ONLINE.equals(root.getReleaseStatus())) {
                 //存版本表
                 doVersion(root);
             }
@@ -339,10 +354,10 @@ public class RootServiceImpl implements RootService {
     }
 
     @Override
-    public void onlineWorkflowCallback(Long rootId,String nodeApproveResult) {
-        if(WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)){
+    public void onlineWorkflowCallback(Long rootId, String nodeApproveResult) {
+        if (WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)) {
             workflowing(rootId, ONLINE);
-        }else{
+        } else {
             workflowing(rootId, OFFLINE);
         }
 
@@ -350,9 +365,9 @@ public class RootServiceImpl implements RootService {
 
     @Override
     public void offlineWorkflowCallback(Long rootId, String nodeApproveResult) {
-        if(WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)){
+        if (WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)) {
             workflowing(rootId, OFFLINE);
-        }else{
+        } else {
             workflowing(rootId, ONLINE);
         }
     }
@@ -459,14 +474,14 @@ public class RootServiceImpl implements RootService {
     }
 
     @Override
-    public Map<String, List<String>> rootTranslate(Long tenantId, Long projectId, String word) {
-        Map<String, List<String>> result = new HashMap<>();
+    public List<String> rootTranslate(Long tenantId, Long projectId, String word) {
+        List<List<String>> results = new ArrayList<>();
         if (StringUtils.isBlank(word)) {
-            return new HashMap<>();
+            return new ArrayList<>();
         }
         String[] words = word.split("_");
         if (words.length <= 0) {
-            return new HashMap<>();
+            return new ArrayList<>();
         }
         for (String rootEnShort : words) {
             //根据rootEn找到对应词根对应的中文
@@ -478,19 +493,29 @@ public class RootServiceImpl implements RootService {
                             .andIn(Root.FIELD_RELEASE_STATUS, Arrays.asList(ONLINE, OFFLINE_APPROVING)))
                     .build());
             if (CollectionUtils.isEmpty(roots)) {
-                result.put(rootEnShort, Arrays.asList(NO_MATCH));
+                results.add(Collections.singletonList(NO_MATCH));
             } else {
                 Root root = roots.get(0);
                 List<RootLine> rootLines = rootLineRepository.select(RootLine.builder().rootId(root.getId()).build());
                 if (CollectionUtils.isEmpty(rootLines)) {
-                    result.put(rootEnShort, Arrays.asList(NO_MATCH));
+                    results.add(Collections.singletonList(NO_MATCH));
                 } else {
                     List<String> rootNames = rootLines.stream().map(RootLine::getRootName).distinct().collect(Collectors.toList());
-                    result.put(rootEnShort, rootNames);
+                    results.add(rootNames);
                 }
             }
         }
-        return result;
+        if (CollectionUtils.isEmpty(results)) {
+            return new ArrayList<>();
+        }
+        List<String> finalResult = results.get(0);
+        for (int i = 1; i < results.size(); i++) {
+            int finalI = i;
+            finalResult = finalResult.stream()
+                    .flatMap(str -> results.get(finalI).stream().map(str::concat))
+                    .collect(Collectors.toList());
+        }
+        return finalResult;
     }
 
     private void findParentGroups(Long groupId, List<RootGroupDTO> rootGroupDTOs, int level) {
@@ -508,7 +533,7 @@ public class RootServiceImpl implements RootService {
         rootGroupDTOs.add(rootGroupDTO);
     }
 
-    private void findChildGroups(RootGroupDTO parentRootGroupDTO, List<RootGroupDTO> rootGroupDTOs, int level) {
+    private void findChildGroups(RootGroupDTO parentRootGroupDTO, Root root, List<RootGroupDTO> rootGroupDTOs, int level) {
         List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID, parentRootGroupDTO.getGroupId()))
@@ -521,10 +546,13 @@ public class RootServiceImpl implements RootService {
                 BeanUtils.copyProperties(standardGroupDTO, rootGroupDTO);
                 rootGroupDTO.setGroupLevel(finalLevel);
                 rootGroupDTO.setParentGroupCode(parentRootGroupDTO.getGroupCode());
-                List<Root> roots = rootRepository.list(Root.builder().groupId(rootGroupDTO.getGroupId()).build());
+                Root builder = Root.builder().build();
+                BeanUtils.copyProperties(root, builder);
+                builder.setGroupId(standardGroupDTO.getGroupId());
+                List<Root> roots = rootRepository.list(builder);
                 rootGroupDTO.setRoots(roots);
                 rootGroupDTOs.add(rootGroupDTO);
-                findChildGroups(rootGroupDTO, rootGroupDTOs, finalLevel);
+                findChildGroups(rootGroupDTO, root, rootGroupDTOs, finalLevel);
             });
         }
     }
@@ -613,6 +641,18 @@ public class RootServiceImpl implements RootService {
             standardApprovalDTO.setApplyTime(runInstance.getStartDate());
             standardApprovalDTO.setInstanceId(runInstance.getInstanceId());
             standardApprovalService.createOrUpdate(standardApprovalDTO);
+        }
+    }
+
+    private void findChildGroups(Long groupId, List<StandardGroupDTO> standardGroups) {
+        List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(
+                Condition.builder(StandardGroup.class)
+                        .andWhere(Sqls.custom()
+                                .andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID, groupId))
+                        .build());
+        if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
+            standardGroups.addAll(standardGroupDTOList);
+            standardGroupDTOList.forEach(standardGroupDTO -> findChildGroups(standardGroupDTO.getGroupId(), standardGroups));
         }
     }
 }

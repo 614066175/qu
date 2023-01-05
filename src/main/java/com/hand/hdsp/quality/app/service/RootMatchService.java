@@ -30,15 +30,14 @@ public interface RootMatchService {
      * @param rootMatchDTO 条件参数
      * @param file 文件
      */
-    void upload(RootMatchDTO rootMatchDTO, MultipartFile file) throws IOException;
+    String upload(RootMatchDTO rootMatchDTO, MultipartFile file) throws IOException;
 
     /**
      * 导出excel
      * @param rootMatchDTO 条件参数
-     * @param exportType 导出类型
-     * @return 导出excel
+     *
      */
-    void export(RootMatchDTO rootMatchDTO, String exportType, HttpServletResponse response);
+    void export(RootMatchDTO rootMatchDTO, HttpServletResponse response);
 
     /**
      * 智能匹配

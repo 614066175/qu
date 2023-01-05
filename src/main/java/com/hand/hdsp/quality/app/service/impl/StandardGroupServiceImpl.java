@@ -48,7 +48,9 @@ public class StandardGroupServiceImpl implements StandardGroupService {
 
     private final DataFieldRepository dataFieldRepository;
 
-    public StandardGroupServiceImpl(StandardGroupRepository standardGroupRepository, StandardGroupMapper standardGroupMapper, DataStandardRepository dataStandardRepository, StandardDocRepository standardDocRepository, DataStandardMapper dataStandardMapper, NameStandardRepository nameStandardRepository, DataFieldRepository dataFieldRepository) {
+    private final RootRepository rootRepository;
+
+    public StandardGroupServiceImpl(StandardGroupRepository standardGroupRepository, StandardGroupMapper standardGroupMapper, DataStandardRepository dataStandardRepository, StandardDocRepository standardDocRepository, DataStandardMapper dataStandardMapper, NameStandardRepository nameStandardRepository, DataFieldRepository dataFieldRepository, RootRepository rootRepository) {
         this.standardGroupRepository = standardGroupRepository;
         this.standardGroupMapper = standardGroupMapper;
         this.dataStandardRepository = dataStandardRepository;
@@ -56,6 +58,7 @@ public class StandardGroupServiceImpl implements StandardGroupService {
         this.dataStandardMapper = dataStandardMapper;
         this.nameStandardRepository = nameStandardRepository;
         this.dataFieldRepository = dataFieldRepository;
+        this.rootRepository = rootRepository;
     }
 
     @Override
@@ -139,6 +142,18 @@ public class StandardGroupServiceImpl implements StandardGroupService {
                 if (CollectionUtils.isNotEmpty(standardDocDTOS)) {
                     StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardDocDTOS.get(0).getGroupId());
                     throw new CommonException(ErrorCode.GROUP_HAS_STANDARD,groupDTO.getGroupName());
+                }
+                break;
+            case StandardConstant.StandardType.ROOT:
+                List<Root> rootList = rootRepository.selectByCondition(Condition.builder(Root.class)
+                        .andWhere(Sqls.custom()
+                                .andEqualTo(Root.FIELD_GROUP_ID, standardGroupDTO.getGroupId())
+                                .andEqualTo(Root.FIELD_TENANT_ID, standardGroupDTO.getTenantId())
+                                .andEqualTo(Root.FIELD_PROJECT_ID, standardGroupDTO.getProjectId()))
+                        .build());
+                if (CollectionUtils.isNotEmpty(rootList)) {
+                    StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByPrimaryKey(rootList.get(0).getGroupId());
+                    throw new CommonException(ErrorCode.GROUP_HAS_ROOT,groupDTO.getGroupName());
                 }
                 break;
             default:

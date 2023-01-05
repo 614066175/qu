@@ -258,6 +258,15 @@ public class AnsjUtil {
         org.apache.commons.io.FileUtils.deleteQuietly(file);
     }
 
+    public void deleteDicFiles() {
+        File library = new File(dicParent);
+        if (!library.exists()) {
+            //目录不存在直接返回
+            return;
+        }
+        org.apache.commons.io.FileUtils.deleteQuietly(library);
+    }
+
     public File getDic(Long tenantId, Long projectId) {
         //获取
         File library = new File(dicParent);

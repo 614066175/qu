@@ -168,8 +168,7 @@ public class RootMatchController extends BaseController {
                                     @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
         rootMatchDTO.setTenantId(tenantId);
         rootMatchDTO.setProjectId(projectId);
-        rootMatchService.upload(rootMatchDTO, file);
-        return Results.success();
+        return Results.success(rootMatchService.upload(rootMatchDTO, file));
     }
 
 
@@ -181,15 +180,14 @@ public class RootMatchController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PostMapping("/export/{exportType}")
+    @PostMapping("/export")
     public ResponseEntity<?> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @PathVariable String exportType,
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     RootMatchDTO rootMatchDTO,
                                     HttpServletResponse response) {
         rootMatchDTO.setProjectId(projectId);
         rootMatchDTO.setTenantId(tenantId);
-        rootMatchService.export(rootMatchDTO, exportType, response);
+        rootMatchService.export(rootMatchDTO,response);
         return Results.success();
     }
 }

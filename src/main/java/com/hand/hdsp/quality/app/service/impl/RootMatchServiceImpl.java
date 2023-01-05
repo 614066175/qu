@@ -103,7 +103,7 @@ public class RootMatchServiceImpl implements RootMatchService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void upload(RootMatchDTO rootMatchDTO, MultipartFile file) {
+    public String upload(RootMatchDTO rootMatchDTO, MultipartFile file) {
         List<RootMatchHis> rootMatchHis = new ArrayList<>();
         Long importRowCount = 0L;
         //生成批次号
@@ -169,35 +169,38 @@ public class RootMatchServiceImpl implements RootMatchService {
         } catch (IOException e) {
             throw new CommonException("上传失败");
         }
+        return rootMatchDTO.getBatchNumber();
     }
 
     /**
      * @param rootMatchDTO 条件参数
-     * @param exportType   导出类型
      */
     @Override
-    public void export(RootMatchDTO rootMatchDTO, String exportType, HttpServletResponse response) {
+    public void export(RootMatchDTO rootMatchDTO, HttpServletResponse response) {
         List<RootMatchDTO> rootMatchDTOList = rootMatchRepository.selectDTOByCondition(Condition.builder(RootMatch.class).andWhere(Sqls.custom()
                         .andEqualTo(RootMatch.FIELD_BATCH_NUMBER, rootMatchDTO.getBatchNumber()))
                 .build());
         List<DataFieldDTO> result = new ArrayList<>();
-        //筛选字段标准来源的
-        List<RootMatchDTO> sortRootMatchDTOList = rootMatchDTOList.stream().filter(dto -> dto.getFieldType().equals(STANDARD) && ObjectUtils.isNotEmpty(dto.getFieldId())).collect(Collectors.toList());
-        for (RootMatchDTO matchDTO : sortRootMatchDTOList) {
-            List<DataFieldDTO> list = dataFieldMapper.list(DataFieldDTO.builder().fieldId(matchDTO.getFieldId()).build());
-            //查询标准组
-            List<StandardRelation> standardRelations = standardRelationRepository.select(StandardRelation.builder().fieldStandardId(matchDTO.getFieldId()).build());
-            List<Long> standardTeamIds = standardRelations.stream()
-                    .map(StandardRelation::getStandardTeamId)
-                    .collect(Collectors.toList());
-            if (CollectionUtils.isNotEmpty(standardTeamIds)) {
-                List<StandardTeamDTO> standardTeamDTOS = standardTeamRepository.selectDTOByIds(standardTeamIds);
-                String standardTeamCodes = standardTeamDTOS.stream().map(StandardTeamDTO::getStandardTeamCode).collect(Collectors.joining(","));
-                list.forEach(dataFieldDTO -> {
-                    dataFieldDTO.setStandardTeamCodes(standardTeamCodes);
-                });
+        for (RootMatchDTO matchDTO : rootMatchDTOList) {
+            if (ObjectUtils.isNotEmpty(matchDTO.getFieldId())) {
+                List<DataFieldDTO> list = dataFieldMapper.list(DataFieldDTO.builder().fieldId(matchDTO.getFieldId()).build());
+                //查询标准组
+                List<StandardRelation> standardRelations = standardRelationRepository.select(StandardRelation.builder().fieldStandardId(matchDTO.getFieldId()).build());
+                List<Long> standardTeamIds = standardRelations.stream()
+                        .map(StandardRelation::getStandardTeamId)
+                        .collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(standardTeamIds)) {
+                    List<StandardTeamDTO> standardTeamDTOS = standardTeamRepository.selectDTOByIds(standardTeamIds);
+                    String standardTeamCodes = standardTeamDTOS.stream().map(StandardTeamDTO::getStandardTeamCode).collect(Collectors.joining(","));
+                    list.forEach(dataFieldDTO -> {
+                        dataFieldDTO.setStandardTeamCodes(standardTeamCodes);
+                    });
+                }
+                result.addAll(list);
+            } else {
+                //字段注释 fieldComment 字段名称 fieldName
+                result.add(DataFieldDTO.builder().fieldComment(matchDTO.getFieldComment()).fieldName(matchDTO.getFieldName()).build());
             }
-            result.addAll(list);
         }
         Map<String, String> fieldMap = new LinkedHashMap<>();
         createHead(fieldMap);
@@ -212,18 +215,14 @@ public class RootMatchServiceImpl implements RootMatchService {
             cell.setCellValue(name);
             cellNum++;
         }
-        if ("excel".equals(exportType)) {
-            exportType = ".xlsx";
-        } else {
-            exportType = ".csv";
-        }
         createCells(result, sheet);
         String fileName = "RootMatch";
         OutputStream out;
         try {
             out = response.getOutputStream();
             response.reset();
-            response.addHeader("Content-Disposition", "attachment; filename=" + fileName + exportType);
+            //默认导出excel
+            response.addHeader("Content-Disposition", "attachment; filename=" + fileName + ".xlsx");
             response.setContentType("application/vnd.ms-excel;charset=utf-8");
             workbook.write(out);
             out.flush();
@@ -262,19 +261,45 @@ public class RootMatchServiceImpl implements RootMatchService {
             int col = 0;
             row.createCell(col).setCellValue(dto.getFieldComment());
             row.createCell(col + 1).setCellValue(dto.getFieldName());
-            row.createCell(col + 2).setCellValue(dto.getGroupName());
-            row.createCell(col + 3).setCellValue(dto.getStandardDesc());
-            row.createCell(col + 4).setCellValue(dto.getStandardTeamCodes());
-            row.createCell(col + 5).setCellValue(dto.getDataStandardName());
-            row.createCell(col + 6).setCellValue(dto.getFieldAccuracy());
-            row.createCell(col + 7).setCellValue(dto.getFieldType());
-            row.createCell(col + 8).setCellValue(dto.getFieldLength());
-            row.createCell(col + 9).setCellValue(dto.getDataPattern());
-            row.createCell(col + 10).setCellValue(dto.getValueType());
-            row.createCell(col + 11).setCellValue(dto.getValueRange());
-            row.createCell(col + 12).setCellValue(dto.getNullFlag());
-            row.createCell(col + 13).setCellValue(dto.getDefaultValue());
-            row.createCell(col + 14).setCellValue(dto.getSysCommonName());
+            if (StringUtils.isNotEmpty(dto.getGroupName())) {
+                row.createCell(col + 2).setCellValue(dto.getGroupName());
+            }
+            if (StringUtils.isNotEmpty(dto.getStandardDesc())) {
+                row.createCell(col + 3).setCellValue(dto.getStandardDesc());
+            }
+            if (StringUtils.isNotEmpty(dto.getStandardDesc())) {
+                row.createCell(col + 4).setCellValue(dto.getStandardTeamCodes());
+            }
+            if (StringUtils.isNotEmpty(dto.getDataStandardName())) {
+                row.createCell(col + 5).setCellValue(dto.getDataStandardName());
+            }
+            if (ObjectUtils.isNotEmpty(dto.getFieldAccuracy())) {
+                row.createCell(col + 6).setCellValue(dto.getFieldAccuracy());
+            }
+            if (StringUtils.isNotEmpty(dto.getFieldType())) {
+                row.createCell(col + 7).setCellValue(dto.getFieldType());
+            }
+            if (StringUtils.isNotEmpty(dto.getFieldLength())) {
+                row.createCell(col + 8).setCellValue(dto.getFieldLength());
+            }
+            if (StringUtils.isNotEmpty(dto.getDataPattern())) {
+                row.createCell(col + 9).setCellValue(dto.getDataPattern());
+            }
+            if (StringUtils.isNotEmpty(dto.getValueType())) {
+                row.createCell(col + 10).setCellValue(dto.getValueType());
+            }
+            if (StringUtils.isNotEmpty(dto.getValueRange())) {
+                row.createCell(col + 11).setCellValue(dto.getValueRange());
+            }
+            if (ObjectUtils.isNotEmpty(dto.getNullFlag())) {
+                row.createCell(col + 12).setCellValue(dto.getNullFlag());
+            }
+            if (StringUtils.isNotEmpty(dto.getDefaultValue())) {
+                row.createCell(col + 13).setCellValue(dto.getDefaultValue());
+            }
+            if (StringUtils.isNotEmpty(dto.getSysCommonName())) {
+                row.createCell(col + 14).setCellValue(dto.getSysCommonName());
+            }
             //加密租户则解密
             if (DataSecurityHelper.isTenantOpen()) {
                 row.createCell(col + 15).setCellValue(DataSecurityHelper.decrypt(dto.getChargeDeptName()));
@@ -338,6 +363,7 @@ public class RootMatchServiceImpl implements RootMatchService {
             rootMatchHisRepository.updateByPrimaryKey(rootMatchHis);
             //匹配完成，进行通知
             Receiver receiver = new Receiver();
+            receiver.setUserId(DetailsHelper.getUserDetails().getUserId());
             receiver.setTargetUserTenantId(rootMatchDTO.getTenantId());
             //模板内容 智能标准匹配【${batchNumber}】${successNum}条数据匹配成功，${partMatchNum}条数据部分匹配，${failNum}条数据匹配失败!
             Map<String, String> args = new HashMap<>();
@@ -365,8 +391,8 @@ public class RootMatchServiceImpl implements RootMatchService {
         if (rootMatchDTO.getFieldId() == null) {
             rootMatchDTO.setMatchingStatus(UN_MATCH);
             rootMatchDTO.setFieldId(null);
+            rootMatchDTO.setFieldName(null);
             rootMatchDTO.setSource(null);
-            rootMatchRepository.updateDTOAllColumnWhereTenant(rootMatchDTO, rootMatchDTO.getTenantId());
         } else {
             rootMatchDTO.setMatchingStatus(MANUAL_MATCH);
             rootMatchDTO.setSource(STANDARD);
@@ -392,9 +418,8 @@ public class RootMatchServiceImpl implements RootMatchService {
         if (CollectionUtils.isNotEmpty(dataFields)) {
             DataField dataField = dataFields.get(0);
             importMatch.setMatchingStatus(SUCCESS);
-            importMatch.setFieldType(dataField.getFieldType());
+            importMatch.setFieldId(dataField.getFieldId());
             importMatch.setFieldName(dataField.getFieldName());
-            importMatch.setFieldDescription(dataField.getFieldComment());
             importMatch.setSource(STANDARD);
             rootMatchRepository.updateByPrimaryKey(importMatch);
             return;
@@ -415,15 +440,26 @@ public class RootMatchServiceImpl implements RootMatchService {
             rootMatchRepository.updateByPrimaryKey(importMatch);
             return;
         }
-
+        String[] split = analyzerWord.split("_");
+        List<String> matchTerms = Arrays.stream(split)
+                .filter(term -> !term.equals(NO_MATCH)).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(matchTerms)) {
+            importMatch.setFieldId(null);
+            importMatch.setFieldName(null);
+            importMatch.setSource(null);
+            importMatch.setMatchingStatus(FAILED);
+            rootMatchRepository.updateByPrimaryKey(importMatch);
+            return;
+        }
         if (analyzerWord.contains(NO_MATCH)) {
             //部分匹配
             importMatch.setMatchingStatus(PART_MATCH);
-            importMatch.setFieldName(ROOT);
         } else {
             importMatch.setMatchingStatus(SUCCESS);
-            importMatch.setFieldName(ROOT);
         }
+        importMatch.setFieldId(null);
+        importMatch.setFieldName(analyzerWord);
+        importMatch.setSource(ROOT);
         rootMatchRepository.updateByPrimaryKey(importMatch);
     }
 }
