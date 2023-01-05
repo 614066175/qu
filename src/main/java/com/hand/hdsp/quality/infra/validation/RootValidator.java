@@ -71,7 +71,7 @@ public class RootValidator extends BatchValidatorHandler {
                                 .andEqualTo(Root.FIELD_TENANT_ID,root.getTenantId())
                         ).build());
                 if(CollectionUtils.isNotEmpty(rootList)){
-                    addErrorMsg(i,ErrorCode.ROOT_EN_SHORT_EXIST);
+                    addErrorMsg(i,String.format("词根英文简称%s已存在!",root.getRootEnShort()));
                 }
 
                 //词根中文校验
