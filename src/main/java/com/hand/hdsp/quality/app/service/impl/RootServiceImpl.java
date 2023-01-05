@@ -462,12 +462,18 @@ public class RootServiceImpl implements RootService {
         terms.forEach(term -> {
             //获取每个term对应的词根
             String name = term.getName();
-            RootLine rootLine = rootLineRepository.selectOne(RootLine.builder().rootName(name).tenantId(tenantId).projectId(projectId).build());
+            RootLine rootLine = rootLineRepository.selectOne(RootLine.builder().rootName(name)
+                    .tenantId(tenantId).projectId(projectId).build());
             if (rootLine == null) {
                 roots.add(NO_MATCH);
             } else {
                 Root root = rootRepository.selectByPrimaryKey(rootLine.getRootId());
-                roots.add(root.getRootEnShort());
+                //判断对应词根是否发布
+                if (root == null || !Arrays.asList(ONLINE, OFFLINE_APPROVING).contains(root.getReleaseStatus())) {
+                    roots.add(NO_MATCH);
+                } else {
+                    roots.add(root.getRootEnShort());
+                }
             }
         });
         return StringUtils.join(roots, "_");
