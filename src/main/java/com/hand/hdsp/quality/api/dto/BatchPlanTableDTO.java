@@ -114,9 +114,6 @@ public class BatchPlanTableDTO extends AuditDomain {
     @ExcelColumn(zh = "校验类型", en = "count type")
     private String countTypeMeaning;
 
-    @ApiModelProperty(value = "自定义SQL")
-    private String customSql;
-
     @ApiModelProperty(value = "条件where")
     @ExcelColumn(zh = "启用条件", en = "where condition")
     private String whereCondition;
@@ -132,6 +129,10 @@ public class BatchPlanTableDTO extends AuditDomain {
     @ApiModelProperty(value = "告警等级json")
     @ExcelColumn(zh = "告警规则", en = "warning level")
     private String warningLevel;
+
+    @ApiModelProperty(value = "自定义SQL")
+    @ExcelColumn(zh = "自定义SQL",en = "custom sql")
+    private String customSql;
 
     @ApiModelProperty(value = "方案告警等级List")
     private List<WarningLevelDTO> warningLevelList;
