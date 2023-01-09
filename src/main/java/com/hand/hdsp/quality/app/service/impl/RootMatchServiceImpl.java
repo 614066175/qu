@@ -201,6 +201,13 @@ public class RootMatchServiceImpl implements RootMatchService {
         for (RootMatchDTO matchDTO : rootMatchDTOList) {
             if (ObjectUtils.isNotEmpty(matchDTO.getFieldId())) {
                 List<DataFieldDTO> list = dataFieldMapper.list(DataFieldDTO.builder().fieldId(matchDTO.getFieldId()).build());
+                list.forEach(dataFieldDTO -> {
+                    if (DataSecurityHelper.isTenantOpen()) {
+                        dataFieldDTO.setChargeName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeName()));
+                        dataFieldDTO.setChargeTel(DataSecurityHelper.decrypt(dataFieldDTO.getChargeTel()));
+                        dataFieldDTO.setChargeEmail(DataSecurityHelper.decrypt(dataFieldDTO.getChargeEmail()));
+                    }
+                });
                 //查询标准组
                 List<StandardRelation> standardRelations = standardRelationRepository.select(StandardRelation.builder().fieldStandardId(matchDTO.getFieldId()).build());
                 List<Long> standardTeamIds = standardRelations.stream()
@@ -210,11 +217,6 @@ public class RootMatchServiceImpl implements RootMatchService {
                     List<StandardTeamDTO> standardTeamDTOS = standardTeamRepository.selectDTOByIds(standardTeamIds);
                     String standardTeamCodes = standardTeamDTOS.stream().map(StandardTeamDTO::getStandardTeamCode).collect(Collectors.joining(","));
                     list.forEach(dataFieldDTO -> {
-                        if (DataSecurityHelper.isTenantOpen()) {
-                            dataFieldDTO.setChargeName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeName()));
-                            dataFieldDTO.setChargeTel(DataSecurityHelper.decrypt(dataFieldDTO.getChargeTel()));
-                            dataFieldDTO.setChargeEmail(DataSecurityHelper.decrypt(dataFieldDTO.getChargeEmail()));
-                        }
                         dataFieldDTO.setStandardTeamCodes(standardTeamCodes);
                     });
                 }
