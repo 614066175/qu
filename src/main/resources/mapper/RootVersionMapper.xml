@@ -93,7 +93,6 @@
         left join hpfm_employee he on xrv.charge_id=he.employee_id
         left join hpfm_unit hu on xrv.charge_dept_id=hu.unit_id
         left join iam_user iu on xrv.last_updated_by=iu.id
-        left join xsta_root_line xrl on xrv.id = xrl.root_id
         left join xsta_standard_group xsg on xrv.group_id = xsg.group_id
         <where>
             <if test="id != null">
