@@ -47,4 +47,11 @@ public interface RuleGroupService {
      * @return 导出的标准规则
      */
     List<RuleGroupDTO> export(RuleDTO dto, ExportParam exportParam);
+
+    /**
+     * 新建分组
+     * @param dto
+     * @return
+     */
+    int create(RuleGroupDTO dto);
 }

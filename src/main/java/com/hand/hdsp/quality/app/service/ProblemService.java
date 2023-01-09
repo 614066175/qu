@@ -32,4 +32,10 @@ public interface ProblemService {
      */
     void deleteProblem(ProblemDTO problemDTO);
 
+    /**
+     * 新建分组
+     * @param dto
+     * @return
+     */
+    int create(ProblemDTO dto);
 }

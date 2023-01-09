@@ -132,7 +132,8 @@ public class PlanGroupController extends BaseController {
         planGroupDTO.setTenantId(tenantId);
         planGroupDTO.setProjectId(projectId);
         this.validObject(planGroupDTO);
-        planGroupRepository.insertDTOSelective(planGroupDTO);
+        planGroupService.create(planGroupDTO);
+//        planGroupRepository.insertDTOSelective(planGroupDTO);
         return Results.success(planGroupDTO);
     }
 

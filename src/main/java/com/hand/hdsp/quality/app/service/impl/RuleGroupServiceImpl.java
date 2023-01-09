@@ -178,6 +178,41 @@ public class RuleGroupServiceImpl implements RuleGroupService {
         return ruleGroupDTOList;
     }
 
+    @Override
+    public int create(RuleGroupDTO dto) {
+
+        if (dto.getParentGroupId() == null) {
+            dto.setParentGroupId(0L);
+        }
+         // 校验父目录下是否有标准
+//        if (ruleGroupDTO.getParentGroupId() != null) {
+//            RuleDTO dto = ruleGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
+//            existStandard(dto);
+//        }
+        // 校验编码存在
+        List<RuleGroupDTO> dtoList = ruleGroupRepository.selectDTOByCondition(Condition.builder(RuleGroup.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(RuleGroup.FIELD_TENANT_ID, dto.getTenantId())
+                        .andEqualTo(RuleGroup.FIELD_GROUP_CODE, dto.getGroupCode())
+                        .andEqualTo(RuleGroup.FIELD_PROJECT_ID, dto.getProjectId()))
+                .build());
+        if (CollectionUtils.isNotEmpty(dtoList)) {
+            throw new CommonException(ErrorCode.CODE_ALREADY_EXISTS);
+        }
+        // 校验名称存在
+        dtoList = ruleGroupRepository.selectDTOByCondition(Condition.builder(RuleGroup.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(RuleGroup.FIELD_TENANT_ID, dto.getTenantId())
+                        .andEqualTo(RuleGroup.FIELD_GROUP_NAME, dto.getGroupName())
+                        .andEqualTo(RuleGroup.FIELD_PROJECT_ID, dto.getProjectId())
+                        .andEqualTo(RuleGroup.FIELD_PARENT_GROUP_ID, dto.getParentGroupId()))
+                .build());
+        if (CollectionUtils.isNotEmpty(dtoList)) {
+            throw new CommonException(ErrorCode.GROUP_NAME_ALREADY_EXIST);
+        }
+        return ruleGroupRepository.insertDTOSelective(dto);
+    }
+
     private void findParentGroups(Long parentGroupId, List<RuleGroupDTO> ruleGroupDTOList, int level) {
         List<RuleGroupDTO> ruleGroupDTOS = ruleGroupRepository.selectDTOByCondition(Condition.builder(RuleGroup.class).andWhere(Sqls.custom()
                         .andEqualTo(RuleGroup.FIELD_GROUP_ID, parentGroupId))

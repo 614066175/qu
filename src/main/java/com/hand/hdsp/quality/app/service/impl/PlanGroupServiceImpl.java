@@ -202,6 +202,41 @@ public class PlanGroupServiceImpl implements PlanGroupService {
         return new ArrayList<>(exportPlanGroupDTOList);
     }
 
+    @Override
+    public int create(PlanGroupDTO dto) {
+
+        if (dto.getParentGroupId() == null) {
+            dto.setParentGroupId(0L);
+        }
+        // 校验父目录下是否有标准
+//        if (ruleGroupDTO.getParentGroupId() != null) {
+//            RuleDTO dto = ruleGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
+//            existStandard(dto);
+//        }
+        // 校验编码存在
+        List<PlanGroupDTO> dtoList = planGroupRepository.selectDTOByCondition(Condition.builder(PlanGroup.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(PlanGroup.FIELD_TENANT_ID, dto.getTenantId())
+                        .andEqualTo(PlanGroup.FIELD_GROUP_CODE, dto.getGroupCode())
+                        .andEqualTo(PlanGroup.FIELD_PROJECT_ID, dto.getProjectId()))
+                .build());
+        if (CollectionUtils.isNotEmpty(dtoList)) {
+            throw new CommonException(ErrorCode.CODE_ALREADY_EXISTS);
+        }
+        // 校验名称存在
+        dtoList = planGroupRepository.selectDTOByCondition(Condition.builder(PlanGroup.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(PlanGroup.FIELD_TENANT_ID, dto.getTenantId())
+                        .andEqualTo(PlanGroup.FIELD_GROUP_NAME, dto.getGroupName())
+                        .andEqualTo(PlanGroup.FIELD_PROJECT_ID, dto.getProjectId())
+                        .andEqualTo(PlanGroup.FIELD_PARENT_GROUP_ID, dto.getParentGroupId()))
+                .build());
+        if (CollectionUtils.isNotEmpty(dtoList)) {
+            throw new CommonException(ErrorCode.GROUP_NAME_ALREADY_EXIST);
+        }
+        return planGroupRepository.insertDTOSelective(dto);
+    }
+
     private List<PlanGroupDTO> getParentGroup(Long parentGroupId) {
         List<PlanGroupDTO> planGroupDTOS = new ArrayList<>();
         if (parentGroupId != 0) {

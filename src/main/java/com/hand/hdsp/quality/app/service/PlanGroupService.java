@@ -27,4 +27,12 @@ public interface PlanGroupService {
      * @return
      */
     List<PlanGroupDTO> export(PlanGroupDTO dto, ExportParam exportParam);
+
+
+    /**
+     * 新建分组
+     * @param dto
+     * @return
+     */
+    int create(PlanGroupDTO dto);
 }
