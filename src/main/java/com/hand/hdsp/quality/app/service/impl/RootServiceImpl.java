@@ -5,7 +5,6 @@ import com.hand.hdsp.quality.api.dto.RootGroupDTO;
 import com.hand.hdsp.quality.api.dto.StandardApprovalDTO;
 import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.app.service.RootService;
-import com.hand.hdsp.quality.app.service.StandardApprovalService;
 import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
@@ -18,6 +17,9 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import com.hand.hdsp.quality.infra.workflow.RootOfflineWorkflowAdapter;
+import com.hand.hdsp.quality.infra.workflow.RootOnlineWorkflowAdapter;
 import lombok.extern.slf4j.Slf4j;
 import org.ansj.domain.Result;
 import org.ansj.domain.Term;
@@ -25,14 +27,11 @@ import org.ansj.splitWord.analysis.DicAnalysis;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
 import org.hzero.boot.platform.plugin.hr.entity.Employee;
 import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.boot.workflow.WorkflowClient;
-import org.hzero.boot.workflow.constant.WorkflowConstant;
 import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
-import org.hzero.boot.workflow.dto.RunInstance;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
@@ -65,11 +64,12 @@ public class RootServiceImpl implements RootService {
     private final RootVersionRepository rootVersionRepository;
     private final RootLineRepository rootLineRepository;
     private final StandardGroupRepository standardGroupRepository;
-    private final StandardApprovalService standardApprovalService;
     private final StandardApprovalRepository standardApprovalRepository;
     private final StandardApprovalMapper standardApprovalMapper;
     private final ProfileClient profileClient;
     private final WorkflowClient workflowClient;
+    private final RootOnlineWorkflowAdapter rootOnlineWorkflowAdapter;
+    private final RootOfflineWorkflowAdapter rootOfflineWorkflowAdapter;
 
     private static final String PATTERN = "^[A-Za-z][A-Za-z0-9]{0,63}$";
 
@@ -86,16 +86,17 @@ public class RootServiceImpl implements RootService {
 
     private final RootDicRepository rootDicRepository;
 
-    public RootServiceImpl(RootRepository rootRepository, RootVersionRepository rootVersionRepository, RootLineRepository rootLineRepository, StandardGroupRepository standardGroupRepository, StandardApprovalService standardApprovalService, StandardApprovalRepository standardApprovalRepository, StandardApprovalMapper standardApprovalMapper, ProfileClient profileClient, WorkflowClient workflowClient, AnsjUtil ansjUtil, RootDicRepository rootDicRepository) {
+    public RootServiceImpl(RootRepository rootRepository, RootVersionRepository rootVersionRepository, RootLineRepository rootLineRepository, StandardGroupRepository standardGroupRepository, StandardApprovalRepository standardApprovalRepository, StandardApprovalMapper standardApprovalMapper, ProfileClient profileClient, WorkflowClient workflowClient, RootOnlineWorkflowAdapter rootOnlineWorkflowAdapter, RootOfflineWorkflowAdapter rootOfflineWorkflowAdapter, AnsjUtil ansjUtil, RootDicRepository rootDicRepository) {
         this.rootRepository = rootRepository;
         this.rootVersionRepository = rootVersionRepository;
         this.rootLineRepository = rootLineRepository;
         this.standardGroupRepository = standardGroupRepository;
-        this.standardApprovalService = standardApprovalService;
         this.standardApprovalRepository = standardApprovalRepository;
         this.standardApprovalMapper = standardApprovalMapper;
         this.profileClient = profileClient;
         this.workflowClient = workflowClient;
+        this.rootOnlineWorkflowAdapter = rootOnlineWorkflowAdapter;
+        this.rootOfflineWorkflowAdapter = rootOfflineWorkflowAdapter;
         this.ansjUtil = ansjUtil;
         this.rootDicRepository = rootDicRepository;
     }
@@ -329,13 +330,11 @@ public class RootServiceImpl implements RootService {
         String offlineFlag = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.ROOT_OFFLINE);
         if ("true".equals(onlineFlag) && ONLINE.equals(root.getReleaseStatus())) {
             //先修改状态再启动工作流，启动工作流需要花费一定时间,有异常回滚
-            this.workflowing(root.getId(), ONLINE_APPROVING);
-            this.startWorkFlow(WorkFlowConstant.Root.ONLINE_WORKFLOW_KEY, root, ONLINE);
+            rootOnlineWorkflowAdapter.startWorkflow(root);
         }
         if ("true".equals(offlineFlag) && OFFLINE.equals(root.getReleaseStatus())) {
             //先修改状态再启动工作流，启动工作流需要花费一定时间,有异常回滚
-            this.workflowing(root.getId(), OFFLINE_APPROVING);
-            this.startWorkFlow(WorkFlowConstant.Root.OFFLINE_WORKFLOW_KEY, root, OFFLINE);
+            rootOfflineWorkflowAdapter.startWorkflow(root);
         }
 
         if (("false".equals(offlineFlag) && ONLINE.equals(root.getReleaseStatus())) ||
@@ -355,21 +354,12 @@ public class RootServiceImpl implements RootService {
 
     @Override
     public void onlineWorkflowCallback(Long rootId, String nodeApproveResult) {
-        if (WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)) {
-            workflowing(rootId, ONLINE);
-        } else {
-            workflowing(rootId, OFFLINE);
-        }
-
+        rootOnlineWorkflowAdapter.callBack(rootId,nodeApproveResult);
     }
 
     @Override
     public void offlineWorkflowCallback(Long rootId, String nodeApproveResult) {
-        if (WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)) {
-            workflowing(rootId, OFFLINE);
-        } else {
-            workflowing(rootId, ONLINE);
-        }
+        rootOfflineWorkflowAdapter.callBack(rootId,nodeApproveResult);
     }
 
     @Override
@@ -564,41 +554,12 @@ public class RootServiceImpl implements RootService {
     }
 
     /**
-     * 修改词根状态，供审批中，审批结束任务状态变更
-     *
-     * @param id
-     * @param status
-     */
-    private void workflowing(Long id, String status) {
-        Root root = rootRepository.selectByPrimaryKey(id);
-        if (root != null) {
-            root.setReleaseStatus(status);
-            rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS);
-            if (ONLINE.equals(status)) {
-                doVersion(root);
-                //上线后词库追加词根对应的中文
-                List<RootLine> rootLines = rootLineRepository.select(RootLine.builder().rootId(id).build());
-                if (CollectionUtils.isNotEmpty(rootLines)) {
-                    List<String> addWords = rootLines.stream()
-                            .filter(rootLine -> Strings.isNotBlank(rootLine.getRootName()))
-                            .map(RootLine::getRootName)
-                            .distinct()
-                            .collect(Collectors.toList());
-                    ansjUtil.addWord(root.getTenantId(), root.getProjectId(), addWords);
-                }
-            } else {
-                //下线词库中进行移除,基于当前在线和下线中的词根重新生成文件
-                ansjUtil.rebuildDic(root.getTenantId(), root.getProjectId());
-            }
-        }
-    }
-
-    /**
      * 版本记录
      *
      * @param root
      */
-    private void doVersion(Root root) {
+    @Override
+    public void doVersion(Root root) {
         Long versionNum = DEFAULT_VERSION;
         List<RootVersion> rootVersions = rootVersionRepository.selectByCondition(Condition.builder(RootVersion.class)
                 .andWhere(Sqls.custom()
@@ -615,39 +576,6 @@ public class RootServiceImpl implements RootService {
         rootVersion.setRootId(root.getId());
         rootVersion.setVersionNumber(versionNum);
         rootVersionRepository.insert(rootVersion);
-    }
-
-    private void startWorkFlow(String workflowKey, Root root, String status) {
-        Long userId = DetailsHelper.getUserDetails().getUserId();
-        StandardApprovalDTO standardApprovalDTO = StandardApprovalDTO
-                .builder()
-                .standardId(root.getId())
-                .standardType("ROOT")
-                .applicantId(userId)
-                .applyType(status)
-                .tenantId(root.getTenantId())
-                .build();
-        // 先删除原来的审批记录
-        standardApprovalService.delete(StandardApprovalDTO
-                .builder()
-                .standardId(root.getId())
-                .standardType("ROOT")
-                .applicantId(userId)
-                .build());
-        standardApprovalDTO = standardApprovalService.createOrUpdate(standardApprovalDTO);
-        //使用当前时间戳作为业务主键
-        String bussinessKey = String.valueOf(System.currentTimeMillis());
-        Map<String, Object> var = new HashMap<>();
-        //给流程变量
-        var.put("rootId", root.getId());
-        var.put("approvalId", standardApprovalDTO.getApprovalId());
-        //使用自研工作流客户端
-        RunInstance runInstance = workflowClient.startInstanceByFlowKey(root.getTenantId(), workflowKey, bussinessKey, "USER", String.valueOf(userId), var);
-        if (Objects.nonNull(runInstance)) {
-            standardApprovalDTO.setApplyTime(runInstance.getStartDate());
-            standardApprovalDTO.setInstanceId(runInstance.getInstanceId());
-            standardApprovalService.createOrUpdate(standardApprovalDTO);
-        }
     }
 
     private void findChildGroups(Long groupId, List<StandardGroupDTO> standardGroups) {

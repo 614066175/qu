@@ -210,7 +210,7 @@ public class DataFieldController extends BaseController {
     }
 
 
-    @ApiOperation(value = "字段标准上线工作流通过事件接口")
+    @ApiOperation(value = "字段标准上线工作流回调事件接口")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -218,15 +218,15 @@ public class DataFieldController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping("/online-workflow-success/{fieldId}")
-    public ResponseEntity<DataStandardDTO> onlineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId,
-                                                                 @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                                                 @PathVariable Long fieldId) {
-        dataFieldService.onlineWorkflowSuccess(tenantId, fieldId);
+    @PutMapping("/online-workflow-callback/{fieldId}")
+    public ResponseEntity<DataStandardDTO> onlineWorkflowCallback(@PathVariable(name = "organizationId") Long tenantId,
+                                                                  @PathVariable Long fieldId,
+                                                                  @RequestParam String nodeApproveResult) {
+        dataFieldService.onlineWorkflowCallback(fieldId,nodeApproveResult);
         return Results.success();
     }
 
-    @ApiOperation(value = "字段标准上线工作流拒绝事件接口")
+    @ApiOperation(value = "字段标准下线工作流回调事件接口")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -234,66 +234,11 @@ public class DataFieldController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping("/online-workflow-fail/{fieldId}")
-    public ResponseEntity<DataStandardDTO> onlineWorkflowFail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long fieldId) {
-        dataFieldService.onlineWorkflowFail(tenantId, fieldId);
-        return Results.success();
-    }
-
-    @ApiOperation(value = "字段标准下线工作流发布通过事件接口")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping("/offline-workflow-success/{fieldId}")
-    public ResponseEntity<DataStandardDTO> offlineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long fieldId) {
-        dataFieldService.offlineWorkflowSuccess(tenantId, fieldId);
-        return Results.success();
-    }
-
-    @ApiOperation(value = "字段标准下线工作流发布拒绝事件接口")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping("/offline-workflow-fail/{fieldId}")
-    public ResponseEntity<DataStandardDTO> offlineWorkflowFail(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long fieldId) {
-        dataFieldService.offlineWorkflowFail(tenantId, fieldId);
-        return Results.success();
-    }
-
-
-    @ApiOperation(value = "字段标准上线审批中事件")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping("/online-workflowing/{fieldId}")
-    public ResponseEntity<DataStandardDTO> onlineWorkflowing(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long fieldId) {
-        dataFieldService.onlineWorkflowing(tenantId, fieldId);
-        return Results.success();
-    }
-
-    @ApiOperation(value = "字段标准下线审批中事件")
-    @ApiImplicitParams({@ApiImplicitParam(
-            name = "organizationId",
-            value = "租户",
-            paramType = "path",
-            required = true
-    )})
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping("/offline-workflowing/{fieldId}")
-    public ResponseEntity<DataStandardDTO> offlineWorkflowing(@PathVariable(name = "organizationId") Long tenantId, @PathVariable Long fieldId) {
-        dataFieldService.offlineWorkflowing(tenantId, fieldId);
+    @PutMapping("/offline-workflow-callback/{fieldId}")
+    public ResponseEntity<DataStandardDTO> offlineWorkflowCallback(@PathVariable(name = "organizationId") Long tenantId,
+                                                                  @PathVariable Long fieldId,
+                                                                  @RequestParam String nodeApproveResult) {
+        dataFieldService.offlineWorkflowCallback(fieldId,nodeApproveResult);
         return Results.success();
     }
 

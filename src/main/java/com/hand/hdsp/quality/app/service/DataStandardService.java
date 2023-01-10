@@ -148,47 +148,18 @@ public interface DataStandardService {
     List<AssigneeUserDTO> findCharger(Long tenantId, String dataStandardCode);
 
     /**
-     * 上线通过事件
-     * @param tenantId
+     * 上线回调事件
      * @param dataStandardCode
+     * @param nodeApproveResult
      */
-    void onlineWorkflowSuccess(Long tenantId, String dataStandardCode);
+    void onlineWorkflowCallback(String dataStandardCode,String nodeApproveResult);
 
     /**
-     * 上线拒绝事件
-     * @param tenantId
+     * 下线回调事件
      * @param dataStandardCode
+     * @param nodeApproveResult
      */
-    void onlineWorkflowFail(Long tenantId, String dataStandardCode);
-
-    /**
-     * 下线通过事件
-     * @param tenantId
-     * @param dataStandardCode
-     */
-    void offlineWorkflowSuccess(Long tenantId, String dataStandardCode);
-
-    /**
-     * 上线拒绝事件
-     * @param tenantId
-     * @param dataStandardCode
-     */
-    void offlineWorkflowFail(Long tenantId, String dataStandardCode);
-
-    /**
-     * 上线工作流审批中
-     * @param tenantId
-     * @param dataStandardCode
-     */
-    void onlineWorkflowing(Long tenantId, String dataStandardCode);
-
-    /**
-     * 下线工作流审批中
-     * @param tenantId
-     * @param dataStandardCode
-     */
-    void offlineWorkflowing(Long tenantId, String dataStandardCode);
-
+    void offlineWorkflowCallback(String dataStandardCode,String nodeApproveResult);
 
     /**
      * 数据标准审批申请信息
@@ -205,4 +176,17 @@ public interface DataStandardService {
      * @return              详细信息
      */
     DataStandardDTO dataInfo(Long tenantId, Long approvalId);
+
+    /**
+     * 版本记录
+     * @param dataStandardDTO
+     */
+    void doVersion(DataStandardDTO dataStandardDTO);
+
+    /**
+     * 发布时处理关联了评估的落标
+     *
+     * @param aimDTOS List<StandardAimDTO>
+     */
+    void publishRelatePlan(List<StandardAimDTO> aimDTOS);
 }

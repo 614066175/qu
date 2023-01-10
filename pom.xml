@@ -37,6 +37,10 @@
             <groupId>org.hzero.boot</groupId>
             <artifactId>hzero-boot-workflow</artifactId>
         </dependency>
+        <dependency>
+            <artifactId>hdsp-workflow-adapter-common</artifactId>
+            <groupId>com.hand.hdsp.adapter</groupId>
+        </dependency>
 
         <!-- hdsp starter -->
         <dependency>
