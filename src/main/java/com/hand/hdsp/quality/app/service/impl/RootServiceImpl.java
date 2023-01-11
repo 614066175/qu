@@ -18,8 +18,9 @@ import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
-import com.hand.hdsp.quality.infra.workflow.RootOfflineWorkflowAdapter;
-import com.hand.hdsp.quality.infra.workflow.RootOnlineWorkflowAdapter;
+import com.hand.hdsp.quality.infra.workflow.DefaultRootOfflineWorkflowAdapter;
+import com.hand.hdsp.workflow.common.infra.quality.RootOfflineWorkflowAdapter;
+import com.hand.hdsp.workflow.common.infra.quality.RootOnlineWorkflowAdapter;
 import lombok.extern.slf4j.Slf4j;
 import org.ansj.domain.Result;
 import org.ansj.domain.Term;
@@ -36,6 +37,8 @@ import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+
+import org.apache.logging.log4j.util.Strings;
 import org.nlpcn.commons.lang.tire.domain.Forest;
 import org.nlpcn.commons.lang.tire.library.Library;
 import org.springframework.beans.BeanUtils;
@@ -86,7 +89,7 @@ public class RootServiceImpl implements RootService {
 
     private final RootDicRepository rootDicRepository;
 
-    public RootServiceImpl(RootRepository rootRepository, RootVersionRepository rootVersionRepository, RootLineRepository rootLineRepository, StandardGroupRepository standardGroupRepository, StandardApprovalRepository standardApprovalRepository, StandardApprovalMapper standardApprovalMapper, ProfileClient profileClient, WorkflowClient workflowClient, RootOnlineWorkflowAdapter rootOnlineWorkflowAdapter, RootOfflineWorkflowAdapter rootOfflineWorkflowAdapter, AnsjUtil ansjUtil, RootDicRepository rootDicRepository) {
+    public RootServiceImpl(RootRepository rootRepository, RootVersionRepository rootVersionRepository, RootLineRepository rootLineRepository, StandardGroupRepository standardGroupRepository, StandardApprovalRepository standardApprovalRepository, StandardApprovalMapper standardApprovalMapper, ProfileClient profileClient, WorkflowClient workflowClient, DefaultRootOfflineWorkflowAdapter defaultRootOfflineWorkflowAdapter, RootOnlineWorkflowAdapter rootOnlineWorkflowAdapter, RootOfflineWorkflowAdapter rootOfflineWorkflowAdapter, AnsjUtil ansjUtil, RootDicRepository rootDicRepository) {
         this.rootRepository = rootRepository;
         this.rootVersionRepository = rootVersionRepository;
         this.rootLineRepository = rootLineRepository;
@@ -329,12 +332,14 @@ public class RootServiceImpl implements RootService {
         String onlineFlag = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.ROOT_ONLINE);
         String offlineFlag = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.ROOT_OFFLINE);
         if ("true".equals(onlineFlag) && ONLINE.equals(root.getReleaseStatus())) {
-            //先修改状态再启动工作流，启动工作流需要花费一定时间,有异常回滚
+            //启动工作流，启动工作流需要花费一定时间,有异常回滚
             rootOnlineWorkflowAdapter.startWorkflow(root);
+            root.setReleaseStatus(ONLINE_APPROVING);
         }
         if ("true".equals(offlineFlag) && OFFLINE.equals(root.getReleaseStatus())) {
-            //先修改状态再启动工作流，启动工作流需要花费一定时间,有异常回滚
+            //启动工作流，启动工作流需要花费一定时间,有异常回滚
             rootOfflineWorkflowAdapter.startWorkflow(root);
+            root.setReleaseStatus(OFFLINE_APPROVING);
         }
 
         if (("false".equals(offlineFlag) && ONLINE.equals(root.getReleaseStatus())) ||
@@ -344,22 +349,51 @@ public class RootServiceImpl implements RootService {
                 throw new CommonException(ErrorCode.ROOT_NOT_EXIST);
             }
             root.setObjectVersionNumber(rootTmp.getObjectVersionNumber());
-            rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS);
             if (ONLINE.equals(root.getReleaseStatus())) {
                 //存版本表
                 doVersion(root);
             }
         }
+        //修改发布状态
+        rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS);
     }
 
     @Override
     public void onlineWorkflowCallback(Long rootId, String nodeApproveResult) {
-        rootOnlineWorkflowAdapter.callBack(rootId,nodeApproveResult);
+        Root root = rootRepository.selectByPrimaryKey(rootId);
+        if(root!=null){
+            //工作流适配器回调
+            root = (Root)rootOnlineWorkflowAdapter.callBack(root,nodeApproveResult);
+            rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS);
+
+            if (ONLINE.equals(root.getReleaseStatus())) {
+                doVersion(root);
+                //上线后词库追加词根对应的中文
+                List<RootLine> rootLines = rootLineRepository.select(RootLine.builder().rootId(rootId).build());
+                if (CollectionUtils.isNotEmpty(rootLines)) {
+                    List<String> addWords = rootLines.stream()
+                            .filter(rootLine -> Strings.isNotBlank(rootLine.getRootName()))
+                            .map(RootLine::getRootName)
+                            .distinct()
+                            .collect(Collectors.toList());
+                    ansjUtil.addWord(root.getTenantId(), root.getProjectId(), addWords);
+                }
+            }
+        }
     }
 
     @Override
     public void offlineWorkflowCallback(Long rootId, String nodeApproveResult) {
-        rootOfflineWorkflowAdapter.callBack(rootId,nodeApproveResult);
+        Root root = rootRepository.selectByPrimaryKey(rootId);
+        if(root!=null){
+            //工作流适配器回调
+            root = (Root)rootOfflineWorkflowAdapter.callBack(root,nodeApproveResult);
+            rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS);
+            if (OFFLINE.equals(root.getReleaseStatus())) {
+                //下线词库中进行移除,基于当前在线和下线中的词根重新生成文件
+                ansjUtil.rebuildDic(root.getTenantId(), root.getProjectId());
+            }
+        }
     }
 
     @Override

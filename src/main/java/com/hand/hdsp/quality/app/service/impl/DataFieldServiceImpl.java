@@ -16,8 +16,8 @@ import com.hand.hdsp.quality.infra.mapper.StandardApprovalMapper;
 import com.hand.hdsp.quality.infra.statistic.validator.StatisticValidator;
 import com.hand.hdsp.quality.infra.util.CustomThreadPool;
 import com.hand.hdsp.quality.infra.util.StandardHandler;
-import com.hand.hdsp.quality.infra.workflow.DataFieldOfflineWorkflowAdapter;
-import com.hand.hdsp.quality.infra.workflow.DataFieldOnlineWorkflowAdapter;
+import com.hand.hdsp.workflow.common.infra.quality.DataFieldOfflineWorkflowAdapter;
+import com.hand.hdsp.workflow.common.infra.quality.DataFieldOnlineWorkflowAdapter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -41,6 +41,7 @@ import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import org.hzero.boot.driver.app.service.DriverSessionService;
@@ -49,6 +50,7 @@ import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
 import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
 import org.hzero.boot.platform.plugin.hr.entity.Employee;
 import org.hzero.boot.workflow.WorkflowClient;
+import org.hzero.boot.workflow.constant.WorkflowConstant;
 import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
@@ -128,7 +130,9 @@ public class DataFieldServiceImpl implements DataFieldService {
                                 DataFieldVersionRepository dataFieldVersionRepository, DataFieldMapper dataFieldMapper,
                                 DataStandardService dataStandardService, ExtraVersionRepository extraVersionRepository,
                                 DataStandardMapper dataStandardMapper, StandardAimRepository standardAimRepository,
-                                DataFieldOnlineWorkflowAdapter dataFieldOnlineWorkflowAdapter, DataFieldOfflineWorkflowAdapter dataFieldOfflineWorkflowAdapter, StandardTeamRepository standardTeamRepository, StandardRelationRepository standardRelationRepository,
+                                DataFieldOnlineWorkflowAdapter dataFieldOnlineWorkflowAdapter,
+                                DataFieldOfflineWorkflowAdapter dataFieldOfflineWorkflowAdapter,
+                                StandardTeamRepository standardTeamRepository, StandardRelationRepository standardRelationRepository,
                                 AimStatisticsRepository aimStatisticsRepository, StandardApprovalRepository standardApprovalRepository,
                                 StandardApprovalMapper standardApprovalMapper, List<StatisticValidator> statisticValidatorList,
                                 DriverSessionService driverSessionService, StandardApprovalService standardApprovalService, AimStatisticsConverter aimStatisticsConverter, StandardGroupRepository standardGroupRepository) {
@@ -142,6 +146,7 @@ public class DataFieldServiceImpl implements DataFieldService {
         this.dataStandardMapper = dataStandardMapper;
         this.dataFieldOnlineWorkflowAdapter = dataFieldOnlineWorkflowAdapter;
         this.dataFieldOfflineWorkflowAdapter = dataFieldOfflineWorkflowAdapter;
+
         this.standardTeamRepository = standardTeamRepository;
         this.standardRelationRepository = standardRelationRepository;
         this.standardApprovalRepository = standardApprovalRepository;
@@ -361,9 +366,13 @@ public class DataFieldServiceImpl implements DataFieldService {
             //开启工作流
             //根据上下线状态开启不同的工作流实例
             if (ONLINE.equals(dataFieldDTO.getStandardStatus())) {
+                //指定字段标准修改状态
+                dataFieldDTO.setStandardStatus(ONLINE_APPROVING);
                 dataFieldOnlineWorkflowAdapter.startWorkflow(dataFieldDTO);
             }
             if (OFFLINE.equals(dataFieldDTO.getStandardStatus())) {
+                //指定字段标准修改状态
+                dataFieldDTO.setStandardStatus(OFFLINE_APPROVING);
                 dataFieldOfflineWorkflowAdapter.startWorkflow(dataFieldDTO);
             }
         } else {
@@ -372,12 +381,12 @@ public class DataFieldServiceImpl implements DataFieldService {
                 throw new CommonException(ErrorCode.DATA_FIELD_STANDARD_NOT_EXIST);
             }
             dataFieldDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
-            dataFieldRepository.updateDTOOptional(dataFieldDTO, DataField.FIELD_STANDARD_STATUS);
             if (ONLINE.equals(dataFieldDTO.getStandardStatus())) {
                 //存版本表
                 doVersion(dataFieldDTO);
             }
         }
+        dataFieldRepository.updateDTOOptional(dataFieldDTO, DataStandard.FIELD_STANDARD_STATUS);
     }
 
     @Override
@@ -635,12 +644,22 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     @Override
     public void onlineWorkflowCallback(Long fieldId,String nodeApproveResult) {
-        dataFieldOnlineWorkflowAdapter.callBack(fieldId,nodeApproveResult);
+        nodeApproveResult = (String) dataFieldOnlineWorkflowAdapter.callBack(fieldId,nodeApproveResult);
+        if(WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)){
+            workflowing(DetailsHelper.getUserDetails().getTenantId(), fieldId, ONLINE);
+        }else {
+            workflowing(DetailsHelper.getUserDetails().getTenantId(), fieldId, OFFLINE);
+        }
     }
 
     @Override
     public void offlineWorkflowCallback(Long fieldId,String nodeApproveResult) {
-        dataFieldOfflineWorkflowAdapter.callBack(fieldId,nodeApproveResult);
+        nodeApproveResult = (String) dataFieldOfflineWorkflowAdapter.callBack(fieldId,nodeApproveResult);
+        if(WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)){
+            workflowing(DetailsHelper.getUserDetails().getTenantId(), fieldId, OFFLINE);
+        }else {
+            workflowing(DetailsHelper.getUserDetails().getTenantId(), fieldId, ONLINE);
+        }
     }
 
     @Override
@@ -834,6 +853,26 @@ public class DataFieldServiceImpl implements DataFieldService {
             return BigDecimal.valueOf(0);
         } else {
             return BigDecimal.valueOf(num1).divide(BigDecimal.valueOf(num2), 2, BigDecimal.ROUND_HALF_UP);
+        }
+    }
+
+    /**
+     * 指定字段标准修改状态，供审批中，审批结束任务状态变更
+     *
+     * @param tenantId
+     * @param fieldId
+     * @param status
+     */
+    private void workflowing(Long tenantId, Long fieldId, String status) {
+        DataFieldDTO dataFieldDTO = dataFieldRepository.selectDTOByPrimaryKey(
+                DataFieldDTO.builder().fieldId(fieldId).tenantId(tenantId).build()
+        );
+        if (dataFieldDTO != null) {
+            dataFieldDTO.setStandardStatus(status);
+            dataFieldRepository.updateDTOOptional(dataFieldDTO, DataStandard.FIELD_STANDARD_STATUS);
+            if (ONLINE.equals(status)) {
+                doVersion(dataFieldDTO);
+            }
         }
     }
 

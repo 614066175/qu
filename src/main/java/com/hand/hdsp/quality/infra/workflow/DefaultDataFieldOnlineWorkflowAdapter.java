@@ -4,10 +4,9 @@ import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.StandardApprovalDTO;
 import com.hand.hdsp.quality.app.service.DataFieldService;
 import com.hand.hdsp.quality.app.service.StandardApprovalService;
-import com.hand.hdsp.quality.domain.entity.DataStandard;
 import com.hand.hdsp.quality.domain.repository.DataFieldRepository;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
-import com.hand.hdsp.workflow.common.infra.OfflineWorkflowAdapter;
+import com.hand.hdsp.workflow.common.infra.quality.DataFieldOnlineWorkflowAdapter;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -28,25 +27,17 @@ import org.hzero.boot.workflow.dto.RunInstance;
  * @author XIN.SHENG01@HAND-CHINA.COM 2023/01/09 11:55
  */
 @Component
-public class DataFieldOnlineWorkflowAdapter  implements OfflineWorkflowAdapter<DataFieldDTO,DataFieldDTO,Long,DataFieldDTO> {
+public class DefaultDataFieldOnlineWorkflowAdapter implements DataFieldOnlineWorkflowAdapter<DataFieldDTO,DataFieldDTO,Long,String> {
     private final StandardApprovalService standardApprovalService;
     private final WorkflowClient workflowClient;
-    private final DataFieldRepository dataFieldRepository;
-    private final DataFieldService dataFieldService;
 
-    public DataFieldOnlineWorkflowAdapter(StandardApprovalService standardApprovalService, WorkflowClient workflowClient, DataFieldRepository dataFieldRepository, DataFieldService dataFieldService) {
+    public DefaultDataFieldOnlineWorkflowAdapter(StandardApprovalService standardApprovalService, WorkflowClient workflowClient) {
         this.standardApprovalService = standardApprovalService;
         this.workflowClient = workflowClient;
-        this.dataFieldRepository = dataFieldRepository;
-        this.dataFieldService = dataFieldService;
     }
 
     @Override
     public DataFieldDTO startWorkflow(DataFieldDTO dataFieldDTO) {
-        //指定字段标准修改状态
-        dataFieldDTO.setStandardStatus(ONLINE_APPROVING);
-        dataFieldRepository.updateDTOOptional(dataFieldDTO, DataStandard.FIELD_STANDARD_STATUS);
-
         Long userId = DetailsHelper.getUserDetails().getUserId();
         StandardApprovalDTO standardApprovalDTO = StandardApprovalDTO
                 .builder()
@@ -81,19 +72,10 @@ public class DataFieldOnlineWorkflowAdapter  implements OfflineWorkflowAdapter<D
     }
 
     @Override
-    public DataFieldDTO callBack(Long fieldId, String approveResult) {
-        DataFieldDTO dataFieldDTO = dataFieldRepository.selectDTOByPrimaryKey(fieldId);
-        if (dataFieldDTO != null) {
-            if(WorkflowConstant.ApproveAction.APPROVED.equals(approveResult)){
-                dataFieldDTO.setStandardStatus(ONLINE);
-            }else{
-                dataFieldDTO.setStandardStatus(OFFLINE);
-            }
-            dataFieldRepository.updateDTOOptional(dataFieldDTO, DataStandard.FIELD_STANDARD_STATUS);
-            if (ONLINE.equals(dataFieldDTO.getStandardStatus())) {
-                dataFieldService.doVersion(dataFieldDTO);
-            }
+    public String callBack(Long fieldId, String approveResult) {
+        if(WorkflowConstant.ApproveAction.APPROVED.equals(approveResult)){
+            return WorkflowConstant.ApproveAction.APPROVED;
         }
-        return dataFieldDTO;
+        return WorkflowConstant.ApproveAction.REJECTED;
     }
 }

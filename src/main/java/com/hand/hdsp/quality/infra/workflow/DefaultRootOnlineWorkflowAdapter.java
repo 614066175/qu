@@ -1,17 +1,25 @@
 package com.hand.hdsp.quality.infra.workflow;
 
 import com.hand.hdsp.quality.api.dto.StandardApprovalDTO;
+import com.hand.hdsp.quality.app.service.RootService;
 import com.hand.hdsp.quality.app.service.StandardApprovalService;
 import com.hand.hdsp.quality.domain.entity.Root;
+import com.hand.hdsp.quality.domain.entity.RootLine;
+import com.hand.hdsp.quality.domain.repository.RootLineRepository;
 import com.hand.hdsp.quality.domain.repository.RootRepository;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.util.AnsjUtil;
-import com.hand.hdsp.workflow.common.infra.OfflineWorkflowAdapter;
+import com.hand.hdsp.workflow.common.infra.OnlineWorkflowAdapter;
+import com.hand.hdsp.workflow.common.infra.quality.RootOnlineWorkflowAdapter;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
@@ -24,34 +32,29 @@ import org.hzero.boot.workflow.dto.RunInstance;
 /**
  * description
  *
- * @author XIN.SHENG01@HAND-CHINA.COM 2023/01/09 11:20
+ * @author XIN.SHENG01@HAND-CHINA.COM 2023/01/09 10:45
  */
 @Component
-public class RootOfflineWorkflowAdapter implements OfflineWorkflowAdapter<Root,Root,Long,Root> {
+public class DefaultRootOnlineWorkflowAdapter implements RootOnlineWorkflowAdapter<Root,Root,Root,Root> {
+
     private final StandardApprovalService standardApprovalService;
     private final WorkflowClient workflowClient;
-    private final RootRepository rootRepository;
-    private final AnsjUtil ansjUtil;
 
-    public RootOfflineWorkflowAdapter(StandardApprovalService standardApprovalService, WorkflowClient workflowClient, RootRepository rootRepository, AnsjUtil ansjUtil) {
+
+    public DefaultRootOnlineWorkflowAdapter(StandardApprovalService standardApprovalService, WorkflowClient workflowClient) {
         this.standardApprovalService = standardApprovalService;
         this.workflowClient = workflowClient;
-        this.rootRepository = rootRepository;
-        this.ansjUtil = ansjUtil;
     }
 
     @Override
     public Root startWorkflow(Root root) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        //修改状态
-        root.setReleaseStatus(OFFLINE_APPROVING);
-        rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS);
         StandardApprovalDTO standardApprovalDTO = StandardApprovalDTO
                 .builder()
                 .standardId(root.getId())
                 .standardType("ROOT")
                 .applicantId(userId)
-                .applyType(OFFLINE)
+                .applyType(ONLINE)
                 .tenantId(root.getTenantId())
                 .build();
         // 删除原来的审批记录
@@ -70,7 +73,7 @@ public class RootOfflineWorkflowAdapter implements OfflineWorkflowAdapter<Root,R
         var.put("approvalId", standardApprovalDTO.getApprovalId());
         //使用自研工作流客户端
         RunInstance runInstance = workflowClient.startInstanceByFlowKey(root.getTenantId(),
-                WorkFlowConstant.Root.OFFLINE_WORKFLOW_KEY, bussinessKey, "USER", String.valueOf(userId), var);
+                WorkFlowConstant.Root.ONLINE_WORKFLOW_KEY, bussinessKey, "USER", String.valueOf(userId), var);
         if (Objects.nonNull(runInstance)) {
             standardApprovalDTO.setApplyTime(runInstance.getStartDate());
             standardApprovalDTO.setInstanceId(runInstance.getInstanceId());
@@ -80,18 +83,12 @@ public class RootOfflineWorkflowAdapter implements OfflineWorkflowAdapter<Root,R
     }
 
     @Override
-    public Root callBack(Long rootId, String approveResult) {
-        Root root = rootRepository.selectByPrimaryKey(rootId);
+    public Root callBack(Root root, String approveResult) {
         if (root != null) {
             if (WorkflowConstant.ApproveAction.APPROVED.equals(approveResult)) {
-                root.setReleaseStatus(OFFLINE);
-            } else {
                 root.setReleaseStatus(ONLINE);
-            }
-            rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS);
-            if (OFFLINE.equals(root.getReleaseStatus())) {
-                //下线词库中进行移除,基于当前在线和下线中的词根重新生成文件
-                ansjUtil.rebuildDic(root.getTenantId(), root.getProjectId());
+            } else {
+                root.setReleaseStatus(OFFLINE);
             }
         }
         return root;
