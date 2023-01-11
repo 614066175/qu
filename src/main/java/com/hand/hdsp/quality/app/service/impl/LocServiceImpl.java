@@ -94,7 +94,6 @@ public class LocServiceImpl implements LocService {
     public LocDTO detail(Long locId) {
         //sql形式
         //locMapper.detail(locId);
-
         //查代码集信息
         LocDTO locDTO = locRepository.selectDTOByPrimaryKey(locId);
         //查最大版本

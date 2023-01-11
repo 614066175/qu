@@ -310,15 +310,6 @@ public class DataFieldController extends BaseController {
         return Results.success(dataFieldService.findCharger(tenantId, fieldId));
     }
 
-    @ApiOperation(value = "字段标准转换标准规则")
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/standard-to-rule")
-    public ResponseEntity<BatchPlanFieldDTO> standardToRule(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                                            Long standardId, String columnType) {
-        BatchPlanFieldDTO batchPlanFieldDTO = dataFieldService.standardToRule(standardId, columnType);
-        return Results.success(batchPlanFieldDTO);
-    }
-
 
     @ApiOperation(value = "字段标准落标统计")
     @ApiImplicitParams({@ApiImplicitParam(
@@ -335,6 +326,15 @@ public class DataFieldController extends BaseController {
         return Results.success(dataFieldService.fieldAimStatistic(dataFieldDTO));
     }
 
+
+    @ApiOperation(value = "字段标准转换标准规则")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/standard-to-rule")
+    public ResponseEntity<BatchPlanFieldDTO> standardToRule(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                                            Long standardId, String columnType) {
+        BatchPlanFieldDTO batchPlanFieldDTO = dataFieldService.standardToRule(standardId, columnType);
+        return Results.success(batchPlanFieldDTO);
+    }
 
     @ApiOperation(value = "字段元数据关联字段标准")
     @Permission(level = ResourceLevel.ORGANIZATION)

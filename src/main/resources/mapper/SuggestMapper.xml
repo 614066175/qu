@@ -54,7 +54,7 @@
         from xqua_suggest xs
         left join xqua_check_rule xcr on xs.rule_id = xcr.rule_id
         left join xqua_problem xp on xp.problem_id = xs.problem_id
-        left join hzero_platform.iam_user iu on iu.id = xs.last_updated_by
+        left join iam_user iu on iu.id = xs.last_updated_by
         where 1=1 and xs.tenant_id = #{suggestDTO.tenantId}
         <if test="suggestDTO.suggestId!=null">
             and xs.suggest_id=#{suggestDTO.suggestId}

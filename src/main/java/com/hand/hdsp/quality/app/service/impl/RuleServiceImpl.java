@@ -70,10 +70,10 @@ public class RuleServiceImpl implements RuleService {
         Long tenantId = ruleDTO.getTenantId();
         ruleRepository.insertDTOSelective(ruleDTO);
         if (ruleDTO.getRuleLineDTOList() != null) {
+
             for (RuleLineDTO ruleLineDTO : ruleDTO.getRuleLineDTOList()) {
                 ruleLineDTO.setRuleId(ruleDTO.getRuleId());
                 ruleLineDTO.setTenantId(tenantId);
-                ruleLineDTO.setProjectId(ruleDTO.getProjectId());
                 //todo 范围重叠判断
                 ruleLineDTO.setWarningLevel(JsonUtils.object2Json(ruleLineDTO.getWarningLevelList()));
                 ruleLineRepository.insertDTOSelective(ruleLineDTO);

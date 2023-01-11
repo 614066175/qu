@@ -47,15 +47,15 @@ public class ProblemServiceImpl implements ProblemService {
     @Override
     public ProblemDTO detail(Long problemId) {
         //前端需要
-        if(problemId == -1){
+        if (problemId == -1) {
             return ProblemDTO.builder().build();
         }
         ProblemDTO problemDTO = problemRepository.selectDTOByPrimaryKeyAndTenant(problemId);
-        if(problemDTO != null){
+        if (problemDTO != null) {
             List<Problem> problems = problemRepository.selectByCondition(Condition.builder(Problem.class).andWhere(
                     Sqls.custom().andEqualTo(Problem.FIELD_PROBLEM_ID, problemDTO.getProblemParentId())
             ).build());
-            if(CollectionUtils.isNotEmpty(problems)){
+            if (CollectionUtils.isNotEmpty(problems)) {
                 problemDTO.setProblemParentName(problems.get(0).getProblemName());
             }
         }
@@ -67,7 +67,7 @@ public class ProblemServiceImpl implements ProblemService {
     public void deleteProblem(ProblemDTO problemDTO) {
 
         List<ProblemDTO> child = problemRepository.listForChild(problemDTO);
-        if (CollectionUtils.isNotEmpty(child)){
+        if (CollectionUtils.isNotEmpty(child)) {
             throw new CommonException(ErrorCode.PROBLEM_HAS_CHILD_PROBLEM);
         }
         problemRepository.deleteByPrimaryKey(problemDTO);
@@ -75,5 +75,36 @@ public class ProblemServiceImpl implements ProblemService {
         List<Suggest> suggests = suggestRepository.selectByCondition(Condition.builder(Suggest.class)
                 .andWhere(Sqls.custom().andEqualTo(Suggest.FIELD_PROBLEM_ID, problemDTO.getProblemId())).build());
         suggestRepository.batchDeleteByPrimaryKey(suggests);
+    }
+
+    @Override
+    public int create(ProblemDTO dto) {
+        if (dto.getProblemParentId() == null) {
+            dto.setProblemParentId(0L);
+        }
+        // 校验父目录下是否有标准
+//        if (ruleGroupDTO.getParentGroupId() != null) {
+//            RuleDTO dto = ruleGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
+//            existStandard(dto);
+//        }
+        // 校验编码存在
+        List<ProblemDTO> dtoList = problemRepository.selectDTOByCondition(Condition.builder(Problem.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(Problem.FIELD_TENANT_ID, dto.getTenantId())
+                        .andEqualTo(Problem.FIELD_PROBLEM_CODE, dto.getProblemCode()))
+                .build());
+        if (CollectionUtils.isNotEmpty(dtoList)) {
+            throw new CommonException(ErrorCode.CODE_ALREADY_EXISTS);
+        }
+        // 校验名称存在
+        dtoList = problemRepository.selectDTOByCondition(Condition.builder(Problem.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(Problem.FIELD_TENANT_ID, dto.getTenantId())
+                        .andEqualTo(Problem.FIELD_PROBLEM_NAME, dto.getProblemName())
+                        .andEqualTo(Problem.FIELD_PROBLEM_PARENT_ID, dto.getProblemParentId())).build());
+        if (CollectionUtils.isNotEmpty(dtoList)) {
+            throw new CommonException(ErrorCode.GROUP_NAME_ALREADY_EXIST);
+        }
+        return problemRepository.insertDTOSelective(dto);
     }
 }

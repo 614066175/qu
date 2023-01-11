@@ -28,7 +28,6 @@
         xl.*
         from xqua_loc xl
         left join (select * from xqua_loc_version  xlv where xlv.loc_version_id in (select max(loc_version) from xqua_loc_version group by loc_id  ) )
-
     </select>
 
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.LocDTO">

@@ -86,11 +86,18 @@ public class DataFieldValidator extends BatchValidatorHandler {
                 if(DataSecurityHelper.isTenantOpen()){
                     //加密后查询
                     String chargeName = DataSecurityHelper.encrypt(dataFieldDTO.getChargeName());
+                    String chargeDeptName = DataSecurityHelper.encrypt(dataFieldDTO.getChargeDeptName());
                     dataFieldDTO.setChargeName(chargeName);
+                    dataFieldDTO.setChargeDeptName(chargeDeptName);
                 }
                 Long chargeId = dataFieldMapper.checkCharger(dataFieldDTO.getChargeName(), dataFieldDTO.getTenantId());
                 if (ObjectUtils.isEmpty(chargeId)) {
                     addErrorMsg(i, "未找到此责任人，请检查数据");
+                    return false;
+                }
+                List<Long> chargeDeptId = dataFieldMapper.selectIdByChargeDeptName(dataFieldDTO.getChargeDeptName(), dataFieldDTO.getTenantId());
+                if(CollectionUtils.isEmpty(chargeDeptId)){
+                    addErrorMsg(i, "未找到此部门，请检查数据");
                     return false;
                 }
                 //当sheet页”数据标准“中的“分组名称”字段在本次导入表格和系统中不存在时则不能导入，并提示”${分组}分组不存在“，并在对应单元格高亮警示
