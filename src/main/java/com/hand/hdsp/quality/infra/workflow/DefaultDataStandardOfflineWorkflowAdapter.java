@@ -3,17 +3,12 @@ package com.hand.hdsp.quality.infra.workflow;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.api.dto.StandardApprovalDTO;
 import com.hand.hdsp.quality.app.service.StandardApprovalService;
-import com.hand.hdsp.quality.domain.entity.DataStandard;
-import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.feign.AssetFeign;
-import com.hand.hdsp.workflow.common.infra.OnlineWorkflowAdapter;
 import com.hand.hdsp.workflow.common.infra.quality.DataStandardOfflineWorkflowAdapter;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -26,8 +21,6 @@ import io.choerodon.core.oauth.DetailsHelper;
 import org.hzero.boot.workflow.WorkflowClient;
 import org.hzero.boot.workflow.constant.WorkflowConstant;
 import org.hzero.boot.workflow.dto.RunInstance;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
 
 /**
  * description
@@ -36,7 +29,6 @@ import org.hzero.mybatis.util.Sqls;
  */
 @Component
 public class DefaultDataStandardOfflineWorkflowAdapter implements DataStandardOfflineWorkflowAdapter<DataStandardDTO,DataStandardDTO,String,String> {
-    private final DataStandardRepository dataStandardRepository;
 
     private final StandardApprovalService standardApprovalService;
 
@@ -45,8 +37,7 @@ public class DefaultDataStandardOfflineWorkflowAdapter implements DataStandardOf
     @Resource
     private AssetFeign assetFeign;
 
-    public DefaultDataStandardOfflineWorkflowAdapter(DataStandardRepository dataStandardRepository, StandardApprovalService standardApprovalService, WorkflowClient workflowClient) {
-        this.dataStandardRepository = dataStandardRepository;
+    public DefaultDataStandardOfflineWorkflowAdapter(StandardApprovalService standardApprovalService, WorkflowClient workflowClient) {
         this.standardApprovalService = standardApprovalService;
         this.workflowClient = workflowClient;
     }

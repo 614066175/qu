@@ -41,6 +41,10 @@
             <artifactId>hdsp-workflow-adapter-common</artifactId>
             <groupId>com.hand.hdsp.adapter</groupId>
         </dependency>
+        <dependency>
+            <groupId>com.hand.hdsp.adapter</groupId>
+            <artifactId>hdsp-message-adapter-common</artifactId>
+        </dependency>
 
         <!-- hdsp starter -->
         <dependency>

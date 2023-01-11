@@ -1,30 +1,21 @@
 package com.hand.hdsp.quality.infra.workflow;
 
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
-import com.hand.hdsp.quality.api.dto.StandardAimDTO;
 import com.hand.hdsp.quality.api.dto.StandardApprovalDTO;
 import com.hand.hdsp.quality.app.service.DataStandardService;
 import com.hand.hdsp.quality.app.service.StandardApprovalService;
-import com.hand.hdsp.quality.domain.entity.DataStandard;
-import com.hand.hdsp.quality.domain.entity.StandardAim;
-import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.domain.repository.StandardAimRepository;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.feign.AssetFeign;
-import com.hand.hdsp.workflow.common.infra.OnlineWorkflowAdapter;
 import com.hand.hdsp.workflow.common.infra.quality.DataStandardOnlineWorkflowAdapter;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
 import io.choerodon.core.oauth.DetailsHelper;
@@ -32,8 +23,6 @@ import io.choerodon.core.oauth.DetailsHelper;
 import org.hzero.boot.workflow.WorkflowClient;
 import org.hzero.boot.workflow.constant.WorkflowConstant;
 import org.hzero.boot.workflow.dto.RunInstance;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
 
 /**
  * description
@@ -43,25 +32,16 @@ import org.hzero.mybatis.util.Sqls;
 @Component
 public class DefaultDataStandardOnlineWorkflowAdapter implements DataStandardOnlineWorkflowAdapter<DataStandardDTO,DataStandardDTO,String,String> {
 
-    private final DataStandardRepository dataStandardRepository;
-
     private final StandardApprovalService standardApprovalService;
 
     private final WorkflowClient workflowClient;
 
-    private final StandardAimRepository standardAimRepository;
-
-    private final DataStandardService dataStandardService;
-
     @Resource
     private AssetFeign assetFeign;
 
-    public DefaultDataStandardOnlineWorkflowAdapter(DataStandardRepository dataStandardRepository, StandardApprovalService standardApprovalService, WorkflowClient workflowClient, StandardAimRepository standardAimRepository, DataStandardService dataStandardService) {
-        this.dataStandardRepository = dataStandardRepository;
+    public DefaultDataStandardOnlineWorkflowAdapter(StandardApprovalService standardApprovalService, WorkflowClient workflowClient, StandardAimRepository standardAimRepository, DataStandardService dataStandardService) {
         this.standardApprovalService = standardApprovalService;
         this.workflowClient = workflowClient;
-        this.standardAimRepository = standardAimRepository;
-        this.dataStandardService = dataStandardService;
     }
 
     @Override

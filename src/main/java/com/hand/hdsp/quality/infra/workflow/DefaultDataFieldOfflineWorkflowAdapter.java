@@ -3,7 +3,6 @@ package com.hand.hdsp.quality.infra.workflow;
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.StandardApprovalDTO;
 import com.hand.hdsp.quality.app.service.StandardApprovalService;
-import com.hand.hdsp.quality.domain.entity.DataStandard;
 import com.hand.hdsp.quality.domain.repository.DataFieldRepository;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.workflow.common.infra.quality.DataFieldOfflineWorkflowAdapter;
@@ -30,12 +29,10 @@ import org.hzero.boot.workflow.dto.RunInstance;
 public class DefaultDataFieldOfflineWorkflowAdapter implements DataFieldOfflineWorkflowAdapter<DataFieldDTO,DataFieldDTO,Long,String> {
     private final StandardApprovalService standardApprovalService;
     private final WorkflowClient workflowClient;
-    private final DataFieldRepository dataFieldRepository;
 
-    public DefaultDataFieldOfflineWorkflowAdapter(StandardApprovalService standardApprovalService, WorkflowClient workflowClient, DataFieldRepository dataFieldRepository) {
+    public DefaultDataFieldOfflineWorkflowAdapter(StandardApprovalService standardApprovalService, WorkflowClient workflowClient) {
         this.standardApprovalService = standardApprovalService;
         this.workflowClient = workflowClient;
-        this.dataFieldRepository = dataFieldRepository;
     }
 
     @Override
