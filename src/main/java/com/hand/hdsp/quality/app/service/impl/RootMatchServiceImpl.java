@@ -1,9 +1,13 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import com.hand.hdsp.quality.api.dto.DataFieldDTO;
-import com.hand.hdsp.quality.api.dto.RootMatchDTO;
-import com.hand.hdsp.quality.api.dto.RootMatchHisDTO;
-import com.hand.hdsp.quality.api.dto.StandardTeamDTO;
+import com.alibaba.excel.EasyExcelFactory;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.support.ExcelTypeEnum;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.write.metadata.WriteSheet;
+import com.alibaba.fastjson.JSON;
+import com.hand.hdsp.core.util.excel.ExcelUtil;
+import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.RootMatchService;
 import com.hand.hdsp.quality.app.service.RootService;
 import com.hand.hdsp.quality.domain.entity.DataField;
@@ -33,20 +37,29 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.hzero.boot.file.FileClient;
+import org.hzero.boot.imported.app.service.TemplateClientService;
+import org.hzero.boot.imported.domain.entity.Template;
 import org.hzero.boot.message.MessageClient;
 import org.hzero.boot.message.entity.Receiver;
+import org.hzero.common.HZeroService;
+import org.hzero.core.base.BaseConstants;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.infra.util.UUIDUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -73,10 +86,12 @@ public class RootMatchServiceImpl implements RootMatchService {
     private final StandardTeamRepository standardTeamRepository;
     private final RootMatchHisRepository rootMatchHisRepository;
     private final MessageClient messageClient;
+    private final ApplicationContext applicationContext;
+    private final FileClient fileClient;
 
     private static final String NO_MATCH = "{未匹配}";
 
-    public RootMatchServiceImpl(RootMatchRepository rootMatchRepository, DataFieldRepository dataFieldRepository, RootService rootService, DataFieldMapper dataFieldMapper, StandardRelationRepository standardRelationRepository, StandardTeamRepository standardTeamRepository, RootMatchHisRepository rootMatchHisRepository, MessageClient messageClient) {
+    public RootMatchServiceImpl(RootMatchRepository rootMatchRepository, DataFieldRepository dataFieldRepository, RootService rootService, DataFieldMapper dataFieldMapper, StandardRelationRepository standardRelationRepository, StandardTeamRepository standardTeamRepository, RootMatchHisRepository rootMatchHisRepository, MessageClient messageClient, ApplicationContext applicationContext, FileClient fileClient) {
         this.rootMatchRepository = rootMatchRepository;
         this.dataFieldRepository = dataFieldRepository;
         this.rootService = rootService;
@@ -85,6 +100,8 @@ public class RootMatchServiceImpl implements RootMatchService {
         this.standardTeamRepository = standardTeamRepository;
         this.rootMatchHisRepository = rootMatchHisRepository;
         this.messageClient = messageClient;
+        this.applicationContext = applicationContext;
+        this.fileClient = fileClient;
     }
 
     /**
@@ -184,6 +201,13 @@ public class RootMatchServiceImpl implements RootMatchService {
         for (RootMatchDTO matchDTO : rootMatchDTOList) {
             if (ObjectUtils.isNotEmpty(matchDTO.getFieldId())) {
                 List<DataFieldDTO> list = dataFieldMapper.list(DataFieldDTO.builder().fieldId(matchDTO.getFieldId()).build());
+                list.forEach(dataFieldDTO -> {
+                    if (DataSecurityHelper.isTenantOpen()) {
+                        dataFieldDTO.setChargeName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeName()));
+                        dataFieldDTO.setChargeTel(DataSecurityHelper.decrypt(dataFieldDTO.getChargeTel()));
+                        dataFieldDTO.setChargeEmail(DataSecurityHelper.decrypt(dataFieldDTO.getChargeEmail()));
+                    }
+                });
                 //查询标准组
                 List<StandardRelation> standardRelations = standardRelationRepository.select(StandardRelation.builder().fieldStandardId(matchDTO.getFieldId()).build());
                 List<Long> standardTeamIds = standardRelations.stream()
@@ -202,116 +226,41 @@ public class RootMatchServiceImpl implements RootMatchService {
                 result.add(DataFieldDTO.builder().fieldComment(matchDTO.getFieldComment()).fieldName(matchDTO.getFieldName()).build());
             }
         }
-        Map<String, String> fieldMap = new LinkedHashMap<>();
-        createHead(fieldMap);
-        XSSFWorkbook workbook = new XSSFWorkbook();
-        XSSFSheet sheet = workbook.createSheet("Match");
-        int rowNum = 0;
-        Row row = sheet.createRow(rowNum);
-        Cell cell;
-        int cellNum = 0;
-        for (String name : fieldMap.values()) {
-            cell = row.createCell(cellNum);
-            cell.setCellValue(name);
-            cellNum++;
-        }
-        createCells(result, sheet);
-        String fileName = "RootMatch";
-        OutputStream out;
-        try {
-            out = response.getOutputStream();
-            response.reset();
-            //默认导出excel
-            response.addHeader("Content-Disposition", "attachment; filename=" + fileName + ".xlsx");
-            response.setContentType("application/vnd.ms-excel;charset=utf-8");
-            workbook.write(out);
-            out.flush();
-            out.close();
-        } catch (IOException e) {
-            log.error(e.getMessage());
+        //下载模板
+        TemplateClientService templateClientService = applicationContext.getBean(TemplateClientService.class);
+        Template template = templateClientService.getTemplate(BaseConstants.DEFAULT_TENANT_ID, "HDSP.XQUA.ROOT_MATCHING");
+        try (InputStream inputStream = fileClient.downloadFile(template.getTenantId(), HZeroService.Import.BUCKET_NAME, template.getTemplateUrl())){
+            fileToResponse(response);
+            ServletOutputStream outputStream = response.getOutputStream();
+            //获取writer
+            ExcelWriter excelWriter = EasyExcelFactory.getWriterWithTemp(inputStream, outputStream, ExcelTypeEnum.XLSX, false);
+            WriteSheet infoSheet = EasyExcel.writerSheet().sheetNo(0).build();
+            infoSheet.setClazz(DataFieldModel.class);
+            //写入
+            List<DataFieldModel> dataFieldModels;
+            dataFieldModels = copy(result,DataFieldModel.class);
+            excelWriter.write(dataFieldModels,infoSheet);
+            //关闭流
+            excelWriter.finish();
+            outputStream.flush();
+            outputStream.close();
+        } catch (Exception e) {
+            log.error("导出excel失败", e);
+            throw new CommonException("hdsp.xqua.err.export_excel_failed", e);
         }
     }
 
-    private void createHead(Map<String, String> fieldMap) {
-        fieldMap.put("fieldComment", "字段注释");
-        fieldMap.put("fieldName", "字段名称");
-        fieldMap.put("groupName", "分组名称");
-        fieldMap.put("standardDesc", "标准描述");
-        fieldMap.put("standardTeamCodes", "字段标准组");
-        fieldMap.put("dataStandardName", "引用数据标准");
-        fieldMap.put("fieldAccuracy", "字段精度");
-        fieldMap.put("fieldType", "字段类型");
-        fieldMap.put("fieldLength", "字段长度");
-        fieldMap.put("dataPattern", "数据格式");
-        fieldMap.put("valueType", "值域类型");
-        fieldMap.put("valueRange", "值域范围");
-        fieldMap.put("nullFlag", "是否可为空");
-        fieldMap.put("defaultValue", "默认值");
-        fieldMap.put("sysCommonName", "系统常用名");
-        fieldMap.put("chargeDeptName", "责任部门");
-        fieldMap.put("chargeName", "责任人");
-        fieldMap.put("chargeTel", "责任人电话");
-        fieldMap.put("chargeEmail", "责任人邮箱");
+    private void fileToResponse(HttpServletResponse response) throws UnsupportedEncodingException {
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("utf-8");
+        //文件名转码
+        String fileName = URLEncoder.encode("标准智能匹配导出.xlsx", "UTF-8");
+        response.setHeader("Content-disposition", "attachment;filename=" + fileName);
     }
 
-    private void createCells(List<DataFieldDTO> result, XSSFSheet sheet) {
-        int rows = 1;
-        for (DataFieldDTO dto : result) {
-            Row row = sheet.createRow(rows);
-            int col = 0;
-            row.createCell(col).setCellValue(dto.getFieldComment());
-            row.createCell(col + 1).setCellValue(dto.getFieldName());
-            if (StringUtils.isNotEmpty(dto.getGroupName())) {
-                row.createCell(col + 2).setCellValue(dto.getGroupName());
-            }
-            if (StringUtils.isNotEmpty(dto.getStandardDesc())) {
-                row.createCell(col + 3).setCellValue(dto.getStandardDesc());
-            }
-            if (StringUtils.isNotEmpty(dto.getStandardDesc())) {
-                row.createCell(col + 4).setCellValue(dto.getStandardTeamCodes());
-            }
-            if (StringUtils.isNotEmpty(dto.getDataStandardName())) {
-                row.createCell(col + 5).setCellValue(dto.getDataStandardName());
-            }
-            if (ObjectUtils.isNotEmpty(dto.getFieldAccuracy())) {
-                row.createCell(col + 6).setCellValue(dto.getFieldAccuracy());
-            }
-            if (StringUtils.isNotEmpty(dto.getFieldType())) {
-                row.createCell(col + 7).setCellValue(dto.getFieldType());
-            }
-            if (StringUtils.isNotEmpty(dto.getFieldLength())) {
-                row.createCell(col + 8).setCellValue(dto.getFieldLength());
-            }
-            if (StringUtils.isNotEmpty(dto.getDataPattern())) {
-                row.createCell(col + 9).setCellValue(dto.getDataPattern());
-            }
-            if (StringUtils.isNotEmpty(dto.getValueType())) {
-                row.createCell(col + 10).setCellValue(dto.getValueType());
-            }
-            if (StringUtils.isNotEmpty(dto.getValueRange())) {
-                row.createCell(col + 11).setCellValue(dto.getValueRange());
-            }
-            if (ObjectUtils.isNotEmpty(dto.getNullFlag())) {
-                row.createCell(col + 12).setCellValue(dto.getNullFlag());
-            }
-            if (StringUtils.isNotEmpty(dto.getDefaultValue())) {
-                row.createCell(col + 13).setCellValue(dto.getDefaultValue());
-            }
-            if (StringUtils.isNotEmpty(dto.getSysCommonName())) {
-                row.createCell(col + 14).setCellValue(dto.getSysCommonName());
-            }
-            //加密租户则解密
-            if (DataSecurityHelper.isTenantOpen()) {
-                row.createCell(col + 15).setCellValue(DataSecurityHelper.decrypt(dto.getChargeDeptName()));
-                row.createCell(col + 16).setCellValue(DataSecurityHelper.decrypt(dto.getChargeTel()));
-                row.createCell(col + 17).setCellValue(DataSecurityHelper.decrypt(dto.getChargeEmail()));
-            } else {
-                row.createCell(col + 15).setCellValue(dto.getChargeDeptName());
-                row.createCell(col + 16).setCellValue(dto.getChargeTel());
-                row.createCell(col + 17).setCellValue(dto.getChargeEmail());
-            }
-            rows++;
-        }
+    public static <T> List<T> copy(List<?> list,Class<T> clazz){
+        String oldOb = JSON.toJSONString(list);
+        return JSON.parseArray(oldOb, clazz);
     }
 
     @Override
