@@ -634,6 +634,7 @@ public class RootServiceImpl implements RootService {
         String bussinessKey = String.valueOf(System.currentTimeMillis());
         Map<String, Object> var = new HashMap<>();
         //给流程变量
+        var.put("rootId", root.getId());
         var.put("chargeId", root.getChargeId());
         var.put("approvalId", standardApprovalDTO.getApprovalId());
         //使用自研工作流客户端
