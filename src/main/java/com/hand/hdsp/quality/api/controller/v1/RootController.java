@@ -175,9 +175,9 @@ public class RootController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/find-charger/{rootId}")
-    public ResponseEntity<List<AssigneeUserDTO>> findCharger(@PathVariable Long rootId) {
-        return Results.success(rootService.findCharger(rootId));
+    @GetMapping("/find-charger/{chargeId}")
+    public ResponseEntity<List<AssigneeUserDTO>> findCharger(@PathVariable Long chargeId) {
+        return Results.success(rootService.findCharger(chargeId));
     }
 
     @ApiOperation(value = "申请信息-审批表单用")
