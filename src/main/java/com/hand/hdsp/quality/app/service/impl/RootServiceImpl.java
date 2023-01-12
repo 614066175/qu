@@ -379,7 +379,7 @@ public class RootServiceImpl implements RootService {
             AssigneeUserDTO assigneeUserDTO = rootRepository.getAssigneeUser(root.getChargeId());
             return Collections.singletonList(assigneeUserDTO);
         } else {
-            throw new CommonException(ErrorCode.NOT_FIND_VALUE);
+            throw new CommonException(ErrorCode.ROOT_NOT_EXIST);
         }
     }
 
