@@ -169,8 +169,8 @@
             hu.unit_id chargeDeptId,
             hu.unit_name chargeDept
         from
-            hpfm_employee_assign hea
-        left join hpfm_unit hu on hu.unit_id = hea.unit_id
+            hpfm_unit hu
+        LEFT JOIN hpfm_employee_assign hea ON hea.unit_id =hu.unit_id
         where
             hea.tenant_id = #{tenantId}
             and hea.employee_id = #{chargeId}
