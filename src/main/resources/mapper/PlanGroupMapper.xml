@@ -116,4 +116,13 @@
                                        AND xps.share_object_type = 'GROUP'
                                        AND xps.share_to_project_id = #{projectId} ))
     </select>
+    <select id="selectWithParentCode" resultType="com.hand.hdsp.quality.api.dto.PlanGroupDTO">
+        SELECT
+            xpg1.*,
+            xpg2.group_code  parentGroupCode
+        FROM
+            xqua_plan_group xpg1
+            left join xqua_plan_group xpg2 on xpg1.parent_group_id=xpg2.group_id
+        where xpg1.group_id=#{parentGroupId}
+    </select>
 </mapper>

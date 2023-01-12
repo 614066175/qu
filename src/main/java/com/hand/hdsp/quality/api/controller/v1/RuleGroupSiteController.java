@@ -79,7 +79,8 @@ public class RuleGroupSiteController extends BaseController {
     public ResponseEntity<?> create(@RequestBody RuleGroupDTO ruleGroupDTO) {
         ruleGroupDTO.setTenantId(0L);
         validObject(ruleGroupDTO);
-        ruleGroupRepository.insertDTOSelective(ruleGroupDTO);
+        ruleGroupService.create(ruleGroupDTO);
+//        ruleGroupRepository.insertDTOSelective(ruleGroupDTO);
         return Results.success(ruleGroupDTO);
     }
 

@@ -94,7 +94,8 @@ public class ProblemController extends BaseController {
         problemDTO.setTenantId(tenantId);
         problemDTO.setProjectId(projectId);
         this.validObject(problemDTO);
-        problemRepository.insertDTOSelective(problemDTO);
+        problemService.create(problemDTO);
+//        problemRepository.insertDTOSelective(problemDTO);
         return Results.success(problemDTO);
     }
 

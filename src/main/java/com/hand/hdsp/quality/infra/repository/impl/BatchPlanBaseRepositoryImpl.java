@@ -57,8 +57,17 @@ public class BatchPlanBaseRepositoryImpl extends BaseRepositoryImpl<BatchPlanBas
             if (planGroup == null && batchPlanBaseDTO.getGroupId() != 0) {
                 throw new CommonException(ErrorCode.PLAN_GROUP_NOT_EXIST);
             }
-            //递归查询此分组下所有子分组
-            List<PlanGroup> subGroupList = getSubGroup(batchPlanBaseDTO.getGroupId());
+            List<PlanGroup> subGroupList;
+            if (batchPlanBaseDTO.getGroupId() == 0) {
+                //查询当前租户，当前项目所有分组
+                subGroupList = planGroupRepository.select(PlanGroup.builder().tenantId(batchPlanBaseDTO.getTenantId())
+                        .projectId(batchPlanBaseDTO.getProjectId())
+                        .build());
+            } else {
+                //递归查询此分组下所有子分组
+                subGroupList = getSubGroup(batchPlanBaseDTO.getGroupId());
+            }
+
             //所有分组（groupId=0）无需考虑
             if (planGroup != null) {
                 subGroupList.add(planGroup);
@@ -68,7 +77,7 @@ public class BatchPlanBaseRepositoryImpl extends BaseRepositoryImpl<BatchPlanBas
             BatchPlanRepository batchPlanRepository = ApplicationContextHelper.getContext().getBean(BatchPlanRepository.class);
             List<BatchPlanDTO> batchPlanDTOS = batchPlanRepository.selectDTOByCondition(Condition.builder(BatchPlan.class)
                     .andWhere(Sqls.custom()
-                            .andIn(BatchPlan.FIELD_GROUP_ID, groupIds,true)
+                            .andIn(BatchPlan.FIELD_GROUP_ID, groupIds, true)
                             .andEqualTo(BatchPlan.FIELD_TENANT_ID, batchPlanBaseDTO.getTenantId())
                             .andEqualTo(BatchPlan.FIELD_PROJECT_ID, batchPlanBaseDTO.getProjectId()))
                     .build());
