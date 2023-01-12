@@ -65,6 +65,7 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
     public Boolean doImport(List<String> data) {
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         Long projectId = ProjectHelper.getProjectId();
+        List<Root> rootList = new ArrayList<>();
         try{
             for(int i=0;i<data.size();i++){
                 Root root = objectMapper.readValue(data.get(i), Root.class);
@@ -147,7 +148,10 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
                 }
                 rootLineRepository.batchInsertSelective(rootLines);
                 root.setReleaseStatus(ONLINE);
-                rootService.publishOrOff(root);
+                rootList.add(root);
+            }
+            if(CollectionUtils.isNotEmpty(rootList)){
+                rootList.forEach(root->rootService.publishOrOff(root));
             }
         }catch (Exception e){
             // 失败
