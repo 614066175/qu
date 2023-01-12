@@ -373,14 +373,9 @@ public class RootServiceImpl implements RootService {
     }
 
     @Override
-    public List<AssigneeUserDTO> findCharger(Long rootId) {
-        Root root = rootRepository.selectByPrimaryKey(rootId);
-        if (root != null) {
-            AssigneeUserDTO assigneeUserDTO = rootRepository.getAssigneeUser(root.getChargeId());
-            return Collections.singletonList(assigneeUserDTO);
-        } else {
-            throw new CommonException(ErrorCode.ROOT_NOT_EXIST);
-        }
+    public List<AssigneeUserDTO> findCharger(Long chargeId) {
+        AssigneeUserDTO assigneeUserDTO = rootRepository.getAssigneeUser(chargeId);
+        return Collections.singletonList(assigneeUserDTO);
     }
 
     @Override
@@ -639,7 +634,7 @@ public class RootServiceImpl implements RootService {
         String bussinessKey = String.valueOf(System.currentTimeMillis());
         Map<String, Object> var = new HashMap<>();
         //给流程变量
-        var.put("rootId", root.getId());
+        var.put("chargeId", root.getChargeId());
         var.put("approvalId", standardApprovalDTO.getApprovalId());
         //使用自研工作流客户端
         RunInstance runInstance = workflowClient.startInstanceByFlowKey(root.getTenantId(), workflowKey, bussinessKey, "USER", String.valueOf(userId), var);
