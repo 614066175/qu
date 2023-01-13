@@ -43,7 +43,7 @@ public class DataFieldModel extends BaseRowModel {
 
     //字段标准组：支持填写多个值，可用;区分
     @ExcelProperty(value = "字段标准组",index = 4)
-    private String standardTeamCode;
+    private String standardTeamCodes;
 
     @ExcelProperty(value = "引用数据标准",index = 5)
     private String dataStandardCode;
@@ -101,10 +101,5 @@ public class DataFieldModel extends BaseRowModel {
     @ExcelProperty(value = "字段类型",index = 19)
     private String fieldTypeMeaning;
 
-    /**
-     * 关联的标准组code，逗号分隔
-     */
-    @Transient
-    private String standardTeamCodes;
 
 }
