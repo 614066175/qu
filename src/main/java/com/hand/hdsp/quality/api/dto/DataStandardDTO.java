@@ -198,4 +198,8 @@ public class DataStandardDTO extends AuditDomain{
     @Transient
     private Long[] groupArrays;
 
+    //用于勾选导出数据标准
+    @Transient
+    private String exportIds;
+
 }

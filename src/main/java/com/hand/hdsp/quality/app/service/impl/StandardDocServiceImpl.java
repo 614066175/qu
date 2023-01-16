@@ -47,6 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DOC;
+import static org.hzero.core.base.BaseConstants.Symbol.COMMA;
 
 /**
  * <p>标准文档管理表应用服务默认实现</p>
@@ -253,7 +254,40 @@ public class StandardDocServiceImpl implements StandardDocService {
         StandardDocGroupDTO standardDocGroupDTO = new StandardDocGroupDTO();
         Long projectId = ProjectHelper.getProjectId();
         int level = 1;
-        if (ObjectUtils.isNotEmpty(dto.getGroupId())) {
+        if(ObjectUtils.isNotEmpty(dto.getExportIds())){
+            String[] exportDocs = dto.getExportIds().split(COMMA);
+            for (String exportDoc : exportDocs) {
+                StandardDocGroupDTO standardDocGroupDto = new StandardDocGroupDTO();
+                //导出DOC
+                dto.setDocId(Long.parseLong(exportDoc));
+                List<StandardDocDTO> standardDocs = standardDocMapper.list(dto);
+                decryptChargers(standardDocs);
+                //导出目录及父目录
+                if(CollectionUtils.isNotEmpty(standardDocs)){
+                    StandardDocDTO standardDocDTO = standardDocs.get(0);
+                    List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                                    .andEqualTo(StandardGroup.FIELD_TENANT_ID, dto.getTenantId())
+                                    .andEqualTo(StandardGroup.FIELD_PROJECT_ID,dto.getProjectId())
+                                    .andEqualTo(StandardGroup.FIELD_GROUP_ID,standardDocDTO.getGroupId()))
+                            .build());
+                    if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
+                        StandardGroupDTO standardGroupDTO = standardGroupDTOList.get(0);
+                        BeanUtils.copyProperties(standardGroupDTO,standardDocGroupDto);
+                        standardDocGroupDto.setGroupLevel(level);
+                        standardDocGroupDto.setStandardDocDTOList(standardDocs);
+                        if(ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())){
+                            StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
+                            standardDocGroupDto.setParentGroupCode(groupDTO.getGroupCode());
+                        }
+                        standardDocGroupDTOList.add(standardDocGroupDto);
+                        if(ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())){
+                            findParentGroups(standardGroupDTO.getParentGroupId(),standardDocGroupDTOList,level);
+                        }
+                    }
+                }
+            }
+            return standardDocGroupDTOList.stream().sorted(Comparator.comparing(StandardDocGroupDTO::getGroupLevel).reversed()).collect(Collectors.toList());
+        }else if(ObjectUtils.isNotEmpty(dto.getGroupId())) {
             //分组条件导出
             StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
                     .andEqualTo(StandardGroup.FIELD_TENANT_ID, dto.getTenantId())
