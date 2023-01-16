@@ -51,6 +51,7 @@ import java.util.stream.Collectors;
 
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.ROOT;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
+import static org.hzero.core.base.BaseConstants.Symbol.COMMA;
 
 /**
  * 词根应用服务默认实现
@@ -267,7 +268,36 @@ public class RootServiceImpl implements RootService {
     public List<RootGroupDTO> export(Root root, ExportParam exportParam) {
         List<RootGroupDTO> rootGroupDTOS = new ArrayList<>();
         int level = 1;
-        if (ObjectUtils.isNotEmpty(root.getGroupId())) {
+        if (StringUtils.isNotEmpty(root.getExportIds())) {
+            root.setGroupId(null);
+            //词根
+            String[] exportRoots = root.getExportIds().split(COMMA);
+            for (String exportId : exportRoots) {
+                root.setId(Long.parseLong(exportId));
+                List<Root> roots = rootRepository.list(root);
+                //分组
+                if (CollectionUtils.isNotEmpty(roots)) {
+                    RootGroupDTO rootGroupDTO = new RootGroupDTO();
+                    Root baseRoot = roots.get(0);
+                    StandardGroupDTO standardGroup = standardGroupRepository.selectDTOByPrimaryKey(baseRoot.getGroupId());
+                    if (ObjectUtils.isNotEmpty(standardGroup)) {
+                        BeanUtils.copyProperties(standardGroup, rootGroupDTO);
+                        rootGroupDTO.setGroupLevel(level);
+                        rootGroupDTO.setRoots(roots);
+                        if (ObjectUtils.isNotEmpty(rootGroupDTO.getParentGroupId())) {
+                            StandardGroupDTO standardGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(rootGroupDTO.getParentGroupId());
+                            rootGroupDTO.setParentGroupCode(standardGroupDTO.getGroupCode());
+                        }
+                        rootGroupDTOS.add(rootGroupDTO);
+                        if (ObjectUtils.isNotEmpty(rootGroupDTO.getParentGroupId())) {
+                            findParentGroups(rootGroupDTO.getParentGroupId(), rootGroupDTOS, level);
+                        }
+                    }
+                }
+            }
+            return rootGroupDTOS.stream().sorted(Comparator.comparing(RootGroupDTO::getGroupLevel)).collect(Collectors.toList());
+        }
+        else if (ObjectUtils.isNotEmpty(root.getGroupId())) {
             //分组条件导出
             StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
                     .andEqualTo(StandardGroup.FIELD_TENANT_ID, root.getTenantId())

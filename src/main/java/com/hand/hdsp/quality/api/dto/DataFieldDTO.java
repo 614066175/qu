@@ -236,6 +236,10 @@ public class DataFieldDTO extends AuditDomain {
     @Transient
     private String standardTeamCodes;
 
+    //用于勾选导出字段标准
+    @Transient
+    private String exportIds;
+
     public interface Group1 {
     }
 

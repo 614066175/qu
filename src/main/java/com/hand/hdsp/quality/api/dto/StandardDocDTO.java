@@ -113,6 +113,8 @@ public class StandardDocDTO extends AuditDomain {
     @Transient
     private Long[] groupArrays;
 
+    private String exportIds;
+
     public interface Group1 {
     }
 

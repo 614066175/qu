@@ -59,6 +59,7 @@ import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.RANGE
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.LengthType.FIXED;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
+import static org.hzero.core.base.BaseConstants.Symbol.COMMA;
 
 /**
  * <p>
@@ -622,7 +623,39 @@ public class DataStandardServiceImpl implements DataStandardService {
         DataStandardGroupDTO dataStandardGroupDTO = new DataStandardGroupDTO();
         Long projectId = ProjectHelper.getProjectId();
         int level = 1;
-        if (ObjectUtils.isNotEmpty(dto.getGroupId())) {
+        if (StringUtils.isNotEmpty(dto.getExportIds())) {
+            String[] exportStandardIds = dto.getExportIds().split(COMMA);
+            for (String exportStandardId : exportStandardIds) {
+                DataStandardGroupDTO standardGroupDto = new DataStandardGroupDTO();
+                dto.setStandardId(Long.parseLong(exportStandardId));
+                List<DataStandardDTO> dataStandards = dataStandardMapper.list(dto);
+                decryptCharger(dataStandards);
+                //导出分组、父分组信息
+                if(CollectionUtils.isNotEmpty(dataStandards)){
+                    DataStandardDTO dataStandardDTO = dataStandards.get(0);
+                    List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                            .andEqualTo(StandardGroup.FIELD_TENANT_ID, dataStandardDTO.getTenantId())
+                            .andEqualTo(StandardGroup.FIELD_PROJECT_ID, dataStandardDTO.getProjectId())
+                            .andEqualTo(StandardGroup.FIELD_GROUP_ID, dataStandardDTO.getGroupId())
+                    ).build());
+                    if(CollectionUtils.isNotEmpty(standardGroupDTOS)){
+                        StandardGroupDTO standardGroupDTO = standardGroupDTOS.get(0);
+                        BeanUtils.copyProperties(standardGroupDTO,standardGroupDto);
+                        standardGroupDto.setGroupLevel(level);
+                        standardGroupDto.setDataStandardDTOList(dataStandards);
+                        if(ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())){
+                            StandardGroupDTO parentGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
+                            standardGroupDto.setParentGroupCode(parentGroupDTO.getGroupCode());
+                        }
+                        dataStandardGroupDTOList.add(standardGroupDto);
+                        if(ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())){
+                            findParentGroups(standardGroupDTO.getParentGroupId(),dataStandardGroupDTOList,level);
+                        }
+                    }
+                }
+            }
+            return dataStandardGroupDTOList.stream().sorted(Comparator.comparing(DataStandardGroupDTO::getGroupLevel).reversed()).collect(Collectors.toList());
+        } else if (ObjectUtils.isNotEmpty(dto.getGroupId())) {
             //分组条件导出
             StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
                     .andEqualTo(StandardGroup.FIELD_TENANT_ID, dto.getTenantId())
@@ -685,7 +718,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         }
     }
 
-    private void decryptCharger(List<DataStandardDTO> dataStandards){
+    public void decryptCharger(List<DataStandardDTO> dataStandards){
         //解密责任人相关信息
         if(DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(dataStandards)){
             dataStandards.forEach(dataStandardDTO -> {

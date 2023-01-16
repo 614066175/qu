@@ -34,7 +34,8 @@
         ${sd}.creation_date,
         ${sd}.created_by,
         ${sd}.last_updated_by,
-        ${sd}.last_update_date
+        ${sd}.last_update_date,
+        ${sd}.project_id
     </sql>
     <update id="updateDesc">
         update

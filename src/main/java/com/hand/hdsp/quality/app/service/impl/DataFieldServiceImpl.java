@@ -55,9 +55,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
+
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
+import static org.hzero.core.base.BaseConstants.Symbol.COMMA;
 
 /**
  * <p>字段标准表应用服务默认实现</p>
@@ -422,7 +423,41 @@ public class DataFieldServiceImpl implements DataFieldService {
         DataFieldGroupDTO dataFieldGroupDTO = new DataFieldGroupDTO();
         Long projectId = ProjectHelper.getProjectId();
         int level = 1;
-        if (ObjectUtils.isNotEmpty(dto.getGroupId())) {
+        if (StringUtils.isNotEmpty(dto.getExportIds())) {
+            //勾选导出
+            String[] exportFieldIds = dto.getExportIds().split(COMMA);
+            //条件导出
+            for (String exportFieldId : exportFieldIds) {
+                DataFieldGroupDTO dataFieldGroupDto = new DataFieldGroupDTO();
+                dto.setFieldId(Long.parseLong(exportFieldId));
+                List<DataFieldDTO> dataFields = dataFieldMapper.list(dto);
+                decryptInfo(dataFields);
+                //导出分组、父分组
+                if (CollectionUtils.isNotEmpty(dataFields)) {
+                    DataFieldDTO dataFieldDTO = dataFields.get(0);
+                    List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                                    .andEqualTo(DataField.FIELD_TENANT_ID, dataFieldDTO.getTenantId())
+                                    .andEqualTo(DataField.FIELD_PROJECT_ID, dataFieldDTO.getProjectId())
+                                    .andEqualTo(DataField.FIELD_GROUP_ID, dataFieldDTO.getGroupId()))
+                            .build());
+                    if (CollectionUtils.isNotEmpty(standardGroupDTOS)) {
+                        StandardGroupDTO standardGroupDTO = standardGroupDTOS.get(0);
+                        dataFieldGroupDto.setGroupLevel(level);
+                        dataFieldGroupDto.setDataFieldDTOList(dataFields);
+                        BeanUtils.copyProperties(standardGroupDTO, dataFieldGroupDto);
+                        if (ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())) {
+                            StandardGroupDTO parentGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
+                            dataFieldGroupDto.setParentGroupCode(parentGroupDTO.getGroupCode());
+                        }
+                        dataFieldGroupDTOList.add(dataFieldGroupDto);
+                        if (ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())) {
+                            findParentGroups(standardGroupDTO.getParentGroupId(), dataFieldGroupDTOList, level);
+                        }
+                    }
+                }
+            }
+            return dataFieldGroupDTOList.stream().sorted(Comparator.comparing(DataFieldGroupDTO::getGroupLevel).reversed()).collect(Collectors.toList());
+        } else if (ObjectUtils.isNotEmpty(dto.getGroupId())) {
             //分组条件导出
             StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
                     .andEqualTo(StandardGroup.FIELD_TENANT_ID, dto.getTenantId())
@@ -459,22 +494,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                 }
             });
             //导出解密责任人信息
-            if(DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(dataFields)){
-                dataFields.forEach(dataFieldDTO -> {
-                    if(StringUtils.isNotEmpty(dataFieldDTO.getChargeName())){
-                        dataFieldDTO.setChargeName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeName()));
-                    }
-                    if(StringUtils.isNotEmpty(dataFieldDTO.getChargeDeptName())){
-                        dataFieldDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeDeptName()));
-                    }
-                    if(StringUtils.isNotEmpty(dataFieldDTO.getChargeTel())){
-                        dataFieldDTO.setChargeTel(DataSecurityHelper.decrypt(dataFieldDTO.getChargeTel()));
-                    }
-                    if(StringUtils.isNotEmpty(dataFieldDTO.getChargeEmail())){
-                        dataFieldDTO.setChargeEmail(DataSecurityHelper.decrypt(dataFieldDTO.getChargeEmail()));
-                    }
-                });
-            }
+            decryptInfo(dataFields);
             dataFieldGroupDTO.setDataFieldDTOList(dataFields);
             dataFieldGroupDTO.setGroupLevel(level);
             dataFieldGroupDTOList.add(dataFieldGroupDTO);
@@ -512,22 +532,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                             dataFieldDTO.setStandardTeamCode(StringUtils.join(standardTeamDTOS.stream().map(StandardTeamDTO::getStandardTeamCode).toArray(), ";"));
                         }
                     });
-                    if (DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(dataFieldDTOList)) {
-                        dataFieldDTOList.forEach(dataFieldDTO -> {
-                            if (StringUtils.isNotEmpty(dataFieldDTO.getChargeName())) {
-                                dataFieldDTO.setChargeName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeName()));
-                            }
-                            if (StringUtils.isNotEmpty(dataFieldDTO.getChargeTel())) {
-                                dataFieldDTO.setChargeTel(DataSecurityHelper.decrypt(dataFieldDTO.getChargeTel()));
-                            }
-                            if (StringUtils.isNotEmpty(dataFieldDTO.getChargeEmail())) {
-                                dataFieldDTO.setChargeEmail(DataSecurityHelper.decrypt(dataFieldDTO.getChargeEmail()));
-                            }
-                            if (StringUtils.isNotEmpty(dataFieldDTO.getChargeDeptName())) {
-                                dataFieldDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeDeptName()));
-                            }
-                        });
-                    }
+                    decryptInfo(dataFieldDTOList);
                     dataFieldGroupDto.setDataFieldDTOList(dataFieldDTOList);
                     dataFieldGroupDto.setGroupLevel(level);
                     dataFieldGroupDTOList.add(dataFieldGroupDto);
@@ -535,6 +540,25 @@ public class DataFieldServiceImpl implements DataFieldService {
                 }
             });
             return dataFieldGroupDTOList.stream().sorted(Comparator.comparing(DataFieldGroupDTO::getGroupLevel)).collect(Collectors.toList());
+        }
+    }
+
+    private void decryptInfo(List<DataFieldDTO> dataFields) {
+        if (DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(dataFields)) {
+            dataFields.forEach(dataFieldDTO -> {
+                if (StringUtils.isNotEmpty(dataFieldDTO.getChargeName())) {
+                    dataFieldDTO.setChargeName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeName()));
+                }
+                if (StringUtils.isNotEmpty(dataFieldDTO.getChargeDeptName())) {
+                    dataFieldDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeDeptName()));
+                }
+                if (StringUtils.isNotEmpty(dataFieldDTO.getChargeTel())) {
+                    dataFieldDTO.setChargeTel(DataSecurityHelper.decrypt(dataFieldDTO.getChargeTel()));
+                }
+                if (StringUtils.isNotEmpty(dataFieldDTO.getChargeEmail())) {
+                    dataFieldDTO.setChargeEmail(DataSecurityHelper.decrypt(dataFieldDTO.getChargeEmail()));
+                }
+            });
         }
     }
 

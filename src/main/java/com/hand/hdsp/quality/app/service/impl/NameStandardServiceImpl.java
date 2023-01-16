@@ -35,11 +35,13 @@ import org.hzero.mybatis.util.Sqls;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.NAME;
+import static org.hzero.core.base.BaseConstants.Symbol.COMMA;
 
 /**
  * <p>命名标准表应用服务默认实现</p>
@@ -227,7 +229,41 @@ public class NameStandardServiceImpl implements NameStandardService {
         NameStandardGroupDTO nameStandardGroupDTO = new NameStandardGroupDTO();
         Long projectId = ProjectHelper.getProjectId();
         int level = 1;
-        if (ObjectUtils.isNotEmpty(dto.getGroupId())) {
+        if (StringUtils.isNotEmpty(dto.getExportIds())) {
+            String[] exportNameStandardIds = dto.getExportIds().split(COMMA);
+            for (String exportNameStandardId : exportNameStandardIds) {
+                //命名标准
+                NameStandardGroupDTO nameStandardGroupDto = new NameStandardGroupDTO();
+                dto.setStandardId(Long.parseLong(exportNameStandardId));
+                List<NameStandardDTO> nameStandards = nameStandardMapper.list(dto);
+                decrypt(nameStandards);
+                //分组及父分组
+                if (CollectionUtils.isNotEmpty(nameStandards)) {
+                    List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+                                    .andEqualTo(StandardGroup.FIELD_PROJECT_ID, dto.getProjectId())
+                                    .andEqualTo(StandardGroup.FIELD_TENANT_ID, dto.getTenantId())
+                                    .andEqualTo(StandardGroup.FIELD_GROUP_ID,nameStandards.get(0).getGroupId()))
+                            .build());
+                    if (CollectionUtils.isNotEmpty(standardGroupDTOS)) {
+                        StandardGroupDTO standardGroupDTO = standardGroupDTOS.get(0);
+                        BeanUtils.copyProperties(standardGroupDTO, nameStandardGroupDto);
+                        nameStandardGroupDto.setGroupLevel(level);
+                        nameStandardGroupDto.setNameStandardDTOList(nameStandards);
+                        if (ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())) {
+                            StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
+                            nameStandardGroupDto.setParentGroupCode(groupDTO.getGroupCode());
+                        }
+                        nameStandardGroupDTOList.add(nameStandardGroupDto);
+                        if (ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())) {
+                            findParentGroups(standardGroupDTO.getParentGroupId(), nameStandardGroupDTOList, level);
+                        }
+                    }
+                }
+
+            }
+            return nameStandardGroupDTOList.stream().sorted(Comparator.comparing(NameStandardGroupDTO::getGroupLevel).reversed()).collect(Collectors.toList());
+        }
+        else if (ObjectUtils.isNotEmpty(dto.getGroupId())) {
             //分组条件导出
             StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
                     .andEqualTo(StandardGroup.FIELD_TENANT_ID, dto.getTenantId())
@@ -357,7 +393,6 @@ public class NameStandardServiceImpl implements NameStandardService {
     }
 
     private void findParentGroups(Long groupId, List<NameStandardGroupDTO> standardGroups, int level) {
-        NameStandardGroupDTO nameStandardGroupDTO = new NameStandardGroupDTO();
         List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
                         .andEqualTo(StandardGroup.FIELD_GROUP_ID, groupId))
                 .build());
@@ -365,6 +400,7 @@ public class NameStandardServiceImpl implements NameStandardService {
         if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
             int finalLevel = level;
             standardGroupDTOList.forEach(parentStandardGroupDTO -> {
+                NameStandardGroupDTO nameStandardGroupDTO = new NameStandardGroupDTO();
                 BeanUtils.copyProperties(parentStandardGroupDTO, nameStandardGroupDTO);
                 //获取设置当前分组的父分组编码
                 if (ObjectUtils.isNotEmpty(nameStandardGroupDTO.getGroupId())) {
@@ -402,6 +438,10 @@ public class NameStandardServiceImpl implements NameStandardService {
             //判断解密责任人部门
             if (StringUtils.isNotEmpty(us.getChargeDeptName())) {
                 us.setChargeDeptName(DataSecurityUtil.decrypt(us.getChargeDeptName()));
+            }
+            //解密员工名
+            if(StringUtils.isNotEmpty(us.getChargeName())){
+                us.setChargeName(DataSecurityHelper.decrypt(us.getChargeName()));
             }
         }
     }

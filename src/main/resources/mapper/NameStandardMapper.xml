@@ -56,7 +56,8 @@
         ${prefix}.creation_date,
         ${prefix}.created_by,
         ${prefix}.last_updated_by,
-        ${prefix}.last_update_date
+        ${prefix}.last_update_date,
+        ${prefix}.project_id
     </sql>
 
     <sql id="BaseWhere">

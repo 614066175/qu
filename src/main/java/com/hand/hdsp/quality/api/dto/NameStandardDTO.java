@@ -168,4 +168,7 @@ public class NameStandardDTO extends AuditDomain {
     @Transient
     private Long[] groupArrays;
 
+    //
+    private String exportIds;
+
 }
