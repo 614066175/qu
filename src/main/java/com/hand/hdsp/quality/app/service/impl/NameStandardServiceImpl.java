@@ -248,14 +248,22 @@ public class NameStandardServiceImpl implements NameStandardService {
                         StandardGroupDTO standardGroupDTO = standardGroupDTOS.get(0);
                         BeanUtils.copyProperties(standardGroupDTO, nameStandardGroupDto);
                         nameStandardGroupDto.setGroupLevel(level);
-                        nameStandardGroupDto.setNameStandardDTOList(nameStandards);
-                        if (ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())) {
-                            StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
-                            nameStandardGroupDto.setParentGroupCode(groupDTO.getGroupCode());
-                        }
-                        nameStandardGroupDTOList.add(nameStandardGroupDto);
-                        if (ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())) {
-                            findParentGroups(standardGroupDTO.getParentGroupId(), nameStandardGroupDTOList, level);
+                        //处理导出的分组sheet中重复的分组
+                        if (CollectionUtils.isNotEmpty(nameStandardGroupDTOList)) {
+                            boolean notExistFlag = true;
+                            for (NameStandardGroupDTO groupDTO : nameStandardGroupDTOList) {
+                                if (groupDTO.getGroupCode().equals(standardGroupDTO.getGroupCode())) {
+                                    notExistFlag = false;
+                                    List<NameStandardDTO> nameStandardDTOList = groupDTO.getNameStandardDTOList();
+                                    nameStandardDTOList.addAll(nameStandards);
+                                    groupDTO.setNameStandardDTOList(nameStandardDTOList);
+                                }
+                            }
+                            if (notExistFlag) {
+                                handleNameStandardGroupDto(nameStandardGroupDto, nameStandards, standardGroupDTO, nameStandardGroupDTOList, level);
+                            }
+                        } else {
+                            handleNameStandardGroupDto(nameStandardGroupDto, nameStandards, standardGroupDTO, nameStandardGroupDTOList, level);
                         }
                     }
                 }
@@ -351,6 +359,18 @@ public class NameStandardServiceImpl implements NameStandardService {
                 }
             });
             return nameStandardGroupDTOList.stream().sorted(Comparator.comparing(NameStandardGroupDTO::getGroupLevel)).collect(Collectors.toList());
+        }
+    }
+
+    private void handleNameStandardGroupDto(NameStandardGroupDTO nameStandardGroupDto, List<NameStandardDTO> nameStandards, StandardGroupDTO standardGroupDTO, List<NameStandardGroupDTO> nameStandardGroupDTOList, int level) {
+        nameStandardGroupDto.setNameStandardDTOList(nameStandards);
+        if (ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())) {
+            StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
+            nameStandardGroupDto.setParentGroupCode(groupDTO.getGroupCode());
+        }
+        nameStandardGroupDTOList.add(nameStandardGroupDto);
+        if (ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())) {
+            findParentGroups(standardGroupDTO.getParentGroupId(), nameStandardGroupDTOList, level);
         }
     }
 

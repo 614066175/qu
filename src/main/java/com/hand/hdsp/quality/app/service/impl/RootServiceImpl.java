@@ -283,14 +283,23 @@ public class RootServiceImpl implements RootService {
                     if (ObjectUtils.isNotEmpty(standardGroup)) {
                         BeanUtils.copyProperties(standardGroup, rootGroupDTO);
                         rootGroupDTO.setGroupLevel(level);
-                        rootGroupDTO.setRoots(roots);
-                        if (ObjectUtils.isNotEmpty(rootGroupDTO.getParentGroupId())) {
-                            StandardGroupDTO standardGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(rootGroupDTO.getParentGroupId());
-                            rootGroupDTO.setParentGroupCode(standardGroupDTO.getGroupCode());
-                        }
-                        rootGroupDTOS.add(rootGroupDTO);
-                        if (ObjectUtils.isNotEmpty(rootGroupDTO.getParentGroupId())) {
-                            findParentGroups(rootGroupDTO.getParentGroupId(), rootGroupDTOS, level);
+                        //处理导出的分组sheet中重复的分组
+                        if(CollectionUtils.isNotEmpty(rootGroupDTOS)){
+                            boolean notExistFlag = true;
+                            for (RootGroupDTO groupDTO : rootGroupDTOS) {
+                                if(groupDTO.getGroupCode().equals(baseRoot.getGroupCode())){
+                                    notExistFlag = false;
+                                    List<Root> rootList = groupDTO.getRoots();
+                                    rootList.addAll(roots);
+                                    groupDTO.setRoots(rootList);
+                                }
+                            }
+                            if(notExistFlag){
+                                handleRootGroupDTO(rootGroupDTO,roots,rootGroupDTOS,level);
+
+                            }
+                        }else {
+                            handleRootGroupDTO(rootGroupDTO,roots,rootGroupDTOS,level);
                         }
                     }
                 }
@@ -349,6 +358,18 @@ public class RootServiceImpl implements RootService {
                 findChildGroups(dto, root, rootGroupDTOS, level);
             });
             return rootGroupDTOS.stream().sorted(Comparator.comparing(RootGroupDTO::getGroupLevel)).collect(Collectors.toList());
+        }
+    }
+
+    private void handleRootGroupDTO(RootGroupDTO rootGroupDTO, List<Root> roots, List<RootGroupDTO> rootGroupDTOS, int level) {
+        rootGroupDTO.setRoots(roots);
+        if (ObjectUtils.isNotEmpty(rootGroupDTO.getParentGroupId())) {
+            StandardGroupDTO standardGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(rootGroupDTO.getParentGroupId());
+            rootGroupDTO.setParentGroupCode(standardGroupDTO.getGroupCode());
+        }
+        rootGroupDTOS.add(rootGroupDTO);
+        if (ObjectUtils.isNotEmpty(rootGroupDTO.getParentGroupId())) {
+            findParentGroups(rootGroupDTO.getParentGroupId(), rootGroupDTOS, level);
         }
     }
 

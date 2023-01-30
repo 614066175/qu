@@ -274,14 +274,22 @@ public class StandardDocServiceImpl implements StandardDocService {
                         StandardGroupDTO standardGroupDTO = standardGroupDTOList.get(0);
                         BeanUtils.copyProperties(standardGroupDTO,standardDocGroupDto);
                         standardDocGroupDto.setGroupLevel(level);
-                        standardDocGroupDto.setStandardDocDTOList(standardDocs);
-                        if(ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())){
-                            StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
-                            standardDocGroupDto.setParentGroupCode(groupDTO.getGroupCode());
-                        }
-                        standardDocGroupDTOList.add(standardDocGroupDto);
-                        if(ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())){
-                            findParentGroups(standardGroupDTO.getParentGroupId(),standardDocGroupDTOList,level);
+                        //处理导出的分组sheet中重复的分组
+                        if(CollectionUtils.isNotEmpty(standardDocGroupDTOList)){
+                            boolean notExistFlag = true;
+                            for (StandardDocGroupDTO docGroupDTO : standardDocGroupDTOList) {
+                                if(docGroupDTO.getGroupCode().equals(standardDocDTO.getGroupCode())){
+                                    notExistFlag = false;
+                                    List<StandardDocDTO> standardDocDTOList = docGroupDTO.getStandardDocDTOList();
+                                    standardDocDTOList.addAll(standardDocs);
+                                    docGroupDTO.setStandardDocDTOList(standardDocDTOList);
+                                }
+                            }
+                            if(notExistFlag){
+                                handleStandardDocGroupDto(standardDocGroupDto,standardDocs,standardGroupDTO,standardDocGroupDTOList,level);
+                            }
+                        }else {
+                            handleStandardDocGroupDto(standardDocGroupDto,standardDocs,standardGroupDTO,standardDocGroupDTOList,level);
                         }
                     }
                 }
@@ -347,6 +355,18 @@ public class StandardDocServiceImpl implements StandardDocService {
                 }
             });
             return standardDocGroupDTOList.stream().sorted(Comparator.comparing(StandardDocGroupDTO::getGroupLevel)).collect(Collectors.toList());
+        }
+    }
+
+    private void handleStandardDocGroupDto(StandardDocGroupDTO standardDocGroupDto, List<StandardDocDTO> standardDocs, StandardGroupDTO standardGroupDTO, List<StandardDocGroupDTO> standardDocGroupDTOList, int level) {
+        standardDocGroupDto.setStandardDocDTOList(standardDocs);
+        if(ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())){
+            StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
+            standardDocGroupDto.setParentGroupCode(groupDTO.getGroupCode());
+        }
+        standardDocGroupDTOList.add(standardDocGroupDto);
+        if(ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())){
+            findParentGroups(standardGroupDTO.getParentGroupId(),standardDocGroupDTOList,level);
         }
     }
 

@@ -20,7 +20,6 @@ import com.hand.hdsp.quality.infra.util.StandardHandler;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -443,15 +442,22 @@ public class DataFieldServiceImpl implements DataFieldService {
                     if (CollectionUtils.isNotEmpty(standardGroupDTOS)) {
                         StandardGroupDTO standardGroupDTO = standardGroupDTOS.get(0);
                         dataFieldGroupDto.setGroupLevel(level);
-                        dataFieldGroupDto.setDataFieldDTOList(dataFields);
-                        BeanUtils.copyProperties(standardGroupDTO, dataFieldGroupDto);
-                        if (ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())) {
-                            StandardGroupDTO parentGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
-                            dataFieldGroupDto.setParentGroupCode(parentGroupDTO.getGroupCode());
-                        }
-                        dataFieldGroupDTOList.add(dataFieldGroupDto);
-                        if (ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())) {
-                            findParentGroups(standardGroupDTO.getParentGroupId(), dataFieldGroupDTOList, level);
+                        //处理导出的分组sheet中重复的分组
+                        if(CollectionUtils.isNotEmpty(dataFieldGroupDTOList)){
+                            boolean notExistFlag = true;
+                            for (DataFieldGroupDTO fieldGroupDTO : dataFieldGroupDTOList) {
+                                if(fieldGroupDTO.getGroupCode().equals(dataFieldDTO.getGroupCode())){
+                                    notExistFlag=false;
+                                    List<DataFieldDTO> dataFieldDTOList = fieldGroupDTO.getDataFieldDTOList();
+                                    dataFieldDTOList.addAll(dataFields);
+                                    fieldGroupDTO.setDataFieldDTOList(dataFieldDTOList);
+                                }
+                            }
+                            if(notExistFlag){
+                                handleFieldGroupDto(dataFieldGroupDto,dataFields,standardGroupDTO,dataFieldGroupDTOList,level);
+                            }
+                        }else {
+                            handleFieldGroupDto(dataFieldGroupDto,dataFields,standardGroupDTO,dataFieldGroupDTOList, level);
                         }
                     }
                 }
@@ -540,6 +546,19 @@ public class DataFieldServiceImpl implements DataFieldService {
                 }
             });
             return dataFieldGroupDTOList.stream().sorted(Comparator.comparing(DataFieldGroupDTO::getGroupLevel)).collect(Collectors.toList());
+        }
+    }
+
+    private void handleFieldGroupDto(DataFieldGroupDTO dataFieldGroupDto, List<DataFieldDTO> dataFields, StandardGroupDTO standardGroupDTO, List<DataFieldGroupDTO> dataFieldGroupDTOList, int level) {
+        dataFieldGroupDto.setDataFieldDTOList(dataFields);
+        BeanUtils.copyProperties(standardGroupDTO, dataFieldGroupDto);
+        if (ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())) {
+            StandardGroupDTO parentGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
+            dataFieldGroupDto.setParentGroupCode(parentGroupDTO.getGroupCode());
+        }
+        dataFieldGroupDTOList.add(dataFieldGroupDto);
+        if (ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())) {
+            findParentGroups(standardGroupDTO.getParentGroupId(), dataFieldGroupDTOList, level);
         }
     }
 
