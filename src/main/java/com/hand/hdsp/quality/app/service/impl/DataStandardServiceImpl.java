@@ -21,7 +21,6 @@ import com.hand.hdsp.quality.infra.util.ValueRangeHandler;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -642,14 +641,22 @@ public class DataStandardServiceImpl implements DataStandardService {
                         StandardGroupDTO standardGroupDTO = standardGroupDTOS.get(0);
                         BeanUtils.copyProperties(standardGroupDTO,standardGroupDto);
                         standardGroupDto.setGroupLevel(level);
-                        standardGroupDto.setDataStandardDTOList(dataStandards);
-                        if(ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())){
-                            StandardGroupDTO parentGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
-                            standardGroupDto.setParentGroupCode(parentGroupDTO.getGroupCode());
-                        }
-                        dataStandardGroupDTOList.add(standardGroupDto);
-                        if(ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())){
-                            findParentGroups(standardGroupDTO.getParentGroupId(),dataStandardGroupDTOList,level);
+                        //处理导出的分组sheet重复的分组
+                        if (CollectionUtils.isNotEmpty(dataStandardGroupDTOList)) {
+                            boolean notExistFlag = true;
+                            for (DataStandardGroupDTO groupDTO : dataStandardGroupDTOList) {
+                                if (groupDTO.getGroupCode().equals(dataStandardDTO.getGroupCode())) {
+                                    notExistFlag=false;
+                                    List<DataStandardDTO> dataStandardDTOList = groupDTO.getDataStandardDTOList();
+                                    dataStandardDTOList.addAll(dataStandards);
+                                    groupDTO.setDataStandardDTOList(dataStandardDTOList);
+                                }
+                            }
+                            if(notExistFlag){
+                                handleStandardGroupDto(standardGroupDTO,dataStandardGroupDTOList,standardGroupDto,dataStandards,level);
+                            }
+                        }else {
+                            handleStandardGroupDto(standardGroupDTO,dataStandardGroupDTOList,standardGroupDto,dataStandards,level);
                         }
                     }
                 }
@@ -715,6 +722,18 @@ public class DataStandardServiceImpl implements DataStandardService {
                 }
             });
             return dataStandardGroupDTOList.stream().sorted(Comparator.comparing(DataStandardGroupDTO::getGroupLevel)).collect(Collectors.toList());
+        }
+    }
+
+    private void handleStandardGroupDto(StandardGroupDTO standardGroupDTO, List<DataStandardGroupDTO> dataStandardGroupDTOList, DataStandardGroupDTO standardGroupDto, List<DataStandardDTO> dataStandards, int level) {
+        if(ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())){
+            StandardGroupDTO parentGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
+            standardGroupDto.setParentGroupCode(parentGroupDTO.getGroupCode());
+        }
+        dataStandardGroupDTOList.add(standardGroupDto);
+        standardGroupDto.setDataStandardDTOList(dataStandards);
+        if(ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())){
+            findParentGroups(standardGroupDTO.getParentGroupId(),dataStandardGroupDTOList,level);
         }
     }
 
