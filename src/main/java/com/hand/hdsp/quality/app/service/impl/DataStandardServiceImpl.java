@@ -17,17 +17,34 @@ import com.hand.hdsp.quality.infra.util.DataLengthHandler;
 import com.hand.hdsp.quality.infra.util.DataPatternHandler;
 import com.hand.hdsp.quality.infra.util.StandardHandler;
 import com.hand.hdsp.quality.infra.util.ValueRangeHandler;
+import com.hand.hdsp.quality.workflow.adapter.DataStandardOfflineWorkflowAdapter;
+import com.hand.hdsp.quality.workflow.adapter.DataStandardOnlineWorkflowAdapter;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import javax.annotation.Resource;
+
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.*;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.RANGE;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.LengthType.FIXED;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
+
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
-import com.hand.hdsp.workflow.common.infra.quality.DataStandardOfflineWorkflowAdapter;
-import com.hand.hdsp.workflow.common.infra.quality.DataStandardOnlineWorkflowAdapter;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.driver.infra.util.PageUtil;
 import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
@@ -45,22 +62,6 @@ import org.hzero.starter.driver.core.infra.meta.Table;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.hzero.starter.driver.core.infra.util.PageParseUtil;
 import org.hzero.starter.driver.core.session.DriverSession;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.Resource;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.*;
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.RANGE;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.LengthType.FIXED;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
 /**
  * <p>
@@ -126,8 +127,6 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     private final DataStandardOfflineWorkflowAdapter dataStandardOfflineWorkflowAdapter;
 
-    private final DataStandardService dataStandardService;
-
     @Autowired
     private WorkflowClient workflowClient;
 
@@ -162,7 +161,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                                    StandardApprovalRepository standardApprovalRepository,
                                    StandardApprovalMapper standardApprovalMapper,
                                    DataStandardOnlineWorkflowAdapter dataStandardOnlineWorkflowAdapter,
-                                   DataStandardOfflineWorkflowAdapter dataStandardOfflineWorkflowAdapter, DataStandardService dataStandardService) {
+                                   DataStandardOfflineWorkflowAdapter dataStandardOfflineWorkflowAdapter) {
         this.dataStandardRepository = dataStandardRepository;
         this.dataStandardVersionRepository = dataStandardVersionRepository;
         this.standardExtraRepository = standardExtraRepository;
@@ -185,7 +184,6 @@ public class DataStandardServiceImpl implements DataStandardService {
         this.standardApprovalMapper = standardApprovalMapper;
         this.dataStandardOnlineWorkflowAdapter = dataStandardOnlineWorkflowAdapter;
         this.dataStandardOfflineWorkflowAdapter = dataStandardOfflineWorkflowAdapter;
-        this.dataStandardService = dataStandardService;
     }
 
 
@@ -986,7 +984,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                 dataStandardDTO.setStandardStatus(ONLINE);
                 dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS);
                 //存版本表
-                dataStandardService.doVersion(dataStandardDTO);
+                doVersion(dataStandardDTO);
                 //1.数据标准没有关联评估方案，直接发布，不做处理
                 //2.数据标准关联了评估方案，第一次发布，则落标到数据质量生成规则
                 //3.数据标准关联了评估方案，不是第一发布，则更新落标到数据质量的规则
@@ -1002,7 +1000,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                     List<StandardAimDTO> aimDTOS = standardAimDTOS.stream()
                             .filter(s -> Objects.nonNull(s.getPlanId()))
                             .collect(Collectors.toList());
-                    dataStandardService.publishRelatePlan(aimDTOS);
+                    publishRelatePlan(aimDTOS);
                 }
                 assetFeign.saveStandardToEs(dataStandardDTO.getTenantId(), dataStandardDTO);
             }
@@ -1041,7 +1039,8 @@ public class DataStandardServiceImpl implements DataStandardService {
      * @param dataStandardCode
      * @param status
      */
-    private void workflowing(Long tenantId, String dataStandardCode, String status) {
+    @Override
+    public void workflowing(Long tenantId, String dataStandardCode, String status) {
         List<DataStandardDTO> standardDTOS = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(DataStandard.FIELD_TENANT_ID, tenantId)

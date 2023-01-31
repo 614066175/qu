@@ -94,10 +94,10 @@ public interface RootService {
     /**
      * 查找责任人审批
      *
-     * @param rootId
+     * @param chargeId
      * @return
      */
-    List<AssigneeUserDTO> findCharger(Long rootId);
+    List<AssigneeUserDTO> findCharger(Long chargeId);
 
     /**
      * 词根申请信息

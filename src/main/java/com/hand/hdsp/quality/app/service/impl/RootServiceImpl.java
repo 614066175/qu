@@ -12,15 +12,9 @@ import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.mapper.StandardApprovalMapper;
 import com.hand.hdsp.quality.infra.util.AnsjUtil;
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
 import com.hand.hdsp.quality.infra.workflow.DefaultRootOfflineWorkflowAdapter;
-import com.hand.hdsp.workflow.common.infra.quality.RootOfflineWorkflowAdapter;
-import com.hand.hdsp.workflow.common.infra.quality.RootOnlineWorkflowAdapter;
+import com.hand.hdsp.quality.workflow.adapter.RootOfflineWorkflowAdapter;
+import com.hand.hdsp.quality.workflow.adapter.RootOnlineWorkflowAdapter;
 import lombok.extern.slf4j.Slf4j;
 import org.ansj.domain.Result;
 import org.ansj.domain.Term;
@@ -28,16 +22,6 @@ import org.ansj.splitWord.analysis.DicAnalysis;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
-import org.hzero.boot.platform.plugin.hr.entity.Employee;
-import org.hzero.boot.platform.profile.ProfileClient;
-import org.hzero.boot.workflow.WorkflowClient;
-import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
-import org.hzero.export.vo.ExportParam;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.helper.DataSecurityHelper;
-import org.hzero.mybatis.util.Sqls;
-
 import org.apache.logging.log4j.util.Strings;
 import org.nlpcn.commons.lang.tire.domain.Forest;
 import org.nlpcn.commons.lang.tire.library.Library;
@@ -53,6 +37,22 @@ import java.util.stream.Collectors;
 
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.ROOT;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
+
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
+import org.hzero.boot.platform.plugin.hr.entity.Employee;
+import org.hzero.boot.platform.profile.ProfileClient;
+import org.hzero.boot.workflow.WorkflowClient;
+import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
+import org.hzero.export.vo.ExportParam;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
+import org.hzero.mybatis.util.Sqls;
 
 /**
  * 词根应用服务默认实现
@@ -397,14 +397,9 @@ public class RootServiceImpl implements RootService {
     }
 
     @Override
-    public List<AssigneeUserDTO> findCharger(Long rootId) {
-        Root root = rootRepository.selectByPrimaryKey(rootId);
-        if (root != null) {
-            AssigneeUserDTO assigneeUserDTO = rootRepository.getAssigneeUser(root.getChargeId());
-            return Collections.singletonList(assigneeUserDTO);
-        } else {
-            throw new CommonException(ErrorCode.NOT_FIND_VALUE);
-        }
+    public List<AssigneeUserDTO> findCharger(Long chargeId) {
+        AssigneeUserDTO assigneeUserDTO = rootRepository.getAssigneeUser(chargeId);
+        return Collections.singletonList(assigneeUserDTO);
     }
 
     @Override

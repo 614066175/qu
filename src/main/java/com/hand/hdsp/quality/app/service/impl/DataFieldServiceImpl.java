@@ -16,8 +16,8 @@ import com.hand.hdsp.quality.infra.mapper.StandardApprovalMapper;
 import com.hand.hdsp.quality.infra.statistic.validator.StatisticValidator;
 import com.hand.hdsp.quality.infra.util.CustomThreadPool;
 import com.hand.hdsp.quality.infra.util.StandardHandler;
-import com.hand.hdsp.workflow.common.infra.quality.DataFieldOfflineWorkflowAdapter;
-import com.hand.hdsp.workflow.common.infra.quality.DataFieldOnlineWorkflowAdapter;
+import com.hand.hdsp.quality.workflow.adapter.DataFieldOfflineWorkflowAdapter;
+import com.hand.hdsp.quality.workflow.adapter.DataFieldOnlineWorkflowAdapter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -863,7 +863,8 @@ public class DataFieldServiceImpl implements DataFieldService {
      * @param fieldId
      * @param status
      */
-    private void workflowing(Long tenantId, Long fieldId, String status) {
+    @Override
+    public void workflowing(Long tenantId, Long fieldId, String status) {
         DataFieldDTO dataFieldDTO = dataFieldRepository.selectDTOByPrimaryKey(
                 DataFieldDTO.builder().fieldId(fieldId).tenantId(tenantId).build()
         );

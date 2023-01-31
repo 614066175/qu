@@ -3,15 +3,17 @@ package com.hand.hdsp.quality.infra.workflow;
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.StandardApprovalDTO;
 import com.hand.hdsp.quality.app.service.StandardApprovalService;
+import com.hand.hdsp.quality.app.service.impl.StandardApprovalServiceImpl;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
-import com.hand.hdsp.workflow.common.infra.quality.DataFieldOnlineWorkflowAdapter;
+import com.hand.hdsp.quality.infra.util.ApplicationContextUtil;
+import com.hand.hdsp.quality.workflow.adapter.DataFieldOnlineWorkflowAdapter;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.ONLINE;
 
 import io.choerodon.core.oauth.DetailsHelper;
 
@@ -26,16 +28,15 @@ import org.hzero.boot.workflow.dto.RunInstance;
  */
 @Component
 public class DefaultDataFieldOnlineWorkflowAdapter implements DataFieldOnlineWorkflowAdapter<DataFieldDTO,DataFieldDTO,Long,String> {
-    private final StandardApprovalService standardApprovalService;
     private final WorkflowClient workflowClient;
 
-    public DefaultDataFieldOnlineWorkflowAdapter(StandardApprovalService standardApprovalService, WorkflowClient workflowClient) {
-        this.standardApprovalService = standardApprovalService;
+    public DefaultDataFieldOnlineWorkflowAdapter(WorkflowClient workflowClient) {
         this.workflowClient = workflowClient;
     }
 
     @Override
     public DataFieldDTO startWorkflow(DataFieldDTO dataFieldDTO) {
+        StandardApprovalServiceImpl standardApprovalService = ApplicationContextUtil.findBean(StandardApprovalServiceImpl.class);
         Long userId = DetailsHelper.getUserDetails().getUserId();
         StandardApprovalDTO standardApprovalDTO = StandardApprovalDTO
                 .builder()

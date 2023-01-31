@@ -3,18 +3,19 @@ package com.hand.hdsp.quality.infra.workflow;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.api.dto.StandardApprovalDTO;
 import com.hand.hdsp.quality.app.service.StandardApprovalService;
+import com.hand.hdsp.quality.app.service.impl.StandardApprovalServiceImpl;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.feign.AssetFeign;
-import com.hand.hdsp.workflow.common.infra.quality.DataStandardOfflineWorkflowAdapter;
+import com.hand.hdsp.quality.infra.util.ApplicationContextUtil;
+import com.hand.hdsp.quality.workflow.adapter.DataStandardOfflineWorkflowAdapter;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
 import javax.annotation.Resource;
 
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.OFFLINE;
 
 import io.choerodon.core.oauth.DetailsHelper;
 
@@ -30,20 +31,18 @@ import org.hzero.boot.workflow.dto.RunInstance;
 @Component
 public class DefaultDataStandardOfflineWorkflowAdapter implements DataStandardOfflineWorkflowAdapter<DataStandardDTO,DataStandardDTO,String,String> {
 
-    private final StandardApprovalService standardApprovalService;
-
     private final WorkflowClient workflowClient;
 
     @Resource
     private AssetFeign assetFeign;
 
-    public DefaultDataStandardOfflineWorkflowAdapter(StandardApprovalService standardApprovalService, WorkflowClient workflowClient) {
-        this.standardApprovalService = standardApprovalService;
+    public DefaultDataStandardOfflineWorkflowAdapter(WorkflowClient workflowClient) {
         this.workflowClient = workflowClient;
     }
 
     @Override
     public DataStandardDTO startWorkflow(DataStandardDTO dataStandardDTO) {
+        StandardApprovalServiceImpl standardApprovalService = ApplicationContextUtil.findBean(StandardApprovalServiceImpl.class);
         Long userId = DetailsHelper.getUserDetails().getUserId();
         StandardApprovalDTO standardApprovalDTO = StandardApprovalDTO
                 .builder()

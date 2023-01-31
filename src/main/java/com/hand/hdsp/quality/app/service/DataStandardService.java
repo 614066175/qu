@@ -189,4 +189,13 @@ public interface DataStandardService {
      * @param aimDTOS List<StandardAimDTO>
      */
     void publishRelatePlan(List<StandardAimDTO> aimDTOS);
+
+    /**
+     * 指定数据标准修改状态，供审批中，审批结束任务状态变更
+     *
+     * @param tenantId
+     * @param dataStandardCode
+     * @param status
+     */
+    void workflowing(Long tenantId, String dataStandardCode, String status);
 }

@@ -169,4 +169,13 @@ public interface DataFieldService {
      * @param dataFieldDTO
      */
     void doVersion(DataFieldDTO dataFieldDTO);
+
+    /**
+     * 指定字段标准修改状态，供审批中，审批结束任务状态变更
+     *
+     * @param tenantId
+     * @param fieldId
+     * @param status
+     */
+    void workflowing(Long tenantId, Long fieldId, String status);
 }

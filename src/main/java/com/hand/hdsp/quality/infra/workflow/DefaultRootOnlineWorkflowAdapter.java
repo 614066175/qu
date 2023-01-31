@@ -2,16 +2,19 @@ package com.hand.hdsp.quality.infra.workflow;
 
 import com.hand.hdsp.quality.api.dto.StandardApprovalDTO;
 import com.hand.hdsp.quality.app.service.StandardApprovalService;
+import com.hand.hdsp.quality.app.service.impl.StandardApprovalServiceImpl;
 import com.hand.hdsp.quality.domain.entity.Root;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
-import com.hand.hdsp.workflow.common.infra.quality.RootOnlineWorkflowAdapter;
+import com.hand.hdsp.quality.infra.util.ApplicationContextUtil;
+import com.hand.hdsp.quality.workflow.adapter.RootOnlineWorkflowAdapter;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.OFFLINE;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.ONLINE;
 
 import io.choerodon.core.oauth.DetailsHelper;
 
@@ -27,17 +30,16 @@ import org.hzero.boot.workflow.dto.RunInstance;
 @Component
 public class DefaultRootOnlineWorkflowAdapter implements RootOnlineWorkflowAdapter<Root,Root,Root,Root> {
 
-    private final StandardApprovalService standardApprovalService;
     private final WorkflowClient workflowClient;
 
 
-    public DefaultRootOnlineWorkflowAdapter(StandardApprovalService standardApprovalService, WorkflowClient workflowClient) {
-        this.standardApprovalService = standardApprovalService;
+    public DefaultRootOnlineWorkflowAdapter( WorkflowClient workflowClient) {
         this.workflowClient = workflowClient;
     }
 
     @Override
     public Root startWorkflow(Root root) {
+        StandardApprovalServiceImpl standardApprovalService = ApplicationContextUtil.findBean(StandardApprovalServiceImpl.class);
         Long userId = DetailsHelper.getUserDetails().getUserId();
         StandardApprovalDTO standardApprovalDTO = StandardApprovalDTO
                 .builder()
@@ -59,6 +61,7 @@ public class DefaultRootOnlineWorkflowAdapter implements RootOnlineWorkflowAdapt
         String bussinessKey = String.valueOf(System.currentTimeMillis());
         Map<String, Object> var = new HashMap<>();
         //给流程变量
+        var.put("rootId", root.getId());
         var.put("rootId", root.getId());
         var.put("approvalId", standardApprovalDTO.getApprovalId());
         //使用自研工作流客户端
