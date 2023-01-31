@@ -223,7 +223,7 @@ public class DataFieldController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping("/online-workflow-callback/{fieldId}")
+    @GetMapping("/online-workflow-callback/{fieldId}")
     public ResponseEntity<DataStandardDTO> onlineWorkflowCallback(@PathVariable(name = "organizationId") Long tenantId,
                                                                   @PathVariable Long fieldId,
                                                                   @RequestParam String nodeApproveResult) {
@@ -239,7 +239,7 @@ public class DataFieldController extends BaseController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping("/offline-workflow-callback/{fieldId}")
+    @GetMapping("/offline-workflow-callback/{fieldId}")
     public ResponseEntity<DataStandardDTO> offlineWorkflowCallback(@PathVariable(name = "organizationId") Long tenantId,
                                                                   @PathVariable Long fieldId,
                                                                   @RequestParam String nodeApproveResult) {
