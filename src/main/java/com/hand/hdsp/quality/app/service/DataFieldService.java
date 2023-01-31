@@ -85,52 +85,19 @@ public interface DataFieldService {
     List<DataFieldGroupDTO> export(DataFieldDTO dto, ExportParam exportParam);
 
     /**
-     * 上线通过事件
-     *
-     * @param tenantId
+     * 上线回调事件
      * @param fieldId
+     * @param nodeApproveResult
      */
-    void onlineWorkflowSuccess(Long tenantId, Long fieldId);
+    void onlineWorkflowCallback(Long fieldId,String nodeApproveResult);
 
     /**
-     * 上线拒绝事件
+     * 下线回调事件
      *
-     * @param tenantId
      * @param fieldId
+     * @param nodeApproveResult
      */
-    void onlineWorkflowFail(Long tenantId, Long fieldId);
-
-    /**
-     * 下线通过事件
-     *
-     * @param tenantId
-     * @param fieldId
-     */
-    void offlineWorkflowSuccess(Long tenantId, Long fieldId);
-
-    /**
-     * 上线拒绝事件
-     *
-     * @param tenantId
-     * @param fieldId
-     */
-    void offlineWorkflowFail(Long tenantId, Long fieldId);
-
-    /**
-     * 上线工作流审批中
-     *
-     * @param tenantId
-     * @param fieldId
-     */
-    void onlineWorkflowing(Long tenantId, Long fieldId);
-
-    /**
-     * 下线工作流审批中
-     *
-     * @param tenantId
-     * @param fieldId
-     */
-    void offlineWorkflowing(Long tenantId, Long fieldId);
+    void offlineWorkflowCallback(Long fieldId,String nodeApproveResult);
 
     /**
      * 查找责任人审批
@@ -196,4 +163,19 @@ public interface DataFieldService {
      * @return              字段标准信息
      */
     DataFieldDTO fieldInfo(Long tenantId, Long approvalId);
+
+    /**
+     * 版本记录
+     * @param dataFieldDTO
+     */
+    void doVersion(DataFieldDTO dataFieldDTO);
+
+    /**
+     * 指定字段标准修改状态，供审批中，审批结束任务状态变更
+     *
+     * @param tenantId
+     * @param fieldId
+     * @param status
+     */
+    void workflowing(Long tenantId, Long fieldId, String status);
 }

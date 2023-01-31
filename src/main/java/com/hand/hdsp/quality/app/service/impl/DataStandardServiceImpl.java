@@ -18,6 +18,8 @@ import com.hand.hdsp.quality.infra.util.DataLengthHandler;
 import com.hand.hdsp.quality.infra.util.DataPatternHandler;
 import com.hand.hdsp.quality.infra.util.StandardHandler;
 import com.hand.hdsp.quality.infra.util.ValueRangeHandler;
+import com.hand.hdsp.quality.workflow.adapter.DataStandardOfflineWorkflowAdapter;
+import com.hand.hdsp.quality.workflow.adapter.DataStandardOnlineWorkflowAdapter;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -26,12 +28,35 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import javax.annotation.Resource;
+
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.*;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.RANGE;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.LengthType.FIXED;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
+
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.driver.infra.util.PageUtil;
 import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
 import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
 import org.hzero.boot.platform.plugin.hr.entity.Employee;
 import org.hzero.boot.workflow.WorkflowClient;
+import org.hzero.boot.workflow.constant.WorkflowConstant;
 import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
 import org.hzero.boot.workflow.dto.RunInstance;
 import org.hzero.export.vo.ExportParam;
@@ -120,6 +145,10 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     private final StandardApprovalMapper standardApprovalMapper;
 
+    private final DataStandardOnlineWorkflowAdapter dataStandardOnlineWorkflowAdapter;
+
+    private final DataStandardOfflineWorkflowAdapter dataStandardOfflineWorkflowAdapter;
+
     @Autowired
     private WorkflowClient workflowClient;
 
@@ -152,7 +181,9 @@ public class DataStandardServiceImpl implements DataStandardService {
                                    StandardGroupRepository standardGroupRepository,
                                    StandardApprovalService standardApprovalService,
                                    StandardApprovalRepository standardApprovalRepository,
-                                   StandardApprovalMapper standardApprovalMapper) {
+                                   StandardApprovalMapper standardApprovalMapper,
+                                   DataStandardOnlineWorkflowAdapter dataStandardOnlineWorkflowAdapter,
+                                   DataStandardOfflineWorkflowAdapter dataStandardOfflineWorkflowAdapter) {
         this.dataStandardRepository = dataStandardRepository;
         this.dataStandardVersionRepository = dataStandardVersionRepository;
         this.standardExtraRepository = standardExtraRepository;
@@ -173,6 +204,8 @@ public class DataStandardServiceImpl implements DataStandardService {
         this.standardApprovalService = standardApprovalService;
         this.standardApprovalRepository = standardApprovalRepository;
         this.standardApprovalMapper = standardApprovalMapper;
+        this.dataStandardOnlineWorkflowAdapter = dataStandardOnlineWorkflowAdapter;
+        this.dataStandardOfflineWorkflowAdapter = dataStandardOfflineWorkflowAdapter;
     }
 
 
@@ -430,13 +463,16 @@ public class DataStandardServiceImpl implements DataStandardService {
             //开启工作流
             //根据上下线状态开启不同的工作流实例
             if (ONLINE.equals(dataStandardDTO.getStandardStatus())) {
-                this.workflowing(dataStandardDTO.getTenantId(), dataStandardDTO.getStandardCode(), ONLINE_APPROVING);
-                this.startWorkFlow(WorkFlowConstant.DataStandard.ONLINE_WORKFLOW_KEY, dataStandardDTO, ONLINE);
+                //修改状态
+                dataStandardDTO.setStandardStatus(ONLINE_APPROVING);
+                dataStandardOnlineWorkflowAdapter.startWorkflow(dataStandardDTO);
             }
             if (OFFLINE.equals(dataStandardDTO.getStandardStatus())) {
-                this.workflowing(dataStandardDTO.getTenantId(), dataStandardDTO.getStandardCode(), OFFLINE_APPROVING);
-                this.startWorkFlow(WorkFlowConstant.DataStandard.OFFLINE_WORKFLOW_KEY, dataStandardDTO, OFFLINE);
+                //修改状态
+                dataStandardDTO.setStandardStatus(OFFLINE_APPROVING);
+                dataStandardOfflineWorkflowAdapter.startWorkflow(dataStandardDTO);
             }
+            dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS);
         } else {
             //通用上线下线
             doPublishOrOff(dataStandardDTO);
@@ -484,7 +520,8 @@ public class DataStandardServiceImpl implements DataStandardService {
      *
      * @param aimDTOS List<StandardAimDTO>
      */
-    private void publishRelatePlan(List<StandardAimDTO> aimDTOS) {
+    @Override
+    public void publishRelatePlan(List<StandardAimDTO> aimDTOS) {
         if (CollectionUtils.isNotEmpty(aimDTOS)) {
             aimDTOS.forEach(standardAimDTO -> {
                 //判断落标是否已经关联到数据质量，如果已关联则更新（删除重建）
@@ -520,8 +557,8 @@ public class DataStandardServiceImpl implements DataStandardService {
             });
         }
     }
-
-    private void doVersion(DataStandardDTO dataStandardDTO) {
+    @Override
+    public void doVersion(DataStandardDTO dataStandardDTO) {
         Long lastVersion = DEFAULT_VERSION;
         List<DataStandardVersionDTO> dataStandardVersionDTOS = dataStandardVersionRepository.selectDTOByCondition(Condition.builder(DataStandardVersion.class)
                 .andWhere(Sqls.custom()
@@ -1007,76 +1044,67 @@ public class DataStandardServiceImpl implements DataStandardService {
     }
 
     @Override
-    public void onlineWorkflowSuccess(Long tenantId, String dataStandardCode) {
-        List<DataStandardDTO> standardDTOS = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
-                .andWhere(Sqls.custom()
-                        .andEqualTo(DataStandard.FIELD_TENANT_ID, tenantId)
-                        .andEqualTo(DataStandard.FIELD_STANDARD_CODE, dataStandardCode))
-                .build());
-        if (CollectionUtils.isNotEmpty(standardDTOS)) {
-            DataStandardDTO dataStandardDTO = standardDTOS.get(0);
-            dataStandardDTO.setStandardStatus(ONLINE);
-            dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS);
-            //存版本表
-            doVersion(dataStandardDTO);
-            //1.数据标准没有关联评估方案，直接发布，不做处理
-            //2.数据标准关联了评估方案，第一次发布，则落标到数据质量生成规则
-            //3.数据标准关联了评估方案，不是第一发布，则更新落标到数据质量的规则
-            //查看此标准落标表的情况
-            List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
+    public void onlineWorkflowCallback(String dataStandardCode,String nodeApproveResult) {
+        //工作流适配器回调
+        nodeApproveResult = (String)dataStandardOnlineWorkflowAdapter.callBack(dataStandardCode,nodeApproveResult);
+        if(WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)){
+            List<DataStandardDTO> standardDTOS = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                     .andWhere(Sqls.custom()
-                            .andEqualTo(StandardAim.FIELD_STANDARD_ID, dataStandardDTO.getStandardId())
-                            .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, DATA)
-                            .andEqualTo(StandardAim.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
+                            .andEqualTo(DataStandard.FIELD_TENANT_ID, DetailsHelper.getUserDetails().getTenantId())
+                            .andEqualTo(DataStandard.FIELD_STANDARD_CODE, dataStandardCode))
                     .build());
-            if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
-                //过滤出关联了评估方案的落标
-                List<StandardAimDTO> aimDTOS = standardAimDTOS.stream()
-                        .filter(s -> Objects.nonNull(s.getPlanId()))
-                        .collect(Collectors.toList());
-                publishRelatePlan(aimDTOS);
+            if (CollectionUtils.isNotEmpty(standardDTOS)) {
+                DataStandardDTO dataStandardDTO = standardDTOS.get(0);
+                dataStandardDTO.setStandardStatus(ONLINE);
+                dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS);
+                //存版本表
+                doVersion(dataStandardDTO);
+                //1.数据标准没有关联评估方案，直接发布，不做处理
+                //2.数据标准关联了评估方案，第一次发布，则落标到数据质量生成规则
+                //3.数据标准关联了评估方案，不是第一发布，则更新落标到数据质量的规则
+                //查看此标准落标表的情况
+                List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
+                        .andWhere(Sqls.custom()
+                                .andEqualTo(StandardAim.FIELD_STANDARD_ID, dataStandardDTO.getStandardId())
+                                .andEqualTo(StandardAim.FIELD_STANDARD_TYPE, DATA)
+                                .andEqualTo(StandardAim.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
+                        .build());
+                if (CollectionUtils.isNotEmpty(standardAimDTOS)) {
+                    //过滤出关联了评估方案的落标
+                    List<StandardAimDTO> aimDTOS = standardAimDTOS.stream()
+                            .filter(s -> Objects.nonNull(s.getPlanId()))
+                            .collect(Collectors.toList());
+                    publishRelatePlan(aimDTOS);
+                }
+                assetFeign.saveStandardToEs(dataStandardDTO.getTenantId(), dataStandardDTO);
             }
-            assetFeign.saveStandardToEs(dataStandardDTO.getTenantId(), dataStandardDTO);
+        }else{
+            //上线失败，修改发布审核中状态未离线
+            workflowing(DetailsHelper.getUserDetails().getTenantId(), dataStandardCode, OFFLINE);
         }
     }
 
     @Override
-    public void onlineWorkflowFail(Long tenantId, String dataStandardCode) {
-        //上线失败，修改发布审核中状态未离线
-        workflowing(tenantId, dataStandardCode, OFFLINE);
-    }
-
-    @Override
-    public void offlineWorkflowSuccess(Long tenantId, String dataStandardCode) {
-        List<DataStandardDTO> standardDTOS = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
-                .andWhere(Sqls.custom()
-                        .andEqualTo(DataStandard.FIELD_TENANT_ID, tenantId)
-                        .andEqualTo(DataStandard.FIELD_STANDARD_CODE, dataStandardCode))
-                .build());
-        if (CollectionUtils.isNotEmpty(standardDTOS)) {
-            DataStandardDTO dataStandardDTO = standardDTOS.get(0);
-            dataStandardDTO.setStandardStatus(OFFLINE);
-            dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS);
-            assetFeign.deleteStandardToEs(dataStandardDTO.getTenantId(), dataStandardDTO);
+    public void offlineWorkflowCallback(String dataStandardCode,String nodeApproveResult) {
+        //工作流适配器回调
+        nodeApproveResult = (String)dataStandardOfflineWorkflowAdapter.callBack(dataStandardCode,nodeApproveResult);
+        if(WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)) {
+            List<DataStandardDTO> standardDTOS = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
+                    .andWhere(Sqls.custom()
+                            .andEqualTo(DataStandard.FIELD_TENANT_ID, DetailsHelper.getUserDetails().getTenantId())
+                            .andEqualTo(DataStandard.FIELD_STANDARD_CODE, dataStandardCode))
+                    .build());
+            if (CollectionUtils.isNotEmpty(standardDTOS)) {
+                DataStandardDTO dataStandardDTO = standardDTOS.get(0);
+                dataStandardDTO.setStandardStatus(OFFLINE);
+                dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS);
+                assetFeign.deleteStandardToEs(dataStandardDTO.getTenantId(), dataStandardDTO);
+            }
+        }else{
+            //下线失败，修改发布审核中状态上线
+            workflowing(DetailsHelper.getUserDetails().getTenantId(), dataStandardCode, ONLINE);
         }
-
     }
-
-    @Override
-    public void offlineWorkflowFail(Long tenantId, String dataStandardCode) {
-        workflowing(tenantId, dataStandardCode, ONLINE);
-    }
-
-    @Override
-    public void offlineWorkflowing(Long tenantId, String dataStandardCode) {
-        workflowing(tenantId, dataStandardCode, OFFLINE_APPROVING);
-    }
-
-    @Override
-    public void onlineWorkflowing(Long tenantId, String dataStandardCode) {
-        workflowing(tenantId, dataStandardCode, ONLINE_APPROVING);
-    }
-
 
     /**
      * 指定数据标准修改状态，供审批中，审批结束任务状态变更
@@ -1085,7 +1113,8 @@ public class DataStandardServiceImpl implements DataStandardService {
      * @param dataStandardCode
      * @param status
      */
-    private void workflowing(Long tenantId, String dataStandardCode, String status) {
+    @Override
+    public void workflowing(Long tenantId, String dataStandardCode, String status) {
         List<DataStandardDTO> standardDTOS = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(DataStandard.FIELD_TENANT_ID, tenantId)
