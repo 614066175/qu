@@ -392,7 +392,7 @@ public class DataStandardController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping("/online-workflow-callback/{dataStandardCode}")
+    @GetMapping("/online-workflow-callback/{dataStandardCode}")
     public ResponseEntity<DataStandardDTO> onlineWorkflowCallback(@PathVariable(name = "organizationId") Long tenantId,
                                                                   @PathVariable String dataStandardCode,
                                                                   @RequestParam String nodeApproveResult) {
@@ -400,7 +400,7 @@ public class DataStandardController {
         return Results.success();
     }
 
-    @ApiOperation(value = "数据标准下线工作流发布回调事件接口")
+    @ApiOperation(value = "数据标准下线工作流回调事件接口")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -408,7 +408,7 @@ public class DataStandardController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping("/offline-workflow-callback/{dataStandardCode}")
+    @GetMapping("/offline-workflow-callback/{dataStandardCode}")
     public ResponseEntity<DataStandardDTO> offlineWorkflowCallback(@PathVariable(name = "organizationId") Long tenantId,
                                                                   @PathVariable String dataStandardCode,
                                                                   @RequestParam String nodeApproveResult) {
