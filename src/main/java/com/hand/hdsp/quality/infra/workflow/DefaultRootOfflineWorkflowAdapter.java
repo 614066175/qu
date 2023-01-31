@@ -60,7 +60,7 @@ public class DefaultRootOfflineWorkflowAdapter implements RootOfflineWorkflowAda
         Map<String, Object> var = new HashMap<>();
         //给流程变量
         var.put("rootId", root.getId());
-        var.put("rootId", root.getId());
+        var.put("chargeId", root.getChargeId());
         var.put("approvalId", standardApprovalDTO.getApprovalId());
         //使用自研工作流客户端
         RunInstance runInstance = workflowClient.startInstanceByFlowKey(root.getTenantId(),
