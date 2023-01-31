@@ -392,7 +392,7 @@ public class DataStandardController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/online-workflow-callback/{dataStandardCode}")
+    @PutMapping("/online-workflow-callback/{dataStandardCode}")
     public ResponseEntity<DataStandardDTO> onlineWorkflowCallback(@PathVariable(name = "organizationId") Long tenantId,
                                                                   @PathVariable String dataStandardCode,
                                                                   @RequestParam String nodeApproveResult) {
@@ -408,7 +408,7 @@ public class DataStandardController {
             required = true
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/offline-workflow-callback/{dataStandardCode}")
+    @PutMapping("/offline-workflow-callback/{dataStandardCode}")
     public ResponseEntity<DataStandardDTO> offlineWorkflowCallback(@PathVariable(name = "organizationId") Long tenantId,
                                                                   @PathVariable String dataStandardCode,
                                                                   @RequestParam String nodeApproveResult) {
