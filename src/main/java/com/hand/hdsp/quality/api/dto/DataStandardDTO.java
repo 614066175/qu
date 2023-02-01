@@ -13,6 +13,7 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -202,4 +203,12 @@ public class DataStandardDTO extends AuditDomain{
     @Transient
     private String exportIds;
 
+    @ApiModelProperty("发布人id")
+    private Long releaseBy;
+
+    @Transient
+    private String releaseByName;
+
+    @ApiModelProperty("发布时间")
+    private Date releaseDate;
 }

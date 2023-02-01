@@ -307,23 +307,9 @@ public class DataFieldServiceImpl implements DataFieldService {
             dataFieldDTO.setGroupArrays(groupIds);
         }
         List<DataFieldDTO> dataFieldDTOList = dataFieldMapper.list(dataFieldDTO);
-        dataFieldDTOList.forEach(dataFieldDto -> {
-            if (DataSecurityHelper.isTenantOpen()) {
-                //解密邮箱，电话
-                if (Strings.isNotEmpty(dataFieldDto.getChargeTel())) {
-                    dataFieldDto.setChargeTel(DataSecurityHelper.decrypt(dataFieldDto.getChargeTel()));
-                }
-                if (Strings.isNotEmpty(dataFieldDto.getChargeEmail())) {
-                    dataFieldDto.setChargeEmail(DataSecurityHelper.decrypt(dataFieldDto.getChargeEmail()));
-                }
-                if (Strings.isNotEmpty(dataFieldDto.getChargeDeptName())) {
-                    dataFieldDto.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldDto.getChargeDeptName()));
-                }
-                if (StringUtils.isNotEmpty(dataFieldDto.getChargeName())) {
-                    dataFieldDto.setChargeName(DataSecurityHelper.decrypt(dataFieldDto.getChargeName()));
-                }
-            }
-        });
+        for (DataFieldDTO dto : dataFieldDTOList) {
+            decodeForDataFieldDTO(dto);
+        }
         return PageParseUtil.springPage2C7nPage(PageUtil.doPage(dataFieldDTOList, org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize())));
     }
 
@@ -662,17 +648,20 @@ public class DataFieldServiceImpl implements DataFieldService {
      * @param dataFieldDTO
      */
     public void decodeForDataFieldDTO(DataFieldDTO dataFieldDTO) {
-        // 解密电话号码
-        if (StringUtils.isNotEmpty(dataFieldDTO.getChargeTel())) {
-            dataFieldDTO.setChargeTel(DataSecurityHelper.decrypt(dataFieldDTO.getChargeTel()));
-        }
-        // 解密邮箱地址
-        if (StringUtils.isNotEmpty(dataFieldDTO.getChargeEmail())) {
-            dataFieldDTO.setChargeEmail(DataSecurityHelper.decrypt(dataFieldDTO.getChargeEmail()));
-        }
-        // 解密部门名称
-        if (StringUtils.isNotEmpty(dataFieldDTO.getChargeDeptName())) {
-            dataFieldDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeDeptName()));
+        if (DataSecurityHelper.isTenantOpen()) {
+            //解密邮箱，电话
+            if (Strings.isNotEmpty(dataFieldDTO.getChargeTel())) {
+                dataFieldDTO.setChargeTel(DataSecurityHelper.decrypt(dataFieldDTO.getChargeTel()));
+            }
+            if (Strings.isNotEmpty(dataFieldDTO.getChargeEmail())) {
+                dataFieldDTO.setChargeEmail(DataSecurityHelper.decrypt(dataFieldDTO.getChargeEmail()));
+            }
+            if (Strings.isNotEmpty(dataFieldDTO.getChargeDeptName())) {
+                dataFieldDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeDeptName()));
+            }
+            if (StringUtils.isNotEmpty(dataFieldDTO.getChargeName())) {
+                dataFieldDTO.setChargeName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeName()));
+            }
         }
     }
 
@@ -946,8 +935,33 @@ public class DataFieldServiceImpl implements DataFieldService {
                 DataFieldDTO.builder().fieldId(fieldId).tenantId(tenantId).build()
         );
         if (dataFieldDTO != null) {
-            dataFieldDTO.setStandardStatus(status);
-            dataFieldRepository.updateDTOOptional(dataFieldDTO, DataStandard.FIELD_STANDARD_STATUS);
+            // 判断流程类型，当字段标准状态不为ONLINE且调用workflowing status传值ONLINE时则为发布上线
+            if (!ONLINE.equals(dataFieldDTO.getStandardStatus()) && ONLINE.equals(status)) {
+                List<StandardApprovalDTO> standardApprovalDTOS = standardApprovalRepository.selectDTOByCondition(Condition.builder(StandardApproval.class)
+                        .andWhere(Sqls.custom()
+                                .andEqualTo(StandardApproval.FIELD_TENANT_ID, tenantId)
+                                .andEqualTo(StandardApproval.FIELD_STANDARD_ID, fieldId)
+                                .andEqualTo(StandardApproval.FIELD_STANDARD_TYPE, FIELD)
+                                .andEqualTo(StandardApproval.FIELD_APPLY_TYPE, ONLINE))
+                        .build());
+                if (CollectionUtils.isNotEmpty(standardApprovalDTOS)) {
+                    StandardApprovalDTO tmepDto = standardApprovalDTOS.get(0);
+                    Long releaseBy = tmepDto.getCreatedBy();
+                    // 从申请记录表中获取发布人id
+                    for (StandardApprovalDTO standardApprovalDTO : standardApprovalDTOS) {
+                        if (standardApprovalDTO.getCreationDate().after(tmepDto.getCreationDate())) {
+                            releaseBy = standardApprovalDTO.getCreatedBy();
+                        }
+                    }
+                    dataFieldDTO.setReleaseBy(releaseBy);
+                    dataFieldDTO.setReleaseDate(new Date());
+                }
+                dataFieldDTO.setStandardStatus(status);
+                dataFieldRepository.updateDTOOptional(dataFieldDTO, DataField.FIELD_STANDARD_STATUS, DataField.FIELD_RELEASE_BY, DataField.FIELD_RELEASE_DATE);
+            } else {
+                dataFieldDTO.setStandardStatus(status);
+                dataFieldRepository.updateDTOOptional(dataFieldDTO, DataField.FIELD_STANDARD_STATUS);
+            }
             if (ONLINE.equals(status)) {
                 doVersion(dataFieldDTO);
             }

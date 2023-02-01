@@ -39,7 +39,9 @@
         ${prefix}.last_updated_by,
         ${prefix}.creation_date,
         ${prefix}.last_update_date,
-        ${prefix}.object_version_number
+        ${prefix}.object_version_number,
+        ${prefix}.release_by,
+        ${prefix}.release_date
     </sql>
 
     <select id="list" resultType="com.hand.hdsp.quality.domain.entity.RootVersion">
@@ -50,6 +52,7 @@
         he.email chargeEmail,
         he.mobile chargeTel,
         he.name chargeName,
+        iu_re.real_name releaseByName,
         hu.unit_name chargeDept,
         iu.real_name updaterName
         from
@@ -57,6 +60,7 @@
         left join hpfm_employee he on xrv.charge_id=he.employee_id
         left join hpfm_unit hu on xrv.charge_dept_id=hu.unit_id
         left join iam_user iu on xrv.last_updated_by=iu.id
+        left join iam_user iu_re on xrv.release_by=iu_re.id
         <where>
             <if test="tenantId != null">
                 and xrv.tenant_id = #{tenantId}

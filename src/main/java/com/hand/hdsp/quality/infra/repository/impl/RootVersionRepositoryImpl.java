@@ -7,6 +7,7 @@ import com.hand.hdsp.quality.domain.entity.Root;
 import com.hand.hdsp.quality.domain.entity.RootVersion;
 import com.hand.hdsp.quality.domain.repository.RootVersionRepository;
 import com.hand.hdsp.quality.infra.mapper.RootVersionMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -31,13 +32,8 @@ public class RootVersionRepositoryImpl extends BaseRepositoryImpl<RootVersion, R
     @Override
     public List<RootVersion> list(RootVersion rootVersion) {
         List<RootVersion> list = rootVersionMapper.list(rootVersion);
-        if(DataSecurityHelper.isTenantOpen()){
-            for(RootVersion tmp:list){
-                tmp.setChargeDept(DataSecurityUtil.decrypt(tmp.getChargeDept()));
-                tmp.setChargeTel(DataSecurityUtil.decrypt(tmp.getChargeTel()));
-                tmp.setChargeEmail(DataSecurityUtil.decrypt(tmp.getChargeEmail()));
-                tmp.setChargeName(DataSecurityUtil.decrypt(tmp.getChargeName()));
-            }
+        for (RootVersion temp : list) {
+            decodeForRootVersion(temp);
         }
         return list;
     }
@@ -45,12 +41,33 @@ public class RootVersionRepositoryImpl extends BaseRepositoryImpl<RootVersion, R
     @Override
     public RootVersion detail(Long id) {
         RootVersion result = rootVersionMapper.detail(id);
-        if(DataSecurityHelper.isTenantOpen()){
-            result.setChargeDept(DataSecurityUtil.decrypt(result.getChargeDept()));
-            result.setChargeTel(DataSecurityUtil.decrypt(result.getChargeTel()));
-            result.setChargeEmail(DataSecurityUtil.decrypt(result.getChargeEmail()));
-            result.setChargeName(DataSecurityUtil.decrypt(result.getChargeName()));
-        }
+        decodeForRootVersion(result);
         return result;
+    }
+
+    /**
+     * 解密
+     *
+     * @param rootVersion
+     */
+    private void decodeForRootVersion(RootVersion rootVersion) {
+        if (DataSecurityHelper.isTenantOpen()) {
+            // 责任部门
+            if (StringUtils.isNotEmpty(rootVersion.getChargeDept())) {
+                rootVersion.setChargeDept(DataSecurityHelper.decrypt(rootVersion.getChargeDept()));
+            }
+            // 责任人电话
+            if (StringUtils.isNotEmpty(rootVersion.getChargeTel())) {
+                rootVersion.setChargeTel(DataSecurityHelper.decrypt(rootVersion.getChargeTel()));
+            }
+            // 责任人邮箱
+            if (StringUtils.isNotEmpty(rootVersion.getChargeEmail())) {
+                rootVersion.setChargeEmail(DataSecurityHelper.decrypt(rootVersion.getChargeEmail()));
+            }
+            // 责任人姓名
+            if (StringUtils.isNotEmpty(rootVersion.getChargeName())) {
+                rootVersion.setChargeName(DataSecurityHelper.decrypt(rootVersion.getChargeName()));
+            }
+        }
     }
 }
