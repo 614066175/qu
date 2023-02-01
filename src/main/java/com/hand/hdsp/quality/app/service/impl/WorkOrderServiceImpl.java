@@ -1,7 +1,6 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 import com.google.common.base.Strings;
-import com.hand.hdsp.message.common.infra.quality.WorkOrderMessageAdapter;
 import com.hand.hdsp.quality.api.dto.WorkOrderDTO;
 import com.hand.hdsp.quality.api.dto.WorkOrderOperationDTO;
 import com.hand.hdsp.quality.app.service.WorkOrderService;
@@ -20,6 +19,8 @@ import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import com.hand.hdsp.quality.message.adapter.WorkOrderMessageAdapter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.message.MessageClient;

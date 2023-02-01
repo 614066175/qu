@@ -1,7 +1,7 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 import com.alibaba.druid.DbType;
-import com.hand.hdsp.message.common.infra.quality.BatchPlanMessageAdapter;
+import com.hand.hdsp.quality.message.adapter.BatchPlanMessageAdapter;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanService;
 import com.hand.hdsp.quality.domain.entity.*;

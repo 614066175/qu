@@ -1,10 +1,9 @@
 package com.hand.hdsp.quality.infra.message;
 
-import com.hand.hdsp.message.common.infra.quality.BatchPlanMessageAdapter;
+import com.hand.hdsp.quality.message.adapter.BatchPlanMessageAdapter;
 import org.springframework.stereotype.Component;
 
 import org.hzero.boot.alert.vo.InboundMessage;
-import org.hzero.boot.message.entity.MessageSender;
 
 /**
  * description

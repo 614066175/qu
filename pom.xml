@@ -44,7 +44,8 @@
         </dependency>
         <dependency>
             <groupId>com.hand.hdsp.adapter</groupId>
-            <artifactId>hdsp-message-adapter-common</artifactId>
+            <artifactId>hdsp-quality-message-adapter</artifactId>
+            <version>1.8.1-SNAPSHOT</version>
         </dependency>
 
         <!-- hdsp starter -->
