@@ -1,6 +1,6 @@
 package com.hand.hdsp.quality.infra.message;
 
-import com.hand.hdsp.message.common.infra.quality.WorkOrderMessageAdapter;
+import com.hand.hdsp.quality.message.adapter.WorkOrderMessageAdapter;
 import org.springframework.stereotype.Component;
 
 import org.hzero.boot.message.entity.MessageSender;
