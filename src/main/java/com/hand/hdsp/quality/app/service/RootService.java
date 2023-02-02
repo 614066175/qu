@@ -133,4 +133,10 @@ public interface RootService {
      * @return
      */
     List<String> rootTranslate(Long tenantId, Long projectId, String word);
+
+    /**
+     * 版本记录
+     * @param root
+     */
+    void doVersion(Root root);
 }

@@ -19,6 +19,8 @@ import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import com.hand.hdsp.quality.message.adapter.WorkOrderMessageAdapter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.message.MessageClient;
@@ -49,6 +51,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
     private final WorkOrderMapper workOrderMapper;
     private final WorkOrderConverter workOrderConverter;
     private final MessageClient messageClient;
+    private final WorkOrderMessageAdapter workOrderMessageAdapter;
 
     public static final String WORK_ORDER_CODE = "XQUA.WORK_ORDER_CODE";
     private static final String GLOBAL = "GLOBAL";
@@ -73,13 +76,14 @@ public class WorkOrderServiceImpl implements WorkOrderService {
      */
     public static final String ORDER_FORWARD = "HDSP.XQUA.ORDER_FORWARD";
 
-    public WorkOrderServiceImpl(WorkOrderRepository workOrderRepository, WorkOrderOperationRepository workOrderOperationRepository, CodeRuleBuilder codeRuleBuilder, WorkOrderMapper workOrderMapper, WorkOrderConverter workOrderConverter, MessageClient messageClient) {
+    public WorkOrderServiceImpl(WorkOrderRepository workOrderRepository, WorkOrderOperationRepository workOrderOperationRepository, CodeRuleBuilder codeRuleBuilder, WorkOrderMapper workOrderMapper, WorkOrderConverter workOrderConverter, MessageClient messageClient, WorkOrderMessageAdapter workOrderMessageAdapter) {
         this.workOrderRepository = workOrderRepository;
         this.workOrderOperationRepository = workOrderOperationRepository;
         this.codeRuleBuilder = codeRuleBuilder;
         this.workOrderMapper = workOrderMapper;
         this.workOrderConverter = workOrderConverter;
         this.messageClient = messageClient;
+        this.workOrderMessageAdapter = workOrderMessageAdapter;
     }
 
     @Override
@@ -162,14 +166,17 @@ public class WorkOrderServiceImpl implements WorkOrderService {
             Map<String, String> args = new HashMap<>();
             args.put("workOrderCode", workOrderDTO.getWorkOrderCode());
             //发送自定义消息，可设置邮件/站内消息发送开关
-            messageClient.sendMessage(MessageSender.builder()
-                            .messageCode(messageTemplateCode)
-                            .serverCode(messageTemplateCode)
-                            .tenantId(userDetails.getTenantId())
-                            .receiverAddressList(Collections.singletonList(receiver))
-                            .args(args)
-                            .lang(ZH_CN.getLanguageTag())
-                    .build());
+            MessageSender messageSender = MessageSender.builder()
+                    .messageCode(messageTemplateCode)
+                    .serverCode(messageTemplateCode)
+                    .tenantId(userDetails.getTenantId())
+                    .receiverAddressList(Collections.singletonList(receiver))
+                    .args(args)
+                    .lang(ZH_CN.getLanguageTag())
+                    .build();
+            messageClient.sendMessage(messageSender);
+            //消息适配器
+            workOrderMessageAdapter.sendMessage(messageSender);
         }
     }
 
@@ -438,14 +445,17 @@ public class WorkOrderServiceImpl implements WorkOrderService {
         Map<String, String> args = new HashMap<>();
         args.put("workOrderCode", workOrderDTO.getWorkOrderCode());
         //发送自定义消息，可设置邮件/站内消息发送开关
-        messageClient.sendMessage(MessageSender.builder()
-                        .tenantId(workOrderDTO.getTenantId())
-                        .messageCode(ORDER_TODO)
-                        .serverCode(ORDER_TODO)
-                        .lang(ZH_CN.getLanguageTag())
-                        .receiverAddressList(Collections.singletonList(receiver))
-                        .args(args)
-                .build());
+        MessageSender messageSender = MessageSender.builder()
+                .tenantId(workOrderDTO.getTenantId())
+                .messageCode(ORDER_TODO)
+                .serverCode(ORDER_TODO)
+                .lang(ZH_CN.getLanguageTag())
+                .receiverAddressList(Collections.singletonList(receiver))
+                .args(args)
+                .build();
+        messageClient.sendMessage(messageSender);
+        //消息适配器
+        workOrderMessageAdapter.sendMessage(messageSender);
         return workOrderDTO;
     }
 
