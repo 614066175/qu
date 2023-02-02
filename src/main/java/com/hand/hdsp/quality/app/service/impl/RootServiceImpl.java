@@ -418,6 +418,27 @@ public class RootServiceImpl implements RootService {
             rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS);
 
             if (ONLINE.equals(root.getReleaseStatus())) {
+                List<StandardApprovalDTO> standardApprovalDTOS = standardApprovalRepository.selectDTOByCondition(Condition.builder(StandardApproval.class)
+                        .andWhere(Sqls.custom()
+                                .andEqualTo(StandardApproval.FIELD_TENANT_ID, root.getTenantId())
+                                .andEqualTo(StandardApproval.FIELD_STANDARD_ID, rootId)
+                                .andEqualTo(StandardApproval.FIELD_STANDARD_TYPE, ROOT)
+                                .andEqualTo(StandardApproval.FIELD_APPLY_TYPE, ONLINE))
+                        .build());
+                if (CollectionUtils.isNotEmpty(standardApprovalDTOS)) {
+                    StandardApprovalDTO tmepDto = standardApprovalDTOS.get(0);
+                    Long releaseBy = tmepDto.getCreatedBy();
+                    // 从申请记录表中获取发布人id
+                    for (StandardApprovalDTO standardApprovalDTO : standardApprovalDTOS) {
+                        if (standardApprovalDTO.getCreationDate().after(tmepDto.getCreationDate())) {
+                            releaseBy = standardApprovalDTO.getCreatedBy();
+                        }
+                    }
+                    root.setReleaseBy(releaseBy);
+                    root.setReleaseDate(new Date());
+                }
+                rootRepository.updateOptional(root, Root.FIELD_RELEASE_BY, Root.FIELD_RELEASE_DATE);
+
                 doVersion(root);
                 //上线后词库追加词根对应的中文
                 List<RootLine> rootLines = rootLineRepository.select(RootLine.builder().rootId(rootId).build());

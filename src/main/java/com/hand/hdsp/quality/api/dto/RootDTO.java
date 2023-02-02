@@ -132,4 +132,12 @@ public class RootDTO extends AuditDomain {
     public interface Group2 {
     }
 
+    @ApiModelProperty("发布人id")
+    private Long releaseBy;
+
+    @Transient
+    private String releaseByName;
+
+    @ApiModelProperty("发布时间")
+    private Date releaseDate;
 }

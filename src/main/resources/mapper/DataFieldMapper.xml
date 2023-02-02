@@ -58,7 +58,9 @@
         ${fs}.data_standard_id,
         ${fs}.null_flag,
         ${fs}.default_value,
-        ${fs}.project_id
+        ${fs}.project_id,
+        ${fs}.release_by,
+        ${fs}.release_date
     </sql>
 
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.DataFieldDTO">
@@ -71,6 +73,7 @@
         he.email chargeEmail,
         he.mobile chargeTel,
         he.name chargeName,
+        iu_re.real_name releaseByName,
         hu.unit_name chargeDeptName,
         xsg.group_name,
         xsg.group_code,
@@ -91,6 +94,7 @@
         left join iam_user iu3 on fs.created_by=iu3.id
         left join hpfm_unit hu on hu.unit_id=fs.charge_dept_id
         left join hpfm_employee he on he.employee_id=fs.charge_id
+        left join iam_user iu_re on fs.release_by=iu_re.id
         <if test='datasourceType == "ORACLE"'>
             LEFT JOIN (
             SELECT

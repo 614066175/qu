@@ -9,6 +9,8 @@ import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 import lombok.*;
 
+import java.util.Date;
+
 /**
  * <p>数据标准版本表实体</p>
  *
@@ -44,6 +46,8 @@ public class DataStandardVersion extends AuditDomain {
     public static final String FIELD_CHARGE_EMAIL = "chargeEmail";
     public static final String FIELD_VERSION_NUMBER = "versionNumber";
     public static final String FIELD_TENANT_ID = "tenantId";
+    public static final String FIELD_RELEASE_BY = "releaseBy";
+    public static final String FIELD_RELEASE_DATE = "releaseDate";
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -97,4 +101,7 @@ public class DataStandardVersion extends AuditDomain {
 
     private Long projectId;
 
+    private Long releaseBy;
+
+    private Date releaseDate;
 }

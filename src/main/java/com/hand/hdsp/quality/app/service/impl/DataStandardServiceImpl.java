@@ -1056,7 +1056,27 @@ public class DataStandardServiceImpl implements DataStandardService {
             if (CollectionUtils.isNotEmpty(standardDTOS)) {
                 DataStandardDTO dataStandardDTO = standardDTOS.get(0);
                 dataStandardDTO.setStandardStatus(ONLINE);
-                dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS);
+                List<StandardApprovalDTO> standardApprovalDTOS = standardApprovalRepository.selectDTOByCondition(Condition.builder(StandardApproval.class)
+                        .andWhere(Sqls.custom()
+                                .andEqualTo(StandardApproval.FIELD_TENANT_ID, tenantId)
+                                .andEqualTo(StandardApproval.FIELD_STANDARD_ID, dataStandardDTO.getStandardId())
+                                .andEqualTo(StandardApproval.FIELD_STANDARD_TYPE, DATA)
+                                .andEqualTo(StandardApproval.FIELD_APPLY_TYPE, ONLINE))
+                        .build());
+                if (CollectionUtils.isNotEmpty(standardApprovalDTOS)) {
+                    StandardApprovalDTO tmepDto = standardApprovalDTOS.get(0);
+                    Long releaseBy = tmepDto.getCreatedBy();
+                    // 从申请记录表中获取发布人id
+                    for (StandardApprovalDTO standardApprovalDTO : standardApprovalDTOS) {
+                        if (standardApprovalDTO.getCreationDate().after(tmepDto.getCreationDate())) {
+                            releaseBy = standardApprovalDTO.getCreatedBy();
+                        }
+                    }
+                    dataStandardDTO.setReleaseBy(releaseBy);
+                    dataStandardDTO.setReleaseDate(new Date());
+                }
+
+                dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS, DataStandard.FIELD_RELEASE_BY, DataStandard.FIELD_RELEASE_DATE);
                 //存版本表
                 doVersion(dataStandardDTO);
                 //1.数据标准没有关联评估方案，直接发布，不做处理
