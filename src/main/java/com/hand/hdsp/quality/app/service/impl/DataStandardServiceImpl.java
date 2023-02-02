@@ -1058,7 +1058,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                 dataStandardDTO.setStandardStatus(ONLINE);
                 List<StandardApprovalDTO> standardApprovalDTOS = standardApprovalRepository.selectDTOByCondition(Condition.builder(StandardApproval.class)
                         .andWhere(Sqls.custom()
-                                .andEqualTo(StandardApproval.FIELD_TENANT_ID, tenantId)
+                                .andEqualTo(StandardApproval.FIELD_TENANT_ID, DetailsHelper.getUserDetails().getTenantId())
                                 .andEqualTo(StandardApproval.FIELD_STANDARD_ID, dataStandardDTO.getStandardId())
                                 .andEqualTo(StandardApproval.FIELD_STANDARD_TYPE, DATA)
                                 .andEqualTo(StandardApproval.FIELD_APPLY_TYPE, ONLINE))
