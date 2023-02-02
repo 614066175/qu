@@ -16,38 +16,17 @@ import com.hand.hdsp.quality.infra.mapper.StandardApprovalMapper;
 import com.hand.hdsp.quality.infra.statistic.validator.StatisticValidator;
 import com.hand.hdsp.quality.infra.util.CustomThreadPool;
 import com.hand.hdsp.quality.infra.util.StandardHandler;
+import com.hand.hdsp.quality.workflow.adapter.DataFieldOfflineWorkflowAdapter;
+import com.hand.hdsp.quality.workflow.adapter.DataFieldOnlineWorkflowAdapter;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import com.hand.hdsp.quality.workflow.adapter.DataFieldOfflineWorkflowAdapter;
-import com.hand.hdsp.quality.workflow.adapter.DataFieldOnlineWorkflowAdapter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CountDownLatch;
-import java.util.stream.Collectors;
-
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
-
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.driver.infra.util.PageUtil;
 import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
@@ -76,7 +55,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
-
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 import static org.hzero.core.base.BaseConstants.Symbol.COMMA;
@@ -391,9 +369,12 @@ public class DataFieldServiceImpl implements DataFieldService {
             if (ONLINE.equals(dataFieldDTO.getStandardStatus())) {
                 //存版本表
                 doVersion(dataFieldDTO);
+                dataFieldDTO.setReleaseBy(DetailsHelper.getUserDetails().getUserId());
+                dataFieldDTO.setReleaseDate(new Date());
+                dataFieldRepository.updateDTOOptional(dataFieldDTO, DataField.FIELD_STANDARD_STATUS, DataField.FIELD_RELEASE_BY, DataField.FIELD_RELEASE_DATE);
             }
         }
-        dataFieldRepository.updateDTOOptional(dataFieldDTO, DataStandard.FIELD_STANDARD_STATUS);
+        dataFieldRepository.updateDTOOptional(dataFieldDTO, DataField.FIELD_STANDARD_STATUS);
     }
 
     @Override
@@ -424,21 +405,21 @@ public class DataFieldServiceImpl implements DataFieldService {
                         StandardGroupDTO standardGroupDTO = standardGroupDTOS.get(0);
                         dataFieldGroupDto.setGroupLevel(level);
                         //处理导出的分组sheet中重复的分组
-                        if(CollectionUtils.isNotEmpty(dataFieldGroupDTOList)){
+                        if (CollectionUtils.isNotEmpty(dataFieldGroupDTOList)) {
                             boolean notExistFlag = true;
                             for (DataFieldGroupDTO fieldGroupDTO : dataFieldGroupDTOList) {
-                                if(fieldGroupDTO.getGroupCode().equals(dataFieldDTO.getGroupCode())){
-                                    notExistFlag=false;
+                                if (fieldGroupDTO.getGroupCode().equals(dataFieldDTO.getGroupCode())) {
+                                    notExistFlag = false;
                                     List<DataFieldDTO> dataFieldDTOList = fieldGroupDTO.getDataFieldDTOList();
                                     dataFieldDTOList.addAll(dataFields);
                                     fieldGroupDTO.setDataFieldDTOList(dataFieldDTOList);
                                 }
                             }
-                            if(notExistFlag){
-                                handleFieldGroupDto(dataFieldGroupDto,dataFields,standardGroupDTO,dataFieldGroupDTOList,level);
+                            if (notExistFlag) {
+                                handleFieldGroupDto(dataFieldGroupDto, dataFields, standardGroupDTO, dataFieldGroupDTOList, level);
                             }
-                        }else {
-                            handleFieldGroupDto(dataFieldGroupDto,dataFields,standardGroupDTO,dataFieldGroupDTOList, level);
+                        } else {
+                            handleFieldGroupDto(dataFieldGroupDto, dataFields, standardGroupDTO, dataFieldGroupDTOList, level);
                         }
                     }
                 }
@@ -696,21 +677,21 @@ public class DataFieldServiceImpl implements DataFieldService {
     }
 
     @Override
-    public void onlineWorkflowCallback(Long fieldId,String nodeApproveResult) {
-        nodeApproveResult = (String) dataFieldOnlineWorkflowAdapter.callBack(fieldId,nodeApproveResult);
-        if(WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)){
+    public void onlineWorkflowCallback(Long fieldId, String nodeApproveResult) {
+        nodeApproveResult = (String) dataFieldOnlineWorkflowAdapter.callBack(fieldId, nodeApproveResult);
+        if (WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)) {
             workflowing(DetailsHelper.getUserDetails().getTenantId(), fieldId, ONLINE);
-        }else {
+        } else {
             workflowing(DetailsHelper.getUserDetails().getTenantId(), fieldId, OFFLINE);
         }
     }
 
     @Override
-    public void offlineWorkflowCallback(Long fieldId,String nodeApproveResult) {
-        nodeApproveResult = (String) dataFieldOfflineWorkflowAdapter.callBack(fieldId,nodeApproveResult);
-        if(WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)){
+    public void offlineWorkflowCallback(Long fieldId, String nodeApproveResult) {
+        nodeApproveResult = (String) dataFieldOfflineWorkflowAdapter.callBack(fieldId, nodeApproveResult);
+        if (WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)) {
             workflowing(DetailsHelper.getUserDetails().getTenantId(), fieldId, OFFLINE);
-        }else {
+        } else {
             workflowing(DetailsHelper.getUserDetails().getTenantId(), fieldId, ONLINE);
         }
     }
@@ -930,17 +911,11 @@ public class DataFieldServiceImpl implements DataFieldService {
                                 .andEqualTo(StandardApproval.FIELD_STANDARD_ID, fieldId)
                                 .andEqualTo(StandardApproval.FIELD_STANDARD_TYPE, FIELD)
                                 .andEqualTo(StandardApproval.FIELD_APPLY_TYPE, ONLINE))
+                                .orderByDesc(StandardApproval.FIELD_APPROVAL_ID)
                         .build());
                 if (CollectionUtils.isNotEmpty(standardApprovalDTOS)) {
-                    StandardApprovalDTO tmepDto = standardApprovalDTOS.get(0);
-                    Long releaseBy = tmepDto.getCreatedBy();
-                    // 从申请记录表中获取发布人id
-                    for (StandardApprovalDTO standardApprovalDTO : standardApprovalDTOS) {
-                        if (standardApprovalDTO.getCreationDate().after(tmepDto.getCreationDate())) {
-                            releaseBy = standardApprovalDTO.getCreatedBy();
-                        }
-                    }
-                    dataFieldDTO.setReleaseBy(releaseBy);
+                    StandardApprovalDTO standardApprovalDTO = standardApprovalDTOS.get(0);
+                    dataFieldDTO.setReleaseBy(standardApprovalDTO.getCreatedBy());
                     dataFieldDTO.setReleaseDate(new Date());
                 }
                 dataFieldDTO.setStandardStatus(status);

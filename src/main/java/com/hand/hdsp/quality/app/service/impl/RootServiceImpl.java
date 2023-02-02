@@ -5,7 +5,6 @@ import com.hand.hdsp.quality.api.dto.RootGroupDTO;
 import com.hand.hdsp.quality.api.dto.StandardApprovalDTO;
 import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.app.service.RootService;
-import com.hand.hdsp.quality.app.service.StandardApprovalService;
 import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
@@ -13,9 +12,13 @@ import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.mapper.StandardApprovalMapper;
 import com.hand.hdsp.quality.infra.util.AnsjUtil;
-import com.hand.hdsp.quality.infra.workflow.DefaultRootOfflineWorkflowAdapter;
 import com.hand.hdsp.quality.workflow.adapter.RootOfflineWorkflowAdapter;
 import com.hand.hdsp.quality.workflow.adapter.RootOnlineWorkflowAdapter;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.ansj.domain.Result;
 import org.ansj.domain.Term;
@@ -24,6 +27,15 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
+import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
+import org.hzero.boot.platform.plugin.hr.entity.Employee;
+import org.hzero.boot.platform.profile.ProfileClient;
+import org.hzero.boot.workflow.WorkflowClient;
+import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
+import org.hzero.export.vo.ExportParam;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
+import org.hzero.mybatis.util.Sqls;
 import org.nlpcn.commons.lang.tire.domain.Forest;
 import org.nlpcn.commons.lang.tire.library.Library;
 import org.springframework.beans.BeanUtils;
@@ -39,22 +51,6 @@ import java.util.stream.Collectors;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.ROOT;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 import static org.hzero.core.base.BaseConstants.Symbol.COMMA;
-
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
-import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
-import org.hzero.boot.platform.plugin.hr.entity.Employee;
-import org.hzero.boot.platform.profile.ProfileClient;
-import org.hzero.boot.workflow.WorkflowClient;
-import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
-import org.hzero.export.vo.ExportParam;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.helper.DataSecurityHelper;
-import org.hzero.mybatis.util.Sqls;
 
 /**
  * 词根应用服务默认实现
@@ -289,29 +285,28 @@ public class RootServiceImpl implements RootService {
                         BeanUtils.copyProperties(standardGroup, rootGroupDTO);
                         rootGroupDTO.setGroupLevel(level);
                         //处理导出的分组sheet中重复的分组
-                        if(CollectionUtils.isNotEmpty(rootGroupDTOS)){
+                        if (CollectionUtils.isNotEmpty(rootGroupDTOS)) {
                             boolean notExistFlag = true;
                             for (RootGroupDTO groupDTO : rootGroupDTOS) {
-                                if(groupDTO.getGroupCode().equals(baseRoot.getGroupCode())){
+                                if (groupDTO.getGroupCode().equals(baseRoot.getGroupCode())) {
                                     notExistFlag = false;
                                     List<Root> rootList = groupDTO.getRoots();
                                     rootList.addAll(roots);
                                     groupDTO.setRoots(rootList);
                                 }
                             }
-                            if(notExistFlag){
-                                handleRootGroupDTO(rootGroupDTO,roots,rootGroupDTOS,level);
+                            if (notExistFlag) {
+                                handleRootGroupDTO(rootGroupDTO, roots, rootGroupDTOS, level);
 
                             }
-                        }else {
-                            handleRootGroupDTO(rootGroupDTO,roots,rootGroupDTOS,level);
+                        } else {
+                            handleRootGroupDTO(rootGroupDTO, roots, rootGroupDTOS, level);
                         }
                     }
                 }
             }
             return rootGroupDTOS.stream().sorted(Comparator.comparing(RootGroupDTO::getGroupLevel)).collect(Collectors.toList());
-        }
-        else if (ObjectUtils.isNotEmpty(root.getGroupId())) {
+        } else if (ObjectUtils.isNotEmpty(root.getGroupId())) {
             //分组条件导出
             StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
                     .andEqualTo(StandardGroup.FIELD_TENANT_ID, root.getTenantId())
@@ -404,6 +399,10 @@ public class RootServiceImpl implements RootService {
             if (ONLINE.equals(root.getReleaseStatus())) {
                 //存版本表
                 doVersion(root);
+                root.setReleaseBy(DetailsHelper.getUserDetails().getUserId());
+                root.setReleaseDate(new Date());
+                rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS, Root.FIELD_RELEASE_BY, Root.FIELD_RELEASE_DATE);
+                return;
             }
         }
         //修改发布状态
@@ -413,10 +412,24 @@ public class RootServiceImpl implements RootService {
     @Override
     public void onlineWorkflowCallback(Long rootId, String nodeApproveResult) {
         Root root = rootRepository.selectByPrimaryKey(rootId);
-        if(root!=null){
+        if (root != null) {
             //工作流适配器回调
-            root = (Root)rootOnlineWorkflowAdapter.callBack(root,nodeApproveResult);
-            rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS);
+            root = (Root) rootOnlineWorkflowAdapter.callBack(root, nodeApproveResult);
+            List<StandardApprovalDTO> standardApprovalDTOS = standardApprovalRepository.selectDTOByCondition(Condition.builder(StandardApproval.class)
+                    .andWhere(Sqls.custom()
+                            .andEqualTo(StandardApproval.FIELD_TENANT_ID, root.getTenantId())
+                            .andEqualTo(StandardApproval.FIELD_STANDARD_ID, root.getId())
+                            .andEqualTo(StandardApproval.FIELD_STANDARD_TYPE, ROOT)
+                            .andEqualTo(StandardApproval.FIELD_APPLY_TYPE, ONLINE))
+                    .orderByDesc(StandardApproval.FIELD_APPROVAL_ID)
+                    .build());
+            if (CollectionUtils.isNotEmpty(standardApprovalDTOS)) {
+                StandardApprovalDTO tmepDto = standardApprovalDTOS.get(0);
+                Long releaseBy = tmepDto.getCreatedBy();
+                root.setReleaseBy(releaseBy);
+                root.setReleaseDate(new Date());
+            }
+            rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS, Root.FIELD_RELEASE_BY, Root.FIELD_RELEASE_DATE);
 
             if (ONLINE.equals(root.getReleaseStatus())) {
                 doVersion(root);
@@ -437,9 +450,9 @@ public class RootServiceImpl implements RootService {
     @Override
     public void offlineWorkflowCallback(Long rootId, String nodeApproveResult) {
         Root root = rootRepository.selectByPrimaryKey(rootId);
-        if(root!=null){
+        if (root != null) {
             //工作流适配器回调
-            root = (Root)rootOfflineWorkflowAdapter.callBack(root,nodeApproveResult);
+            root = (Root) rootOfflineWorkflowAdapter.callBack(root, nodeApproveResult);
             rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS);
             if (OFFLINE.equals(root.getReleaseStatus())) {
                 //下线词库中进行移除,基于当前在线和下线中的词根重新生成文件

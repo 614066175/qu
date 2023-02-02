@@ -10,7 +10,6 @@ import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardConstant.AimType;
 import com.hand.hdsp.quality.infra.constant.WarningLevel;
-import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.feign.AssetFeign;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import com.hand.hdsp.quality.infra.mapper.StandardApprovalMapper;
@@ -18,38 +17,16 @@ import com.hand.hdsp.quality.infra.util.DataLengthHandler;
 import com.hand.hdsp.quality.infra.util.DataPatternHandler;
 import com.hand.hdsp.quality.infra.util.StandardHandler;
 import com.hand.hdsp.quality.infra.util.ValueRangeHandler;
+import com.hand.hdsp.quality.workflow.adapter.DataStandardOfflineWorkflowAdapter;
+import com.hand.hdsp.quality.workflow.adapter.DataStandardOnlineWorkflowAdapter;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import com.hand.hdsp.quality.workflow.adapter.DataStandardOfflineWorkflowAdapter;
-import com.hand.hdsp.quality.workflow.adapter.DataStandardOnlineWorkflowAdapter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.annotation.Resource;
-
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.*;
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.RANGE;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.LengthType.FIXED;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
-
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.driver.infra.util.PageUtil;
 import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
@@ -484,10 +461,12 @@ public class DataStandardServiceImpl implements DataStandardService {
         if (Objects.isNull(dto)) {
             throw new CommonException(ErrorCode.DATA_STANDARD_NOT_EXIST);
         }
-        dataStandardDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
-        dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS);
         //判断数据标准状态,如果是发布上线状态，则存版本表
         if (ONLINE.equals(dataStandardDTO.getStandardStatus())) {
+            dataStandardDTO.setReleaseBy(DetailsHelper.getUserDetails().getUserId());
+            dataStandardDTO.setReleaseDate(new Date());
+            dataStandardDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
+            dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS, DataStandard.FIELD_RELEASE_BY, DataStandard.FIELD_RELEASE_DATE);
             //存版本表
             doVersion(dataStandardDTO);
             //1.数据标准没有关联评估方案，直接发布，不做处理
@@ -512,7 +491,10 @@ public class DataStandardServiceImpl implements DataStandardService {
         }
         if (OFFLINE.equals(dataStandardDTO.getStandardStatus())) {
             assetFeign.deleteStandardToEs(dataStandardDTO.getTenantId(), dataStandardDTO);
+            dataStandardDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
+            dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS);
         }
+
     }
 
     /**
@@ -557,6 +539,7 @@ public class DataStandardServiceImpl implements DataStandardService {
             });
         }
     }
+
     @Override
     public void doVersion(DataStandardDTO dataStandardDTO) {
         Long lastVersion = DEFAULT_VERSION;
@@ -667,33 +650,33 @@ public class DataStandardServiceImpl implements DataStandardService {
                 List<DataStandardDTO> dataStandards = dataStandardMapper.list(dto);
                 decryptCharger(dataStandards);
                 //导出分组、父分组信息
-                if(CollectionUtils.isNotEmpty(dataStandards)){
+                if (CollectionUtils.isNotEmpty(dataStandards)) {
                     DataStandardDTO dataStandardDTO = dataStandards.get(0);
                     List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
                             .andEqualTo(StandardGroup.FIELD_TENANT_ID, dataStandardDTO.getTenantId())
                             .andEqualTo(StandardGroup.FIELD_PROJECT_ID, dataStandardDTO.getProjectId())
                             .andEqualTo(StandardGroup.FIELD_GROUP_ID, dataStandardDTO.getGroupId())
                     ).build());
-                    if(CollectionUtils.isNotEmpty(standardGroupDTOS)){
+                    if (CollectionUtils.isNotEmpty(standardGroupDTOS)) {
                         StandardGroupDTO standardGroupDTO = standardGroupDTOS.get(0);
-                        BeanUtils.copyProperties(standardGroupDTO,standardGroupDto);
+                        BeanUtils.copyProperties(standardGroupDTO, standardGroupDto);
                         standardGroupDto.setGroupLevel(level);
                         //处理导出的分组sheet重复的分组
                         if (CollectionUtils.isNotEmpty(dataStandardGroupDTOList)) {
                             boolean notExistFlag = true;
                             for (DataStandardGroupDTO groupDTO : dataStandardGroupDTOList) {
                                 if (groupDTO.getGroupCode().equals(dataStandardDTO.getGroupCode())) {
-                                    notExistFlag=false;
+                                    notExistFlag = false;
                                     List<DataStandardDTO> dataStandardDTOList = groupDTO.getDataStandardDTOList();
                                     dataStandardDTOList.addAll(dataStandards);
                                     groupDTO.setDataStandardDTOList(dataStandardDTOList);
                                 }
                             }
-                            if(notExistFlag){
-                                handleStandardGroupDto(standardGroupDTO,dataStandardGroupDTOList,standardGroupDto,dataStandards,level);
+                            if (notExistFlag) {
+                                handleStandardGroupDto(standardGroupDTO, dataStandardGroupDTOList, standardGroupDto, dataStandards, level);
                             }
-                        }else {
-                            handleStandardGroupDto(standardGroupDTO,dataStandardGroupDTOList,standardGroupDto,dataStandards,level);
+                        } else {
+                            handleStandardGroupDto(standardGroupDTO, dataStandardGroupDTOList, standardGroupDto, dataStandards, level);
                         }
                     }
                 }
@@ -763,36 +746,37 @@ public class DataStandardServiceImpl implements DataStandardService {
     }
 
     private void handleStandardGroupDto(StandardGroupDTO standardGroupDTO, List<DataStandardGroupDTO> dataStandardGroupDTOList, DataStandardGroupDTO standardGroupDto, List<DataStandardDTO> dataStandards, int level) {
-        if(ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())){
+        if (ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())) {
             StandardGroupDTO parentGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
             standardGroupDto.setParentGroupCode(parentGroupDTO.getGroupCode());
         }
         dataStandardGroupDTOList.add(standardGroupDto);
         standardGroupDto.setDataStandardDTOList(dataStandards);
-        if(ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())){
-            findParentGroups(standardGroupDTO.getParentGroupId(),dataStandardGroupDTOList,level);
+        if (ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())) {
+            findParentGroups(standardGroupDTO.getParentGroupId(), dataStandardGroupDTOList, level);
         }
     }
 
-    public void decryptCharger(List<DataStandardDTO> dataStandards){
+    public void decryptCharger(List<DataStandardDTO> dataStandards) {
         //解密责任人相关信息
-        if(DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(dataStandards)){
+        if (DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(dataStandards)) {
             dataStandards.forEach(dataStandardDTO -> {
-                if(StringUtils.isNotEmpty(dataStandardDTO.getChargeName())){
+                if (StringUtils.isNotEmpty(dataStandardDTO.getChargeName())) {
                     dataStandardDTO.setChargeName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeName()));
                 }
-                if(StringUtils.isNotEmpty(dataStandardDTO.getChargeEmail())){
+                if (StringUtils.isNotEmpty(dataStandardDTO.getChargeEmail())) {
                     dataStandardDTO.setChargeEmail(DataSecurityHelper.decrypt(dataStandardDTO.getChargeEmail()));
                 }
-                if(StringUtils.isNotEmpty(dataStandardDTO.getChargeTel())){
+                if (StringUtils.isNotEmpty(dataStandardDTO.getChargeTel())) {
                     dataStandardDTO.setChargeTel(DataSecurityHelper.decrypt(dataStandardDTO.getChargeTel()));
                 }
-                if(StringUtils.isNotEmpty(dataStandardDTO.getChargeDeptName())){
+                if (StringUtils.isNotEmpty(dataStandardDTO.getChargeDeptName())) {
                     dataStandardDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeDeptName()));
                 }
             });
         }
     }
+
     private void findSortedChildGroups(DataStandardGroupDTO parentDataStandardGroupDTO, int level, List<DataStandardGroupDTO> dataStandardGroupDTOList) {
         level++;
         List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
@@ -1044,10 +1028,10 @@ public class DataStandardServiceImpl implements DataStandardService {
     }
 
     @Override
-    public void onlineWorkflowCallback(String dataStandardCode,String nodeApproveResult) {
+    public void onlineWorkflowCallback(String dataStandardCode, String nodeApproveResult) {
         //工作流适配器回调
-        nodeApproveResult = (String)dataStandardOnlineWorkflowAdapter.callBack(dataStandardCode,nodeApproveResult);
-        if(WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)){
+        nodeApproveResult = (String) dataStandardOnlineWorkflowAdapter.callBack(dataStandardCode, nodeApproveResult);
+        if (WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)) {
             List<DataStandardDTO> standardDTOS = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                     .andWhere(Sqls.custom()
                             .andEqualTo(DataStandard.FIELD_TENANT_ID, DetailsHelper.getUserDetails().getTenantId())
@@ -1062,17 +1046,11 @@ public class DataStandardServiceImpl implements DataStandardService {
                                 .andEqualTo(StandardApproval.FIELD_STANDARD_ID, dataStandardDTO.getStandardId())
                                 .andEqualTo(StandardApproval.FIELD_STANDARD_TYPE, DATA)
                                 .andEqualTo(StandardApproval.FIELD_APPLY_TYPE, ONLINE))
+                                .orderByDesc(StandardApproval.FIELD_APPROVAL_ID)
                         .build());
                 if (CollectionUtils.isNotEmpty(standardApprovalDTOS)) {
-                    StandardApprovalDTO tmepDto = standardApprovalDTOS.get(0);
-                    Long releaseBy = tmepDto.getCreatedBy();
-                    // 从申请记录表中获取发布人id
-                    for (StandardApprovalDTO standardApprovalDTO : standardApprovalDTOS) {
-                        if (standardApprovalDTO.getCreationDate().after(tmepDto.getCreationDate())) {
-                            releaseBy = standardApprovalDTO.getCreatedBy();
-                        }
-                    }
-                    dataStandardDTO.setReleaseBy(releaseBy);
+                    StandardApprovalDTO standardApprovalDTO = standardApprovalDTOS.get(0);
+                    dataStandardDTO.setReleaseBy(standardApprovalDTO.getCreatedBy());
                     dataStandardDTO.setReleaseDate(new Date());
                 }
                 dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS, DataStandard.FIELD_RELEASE_BY, DataStandard.FIELD_RELEASE_DATE);
@@ -1097,17 +1075,17 @@ public class DataStandardServiceImpl implements DataStandardService {
                 }
                 assetFeign.saveStandardToEs(dataStandardDTO.getTenantId(), dataStandardDTO);
             }
-        }else{
+        } else {
             //上线失败，修改发布审核中状态未离线
             workflowing(DetailsHelper.getUserDetails().getTenantId(), dataStandardCode, OFFLINE);
         }
     }
 
     @Override
-    public void offlineWorkflowCallback(String dataStandardCode,String nodeApproveResult) {
+    public void offlineWorkflowCallback(String dataStandardCode, String nodeApproveResult) {
         //工作流适配器回调
-        nodeApproveResult = (String)dataStandardOfflineWorkflowAdapter.callBack(dataStandardCode,nodeApproveResult);
-        if(WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)) {
+        nodeApproveResult = (String) dataStandardOfflineWorkflowAdapter.callBack(dataStandardCode, nodeApproveResult);
+        if (WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)) {
             List<DataStandardDTO> standardDTOS = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
                     .andWhere(Sqls.custom()
                             .andEqualTo(DataStandard.FIELD_TENANT_ID, DetailsHelper.getUserDetails().getTenantId())
@@ -1119,7 +1097,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                 dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS);
                 assetFeign.deleteStandardToEs(dataStandardDTO.getTenantId(), dataStandardDTO);
             }
-        }else{
+        } else {
             //下线失败，修改发布审核中状态上线
             workflowing(DetailsHelper.getUserDetails().getTenantId(), dataStandardCode, ONLINE);
         }
