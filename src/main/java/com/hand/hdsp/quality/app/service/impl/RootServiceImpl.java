@@ -69,7 +69,6 @@ public class RootServiceImpl implements RootService {
     private final RootVersionRepository rootVersionRepository;
     private final RootLineRepository rootLineRepository;
     private final StandardGroupRepository standardGroupRepository;
-    private final StandardApprovalService standardApprovalService;
     private final StandardApprovalRepository standardApprovalRepository;
     private final StandardApprovalMapper standardApprovalMapper;
     private final ProfileClient profileClient;
@@ -92,12 +91,11 @@ public class RootServiceImpl implements RootService {
 
     private final RootDicRepository rootDicRepository;
 
-    public RootServiceImpl(RootRepository rootRepository, RootVersionRepository rootVersionRepository, RootLineRepository rootLineRepository, StandardGroupRepository standardGroupRepository, StandardApprovalRepository standardApprovalRepository, StandardApprovalMapper standardApprovalMapper, ProfileClient profileClient, WorkflowClient workflowClient, DefaultRootOfflineWorkflowAdapter defaultRootOfflineWorkflowAdapter, RootOnlineWorkflowAdapter rootOnlineWorkflowAdapter, RootOfflineWorkflowAdapter rootOfflineWorkflowAdapter, AnsjUtil ansjUtil, RootDicRepository rootDicRepository) {
+    public RootServiceImpl(RootRepository rootRepository, RootVersionRepository rootVersionRepository, RootLineRepository rootLineRepository, StandardGroupRepository standardGroupRepository, StandardApprovalRepository standardApprovalRepository, StandardApprovalMapper standardApprovalMapper, ProfileClient profileClient, WorkflowClient workflowClient, RootOnlineWorkflowAdapter rootOnlineWorkflowAdapter, RootOfflineWorkflowAdapter rootOfflineWorkflowAdapter, AnsjUtil ansjUtil, RootDicRepository rootDicRepository) {
         this.rootRepository = rootRepository;
         this.rootVersionRepository = rootVersionRepository;
         this.rootLineRepository = rootLineRepository;
         this.standardGroupRepository = standardGroupRepository;
-        this.standardApprovalService = standardApprovalService;
         this.standardApprovalRepository = standardApprovalRepository;
         this.standardApprovalMapper = standardApprovalMapper;
         this.profileClient = profileClient;
