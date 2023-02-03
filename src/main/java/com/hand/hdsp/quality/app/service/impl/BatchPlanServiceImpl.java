@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 import com.alibaba.druid.DbType;
+import com.hand.hdsp.quality.message.adapter.BatchPlanMessageAdapter;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanService;
 import com.hand.hdsp.quality.domain.entity.*;
@@ -151,6 +152,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
 
     @Autowired
     private PlanShareRepository planShareRepository;
+
+    @Autowired
+    private BatchPlanMessageAdapter batchPlanMessageAdapter;
 
 
     @Override
@@ -378,6 +382,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             //同步告警走的是alert服务的handler，异步告警走的是event服务,生成事件消息处理
 //            inboundMessage.setAsyncFlag(1);
             alertMessageHandler.sendMessage(inboundMessage);
+            //消息适配器
+            batchPlanMessageAdapter.sendMessage(inboundMessage);
         }
     }
 

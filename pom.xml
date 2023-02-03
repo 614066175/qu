@@ -41,6 +41,16 @@
             <groupId>org.hzero.boot</groupId>
             <artifactId>hzero-boot-workflow</artifactId>
         </dependency>
+        <dependency>
+            <artifactId>hdsp-quality-workflow-adapter</artifactId>
+            <groupId>com.hand.hdsp.adapter</groupId>
+            <version>1.8.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hand.hdsp.adapter</groupId>
+            <artifactId>hdsp-quality-message-adapter</artifactId>
+            <version>1.8.1-SNAPSHOT</version>
+        </dependency>
 
         <!-- hdsp starter -->
         <dependency>

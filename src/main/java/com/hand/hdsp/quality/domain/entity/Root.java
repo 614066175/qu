@@ -166,6 +166,7 @@ public class Root extends AuditDomain {
     private Long[] groupArrays;
 
     //勾选导出传入的ids
+    @Transient
     private String exportIds;
 
 }
