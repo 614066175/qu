@@ -204,7 +204,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     public void generate(Long tenantId, Long projectId, Long planId) {
         BatchPlanDTO batchPlanDTO = batchPlanRepository.selectDTOByPrimaryKey(planId);
         // 创建或更新job
-        String jobName = String.format(PlanConstant.JOB_NAME, tenantId, projectId, batchPlanDTO.getPlanCode());
+        String jobName = String.format(PlanConstant.JOB_NAME, batchPlanDTO.getPlanCode());
 
         //生成数据质量command
         String jobCommand = generateCommand(batchPlanDTO);
