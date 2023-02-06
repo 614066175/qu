@@ -5,14 +5,11 @@ import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
-import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.imported.app.service.IBatchImportService;
-import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +23,8 @@ import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType
  * 数据标准 分组导入
  */
 @Slf4j
-@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_DATA_STANDARD,sheetIndex = 0)
+@Deprecated
+//@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_DATA_STANDARD,sheetIndex = 0)
 public class DataStandardGroupBatchImportServiceImpl implements IBatchImportService {
 
     private final ObjectMapper objectMapper;
