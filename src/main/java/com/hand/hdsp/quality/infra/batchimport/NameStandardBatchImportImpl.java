@@ -1,37 +1,45 @@
 package com.hand.hdsp.quality.infra.batchimport;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hand.hdsp.core.domain.entity.CommonGroup;
+import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.NameStandardDTO;
-import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
-import com.hand.hdsp.quality.domain.entity.StandardGroup;
+import com.hand.hdsp.quality.domain.entity.NameStandard;
 import com.hand.hdsp.quality.domain.repository.NameStandardRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
+import com.hand.hdsp.quality.infra.converter.NameStandardConverter;
 import com.hand.hdsp.quality.infra.mapper.NameStandardMapper;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.hzero.boot.imported.app.service.BatchImportHandler;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
-import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
-import org.hzero.mybatis.util.Sqls;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.NAME_STANDARD;
 
 @Slf4j
-@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_NAME_STANDARD,sheetIndex = 1)
-public class NameStandardBatchImportImpl implements IBatchImportService {
+@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_NAME_STANDARD, sheetIndex = 1)
+public class NameStandardBatchImportImpl extends BatchImportHandler implements IBatchImportService {
 
     private final ObjectMapper objectMapper;
     private final NameStandardRepository nameStandardRepository;
     private final StandardGroupRepository standardGroupRepository;
     private final NameStandardMapper nameStandardMapper;
+
+    @Autowired
+    private CommonGroupRepository commonGroupRepository;
+    @Autowired
+    private NameStandardConverter nameStandardConverter;
+
 
     public NameStandardBatchImportImpl(ObjectMapper objectMapper,
                                        NameStandardRepository nameStandardRepository,
@@ -45,40 +53,64 @@ public class NameStandardBatchImportImpl implements IBatchImportService {
 
     @Override
     public Boolean doImport(List<String> data) {
-        List<NameStandardDTO> nameStandardDTOList = new ArrayList<>(data.size());
+        List<NameStandardDTO> addList = new ArrayList<>();
+        List<NameStandard> updateList = new ArrayList<>();
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         Long projectId = ProjectHelper.getProjectId();
-        try{
-            for (String json:data){
-                NameStandardDTO nameStandardDTO = objectMapper.readValue(json,NameStandardDTO.class);
+        try {
+            for (int i = 0, dataSize = data.size(); i < dataSize; i++) {
+                String json = data.get(i);
+                NameStandardDTO nameStandardDTO = objectMapper.readValue(json, NameStandardDTO.class);
                 //导入分组id
-                List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
-                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE, nameStandardDTO.getGroupCode())
-                        .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, NAME)
-                        .andEqualTo(StandardGroup.FIELD_TENANT_ID,tenantId)
-                        .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId)
-                ).build());
-                if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
-                    nameStandardDTO.setGroupId(standardGroupDTOList.get(0).getGroupId());
+                CommonGroup commonGroup = commonGroupRepository.selectOne(CommonGroup.builder()
+                        .groupType(NAME_STANDARD)
+                        .groupPath(nameStandardDTO.getGroupPath())
+                        .tenantId(tenantId).projectId(projectId).build());
+                if (commonGroup == null) {
+                    addErrorMsg(i, "分组不存在，请先维护分组!");
+                    continue;
+                } else {
+                    nameStandardDTO.setGroupId(commonGroup.getGroupId());
                 }
                 nameStandardDTO.setTenantId(tenantId);
                 nameStandardDTO.setProjectId(projectId);
                 //设置责任人
-                if(DataSecurityHelper.isTenantOpen()){
+                if (DataSecurityHelper.isTenantOpen()) {
                     //加密后查询
                     String chargeName = DataSecurityHelper.encrypt(nameStandardDTO.getChargeName());
                     nameStandardDTO.setChargeName(chargeName);
                 }
                 Long chargeId = nameStandardMapper.checkCharger(nameStandardDTO.getChargeName(), nameStandardDTO.getTenantId());
                 nameStandardDTO.setChargeId(chargeId);
-                nameStandardDTOList.add(nameStandardDTO);
+
+
+                //判断命名标准是否存在
+                NameStandard exist = nameStandardRepository.selectOne(NameStandard.builder()
+                        .standardCode(nameStandardDTO.getStandardCode())
+                        .tenantId(nameStandardDTO.getTenantId())
+                        .projectId(nameStandardDTO.getProjectId())
+                        .build());
+                if (exist != null) {
+                    nameStandardDTO.setStandardId(exist.getStandardId());
+                    nameStandardDTO.setObjectVersionNumber(exist.getObjectVersionNumber());
+                    updateList.add(nameStandardConverter.dtoToEntity(nameStandardDTO));
+                } else {
+                    addList.add(nameStandardDTO);
+                }
             }
-        }catch (IOException e){
+
+            if (CollectionUtils.isNotEmpty(addList)) {
+                nameStandardRepository.batchInsertDTOSelective(addList);
+            }
+            if (CollectionUtils.isNotEmpty(updateList)) {
+                nameStandardRepository.batchUpdateByPrimaryKey(updateList);
+            }
+        } catch (IOException e) {
             log.error("Permission Object data:{}", data);
             log.error("Permission Object Read Json Error", e);
             return false;
         }
-        nameStandardRepository.batchInsertDTOSelective(nameStandardDTOList);
+
         return true;
     }
 }

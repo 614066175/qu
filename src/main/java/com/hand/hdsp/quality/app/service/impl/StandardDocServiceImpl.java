@@ -1,21 +1,14 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletResponse;
-
+import com.hand.hdsp.core.CommonGroupClient;
+import com.hand.hdsp.core.domain.entity.CommonGroup;
+import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.core.util.DiscoveryHelper;
 import com.hand.hdsp.core.util.PageParseUtil;
 import com.hand.hdsp.core.util.ProjectHelper;
-import com.hand.hdsp.quality.api.dto.*;
+import com.hand.hdsp.quality.api.dto.StandardDocDTO;
+import com.hand.hdsp.quality.api.dto.StandardDocGroupDTO;
+import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.app.service.MinioStorageService;
 import com.hand.hdsp.quality.app.service.StandardDocService;
 import com.hand.hdsp.quality.domain.entity.DataStandard;
@@ -26,6 +19,7 @@ import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.StandardDocConstant;
 import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
+import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -45,6 +39,18 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DOC;
 import static org.hzero.core.base.BaseConstants.Symbol.COMMA;
@@ -95,13 +101,19 @@ public class StandardDocServiceImpl implements StandardDocService {
         //分组查询时同时查询当前分组和当前分组子分组的数据标准
         Long groupId = standardDocDTO.getGroupId();
         if(ObjectUtils.isNotEmpty(groupId)){
-            List<StandardGroupDTO> standardGroupDTOList = new ArrayList<>();
-            //查询子分组
-            findChildGroups(groupId,standardGroupDTOList);
-            //添加当前分组
-            standardGroupDTOList.add(StandardGroupDTO.builder().groupId(groupId).build());
-            Long[] groupIds = standardGroupDTOList.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
-            standardDocDTO.setGroupArrays(groupIds);
+//            List<StandardGroupDTO> standardGroupDTOList = new ArrayList<>();
+//            //查询子分组
+//            findChildGroups(groupId,standardGroupDTOList);
+//            //添加当前分组
+//            standardGroupDTOList.add(StandardGroupDTO.builder().groupId(groupId).build());
+//            Long[] groupIds = standardGroupDTOList.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
+//            standardDocDTO.setGroupArrays(groupIds);
+            CommonGroupRepository commonGroupRepository = ApplicationContextHelper.getContext().getBean(CommonGroupRepository.class);
+            CommonGroup commonGroup = commonGroupRepository.selectByPrimaryKey(groupId);
+            CommonGroupClient commonGroupClient = ApplicationContextHelper.getContext().getBean(CommonGroupClient.class);
+            List<CommonGroup> subGroup = commonGroupClient.getSubGroup(commonGroup);
+            subGroup.add(commonGroup);
+            standardDocDTO.setGroupArrays(subGroup.stream().map(CommonGroup::getGroupId).toArray(Long[]::new));
         }
         List<StandardDocDTO> list = standardDocMapper.list(standardDocDTO);
         for (StandardDocDTO docDTO : list) {

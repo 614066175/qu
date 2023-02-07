@@ -1,6 +1,9 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 
+import com.hand.hdsp.core.CommonGroupClient;
+import com.hand.hdsp.core.domain.entity.CommonGroup;
+import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.DataFieldService;
@@ -16,38 +19,18 @@ import com.hand.hdsp.quality.infra.mapper.StandardApprovalMapper;
 import com.hand.hdsp.quality.infra.statistic.validator.StatisticValidator;
 import com.hand.hdsp.quality.infra.util.CustomThreadPool;
 import com.hand.hdsp.quality.infra.util.StandardHandler;
+import com.hand.hdsp.quality.workflow.adapter.DataFieldOfflineWorkflowAdapter;
+import com.hand.hdsp.quality.workflow.adapter.DataFieldOnlineWorkflowAdapter;
+import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import com.hand.hdsp.quality.workflow.adapter.DataFieldOfflineWorkflowAdapter;
-import com.hand.hdsp.quality.workflow.adapter.DataFieldOnlineWorkflowAdapter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CountDownLatch;
-import java.util.stream.Collectors;
-
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
-
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.driver.infra.util.PageUtil;
 import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
@@ -76,7 +59,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
-
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 import static org.hzero.core.base.BaseConstants.Symbol.COMMA;
@@ -326,13 +308,19 @@ public class DataFieldServiceImpl implements DataFieldService {
         //分组查询时同时查询当前分组和当前分组子分组的数据标准
         Long groupId = dataFieldDTO.getGroupId();
         if (ObjectUtils.isNotEmpty(groupId)) {
-            List<StandardGroupDTO> standardGroupDTOList = new ArrayList<>();
-            //查询子分组
-            findChildGroups(groupId, standardGroupDTOList);
-            //添加当前分组
-            standardGroupDTOList.add(StandardGroupDTO.builder().groupId(groupId).build());
-            Long[] groupIds = standardGroupDTOList.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
-            dataFieldDTO.setGroupArrays(groupIds);
+//            List<StandardGroupDTO> standardGroupDTOList = new ArrayList<>();
+//            //查询子分组
+//            findChildGroups(groupId, standardGroupDTOList);
+//            //添加当前分组
+//            standardGroupDTOList.add(StandardGroupDTO.builder().groupId(groupId).build());
+//            Long[] groupIds = standardGroupDTOList.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
+//            dataFieldDTO.setGroupArrays(groupIds);
+            CommonGroupRepository commonGroupRepository = ApplicationContextHelper.getContext().getBean(CommonGroupRepository.class);
+            CommonGroup commonGroup = commonGroupRepository.selectByPrimaryKey(groupId);
+            CommonGroupClient commonGroupClient = ApplicationContextHelper.getContext().getBean(CommonGroupClient.class);
+            List<CommonGroup> subGroup = commonGroupClient.getSubGroup(commonGroup);
+            subGroup.add(commonGroup);
+            dataFieldDTO.setGroupArrays(subGroup.stream().map(CommonGroup::getGroupId).toArray(Long[]::new));
         }
         List<DataFieldDTO> dataFieldDTOList = dataFieldMapper.list(dataFieldDTO);
         dataFieldDTOList.forEach(dataFieldDto -> {
