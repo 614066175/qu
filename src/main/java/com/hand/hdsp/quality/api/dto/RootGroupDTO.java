@@ -35,11 +35,14 @@ public class RootGroupDTO extends AuditDomain {
     @ApiModelProperty(value = "分组名称")
     @NotBlank
     @Size(max = 120)
-    @ExcelColumn(zh = "分组名称",en = "groupName",showInChildren = true)
+    @ExcelColumn(zh = "分组名称",en = "groupName")
     private String groupName;
 
+    @ApiModelProperty(value = "父分组路径")
+    @ExcelColumn(zh = "父分组路径",en = "parentGroupPath",showInChildren = true)
+    private String parentGroupPath;
+
     @ApiModelProperty(value = "分组路径")
-    @ExcelColumn(zh = "分组路径",en = "groupPath")
     private String groupPath;
 
     @ApiModelProperty(value = "分组类型")

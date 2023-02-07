@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import com.hand.hdsp.core.CommonGroupClient;
 import com.hand.hdsp.core.domain.entity.CommonGroup;
 import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.quality.api.dto.AssigneeUserDTO;
@@ -40,6 +41,7 @@ import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.R
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 import static org.hzero.core.base.BaseConstants.Symbol.COMMA;
 
+import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -110,12 +112,9 @@ public class RootServiceImpl implements RootService {
     public Page<Root> list(PageRequest pageRequest, Root root) {
         Long groupId = root.getGroupId();
         if (ObjectUtils.isNotEmpty(groupId)) {
-            List<CommonGroup> commonGroupList = new ArrayList<>();
-            //查询子分组
-            findChildGroups(groupId, commonGroupList);
-            //添加当前分组
-            commonGroupList.add(CommonGroup.builder().groupId(groupId).build());
-            Long[] groupIds = commonGroupList.stream().map(CommonGroup::getGroupId).toArray(Long[]::new);
+            CommonGroupClient commonGroupClient = ApplicationContextHelper.getContext().getBean(CommonGroupClient.class);
+            List<Long> subGroup = commonGroupClient.getSubGroup(root.getTenantId(),root.getProjectId(),ROOT_STANDARD,"");
+            Long[] groupIds = subGroup.stream().toArray(Long[]::new);
             root.setGroupArrays(groupIds);
             root.setGroupId(null);
         }
