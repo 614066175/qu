@@ -1,33 +1,33 @@
 package com.hand.hdsp.quality.infra.validation;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
-import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.domain.entity.DataStandard;
-import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
-import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
+import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.imported.app.service.BatchValidatorHandler;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidator;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidators;
+import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
+import java.io.IOException;
+import java.util.List;
+
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.StandardStatus.OFFLINE_APPROVING;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.StandardStatus.ONLINE;
 
 /**
  * <p>
@@ -45,21 +45,24 @@ public class DataStandardValidator extends BatchValidatorHandler {
     private final DataStandardRepository dataStandardRepository;
 
     private final DataStandardMapper dataStandardMapper;
-    private final StandardGroupRepository standardGroupRepository;
+    private final CommonGroupRepository commonGroupRepository;
+
+    @Autowired
+    private ProfileClient profileClient;
 
     public DataStandardValidator(ObjectMapper objectMapper,
                                  DataStandardRepository dataStandardRepository,
-                                 DataStandardMapper dataStandardMapper, StandardGroupRepository standardGroupRepository) {
+                                 DataStandardMapper dataStandardMapper,
+                                 CommonGroupRepository commonGroupRepository) {
         this.objectMapper = objectMapper;
         this.dataStandardRepository = dataStandardRepository;
         this.dataStandardMapper = dataStandardMapper;
-        this.standardGroupRepository = standardGroupRepository;
+        this.commonGroupRepository = commonGroupRepository;
     }
 
 
     @Override
     public boolean validate(List<String> data) {
-        List<DataStandardDTO> dataStandardDTOList = new ArrayList<>(data.size());
         // 设置租户Id
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         Long projectId = ProjectHelper.getProjectId();
@@ -67,29 +70,9 @@ public class DataStandardValidator extends BatchValidatorHandler {
             for (int i = 0; i < data.size(); i++) {
                 DataStandardDTO dataStandardDTO = objectMapper.readValue(data.get(i), DataStandardDTO.class);
                 dataStandardDTO.setTenantId(tenantId);
-                dataStandardDTOList.add(dataStandardDTO);
-                dataStandardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
-                        .andWhere(Sqls.custom()
-                                .andEqualTo(DataStandard.FIELD_STANDARD_CODE, dataStandardDTO.getStandardCode())
-                                .andEqualTo(DataStandard.FIELD_TENANT_ID, tenantId)
-                                .andEqualTo(DataStandard.FIELD_PROJECT_ID,projectId))
-                        .build());
-                //标准编码存在
-                if (CollectionUtils.isNotEmpty(dataStandardDTOList)) {
-                    addErrorMsg(i, "标准编码已存在");
-                }
-                dataStandardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
-                        .andWhere(Sqls.custom()
-                                .andEqualTo(DataStandard.FIELD_STANDARD_NAME, dataStandardDTO.getStandardName())
-                                .andEqualTo(DataStandard.FIELD_TENANT_ID, tenantId)
-                                .andEqualTo(DataStandard.FIELD_PROJECT_ID,projectId))
-                        .build());
-                //标准名称存在
-                if (CollectionUtils.isNotEmpty(dataStandardDTOList)) {
-                    addErrorMsg(i, "标准名称已存在");
-                }
+
                 //校验的责任人名称为员工姓名
-                if(DataSecurityHelper.isTenantOpen()){
+                if (DataSecurityHelper.isTenantOpen()) {
                     //加密后查询
                     String chargeName = DataSecurityHelper.encrypt(dataStandardDTO.getChargeName());
                     dataStandardDTO.setChargeName(chargeName);
@@ -109,10 +92,28 @@ public class DataStandardValidator extends BatchValidatorHandler {
                         addErrorMsg(i, "未找到此责任人，请检查数据");
                     }
                 }
-                //当sheet页”数据标准“中的分组code在本次导入表格和系统中不存在时则不能导入，并提示”${分组}分组不存在“，并在对应单元格高亮警示
-                String groupCode = dataStandardDTO.getGroupCode();
-                if (StringUtils.isEmpty(groupCode)) {
-                    addErrorMsg(i, "当前行中没有分组");
+
+                List<DataStandardDTO> dataStandardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class)
+                        .andWhere(Sqls.custom()
+                                .andEqualTo(DataStandard.FIELD_STANDARD_CODE, dataStandardDTO.getStandardCode())
+                                .andEqualTo(DataStandard.FIELD_TENANT_ID, tenantId)
+                                .andEqualTo(DataStandard.FIELD_PROJECT_ID, projectId))
+                        .build());
+                //标准编码存在
+                //若编码已存在，且状态为新建/离线，则采用更新逻辑。
+                //若编码已存在，且流程不需要下线审批，状态为在线/下线审批中，则下线原内容后更新。
+                //若编码已存在，且流程需要下线审批，状态为在线/下线审批中，则报错。
+                //若编码已存在，状态为发布审核中，则撤回之前的流程后更新。
+                if (CollectionUtils.isNotEmpty(dataStandardDTOList)) {
+                    DataStandardDTO exist = dataStandardDTOList.get(0);
+                    if (ONLINE.equals(exist.getStandardStatus()) || OFFLINE_APPROVING.equals(exist.getStandardStatus())) {
+                        String offlineOpen = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.DATA_STANDARD_OFFLINE);
+                        if (offlineOpen == null || Boolean.parseBoolean(offlineOpen)) {
+                            //如果需要下线审批,则报错
+                            addErrorMsg(i, "标准已存在，状态不可进行数据修改，请先下线标准！");
+                        }
+                    }
+
                 }
             }
         } catch (IOException e) {

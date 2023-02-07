@@ -5,7 +5,6 @@ import com.hand.hdsp.quality.api.dto.RootGroupDTO;
 import com.hand.hdsp.quality.api.dto.StandardApprovalDTO;
 import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
 import com.hand.hdsp.quality.app.service.RootService;
-import com.hand.hdsp.quality.app.service.StandardApprovalService;
 import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
@@ -13,9 +12,13 @@ import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.mapper.StandardApprovalMapper;
 import com.hand.hdsp.quality.infra.util.AnsjUtil;
-import com.hand.hdsp.quality.infra.workflow.DefaultRootOfflineWorkflowAdapter;
 import com.hand.hdsp.quality.workflow.adapter.RootOfflineWorkflowAdapter;
 import com.hand.hdsp.quality.workflow.adapter.RootOnlineWorkflowAdapter;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.ansj.domain.Result;
 import org.ansj.domain.Term;
@@ -24,6 +27,15 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
+import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
+import org.hzero.boot.platform.plugin.hr.entity.Employee;
+import org.hzero.boot.platform.profile.ProfileClient;
+import org.hzero.boot.workflow.WorkflowClient;
+import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
+import org.hzero.export.vo.ExportParam;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
+import org.hzero.mybatis.util.Sqls;
 import org.nlpcn.commons.lang.tire.domain.Forest;
 import org.nlpcn.commons.lang.tire.library.Library;
 import org.springframework.beans.BeanUtils;
@@ -39,22 +51,6 @@ import java.util.stream.Collectors;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.ROOT;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 import static org.hzero.core.base.BaseConstants.Symbol.COMMA;
-
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
-import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
-import org.hzero.boot.platform.plugin.hr.entity.Employee;
-import org.hzero.boot.platform.profile.ProfileClient;
-import org.hzero.boot.workflow.WorkflowClient;
-import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
-import org.hzero.export.vo.ExportParam;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.helper.DataSecurityHelper;
-import org.hzero.mybatis.util.Sqls;
 
 /**
  * 词根应用服务默认实现
@@ -381,8 +377,8 @@ public class RootServiceImpl implements RootService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void publishOrOff(Root root) {
-        String onlineFlag = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.ROOT_ONLINE);
-        String offlineFlag = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.ROOT_OFFLINE);
+        String onlineFlag = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.ROOT_ONLINE);
+        String offlineFlag = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.ROOT_OFFLINE);
         if ("true".equals(onlineFlag) && ONLINE.equals(root.getReleaseStatus())) {
             //启动工作流，启动工作流需要花费一定时间,有异常回滚
             rootOnlineWorkflowAdapter.startWorkflow(root);

@@ -39,6 +39,9 @@ public class DataStandardDTO extends AuditDomain{
     private Long groupId;
 
     @Transient
+    private String groupPath;
+
+    @Transient
 //    @ExcelColumn(zh = "分组编码", en = "groupCode")
     private String groupCode;
 
@@ -201,5 +204,6 @@ public class DataStandardDTO extends AuditDomain{
     //用于勾选导出数据标准
     @Transient
     private String exportIds;
+
 
 }

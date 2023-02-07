@@ -10,10 +10,19 @@ package com.hand.hdsp.quality.infra.constant;
  */
 public interface WorkFlowConstant {
 
-    // 工作流开关
-    String ROOT_ONLINE = "XQUA.ROOT_ONLINE";
+    interface OpenConfig{
+        // 词根工作流开关
+        String ROOT_ONLINE = "XQUA.ROOT_ONLINE";
 
-    String ROOT_OFFLINE = "XQUA.ROOT_OFFLINE";
+        String ROOT_OFFLINE = "XQUA.ROOT_OFFLINE";
+
+
+        // 数据标准工作流开关
+        String DATA_STANDARD_ONLINE= "XQUA.DATA_STANDARD_ONLINE";
+        String DATA_STANDARD_OFFLINE= "XQUA.DATA_STANDARD_OFFLINE";
+    }
+
+
 
     interface DataStandard{
         String ONLINE_WORKFLOW_KEY="FLOW1364824631562809345";

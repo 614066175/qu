@@ -63,6 +63,10 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>com.hand.hdsp.starter</groupId>
+            <artifactId>hdsp-group-starter</artifactId>
+        </dependency>
         <!-- ansj_seg -->
         <dependency>
             <groupId>org.ansj</groupId>
