@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import com.hand.hdsp.core.domain.entity.CommonGroup;
+import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.quality.api.dto.AssigneeUserDTO;
 import com.hand.hdsp.quality.api.dto.RootGroupDTO;
 import com.hand.hdsp.quality.api.dto.StandardApprovalDTO;
@@ -14,11 +16,6 @@ import com.hand.hdsp.quality.infra.mapper.StandardApprovalMapper;
 import com.hand.hdsp.quality.infra.util.AnsjUtil;
 import com.hand.hdsp.quality.workflow.adapter.RootOfflineWorkflowAdapter;
 import com.hand.hdsp.quality.workflow.adapter.RootOnlineWorkflowAdapter;
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.ansj.domain.Result;
 import org.ansj.domain.Term;
@@ -27,15 +24,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
-import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
-import org.hzero.boot.platform.plugin.hr.entity.Employee;
-import org.hzero.boot.platform.profile.ProfileClient;
-import org.hzero.boot.workflow.WorkflowClient;
-import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
-import org.hzero.export.vo.ExportParam;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.helper.DataSecurityHelper;
-import org.hzero.mybatis.util.Sqls;
 import org.nlpcn.commons.lang.tire.domain.Forest;
 import org.nlpcn.commons.lang.tire.library.Library;
 import org.springframework.beans.BeanUtils;
@@ -48,9 +36,25 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.ROOT;
+import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.ROOT_STANDARD;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 import static org.hzero.core.base.BaseConstants.Symbol.COMMA;
+
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
+import org.hzero.boot.platform.plugin.hr.entity.Employee;
+import org.hzero.boot.platform.profile.ProfileClient;
+import org.hzero.boot.workflow.WorkflowClient;
+import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
+import org.hzero.export.vo.ExportParam;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
+import org.hzero.mybatis.util.Sqls;
 
 /**
  * 词根应用服务默认实现
@@ -64,7 +68,7 @@ public class RootServiceImpl implements RootService {
     private final RootRepository rootRepository;
     private final RootVersionRepository rootVersionRepository;
     private final RootLineRepository rootLineRepository;
-    private final StandardGroupRepository standardGroupRepository;
+    private final CommonGroupRepository commonGroupRepository;
     private final StandardApprovalRepository standardApprovalRepository;
     private final StandardApprovalMapper standardApprovalMapper;
     private final ProfileClient profileClient;
@@ -87,11 +91,11 @@ public class RootServiceImpl implements RootService {
 
     private final RootDicRepository rootDicRepository;
 
-    public RootServiceImpl(RootRepository rootRepository, RootVersionRepository rootVersionRepository, RootLineRepository rootLineRepository, StandardGroupRepository standardGroupRepository, StandardApprovalRepository standardApprovalRepository, StandardApprovalMapper standardApprovalMapper, ProfileClient profileClient, WorkflowClient workflowClient, RootOnlineWorkflowAdapter rootOnlineWorkflowAdapter, RootOfflineWorkflowAdapter rootOfflineWorkflowAdapter, AnsjUtil ansjUtil, RootDicRepository rootDicRepository) {
+    public RootServiceImpl(RootRepository rootRepository, RootVersionRepository rootVersionRepository, RootLineRepository rootLineRepository, CommonGroupRepository commonGroupRepository, StandardApprovalRepository standardApprovalRepository, StandardApprovalMapper standardApprovalMapper, ProfileClient profileClient, WorkflowClient workflowClient, RootOnlineWorkflowAdapter rootOnlineWorkflowAdapter, RootOfflineWorkflowAdapter rootOfflineWorkflowAdapter, AnsjUtil ansjUtil, RootDicRepository rootDicRepository) {
         this.rootRepository = rootRepository;
         this.rootVersionRepository = rootVersionRepository;
         this.rootLineRepository = rootLineRepository;
-        this.standardGroupRepository = standardGroupRepository;
+        this.commonGroupRepository = commonGroupRepository;
         this.standardApprovalRepository = standardApprovalRepository;
         this.standardApprovalMapper = standardApprovalMapper;
         this.profileClient = profileClient;
@@ -106,12 +110,12 @@ public class RootServiceImpl implements RootService {
     public Page<Root> list(PageRequest pageRequest, Root root) {
         Long groupId = root.getGroupId();
         if (ObjectUtils.isNotEmpty(groupId)) {
-            List<StandardGroupDTO> standardGroupDTOList = new ArrayList<>();
+            List<CommonGroup> commonGroupList = new ArrayList<>();
             //查询子分组
-            findChildGroups(groupId, standardGroupDTOList);
+            findChildGroups(groupId, commonGroupList);
             //添加当前分组
-            standardGroupDTOList.add(StandardGroupDTO.builder().groupId(groupId).build());
-            Long[] groupIds = standardGroupDTOList.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
+            commonGroupList.add(CommonGroup.builder().groupId(groupId).build());
+            Long[] groupIds = commonGroupList.stream().map(CommonGroup::getGroupId).toArray(Long[]::new);
             root.setGroupArrays(groupIds);
             root.setGroupId(null);
         }
@@ -280,15 +284,15 @@ public class RootServiceImpl implements RootService {
                 if (CollectionUtils.isNotEmpty(roots)) {
                     RootGroupDTO rootGroupDTO = new RootGroupDTO();
                     Root baseRoot = roots.get(0);
-                    StandardGroupDTO standardGroup = standardGroupRepository.selectDTOByPrimaryKey(baseRoot.getGroupId());
-                    if (ObjectUtils.isNotEmpty(standardGroup)) {
-                        BeanUtils.copyProperties(standardGroup, rootGroupDTO);
+                    CommonGroup commonGroup = commonGroupRepository.selectByPrimaryKey(baseRoot.getGroupId());
+                    if (ObjectUtils.isNotEmpty(commonGroup)) {
+                        BeanUtils.copyProperties(commonGroup, rootGroupDTO);
                         rootGroupDTO.setGroupLevel(level);
                         //处理导出的分组sheet中重复的分组
                         if(CollectionUtils.isNotEmpty(rootGroupDTOS)){
                             boolean notExistFlag = true;
                             for (RootGroupDTO groupDTO : rootGroupDTOS) {
-                                if(groupDTO.getGroupCode().equals(baseRoot.getGroupCode())){
+                                if(groupDTO.getGroupPath().equals(baseRoot.getGroupPath())){
                                     notExistFlag = false;
                                     List<Root> rootList = groupDTO.getRoots();
                                     rootList.addAll(roots);
@@ -297,7 +301,6 @@ public class RootServiceImpl implements RootService {
                             }
                             if(notExistFlag){
                                 handleRootGroupDTO(rootGroupDTO,roots,rootGroupDTOS,level);
-
                             }
                         }else {
                             handleRootGroupDTO(rootGroupDTO,roots,rootGroupDTOS,level);
@@ -306,52 +309,46 @@ public class RootServiceImpl implements RootService {
                 }
             }
             return rootGroupDTOS.stream().sorted(Comparator.comparing(RootGroupDTO::getGroupLevel)).collect(Collectors.toList());
-        }
-        else if (ObjectUtils.isNotEmpty(root.getGroupId())) {
+        } else if (ObjectUtils.isNotEmpty(root.getGroupId())) {
             //分组条件导出
-            StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
+            CommonGroup commonGroup = commonGroupRepository.selectByCondition(Condition.builder(CommonGroup.class).andWhere(Sqls.custom()
                     .andEqualTo(StandardGroup.FIELD_TENANT_ID, root.getTenantId())
                     .andEqualTo(StandardGroup.FIELD_PROJECT_ID, root.getProjectId())
                     .andEqualTo(StandardGroup.FIELD_GROUP_ID, root.getGroupId())
             ).build()).get(0);
-            //获取设置当前分组的父分组编码
-            if (ObjectUtils.isNotEmpty(groupDTO.getParentGroupId())) {
-                StandardGroupDTO parentGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(groupDTO.getParentGroupId());
-                groupDTO.setParentGroupCode(parentGroupDTO.getGroupCode());
-            }
             //查询当前分组数据
             Root builder = Root.builder().build();
             BeanUtils.copyProperties(root, builder);
-            builder.setGroupId(groupDTO.getGroupId());
+            builder.setGroupId(commonGroup.getGroupId());
             List<Root> roots = rootRepository.list(builder);
             RootGroupDTO dto = new RootGroupDTO();
-            BeanUtils.copyProperties(groupDTO, dto);
+            BeanUtils.copyProperties(commonGroup, dto);
             dto.setRoots(roots);
             dto.setGroupLevel(level);
             rootGroupDTOS.add(dto);
             //添加查询父分组 并排序
-            if (ObjectUtils.isNotEmpty(groupDTO.getParentGroupId())) {
-                findParentGroups(groupDTO.getParentGroupId(), rootGroupDTOS, level);
+            if (ObjectUtils.isNotEmpty(commonGroup.getParentGroupId())) {
+                findParentGroups(commonGroup.getParentGroupId(), rootGroupDTOS, level);
             }
             findChildGroups(dto, root, rootGroupDTOS, level);
             return rootGroupDTOS.stream().sorted(Comparator.comparing(RootGroupDTO::getGroupLevel)).collect(Collectors.toList());
         } else {
             //全部分组条件导出
             //添加查询所有父分组 并排序导出保证导入准确性
-            List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
-                            .andEqualTo(StandardGroup.FIELD_TENANT_ID, root.getTenantId())
-                            .andEqualTo(StandardGroup.FIELD_PROJECT_ID, root.getProjectId())
-                            .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, ROOT)
-                            .andIsNull(StandardGroup.FIELD_PARENT_GROUP_ID))
-                    .build());
-            standardGroupDTOList.forEach(standardGroupDTO -> {
+            List<CommonGroup> commonGroupList = commonGroupRepository.selectByCondition(Condition.builder(CommonGroup.class).andWhere(Sqls.custom()
+                            .andEqualTo(CommonGroup.FIELD_TENANT_ID, root.getTenantId())
+                            .andEqualTo(CommonGroup.FIELD_PROJECT_ID, root.getProjectId())
+                            .andEqualTo(CommonGroup.FIELD_GROUP_TYPE, ROOT_STANDARD)
+                            .andEqualTo(CommonGroup.FIELD_PARENT_GROUP_ID,0)
+                    ).build());
+            commonGroupList.forEach(commonGroup -> {
                 //从所有的根目录 向下查询
                 RootGroupDTO dto = new RootGroupDTO();
-                BeanUtils.copyProperties(standardGroupDTO, dto);
+                BeanUtils.copyProperties(commonGroup, dto);
                 //查询当前分组数据
                 Root builder = Root.builder().build();
                 BeanUtils.copyProperties(root, builder);
-                builder.setGroupId(standardGroupDTO.getGroupId());
+                builder.setGroupId(commonGroup.getGroupId());
                 List<Root> roots = rootRepository.list(builder);
                 dto.setRoots(roots);
                 dto.setGroupLevel(level);
@@ -364,10 +361,6 @@ public class RootServiceImpl implements RootService {
 
     private void handleRootGroupDTO(RootGroupDTO rootGroupDTO, List<Root> roots, List<RootGroupDTO> rootGroupDTOS, int level) {
         rootGroupDTO.setRoots(roots);
-        if (ObjectUtils.isNotEmpty(rootGroupDTO.getParentGroupId())) {
-            StandardGroupDTO standardGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(rootGroupDTO.getParentGroupId());
-            rootGroupDTO.setParentGroupCode(standardGroupDTO.getGroupCode());
-        }
         rootGroupDTOS.add(rootGroupDTO);
         if (ObjectUtils.isNotEmpty(rootGroupDTO.getParentGroupId())) {
             findParentGroups(rootGroupDTO.getParentGroupId(), rootGroupDTOS, level);
@@ -593,35 +586,33 @@ public class RootServiceImpl implements RootService {
 
     private void findParentGroups(Long groupId, List<RootGroupDTO> rootGroupDTOs, int level) {
         RootGroupDTO rootGroupDTO = new RootGroupDTO();
-        StandardGroupDTO standardGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(groupId);
+        CommonGroup commonGroup = commonGroupRepository.selectByPrimaryKey(groupId);
         level--;
 
-        if (ObjectUtils.isNotEmpty(standardGroupDTO.getParentGroupId())) {
-            StandardGroupDTO parentGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(standardGroupDTO.getParentGroupId());
-            standardGroupDTO.setParentGroupCode(parentGroupDTO.getGroupCode());
-            findParentGroups(standardGroupDTO.getParentGroupId(), rootGroupDTOs, level);
+        if (ObjectUtils.isNotEmpty(commonGroup.getParentGroupId()) && !commonGroup.getParentGroupId().equals(0)) {
+            CommonGroup parentGroup =  commonGroupRepository.selectByPrimaryKey(commonGroup.getParentGroupId());
+            findParentGroups(commonGroup.getParentGroupId(), rootGroupDTOs, level);
         }
-        BeanUtils.copyProperties(standardGroupDTO, rootGroupDTO);
+        BeanUtils.copyProperties(commonGroup, rootGroupDTO);
         rootGroupDTO.setGroupLevel(level);
         rootGroupDTOs.add(rootGroupDTO);
     }
 
     private void findChildGroups(RootGroupDTO parentRootGroupDTO, Root root, List<RootGroupDTO> rootGroupDTOs, int level) {
-        List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class)
+        List<CommonGroup> commonGroupList = commonGroupRepository.selectByCondition(Condition.builder(CommonGroup.class)
                 .andWhere(Sqls.custom()
-                        .andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID, parentRootGroupDTO.getGroupId()))
+                        .andEqualTo(CommonGroup.FIELD_PARENT_GROUP_ID, parentRootGroupDTO.getGroupId()))
                 .build());
         level++;
-        if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
+        if (CollectionUtils.isNotEmpty(commonGroupList)) {
             int finalLevel = level;
-            standardGroupDTOList.forEach(standardGroupDTO -> {
+            commonGroupList.forEach(commonGroup -> {
                 RootGroupDTO rootGroupDTO = new RootGroupDTO();
-                BeanUtils.copyProperties(standardGroupDTO, rootGroupDTO);
+                BeanUtils.copyProperties(commonGroup, rootGroupDTO);
                 rootGroupDTO.setGroupLevel(finalLevel);
-                rootGroupDTO.setParentGroupCode(parentRootGroupDTO.getGroupCode());
                 Root builder = Root.builder().build();
                 BeanUtils.copyProperties(root, builder);
-                builder.setGroupId(standardGroupDTO.getGroupId());
+                builder.setGroupId(commonGroup.getGroupId());
                 List<Root> roots = rootRepository.list(builder);
                 rootGroupDTO.setRoots(roots);
                 rootGroupDTOs.add(rootGroupDTO);
@@ -655,15 +646,15 @@ public class RootServiceImpl implements RootService {
         rootVersionRepository.insert(rootVersion);
     }
 
-    private void findChildGroups(Long groupId, List<StandardGroupDTO> standardGroups) {
-        List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(
-                Condition.builder(StandardGroup.class)
+    private void findChildGroups(Long groupId, List<CommonGroup> commonGroupList) {
+        List<CommonGroup> childGroupList = commonGroupRepository.selectByCondition(
+                Condition.builder(CommonGroup.class)
                         .andWhere(Sqls.custom()
-                                .andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID, groupId))
+                                .andEqualTo(CommonGroup.FIELD_PARENT_GROUP_ID, groupId))
                         .build());
-        if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
-            standardGroups.addAll(standardGroupDTOList);
-            standardGroupDTOList.forEach(standardGroupDTO -> findChildGroups(standardGroupDTO.getGroupId(), standardGroups));
+        if (CollectionUtils.isNotEmpty(childGroupList)) {
+            commonGroupList.addAll(childGroupList);
+            childGroupList.forEach(commonGroup -> findChildGroups(commonGroup.getGroupId(), commonGroupList));
         }
     }
 }

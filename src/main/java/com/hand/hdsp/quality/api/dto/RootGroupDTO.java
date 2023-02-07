@@ -32,34 +32,20 @@ public class RootGroupDTO extends AuditDomain {
     @NotNull
     private Long parentGroupId;
 
-    @ApiModelProperty(value = "分组编码")
-    @NotBlank
-    @Size(max = 50)
-    @ExcelColumn(zh = "分组编码",en = "groupCode", showInChildren = true)
-    private String groupCode;
-
     @ApiModelProperty(value = "分组名称")
     @NotBlank
     @Size(max = 120)
-    @ExcelColumn(zh = "分组名称",en = "groupName")
+    @ExcelColumn(zh = "分组名称",en = "groupName",showInChildren = true)
     private String groupName;
 
-    @ApiModelProperty(value = "分组描述")
-    @ExcelColumn(zh = "分组描述",en = "groupDesc")
-    private String groupDesc;
+    @ApiModelProperty(value = "分组路径")
+    @ExcelColumn(zh = "分组路径",en = "groupPath")
+    private String groupPath;
 
-    @Transient
-    @ExcelColumn(zh = "父分组编码",en = "parentGroupCode")
-    private String 	parentGroupCode;
-
-    @ApiModelProperty(value = "标准类型(快码：HDSP.XSTA.STANDARD_TYPE：DATA/数据标准，FIELD/字段标准，NAME/命名标准,ROOT/词根)")
+    @ApiModelProperty(value = "分组类型")
     @NotBlank
     @Size(max = 30)
-    private String standardType;
-
-    @ApiModelProperty(value = "是否启用 1-启用 0-不启用")
-    @NotNull
-    private Integer enabledFlag;
+    private String groupType;
 
     @ApiModelProperty(value = "租户ID")
     @NotNull
@@ -77,5 +63,5 @@ public class RootGroupDTO extends AuditDomain {
      * 分组层级，用于导出分组时排序
      */
     @Transient
-    private int groupLevel;
+    private Integer groupLevel;
 }

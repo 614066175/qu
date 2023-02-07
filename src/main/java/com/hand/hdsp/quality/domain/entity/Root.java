@@ -121,12 +121,6 @@ public class Root extends AuditDomain {
      * 分组编码
      */
     @Transient
-    private String groupCode;
-
-    /**
-     * 分组编码
-     */
-    @Transient
     private String groupName;
 
     /**
@@ -168,5 +162,11 @@ public class Root extends AuditDomain {
     //勾选导出传入的ids
     @Transient
     private String exportIds;
+
+    /**
+     * 分组路径
+     */
+    @Transient
+    private String groupPath;
 
 }

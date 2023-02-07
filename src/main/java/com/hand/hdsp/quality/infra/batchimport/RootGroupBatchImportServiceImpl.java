@@ -29,7 +29,7 @@ import org.hzero.mybatis.util.Sqls;
  * @author XIN.SHENG01@HAND-CHINA.COM 2022/11/22 20:40
  */
 @Slf4j
-@ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_ROOT,sheetIndex = 0)
+@Deprecated
 public class RootGroupBatchImportServiceImpl implements IBatchImportService {
 
     private final ObjectMapper objectMapper;

@@ -1,37 +1,34 @@
 package com.hand.hdsp.quality.infra.batchimport;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hand.hdsp.core.domain.entity.CommonGroup;
+import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.core.util.ProjectHelper;
-import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
-import com.hand.hdsp.quality.app.service.RootService;
 import com.hand.hdsp.quality.domain.entity.Root;
 import com.hand.hdsp.quality.domain.entity.RootLine;
-import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.RootLineRepository;
 import com.hand.hdsp.quality.domain.repository.RootRepository;
-import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
 import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
+import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.mapper.RootMapper;
 import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.ROOT;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.ONLINE;
+import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.ROOT_STANDARD;
 
 import io.choerodon.core.oauth.DetailsHelper;
 
 import org.hzero.boot.imported.app.service.BatchImportHandler;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
+import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
@@ -47,17 +44,18 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
     private final ObjectMapper objectMapper;
     private final RootMapper rootMapper;
     private final RootRepository rootRepository;
-    private final RootService rootService;
     private final RootLineRepository rootLineRepository;
-    private final StandardGroupRepository standardGroupRepository;
+    private final CommonGroupRepository commonGroupRepository;
+    private final ProfileClient profileClient;
 
-    public RootBatchImportServiceImpl(ObjectMapper objectMapper, RootMapper rootMapper, RootRepository rootRepository, RootService rootService, RootLineRepository rootLineRepository, StandardGroupRepository standardGroupRepository) {
+    public RootBatchImportServiceImpl(ObjectMapper objectMapper, RootMapper rootMapper, RootRepository rootRepository, RootLineRepository rootLineRepository, CommonGroupRepository commonGroupRepository, ProfileClient profileClient) {
         this.objectMapper = objectMapper;
         this.rootMapper = rootMapper;
         this.rootRepository = rootRepository;
-        this.rootService = rootService;
         this.rootLineRepository = rootLineRepository;
-        this.standardGroupRepository = standardGroupRepository;
+        this.commonGroupRepository = commonGroupRepository;
+
+        this.profileClient = profileClient;
     }
 
     @Override
@@ -65,7 +63,6 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
     public Boolean doImport(List<String> data) {
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         Long projectId = ProjectHelper.getProjectId();
-        List<Root> rootList = new ArrayList<>();
         try{
             for(int i=0;i<data.size();i++){
                 Root root = objectMapper.readValue(data.get(i), Root.class);
@@ -73,16 +70,17 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
                 root.setProjectId(projectId);
 
                 //分组id
-                List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
-                        .andEqualTo(StandardGroup.FIELD_GROUP_CODE, root.getGroupCode())
-                        .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, ROOT)
-                        .andEqualTo(StandardGroup.FIELD_TENANT_ID,tenantId)
-                        .andEqualTo(StandardGroup.FIELD_PROJECT_ID,projectId)
-                ).build());
-                if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
-                    root.setGroupId(standardGroupDTOList.get(0).getGroupId());
+                List<CommonGroup> commonGroupList = commonGroupRepository.selectByCondition(Condition.builder(CommonGroup.class)
+                        .andWhere(Sqls.custom().andEqualTo(CommonGroup.FIELD_GROUP_PATH,root.getGroupPath())
+                                .andEqualTo(CommonGroup.FIELD_GROUP_TYPE,ROOT_STANDARD)
+                                .andEqualTo(CommonGroup.FIELD_TENANT_ID,tenantId)
+                                .andEqualTo(CommonGroup.FIELD_PROJECT_ID,projectId)
+                        ).build());
+
+                if(CollectionUtils.isNotEmpty(commonGroupList)){
+                    root.setGroupId(commonGroupList.get(0).getGroupId());
                 }else {
-                    addErrorMsg(i, String.format("未找到分组%s，请检查数据",root.getGroupCode()));
+                    addErrorMsg(i, String.format("未找到分组%s，请检查数据",root.getGroupPath()));
                     return false;
                 }
 
@@ -119,21 +117,45 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
                 }
                 root.setChargeDeptId(chargeDeptId);
                 root.setReleaseStatus(StandardConstant.Status.CREATE);
-                rootRepository.insertSelective(root);
+
+                List<Root> rootList = rootRepository.selectByCondition(Condition.builder(Root.class)
+                        .andWhere(Sqls.custom()
+                                .andEqualTo(Root.FIELD_ROOT_EN_SHORT, root.getRootEnShort())
+                                .andEqualTo(Root.FIELD_PROJECT_ID, root.getProjectId())
+                                .andEqualTo(Root.FIELD_TENANT_ID, root.getTenantId())
+                        ).build());
+                //判断是更新还是插入
+                if(CollectionUtils.isNotEmpty(rootList)){
+                    Root rootExist = rootList.get(0);
+                    //在线、下线审核中,下线要审批则报错，不要则更新，改未下线状态
+                    if(StandardConstant.Status.ONLINE.equals(rootExist.getReleaseStatus())
+                            || StandardConstant.Status.OFFLINE_APPROVING.equals(rootExist.getReleaseStatus())){
+                        String offlineFlag = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.ROOT_OFFLINE);
+                        if(Boolean.parseBoolean(offlineFlag)){
+                            addErrorMsg(i,"词根已存在，状态不可有修改，请先下线");
+                            continue;
+                        }
+                        root.setReleaseStatus(StandardConstant.Status.OFFLINE);
+                    }else{
+                        //新建、离线、发布审核中进行更新，状态不变
+                        root.setReleaseStatus(rootExist.getReleaseStatus());
+                    }
+                    root.setId(rootExist.getId());
+                    root.setObjectVersionNumber(rootExist.getObjectVersionNumber());
+                    rootRepository.updateByPrimaryKeySelective(root);
+                }else{
+                    rootRepository.insertSelective(root);
+                }
+
 
                 String[] rootName =  root.getRootName().split(StandardConstant.RootName.SEPARATOR);
                 List<RootLine> rootLines = rootLineRepository.selectByCondition(Condition.builder(RootLine.class)
-                        .andWhere(Sqls.custom().andIn(RootLine.FIELD_ROOT_NAME, Arrays.asList(rootName))
+                        .andWhere(Sqls.custom().andEqualTo(RootLine.FIELD_ROOT_ID,root.getId())
                                 .andEqualTo(RootLine.FIELD_PROJECT_ID,root.getProjectId())
                                 .andEqualTo(RootLine.FIELD_TENANT_ID,root.getTenantId())
                         ).build());
-                StringBuffer rootNameStr = new StringBuffer();
                 if(CollectionUtils.isNotEmpty(rootLines)){
-                    for (RootLine tmp: rootLines){
-                        rootNameStr.append(tmp.getRootName()).append(" ");
-                    }
-                    addErrorMsg(i,String.format("词根中文名称%s数据库中已存在!",rootNameStr));
-                    return false;
+                    rootLineRepository.batchDeleteByPrimaryKey(rootLines);
                 }
                 rootLines = new ArrayList<>();
                 RootLine rootLine;
@@ -147,11 +169,6 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
                     rootLines.add(rootLine);
                 }
                 rootLineRepository.batchInsertSelective(rootLines);
-                root.setReleaseStatus(ONLINE);
-                rootList.add(root);
-            }
-            if(CollectionUtils.isNotEmpty(rootList)){
-                rootList.forEach(root->rootService.publishOrOff(root));
             }
         }catch (Exception e){
             // 失败

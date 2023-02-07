@@ -49,8 +49,8 @@
         he.name chargeName,
         hu.unit_name chargeDept,
         iu.real_name lastUpdatedName,
-        xsg.group_name,
-        xsg.group_code,
+        xcg.group_name,
+        xcg.group_path,
         xsa.instance_id
         from
             xsta_root xr
@@ -58,7 +58,7 @@
         left join hpfm_unit hu on xr.charge_dept_id=hu.unit_id
         left join iam_user iu on xr.last_updated_by=iu.id
         left join xsta_root_line xrl on xr.id = xrl.root_id
-        left join xsta_standard_group xsg on xr.group_id = xsg.group_id
+        left join xcor_common_group xcg on xr.group_id = xcg.group_id
         <if test='datasourceType == "ORACLE"'>
             LEFT JOIN (
             SELECT
