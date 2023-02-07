@@ -36,6 +36,9 @@ public class DataFieldDTO extends AuditDomain {
     private String groupName;
 
     @Transient
+    private String groupPath;
+
+    @Transient
 //    @ExcelColumn(zh = "分组编码", en = "groupCode", groups = {Group1.class})
     private String groupCode;
 

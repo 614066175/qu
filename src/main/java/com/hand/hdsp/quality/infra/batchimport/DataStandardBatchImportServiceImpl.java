@@ -126,18 +126,19 @@ public class DataStandardBatchImportServiceImpl extends BatchImportHandler imple
                     addList.add(dataStandardConverter.dtoToEntity(dataStandardDTO));
                 }
             }
+
+            if (CollectionUtils.isNotEmpty(addList)) {
+                dataStandardRepository.batchInsertSelective(addList);
+
+            }
+            if (CollectionUtils.isNotEmpty(updateList)) {
+                dataStandardRepository.batchUpdateByPrimaryKey(updateList);
+            }
         } catch (IOException e) {
             // 失败
             log.error("Permission Object data:{}", data);
             log.error("Permission Object Read Json Error", e);
             return false;
-        }
-        if (CollectionUtils.isNotEmpty(addList)) {
-            dataStandardRepository.batchInsertSelective(addList);
-
-        }
-        if (CollectionUtils.isNotEmpty(updateList)) {
-            dataStandardRepository.batchUpdateByPrimaryKey(updateList);
         }
 
         return true;

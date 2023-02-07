@@ -1,11 +1,5 @@
 package com.hand.hdsp.quality.api.dto;
 
-import java.util.Date;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
@@ -14,6 +8,12 @@ import lombok.*;
 import org.hzero.boot.platform.lov.annotation.LovValue;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
+
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.Date;
 
 /**
  * <p>命名标准表 数据传输对象</p>
@@ -138,6 +138,8 @@ public class NameStandardDTO extends AuditDomain {
     @Transient
     private String chargeDeptName;
 
+    @Transient
+    private String groupPath;
     /**
      * 分组编码
      */

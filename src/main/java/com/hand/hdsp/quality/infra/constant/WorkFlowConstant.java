@@ -20,6 +20,10 @@ public interface WorkFlowConstant {
         // 数据标准工作流开关
         String DATA_STANDARD_ONLINE= "XQUA.DATA_STANDARD_ONLINE";
         String DATA_STANDARD_OFFLINE= "XQUA.DATA_STANDARD_OFFLINE";
+
+        //字段标准
+        String FIELD_STANDARD_ONLINE="XQUA.FIELD_STANDARD_ONLINE";
+        String FIELD_STANDARD_OFFLINE="XQUA.FIELD_STANDARD_OFFLINE";
     }
 
 

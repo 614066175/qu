@@ -1,9 +1,8 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
+import com.hand.hdsp.core.CommonGroupClient;
+import com.hand.hdsp.core.domain.entity.CommonGroup;
+import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.NameStandardService;
@@ -19,6 +18,7 @@ import com.hand.hdsp.quality.infra.mapper.NameStandardMapper;
 import com.hand.hdsp.quality.infra.util.DataSecurityUtil;
 import com.hand.hdsp.quality.infra.vo.NameStandardDatasourceVO;
 import com.hand.hdsp.quality.infra.vo.NameStandardTableVO;
+import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -31,15 +31,17 @@ import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
 import org.hzero.mybatis.helper.DataSecurityHelper;
+import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.NAME;
 import static org.hzero.core.base.BaseConstants.Symbol.COMMA;
 
@@ -563,13 +565,19 @@ public class NameStandardServiceImpl implements NameStandardService {
         //分组查询时同时查询当前分组和当前分组子分组的数据标准
         Long groupId = nameStandardDTO.getGroupId();
         if(ObjectUtils.isNotEmpty(groupId)){
-            List<StandardGroupDTO> standardGroups = new ArrayList<>();
-            //查询子分组
-            findChildGroups(groupId, standardGroups);
-            //添加当前分组
-            standardGroups.add(StandardGroupDTO.builder().groupId(groupId).build());
-            Long[] groupIds = standardGroups.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
-            nameStandardDTO.setGroupArrays(groupIds);
+//            List<StandardGroupDTO> standardGroups = new ArrayList<>();
+//            //查询子分组
+//            findChildGroups(groupId, standardGroups);
+//            //添加当前分组
+//            standardGroups.add(StandardGroupDTO.builder().groupId(groupId).build());
+//            Long[] groupIds = standardGroups.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
+//            nameStandardDTO.setGroupArrays(groupIds);
+            CommonGroupRepository commonGroupRepository = ApplicationContextHelper.getContext().getBean(CommonGroupRepository.class);
+            CommonGroup commonGroup = commonGroupRepository.selectByPrimaryKey(groupId);
+            CommonGroupClient commonGroupClient = ApplicationContextHelper.getContext().getBean(CommonGroupClient.class);
+            List<CommonGroup> subGroup = commonGroupClient.getSubGroup(commonGroup);
+            subGroup.add(commonGroup);
+            nameStandardDTO.setGroupArrays(subGroup.stream().map(CommonGroup::getGroupId).toArray(Long[]::new));
         }
         return PageHelper.doPageAndSort(pageRequest, () -> nameStandardRepository.list(nameStandardDTO));
     }
