@@ -2,19 +2,17 @@ package com.hand.hdsp.quality.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hand.hdsp.quality.domain.entity.Root;
+import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+import org.hzero.export.annotation.ExcelColumn;
+import org.hzero.export.annotation.ExcelSheet;
 
-import java.util.List;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-
-import io.choerodon.mybatis.domain.AuditDomain;
-
-import org.hzero.export.annotation.ExcelColumn;
-import org.hzero.export.annotation.ExcelSheet;
+import java.util.List;
 
 @Data
 @Builder
@@ -35,7 +33,7 @@ public class RootGroupDTO extends AuditDomain {
     @ApiModelProperty(value = "分组名称")
     @NotBlank
     @Size(max = 120)
-    @ExcelColumn(zh = "分组名称",en = "groupName",showInChildren = true)
+    @ExcelColumn(zh = "分组名称",en = "groupName")
     private String groupName;
 
     @ApiModelProperty(value = "分组路径")

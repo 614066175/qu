@@ -39,6 +39,7 @@ public class DataStandardDTO extends AuditDomain{
     private Long groupId;
 
     @Transient
+    @ExcelColumn(zh = "分组全路径", en = "分组全路径")
     private String groupPath;
 
     @Transient
@@ -204,6 +205,9 @@ public class DataStandardDTO extends AuditDomain{
     //用于勾选导出数据标准
     @Transient
     private String exportIds;
+
+    @Transient
+    private List<Long> standardIds;
 
 
 }

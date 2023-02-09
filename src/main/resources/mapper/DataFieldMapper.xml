@@ -72,9 +72,12 @@
         he.mobile chargeTel,
         he.name chargeName,
         hu.unit_name chargeDeptName,
-        xsg.group_name,
-        xsg.group_code,
-        xsg.group_desc,
+        xcg.group_id,
+        xcg.group_name,
+        xcg.group_path,
+--         xsg.group_name,
+--         xsg.group_code,
+--         xsg.group_desc,
         iu.login_name lastUpdatedByName,
         iu3.login_name createdByName,
         xds.standard_name dataStandardName,
@@ -85,7 +88,8 @@
         </include>
         from xsta_field_standard fs
         left join xsta_data_standard xds on fs.data_standard_id = xds.standard_id
-        left join xsta_standard_group xsg on xsg.group_id=fs.group_id
+        left join xcor_common_group xcg on xcg.group_id=fs.group_id
+--         left join xsta_standard_group xsg on xsg.group_id=fs.group_id
         left join iam_user iu on fs.last_updated_by=iu.id
 --         left join iam_user iu2 on fs.charge_id=iu2.id
         left join iam_user iu3 on fs.created_by=iu3.id
@@ -115,6 +119,12 @@
         <where>
             <if test="dataFieldDTO.fieldId!=null">
                 fs.field_id=#{dataFieldDTO.fieldId}
+            </if>
+            <if test="dataFieldDTO.fieldIds!=null">
+                and fs.field_id in
+                <foreach collection="dataFieldDTO.fieldIds" item="tmpId" open="(" separator="," close=")">
+                    #{tmpId}
+                </foreach>
             </if>
             <if test="dataFieldDTO.groupArrays!=null and dataFieldDTO.groupArrays.length>0">
                 and fs.group_id in

@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.infra.datafix;
 import com.hand.hdsp.core.domain.entity.CommonGroup;
 import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.core.infra.datafix.GroupDataFixer;
+import com.hand.hdsp.quality.domain.entity.DataStandard;
 import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
@@ -58,13 +59,13 @@ public class DataStandardGroupFixer implements GroupDataFixer {
             doFix(group, standardGroupMap, groupMap, fixedGroup);
         }
         //修复分组数据
-//        List<DataStandard> dataStandards = dataStandardRepository.selectAll();
-//        if (CollectionUtils.isNotEmpty(dataStandards)) {
-//            dataStandards.forEach(dataStandard -> {
-//                dataStandard.setGroupId(groupMap.getOrDefault(dataStandard.getGroupId(), 0L));
-//            });
-//            dataStandardRepository.batchUpdateOptional(dataStandards, CommonGroup.FIELD_GROUP_ID);
-//        }
+        List<DataStandard> dataStandards = dataStandardRepository.selectAll();
+        if (CollectionUtils.isNotEmpty(dataStandards)) {
+            dataStandards.forEach(dataStandard -> {
+                dataStandard.setGroupId(groupMap.getOrDefault(dataStandard.getGroupId(), 0L));
+            });
+            dataStandardRepository.batchUpdateOptional(dataStandards, CommonGroup.FIELD_GROUP_ID);
+        }
     }
 
     private void doFix(StandardGroup group, Map<Long, StandardGroup> standardGroupMap, Map<Long, Long> groupMap, Set<Long> fixedGroup) {
@@ -96,7 +97,14 @@ public class DataStandardGroupFixer implements GroupDataFixer {
         } else {
             commonGroup.setGroupPath(String.format("%s/%s", parentGroup.getGroupPath(), commonGroup.getGroupName()));
         }
-        commonGroupRepository.insertSelective(commonGroup);
+        //判断分组存不存在
+        CommonGroup exist = commonGroupRepository.selectOne(commonGroup);
+        if (exist == null) {
+            commonGroupRepository.insertSelective(commonGroup);
+        } else {
+            commonGroup.setGroupId(exist.getGroupId());
+        }
+
         fixedGroup.add(group.getGroupId());
         groupMap.put(group.getGroupId(), commonGroup.getGroupId());
     }

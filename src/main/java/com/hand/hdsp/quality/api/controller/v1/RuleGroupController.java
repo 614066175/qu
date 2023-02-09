@@ -1,8 +1,5 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
-
 import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
@@ -10,6 +7,7 @@ import com.hand.hdsp.quality.app.service.RuleGroupService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.RuleGroup;
 import com.hand.hdsp.quality.domain.repository.RuleGroupRepository;
+import com.hand.hdsp.quality.infra.export.dto.StandardRuleExportDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
@@ -25,6 +23,9 @@ import org.hzero.export.vo.ExportParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * 规则分组表 管理 API
@@ -158,7 +159,7 @@ public class RuleGroupController extends BaseController {
     @ApiOperation(value = "从分组开始导出标准规则")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/export")
-    @ExcelExport(value = RuleGroupDTO.class)
+    @ExcelExport(value = StandardRuleExportDTO.class)
     public ResponseEntity<?> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     RuleDTO dto,
@@ -166,7 +167,7 @@ public class RuleGroupController extends BaseController {
                                     HttpServletResponse response) {
         dto.setTenantId(tenantId);
         dto.setProjectId(projectId);
-        List<RuleGroupDTO> dtoList =
+        List<StandardRuleExportDTO> dtoList =
                 ruleGroupService.export(dto, exportParam);
         response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
         return Results.success(dtoList);

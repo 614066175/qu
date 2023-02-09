@@ -243,6 +243,9 @@ public class DataFieldDTO extends AuditDomain {
     @Transient
     private String exportIds;
 
+    @Transient
+    private List<Long> fieldIds;
+
     public interface Group1 {
     }
 

@@ -7,6 +7,7 @@ import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.DataStandard;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
+import com.hand.hdsp.quality.infra.export.dto.DataStandardExportDTO;
 import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
 import com.hand.hdsp.quality.infra.util.StandardHandler;
 import io.choerodon.core.domain.Page;
@@ -15,7 +16,6 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.*;
 import org.apache.commons.collections4.CollectionUtils;
-
 import org.hzero.boot.workflow.constant.WorkflowConstant;
 import org.hzero.core.util.Results;
 import org.hzero.export.annotation.ExcelExport;
@@ -272,8 +272,8 @@ public class DataStandardController {
     @ApiOperation(value = "导出数据标准")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/export")
-    @ExcelExport(value = DataStandardGroupDTO.class)
-    public ResponseEntity<List<DataStandardGroupDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+    @ExcelExport(value = DataStandardExportDTO.class)
+    public ResponseEntity<List<DataStandardExportDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                                         @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                         DataStandardDTO dto,
                                                         ExportParam exportParam,
@@ -281,7 +281,7 @@ public class DataStandardController {
 
         dto.setTenantId(tenantId);
         dto.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
-        List<DataStandardGroupDTO> dtoList =
+        List<DataStandardExportDTO> dtoList =
                 dataStandardService.export(dto, exportParam);
         return Results.success(dtoList);
     }

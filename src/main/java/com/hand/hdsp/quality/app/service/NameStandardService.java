@@ -1,15 +1,15 @@
 package com.hand.hdsp.quality.app.service;
 
-import java.util.List;
-
 import com.hand.hdsp.quality.api.dto.NameStandardDTO;
-import com.hand.hdsp.quality.api.dto.NameStandardGroupDTO;
 import com.hand.hdsp.quality.domain.entity.NameStandard;
+import com.hand.hdsp.quality.infra.export.dto.NameStandardExportDTO;
 import com.hand.hdsp.quality.infra.vo.NameStandardDatasourceVO;
 import com.hand.hdsp.quality.infra.vo.NameStandardTableVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.export.vo.ExportParam;
+
+import java.util.List;
 
 /**
  * <p>命名标准表应用服务</p>
@@ -60,7 +60,7 @@ public interface NameStandardService {
      * @param exportParam 导出参数
      * @return Page<NameStandardDTO>
      */
-    List<NameStandardGroupDTO> export(NameStandardDTO dto, ExportParam exportParam);
+    List<NameStandardExportDTO> export(NameStandardDTO dto, ExportParam exportParam);
 
     /**
      * 获取表

@@ -99,7 +99,13 @@ public class NameStandardGroupFixer implements GroupDataFixer {
         } else {
             commonGroup.setGroupPath(String.format("%s/%s", parentGroup.getGroupPath(), commonGroup.getGroupName()));
         }
-        commonGroupRepository.insertSelective(commonGroup);
+        //判断分组存不存在
+        CommonGroup exist = commonGroupRepository.selectOne(commonGroup);
+        if (exist == null) {
+            commonGroupRepository.insertSelective(commonGroup);
+        } else {
+            commonGroup.setGroupId(exist.getGroupId());
+        }
         fixedGroup.add(group.getGroupId());
         groupMap.put(group.getGroupId(), commonGroup.getGroupId());
     }

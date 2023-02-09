@@ -1,22 +1,17 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletResponse;
-
 import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.NameStandardDTO;
-import com.hand.hdsp.quality.api.dto.NameStandardGroupDTO;
 import com.hand.hdsp.quality.app.service.NameStandardService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.NameStandard;
 import com.hand.hdsp.quality.domain.repository.NameStandardRepository;
+import com.hand.hdsp.quality.infra.export.dto.NameStandardExportDTO;
 import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
 import com.hand.hdsp.quality.infra.vo.NameStandardDatasourceVO;
 import com.hand.hdsp.quality.infra.vo.NameStandardTableVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
@@ -29,6 +24,9 @@ import org.hzero.export.vo.ExportParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * <p>命名标准表 管理 API</p>
@@ -162,8 +160,8 @@ public class NameStandardController extends BaseController {
     @ApiOperation(value = "命名标准导出")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/export")
-    @ExcelExport(value = NameStandardGroupDTO.class)
-    public ResponseEntity<List<NameStandardGroupDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+    @ExcelExport(value = NameStandardExportDTO.class)
+    public ResponseEntity<List<NameStandardExportDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                                         @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                         NameStandardDTO dto,
                                                         ExportParam exportParam,
@@ -171,8 +169,7 @@ public class NameStandardController extends BaseController {
 
         dto.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
         dto.setTenantId(tenantId);
-        List<NameStandardGroupDTO> dtoList = nameStandardService.export(dto, exportParam);
-        response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
+        List<NameStandardExportDTO> dtoList = nameStandardService.export(dto, exportParam);
         return Results.success(dtoList);
     }
 

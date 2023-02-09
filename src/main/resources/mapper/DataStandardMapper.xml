@@ -68,15 +68,18 @@
         he.mobile chargeTel,
         he.name chargeName,
         hu.unit_name chargeDeptName,
-        xsg.group_name,
-        xsg.group_code,
-        xsg.parent_group_id,
+        xcg.group_id,
+        xcg.group_path,
+--         xsg.group_name,
+--         xsg.group_code,
+--         xsg.parent_group_id,
         xsa.instance_id,
         <include refid="baseColumn">
             <property name="ds" value="ds"/>
         </include>
         from xsta_data_standard ds
-        left join xsta_standard_group xsg on xsg.group_id=ds.group_id
+        left join xcor_common_group xcg on ds.group_id=xcg.group_id
+--         left join xsta_standard_group xsg on xsg.group_id=ds.group_id
         left join iam_user iu on ds.last_updated_by=iu.id
         left join iam_user iu3 on ds.created_by=iu3.id
         left join hpfm_unit hu on hu.unit_id=ds.charge_dept_id
@@ -110,6 +113,12 @@
                 and ds.group_id in
                 <foreach collection="dataStandardDTO.groupArrays" item="arr" index="no" open="("      separator="," close=")">
                     #{arr}
+                </foreach>
+            </if>
+            <if test="dataStandardDTO.standardIds !=null">
+                and ds.standard_id in
+                <foreach collection="dataStandardDTO.standardIds" item="tmpId"  open="("  separator="," close=")">
+                    #{tmpId}
                 </foreach>
             </if>
             <if test="dataStandardDTO.standardCode!=null">

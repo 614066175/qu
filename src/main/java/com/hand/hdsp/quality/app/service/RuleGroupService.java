@@ -1,11 +1,12 @@
 package com.hand.hdsp.quality.app.service;
 
-import java.util.List;
-
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
 import com.hand.hdsp.quality.domain.entity.RuleGroup;
+import com.hand.hdsp.quality.infra.export.dto.StandardRuleExportDTO;
 import org.hzero.export.vo.ExportParam;
+
+import java.util.List;
 
 /**
  * 规则分组表应用服务
@@ -46,7 +47,7 @@ public interface RuleGroupService {
      * @param exportParam 导出参数
      * @return 导出的标准规则
      */
-    List<RuleGroupDTO> export(RuleDTO dto, ExportParam exportParam);
+    List<StandardRuleExportDTO> export(RuleDTO dto, ExportParam exportParam);
 
     /**
      * 新建分组

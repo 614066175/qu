@@ -14,6 +14,7 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 /**
  * <p>标准文档管理表 数据传输对象</p>
@@ -117,6 +118,9 @@ public class StandardDocDTO extends AuditDomain {
     private Long[] groupArrays;
 
     private String exportIds;
+
+    @Transient
+    private List<Long> docIds;
 
     public interface Group1 {
     }

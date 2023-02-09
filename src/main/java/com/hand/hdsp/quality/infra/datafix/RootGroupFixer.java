@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.infra.datafix;
 import com.hand.hdsp.core.domain.entity.CommonGroup;
 import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.core.infra.datafix.GroupDataFixer;
+import com.hand.hdsp.quality.domain.entity.Root;
 import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.RootRepository;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
@@ -20,7 +21,7 @@ import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType
  * @Description: 词根分组修复接口
  * @author XIN.SHENG01@HAND-CHINA.COM 2023/02/07 11:24
  */
-@Component(value = "ROOT_FIXER")
+@Component(value = "ROOT_STANDARD_FIXER")
 public class RootGroupFixer implements GroupDataFixer {
     private final StandardGroupRepository standardGroupRepository;
     private final RootRepository rootRepository;
@@ -56,13 +57,13 @@ public class RootGroupFixer implements GroupDataFixer {
             doFix(group, standardGroupMap, groupMap, fixedGroup);
         }
         //修复分组数据
-//        List<Root> rootList = rootRepository.selectAll();
-//        if (CollectionUtils.isNotEmpty(rootList)) {
-//            rootList.forEach(root -> {
-//                root.setGroupId(groupMap.getOrDefault(root.getGroupId(), 0L));
-//            });
-//            rootRepository.batchUpdateOptional(rootList, Root.FIELD_GROUP_ID);
-//        }
+        List<Root> rootList = rootRepository.selectAll();
+        if (CollectionUtils.isNotEmpty(rootList)) {
+            rootList.forEach(root -> {
+                root.setGroupId(groupMap.getOrDefault(root.getGroupId(), 0L));
+            });
+            rootRepository.batchUpdateOptional(rootList, Root.FIELD_GROUP_ID);
+        }
     }
 
     private void doFix(StandardGroup group, Map<Long, StandardGroup> standardGroupMap, Map<Long, Long> groupMap, Set<Long> fixedGroup) {
@@ -94,7 +95,13 @@ public class RootGroupFixer implements GroupDataFixer {
         } else {
             commonGroup.setGroupPath(String.format("%s/%s", parentGroup.getGroupPath(), commonGroup.getGroupName()));
         }
-        commonGroupRepository.insertSelective(commonGroup);
+        //判断分组存不存在
+        CommonGroup exist = commonGroupRepository.selectOne(commonGroup);
+        if (exist == null) {
+            commonGroupRepository.insertSelective(commonGroup);
+        } else {
+            commonGroup.setGroupId(exist.getGroupId());
+        }
         fixedGroup.add(group.getGroupId());
         groupMap.put(group.getGroupId(), commonGroup.getGroupId());
     }

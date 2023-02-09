@@ -14,6 +14,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Date;
+import java.util.List;
 
 /**
  * <p>命名标准表 数据传输对象</p>
@@ -27,7 +28,7 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = false)
 @ApiModel("命名标准表")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ExcelSheet(zh = "命名标准", en = "Name Standard",rowOffset = 2)
+@ExcelSheet(zh = "命名标准", en = "Name Standard", rowOffset = 2)
 public class NameStandardDTO extends AuditDomain {
 
     @ApiModelProperty("命名标准ID，主键，供其他表做外键")
@@ -37,45 +38,45 @@ public class NameStandardDTO extends AuditDomain {
     @NotNull
     private Long groupId;
 
-    @ExcelColumn(zh = "标准编码",en="standardCode",order = 3)
+    @ExcelColumn(zh = "标准编码", en = "standardCode", order = 3)
     @ApiModelProperty(value = "命名标准编码")
     @NotBlank
     @Size(max = 80)
     private String standardCode;
 
-    @ExcelColumn(zh = "命名标准名称",en="standardName",order = 4)
+    @ExcelColumn(zh = "命名标准名称", en = "standardName", order = 4)
     @ApiModelProperty(value = "命名标准名称")
     @NotBlank
     @Size(max = 120)
     private String standardName;
 
-    @ExcelColumn(zh = "命名标准描述",en="standardDesc",order = 5)
+    @ExcelColumn(zh = "命名标准描述", en = "standardDesc", order = 5)
     @ApiModelProperty(value = "命名标准描述")
     private String standardDesc;
 
-//    @ExcelColumn(zh = "命名标准类型",en="standardType",order = 6)
-    @LovValue(lovCode = "HDSP.XSTA.NAME_STANDARD_TYPE",meaningField = "standardTypeMeaning")
+    //    @ExcelColumn(zh = "命名标准类型",en="standardType",order = 6)
+    @LovValue(lovCode = "HDSP.XSTA.NAME_STANDARD_TYPE", meaningField = "standardTypeMeaning")
     @ApiModelProperty(value = "命名标准类型，快码：HDSP.XSTA.NAME_STANDARD_TYPE <TABLE:表名称>")
     @NotBlank
     @Size(max = 30)
     private String standardType;
 
-    @ExcelColumn(zh = "命名标准规则",en="standardRule",order = 7)
+    @ExcelColumn(zh = "命名标准规则", en = "standardRule", order = 7)
     @ApiModelProperty(value = "命名标准规则")
     @NotBlank
     @Size(max = 240)
     private String standardRule;
 
-    @ExcelColumn(zh = "是否忽略大小写",en="ignoreCaseFlag",order = 8)
+    @ExcelColumn(zh = "是否忽略大小写", en = "ignoreCaseFlag", order = 8)
     @ApiModelProperty(value = "是否忽略大小写 1-忽略 0-不忽略")
     @NotNull
     private Integer ignoreCaseFlag;
 
-    @ExcelColumn(zh = "责任人电话",en="chargeTel",order = 11)
+    @ExcelColumn(zh = "责任人电话", en = "chargeTel", order = 11)
     @ApiModelProperty(value = "责任人电话")
     private String chargeTel;
 
-    @ExcelColumn(zh = "责任人邮箱",en="chargeEmail",order = 12)
+    @ExcelColumn(zh = "责任人邮箱", en = "chargeEmail", order = 12)
     @ApiModelProperty(value = "责任人邮箱")
     private String chargeEmail;
 
@@ -86,7 +87,7 @@ public class NameStandardDTO extends AuditDomain {
     @ApiModelProperty(value = "责任部门ID")
     private Long chargeDeptId;
 
-    @LovValue(lovCode = "HDSP.XSTA.EXEC_STATUS",meaningField = "latestCheckedStatusMeaning")
+    @LovValue(lovCode = "HDSP.XSTA.EXEC_STATUS", meaningField = "latestCheckedStatusMeaning")
     @ApiModelProperty(value = "最新稽核状态，值集：HDSP.XSTA.EXEC_STATUS")
     private String latestCheckedStatus;
 
@@ -114,7 +115,7 @@ public class NameStandardDTO extends AuditDomain {
     /**
      * 标准类型值集意义
      */
-    @ExcelColumn(zh = "命名标准类型",en="standardType",order = 6)
+    @ExcelColumn(zh = "命名标准类型", en = "standardType", order = 6)
     @Transient
     private String standardTypeMeaning;
 
@@ -127,14 +128,14 @@ public class NameStandardDTO extends AuditDomain {
     /**
      * 责任人姓名
      */
-    @ExcelColumn(zh = "责任人姓名",en="chargeName",order = 10)
+    @ExcelColumn(zh = "责任人姓名", en = "chargeName", order = 10)
     @Transient
     private String chargeName;
 
     /**
      * 责任部门名称
      */
-    @ExcelColumn(zh = "责任部门",en="chargeDeptName",order = 9)
+    @ExcelColumn(zh = "责任部门", en = "chargeDeptName", order = 9)
     @Transient
     private String chargeDeptName;
 
@@ -172,5 +173,8 @@ public class NameStandardDTO extends AuditDomain {
 
     //
     private String exportIds;
+
+    @Transient
+    private List<Long> standardIds;
 
 }
