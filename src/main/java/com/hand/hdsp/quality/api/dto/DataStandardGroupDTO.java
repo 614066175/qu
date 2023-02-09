@@ -20,6 +20,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @ExcelSheet(zh = "分组",en = "DataStandard Group",rowOffset = 2)
+@Deprecated
 public class DataStandardGroupDTO extends AuditDomain {
 
 
@@ -33,8 +34,12 @@ public class DataStandardGroupDTO extends AuditDomain {
     @ApiModelProperty(value = "分组编码")
     @NotBlank
     @Size(max = 50)
-    @ExcelColumn(zh = "分组编码",en = "groupCode", showInChildren = true)
+//    @ExcelColumn(zh = "分组编码",en = "groupCode", showInChildren = true)
     private String groupCode;
+
+    @Transient
+//    @ExcelColumn(zh = "父分组编码",en = "parentGroupCode")
+    private String 	parentGroupCode;
 
     @ApiModelProperty(value = "分组名称")
     @NotBlank
@@ -42,22 +47,16 @@ public class DataStandardGroupDTO extends AuditDomain {
     @ExcelColumn(zh = "分组名称",en = "groupName")
     private String groupName;
 
-    @ApiModelProperty(value = "分组描述")
-    @ExcelColumn(zh = "分组描述",en = "groupDesc")
-    private String groupDesc;
-
-    @Transient
-    @ExcelColumn(zh = "父分组编码",en = "parentGroupCode")
-    private String 	parentGroupCode;
-
-    @ApiModelProperty(value = "标准类型(快码：HDSP.XSTA.STANDARD_TYPE：DATA/数据标准，FIELD/字段标准，NAME/命名标准)")
+    @ApiModelProperty(value = "父分组全路径")
     @NotBlank
-    @Size(max = 30)
-    private String standardType;
+    @Size(max = 120)
+    @ExcelColumn(zh = "父分组全路径",en = "parentGroupPath")
+    private String parentGroupPath;
 
-    @ApiModelProperty(value = "是否启用 1-启用 0-不启用")
-    @NotNull
-    private Integer enabledFlag;
+    private String groupPath;
+
+    private String groupType;
+
 
     @ApiModelProperty(value = "租户ID")
     @NotNull

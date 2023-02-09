@@ -1,12 +1,5 @@
 package com.hand.hdsp.quality.api.dto;
 
-import java.util.List;
-import javax.persistence.Id;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
@@ -16,6 +9,13 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
+
+import javax.persistence.Id;
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.List;
 
 /**
  * 规则分组表 数据传输对象
@@ -34,6 +34,7 @@ import org.hzero.export.annotation.ExcelSheet;
 @VersionAudit
 @ModifyAudit
 @ExcelSheet(zh = "规则分组",en = "rule group",rowOffset = 2)
+@Deprecated
 public class RuleGroupDTO extends AuditDomain {
 
     @ApiModelProperty("表ID，主键，供其他表做外键")

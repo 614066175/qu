@@ -66,6 +66,13 @@
                 AND ${prefix}.standard_id = #{standardId}
             </if>
 
+            <if test="standardIds != null ">
+                AND ${prefix}.standard_id in
+                <foreach collection="standardIds" item="tmpId" open="("  separator="," close=")">
+                    #{tmpId}
+                </foreach>
+            </if>
+
             <if test="groupArrays != null and groupArrays.length>0">
                 AND ${prefix}.group_id in
                 <foreach collection="groupArrays" item="arr" index="no" open="("     separator="," close=")">
@@ -139,8 +146,10 @@
         he.mobile chargeTel,
         he.email chargeEmail,
         hu.unit_name AS chargeDeptName,
-        xsg.group_code AS groupCode,
-        xsg.group_name AS groupName,
+--         xsg.group_code AS groupCode,
+--         xsg.group_name AS groupName,
+        xcg.group_name,
+        xcg.group_path,
         <include refid="BaseProperties">
             <property name="prefix" value="xns"/>
         </include>
@@ -150,7 +159,8 @@
 --         LEFT JOIN iam_user iu2 ON (xns.charge_id = iu2.id)
         left join iam_user iu3 on xns.created_by=iu3.id
         LEFT JOIN hpfm_unit hu ON (hu.unit_id=xns.charge_dept_id)
-        LEFT JOIN xsta_standard_group xsg ON (xsg.group_id=xns.group_id)
+        left join xcor_common_group xcg on xcg.group_id=xns.group_id
+--         LEFT JOIN xsta_standard_group xsg ON (xsg.group_id=xns.group_id)
         LEFT JOIN hpfm_employee he on he.employee_id=xns.charge_id
         <include refid="BaseWhere">
             <property name="prefix" value="xns"/>

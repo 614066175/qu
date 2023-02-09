@@ -20,6 +20,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @ExcelSheet(zh = "分组",en = "NameStandard Group",rowOffset = 2)
+@Deprecated
 public class NameStandardGroupDTO extends AuditDomain {
 
     @ApiModelProperty("分组ID，主键，供其他表做外键")

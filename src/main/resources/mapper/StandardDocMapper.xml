@@ -47,9 +47,11 @@
 
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.StandardDocDTO">
         select
-        xsg.group_name,
-        xsg.group_code,
-        xsg.group_desc,
+        xcg.group_name,
+        xcg.group_path,
+--         xsg.group_name,
+--         xsg.group_code,
+--         xsg.group_desc,
         iu1.login_name createdByName,
         iu3.login_name lastUpdatedByName,
 --         iu2.login_name chargeName,
@@ -63,7 +65,8 @@
             <property name="sd" value="sd"/>
         </include>
         from xsta_standard_doc sd
-        left join xsta_standard_group xsg on xsg.group_id=sd.group_id
+        left join xcor_common_group xcg on xcg.group_id=sd.group_id
+--         left join xsta_standard_group xsg on xsg.group_id=sd.group_id
         left join iam_user iu1 on iu1.id=sd.created_by
         left join iam_user iu3 on iu3.id=sd.last_updated_by
 --         left join iam_user iu2 on sd.charge_id=iu2.id
@@ -72,6 +75,12 @@
         <where>
             <if test="standardDocDTO.docId!=null">
                 sd.doc_id=#{standardDocDTO.docId}
+            </if>
+            <if test="standardDocDTO.docIds!=null ">
+                and sd.doc_id in
+                <foreach collection="standardDocDTO.docIds" item="tmpId" open="("  separator="," close=")">
+                    #{tmpId}
+                </foreach>
             </if>
             <if test="standardDocDTO.groupArrays!=null and standardDocDTO.groupArrays.length>0">
                 and sd.group_id in

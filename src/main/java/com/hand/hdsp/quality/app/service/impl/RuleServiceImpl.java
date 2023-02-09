@@ -1,8 +1,8 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.hand.hdsp.core.CommonGroupClient;
+import com.hand.hdsp.core.domain.entity.CommonGroup;
+import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
 import com.hand.hdsp.quality.api.dto.RuleLineDTO;
@@ -15,6 +15,7 @@ import com.hand.hdsp.quality.domain.repository.RuleRepository;
 import com.hand.hdsp.quality.infra.converter.RuleConverter;
 import com.hand.hdsp.quality.infra.converter.RuleLineConverter;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
+import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -25,6 +26,8 @@ import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * <p>规则表应用服务默认实现</p>
@@ -54,9 +57,9 @@ public class RuleServiceImpl implements RuleService {
 
 
     @Override
-    public RuleDTO detail(Long ruleId, Long tenantId,Long projectId) {
+    public RuleDTO detail(Long ruleId, Long tenantId, Long projectId) {
         RuleDTO ruleDTO = ruleRepository.selectDTOByPrimaryKey(ruleId);
-        List<RuleLineDTO> ruleLineDTOList = ruleLineRepository.list(ruleId, tenantId,projectId);
+        List<RuleLineDTO> ruleLineDTOList = ruleLineRepository.list(ruleId, tenantId, projectId);
         for (RuleLineDTO ruleLineDTO : ruleLineDTOList) {
             ruleLineDTO.setWarningLevelList(JsonUtils.json2WarningLevel(ruleLineDTO.getWarningLevel()));
         }
@@ -142,35 +145,41 @@ public class RuleServiceImpl implements RuleService {
 
     @Override
     public List<RuleDTO> export(RuleDTO dto, ExportParam exportParam) {
-       return ruleRepository.listAll(dto);
+        return ruleRepository.listAll(dto);
     }
 
     @Override
     public Page<RuleDTO> pageRules(PageRequest pageRequest, RuleDTO ruleDTO) {
         //分组查询时同时查询当前分组和当前分组子分组的数据标准
         Long groupId = ruleDTO.getGroupId();
-        if(ObjectUtils.isNotEmpty(groupId)){
-            List<RuleGroupDTO> ruleGroupDTOList = new ArrayList<>();
-            if (groupId == 0) {
-                ruleDTO.setGroupId(null);
-            }
+        if (ObjectUtils.isNotEmpty(groupId)) {
+//            List<RuleGroupDTO> ruleGroupDTOList = new ArrayList<>();
+//            if (groupId == 0) {
+//                ruleDTO.setGroupId(null);
+//            }
             //查询子分组
-            findChildGroups(groupId,ruleGroupDTOList);
-            //添加当前分组
-            ruleGroupDTOList.add(RuleGroupDTO.builder().groupId(groupId).build());
-            Long[] groupIds = ruleGroupDTOList.stream().map(RuleGroupDTO::getGroupId).toArray(Long[]::new);
-            ruleDTO.setGroupArrays(groupIds);
+//            findChildGroups(groupId,ruleGroupDTOList);
+//            //添加当前分组
+//            ruleGroupDTOList.add(RuleGroupDTO.builder().groupId(groupId).build());
+//            Long[] groupIds = ruleGroupDTOList.stream().map(RuleGroupDTO::getGroupId).toArray(Long[]::new);
+//            ruleDTO.setGroupArrays(groupIds);
+            CommonGroupRepository commonGroupRepository = ApplicationContextHelper.getContext().getBean(CommonGroupRepository.class);
+            CommonGroup commonGroup = commonGroupRepository.selectByPrimaryKey(groupId);
+            CommonGroupClient commonGroupClient = ApplicationContextHelper.getContext().getBean(CommonGroupClient.class);
+            List<CommonGroup> subGroup = commonGroupClient.getSubGroup(commonGroup);
+            subGroup.add(commonGroup);
+            ruleDTO.setGroupArrays(subGroup.stream().map(CommonGroup::getGroupId).toArray(Long[]::new));
         }
         return ruleRepository.listTenant(pageRequest, ruleDTO);
     }
 
     private void findChildGroups(Long groupId, List<RuleGroupDTO> ruleGroupDTOList) {
         List<RuleGroupDTO> standardGroupDTOList = ruleGroupRepository.selectDTOByCondition(Condition.builder(RuleGroup.class).andWhere(Sqls.custom()
-                        .andEqualTo(RuleGroup.FIELD_PARENT_GROUP_ID,groupId))
+                        .andEqualTo(RuleGroup.FIELD_PARENT_GROUP_ID, groupId))
                 .build());
-        if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
+        if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
             ruleGroupDTOList.addAll(standardGroupDTOList);
-            standardGroupDTOList.forEach(standardGroupDTO -> findChildGroups(standardGroupDTO.getGroupId(),ruleGroupDTOList));
+            standardGroupDTOList.forEach(standardGroupDTO -> findChildGroups(standardGroupDTO.getGroupId(), ruleGroupDTOList));
         }
     }
 }

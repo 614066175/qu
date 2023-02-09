@@ -1,11 +1,12 @@
 package com.hand.hdsp.quality.app.service;
 
-import java.util.List;
-
 import com.hand.hdsp.quality.api.dto.*;
+import com.hand.hdsp.quality.infra.export.dto.DataStandardExportDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.export.vo.ExportParam;
+
+import java.util.List;
 
 /**
  * <p>
@@ -99,7 +100,7 @@ public interface DataStandardService {
      * @param exportParam 导出参数
      * @return 分组的数据标准
      */
-    List<DataStandardGroupDTO> export(DataStandardDTO dto, ExportParam exportParam);
+    List<DataStandardExportDTO> export(DataStandardDTO dto, ExportParam exportParam);
 
     /**
      * 标准转换为规则

@@ -6,6 +6,7 @@ import com.hand.hdsp.quality.app.service.DataFieldService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.repository.DataFieldRepository;
 import com.hand.hdsp.quality.domain.repository.StandardExtraRepository;
+import com.hand.hdsp.quality.infra.export.dto.FieldStandardExportDTO;
 import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
@@ -13,7 +14,6 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.*;
 import org.apache.commons.collections4.CollectionUtils;
-
 import org.hzero.boot.workflow.constant.WorkflowConstant;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
@@ -199,8 +199,8 @@ public class DataFieldController extends BaseController {
     @ApiOperation(value = "分组导出字段标准")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/export")
-    @ExcelExport(value = DataFieldGroupDTO.class)
-    public ResponseEntity<List<DataFieldGroupDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+    @ExcelExport(value = FieldStandardExportDTO.class)
+    public ResponseEntity<List<FieldStandardExportDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                                      @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                      DataFieldDTO dto,
                                                      ExportParam exportParam,
@@ -209,7 +209,7 @@ public class DataFieldController extends BaseController {
         response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
         dto.setTenantId(tenantId);
         dto.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
-        List<DataFieldGroupDTO> dtoList =
+        List<FieldStandardExportDTO> dtoList =
                 dataFieldService.export(dto, exportParam);
         return Results.success(dtoList);
     }

@@ -1,14 +1,14 @@
 package com.hand.hdsp.quality.app.service;
 
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
-
 import com.hand.hdsp.quality.api.dto.StandardDocDTO;
-import com.hand.hdsp.quality.api.dto.StandardDocGroupDTO;
+import com.hand.hdsp.quality.infra.export.dto.DocStandardExportDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.export.vo.ExportParam;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * <p>标准文档管理表应用服务</p>
@@ -74,7 +74,7 @@ public interface StandardDocService {
      * @param exportParam ExportParam
      * @return List<StandardDocDTO>
      */
-    List<StandardDocGroupDTO> export(StandardDocDTO dto, ExportParam exportParam);
+    List<DocStandardExportDTO> export(StandardDocDTO dto, ExportParam exportParam);
 
     /**
      * 获取预览接口url

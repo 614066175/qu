@@ -1,16 +1,12 @@
 package com.hand.hdsp.quality.api.controller.v1;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletResponse;
-
 import com.hand.hdsp.core.constant.HdspConstant;
 import com.hand.hdsp.quality.api.dto.StandardDocDTO;
-import com.hand.hdsp.quality.api.dto.StandardDocGroupDTO;
 import com.hand.hdsp.quality.app.service.StandardDocService;
 import com.hand.hdsp.quality.config.SwaggerTags;
 import com.hand.hdsp.quality.domain.entity.StandardDoc;
 import com.hand.hdsp.quality.domain.repository.StandardDocRepository;
+import com.hand.hdsp.quality.infra.export.dto.DocStandardExportDTO;
 import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
@@ -27,6 +23,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * <p>标准文档管理表 管理 API</p>
@@ -157,8 +156,8 @@ public class StandardDocController extends BaseController {
     @ApiOperation(value = "导出标准标准文档")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/export")
-    @ExcelExport(value = StandardDocGroupDTO.class)
-    public ResponseEntity<List<StandardDocGroupDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+    @ExcelExport(value = DocStandardExportDTO.class)
+    public ResponseEntity<List<DocStandardExportDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
                                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                        StandardDocDTO dto,
                                                        ExportParam exportParam,
@@ -166,7 +165,7 @@ public class StandardDocController extends BaseController {
         response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
         dto.setTenantId(tenantId);
         dto.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
-        List<StandardDocGroupDTO> dtoList =
+        List<DocStandardExportDTO> dtoList =
                 standardDocService.export(dto, exportParam);
         return Results.success(dtoList);
     }

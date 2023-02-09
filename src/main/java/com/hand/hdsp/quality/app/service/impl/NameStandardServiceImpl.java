@@ -1,10 +1,8 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import com.hand.hdsp.core.util.ProjectHelper;
+import com.hand.hdsp.core.CommonGroupClient;
+import com.hand.hdsp.core.domain.entity.CommonGroup;
+import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.NameStandardService;
 import com.hand.hdsp.quality.domain.entity.NameAim;
@@ -15,10 +13,13 @@ import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.NameStandardStatusEnum;
 import com.hand.hdsp.quality.infra.converter.NameStandardConverter;
+import com.hand.hdsp.quality.infra.export.NameStandardExporter;
+import com.hand.hdsp.quality.infra.export.dto.NameStandardExportDTO;
 import com.hand.hdsp.quality.infra.mapper.NameStandardMapper;
 import com.hand.hdsp.quality.infra.util.DataSecurityUtil;
 import com.hand.hdsp.quality.infra.vo.NameStandardDatasourceVO;
 import com.hand.hdsp.quality.infra.vo.NameStandardTableVO;
+import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -31,17 +32,19 @@ import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
 import org.hzero.mybatis.helper.DataSecurityHelper;
+import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.NAME;
-import static org.hzero.core.base.BaseConstants.Symbol.COMMA;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * <p>命名标准表应用服务默认实现</p>
@@ -224,142 +227,8 @@ public class NameStandardServiceImpl implements NameStandardService {
 
     @Override
     @ProcessLovValue(targetField = "nameStandardDTOList")
-    public List<NameStandardGroupDTO> export(NameStandardDTO dto, ExportParam exportParam) {
-        List<NameStandardGroupDTO> nameStandardGroupDTOList = new ArrayList<>();
-        NameStandardGroupDTO nameStandardGroupDTO = new NameStandardGroupDTO();
-        Long projectId = ProjectHelper.getProjectId();
-        int level = 1;
-        if (StringUtils.isNotEmpty(dto.getExportIds())) {
-            String[] exportNameStandardIds = dto.getExportIds().split(COMMA);
-            for (String exportNameStandardId : exportNameStandardIds) {
-                //命名标准
-                NameStandardGroupDTO nameStandardGroupDto = new NameStandardGroupDTO();
-                dto.setStandardId(Long.parseLong(exportNameStandardId));
-                List<NameStandardDTO> nameStandards = nameStandardMapper.list(dto);
-                decrypt(nameStandards);
-                //分组及父分组
-                if (CollectionUtils.isNotEmpty(nameStandards)) {
-                    List<StandardGroupDTO> standardGroupDTOS = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
-                                    .andEqualTo(StandardGroup.FIELD_PROJECT_ID, dto.getProjectId())
-                                    .andEqualTo(StandardGroup.FIELD_TENANT_ID, dto.getTenantId())
-                                    .andEqualTo(StandardGroup.FIELD_GROUP_ID,nameStandards.get(0).getGroupId()))
-                            .build());
-                    if (CollectionUtils.isNotEmpty(standardGroupDTOS)) {
-                        StandardGroupDTO standardGroupDTO = standardGroupDTOS.get(0);
-                        BeanUtils.copyProperties(standardGroupDTO, nameStandardGroupDto);
-                        nameStandardGroupDto.setGroupLevel(level);
-                        //处理导出的分组sheet中重复的分组
-                        if (CollectionUtils.isNotEmpty(nameStandardGroupDTOList)) {
-                            boolean notExistFlag = true;
-                            for (NameStandardGroupDTO groupDTO : nameStandardGroupDTOList) {
-                                if (groupDTO.getGroupCode().equals(standardGroupDTO.getGroupCode())) {
-                                    notExistFlag = false;
-                                    List<NameStandardDTO> nameStandardDTOList = groupDTO.getNameStandardDTOList();
-                                    nameStandardDTOList.addAll(nameStandards);
-                                    groupDTO.setNameStandardDTOList(nameStandardDTOList);
-                                }
-                            }
-                            if (notExistFlag) {
-                                handleNameStandardGroupDto(nameStandardGroupDto, nameStandards, standardGroupDTO, nameStandardGroupDTOList, level);
-                            }
-                        } else {
-                            handleNameStandardGroupDto(nameStandardGroupDto, nameStandards, standardGroupDTO, nameStandardGroupDTOList, level);
-                        }
-                    }
-                }
-
-            }
-            return nameStandardGroupDTOList.stream().sorted(Comparator.comparing(NameStandardGroupDTO::getGroupLevel).reversed()).collect(Collectors.toList());
-        }
-        else if (ObjectUtils.isNotEmpty(dto.getGroupId())) {
-            //分组条件导出
-            StandardGroupDTO groupDTO = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
-                    .andEqualTo(StandardGroup.FIELD_TENANT_ID, dto.getTenantId())
-                    .andEqualTo(StandardGroup.FIELD_PROJECT_ID, projectId)
-                    .andEqualTo(StandardGroup.FIELD_GROUP_ID, dto.getGroupId(), true)
-            ).build()).get(0);
-            //获取设置当前分组的父分组编码
-            if (ObjectUtils.isNotEmpty(groupDTO.getParentGroupId())) {
-                StandardGroupDTO parentGroupDTO = standardGroupRepository.selectDTOByPrimaryKey(groupDTO.getParentGroupId());
-                groupDTO.setParentGroupCode(parentGroupDTO.getGroupCode());
-            }
-            BeanUtils.copyProperties(groupDTO, nameStandardGroupDTO);
-            List<StandardGroupDTO> standardGroups = new ArrayList<>();
-            //导出分组下条件筛选后的数据标准
-            Long groupId = nameStandardGroupDTO.getGroupId();
-            if (ObjectUtils.isNotEmpty(groupId)) {
-                //添加当前分组
-                standardGroups.add(StandardGroupDTO.builder().groupId(groupId).build());
-                Long[] groupIds = standardGroups.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
-                dto.setGroupArrays(groupIds);
-            }
-            //当前目录和子目录的数据标准的集合，与查询保持一致
-            List<NameStandardDTO> nameStandards = nameStandardMapper.list(dto);
-            if (DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(nameStandards)) {
-                nameStandards.forEach(nameStandardDTO -> {
-                    if (StringUtils.isNotEmpty(nameStandardDTO.getChargeName())) {
-                        nameStandardDTO.setChargeName(DataSecurityHelper.decrypt(nameStandardDTO.getChargeName()));
-                    }
-                    if (StringUtils.isNotEmpty(nameStandardDTO.getChargeTel())) {
-                        nameStandardDTO.setChargeTel(DataSecurityHelper.decrypt(nameStandardDTO.getChargeTel()));
-                    }
-                    if (StringUtils.isNotEmpty(nameStandardDTO.getChargeEmail())) {
-                        nameStandardDTO.setChargeEmail(DataSecurityHelper.decrypt(nameStandardDTO.getChargeEmail()));
-                    }
-                    if (StringUtils.isNotEmpty(nameStandardDTO.getChargeDeptName())) {
-                        nameStandardDTO.setChargeDeptName(DataSecurityHelper.decrypt(nameStandardDTO.getChargeDeptName()));
-                    }
-                });
-            }
-            nameStandardGroupDTO.setNameStandardDTOList(nameStandards);
-            nameStandardGroupDTO.setGroupLevel(level);
-            nameStandardGroupDTOList.add(nameStandardGroupDTO);
-            //添加查询父分组 并排序导出保证导入准确性
-            List<NameStandardGroupDTO> nameStandardGroupDTOS = new ArrayList<>();
-            if (ObjectUtils.isNotEmpty(groupDTO.getParentGroupId())) {
-                findParentGroups(groupDTO.getParentGroupId(), nameStandardGroupDTOS, level);
-            }
-            nameStandardGroupDTOList.addAll(nameStandardGroupDTOS);
-            return nameStandardGroupDTOList.stream().sorted(Comparator.comparing(NameStandardGroupDTO::getGroupLevel).reversed()).collect(Collectors.toList());
-        } else {
-            //全部分组条件导出
-            //添加查询所有父分组 并排序导出保证导入准确性
-            List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
-                            .andEqualTo(StandardGroup.FIELD_TENANT_ID, dto.getTenantId())
-                            .andEqualTo(StandardGroup.FIELD_PROJECT_ID, dto.getProjectId())
-                            .andEqualTo(StandardGroup.FIELD_STANDARD_TYPE, NAME))
-                    .build());
-            standardGroupDTOList.forEach(standardGroupDTO -> {
-                if (ObjectUtils.isEmpty(standardGroupDTO.getParentGroupId())) {
-                    //从所有的根目录 向下查询
-                    NameStandardGroupDTO nameStandardGroupDto = new NameStandardGroupDTO();
-                    BeanUtils.copyProperties(standardGroupDTO, nameStandardGroupDto);
-                    //根目录数据标准列表
-                    List<NameStandardDTO> nameStandardDTOList = nameStandardMapper.list(NameStandardDTO.builder().groupArrays(new Long[]{nameStandardGroupDto.getGroupId()}).build());
-                    if (DataSecurityHelper.isTenantOpen() && CollectionUtils.isNotEmpty(nameStandardDTOList)) {
-                        nameStandardDTOList.forEach(nameStandardDTO -> {
-                            if (StringUtils.isNotEmpty(nameStandardDTO.getChargeName())) {
-                                nameStandardDTO.setChargeName(DataSecurityHelper.decrypt(nameStandardDTO.getChargeName()));
-                            }
-                            if (StringUtils.isNotEmpty(nameStandardDTO.getChargeTel())) {
-                                nameStandardDTO.setChargeTel(DataSecurityHelper.decrypt(nameStandardDTO.getChargeTel()));
-                            }
-                            if (StringUtils.isNotEmpty(nameStandardDTO.getChargeEmail())) {
-                                nameStandardDTO.setChargeEmail(DataSecurityHelper.decrypt(nameStandardDTO.getChargeEmail()));
-                            }
-                            if (StringUtils.isNotEmpty(nameStandardDTO.getChargeDeptName())) {
-                                nameStandardDTO.setChargeDeptName(DataSecurityHelper.decrypt(nameStandardDTO.getChargeDeptName()));
-                            }
-                        });
-                    }
-                    nameStandardGroupDto.setNameStandardDTOList(nameStandardDTOList);
-                    nameStandardGroupDto.setGroupLevel(level);
-                    nameStandardGroupDTOList.add(nameStandardGroupDto);
-                    findSortedChildGroups(nameStandardGroupDto, level, nameStandardGroupDTOList);
-                }
-            });
-            return nameStandardGroupDTOList.stream().sorted(Comparator.comparing(NameStandardGroupDTO::getGroupLevel)).collect(Collectors.toList());
-        }
+    public List<NameStandardExportDTO> export(NameStandardDTO dto, ExportParam exportParam) {
+        return ApplicationContextHelper.getContext().getBean(NameStandardExporter.class).export(dto);
     }
 
     private void handleNameStandardGroupDto(NameStandardGroupDTO nameStandardGroupDto, List<NameStandardDTO> nameStandards, StandardGroupDTO standardGroupDTO, List<NameStandardGroupDTO> nameStandardGroupDTOList, int level) {
@@ -460,7 +329,7 @@ public class NameStandardServiceImpl implements NameStandardService {
                 us.setChargeDeptName(DataSecurityUtil.decrypt(us.getChargeDeptName()));
             }
             //解密员工名
-            if(StringUtils.isNotEmpty(us.getChargeName())){
+            if (StringUtils.isNotEmpty(us.getChargeName())) {
                 us.setChargeName(DataSecurityHelper.decrypt(us.getChargeName()));
             }
         }
@@ -562,25 +431,31 @@ public class NameStandardServiceImpl implements NameStandardService {
     public Page<NameStandardDTO> pageNameStandards(NameStandardDTO nameStandardDTO, PageRequest pageRequest) {
         //分组查询时同时查询当前分组和当前分组子分组的数据标准
         Long groupId = nameStandardDTO.getGroupId();
-        if(ObjectUtils.isNotEmpty(groupId)){
-            List<StandardGroupDTO> standardGroups = new ArrayList<>();
-            //查询子分组
-            findChildGroups(groupId, standardGroups);
-            //添加当前分组
-            standardGroups.add(StandardGroupDTO.builder().groupId(groupId).build());
-            Long[] groupIds = standardGroups.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
-            nameStandardDTO.setGroupArrays(groupIds);
+        if (ObjectUtils.isNotEmpty(groupId)) {
+//            List<StandardGroupDTO> standardGroups = new ArrayList<>();
+//            //查询子分组
+//            findChildGroups(groupId, standardGroups);
+//            //添加当前分组
+//            standardGroups.add(StandardGroupDTO.builder().groupId(groupId).build());
+//            Long[] groupIds = standardGroups.stream().map(StandardGroupDTO::getGroupId).toArray(Long[]::new);
+//            nameStandardDTO.setGroupArrays(groupIds);
+            CommonGroupRepository commonGroupRepository = ApplicationContextHelper.getContext().getBean(CommonGroupRepository.class);
+            CommonGroup commonGroup = commonGroupRepository.selectByPrimaryKey(groupId);
+            CommonGroupClient commonGroupClient = ApplicationContextHelper.getContext().getBean(CommonGroupClient.class);
+            List<CommonGroup> subGroup = commonGroupClient.getSubGroup(commonGroup);
+            subGroup.add(commonGroup);
+            nameStandardDTO.setGroupArrays(subGroup.stream().map(CommonGroup::getGroupId).toArray(Long[]::new));
         }
         return PageHelper.doPageAndSort(pageRequest, () -> nameStandardRepository.list(nameStandardDTO));
     }
 
     private void findChildGroups(Long groupId, List<StandardGroupDTO> standardGroups) {
         List<StandardGroupDTO> standardGroupDTOList = standardGroupRepository.selectDTOByCondition(Condition.builder(StandardGroup.class).andWhere(Sqls.custom()
-                        .andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID,groupId))
+                        .andEqualTo(StandardGroup.FIELD_PARENT_GROUP_ID, groupId))
                 .build());
-        if(CollectionUtils.isNotEmpty(standardGroupDTOList)){
+        if (CollectionUtils.isNotEmpty(standardGroupDTOList)) {
             standardGroups.addAll(standardGroupDTOList);
-            standardGroupDTOList.forEach(standardGroupDTO -> findChildGroups(standardGroupDTO.getGroupId(),standardGroups));
+            standardGroupDTOList.forEach(standardGroupDTO -> findChildGroups(standardGroupDTO.getGroupId(), standardGroups));
         }
     }
 }

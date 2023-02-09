@@ -124,12 +124,6 @@ public class Root extends AuditDomain {
      * 分组编码
      */
     @Transient
-    private String groupCode;
-
-    /**
-     * 分组编码
-     */
-    @Transient
     private String groupName;
 
     /**
@@ -180,4 +174,11 @@ public class Root extends AuditDomain {
 
     @ApiModelProperty("发布时间")
     private Date releaseDate;
+
+    /**
+     * 分组路径
+     */
+    @Transient
+    private String groupPath;
+
 }

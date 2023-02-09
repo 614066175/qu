@@ -40,6 +40,10 @@ public class DataStandardDTO extends AuditDomain{
     private Long groupId;
 
     @Transient
+    @ExcelColumn(zh = "分组全路径", en = "分组全路径")
+    private String groupPath;
+
+    @Transient
 //    @ExcelColumn(zh = "分组编码", en = "groupCode")
     private String groupCode;
 
@@ -211,4 +215,9 @@ public class DataStandardDTO extends AuditDomain{
 
     @ApiModelProperty("发布时间")
     private Date releaseDate;
+
+    @Transient
+    private List<Long> standardIds;
+
+
 }

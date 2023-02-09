@@ -1,10 +1,5 @@
 package com.hand.hdsp.quality.api.dto;
 
-import javax.persistence.Transient;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
@@ -14,6 +9,12 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
+
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.List;
 
 /**
  * <p>标准文档管理表 数据传输对象</p>
@@ -38,6 +39,9 @@ public class StandardDocDTO extends AuditDomain {
     @ApiModelProperty(value = "分组ID")
     @NotNull
     private Long groupId;
+
+    @Transient
+    private String groupPath;
 
     @Transient
 //    @ExcelColumn(zh = "分组编码", en = "groupCode", order = 1)
@@ -114,6 +118,9 @@ public class StandardDocDTO extends AuditDomain {
     private Long[] groupArrays;
 
     private String exportIds;
+
+    @Transient
+    private List<Long> docIds;
 
     public interface Group1 {
     }

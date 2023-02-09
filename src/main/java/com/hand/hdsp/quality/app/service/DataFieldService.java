@@ -1,7 +1,7 @@
 package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.*;
-
+import com.hand.hdsp.quality.infra.export.dto.FieldStandardExportDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.export.vo.ExportParam;
@@ -82,7 +82,7 @@ public interface DataFieldService {
      * @param exportParam
      * @return
      */
-    List<DataFieldGroupDTO> export(DataFieldDTO dto, ExportParam exportParam);
+    List<FieldStandardExportDTO> export(DataFieldDTO dto, ExportParam exportParam);
 
     /**
      * 上线回调事件
