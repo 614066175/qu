@@ -3,6 +3,7 @@ package com.hand.hdsp.quality.infra.datafix;
 import com.hand.hdsp.core.domain.entity.CommonGroup;
 import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.core.infra.datafix.GroupDataFixer;
+import com.hand.hdsp.quality.domain.entity.Rule;
 import com.hand.hdsp.quality.domain.entity.RuleGroup;
 import com.hand.hdsp.quality.domain.repository.RuleGroupRepository;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
@@ -58,13 +59,13 @@ public class RuleGroupFixer implements GroupDataFixer {
             doFix(group, standardGroupMap, groupMap, fixedGroup);
         }
         //修复分组数据
-//        List<Rule> ruleList = ruleRepository.selectAll();
-//        if (CollectionUtils.isNotEmpty(ruleList)) {
-//            ruleList.forEach(rule -> {
-//                rule.setGroupId(groupMap.getOrDefault(rule.getGroupId(), 0L));
-//            });
-//            ruleRepository.batchUpdateOptional(ruleList, Rule.FIELD_GROUP_ID);
-//        }
+        List<Rule> ruleList = ruleRepository.selectAll();
+        if (CollectionUtils.isNotEmpty(ruleList)) {
+            ruleList.forEach(rule -> {
+                rule.setGroupId(groupMap.getOrDefault(rule.getGroupId(), 0L));
+            });
+            ruleRepository.batchUpdateOptional(ruleList, Rule.FIELD_GROUP_ID);
+        }
     }
 
     private void doFix(RuleGroup group, Map<Long, RuleGroup> standardGroupMap, Map<Long, Long> groupMap, Set<Long> fixedGroup) {
