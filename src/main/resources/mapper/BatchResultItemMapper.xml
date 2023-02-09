@@ -59,6 +59,15 @@
         and xbri.condition_id = #{conditionId}
         and xbrr.rule_type = #{ruleType}
         <choose>
+            <when test="datasourceType == 'MYSQL'">
+                <if test="measureDate != null">
+                    and date_format(xbri.creation_date, '%Y%m%d') = date_format(#{measureDate}, '%Y%m%d')
+                </if>
+                <if test="measureDateFrom != null">
+                    and date_format(xbri.creation_date, '%Y%m%d') &gt;= date_format(#{measureDateFrom}, '%Y%m%d')
+                    and date_format(xbri.creation_date, '%Y%m%d') &lt;= date_format(date_sub(curdate(),interval 1 day), '%Y%m%d')
+                </if>
+            </when>
             <when test='datasourceType == "ORACLE"'>
                 <if test="measureDate != null">
                     and to_char(xbri.creation_date, 'yyyyMMdd') = to_char(#{measureDate}, 'yyyyMMdd')
@@ -68,15 +77,15 @@
                     and to_char(xbri.creation_date, 'yyyyMMdd') &lt;= to_char(SYSDATE-1, 'yyyyMMdd')
                 </if>
             </when>
-            <otherwise>
+            <when test="datasourceType == 'PANWEI'">
                 <if test="measureDate != null">
-                    and date_format(xbri.creation_date, '%Y%m%d') = date_format(#{measureDate}, '%Y%m%d')
+                    and to_char(xbri.creation_date, 'yyyymmdd') = to_char(#{measureDate}, 'yyyymmdd')
                 </if>
                 <if test="measureDateFrom != null">
-                    and date_format(xbri.creation_date, '%Y%m%d') &gt;= date_format(#{measureDateFrom}, '%Y%m%d')
-                    and date_format(xbri.creation_date, '%Y%m%d') &lt;= date_format(date_sub(curdate(),interval 1 day), '%Y%m%d')
+                    and to_char(xbri.creation_date, 'yyyymmdd') &gt;= to_char(#{measureDateFrom}, 'yyyymmdd')
+                    and to_char(xbri.creation_date, 'yyyymmdd') &lt;= to_char(current_date - interval '1' day), 'yyyymmdd')
                 </if>
-            </otherwise>
+            </when>
         </choose>
         order by xbri.creation_date desc
     </select>
@@ -211,12 +220,15 @@
             JOIN xqua_batch_plan xbp ON xbpb.plan_id = xbp.plan_id
         <if test='datasourceType == "ORACLE"'>
             <if test="fieldName != null ">
-                join (select DISTINCT result_item_id,REGEXP_SUBSTR(REGEXP_REPLACE(xbri2.field_name, '\(([^)]+)\)', ''), '[^,]+', 1, LEVEL) as name
-                from xqua_batch_result_item xbri2
-                CONNECT BY REGEXP_SUBSTR(REGEXP_REPLACE(xbri2.field_name, '\(([^)]+)\)', ''), '[^,]+', 1, LEVEL) IS NOT NULL) a
+                join (
+                    select DISTINCT result_item_id,REGEXP_SUBSTR(REGEXP_REPLACE(xbri2.field_name, '\(([^)]+)\)', ''), '[^,]+', 1, LEVEL) as name
+                    from xqua_batch_result_item xbri2
+                    CONNECT BY REGEXP_SUBSTR(REGEXP_REPLACE(xbri2.field_name, '\(([^)]+)\)', ''), '[^,]+', 1, LEVEL) IS NOT NULL
+                ) a
                 on xbri.result_item_id=a.result_item_id and a.name=#{fieldName}
             </if>
         </if>
+        -- TODO
         WHERE
             xbpb.sql_type = 'TABLE'
             <if test="datasourceId != null ">
@@ -233,10 +245,26 @@
             </if>
         <if test='datasourceType == "MYSQL"'>
             <if test="fieldName != null ">
-                AND FIND_IN_SET(#{fieldName},
-                REPLACE(REPLACE(REPLACE(xbri.field_name,SUBSTRING_INDEX(SUBSTRING_INDEX(xbri.field_name,')',1),'(',-1),''),
-                SUBSTRING_INDEX(SUBSTRING_INDEX(xbri.field_name,'(',-1),')',1),''),'()',''))
+                AND FIND_IN_SET(
+                    #{fieldName},
+                    REPLACE(
+                        REPLACE(
+                            REPLACE(
+                                xbri.field_name,
+                                SUBSTRING_INDEX(SUBSTRING_INDEX(xbri.field_name,')',1),'(',-1),
+                                ''
+                                ),
+                            SUBSTRING_INDEX(SUBSTRING_INDEX(xbri.field_name,'(',-1),')',1),
+                            ''
+                        ),
+                        '()',
+                        ''
+                    )
+                )
             </if>
+        </if>
+        <if test="datasourceType == 'PANWEI'">
+            and #{fieldName} = ANY ( string_to_array( REGEXP_REPLACE( xbri.field_name, '\([A-Z]*\)*', '', 'g' ), ',' ) )
         </if>
     </select>
     <select id="selectWarningLevelByResultId" resultType="com.hand.hdsp.quality.infra.vo.ResultWaringVO">

@@ -71,7 +71,7 @@
             AND xsa.rw = 1
             AND xr.release_status != 'CREATE'
         </if>
-        <if test='datasourceType == "MYSQL"'>
+        <if test='datasourceType == "MYSQL" or datasourceType == "PANWEI"'>
             left join xsta_standard_approval xsa on xsa.approval_id = (
             select max(xsa.approval_id)
             from xsta_standard_approval xsa
@@ -159,7 +159,7 @@
         <if test='datasourceType == "ORACLE"'>
             and rownum = 1
         </if>
-        <if test='datasourceType == "MYSQL"'>
+        <if test='datasourceType == "MYSQL" or datasourceType == "PANWEI"'>
             LIMIT 1
         </if>
     </select>
