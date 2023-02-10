@@ -1,9 +1,10 @@
 package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.AssigneeUserDTO;
-import com.hand.hdsp.quality.api.dto.RootGroupDTO;
 import com.hand.hdsp.quality.api.dto.StandardApprovalDTO;
 import com.hand.hdsp.quality.domain.entity.Root;
+import com.hand.hdsp.quality.infra.export.dto.RootExportDTO;
+
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.export.vo.ExportParam;
@@ -67,7 +68,7 @@ public interface RootService {
      * @return
      */
 
-    List<RootGroupDTO> export(Root root, ExportParam exportParam);
+    List<RootExportDTO> export(Root root, ExportParam exportParam);
 
     /**
      * 发布 下线
