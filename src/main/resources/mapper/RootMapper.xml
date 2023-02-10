@@ -99,6 +99,12 @@
                     #{arr}
                 </foreach>
             </if>
+            <if test="exportIdList!=null">
+                and xr.id in
+                <foreach collection="exportIdList" item="exportId" index="no" open="("     separator="," close=")">
+                    #{exportId}
+                </foreach>
+            </if>
             <if test="rootName != null and rootName !=''">
                 <bind name="rootNameLike" value='"%"+rootName+"%"'/>
                 and xrl.root_name like #{rootNameLike}

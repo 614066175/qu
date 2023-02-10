@@ -6,7 +6,6 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.hzero.export.annotation.ExcelColumn;
-import org.hzero.export.annotation.ExcelSheet;
 
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
@@ -20,7 +19,6 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ExcelSheet(zh = "分组",en = "Root Group",rowOffset = 2)
 public class RootGroupDTO extends AuditDomain {
 
     @ApiModelProperty("分组ID，主键，供其他表做外键")
@@ -37,10 +35,10 @@ public class RootGroupDTO extends AuditDomain {
     private String groupName;
 
     @ApiModelProperty(value = "父分组路径")
+    @ExcelColumn(zh = "父分组路径",en = "parentGroupPath")
     private String parentGroupPath;
 
     @ApiModelProperty(value = "分组路径")
-    @ExcelColumn(zh = "分组路径",en = "parentGroupPath",showInChildren = true)
     private String groupPath;
 
     @ApiModelProperty(value = "分组类型")

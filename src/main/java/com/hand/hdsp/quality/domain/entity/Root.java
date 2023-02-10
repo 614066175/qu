@@ -7,10 +7,12 @@ import javax.persistence.Transient;
 
 import io.choerodon.mybatis.domain.AuditDomain;
 import java.util.Date;
+import java.util.List;
+
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 
-import com.hand.hdsp.quality.api.dto.RootDTO;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -62,6 +64,10 @@ public class Root extends AuditDomain {
     private Long id;
 
     private Long groupId;
+    @Transient
+    @ApiModelProperty(value = "分组路径")
+    @ExcelColumn(zh = "分组路径", en = "groupPath")
+    private String groupPath;
 
     @ExcelColumn(zh = "词根英文简称", en = "rootEnShort")
     private String rootEnShort;
@@ -159,14 +165,12 @@ public class Root extends AuditDomain {
     @Transient
     private Long[] groupArrays;
 
-    //勾选导出传入的ids
+    /**
+     * 勾选导出传入的ids
+     */
     @Transient
     private String exportIds;
 
-    /**
-     * 分组路径
-     */
     @Transient
-    private String groupPath;
-
+    private List<Long> exportIdList;
 }
