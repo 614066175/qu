@@ -11,8 +11,8 @@ import com.hand.hdsp.quality.app.service.StandardApprovalService;
 import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
-import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.converter.AimStatisticsConverter;
+import com.hand.hdsp.quality.infra.export.ExportUtils;
 import com.hand.hdsp.quality.infra.export.FieldStandardExporter;
 import com.hand.hdsp.quality.infra.export.dto.FieldStandardExportDTO;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
@@ -41,7 +41,6 @@ import org.hzero.boot.platform.plugin.hr.entity.Employee;
 import org.hzero.boot.workflow.WorkflowClient;
 import org.hzero.boot.workflow.constant.WorkflowConstant;
 import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
-import org.hzero.boot.workflow.dto.RunInstance;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
@@ -325,9 +324,7 @@ public class DataFieldServiceImpl implements DataFieldService {
             dataFieldDTO.setGroupArrays(subGroup.stream().map(CommonGroup::getGroupId).toArray(Long[]::new));
         }
         List<DataFieldDTO> dataFieldDTOList = dataFieldMapper.list(dataFieldDTO);
-        for (DataFieldDTO dto : dataFieldDTOList) {
-            decodeForDataFieldDTO(dto);
-        }
+        ExportUtils.decryptFieldStandard(dataFieldDTOList);
         return PageParseUtil.springPage2C7nPage(PageUtil.doPage(dataFieldDTOList, org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize())));
     }
 
