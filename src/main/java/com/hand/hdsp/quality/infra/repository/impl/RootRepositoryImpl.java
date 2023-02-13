@@ -40,17 +40,14 @@ public class RootRepositoryImpl extends BaseRepositoryImpl<Root, RootDTO> implem
     @Override
     public List<Root> list(Root root) {
         if(DataSecurityHelper.isTenantOpen()){
-            root.setChargeName(DataSecurityUtil.encrypt(root.getChargeName()));
+            if (StringUtils.isNotEmpty(root.getChargeName())) {
+                root.setChargeName(DataSecurityUtil.encrypt(root.getChargeName()));
+            }
         }
 
         List<Root> rootList = rootMapper.list(root);
-        if(DataSecurityHelper.isTenantOpen()){
-            for(Root tmp:rootList){
-                tmp.setChargeDept(DataSecurityUtil.decrypt(tmp.getChargeDept()));
-                tmp.setChargeTel(DataSecurityUtil.decrypt(tmp.getChargeTel()));
-                tmp.setChargeEmail(DataSecurityUtil.decrypt(tmp.getChargeEmail()));
-                tmp.setChargeName(DataSecurityUtil.decrypt(tmp.getChargeName()));
-            }
+        for (Root rootTemp : rootList) {
+            decodeForRoot(rootTemp);
         }
 
         List<RootLine> rootLines;
@@ -83,5 +80,28 @@ public class RootRepositoryImpl extends BaseRepositoryImpl<Root, RootDTO> implem
             }
         }
         return assigneeUserDTO;
+    }
+
+    /**
+     * 解密字段
+     *
+     * @param root
+     */
+    private void decodeForRoot(Root root) {
+        if (DataSecurityHelper.isTenantOpen()) {
+            // 责任人等
+            if (StringUtils.isNotEmpty(root.getChargeDept())) {
+                root.setChargeDept(DataSecurityHelper.decrypt(root.getChargeDept()));
+            }
+            if (StringUtils.isNotEmpty(root.getChargeTel())) {
+                root.setChargeTel(DataSecurityHelper.decrypt(root.getChargeTel()));
+            }
+            if (StringUtils.isNotEmpty(root.getChargeEmail())) {
+                root.setChargeEmail(DataSecurityHelper.decrypt(root.getChargeEmail()));
+            }
+            if (StringUtils.isNotEmpty(root.getChargeName())) {
+                root.setChargeName(DataSecurityHelper.decrypt(root.getChargeName()));
+            }
+        }
     }
 }

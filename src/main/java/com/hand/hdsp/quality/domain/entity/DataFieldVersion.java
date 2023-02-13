@@ -9,6 +9,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.Date;
 
 /**
  * <p>字段标准版本表实体</p>
@@ -74,5 +75,7 @@ public class DataFieldVersion extends AuditDomain {
 
     private Long projectId;
 
+    private Long releaseBy;
 
+    private Date releaseDate;
 }

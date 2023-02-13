@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
+import java.util.Date;
 
 /**
  * <p>字段标准表实体</p>
@@ -82,5 +83,7 @@ public class DataField extends AuditDomain {
 
     private String defaultValue;
 
+    private Long releaseBy;
 
+    private Date releaseDate;
 }

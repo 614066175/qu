@@ -35,7 +35,9 @@
         ${prefix}.charge_dept_id,
         ${prefix}.charge_id,
         ${prefix}.release_status,
-        ${prefix}.group_id
+        ${prefix}.group_id,
+        ${prefix}.release_by,
+        ${prefix}.release_date
     </sql>
 
     <select id="list" resultType="com.hand.hdsp.quality.domain.entity.Root">
@@ -47,6 +49,7 @@
         he.email chargeEmail,
         he.mobile chargeTel,
         he.name chargeName,
+        iu_re.real_name releaseByName,
         hu.unit_name chargeDept,
         iu.real_name lastUpdatedName,
         xcg.group_name,
@@ -57,6 +60,7 @@
         left join hpfm_employee he on xr.charge_id=he.employee_id
         left join hpfm_unit hu on xr.charge_dept_id=hu.unit_id
         left join iam_user iu on xr.last_updated_by=iu.id
+        left join iam_user iu_re on xr.release_by=iu_re.id
         left join xsta_root_line xrl on xr.id = xrl.root_id
         left join xcor_common_group xcg on xr.group_id = xcg.group_id
         <if test='datasourceType == "ORACLE"'>

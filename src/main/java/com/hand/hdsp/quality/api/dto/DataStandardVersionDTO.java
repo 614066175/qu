@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.api.dto;
 
+import java.util.Date;
 import java.util.List;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
@@ -118,4 +119,13 @@ public class DataStandardVersionDTO extends AuditDomain {
     private String groupName;
 
     private Long projectId;
+
+    @ApiModelProperty("发布人id")
+    private Long releaseBy;
+
+    @Transient
+    private String releaseByName;
+
+    @ApiModelProperty("发布时间")
+    private Date releaseDate;
 }

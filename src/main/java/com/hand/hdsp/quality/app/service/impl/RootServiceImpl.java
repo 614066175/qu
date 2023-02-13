@@ -18,6 +18,11 @@ import com.hand.hdsp.quality.infra.mapper.StandardApprovalMapper;
 import com.hand.hdsp.quality.infra.util.AnsjUtil;
 import com.hand.hdsp.quality.workflow.adapter.RootOfflineWorkflowAdapter;
 import com.hand.hdsp.quality.workflow.adapter.RootOnlineWorkflowAdapter;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.ansj.domain.Result;
 import org.ansj.domain.Term;
@@ -300,6 +305,10 @@ public class RootServiceImpl implements RootService {
             if (ONLINE.equals(root.getReleaseStatus())) {
                 //存版本表
                 doVersion(root);
+                root.setReleaseBy(DetailsHelper.getUserDetails().getUserId());
+                root.setReleaseDate(new Date());
+                rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS, Root.FIELD_RELEASE_BY, Root.FIELD_RELEASE_DATE);
+                return;
             }
         }
         //修改发布状态
@@ -312,9 +321,22 @@ public class RootServiceImpl implements RootService {
         if (root != null) {
             //工作流适配器回调
             root = (Root) rootOnlineWorkflowAdapter.callBack(root, nodeApproveResult);
-            rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS);
-
             if (ONLINE.equals(root.getReleaseStatus())) {
+                List<StandardApprovalDTO> standardApprovalDTOS = standardApprovalRepository.selectDTOByCondition(Condition.builder(StandardApproval.class)
+                        .andWhere(Sqls.custom()
+                                .andEqualTo(StandardApproval.FIELD_TENANT_ID, root.getTenantId())
+                                .andEqualTo(StandardApproval.FIELD_STANDARD_ID, root.getId())
+                                .andEqualTo(StandardApproval.FIELD_STANDARD_TYPE, ROOT)
+                                .andEqualTo(StandardApproval.FIELD_APPLY_TYPE, ONLINE))
+                        .orderByDesc(StandardApproval.FIELD_APPROVAL_ID)
+                        .build());
+                if (CollectionUtils.isNotEmpty(standardApprovalDTOS)) {
+                    StandardApprovalDTO tmepDto = standardApprovalDTOS.get(0);
+                    Long releaseBy = tmepDto.getCreatedBy();
+                    root.setReleaseBy(releaseBy);
+                    root.setReleaseDate(new Date());
+                }
+                rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS, Root.FIELD_RELEASE_BY, Root.FIELD_RELEASE_DATE);
                 doVersion(root);
                 //上线后词库追加词根对应的中文
                 List<RootLine> rootLines = rootLineRepository.select(RootLine.builder().rootId(rootId).build());
@@ -326,6 +348,8 @@ public class RootServiceImpl implements RootService {
                             .collect(Collectors.toList());
                     ansjUtil.addWord(root.getTenantId(), root.getProjectId(), addWords);
                 }
+            } else {
+                rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS);
             }
         }
     }

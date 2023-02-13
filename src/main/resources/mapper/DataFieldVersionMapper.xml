@@ -51,7 +51,9 @@
         ${fsv}.charge_tel,
         ${fsv}.charge_email,
         ${fsv}.version_number,
-        ${fsv}.tenant_id
+        ${fsv}.tenant_id,
+        ${fsv}.release_by,
+        ${fsv}.release_date
     </sql>
 
     <select id="detail" resultType="com.hand.hdsp.quality.api.dto.DataFieldVersionDTO">
@@ -78,6 +80,7 @@
         SELECT
         iu.login_name lastUpdateName,
         iu2.login_name chargeName,
+        iu_re.real_name releaseByName,
         hu.unit_name chargeDeptName,
         xsg.group_name,
         xsg.group_code,
@@ -90,6 +93,7 @@
         left join iam_user iu on fsv.last_updated_by=iu.id
         left join iam_user iu2 on fsv.charge_id=iu2.id
         left join hpfm_unit hu on hu.unit_id=fsv.charge_dept_id
+        left join iam_user iu_re on fsv.release_by=iu_re.id
         <where>
             <if test="dataFieldVersionDTO.fieldId!=null">
                 fsv.field_id=#{dataFieldVersionDTO.fieldId}

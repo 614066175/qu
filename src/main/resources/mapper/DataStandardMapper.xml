@@ -55,7 +55,9 @@
           ${ds}.last_updated_by,
           ${ds}.last_update_date,
           ${ds}.null_flag,
-          ${ds}.project_id
+          ${ds}.project_id,
+          ${ds}.release_by,
+          ${ds}.release_date
     </sql>
 
     <select id="list" resultType="com.hand.hdsp.quality.api.dto.DataStandardDTO">
@@ -63,6 +65,7 @@
         select
         iu.login_name lastUpdateName,
         iu.login_name lastUpdatedByName,
+        iu_re.real_name releaseByName,
         iu3.login_name createdByName,
         he.email chargeEmail,
         he.mobile chargeTel,
@@ -81,6 +84,7 @@
         left join xcor_common_group xcg on ds.group_id=xcg.group_id
 --         left join xsta_standard_group xsg on xsg.group_id=ds.group_id
         left join iam_user iu on ds.last_updated_by=iu.id
+        left join iam_user iu_re on ds.release_by=iu_re.id
         left join iam_user iu3 on ds.created_by=iu3.id
         left join hpfm_unit hu on hu.unit_id=ds.charge_dept_id
         left join hpfm_employee he on ds.charge_id=he.employee_id
