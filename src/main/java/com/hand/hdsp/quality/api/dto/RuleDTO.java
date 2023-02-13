@@ -38,6 +38,8 @@ import java.util.List;
 @ExcelSheet(zh = "标准规则", en = "Rule", rowOffset = 2)
 public class RuleDTO extends AuditDomain {
 
+    private String groupPath;
+
     private String groupCode;
 
     @ApiModelProperty("表ID，主键，供其他表做外键")
@@ -143,4 +145,8 @@ public class RuleDTO extends AuditDomain {
      */
     @Transient
     private Long[] groupArrays;
+
+    @Transient
+    //平台及标识 Y/N
+    private String isPlatformFlag;
 }

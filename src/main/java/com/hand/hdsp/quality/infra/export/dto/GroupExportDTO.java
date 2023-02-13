@@ -14,14 +14,14 @@ public class GroupExportDTO {
     public Long groupId;
     public String groupType;
 
-    @ExcelColumn(zh = "分组名称",en = "groupName")
+    @ExcelColumn(zh = "分组名称",en = "groupName",order = -1)
     public String groupName;
     public String groupPath;
     public Long parentGroupId;
     public Long tenantId;
     public Long projectId;
 
-    @ExcelColumn(zh = "父分组全路径",en = "parentGroupPath")
+    @ExcelColumn(zh = "父分组全路径",en = "parentGroupPath",order = -2)
     private String parentGroupPath;
 
 }

@@ -1,30 +1,22 @@
 package com.hand.hdsp.quality.infra.validation;
 
-import java.io.IOException;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.StandardDocDTO;
-
-import com.hand.hdsp.quality.domain.entity.StandardDoc;
-
 import com.hand.hdsp.quality.domain.repository.StandardDocRepository;
-
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import com.hand.hdsp.quality.infra.mapper.StandardDocMapper;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-
 import org.hzero.boot.imported.app.service.BatchValidatorHandler;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidator;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidators;
-import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
-import org.hzero.mybatis.util.Sqls;
+
+import java.io.IOException;
+import java.util.List;
 
 
 
@@ -56,28 +48,6 @@ public class StandardDocValidator extends BatchValidatorHandler {
             for (int i = 0; i < data.size(); i++) {
                 if (StringUtils.isNoneBlank(data.get(i))) {
                     StandardDocDTO standardDocDTO = objectMapper.readValue(data.get(i), StandardDocDTO.class);
-                    List<StandardDocDTO> standardDocDTOList = standardDocRepository.selectDTOByCondition(Condition.builder(StandardDoc.class)
-                            .andWhere(Sqls.custom()
-                                    .andEqualTo(StandardDoc.FIELD_STANDARD_CODE, standardDocDTO.getStandardCode())
-                                    .andEqualTo(StandardDoc.FIELD_TENANT_ID, tenantId)
-                                    .andEqualTo(StandardDoc.FIELD_PROJECT_ID,projectId))
-                            .build());
-                    //标准编码存在
-                    if (CollectionUtils.isNotEmpty(standardDocDTOList)) {
-                        addErrorMsg(i, "标准编码存已在");
-                        return false;
-                    }
-                    standardDocDTOList = standardDocRepository.selectDTOByCondition(Condition.builder(StandardDoc.class)
-                            .andWhere(Sqls.custom()
-                                    .andEqualTo(StandardDoc.FIELD_STANDARD_NAME, standardDocDTO.getStandardName())
-                                    .andEqualTo(StandardDoc.FIELD_TENANT_ID, tenantId)
-                                    .andEqualTo(StandardDoc.FIELD_PROJECT_ID,projectId))
-                            .build());
-                    //标准名称存在
-                    if (CollectionUtils.isNotEmpty(standardDocDTOList)) {
-                        addErrorMsg(i, "标准名称已存在");
-                        return false;
-                    }
 
                     //标准编码不符合规范
                     if (!standardDocDTO.getStandardCode().matches("^[a-zA-Z][a-zA-Z0-9_]*$")) {

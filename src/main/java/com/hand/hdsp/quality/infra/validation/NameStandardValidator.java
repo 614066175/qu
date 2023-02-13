@@ -3,21 +3,17 @@ package com.hand.hdsp.quality.infra.validation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.NameStandardDTO;
-import com.hand.hdsp.quality.domain.entity.NameStandard;
 import com.hand.hdsp.quality.domain.repository.NameStandardRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import com.hand.hdsp.quality.infra.mapper.NameStandardMapper;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.imported.app.service.BatchValidatorHandler;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidator;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidators;
-import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
-import org.hzero.mybatis.util.Sqls;
 
 import java.io.IOException;
 import java.util.List;
@@ -56,16 +52,7 @@ public class NameStandardValidator extends BatchValidatorHandler {
                     addErrorMsg(i,"导入表格中字段命名标准不存在");
                     return false;
                 }
-                List<NameStandardDTO> nameStandardDTOList = nameStandardRepository.selectDTOByCondition(Condition.builder(NameStandard.class).andWhere(Sqls.custom()
-                                .andEqualTo(NameStandard.FIELD_STANDARD_CODE, standardCode)
-                                .andEqualTo(NameStandard.FIELD_TENANT_ID, tenantId)
-                                .andEqualTo(NameStandard.FIELD_PROJECT_ID, projectId)
-                        )
-                        .build());
-                if(CollectionUtils.isNotEmpty(nameStandardDTOList)){
-                    addErrorMsg(i,"命名标准：" + nameStandardDTO.getStandardName() + "已存在;");
-                    return false;
-                }
+
                 //如果有责任人，则进行验证
                 //校验的责任人名称为员工姓名
                 if(DataSecurityHelper.isTenantOpen()){

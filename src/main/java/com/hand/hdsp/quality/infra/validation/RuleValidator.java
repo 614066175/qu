@@ -5,13 +5,10 @@ import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.domain.entity.Rule;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
-import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.boot.imported.app.service.BatchValidatorHandler;
-import org.hzero.boot.imported.infra.validator.annotation.ImportValidator;
-import org.hzero.boot.imported.infra.validator.annotation.ImportValidators;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 
@@ -27,7 +24,8 @@ import java.util.List;
  * @since 1.0
  */
 @Slf4j
-@ImportValidators(value = {@ImportValidator(templateCode = TemplateCodeConstants.TEMPLATE_CODE_RULE, sheetIndex = 1)})
+@Deprecated
+//@ImportValidators(value = {@ImportValidator(templateCode = TemplateCodeConstants.TEMPLATE_CODE_RULE, sheetIndex = 1)})
 public class RuleValidator extends BatchValidatorHandler {
 
     private final ObjectMapper objectMapper;
