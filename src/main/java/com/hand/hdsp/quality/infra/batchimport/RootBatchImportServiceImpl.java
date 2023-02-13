@@ -12,19 +12,11 @@ import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.mapper.RootMapper;
+import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.ROOT_STANDARD;
-
-import io.choerodon.core.oauth.DetailsHelper;
-
 import org.hzero.boot.imported.app.service.BatchImportHandler;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
@@ -32,6 +24,12 @@ import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.ROOT_STANDARD;
 
 /**
  * description
@@ -81,7 +79,7 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
                     root.setGroupId(commonGroupList.get(0).getGroupId());
                 }else {
                     addErrorMsg(i, String.format("未找到分组%s，请检查数据",root.getGroupPath()));
-                    return false;
+                    continue;
                 }
 
                 //责任人id
@@ -92,7 +90,7 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
                 Long chargeId = rootMapper.checkCharger(root.getChargeName(), root.getTenantId());
                 if (ObjectUtils.isEmpty(chargeId)) {
                     addErrorMsg(i, "未找到此责任人，请检查数据");
-                    return false;
+                    continue;
                 }
                 root.setChargeId(chargeId);
 
@@ -113,7 +111,7 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
                 }
                 if(ObjectUtils.isEmpty(chargeDeptId)){
                     addErrorMsg(i,"该责任人未分配部门");
-                    return false;
+                    continue;
                 }
                 root.setChargeDeptId(chargeDeptId);
                 root.setReleaseStatus(StandardConstant.Status.CREATE);
