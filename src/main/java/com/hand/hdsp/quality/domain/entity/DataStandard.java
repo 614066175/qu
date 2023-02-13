@@ -12,6 +12,8 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
+import java.util.Date;
+
 /**
  * <p>数据标准表实体</p>
  *
@@ -48,6 +50,8 @@ public class DataStandard extends AuditDomain {
     public static final String FIELD_TENANT_ID = "tenantId";
     public static final String FIELD_PROJECT_ID = "projectId";
     public static final String FIELD_NULL_FLAG = "nullFlag";
+    public static final String FIELD_RELEASE_BY = "releaseBy";
+    public static final String FIELD_RELEASE_DATE = "releaseDate";
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -101,4 +105,7 @@ public class DataStandard extends AuditDomain {
 
     private Integer nullFlag;
 
+    private Long releaseBy;
+
+    private Date releaseDate;
 }

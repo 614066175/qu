@@ -635,6 +635,61 @@ public class RootServiceImpl implements RootService {
     }
 
     /**
+     * 修改词根状态，供审批中，审批结束任务状态变更
+     *
+     * @param id
+     * @param status
+     */
+    private void workflowing(Long id, String status) {
+        Root root = rootRepository.selectByPrimaryKey(id);
+        if (root != null) {
+            // 判断流程类型，当字段标准状态不为ONLINE且调用workflowing status传值ONLINE时则为发布上线
+            if (!ONLINE.equals(root.getReleaseStatus()) && ONLINE.equals(status)) {
+                List<StandardApprovalDTO> standardApprovalDTOS = standardApprovalRepository.selectDTOByCondition(Condition.builder(StandardApproval.class)
+                        .andWhere(Sqls.custom()
+                                .andEqualTo(StandardApproval.FIELD_TENANT_ID, root.getTenantId())
+                                .andEqualTo(StandardApproval.FIELD_STANDARD_ID, id)
+                                .andEqualTo(StandardApproval.FIELD_STANDARD_TYPE, ROOT)
+                                .andEqualTo(StandardApproval.FIELD_APPLY_TYPE, ONLINE))
+                        .build());
+                if (CollectionUtils.isNotEmpty(standardApprovalDTOS)) {
+                    StandardApprovalDTO tmepDto = standardApprovalDTOS.get(0);
+                    Long releaseBy = tmepDto.getCreatedBy();
+                    // 从申请记录表中获取发布人id
+                    for (StandardApprovalDTO standardApprovalDTO : standardApprovalDTOS) {
+                        if (standardApprovalDTO.getCreationDate().after(tmepDto.getCreationDate())) {
+                            releaseBy = standardApprovalDTO.getCreatedBy();
+                        }
+                    }
+                    root.setReleaseBy(releaseBy);
+                    root.setReleaseDate(new Date());
+                }
+                root.setReleaseStatus(status);
+                rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS, Root.FIELD_RELEASE_BY, Root.FIELD_RELEASE_DATE);
+            } else {
+                root.setReleaseStatus(status);
+                rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS);
+            }
+            if (ONLINE.equals(status)) {
+                doVersion(root);
+                //上线后词库追加词根对应的中文
+                List<RootLine> rootLines = rootLineRepository.select(RootLine.builder().rootId(id).build());
+                if (CollectionUtils.isNotEmpty(rootLines)) {
+                    List<String> addWords = rootLines.stream()
+                            .filter(rootLine -> Strings.isNotBlank(rootLine.getRootName()))
+                            .map(RootLine::getRootName)
+                            .distinct()
+                            .collect(Collectors.toList());
+                    ansjUtil.addWord(root.getTenantId(), root.getProjectId(), addWords);
+                }
+            } else {
+                //下线词库中进行移除,基于当前在线和下线中的词根重新生成文件
+                ansjUtil.rebuildDic(root.getTenantId(), root.getProjectId());
+            }
+        }
+    }
+
+    /**
      * 版本记录
      *
      * @param root

@@ -11,6 +11,7 @@ import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 
 import com.hand.hdsp.quality.api.dto.RootDTO;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -48,6 +49,8 @@ public class Root extends AuditDomain {
     public static final String FIELD_RELEASE_STATUS = "releaseStatus";
     public static final String FIELD_TENANT_ID = "tenantId";
     public static final String FIELD_PROJECT_ID = "projectId";
+    public static final String FIELD_RELEASE_BY = "releaseBy";
+    public static final String FIELD_RELEASE_DATE = "releaseDate";
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -169,4 +172,12 @@ public class Root extends AuditDomain {
     @Transient
     private String exportIds;
 
+    @ApiModelProperty("发布人id")
+    private Long releaseBy;
+
+    @Transient
+    private String releaseByName;
+
+    @ApiModelProperty("发布时间")
+    private Date releaseDate;
 }

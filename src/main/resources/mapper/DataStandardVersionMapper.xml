@@ -55,7 +55,9 @@
         ${dsv}.charge_tel,
         ${dsv}.charge_email,
         ${dsv}.version_number,
-        ${dsv}.tenant_id
+        ${dsv}.tenant_id,
+        ${dsv}.release_by,
+        ${dsv}.release_date
     </sql>
     <select id="detail" resultType="com.hand.hdsp.quality.api.dto.DataStandardVersionDTO">
         SELECT
@@ -79,6 +81,7 @@
         SELECT
         iu.login_name lastUpdateName,
         iu2.login_name chargeName,
+        iu_re.real_name releaseByName,
         hu.unit_name chargeDeptName,
         xsg.group_name,
         <include refid="baseColumn">
@@ -89,6 +92,7 @@
         left join xsta_standard_group xsg on xsg.group_id=dsv.group_id
         left join iam_user iu on dsv.last_updated_by=iu.id
         left join iam_user iu2 on dsv.charge_id=iu2.id
+        left join iam_user iu_re on dsv.release_by=iu_re.id
         left join hpfm_unit hu on hu.unit_id=dsv.charge_dept_id
         WHERE
         <if test="dataStandardVersionDTO.standardId!=null">

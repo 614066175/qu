@@ -21,6 +21,8 @@ import lombok.NoArgsConstructor;
 
 import org.hzero.export.annotation.ExcelColumn;
 
+import java.util.Date;
+
 /**
  * 词根版本
  *
@@ -49,6 +51,8 @@ public class RootVersion extends AuditDomain {
     public static final String FIELD_CHARGE_ID = "chargeId";
     public static final String FIELD_GROUP_ID = "groupId";
     public static final String FIELD_VERSION_NUMBER = "versionNumber";
+    public static final String FIELD_RELEASE_BY = "releaseBy";
+    public static final String FIELD_RELEASE_DATE = "releaseDate";
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -138,4 +142,13 @@ public class RootVersion extends AuditDomain {
      */
     @Transient
     private  String updaterName;
+
+    @ApiModelProperty("发布人id")
+    private Long releaseBy;
+
+    @Transient
+    private String releaseByName;
+
+    @ApiModelProperty("发布时间")
+    private Date releaseDate;
 }
