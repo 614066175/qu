@@ -142,6 +142,8 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
                         .build());
                 if (exist != null) {
                     dataFieldDTO.setFieldId(exist.getFieldId());
+                    dataFieldDTO.setReleaseBy(exist.getReleaseBy());
+                    dataFieldDTO.setReleaseDate(exist.getReleaseDate());
                     dataFieldDTO.setObjectVersionNumber(exist.getObjectVersionNumber());
                     //存在默认使用本身状态
                     dataFieldDTO.setStandardStatus(exist.getStandardStatus());

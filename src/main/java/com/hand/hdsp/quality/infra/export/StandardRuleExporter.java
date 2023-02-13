@@ -15,10 +15,8 @@ import org.hzero.mybatis.util.Sqls;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.STANDARD_RULE;
 
@@ -64,10 +62,11 @@ public class StandardRuleExporter implements Exporter<RuleDTO, List<StandardRule
             if (CollectionUtils.isNotEmpty(ruleDTOList)) {
                 //查询标准规则的告警配置默认取一个，拉平头行
                 ruleDTOList.forEach(ruleDTO -> {
-                    if(ruleDTO.getTenantId().equals(dto.getTenantId())){
+                    ruleDTO.setGroupPath(commonGroup.getGroupPath());
+                    if (ruleDTO.getTenantId().equals(dto.getTenantId())) {
                         //如果导出数据是当前租户的数据
                         ruleDTO.setIsPlatformFlag("N");
-                    }else{
+                    } else {
                         ruleDTO.setIsPlatformFlag("Y");
                     }
                     List<RuleLineDTO> ruleLineDTOList = ruleLineRepository.selectDTOByCondition(Condition.builder(RuleLine.class)
@@ -88,6 +87,10 @@ public class StandardRuleExporter implements Exporter<RuleDTO, List<StandardRule
                             .andEqualTo(CommonGroup.FIELD_PROJECT_ID, dto.getProjectId())
                             .andEqualTo(CommonGroup.FIELD_GROUP_TYPE, STANDARD_RULE))
                     .build());
+            if (CollectionUtils.isEmpty(commonGroups)) {
+                return new ArrayList<>();
+            }
+            Map<Long, String> groupPathMap = commonGroups.stream().collect(Collectors.toMap(CommonGroup::getGroupId, CommonGroup::getGroupPath, (key1, key2) -> key2));
             //查询符合条件的标准规则数据
             //条件查询获取这个分组下的标准数据
             List<RuleDTO> ruleDTOList = ruleRepository.selectDTOByCondition(Condition.builder(Rule.class)
@@ -105,10 +108,11 @@ public class StandardRuleExporter implements Exporter<RuleDTO, List<StandardRule
             if (CollectionUtils.isNotEmpty(ruleDTOList)) {
                 //查询标准规则的告警配置默认取一个，拉平头行
                 ruleDTOList.forEach(ruleDTO -> {
-                    if(ruleDTO.getTenantId().equals(dto.getTenantId())){
+                    ruleDTO.setGroupPath(groupPathMap.get(ruleDTO.getGroupId()));
+                    if (ruleDTO.getTenantId().equals(dto.getTenantId())) {
                         //如果导出数据是当前租户的数据
                         ruleDTO.setIsPlatformFlag("N");
-                    }else{
+                    } else {
                         ruleDTO.setIsPlatformFlag("Y");
                     }
                     List<RuleLineDTO> ruleLineDTOList = ruleLineRepository.selectDTOByCondition(Condition.builder(RuleLine.class)

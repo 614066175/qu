@@ -96,6 +96,8 @@ public class StandardDocBatchImportServiceImpl extends BatchImportHandler implem
                 if (exist != null) {
                     standardDocDTO.setDocId(exist.getDocId());
                     standardDocDTO.setObjectVersionNumber(exist.getObjectVersionNumber());
+                    standardDocDTO.setDocPath(exist.getDocPath());
+                    standardDocDTO.setDocName(exist.getDocName());
                     updateList.add(standardDocConverter.dtoToEntity(standardDocDTO));
                 } else {
                     addList.add(standardDocDTO);

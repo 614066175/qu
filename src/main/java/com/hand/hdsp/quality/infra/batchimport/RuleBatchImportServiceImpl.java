@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.List;
 
-import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.DOC_STANDARD;
+import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.STANDARD_RULE;
 
 /**
  * <p>
@@ -66,7 +66,7 @@ public class RuleBatchImportServiceImpl extends BatchImportHandler implements IB
                 }
                 //导入分组id
                 CommonGroup commonGroup = commonGroupRepository.selectOne(CommonGroup.builder()
-                        .groupType(DOC_STANDARD)
+                        .groupType(STANDARD_RULE)
                         .groupPath(ruleDTO.getGroupPath())
                         .tenantId(tenantId).projectId(projectId)
                         .build());
@@ -78,11 +78,18 @@ public class RuleBatchImportServiceImpl extends BatchImportHandler implements IB
                 }
                 ruleDTO.setTenantId(tenantId);
                 ruleDTO.setProjectId(projectId);
+                if ("是".equals(ruleDTO.getExceptionBlockFlag())) {
+                    ruleDTO.setExceptionBlock(1);
+                } else {
+                    ruleDTO.setExceptionBlock(0);
+                }
                 //判断标准规则是否存在
-                Rule exist = ruleRepository.selectOne(Rule.builder().ruleCode(ruleDTO.getRuleCode()).tenantId(tenantId)
+                Rule exist = ruleRepository.selectOne(Rule.builder().ruleCode(ruleDTO.getRuleCode())
+                        .tenantId(tenantId)
                         .projectId(projectId).build());
                 if (exist != null) {
                     ruleDTO.setRuleId(exist.getRuleId());
+                    ruleDTO.setEnabledFlag(exist.getEnabledFlag());
                     ruleDTO.setObjectVersionNumber(exist.getObjectVersionNumber());
                     ruleRepository.updateByDTOPrimaryKey(ruleDTO);
                 } else {

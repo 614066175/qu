@@ -38,6 +38,10 @@ public class NameStandardDTO extends AuditDomain {
     @NotNull
     private Long groupId;
 
+    @Transient
+    @ExcelColumn(zh = "分组全路径", en = "groupPath", order = 2)
+    private String groupPath;
+
     @ExcelColumn(zh = "标准编码", en = "standardCode", order = 3)
     @ApiModelProperty(value = "命名标准编码")
     @NotBlank
@@ -139,8 +143,7 @@ public class NameStandardDTO extends AuditDomain {
     @Transient
     private String chargeDeptName;
 
-    @Transient
-    private String groupPath;
+
     /**
      * 分组编码
      */

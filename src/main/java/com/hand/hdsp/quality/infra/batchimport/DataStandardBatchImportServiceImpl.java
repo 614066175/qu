@@ -106,6 +106,8 @@ public class DataStandardBatchImportServiceImpl extends BatchImportHandler imple
                 if (exist != null) {
                     dataStandardDTO.setStandardId(exist.getStandardId());
                     dataStandardDTO.setObjectVersionNumber(exist.getObjectVersionNumber());
+                    dataStandardDTO.setReleaseBy(exist.getReleaseBy());
+                    dataStandardDTO.setReleaseDate(exist.getReleaseDate());
                     //存在默认使用本身状态
                     dataStandardDTO.setStandardStatus(exist.getStandardStatus());
                     //如果是在线或下线中状态，判断是否需要下线审核，需要则报错
@@ -113,9 +115,9 @@ public class DataStandardBatchImportServiceImpl extends BatchImportHandler imple
                         String offlineOpen = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.DATA_STANDARD_OFFLINE);
                         //为空，或者为true
                         if (StringUtils.isEmpty(offlineOpen) || Boolean.parseBoolean(offlineOpen)) {
-                            addErrorMsg(i,"标准已存在，状态不可进行数据修改，请先下线标准！");
+                            addErrorMsg(i, "标准已存在，状态不可进行数据修改，请先下线标准！");
                             continue;
-                        }else{
+                        } else {
                             //设置为离线状态
                             dataStandardDTO.setStandardStatus(OFFLINE);
                         }
