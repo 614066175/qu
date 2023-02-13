@@ -378,6 +378,10 @@ public class DataFieldServiceImpl implements DataFieldService {
                 dataFieldDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
                 //存版本表
                 doVersion(dataFieldDTO);
+                dataFieldDTO.setReleaseBy(DetailsHelper.getUserDetails().getUserId());
+                dataFieldDTO.setReleaseDate(new Date());
+                dataFieldRepository.updateDTOOptional(dataFieldDTO, DataField.FIELD_STANDARD_STATUS, DataField.FIELD_RELEASE_BY, DataField.FIELD_RELEASE_DATE);
+                return ;
             }
         }
 
@@ -394,7 +398,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                 dataFieldDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
             }
         }
-        dataFieldRepository.updateDTOOptional(dataFieldDTO, DataStandard.FIELD_STANDARD_STATUS);
+        dataFieldRepository.updateDTOOptional(dataFieldDTO, DataField.FIELD_STANDARD_STATUS);
     }
 
     @Override
@@ -443,17 +447,17 @@ public class DataFieldServiceImpl implements DataFieldService {
         nodeApproveResult = (String) dataFieldOnlineWorkflowAdapter.callBack(fieldId,nodeApproveResult);
         if(WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)){
             workflowing(DetailsHelper.getUserDetails().getTenantId(), fieldId, ONLINE);
-        }else {
+        } else {
             workflowing(DetailsHelper.getUserDetails().getTenantId(), fieldId, OFFLINE);
         }
     }
 
     @Override
-    public void offlineWorkflowCallback(Long fieldId,String nodeApproveResult) {
-        nodeApproveResult = (String) dataFieldOfflineWorkflowAdapter.callBack(fieldId,nodeApproveResult);
-        if(WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)){
+    public void offlineWorkflowCallback(Long fieldId, String nodeApproveResult) {
+        nodeApproveResult = (String) dataFieldOfflineWorkflowAdapter.callBack(fieldId, nodeApproveResult);
+        if (WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)) {
             workflowing(DetailsHelper.getUserDetails().getTenantId(), fieldId, OFFLINE);
-        }else {
+        } else {
             workflowing(DetailsHelper.getUserDetails().getTenantId(), fieldId, ONLINE);
         }
     }
@@ -673,17 +677,11 @@ public class DataFieldServiceImpl implements DataFieldService {
                                 .andEqualTo(StandardApproval.FIELD_STANDARD_ID, fieldId)
                                 .andEqualTo(StandardApproval.FIELD_STANDARD_TYPE, FIELD)
                                 .andEqualTo(StandardApproval.FIELD_APPLY_TYPE, ONLINE))
+                                .orderByDesc(StandardApproval.FIELD_APPROVAL_ID)
                         .build());
                 if (CollectionUtils.isNotEmpty(standardApprovalDTOS)) {
-                    StandardApprovalDTO tmepDto = standardApprovalDTOS.get(0);
-                    Long releaseBy = tmepDto.getCreatedBy();
-                    // 从申请记录表中获取发布人id
-                    for (StandardApprovalDTO standardApprovalDTO : standardApprovalDTOS) {
-                        if (standardApprovalDTO.getCreationDate().after(tmepDto.getCreationDate())) {
-                            releaseBy = standardApprovalDTO.getCreatedBy();
-                        }
-                    }
-                    dataFieldDTO.setReleaseBy(releaseBy);
+                    StandardApprovalDTO standardApprovalDTO = standardApprovalDTOS.get(0);
+                    dataFieldDTO.setReleaseBy(standardApprovalDTO.getCreatedBy());
                     dataFieldDTO.setReleaseDate(new Date());
                 }
                 dataFieldDTO.setStandardStatus(status);

@@ -26,6 +26,8 @@ import com.hand.hdsp.quality.infra.util.ValueRangeHandler;
 import com.hand.hdsp.quality.workflow.adapter.DataStandardOfflineWorkflowAdapter;
 import com.hand.hdsp.quality.workflow.adapter.DataStandardOnlineWorkflowAdapter;
 import io.choerodon.core.convertor.ApplicationContextHelper;
+import com.hand.hdsp.quality.workflow.adapter.DataStandardOfflineWorkflowAdapter;
+import com.hand.hdsp.quality.workflow.adapter.DataStandardOnlineWorkflowAdapter;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -480,10 +482,12 @@ public class DataStandardServiceImpl implements DataStandardService {
         if (Objects.isNull(dto)) {
             throw new CommonException(ErrorCode.DATA_STANDARD_NOT_EXIST);
         }
-        dataStandardDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
-        dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS);
         //判断数据标准状态,如果是发布上线状态，则存版本表
         if (ONLINE.equals(dataStandardDTO.getStandardStatus())) {
+            dataStandardDTO.setReleaseBy(DetailsHelper.getUserDetails().getUserId());
+            dataStandardDTO.setReleaseDate(new Date());
+            dataStandardDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
+            dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS, DataStandard.FIELD_RELEASE_BY, DataStandard.FIELD_RELEASE_DATE);
             //存版本表
             doVersion(dataStandardDTO);
             //1.数据标准没有关联评估方案，直接发布，不做处理
@@ -508,7 +512,10 @@ public class DataStandardServiceImpl implements DataStandardService {
         }
         if (OFFLINE.equals(dataStandardDTO.getStandardStatus())) {
             assetFeign.deleteStandardToEs(dataStandardDTO.getTenantId(), dataStandardDTO);
+            dataStandardDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
+            dataStandardRepository.updateDTOOptional(dataStandardDTO, DataStandard.FIELD_STANDARD_STATUS);
         }
+
     }
 
     /**
@@ -850,17 +857,11 @@ public class DataStandardServiceImpl implements DataStandardService {
                                 .andEqualTo(StandardApproval.FIELD_STANDARD_ID, dataStandardDTO.getStandardId())
                                 .andEqualTo(StandardApproval.FIELD_STANDARD_TYPE, DATA)
                                 .andEqualTo(StandardApproval.FIELD_APPLY_TYPE, ONLINE))
+                        .orderByDesc(StandardApproval.FIELD_APPROVAL_ID)
                         .build());
                 if (CollectionUtils.isNotEmpty(standardApprovalDTOS)) {
-                    StandardApprovalDTO tmepDto = standardApprovalDTOS.get(0);
-                    Long releaseBy = tmepDto.getCreatedBy();
-                    // 从申请记录表中获取发布人id
-                    for (StandardApprovalDTO standardApprovalDTO : standardApprovalDTOS) {
-                        if (standardApprovalDTO.getCreationDate().after(tmepDto.getCreationDate())) {
-                            releaseBy = standardApprovalDTO.getCreatedBy();
-                        }
-                    }
-                    dataStandardDTO.setReleaseBy(releaseBy);
+                    StandardApprovalDTO standardApprovalDTO = standardApprovalDTOS.get(0);
+                    dataStandardDTO.setReleaseBy(standardApprovalDTO.getCreatedBy());
                     dataStandardDTO.setReleaseDate(new Date());
                 }
 
