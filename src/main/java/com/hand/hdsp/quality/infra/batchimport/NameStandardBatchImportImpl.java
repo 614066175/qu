@@ -92,6 +92,9 @@ public class NameStandardBatchImportImpl extends BatchImportHandler implements I
                         .build());
                 if (exist != null) {
                     nameStandardDTO.setStandardId(exist.getStandardId());
+                    nameStandardDTO.setLatestCheckedStatus(exist.getLatestCheckedStatus());
+                    nameStandardDTO.setLatestAbnormalNum(exist.getLatestAbnormalNum());
+                    nameStandardDTO.setEnabledFlag(exist.getEnabledFlag());
                     nameStandardDTO.setObjectVersionNumber(exist.getObjectVersionNumber());
                     updateList.add(nameStandardConverter.dtoToEntity(nameStandardDTO));
                 } else {

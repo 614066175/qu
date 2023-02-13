@@ -41,6 +41,7 @@ public class StandardDocDTO extends AuditDomain {
     private Long groupId;
 
     @Transient
+    @ExcelColumn(zh = "分组全路径", en = "groupPath", order = 1)
     private String groupPath;
 
     @Transient

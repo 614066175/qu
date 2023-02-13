@@ -38,6 +38,7 @@ import java.util.List;
 @ExcelSheet(zh = "标准规则", en = "Rule", rowOffset = 2)
 public class RuleDTO extends AuditDomain {
 
+    @ExcelColumn(zh = "分组全路径", en = "rule code", order = 0)
     private String groupPath;
 
     private String groupCode;
@@ -78,6 +79,9 @@ public class RuleDTO extends AuditDomain {
     @NotNull
     @ExcelColumn(zh = "是否异常阻断", en = "exception block", renderers = BooleanColumnRender.class, order = 4)
     private Integer exceptionBlock;
+
+    @Transient
+    private String exceptionBlockFlag;
 
     @ApiModelProperty("权重")
     @ExcelColumn(zh = "权重", en = "weight", order = 5)
@@ -147,6 +151,7 @@ public class RuleDTO extends AuditDomain {
     private Long[] groupArrays;
 
     @Transient
-    //平台及标识 Y/N
+    //平台级标识 Y/N
+    @ExcelColumn(zh = "平台级标识", en = "isPlatformFlag", order = 13)
     private String isPlatformFlag;
 }

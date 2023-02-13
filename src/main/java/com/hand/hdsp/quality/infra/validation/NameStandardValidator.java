@@ -65,12 +65,6 @@ public class NameStandardValidator extends BatchValidatorHandler {
                     addErrorMsg(i, "未找到此责任人，请检查数据");
                     return false;
                 }
-                //当sheet页”数据标准“中的“分组名称”字段在本次导入表格和系统中不存在时则不能导入，并提示”${分组}分组不存在“，并在对应单元格高亮警示
-                String groupCode = nameStandardDTO.getGroupCode();
-                if (StringUtils.isEmpty(groupCode)) {
-                    addErrorMsg(i, String.format("表格中不存在分组%s", groupCode));
-                    return false;
-                }
             } catch (IOException e) {
                 log.info(e.getMessage());
                 addErrorMsg(i, e.getMessage());

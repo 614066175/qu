@@ -10,18 +10,11 @@ import com.hand.hdsp.quality.infra.constant.StandardConstant;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.mapper.RootMapper;
+import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import io.choerodon.core.oauth.DetailsHelper;
-
 import org.hzero.boot.imported.app.service.BatchValidatorHandler;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidator;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidators;
@@ -29,6 +22,11 @@ import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * description
@@ -137,10 +135,6 @@ public class RootValidator extends BatchValidatorHandler {
                     addErrorMsg(i, "责任人未分配至该责任部门");
                 }
 
-                String groupCode = root.getGroupPath();
-                if (StringUtils.isEmpty(groupCode)) {
-                    addErrorMsg(i, "当前行中没有分组路径");
-                }
 
                 //英文简称是否存在
                 if (CollectionUtils.isNotEmpty(rootList)) {
