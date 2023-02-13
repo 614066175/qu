@@ -1,28 +1,18 @@
 package com.hand.hdsp.quality.infra.validation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.StandardGroupDTO;
-import com.hand.hdsp.quality.domain.entity.StandardGroup;
 import com.hand.hdsp.quality.domain.repository.StandardGroupRepository;
-import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
-import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.imported.app.service.BatchValidatorHandler;
-import org.hzero.boot.imported.infra.validator.annotation.ImportValidator;
-import org.hzero.boot.imported.infra.validator.annotation.ImportValidators;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
 
 import java.io.IOException;
 import java.util.List;
 
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DOC;
-
 @Slf4j
-@ImportValidators(value = {@ImportValidator(templateCode = TemplateCodeConstants.TEMPLATE_CODE_STANDARD_DOC, sheetIndex = 0)})
+@Deprecated
+//@ImportValidators(value = {@ImportValidator(templateCode = TemplateCodeConstants.TEMPLATE_CODE_STANDARD_DOC, sheetIndex = 0)})
 public class StandardDocGroupValidator extends BatchValidatorHandler {
 
     private final ObjectMapper objectMapper;

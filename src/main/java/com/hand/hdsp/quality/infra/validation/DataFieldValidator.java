@@ -12,6 +12,7 @@ import com.hand.hdsp.quality.domain.repository.DataFieldRepository;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
 import com.hand.hdsp.quality.domain.repository.StandardTeamRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
+import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -21,14 +22,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.imported.app.service.BatchValidatorHandler;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidator;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidators;
+import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.StandardStatus.OFFLINE_APPROVING;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.StandardStatus.ONLINE;
 
 /**
  * <p>
@@ -49,13 +53,15 @@ public class DataFieldValidator extends BatchValidatorHandler {
 
     private final DataStandardRepository dataStandardRepository;
     private final StandardTeamRepository standardTeamRepository;
+    private final ProfileClient profileClient;
 
-    public DataFieldValidator(ObjectMapper objectMapper, DataFieldRepository dataFieldRepository, DataFieldMapper dataFieldMapper, DataStandardRepository dataStandardRepository, StandardTeamRepository standardTeamRepository) {
+    public DataFieldValidator(ObjectMapper objectMapper, DataFieldRepository dataFieldRepository, DataFieldMapper dataFieldMapper, DataStandardRepository dataStandardRepository, StandardTeamRepository standardTeamRepository, ProfileClient profileClient) {
         this.objectMapper = objectMapper;
         this.dataFieldRepository = dataFieldRepository;
         this.dataFieldMapper = dataFieldMapper;
         this.dataStandardRepository = dataStandardRepository;
         this.standardTeamRepository = standardTeamRepository;
+        this.profileClient = profileClient;
     }
 
     @Override
@@ -77,9 +83,17 @@ public class DataFieldValidator extends BatchValidatorHandler {
                                 .andEqualTo(DataField.FIELD_PROJECT_ID, projectId)
                         )
                         .build());
-                if(CollectionUtils.isNotEmpty(dataFieldDTOS)){
-                    addErrorMsg(i,"标准字段名称：" + dataFieldDTO.getFieldName() + "已存在;");
-                    return false;
+                //检验是否允许调整
+                if (CollectionUtils.isNotEmpty(dataFieldDTOS)) {
+                    DataFieldDTO exist = dataFieldDTOS.get(0);
+                    if (ONLINE.equals(exist.getStandardStatus()) || OFFLINE_APPROVING.equals(exist.getStandardStatus())) {
+                        String offlineOpen = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.FIELD_STANDARD_OFFLINE);
+                        if (offlineOpen == null || Boolean.parseBoolean(offlineOpen)) {
+                            //如果需要下线审批,则报错
+                            addErrorMsg(i, "标准已存在，状态不可进行数据修改，请先下线标准！");
+                        }
+                    }
+
                 }
                 //如果有责任人，则进行验证
                 //校验的责任人名称为员工姓名

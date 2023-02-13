@@ -20,6 +20,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.STANDARD_RULE;
+
 /**
  * @Title: StandardRuleExporter
  * @Description:
@@ -50,7 +52,7 @@ public class StandardRuleExporter implements Exporter<RuleDTO, List<StandardRule
                     .andWhere(Sqls.custom()
                             .andEqualTo(Rule.FIELD_GROUP_ID, commonGroup.getGroupId())
                             .andEqualTo(Rule.FIELD_PROJECT_ID, commonGroup.getProjectId())
-                            .andEqualTo(Rule.FIELD_TENANT_ID, Arrays.asList(commonGroup.getTenantId())))
+                            .andIn(Rule.FIELD_TENANT_ID, Arrays.asList(0L, commonGroup.getTenantId())))
                     .andWhere(Sqls.custom()
                             .andLike(Rule.FIELD_RULE_CODE, dto.getRuleCode(), true)
                             .andLike(Rule.FIELD_RULE_NAME, dto.getRuleName(), true)
@@ -62,94 +64,64 @@ public class StandardRuleExporter implements Exporter<RuleDTO, List<StandardRule
             if (CollectionUtils.isNotEmpty(ruleDTOList)) {
                 //查询标准规则的告警配置默认取一个，拉平头行
                 ruleDTOList.forEach(ruleDTO -> {
+                    if(ruleDTO.getTenantId().equals(dto.getTenantId())){
+                        //如果导出数据是当前租户的数据
+                        ruleDTO.setIsPlatformFlag("N");
+                    }else{
+                        ruleDTO.setIsPlatformFlag("Y");
+                    }
                     List<RuleLineDTO> ruleLineDTOList = ruleLineRepository.selectDTOByCondition(Condition.builder(RuleLine.class)
                             .andWhere(Sqls.custom()
                                     .andEqualTo(RuleLine.FIELD_RULE_ID, ruleDTO.getRuleId()))
                             .build());
-                    if (CollectionUtils.isNotEmpty(ruleDTOList)) {
-                        BeanUtils.copyProperties(ruleDTOList.get(0), ruleDTO);
+                    if (CollectionUtils.isNotEmpty(ruleLineDTOList)) {
+                        BeanUtils.copyProperties(ruleLineDTOList.get(0), ruleDTO);
                     }
                 });
             }
             return exportStandardRule(Collections.singletonList(commonGroup), ruleDTOList);
         } else {
-            //平台级数据无需导入导出
-//            CommonGroup commonGroup = commonGroupRepository.selectByCondition(Condition.builder().build());
+            //导出所有分组数据
+            List<CommonGroup> commonGroups = commonGroupRepository.selectByCondition(Condition.builder(CommonGroup.class)
+                    .andWhere(Sqls.custom()
+                            .andIn(Rule.FIELD_TENANT_ID, Arrays.asList(0L, dto.getTenantId()))
+                            .andEqualTo(CommonGroup.FIELD_PROJECT_ID, dto.getProjectId())
+                            .andEqualTo(CommonGroup.FIELD_GROUP_TYPE, STANDARD_RULE))
+                    .build());
+            //查询符合条件的标准规则数据
+            //条件查询获取这个分组下的标准数据
+            List<RuleDTO> ruleDTOList = ruleRepository.selectDTOByCondition(Condition.builder(Rule.class)
+                    .andWhere(Sqls.custom()
+                            .andEqualTo(Rule.FIELD_PROJECT_ID, dto.getProjectId())
+                            .andIn(Rule.FIELD_TENANT_ID, Arrays.asList(0L, dto.getTenantId())))
+                    .andWhere(Sqls.custom()
+                            .andLike(Rule.FIELD_RULE_CODE, dto.getRuleCode(), true)
+                            .andLike(Rule.FIELD_RULE_NAME, dto.getRuleName(), true)
+                            .andLike(Rule.FIELD_RULE_DESC, dto.getRuleDesc(), true)
+                            .andEqualTo(Rule.FIELD_CHECK_TYPE, dto.getCheckType(), true)
+                            .andEqualTo(Rule.FIELD_EXCEPTION_BLOCK, dto.getExceptionBlock(), true)
+                            .andEqualTo(Rule.FIELD_WEIGHT, dto.getWeight(), true))
+                    .build());
+            if (CollectionUtils.isNotEmpty(ruleDTOList)) {
+                //查询标准规则的告警配置默认取一个，拉平头行
+                ruleDTOList.forEach(ruleDTO -> {
+                    if(ruleDTO.getTenantId().equals(dto.getTenantId())){
+                        //如果导出数据是当前租户的数据
+                        ruleDTO.setIsPlatformFlag("N");
+                    }else{
+                        ruleDTO.setIsPlatformFlag("Y");
+                    }
+                    List<RuleLineDTO> ruleLineDTOList = ruleLineRepository.selectDTOByCondition(Condition.builder(RuleLine.class)
+                            .andWhere(Sqls.custom()
+                                    .andEqualTo(RuleLine.FIELD_RULE_ID, ruleDTO.getRuleId()))
+                            .build());
+                    if (CollectionUtils.isNotEmpty(ruleLineDTOList)) {
+                        BeanUtils.copyProperties(ruleLineDTOList.get(0), ruleDTO);
+                    }
+                });
+            }
+            return exportStandardRule(commonGroups, ruleDTOList);
         }
-
-
-//        //此处为hzero导出功能，从上下文中获取projectId
-//        Long projectId = ProjectHelper.getProjectId();
-//        dto.setProjectId(projectId);
-//        Long groupId = dto.getGroupId();
-//        //0分组是所有分组
-//        if (ObjectUtils.isNotEmpty(groupId) && groupId.equals(0L)) {
-//            groupId = null;
-//        }
-//        List<RuleGroupDTO> ruleGroupDTOList = ruleGroupRepository.selectDTOByCondition(Condition.builder(RuleGroup.class)
-//                .andWhere(Sqls.custom()
-//                        .andEqualTo(RuleGroup.FIELD_GROUP_ID, groupId, true)
-//                        .andIn(RuleGroup.FIELD_TENANT_ID, Arrays.asList(0, dto.getTenantId()))
-//                        .andEqualTo(RuleGroup.FIELD_PROJECT_ID, dto.getProjectId()))
-//                .build());
-//        if (ObjectUtils.isNotEmpty(groupId)) {
-//            int level = 1;
-//            ruleGroupDTOList.forEach(ruleGroupDTO -> {
-//                ruleGroupDTO.setGroupLevel(level);
-//            });
-//            Long parentGroupId = ruleGroupDTOList.get(0).getParentGroupId();
-//            if (ObjectUtils.isNotEmpty(parentGroupId)) {
-//                findParentGroups(parentGroupId, ruleGroupDTOList, level);
-//            }
-//            ruleGroupDTOList = ruleGroupDTOList.stream().sorted(Comparator.comparing(RuleGroupDTO::getGroupLevel).reversed()).collect(Collectors.toList());
-//        } else {
-//            //全量导出
-//            List<RuleGroupDTO> parentRuleGroupDTOS = ruleGroupDTOList.stream()
-//                    .filter(ruleGroupDTO -> (ruleGroupDTO.getParentGroupId().equals(0L)))
-//                    .peek(ruleGroupDTO -> ruleGroupDTO.setParentGroupCode(null))
-//                    .collect(Collectors.toList());
-//            Iterator<RuleGroupDTO> iterator = parentRuleGroupDTOS.iterator();
-//            if (iterator.hasNext()) {
-//                findChildGroups(iterator.next(), parentRuleGroupDTOS);
-//            }
-//        }
-//        ruleGroupDTOList.forEach(ruleGroupDTO -> {
-//            //查询某一分组下的，筛选后的标准规则
-//            List<RuleDTO> ruleDTOList = ruleRepository.selectDTOByCondition(Condition.builder(Rule.class)
-//                    .andWhere(Sqls.custom()
-//                            .andEqualTo(Rule.FIELD_GROUP_ID, ruleGroupDTO.getGroupId())
-//                            .andEqualTo(Rule.FIELD_PROJECT_ID, ruleGroupDTO.getProjectId())
-//                            .andIn(Rule.FIELD_TENANT_ID, Arrays.asList(0, dto.getTenantId())))
-//                    .andWhere(Sqls.custom()
-//                            .andLike(Rule.FIELD_RULE_CODE, dto.getRuleCode(), true)
-//                            .andLike(Rule.FIELD_RULE_NAME, dto.getRuleName(), true)
-//                            .andLike(Rule.FIELD_RULE_DESC, dto.getRuleDesc(), true)
-//                            .andEqualTo(Rule.FIELD_CHECK_TYPE, dto.getCheckType(), true)
-//                            .andEqualTo(Rule.FIELD_EXCEPTION_BLOCK, dto.getExceptionBlock(), true)
-//                            .andEqualTo(Rule.FIELD_WEIGHT, dto.getWeight(), true))
-//                    .build());
-//            //设置分组的父分组编码
-//            if (ObjectUtils.isNotEmpty(ruleGroupDTO.getParentGroupId())) {
-//                if (ruleGroupDTO.getParentGroupId() != 0) {
-//                    RuleGroupDTO parentRuleGroupDTO = ruleGroupRepository.selectDTOByPrimaryKey(ruleGroupDTO.getParentGroupId());
-//                    ruleGroupDTO.setParentGroupCode(parentRuleGroupDTO.getGroupCode());
-//                } else {
-//                    //0目录：所有分组
-//                    ruleGroupDTO.setParentGroupCode(RuleGroup.ROOT_RULE_GROUP.getGroupCode());
-//                }
-//            }
-//            //查询标准规则的告警配置
-//            ruleDTOList.forEach(ruleDTO -> {
-//                List<RuleLineDTO> ruleLineDTOList = ruleLineRepository.selectDTOByCondition(Condition.builder(RuleLine.class)
-//                        .andWhere(Sqls.custom()
-//                                .andEqualTo(RuleLine.FIELD_RULE_ID, ruleDTO.getRuleId()))
-//                        .build());
-//                ruleLineDTOList.forEach(ruleLineDTO -> BeanUtils.copyProperties(ruleLineDTO, ruleDTO));
-//            });
-//            ruleGroupDTO.setRuleDTOList(ruleDTOList);
-//        });
-//        return ruleGroupDTOList;
-        return null;
     }
 
     public List<StandardRuleExportDTO> exportStandardRule(List<CommonGroup> commonGroups, List<RuleDTO> ruleDTOList) {

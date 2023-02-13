@@ -11,6 +11,7 @@ import com.hand.hdsp.quality.app.service.StandardApprovalService;
 import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.converter.AimStatisticsConverter;
 import com.hand.hdsp.quality.infra.export.FieldStandardExporter;
 import com.hand.hdsp.quality.infra.export.dto.FieldStandardExportDTO;
@@ -37,6 +38,7 @@ import org.hzero.boot.driver.infra.util.PageUtil;
 import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
 import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
 import org.hzero.boot.platform.plugin.hr.entity.Employee;
+import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.boot.workflow.WorkflowClient;
 import org.hzero.boot.workflow.constant.WorkflowConstant;
 import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
@@ -128,6 +130,9 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     //统计非空行数
     private final static String NOT_NULL_COUNT = "SELECT COUNT(*)  FROM %s where %s is not null";
+
+    @Autowired
+    private ProfileClient profileClient;
 
     public DataFieldServiceImpl(DataFieldRepository dataFieldRepository, StandardExtraRepository standardExtraRepository,
                                 DataFieldVersionRepository dataFieldVersionRepository, DataFieldMapper dataFieldMapper,
@@ -371,28 +376,37 @@ public class DataFieldServiceImpl implements DataFieldService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void publishOrOff(DataFieldDTO dataFieldDTO) {
-        if (enableWorkflow) {
-            //开启工作流
-            //根据上下线状态开启不同的工作流实例
-            if (ONLINE.equals(dataFieldDTO.getStandardStatus())) {
+        //一个工作流的总开关
+        String onlineOpen = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.FIELD_STANDARD_ONLINE);
+        String offlineOpen = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.FIELD_STANDARD_OFFLINE);
+
+        if (ONLINE.equals(dataFieldDTO.getStandardStatus())) {
+            if ((onlineOpen == null || Boolean.parseBoolean(onlineOpen))) {
                 //指定字段标准修改状态
                 dataFieldDTO.setStandardStatus(ONLINE_APPROVING);
                 dataFieldOnlineWorkflowAdapter.startWorkflow(dataFieldDTO);
+            }else{
+                DataFieldDTO dto = dataFieldRepository.selectDTOByPrimaryKey(dataFieldDTO.getFieldId());
+                if (Objects.isNull(dto)) {
+                    throw new CommonException(ErrorCode.DATA_FIELD_STANDARD_NOT_EXIST);
+                }
+                dataFieldDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
+                //存版本表
+                doVersion(dataFieldDTO);
             }
-            if (OFFLINE.equals(dataFieldDTO.getStandardStatus())) {
+        }
+
+        if (OFFLINE.equals(dataFieldDTO.getStandardStatus())) {
+            if ((offlineOpen == null || Boolean.parseBoolean(offlineOpen))) {
                 //指定字段标准修改状态
                 dataFieldDTO.setStandardStatus(OFFLINE_APPROVING);
                 dataFieldOfflineWorkflowAdapter.startWorkflow(dataFieldDTO);
-            }
-        } else {
-            DataFieldDTO dto = dataFieldRepository.selectDTOByPrimaryKey(dataFieldDTO.getFieldId());
-            if (Objects.isNull(dto)) {
-                throw new CommonException(ErrorCode.DATA_FIELD_STANDARD_NOT_EXIST);
-            }
-            dataFieldDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
-            if (ONLINE.equals(dataFieldDTO.getStandardStatus())) {
-                //存版本表
-                doVersion(dataFieldDTO);
+            }else{
+                DataFieldDTO dto = dataFieldRepository.selectDTOByPrimaryKey(dataFieldDTO.getFieldId());
+                if (Objects.isNull(dto)) {
+                    throw new CommonException(ErrorCode.DATA_FIELD_STANDARD_NOT_EXIST);
+                }
+                dataFieldDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
             }
         }
         dataFieldRepository.updateDTOOptional(dataFieldDTO, DataStandard.FIELD_STANDARD_STATUS);

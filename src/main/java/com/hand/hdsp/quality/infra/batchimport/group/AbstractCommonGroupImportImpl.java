@@ -55,8 +55,8 @@ public class AbstractCommonGroupImportImpl implements IBatchImportService {
                 List<CommonGroup> commonGroups = commonGroupRepository.selectByCondition(Condition.builder(CommonGroup.class).andWhere(Sqls.custom()
                                 .andEqualTo(CommonGroup.FIELD_TENANT_ID, tenantId)
                                 .andEqualTo(CommonGroup.FIELD_PROJECT_ID, projectId)
-                                .andEqualTo(CommonGroup.FIELD_GROUP_PATH, groupPath)
-                                .andEqualTo(CommonGroup.FIELD_GROUP_TYPE, commonGroup.getGroupType()))
+                                .andEqualTo(CommonGroup.FIELD_GROUP_TYPE, commonGroup.getGroupType())
+                                .andEqualTo(CommonGroup.FIELD_GROUP_PATH, groupPath))
                         .build());
                 if (CollectionUtils.isEmpty(commonGroups)) {
                     //如果分组不存在

@@ -1,27 +1,27 @@
 package com.hand.hdsp.quality.infra.batchimport;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hand.hdsp.core.domain.entity.CommonGroup;
+import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
-import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
 import com.hand.hdsp.quality.api.dto.RuleLineDTO;
-import com.hand.hdsp.quality.domain.entity.RuleGroup;
+import com.hand.hdsp.quality.domain.entity.Rule;
 import com.hand.hdsp.quality.domain.repository.RuleGroupRepository;
 import com.hand.hdsp.quality.domain.repository.RuleLineRepository;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
+import org.hzero.boot.imported.app.service.BatchImportHandler;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+
+import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.DOC_STANDARD;
 
 /**
  * <p>
@@ -33,20 +33,22 @@ import java.util.List;
  */
 @Slf4j
 @ImportService(templateCode = TemplateCodeConstants.TEMPLATE_CODE_RULE, sheetIndex = 1)
-public class RuleBatchImportServiceImpl implements IBatchImportService {
+public class RuleBatchImportServiceImpl extends BatchImportHandler implements IBatchImportService {
     private final ObjectMapper objectMapper;
     private final RuleRepository ruleRepository;
     private final RuleGroupRepository ruleGroupRepository;
     private final RuleLineRepository ruleLineRepository;
+    private final CommonGroupRepository commonGroupRepository;
 
     public RuleBatchImportServiceImpl(ObjectMapper objectMapper,
                                       RuleRepository ruleRepository,
                                       RuleGroupRepository ruleGroupRepository,
-                                      RuleLineRepository ruleLineRepository) {
+                                      RuleLineRepository ruleLineRepository, CommonGroupRepository commonGroupRepository) {
         this.objectMapper = objectMapper;
         this.ruleRepository = ruleRepository;
         this.ruleGroupRepository = ruleGroupRepository;
         this.ruleLineRepository = ruleLineRepository;
+        this.commonGroupRepository = commonGroupRepository;
     }
 
     @Override
@@ -55,20 +57,41 @@ public class RuleBatchImportServiceImpl implements IBatchImportService {
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         Long projectId = ProjectHelper.getProjectId();
         try {
-            for (String json : data) {
+            for (int i = 0; i < data.size(); i++) {
+                String json = data.get(i);
                 RuleDTO ruleDTO = objectMapper.readValue(json, RuleDTO.class);
+                if ("Y".equals(ruleDTO.getIsPlatformFlag())) {
+                    addBackInfo(i, "平台级数据不进行导入");
+                    continue;
+                }
                 //导入分组id
-                List<RuleGroupDTO> ruleGroupDTOS = ruleGroupRepository.selectDTOByCondition(Condition.builder(RuleGroup.class).andWhere(Sqls.custom()
-                        .andEqualTo(RuleGroup.FIELD_TENANT_ID, tenantId)
-                        .andEqualTo(RuleGroup.FIELD_PROJECT_ID, projectId)
-                        .andEqualTo(RuleGroup.FIELD_GROUP_CODE, ruleDTO.getGroupCode())
-                ).build());
-                if (CollectionUtils.isNotEmpty(ruleGroupDTOS)) {
-                    ruleDTO.setGroupId(ruleGroupDTOS.get(0).getGroupId());
+                CommonGroup commonGroup = commonGroupRepository.selectOne(CommonGroup.builder()
+                        .groupType(DOC_STANDARD)
+                        .groupPath(ruleDTO.getGroupPath())
+                        .tenantId(tenantId).projectId(projectId)
+                        .build());
+                if (commonGroup == null) {
+                    addErrorMsg(i, "分组不存在，请先维护分组!");
+                    continue;
+                } else {
+                    ruleDTO.setGroupId(commonGroup.getGroupId());
                 }
                 ruleDTO.setTenantId(tenantId);
                 ruleDTO.setProjectId(projectId);
-                ruleRepository.insertDTOSelective(ruleDTO);
+                //判断标准规则是否存在
+                Rule exist = ruleRepository.selectOne(Rule.builder().ruleCode(ruleDTO.getRuleCode()).tenantId(tenantId)
+                        .projectId(projectId).build());
+                if (exist != null) {
+                    ruleDTO.setRuleId(exist.getRuleId());
+                    ruleDTO.setObjectVersionNumber(exist.getObjectVersionNumber());
+                    ruleRepository.updateByDTOPrimaryKey(ruleDTO);
+                } else {
+                    ruleRepository.insertDTOSelective(ruleDTO);
+                }
+                //删除之前的检验项
+                if (exist != null) {
+                    ruleLineRepository.deleteByParentId(exist.getRuleId());
+                }
                 //导入校验项
                 ruleLineRepository.insertDTOSelective(RuleLineDTO.builder()
                         .ruleId(ruleDTO.getRuleId())
