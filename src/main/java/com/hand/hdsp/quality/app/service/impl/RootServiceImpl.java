@@ -4,7 +4,6 @@ import com.hand.hdsp.core.CommonGroupClient;
 import com.hand.hdsp.core.domain.entity.CommonGroup;
 import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.quality.api.dto.AssigneeUserDTO;
-import com.hand.hdsp.quality.api.dto.RootGroupDTO;
 import com.hand.hdsp.quality.api.dto.StandardApprovalDTO;
 import com.hand.hdsp.quality.app.service.RootService;
 import com.hand.hdsp.quality.domain.entity.*;
@@ -18,6 +17,7 @@ import com.hand.hdsp.quality.infra.mapper.StandardApprovalMapper;
 import com.hand.hdsp.quality.infra.util.AnsjUtil;
 import com.hand.hdsp.quality.workflow.adapter.RootOfflineWorkflowAdapter;
 import com.hand.hdsp.quality.workflow.adapter.RootOnlineWorkflowAdapter;
+import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -52,16 +52,8 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.ROOT_STANDARD;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.ROOT;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
-
-import io.choerodon.core.convertor.ApplicationContextHelper;
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * 词根应用服务默认实现
@@ -323,21 +315,6 @@ public class RootServiceImpl implements RootService {
         if (root != null) {
             //工作流适配器回调
             root = (Root) rootOnlineWorkflowAdapter.callBack(root, nodeApproveResult);
-            List<StandardApprovalDTO> standardApprovalDTOS = standardApprovalRepository.selectDTOByCondition(Condition.builder(StandardApproval.class)
-                    .andWhere(Sqls.custom()
-                            .andEqualTo(StandardApproval.FIELD_TENANT_ID, root.getTenantId())
-                            .andEqualTo(StandardApproval.FIELD_STANDARD_ID, root.getId())
-                            .andEqualTo(StandardApproval.FIELD_STANDARD_TYPE, ROOT)
-                            .andEqualTo(StandardApproval.FIELD_APPLY_TYPE, ONLINE))
-                    .orderByDesc(StandardApproval.FIELD_APPROVAL_ID)
-                    .build());
-            if (CollectionUtils.isNotEmpty(standardApprovalDTOS)) {
-                StandardApprovalDTO tmepDto = standardApprovalDTOS.get(0);
-                Long releaseBy = tmepDto.getCreatedBy();
-                root.setReleaseBy(releaseBy);
-                root.setReleaseDate(new Date());
-            }
-            rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS, Root.FIELD_RELEASE_BY, Root.FIELD_RELEASE_DATE);
 
             if (ONLINE.equals(root.getReleaseStatus())) {
                 List<StandardApprovalDTO> standardApprovalDTOS = standardApprovalRepository.selectDTOByCondition(Condition.builder(StandardApproval.class)
@@ -346,17 +323,11 @@ public class RootServiceImpl implements RootService {
                                 .andEqualTo(StandardApproval.FIELD_STANDARD_ID, rootId)
                                 .andEqualTo(StandardApproval.FIELD_STANDARD_TYPE, ROOT)
                                 .andEqualTo(StandardApproval.FIELD_APPLY_TYPE, ONLINE))
+                        .orderByDesc(StandardApproval.FIELD_APPROVAL_ID)
                         .build());
                 if (CollectionUtils.isNotEmpty(standardApprovalDTOS)) {
-                    StandardApprovalDTO tmepDto = standardApprovalDTOS.get(0);
-                    Long releaseBy = tmepDto.getCreatedBy();
-                    // 从申请记录表中获取发布人id
-                    for (StandardApprovalDTO standardApprovalDTO : standardApprovalDTOS) {
-                        if (standardApprovalDTO.getCreationDate().after(tmepDto.getCreationDate())) {
-                            releaseBy = standardApprovalDTO.getCreatedBy();
-                        }
-                    }
-                    root.setReleaseBy(releaseBy);
+                    StandardApprovalDTO standardApprovalDTO = standardApprovalDTOS.get(0);
+                    root.setReleaseBy(standardApprovalDTO.getCreatedBy());
                     root.setReleaseDate(new Date());
                 }
                 rootRepository.updateOptional(root, Root.FIELD_RELEASE_BY, Root.FIELD_RELEASE_DATE);
@@ -372,6 +343,9 @@ public class RootServiceImpl implements RootService {
                             .collect(Collectors.toList());
                     ansjUtil.addWord(root.getTenantId(), root.getProjectId(), addWords);
                 }
+            } else {
+                //上线审批拒绝
+                rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS);
             }
         }
     }
