@@ -181,7 +181,7 @@ public class RootServiceImpl implements RootService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(Root root) {
-        rootRepository.updateByPrimaryKeySelective(root);
+        rootRepository.updateByPrimaryKey(root);
 
         //删除行表数据，重新插入
         List<RootLine> rootLines = rootLineRepository.selectByCondition(Condition.builder(RootLine.class)
