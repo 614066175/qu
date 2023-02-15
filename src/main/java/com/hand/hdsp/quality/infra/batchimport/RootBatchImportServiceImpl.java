@@ -106,12 +106,6 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
                             chargeDeptId = tmp.getChargeDeptId();
                         }
                     }
-                }else{
-                    chargeDeptId = unitList.get(0).getChargeDeptId();
-                }
-                if(ObjectUtils.isEmpty(chargeDeptId)){
-                    addErrorMsg(i,"该责任人未分配部门");
-                    continue;
                 }
                 root.setChargeDeptId(chargeDeptId);
                 root.setReleaseStatus(StandardConstant.Status.CREATE);
