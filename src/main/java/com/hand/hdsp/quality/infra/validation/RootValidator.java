@@ -86,7 +86,7 @@ public class RootValidator extends BatchValidatorHandler {
                     for (RootLine tmp : rootLines) {
                         rootNameStr.append(tmp.getRootName()).append(" ");
                     }
-                    addErrorMsg(i, String.format("词根中文名称%s数据库中已存在!", rootNameStr));
+                    addErrorMsg(i, String.format("词根中文名【%s】已被其他词根引用!", rootNameStr));
                 }
 
                 //校验表中词根中文重复
@@ -97,7 +97,7 @@ public class RootValidator extends BatchValidatorHandler {
                     }
                 }
                 if (StringUtils.isNotEmpty(rootNameStr)) {
-                    addErrorMsg(i, String.format("词根中文名称%s表中已存在!", rootNameStr));
+                    addErrorMsg(i, String.format("词根中文名【%s】导入文件中重复存在!", rootNameStr));
                 }
 
                 //校验的责任人名称为员工姓名
@@ -145,7 +145,7 @@ public class RootValidator extends BatchValidatorHandler {
                         String offlineFlag = profileClient.getProfileValueByOptions(tenantId, null, null, WorkFlowConstant.OpenConfig.ROOT_OFFLINE);
                         //下线是否需要审批
                         if(Boolean.parseBoolean(offlineFlag)){
-                            addErrorMsg(i,"词根已存在，状态不可有修改，请先下线");
+                            addErrorMsg(i,"词根已存在，状态不允许做修改操作，请先下线");
                         }
                     }
                 }
