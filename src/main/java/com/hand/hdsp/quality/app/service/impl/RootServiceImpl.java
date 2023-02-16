@@ -315,7 +315,6 @@ public class RootServiceImpl implements RootService {
         if (root != null) {
             //工作流适配器回调
             root = (Root) rootOnlineWorkflowAdapter.callBack(root, nodeApproveResult);
-
             if (ONLINE.equals(root.getReleaseStatus())) {
                 List<StandardApprovalDTO> standardApprovalDTOS = standardApprovalRepository.selectDTOByCondition(Condition.builder(StandardApproval.class)
                         .andWhere(Sqls.custom()
@@ -330,8 +329,7 @@ public class RootServiceImpl implements RootService {
                     root.setReleaseBy(standardApprovalDTO.getCreatedBy());
                     root.setReleaseDate(new Date());
                 }
-                rootRepository.updateOptional(root, Root.FIELD_RELEASE_BY, Root.FIELD_RELEASE_DATE);
-
+                rootRepository.updateOptional( root, Root.FIELD_RELEASE_STATUS, Root.FIELD_RELEASE_BY, Root.FIELD_RELEASE_DATE);
                 doVersion(root);
                 //上线后词库追加词根对应的中文
                 List<RootLine> rootLines = rootLineRepository.select(RootLine.builder().rootId(rootId).build());
