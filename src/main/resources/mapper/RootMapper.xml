@@ -53,12 +53,7 @@
         hu.unit_name chargeDept,
         iu.real_name lastUpdatedName,
         xcg.group_name,
-        <if test='datasourceType == "ORACLE"'>
-            TO_CHAR(xcg.GROUP_PATH),
-        </if>
-        <if test='datasourceType == "MYSQL"'>
-            xcg.GROUP_PATH,
-        </if>
+        xcg.GROUP_PATH,
         xsa.instance_id
         from
             xsta_root xr

@@ -330,7 +330,7 @@ public class RootServiceImpl implements RootService {
                     root.setReleaseBy(releaseBy);
                     root.setReleaseDate(new Date());
                 }
-                rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS, Root.FIELD_RELEASE_BY, Root.FIELD_RELEASE_DATE);
+                rootRepository.updateOptional( root, Root.FIELD_RELEASE_STATUS, Root.FIELD_RELEASE_BY, Root.FIELD_RELEASE_DATE);
                 doVersion(root);
                 //上线后词库追加词根对应的中文
                 List<RootLine> rootLines = rootLineRepository.select(RootLine.builder().rootId(rootId).build());
