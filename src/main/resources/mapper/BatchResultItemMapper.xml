@@ -77,7 +77,7 @@
                     and to_char(xbri.creation_date, 'yyyyMMdd') &lt;= to_char(SYSDATE-1, 'yyyyMMdd')
                 </if>
             </when>
-            <when test="datasourceType == 'PANWEI'">
+            <when test="datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
                 <if test="measureDate != null">
                     and to_char(xbri.creation_date, 'yyyymmdd') = to_char(#{measureDate}, 'yyyymmdd')
                 </if>
@@ -263,7 +263,7 @@
                 )
             </if>
         </if>
-        <if test="datasourceType == 'PANWEI'">
+        <if test="datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
             and #{fieldName} = ANY ( string_to_array( REGEXP_REPLACE( xbri.field_name, '\([A-Z]*\)*', '', 'g' ), ',' ) )
         </if>
     </select>

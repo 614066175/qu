@@ -33,7 +33,7 @@
             <when test='datasourceType == "ORACLE"'>
                 (select WM_CONCAT(check_item) from xqua_batch_plan_table_line xbptl) as check_item
             </when>
-            <when test="datasourceType == 'PANWEI'">
+            <when test="datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
                 (select array_to_string(array_agg(check_item),',') from xqua_batch_plan_table_line xbptl) as check_item
             </when>
         </choose>

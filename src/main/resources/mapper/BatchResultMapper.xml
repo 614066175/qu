@@ -52,7 +52,7 @@
                     and ${mt}.creation_date &lt;= #{endDate}
                 </if>
             </when>
-            <when test='datasourceType == "ORACLE" or datasourceType == "PANWEI"'>
+            <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
                 <if test="startDate != null and startDate != ''">
                     and ${mt}.creation_date &gt;= to_date(  #{startDate},'yyyy-MM-dd HH24:mi:ss')
                 </if>
@@ -365,7 +365,7 @@
         SELECT
         xbrr.check_type,
         <choose>
-            <when test='datasourceType == "ORACLE" or datasourceType == "PANWEI"'>
+            <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
                 COUNT(distinct xbrr.rule_type||xbrr.plan_rule_id) count_sum
             </when>
             <otherwise>
@@ -388,7 +388,7 @@
         SELECT
         xbrr.check_type,
         <choose>
-            <when test='datasourceType == "ORACLE" or datasourceType == "PANWEI"'>
+            <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
                 COUNT(distinct xbrr.rule_type||xbrr.plan_rule_id) count_sum
             </when>
             <otherwise>
@@ -438,7 +438,7 @@
                 group by to_char(xbr.end_date, 'yyyy-MM-dd')
                 order by to_char(xbr.end_date, 'yyyy-MM-dd')
             </when>
-            <when test="datasourceType == 'PANWEI'">
+            <when test="datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
                 select to_char(xbr.end_date, 'yyyy-mm-dd') "date",coalesce(avg(xbr.mark),0) mark
                 from xqua_batch_result xbr
                 join xqua_batch_result_base xbrb on xbr.result_id=xbrb.result_id
@@ -494,7 +494,7 @@
             group by to_char(xbr.start_date, 'yyyy-MM-dd'),xbrr.rule_type
             order by to_char(xbr.start_date, 'yyyy-MM-dd')
         </when>
-        <when test="datasourceType == 'PANWEI'">
+        <when test="datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
             select
                 to_char(xbr.start_date, 'yyyy-mm-dd') "date",
                 xbrr.rule_type ruleType,
@@ -557,7 +557,7 @@
                 group by date_format(xbr.start_date, '%Y-%m-%d'),xbri.warning_level
                 order by date_format(xbr.start_date, '%Y-%m-%d')
             </when>
-            <when test="datasourceType == 'PANWEI'">
+            <when test="datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
                 select
                     to_char(xbr.start_date, 'yyyy-mm-dd') date,
                     xbri.warning_level warningLevel,
@@ -657,7 +657,7 @@
                 xd.datasource_code,
                 xbpb.datasource_schema
             </when>
-            <when test="datasourceType == 'PANWEI'">
+            <when test="datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
                 SELECT
                     xbpb.object_name,
                     xbpb.datasource_id,
@@ -1028,9 +1028,10 @@
     <select id="listResultDetail" resultType="com.hand.hdsp.quality.api.dto.BatchResultMarkDTO">
         <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         <choose>
-            <when test='datasourceType == "ORACLE" or datasourceType == "PANWEI"'>
-                SELECT avg(mark) avgMark,
-                to_char(end_date,'yyyy-MM-dd') "day"
+            <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
+                SELECT
+                    avg(mark) avgMark,
+                    to_char(end_date,'yyyy-MM-dd') "day"
                 FROM xqua_batch_result
                 <where>
                     <if test="planId!=null and planId != ''">
@@ -1074,36 +1075,37 @@
         JOIN xqua_check_rule xcr ON xcr.rule_id = xs.rule_id
         JOIN (
             SELECT
-            xbri.check_way,
-            xbri.check_item,
-            xbri.count_type,
-            xbri.field_name,
-            xbrr.rule_type,
-            xbri.creation_date,
-            xbpb.datasource_type
-            FROM
-            xqua_batch_result_item xbri
+                xbri.check_way,
+                xbri.check_item,
+                xbri.count_type,
+                xbri.field_name,
+                xbrr.rule_type,
+                xbri.creation_date,
+                xbpb.datasource_type
+            FROM xqua_batch_result_item xbri
             LEFT JOIN xqua_batch_result_rule xbrr ON xbri.result_rule_id = xbrr.result_rule_id
             LEFT JOIN xqua_batch_result_base xbrb on xbrb.result_base_id = xbrr.result_base_id
             LEFT JOIN xqua_batch_plan_base xbpb on xbpb.plan_base_id = xbrb.plan_base_id
             where xbri.tenant_id = #{tenantId}
-            <if test='datasourceType == "MYSQL"'>
-                <if test="startDate != null and startDate != ''">
-                    and xbri.creation_date &gt;= #{startDate}
-                </if>
-                <if test="endDate != null and endDate != ''">
-                    and xbri.creation_date &lt;= #{endDate}
-                </if>
-            </if>
-            <if test='datasourceType == "ORACLE" or datasourceType == "PANWEI"'>
-                <if test="startDate != null and startDate != ''">
-                    and xbri.creation_date &gt;= to_date(  #{startDate},'yyyy-MM-dd HH24:mi:ss')
-                </if>
-                <if test="endDate != null and endDate != ''">
-                    and xbri.creation_date &lt;= to_date(  #{endDate},'yyyy-MM-dd HH24:mi:ss')
-                </if>
-            </if>) a
-        ON ( a.rule_type = xcr.rule_type AND a.check_item = xcr.check_item )
+            <choose>
+                <when test='datasourceType == "MYSQL"'>
+                    <if test="startDate != null and startDate != ''">
+                        and xbri.creation_date &gt;= #{startDate}
+                    </if>
+                    <if test="endDate != null and endDate != ''">
+                        and xbri.creation_date &lt;= #{endDate}
+                    </if>
+                </when>
+                <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
+                    <if test="startDate != null and startDate != ''">
+                        and xbri.creation_date &gt;= to_date(  #{startDate},'yyyy-MM-dd HH24:mi:ss')
+                    </if>
+                    <if test="endDate != null and endDate != ''">
+                        and xbri.creation_date &lt;= to_date(  #{endDate},'yyyy-MM-dd HH24:mi:ss')
+                    </if>
+                </when>
+            </choose>
+        ) a ON ( a.rule_type = xcr.rule_type AND a.check_item = xcr.check_item )
         <where>
             xp.tenant_id = #{tenantId}
             and a.datasource_type is not null
@@ -1120,38 +1122,44 @@
         from
         (
             select
-                <if test='datasourceType == "MYSQL"'>
-                    DATE_FORMAT( xbrb.last_update_date, '%Y-%m-%d' ) groupName,
-                </if>
-                <if test='datasourceType == "ORACLE" or datasourceType == "PANWEI"'>
-                    to_char( xbrb.last_update_date, 'yyyy-MM-dd' ) groupName,
-                </if>
+                <choose>
+                    <when test='datasourceType == "MYSQL"'>
+                        DATE_FORMAT( xbrb.last_update_date, '%Y-%m-%d' ) groupName,
+                    </when>
+                    <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
+                        to_char( xbrb.last_update_date, 'yyyy-MM-dd' ) groupName,
+                    </when>
+                </choose>
                 MAX(result_base_id) lastId
             from xqua_batch_result_base xbrb
             where xbrb.plan_base_id = #{planBaseId} and xbrb.project_id=#{projectId}
-            <if test='datasourceType == "MYSQL"'>
-                <if test="startDate != null and startDate != ''">
-                    and xbrb.last_update_date &gt;= #{startDate}
-                </if>
-                <if test="endDate != null and endDate != ''">
-                    and xbrb.last_update_date &lt;= #{endDate}
-                </if>
-            </if>
-            <if test='datasourceType == "ORACLE" or datasourceType == "PANWEI"'>
-                <if test="startDate != null and startDate != ''">
-                    and xbrb.last_update_date &gt;= to_date(  #{startDate},'yyyy-MM-dd HH24:mi:ss')
-                </if>
-                <if test="endDate != null and endDate != ''">
-                    and xbrb.last_update_date &lt;= to_date(  #{endDate},'yyyy-MM-dd HH24:mi:ss')
-                </if>
-            </if>
+            <choose>
+                <when test='datasourceType == "MYSQL"'>
+                    <if test="startDate != null and startDate != ''">
+                        and xbrb.last_update_date &gt;= #{startDate}
+                    </if>
+                    <if test="endDate != null and endDate != ''">
+                        and xbrb.last_update_date &lt;= #{endDate}
+                    </if>
+                </when>
+                <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
+                    <if test="startDate != null and startDate != ''">
+                        and xbrb.last_update_date &gt;= to_date(  #{startDate},'yyyy-MM-dd HH24:mi:ss')
+                    </if>
+                    <if test="endDate != null and endDate != ''">
+                        and xbrb.last_update_date &lt;= to_date(  #{endDate},'yyyy-MM-dd HH24:mi:ss')
+                    </if>
+                </when>
+            </choose>
             GROUP BY
-            <if test='datasourceType == "MYSQL"'>
-                DATE_FORMAT( xbrb.last_update_date, '%Y-%m-%d' )
-            </if>
-            <if test='datasourceType == "ORACLE" or datasourceType == "PANWEI"'>
-                to_char( xbrb.last_update_date, 'yyyy-MM-dd' )
-            </if>
+            <choose>
+                <when test='datasourceType == "MYSQL"'>
+                    DATE_FORMAT( xbrb.last_update_date, '%Y-%m-%d' )
+                </when>
+                <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
+                    to_char( xbrb.last_update_date, 'yyyy-MM-dd' )
+                </when>
+            </choose>
         ) A
         LEFT JOIN xqua_batch_result_rule xbrr ON xbrr.result_base_id = A.lastId
         LEFT JOIN xqua_batch_result_item xbri ON xbri.result_rule_id = xbrr.result_rule_id
@@ -1160,12 +1168,14 @@
     <select id="selectProblemWithIncre" resultType="com.hand.hdsp.quality.api.dto.TimeRangeDTO">
         <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         SELECT
-            <if test='datasourceType == "MYSQL"'>
-                DATE_FORMAT( xbrb.last_update_date,'%Y-%m-%d') dateGroup,
-            </if>
-            <if test='datasourceType == "ORACLE" or datasourceType == "PANWEI"'>
-                to_char( xbrb.last_update_date, 'yyyy-MM-dd' ) dateGroup,
-            </if>
+            <choose>
+                <when test='datasourceType == "MYSQL"'>
+                    DATE_FORMAT( xbrb.last_update_date,'%Y-%m-%d') dateGroup,
+                </when>
+                <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
+                    to_char( xbrb.last_update_date, 'yyyy-MM-dd' ) dateGroup,
+                </when>
+            </choose>
             xbri.warning_level
         FROM
             xqua_batch_result_base xbrb
@@ -1173,22 +1183,24 @@
             LEFT JOIN xqua_batch_result_item xbri ON xbri.result_rule_id = xbrr.result_rule_id
         WHERE
             xbrb.plan_base_id = #{planBaseId} and xbrb.project_id= #{projectId}
-            <if test='datasourceType == "MYSQL"'>
+            <choose>
+            <when test='datasourceType == "MYSQL"'>
                 <if test="startDate != null and startDate != ''">
                     and xbrb.last_update_date &gt;= #{startDate}
                 </if>
                 <if test="endDate != null and endDate != ''">
                     and xbrb.last_update_date &lt;= #{endDate}
                 </if>
-            </if>
-            <if test='datasourceType == "ORACLE" or datasourceType == "PANWEI"'>
+            </when>
+            <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
                 <if test="startDate != null and startDate != ''">
                     and xbrb.last_update_date &gt;= to_date(  #{startDate},'yyyy-MM-dd HH24:mi:ss')
                 </if>
                 <if test="endDate != null and endDate != ''">
                     and xbrb.last_update_date &lt;= to_date(  #{endDate},'yyyy-MM-dd HH24:mi:ss')
                 </if>
-            </if>
+            </when>
+            </choose>
             AND xbri.warning_level IS NOT NULL
     </select>
 </mapper>
