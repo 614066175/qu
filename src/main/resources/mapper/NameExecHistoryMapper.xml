@@ -77,16 +77,23 @@
         <if test="execEndTime !=null">
             AND xneh.exec_end_time &lt;= #{execEndTime}
         </if>
-        <if test='datasourceType == "MYSQL"'>
-            <if test="startDay != null">
-                AND ( datediff ( xneh.exec_start_time , #{startDay} ) = 0 )
-            </if>
-        </if>
-        <if test='datasourceType == "ORACLE"'>
-            <if test="startDay != null">
-                and ROUND(TO_NUMBER(xneh.exec_start_time - #{startDay}))=0
-            </if>
-        </if>
+        <choose>
+            <when test='datasourceType == "MYSQL"'>
+                <if test="startDay != null">
+                    AND ( datediff ( xneh.exec_start_time , #{startDay} ) = 0 )
+                </if>
+            </when>
+            <when test='datasourceType == "ORACLE"'>
+                <if test="startDay != null">
+                    and ROUND(TO_NUMBER(xneh.exec_start_time - #{startDay}))=0
+                </if>
+            </when>
+            <when test="datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
+                <if test="startDay != null">
+                    and DATE_PART('day', xneh.exec_start_time - #{startDay}) = 0
+                </if>
+            </when>
+        </choose>
         ORDER BY xneh.history_id DESC
     </select>
 
@@ -102,18 +109,18 @@
     <select id="getReport" resultType="com.hand.hdsp.quality.infra.vo.NameStandardHisReportVO">
         <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         <choose>
-            <when test='datasourceType == "ORACLE"'>
+            <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
                 SELECT to_char(creation_date,'yyyy-MM-dd') as "date", AVG(abnormal_num) as averageAbnormalNum
                 FROM xsta_name_exec_history xneh
                 WHERE xneh.exec_status='SUCCESS'AND xneh.standard_id=#{standardId}
                 GROUP BY to_char(creation_date,'yyyy-MM-dd')
             </when>
-            <otherwise>
+            <when test="datasourceType == 'MYSQL'">
                 SELECT DATE_FORMAT(creation_date,'%Y-%m-%d') as date, AVG(abnormal_num) as averageAbnormalNum
                 FROM xsta_name_exec_history xneh
                 WHERE xneh.exec_status='SUCCESS'AND xneh.standard_id=#{standardId}
                 GROUP BY DATE_FORMAT(creation_date,'%Y-%m-%d')
-            </otherwise>
+            </when>
         </choose>
     </select>
 
