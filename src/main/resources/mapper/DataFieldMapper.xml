@@ -99,27 +99,25 @@
         left join hpfm_unit hu on hu.unit_id=fs.charge_dept_id
         left join hpfm_employee he on he.employee_id=fs.charge_id
         left join iam_user iu_re on fs.release_by=iu_re.id
-        <if test='datasourceType == "ORACLE"'>
+        <choose>
+        <when test='datasourceType == "ORACLE"'>
             LEFT JOIN (
-            SELECT
-            xsa1.standard_id,
-            xsa1.instance_id,
-            row_number()over(partition by xsa1.standard_id order by approval_id desc) rw
-            FROM xsta_standard_approval xsa1
-            WHERE xsa1.standard_type = 'FIELD'
-            ) xsa ON xsa.standard_id = fs.field_id
-            AND xsa.rw = 1
-            AND fs.standard_status != 'CREATE'
-        </if>
-        <if test='datasourceType == "MYSQL"'>
+                SELECT
+                    xsa1.standard_id,
+                    xsa1.instance_id,
+                    row_number()over(partition by xsa1.standard_id order by approval_id desc) rw
+                FROM xsta_standard_approval xsa1
+                WHERE xsa1.standard_type = 'FIELD'
+            ) xsa ON xsa.standard_id = fs.field_id AND xsa.rw = 1 AND fs.standard_status != 'CREATE'
+        </when>
+        <when test="datasourceType == 'MYSQL' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
             left join xsta_standard_approval xsa on xsa.approval_id = (
-            select max(xsa1.approval_id)
-            from xsta_standard_approval xsa1
-            where xsa1.standard_id = fs.field_id
-            and xsa1.standard_type = 'FIELD'
-            and fs.standard_status != 'CREATE'
+                select max(xsa1.approval_id)
+                from xsta_standard_approval xsa1
+                where xsa1.standard_id = fs.field_id and xsa1.standard_type = 'FIELD' and fs.standard_status != 'CREATE'
             )
-        </if>
+        </when>
+        </choose>
         <where>
             <if test="dataFieldDTO.fieldId!=null">
                 fs.field_id=#{dataFieldDTO.fieldId}

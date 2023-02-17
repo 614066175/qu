@@ -63,27 +63,29 @@
         left join iam_user iu_re on xr.release_by=iu_re.id
         left join xsta_root_line xrl on xr.id = xrl.root_id
         left join xcor_common_group xcg on xr.group_id = xcg.group_id
-        <if test='datasourceType == "ORACLE"'>
-            LEFT JOIN (
-            SELECT
-            xsa.standard_id,
-            xsa.instance_id,
-            row_number()over(partition by xsa.standard_id order by approval_id desc) rw
-            FROM xsta_standard_approval xsa
-            WHERE xsa.standard_type = 'ROOT'
-            ) xsa ON xsa.standard_id = xr.id
-            AND xsa.rw = 1
-            AND xr.release_status != 'CREATE'
-        </if>
-        <if test='datasourceType == "MYSQL"'>
-            left join xsta_standard_approval xsa on xsa.approval_id = (
-            select max(xsa.approval_id)
-            from xsta_standard_approval xsa
-            where xsa.standard_id = xr.id
-            and xsa.standard_type = 'ROOT'
-            and xr.release_status != 'CREATE'
-            )
-        </if>
+        <choose>
+            <when test='datasourceType == "ORACLE"'>
+                LEFT JOIN (
+                SELECT
+                xsa.standard_id,
+                xsa.instance_id,
+                row_number()over(partition by xsa.standard_id order by approval_id desc) rw
+                FROM xsta_standard_approval xsa
+                WHERE xsa.standard_type = 'ROOT'
+                ) xsa ON xsa.standard_id = xr.id
+                AND xsa.rw = 1
+                AND xr.release_status != 'CREATE'
+            </when>
+            <when test="datasourceType == 'MYSQL' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
+                left join xsta_standard_approval xsa on xsa.approval_id = (
+                    select max(xsa.approval_id)
+                    from xsta_standard_approval xsa
+                    where xsa.standard_id = xr.id
+                    and xsa.standard_type = 'ROOT'
+                    and xr.release_status != 'CREATE'
+                )
+            </when>
+        </choose>
         <where>
             <if test="tenantId != null">
                 and xr.tenant_id = #{tenantId}
@@ -166,12 +168,14 @@
         WHERE
             name=#{chargeName}
           and tenant_id  = #{tenantId}
-        <if test='datasourceType == "ORACLE"'>
+        <choose>
+        <when test='datasourceType == "ORACLE"'>
             and rownum = 1
-        </if>
-        <if test='datasourceType == "MYSQL"'>
+        </when>
+        <when test="datasourceType == 'MYSQL' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
             LIMIT 1
-        </if>
+        </when>
+        </choose>
     </select>
 
     <select id="getUnitByEmployeeId" resultType="com.hand.hdsp.quality.domain.entity.Root">

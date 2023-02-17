@@ -20,9 +20,9 @@
     </resultMap>
 
     <select id="selectSql" resultType="com.hand.hdsp.quality.domain.entity.ItemTemplateSql">
-        <bind name="dbType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         <choose>
-            <when test='dbType != "ORACLE"'>
+            <when test='datasourceType != "ORACLE"'>
                 select sql_id,
                 check_item,
                 datasource_type,

@@ -245,9 +245,10 @@
     <select id="listMarkTrend" resultType="com.hand.hdsp.quality.infra.vo.MarkTrendVO">
         <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         <choose>
-            <when test='datasourceType == "ORACLE"'>
-                select to_char(xsr.end_date, 'yyyy-MM-dd') date,
-                (case when avg(xsr.mark) is null then 0 else avg(xsr.mark) end ) mark
+            <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
+                select
+                    to_char(xsr.end_date, 'yyyy-MM-dd') date,
+                    (case when avg(xsr.mark) is null then 0 else avg(xsr.mark) end ) mark
                 from xqua_streaming_result xsr
                 <where>
                     <if test="tenantId != null">
@@ -266,7 +267,7 @@
                 group by to_char(xsr.end_date, 'yyyy-MM-dd')
                 order by to_char(xsr.end_date, 'yyyy-MM-dd') asc
             </when>
-            <otherwise>
+            <when test="datasourceType == 'MYSQL'">
                 select date_format(xsr.end_date, '%Y-%m-%d') date,IFNULL(avg(xsr.mark),0) mark
                 from xqua_streaming_result xsr
                 <where>
@@ -285,22 +286,21 @@
                 </where>
                 group by date_format(xsr.end_date, '%Y-%m-%d')
                 order by date_format(xsr.end_date, '%Y-%m-%d') asc
-            </otherwise>
+            </when>
         </choose>
     </select>
 
     <select id="listWarningLevel" resultType="com.hand.hdsp.quality.infra.vo.WarningLevelVO">
         <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         <choose>
-            <when test='datasourceType == "ORACLE"'>
-                select to_char(xsr.end_date, 'yyyy-MM-dd') date,
-                xsrr.warning_level warningLevel,
-                count(xsrr.warning_level) levelCount
+            <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
+                select
+                    to_char(xsr.end_date, 'yyyy-MM-dd') date,
+                    xsrr.warning_level warningLevel,
+                    count(xsrr.warning_level) levelCount
                 from xqua_streaming_result xsr
-                INNER JOIN xqua_streaming_result_base xsrb
-                on xsr.result_id=xsrb.result_id
-                INNER JOIN xqua_streaming_result_rule xsrr
-                on xsrb.result_base_id=xsrr.result_base_id
+                INNER JOIN xqua_streaming_result_base xsrb on xsr.result_id=xsrb.result_id
+                INNER JOIN xqua_streaming_result_rule xsrr on xsrb.result_base_id=xsrr.result_base_id
                 <where>
                     <if test="tenantId != null">
                         xsr.tenant_id = #{tenantId}
@@ -318,7 +318,7 @@
                 group by to_char(xsr.end_date, 'yyyy-MM-dd'),xsrr.warning_level
                 order by to_char(xsr.end_date, 'yyyy-MM-dd') asc
             </when>
-            <otherwise>
+            <when test="datasourceType == 'MYSQL'">
                 select date_format(xsr.end_date, '%Y-%m-%d') date,
                 xsrr.warning_level warningLevel,
                 count(xsrr.warning_level) levelCount
@@ -343,7 +343,7 @@
                 </where>
                 group by date_format(xsr.end_date, '%Y-%m-%d'),xsrr.warning_level
                 order by date_format(xsr.end_date, '%Y-%m-%d') asc
-            </otherwise>
+            </when>
         </choose>
     </select>
 
@@ -379,15 +379,14 @@
     <select id="listRuleError" resultType="com.hand.hdsp.quality.infra.vo.RuleExceptionVO">
         <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         <choose>
-            <when test='datasourceType == "ORACLE"'>
-                select to_char(xsr.end_date, 'yyyy-MM-dd') date,
-                xsrr.rule_type ruleType,
-                (case when SUM(xsrb.exception_rule_count) is null then 0 else SUM(xsrb.exception_rule_count) end ) exceptionRuleCount
+            <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
+                select
+                    to_char(xsr.end_date, 'yyyy-MM-dd') date,
+                    xsrr.rule_type ruleType,
+                    (case when SUM(xsrb.exception_rule_count) is null then 0 else SUM(xsrb.exception_rule_count) end ) exceptionRuleCount
                 from xqua_streaming_result xsr
-                INNER JOIN xqua_streaming_result_base xsrb
-                on xsr.result_id=xsrb.result_id
-                INNER JOIN xqua_streaming_result_rule xsrr
-                on xsrb.result_base_id=xsrr.result_base_id
+                INNER JOIN xqua_streaming_result_base xsrb on xsr.result_id=xsrb.result_id
+                INNER JOIN xqua_streaming_result_rule xsrr on xsrb.result_base_id=xsrr.result_base_id
                 <where>
                     <if test="tenantId != null">
                         xsr.tenant_id = #{tenantId}
@@ -405,7 +404,7 @@
                 group by to_char(xsr.end_date, 'yyyy-MM-dd'),xsrr.rule_type
                 order by to_char(xsr.end_date, 'yyyy-MM-dd') asc
             </when>
-            <otherwise>
+            <when test="datasourceType == 'MYSQL'">
                 select date_format(xsr.end_date, '%Y-%m-%d') date,
                 xsrr.rule_type ruleType,
                 IFNULL(SUM(xsrb.exception_rule_count),0) exceptionRuleCount
@@ -430,7 +429,7 @@
                 </where>
                 group by date_format(xsr.end_date, '%Y-%m-%d'),xsrr.rule_type
                 order by date_format(xsr.end_date, '%Y-%m-%d') asc
-            </otherwise>
+            </when>
         </choose>
     </select>
 </mapper>

@@ -2,10 +2,10 @@ spring:
   application:
     name: ${SPRING_APPLICATION_NAME:hdsp-quality}
   datasource:
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:com.mysql.jdbc.Driver}
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://db.hdsp.hand.com:23306/hdsp_quality?useUnicode=true&characterEncoding=utf-8&useSSL=false}
     username: ${SPRING_DATASOURCE_USERNAME:hdsp_dev}
     password: ${SPRING_DATASOURCE_PASSWORD:hdsp_dev123$%^}
-    driver-class-name: com.mysql.jdbc.Driver
     hikari:
       # 连接池最小空闲连接数
       minimum-idle: ${SPRING_DATASOURCE_MINIMUM_IDLE:20}
