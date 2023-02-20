@@ -27,8 +27,8 @@ public  class CustomThreadPool {
      * 线程池
      */
     private static final ThreadPoolExecutor EXECUTOR = new ThreadPoolExecutor(
-        10,
         20,
+        30,
         10L,
         TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(100),

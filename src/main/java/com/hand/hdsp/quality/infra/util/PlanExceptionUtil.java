@@ -170,16 +170,28 @@ public class PlanExceptionUtil {
             while (true) {
                 try {
                     //休眠
-                    Thread.sleep(5000);
-                    if (redisHelper.hasKey(HANDLE_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId()) &&
-                            redisHelper.strGet(HANDLE_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId()).equals(redisHelper.strGet(TOTAL_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId()))) {
-                        //当计数器当0时，判断是否存在异常标识
-                        redisHelper.delKey(TOTAL_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId());
-                        redisHelper.delKey(HANDLE_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId());
+                    Thread.sleep(3000);
+                    if (!redisHelper.hasKey(HANDLE_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId())) {
+                        //消息处理完，键被删除了
                         break;
                     }
+                    if (redisHelper.hasKey(HANDLE_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId()) &&
+                            redisHelper.strGet(HANDLE_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId()).equals(redisHelper.strGet(TOTAL_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId()))) {
+                        //如果处理记录相等时，也执行结束
+                        break;
+                    }
+                    //判断是否异常了
+                    if (redisHelper.hasKey(ERROR_FLAG + batchResultBase.getResultBaseId())) {
+                        //删除，并抛出异常
+                        mongoTemplate.dropCollection(String.format("%d_%d", batchResultBase.getPlanBaseId(), batchResultBase.getResultBaseId()));
+                        throw new CommonException("异常数据获取失败！");
+                    }
                 } catch (InterruptedException e) {
+                    log.error("线程中断，设置异常标识");
                     e.printStackTrace();
+                    //线程被中断跳出循环
+                    redisHelper.strSet(ERROR_FLAG + batchResultBase.getResultBaseId(), "Y");
+                    break;
                 }
             }
             if (redisHelper.hasKey(ERROR_FLAG + batchResultBase.getResultBaseId())) {
@@ -197,10 +209,12 @@ public class PlanExceptionUtil {
     }
 
     private static void sendSqlMessage(MeasureParamDO param, BatchResultBase batchResultBase, String sql, WarningLevelDTO warningLevelDTO, DriverSession driverSession, int pageNumber, int batchNumber) {
-        //定义计数器
-        redisHelper.strIncrement(TOTAL_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId(), (long) pageNumber);
         for (int i = 0; i < pageNumber; i++) {
             try {
+                //如果当然质检项结果id存在异常标识，停止发送
+                if (redisHelper.hasKey(ERROR_FLAG + batchResultBase.getResultBaseId())) {
+                    break;
+                }
                 //获取分页sql
                 String pageSql = driverSession.getPageSql(sql, PageRequest.of(i, batchNumber));
                 MessageDTO messageDTO = MessageDTO.builder().param(param).batchResultBase(batchResultBase)
@@ -208,9 +222,12 @@ public class PlanExceptionUtil {
                         .warningLevelDTO(warningLevelDTO)
                         .build();
                 redisHelper.lstLeftPush(messageKey, JsonUtil.toJson(messageDTO));
+                //定义计数器，成功+1
+                redisHelper.strIncrement(TOTAL_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId(), 1L);
             } catch (Exception e) {
                 // todo 如果有异常，则定义删除标识
                 redisHelper.strSet(ERROR_FLAG + batchResultBase.getResultBaseId(), "Y");
+                break;
             }
         }
     }
@@ -295,6 +312,10 @@ public class PlanExceptionUtil {
             WarningLevelDTO warningLevelDTO = messageDTO.getWarningLevelDTO();
             batchResultBase = messageDTO.getBatchResultBase();
             String sql = messageDTO.getSql();
+            //如果当然质检项结果id存在异常标识，停止获取
+            if (redisHelper.hasKey(ERROR_FLAG + batchResultBase.getResultBaseId())) {
+                return;
+            }
             DriverSession driverSession = driverSessionService.getDriverSession(batchResultBase.getTenantId(), param.getPluginDatasourceDTO().getDatasourceCode());
             getExceptionResult(param, batchResultBase, sql, driverSession, warningLevelDTO);
         } catch (Throwable throwable) {
@@ -302,6 +323,18 @@ public class PlanExceptionUtil {
         } finally {
             //处理计数器加1
             redisHelper.strIncrement(HANDLE_EXCEPTION_BATCH_NUM + Objects.requireNonNull(batchResultBase).getResultBaseId(), 1L);
+            //判断是否清空异常标识
+            if (redisHelper.hasKey(HANDLE_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId()) &&
+                    redisHelper.strGet(HANDLE_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId()).equals(redisHelper.strGet(TOTAL_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId()))) {
+                log.info("处理完成，后置清理");
+                redisHelper.delKey(TOTAL_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId());
+                redisHelper.delKey(HANDLE_EXCEPTION_BATCH_NUM + batchResultBase.getResultBaseId());
+                if (redisHelper.hasKey(ERROR_FLAG + batchResultBase.getResultBaseId())) {
+                    //删除数据
+                    mongoTemplate.dropCollection(String.format("%d_%d", batchResultBase.getPlanBaseId(), batchResultBase.getResultBaseId()));
+                }
+                redisHelper.delKey(ERROR_FLAG + batchResultBase.getResultBaseId());
+            }
 
             //线程执行完，进行回收
             ExceptionDataConsumer exceptionDataConsumer = context.getBean(ExceptionDataConsumer.class);
