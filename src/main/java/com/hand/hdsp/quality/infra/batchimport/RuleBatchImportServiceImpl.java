@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.infra.batchimport;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hand.hdsp.core.CommonGroupClient;
 import com.hand.hdsp.core.domain.entity.CommonGroup;
 import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.core.util.ProjectHelper;
@@ -16,11 +17,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.hzero.boot.imported.app.service.BatchImportHandler;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
 
+import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.NAME_STANDARD;
 import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.STANDARD_RULE;
 
 /**
@@ -39,6 +42,9 @@ public class RuleBatchImportServiceImpl extends BatchImportHandler implements IB
     private final RuleGroupRepository ruleGroupRepository;
     private final RuleLineRepository ruleLineRepository;
     private final CommonGroupRepository commonGroupRepository;
+
+    @Autowired
+    private CommonGroupClient commonGroupClient;
 
     public RuleBatchImportServiceImpl(ObjectMapper objectMapper,
                                       RuleRepository ruleRepository,
@@ -71,8 +77,13 @@ public class RuleBatchImportServiceImpl extends BatchImportHandler implements IB
                         .tenantId(tenantId).projectId(projectId)
                         .build());
                 if (commonGroup == null) {
-                    addErrorMsg(i, "分组不存在，请先维护分组!");
-                    continue;
+                    //不存在直接新建
+                    commonGroupClient.createGroup(tenantId, projectId, STANDARD_RULE, ruleDTO.getGroupPath());
+                    CommonGroup group = commonGroupRepository.selectOne(CommonGroup.builder()
+                            .groupType(NAME_STANDARD)
+                            .groupPath(ruleDTO.getGroupPath())
+                            .tenantId(tenantId).projectId(projectId).build());
+                    ruleDTO.setGroupId(group.getGroupId());
                 } else {
                     ruleDTO.setGroupId(commonGroup.getGroupId());
                 }

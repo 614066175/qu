@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.infra.batchimport;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hand.hdsp.core.CommonGroupClient;
 import com.hand.hdsp.core.domain.entity.CommonGroup;
 import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.core.util.ProjectHelper;
@@ -24,7 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.DOC_STANDARD;
+import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.*;
 
 /**
  * @author StoneHell
@@ -42,6 +43,8 @@ public class StandardDocBatchImportServiceImpl extends BatchImportHandler implem
     private CommonGroupRepository commonGroupRepository;
     @Autowired
     private StandardDocConverter standardDocConverter;
+    @Autowired
+    private CommonGroupClient commonGroupClient;
 
     public StandardDocBatchImportServiceImpl(ObjectMapper objectMapper,
                                              StandardDocRepository standardDocRepository,
@@ -71,8 +74,13 @@ public class StandardDocBatchImportServiceImpl extends BatchImportHandler implem
                         .tenantId(tenantId).projectId(projectId)
                         .build());
                 if (commonGroup == null) {
-                    addErrorMsg(i, "分组不存在，请先维护分组!");
-                    continue;
+                    //不存在直接新建
+                    commonGroupClient.createGroup(tenantId, projectId, DOC_STANDARD, standardDocDTO.getGroupPath());
+                    CommonGroup group = commonGroupRepository.selectOne(CommonGroup.builder()
+                            .groupType(DOC_STANDARD)
+                            .groupPath(standardDocDTO.getGroupPath())
+                            .tenantId(tenantId).projectId(projectId).build());
+                    standardDocDTO.setGroupId(group.getGroupId());
                 } else {
                     standardDocDTO.setGroupId(commonGroup.getGroupId());
                 }
