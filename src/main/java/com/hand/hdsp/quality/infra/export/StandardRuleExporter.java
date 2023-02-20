@@ -1,5 +1,6 @@
 package com.hand.hdsp.quality.infra.export;
 
+import com.hand.hdsp.core.CommonGroupClient;
 import com.hand.hdsp.core.domain.entity.CommonGroup;
 import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
@@ -31,11 +32,13 @@ public class StandardRuleExporter implements Exporter<RuleDTO, List<StandardRule
     private final CommonGroupRepository commonGroupRepository;
     private final RuleRepository ruleRepository;
     private final RuleLineRepository ruleLineRepository;
+    private final CommonGroupClient commonGroupClient;
 
-    public StandardRuleExporter(CommonGroupRepository commonGroupRepository, RuleRepository ruleRepository, RuleLineRepository ruleLineRepository) {
+    public StandardRuleExporter(CommonGroupRepository commonGroupRepository, RuleRepository ruleRepository, RuleLineRepository ruleLineRepository, CommonGroupClient commonGroupClient) {
         this.commonGroupRepository = commonGroupRepository;
         this.ruleRepository = ruleRepository;
         this.ruleLineRepository = ruleLineRepository;
+        this.commonGroupClient = commonGroupClient;
     }
 
     @Override
@@ -45,10 +48,12 @@ public class StandardRuleExporter implements Exporter<RuleDTO, List<StandardRule
         if (dto.getGroupId() != null && dto.getGroupId() != 0) {
             //获取这个分组
             CommonGroup commonGroup = commonGroupRepository.selectByPrimaryKey(dto.getGroupId());
+            List<CommonGroup> subGroup = commonGroupClient.getSubGroup(commonGroup);
+            subGroup.add(commonGroup);
             //条件查询获取这个分组下的标准数据
             List<RuleDTO> ruleDTOList = ruleRepository.selectDTOByCondition(Condition.builder(Rule.class)
                     .andWhere(Sqls.custom()
-                            .andEqualTo(Rule.FIELD_GROUP_ID, commonGroup.getGroupId())
+                            .andIn(Rule.FIELD_GROUP_ID, subGroup.stream().map(CommonGroup::getGroupId).collect(Collectors.toList()))
                             .andEqualTo(Rule.FIELD_PROJECT_ID, commonGroup.getProjectId())
                             .andIn(Rule.FIELD_TENANT_ID, Arrays.asList(0L, commonGroup.getTenantId())))
                     .andWhere(Sqls.custom()

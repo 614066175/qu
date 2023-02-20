@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.infra.batchimport;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hand.hdsp.core.CommonGroupClient;
 import com.hand.hdsp.core.domain.entity.CommonGroup;
 import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.core.util.ProjectHelper;
@@ -33,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.List;
 
+import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.DATA_STANDARD;
 import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.FIELD_STANDARD;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
@@ -55,6 +57,9 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
     private CommonGroupRepository commonGroupRepository;
     @Autowired
     private ProfileClient profileClient;
+
+    @Autowired
+    private CommonGroupClient commonGroupClient;
 
     public DataFieldStandardBatchImportServiceImpl(ObjectMapper objectMapper,
                                                    DataFieldRepository dataFieldRepository,
@@ -88,8 +93,13 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
                         .groupPath(dataFieldDTO.getGroupPath())
                         .tenantId(tenantId).projectId(projectId).build());
                 if (commonGroup == null) {
-                    addErrorMsg(i, "分组不存在，请先维护分组!");
-                    continue;
+                    //不存在直接新建
+                    commonGroupClient.createGroup(tenantId, projectId, FIELD_STANDARD, dataFieldDTO.getGroupPath());
+                    CommonGroup group = commonGroupRepository.selectOne(CommonGroup.builder()
+                            .groupType(FIELD_STANDARD)
+                            .groupPath(dataFieldDTO.getGroupPath())
+                            .tenantId(tenantId).projectId(projectId).build());
+                    dataFieldDTO.setGroupId(group.getGroupId());
                 } else {
                     dataFieldDTO.setGroupId(commonGroup.getGroupId());
                 }
