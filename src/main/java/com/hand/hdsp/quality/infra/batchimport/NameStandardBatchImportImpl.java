@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.infra.batchimport;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hand.hdsp.core.CommonGroupClient;
 import com.hand.hdsp.core.domain.entity.CommonGroup;
 import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.core.util.ProjectHelper;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.FIELD_STANDARD;
 import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.NAME_STANDARD;
 
 @Slf4j
@@ -39,6 +41,8 @@ public class NameStandardBatchImportImpl extends BatchImportHandler implements I
     private CommonGroupRepository commonGroupRepository;
     @Autowired
     private NameStandardConverter nameStandardConverter;
+    @Autowired
+    private CommonGroupClient commonGroupClient;
 
 
     public NameStandardBatchImportImpl(ObjectMapper objectMapper,
@@ -67,8 +71,13 @@ public class NameStandardBatchImportImpl extends BatchImportHandler implements I
                         .groupPath(nameStandardDTO.getGroupPath())
                         .tenantId(tenantId).projectId(projectId).build());
                 if (commonGroup == null) {
-                    addErrorMsg(i, "分组不存在，请先维护分组!");
-                    continue;
+                    //不存在直接新建
+                    commonGroupClient.createGroup(tenantId, projectId, NAME_STANDARD, nameStandardDTO.getGroupPath());
+                    CommonGroup group = commonGroupRepository.selectOne(CommonGroup.builder()
+                            .groupType(NAME_STANDARD)
+                            .groupPath(nameStandardDTO.getGroupPath())
+                            .tenantId(tenantId).projectId(projectId).build());
+                    nameStandardDTO.setGroupId(group.getGroupId());
                 } else {
                     nameStandardDTO.setGroupId(commonGroup.getGroupId());
                 }

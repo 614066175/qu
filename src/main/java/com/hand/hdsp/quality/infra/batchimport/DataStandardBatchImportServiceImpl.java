@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.infra.batchimport;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hand.hdsp.core.CommonGroupClient;
 import com.hand.hdsp.core.domain.entity.CommonGroup;
 import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.core.util.ProjectHelper;
@@ -47,17 +48,19 @@ public class DataStandardBatchImportServiceImpl extends BatchImportHandler imple
     private final DataStandardMapper dataStandardMapper;
     private final DataStandardConverter dataStandardConverter;
     private final ProfileClient profileClient;
+    private final CommonGroupClient commonGroupClient;
 
 
     public DataStandardBatchImportServiceImpl(ObjectMapper objectMapper, DataStandardRepository dataStandardRepository,
                                               CommonGroupRepository commonGroupRepository,
-                                              DataStandardMapper dataStandardMapper, DataStandardConverter dataStandardConverter, ProfileClient profileClient) {
+                                              DataStandardMapper dataStandardMapper, DataStandardConverter dataStandardConverter, ProfileClient profileClient, CommonGroupClient commonGroupClient) {
         this.objectMapper = objectMapper;
         this.dataStandardRepository = dataStandardRepository;
         this.commonGroupRepository = commonGroupRepository;
         this.dataStandardMapper = dataStandardMapper;
         this.dataStandardConverter = dataStandardConverter;
         this.profileClient = profileClient;
+        this.commonGroupClient = commonGroupClient;
     }
 
     @Override
@@ -76,8 +79,16 @@ public class DataStandardBatchImportServiceImpl extends BatchImportHandler imple
                         .groupPath(dataStandardDTO.getGroupPath())
                         .tenantId(tenantId).projectId(projectId).build());
                 if (commonGroup == null) {
-                    addErrorMsg(i, "分组不存在，请先维护分组!");
-                    continue;
+//                    addErrorMsg(i, "分组不存在，请先维护分组!");
+//                    getContextList().get(i).setDataStatus(IMPORT_FAILED);
+//                    continue;
+                    //不存在直接新建
+                    commonGroupClient.createGroup(tenantId, projectId, DATA_STANDARD, dataStandardDTO.getGroupPath());
+                    CommonGroup group = commonGroupRepository.selectOne(CommonGroup.builder()
+                            .groupType(DATA_STANDARD)
+                            .groupPath(dataStandardDTO.getGroupPath())
+                            .tenantId(tenantId).projectId(projectId).build());
+                    dataStandardDTO.setGroupId(group.getGroupId());
                 } else {
                     dataStandardDTO.setGroupId(commonGroup.getGroupId());
                 }
