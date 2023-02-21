@@ -1,17 +1,17 @@
 package com.hand.hdsp.quality.api.dto;
 
-import java.util.Date;
-import java.util.List;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.Date;
+import java.util.List;
 
 /**
  * <p>数据标准版本表 数据传输对象</p>
@@ -117,6 +117,9 @@ public class DataStandardVersionDTO extends AuditDomain {
 
     @Transient
     private String groupName;
+
+    @Transient
+    private String groupPath;
 
     private Long projectId;
 

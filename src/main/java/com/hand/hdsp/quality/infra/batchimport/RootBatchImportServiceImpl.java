@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.infra.batchimport;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hand.hdsp.core.CommonGroupClient;
 import com.hand.hdsp.core.domain.entity.CommonGroup;
 import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.core.util.ProjectHelper;
@@ -19,11 +20,13 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.imported.app.service.BatchImportHandler;
 import org.hzero.boot.imported.app.service.IBatchImportService;
+import org.hzero.boot.imported.infra.enums.DataStatus;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -45,6 +48,9 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
     private final RootLineRepository rootLineRepository;
     private final CommonGroupRepository commonGroupRepository;
     private final ProfileClient profileClient;
+
+    @Autowired
+    private CommonGroupClient commonGroupClient;
 
     public RootBatchImportServiceImpl(ObjectMapper objectMapper, RootMapper rootMapper, RootRepository rootRepository, RootLineRepository rootLineRepository, CommonGroupRepository commonGroupRepository, ProfileClient profileClient) {
         this.objectMapper = objectMapper;
@@ -78,8 +84,13 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
                 if(CollectionUtils.isNotEmpty(commonGroupList)){
                     root.setGroupId(commonGroupList.get(0).getGroupId());
                 }else {
-                    addErrorMsg(i, String.format("未找到分组%s，请检查数据",root.getGroupPath()));
-                    continue;
+                    //不存在直接新建
+                    commonGroupClient.createGroup(tenantId, projectId, ROOT_STANDARD, root.getGroupPath());
+                    CommonGroup group = commonGroupRepository.selectOne(CommonGroup.builder()
+                            .groupType(ROOT_STANDARD)
+                            .groupPath(root.getGroupPath())
+                            .tenantId(tenantId).projectId(projectId).build());
+                    root.setGroupId(group.getGroupId());
                 }
 
                 //责任人id
@@ -90,6 +101,7 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
                 Long chargeId = rootMapper.checkCharger(root.getChargeName(), root.getTenantId());
                 if (ObjectUtils.isEmpty(chargeId)) {
                     addErrorMsg(i, "未找到此责任人，请检查数据");
+                    getContextList().get(i).setDataStatus(DataStatus.IMPORT_FAILED);
                     continue;
                 }
                 root.setChargeId(chargeId);
@@ -125,6 +137,7 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
                         String offlineFlag = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.ROOT_OFFLINE);
                         if(Boolean.parseBoolean(offlineFlag)){
                             addErrorMsg(i,"词根已存在，状态不可有修改，请先下线");
+                            getContextList().get(i).setDataStatus(DataStatus.IMPORT_FAILED);
                             continue;
                         }
                         root.setReleaseStatus(StandardConstant.Status.OFFLINE);
