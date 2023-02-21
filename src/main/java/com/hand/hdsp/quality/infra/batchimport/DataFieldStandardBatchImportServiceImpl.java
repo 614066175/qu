@@ -23,6 +23,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.imported.app.service.BatchImportHandler;
 import org.hzero.boot.imported.app.service.IBatchImportService;
+import org.hzero.boot.imported.infra.enums.DataStatus;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.mybatis.domian.Condition;
@@ -34,7 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.List;
 
-import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.DATA_STANDARD;
 import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.FIELD_STANDARD;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
 
@@ -119,8 +119,13 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
                     String chargeName = DataSecurityHelper.encrypt(dataFieldDTO.getChargeName());
                     dataFieldDTO.setChargeName(chargeName);
                 }
-                Long chargeId = dataFieldMapper.checkCharger(dataFieldDTO.getChargeName(), dataFieldDTO.getTenantId());
-                dataFieldDTO.setChargeId(chargeId);
+                List<Long> chargeIds = dataFieldMapper.checkCharger(dataFieldDTO.getChargeName(), dataFieldDTO.getTenantId());
+                if (CollectionUtils.isEmpty(chargeIds)) {
+                    addErrorMsg(i, "未找到此责任人，请检查数据");
+                    getContextList().get(i).setDataStatus(DataStatus.IMPORT_FAILED);
+                    continue;
+                }
+                dataFieldDTO.setChargeId(chargeIds.get(0));
                 //导入责任部门
                 if (StringUtils.isNotEmpty(dataFieldDTO.getChargeDeptName())) {
                     String chargeDeptName = dataFieldDTO.getChargeDeptName();
@@ -163,6 +168,7 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
                         //为空，或者为true
                         if (StringUtils.isEmpty(offlineOpen) || Boolean.parseBoolean(offlineOpen)) {
                             addErrorMsg(i, "标准已存在，状态不可进行数据修改，请先下线标准！");
+                            getContextList().get(i).setDataStatus(DataStatus.IMPORT_FAILED);
                             continue;
                         } else {
                             //设置为离线状态

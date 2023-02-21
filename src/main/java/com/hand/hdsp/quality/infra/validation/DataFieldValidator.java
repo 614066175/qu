@@ -103,11 +103,12 @@ public class DataFieldValidator extends BatchValidatorHandler {
                     dataFieldDTO.setChargeName(chargeName);
 
                 }
-                Long chargeId = dataFieldMapper.checkCharger(dataFieldDTO.getChargeName(), dataFieldDTO.getTenantId());
-                if (ObjectUtils.isEmpty(chargeId)) {
+                List<Long> chargeIds = dataFieldMapper.checkCharger(dataFieldDTO.getChargeName(), dataFieldDTO.getTenantId());
+                if(CollectionUtils.isEmpty(chargeIds)){
                     addErrorMsg(i, "未找到此责任人，请检查数据");
                     return false;
                 }
+
 
                 //责任部门不为空进行校验
                 if(StringUtils.isNotEmpty(dataFieldDTO.getChargeDeptName())){
@@ -124,7 +125,7 @@ public class DataFieldValidator extends BatchValidatorHandler {
                     addErrorMsg(i, "字段类型不能为空");
                     return false;
                 }else {
-                    if("DECIMAL".equals(dataFieldDTO.getFieldType() ) || "INTEGER".equals(dataFieldDTO.getFieldType())){
+                    if("DECIMAL".equals(dataFieldDTO.getFieldType())){
                         //校验字段精度
                         if(ObjectUtils.isNotEmpty(dataFieldDTO.getFieldAccuracy())){
                             //字段精度为正整数
@@ -132,10 +133,13 @@ public class DataFieldValidator extends BatchValidatorHandler {
                                 addErrorMsg(i,"浮点型字段精度需要为正整数");
                                 return false;
                             }
+                        }else{
+                            addErrorMsg(i,"浮点型字段需设置字段精度");
+                            return false;
                         }
                     }else {
                         if(ObjectUtils.isNotEmpty(dataFieldDTO.getFieldAccuracy())){
-                            addErrorMsg(i,"非浮点型字段不应设置字段精度");
+                            addErrorMsg(i,"非浮点型字段无需设置字段精度");
                             return false;
                         }
                     }
