@@ -133,6 +133,9 @@ public class DataFieldValidator extends BatchValidatorHandler {
                                 addErrorMsg(i,"浮点型字段精度需要为正整数");
                                 return false;
                             }
+                        }else{
+                            addErrorMsg(i,"浮点型字段需设置字段精度");
+                            return false;
                         }
                     }else {
                         if(ObjectUtils.isNotEmpty(dataFieldDTO.getFieldAccuracy())){
