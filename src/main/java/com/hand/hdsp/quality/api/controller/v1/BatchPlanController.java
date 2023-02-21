@@ -8,6 +8,7 @@ import com.hand.hdsp.quality.domain.entity.BatchPlan;
 import com.hand.hdsp.quality.domain.repository.BatchPlanRepository;
 import com.hand.hdsp.quality.infra.mapper.BatchPlanMapper;
 import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
@@ -22,6 +23,8 @@ import org.hzero.mybatis.util.Sqls;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+
+import java.util.List;
 
 /**
  * <p>批数据评估方案表 管理 API</p>
@@ -198,6 +201,28 @@ public class BatchPlanController extends BaseController {
         return Results.success();
     }
 
+    @ApiOperation(value = "批量生成数据质量任务")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    ), @ApiImplicitParam(
+            name = "planId",
+            value = "批数据评估方案表主键",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/batch-generate")
+    public ResponseEntity<?> batchGenerate(@PathVariable("organizationId") Long tenantId,
+                                      @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                      @RequestBody List<Long> planIds) {
+        batchPlanService.batchGenerate(tenantId, projectId, planIds);
+        return Results.success(planIds);
+    }
+
+
     @ApiOperation(value = "执行批数据评估方案")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
@@ -217,6 +242,36 @@ public class BatchPlanController extends BaseController {
                                      @PathVariable Long planId) {
         Long resultId = batchPlanService.exec(tenantId, planId, projectId);
         batchPlanService.sendMessage(planId, resultId);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "执行批数据评估方案")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    ), @ApiImplicitParam(
+            name = "planId",
+            value = "批数据评估方案表主键",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/exec-by-code/{planCode}")
+    public ResponseEntity<?> execByCode(@PathVariable("organizationId") Long tenantId,
+                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                        @RequestParam(name = "sourceProjectId") Long sourceProjectId,
+                                        @PathVariable String planCode) {
+        //通过编码查找planId
+        BatchPlan batchPlan = batchPlanRepository.selectOne(BatchPlan.builder().planCode(planCode)
+                .tenantId(tenantId).projectId(sourceProjectId)
+                .build());
+        if (batchPlan == null) {
+            throw new CommonException("未找到评估方案！");
+        }
+        Long resultId = batchPlanService.exec(tenantId, batchPlan.getPlanId(), projectId);
+        batchPlanService.sendMessage(batchPlan.getPlanId(), resultId);
         return Results.success();
     }
 
