@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.List;
 
-import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.NAME_STANDARD;
 import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.STANDARD_RULE;
 
 /**
@@ -80,7 +79,7 @@ public class RuleBatchImportServiceImpl extends BatchImportHandler implements IB
                     //不存在直接新建
                     commonGroupClient.createGroup(tenantId, projectId, STANDARD_RULE, ruleDTO.getGroupPath());
                     CommonGroup group = commonGroupRepository.selectOne(CommonGroup.builder()
-                            .groupType(NAME_STANDARD)
+                            .groupType(STANDARD_RULE)
                             .groupPath(ruleDTO.getGroupPath())
                             .tenantId(tenantId).projectId(projectId).build());
                     ruleDTO.setGroupId(group.getGroupId());

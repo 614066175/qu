@@ -3,12 +3,11 @@ package com.hand.hdsp.quality.infra.export.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hand.hdsp.quality.domain.entity.Root;
 import lombok.*;
-
-import java.util.List;
-import javax.persistence.Transient;
-
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
+
+import javax.persistence.Transient;
+import java.util.List;
 
 /**
  * description
@@ -21,9 +20,9 @@ import org.hzero.export.annotation.ExcelSheet;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ExcelSheet(zh = "分组",en = "Root Group",rowOffset = 2)
+@ExcelSheet(zh = "词根",en = "Root Group",rowOffset = 2)
 public class RootExportDTO extends GroupExportDTO{
     @Transient
-    @ExcelColumn(zh = "数据标准列表", en = "rootDTOS", child = true)
+    @ExcelColumn(zh = "词根列表", en = "rootDTOS", child = true)
     private List<Root> roots;
 }
