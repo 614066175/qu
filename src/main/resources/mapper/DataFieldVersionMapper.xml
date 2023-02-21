@@ -82,14 +82,18 @@
         iu2.login_name chargeName,
         iu_re.real_name releaseByName,
         hu.unit_name chargeDeptName,
-        xsg.group_name,
-        xsg.group_code,
+--         xsg.group_name,
+--         xsg.group_code,
+        xcg.group_id,
+        xcg.group_name,
+        xcg.group_path,
         <include refid="baseColumn">
             <property name="fsv" value="fsv"/>
         </include>
         FROM
         xsta_field_standard_version  fsv
-        left join xsta_standard_group xsg on xsg.group_id=fsv.group_id
+        left join xcor_common_group xcg on fsv.group_id=xcg.group_id
+--         left join xsta_standard_group xsg on xsg.group_id=fsv.group_id
         left join iam_user iu on fsv.last_updated_by=iu.id
         left join iam_user iu2 on fsv.charge_id=iu2.id
         left join hpfm_unit hu on hu.unit_id=fsv.charge_dept_id

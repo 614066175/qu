@@ -18,6 +18,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.imported.app.service.BatchImportHandler;
 import org.hzero.boot.imported.app.service.IBatchImportService;
+import org.hzero.boot.imported.infra.enums.DataStatus;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.mybatis.helper.DataSecurityHelper;
@@ -127,6 +128,7 @@ public class DataStandardBatchImportServiceImpl extends BatchImportHandler imple
                         //为空，或者为true
                         if (StringUtils.isEmpty(offlineOpen) || Boolean.parseBoolean(offlineOpen)) {
                             addErrorMsg(i, "标准已存在，状态不可进行数据修改，请先下线标准！");
+                            getContextList().get(i).setDataStatus(DataStatus.IMPORT_FAILED);
                             continue;
                         } else {
                             //设置为离线状态

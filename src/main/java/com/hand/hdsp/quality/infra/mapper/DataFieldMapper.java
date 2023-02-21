@@ -67,5 +67,5 @@ public interface DataFieldMapper extends BaseMapper<DataField> {
      * 根据责任人名称去查找员工id
      * @return 员工id
      */
-    Long checkCharger(String chargeName,Long tenantId);
+    List<Long> checkCharger(String chargeName,Long tenantId);
 }
