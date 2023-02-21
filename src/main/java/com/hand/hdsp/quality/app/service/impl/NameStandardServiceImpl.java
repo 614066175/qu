@@ -30,10 +30,12 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
+import org.hzero.core.base.BaseConstants;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.starter.driver.core.infra.constant.BaseConstant;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -179,12 +181,22 @@ public class NameStandardServiceImpl implements NameStandardService {
             List<NameExecHisDetailDTO> nameExecHisDetailDTOList = this.getAimTable(nameAimDTOList);
             nameExecHistoryDTO.setCheckedNum((long) nameExecHisDetailDTOList.size());
             List<NameExecHisDetailDTO> abnormalList = new ArrayList<>();
-            nameExecHisDetailDTOList.forEach(x -> {
-                if (!Pattern.matches(nameStandard.getStandardRule(), x.getTableName())) {
-                    x.setErrorMessage(String.format(ERROR_MESSAGE, nameStandard.getStandardRule()));
-                    abnormalList.add(x);
-                }
-            });
+            //判断是否忽略大小写,若忽略则正则、表名都转为大写
+            if (BaseConstants.Flag.YES.equals(nameStandard.getIgnoreCaseFlag())) {
+                nameExecHisDetailDTOList.forEach(x -> {
+                    if (!Pattern.compile(nameStandard.getStandardRule().toUpperCase()).matcher(x.getTableName().toUpperCase()).find()) {
+                        x.setErrorMessage(String.format(ERROR_MESSAGE, nameStandard.getStandardRule()));
+                        abnormalList.add(x);
+                    }
+                });
+            } else {
+                nameExecHisDetailDTOList.forEach(x -> {
+                    if (!Pattern.compile(nameStandard.getStandardRule()).matcher(x.getTableName()).find()) {
+                        x.setErrorMessage(String.format(ERROR_MESSAGE, nameStandard.getStandardRule()));
+                        abnormalList.add(x);
+                    }
+                });
+            }
             nameExecHistoryDTO.setAbnormalNum((long) abnormalList.size());
             nameExecHistoryDTO.setExecEndTime(new Date());
             nameExecHistoryDTO.setExecStatus(NameStandardStatusEnum.SUCCESS.getStatusCode());
@@ -394,8 +406,7 @@ public class NameStandardServiceImpl implements NameStandardService {
                 throw new CommonException("invalid schema:{0}/{1}", nameAimDTO.getDatasourceCode(), x.getSchemaName());
             }
             if (!Objects.isNull(nameAimDTO.getExcludeRule())) {
-                //获取满足排除规则的表
-                List<String> excludeRuleTable = tables.stream().filter(o -> Pattern.matches(nameAimDTO.getExcludeRule(), o))
+                List<String> excludeRuleTable = tables.stream().filter(o -> Pattern.compile(nameAimDTO.getExcludeRule()).matcher(o).find())
                         .collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(excludeRuleTable)) {
                     //去除满足排除规则的表
