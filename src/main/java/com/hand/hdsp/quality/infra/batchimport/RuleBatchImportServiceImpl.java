@@ -114,6 +114,7 @@ public class RuleBatchImportServiceImpl extends BatchImportHandler implements IB
                         .ruleId(ruleDTO.getRuleId())
                         .checkWay(ruleDTO.getCheckWay())
                         .checkItem(ruleDTO.getCheckItem())
+                        .countType(ruleDTO.getCountType())
                         .compareWay(ruleDTO.getCompareWay())
                         .regularExpression(ruleDTO.getRegularExpression())
                         .warningLevel(ruleDTO.getWarningLevel())
