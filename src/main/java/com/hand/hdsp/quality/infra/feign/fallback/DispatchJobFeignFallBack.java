@@ -30,4 +30,9 @@ public class DispatchJobFeignFallBack implements DispatchJobFeign {
         throw new CommonException(ErrorCode.JOB_CREATE_UPDATE);
     }
 
+    @Override
+    public ResponseEntity<String> findByName(Long tenantId, Long projectId, String jobName) {
+        throw new CommonException("查找质量任务失败！");
+    }
+
 }

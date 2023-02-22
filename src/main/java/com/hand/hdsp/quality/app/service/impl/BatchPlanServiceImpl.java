@@ -1,7 +1,6 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 import com.alibaba.druid.DbType;
-import com.hand.hdsp.quality.message.adapter.BatchPlanMessageAdapter;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanService;
 import com.hand.hdsp.quality.domain.entity.*;
@@ -27,6 +26,7 @@ import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.util.ParamsUtil;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
+import com.hand.hdsp.quality.message.adapter.BatchPlanMessageAdapter;
 import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
@@ -203,8 +203,20 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     @Transactional(rollbackFor = Exception.class)
     public void generate(Long tenantId, Long projectId, Long planId) {
         BatchPlanDTO batchPlanDTO = batchPlanRepository.selectDTOByPrimaryKey(planId);
+        if (batchPlanDTO == null) {
+            throw new CommonException(ErrorCode.PLAN_NOT_EXIST);
+        }
+        tenantId = batchPlanDTO.getTenantId();
+        projectId = batchPlanDTO.getProjectId();
         // 创建或更新job
+        String oldJobName = String.format(PlanConstant.OLD_JOB_NAME, tenantId, projectId, batchPlanDTO.getPlanCode());
+
+        JobDTO jobDTO = ResponseUtils.getResponse(dispatchJobFeign.findByName(tenantId, projectId, oldJobName), JobDTO.class);
         String jobName = String.format(PlanConstant.JOB_NAME, batchPlanDTO.getPlanCode());
+        if (jobDTO != null) {
+            jobName = jobDTO.getJobName();
+        }
+
 
         //生成数据质量command
         String jobCommand = generateCommand(batchPlanDTO);
@@ -267,9 +279,10 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 .append("rest.useGateway=true\n")
                 .append("rest.uri=/" + serviceShort + "/v1/")
                 .append(batchPlanDTO.getTenantId())
-                .append("/batch-plans/exec/")
+                //调整为按编码执行，解决环境迁移id不一致的问题
+                .append("/batch-plans/exec-by-code/")
                 //不写死projectId，项目共享支持跨项目支持
-                .append(batchPlanDTO.getPlanId() + String.format("?projectId=${projectId}") + "\n")
+                .append(batchPlanDTO.getPlanCode() + String.format("?projectId=${projectId}&sourceProjectId=${hProjectId}") + "\n")
                 .append("rest.method=GET\n")
                 .append("rest.contentType=application/json\n")
                 .append("rest.body={}\n")
@@ -333,6 +346,16 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 .build());
         if (CollectionUtils.isNotEmpty(batchPlans)) {
             batchPlans.forEach(batchPlan -> this.generate(batchPlan.getTenantId(), batchPlan.getProjectId(), batchPlan.getPlanId()));
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void batchGenerate(Long tenantId, Long projectId, List<Long> planIds) {
+        if (CollectionUtils.isNotEmpty(planIds)) {
+            for (Long planId : planIds) {
+                generate(tenantId, projectId, planId);
+            }
         }
     }
 

@@ -83,6 +83,8 @@ public interface PlanConstant {
      */
     String JOB_NAME = "DQ_%s";
 
+    String OLD_JOB_NAME = "DQ%d_%d_%s";
+
 
     /**
      * 数据质量时间戳类型
