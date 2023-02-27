@@ -156,6 +156,15 @@
             <if test="endUpdateDate != null">
                 and xr.last_update_date &lt;=#{endUpdateDate}
             </if>
+            <if test="releaseByName !=null">
+                and iu_re.real_name=#{releaseByName}
+            </if>
+            <if test="releaseDateFrom !=null">
+                and xr.release_date &gt;= #{releaseDateFrom}
+            </if>
+            <if test="releaseDateTo !=null">
+                and xr.release_date &lt;= #{releaseDateTo}
+            </if>
         </where>
     </select>
 
