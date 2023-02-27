@@ -261,4 +261,12 @@ public class DataFieldDTO extends AuditDomain {
 
     @ApiModelProperty("发布时间")
     private Date releaseDate;
+
+    @Transient
+    @ApiModelProperty("发布时间从...")
+    private Date releaseDateFrom;
+
+    @Transient
+    @ApiModelProperty("发布时间到...")
+    private Date releaseDateTo;
 }

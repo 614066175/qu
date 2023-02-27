@@ -219,5 +219,11 @@ public class DataStandardDTO extends AuditDomain{
     @Transient
     private List<Long> standardIds;
 
+    @Transient
+    @ApiModelProperty("发布时间从...")
+    private Date releaseDateFrom;
 
+    @Transient
+    @ApiModelProperty("发布时间到...")
+    private Date releaseDateTo;
 }
