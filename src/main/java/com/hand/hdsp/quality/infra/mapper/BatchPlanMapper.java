@@ -1,8 +1,11 @@
 package com.hand.hdsp.quality.infra.mapper;
 
 
+import com.hand.hdsp.quality.api.dto.BatchPlanDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlan;
 import io.choerodon.mybatis.common.BaseMapper;
+
+import java.util.List;
 
 /**
  * <p>批数据评估方案表Mapper</p>
@@ -17,4 +20,12 @@ public interface BatchPlanMapper extends BaseMapper<BatchPlan> {
      */
     String getProjectCodeById(Long projectId);
 
+    /**
+     * 查询分组评估方案
+     * @param groupIds
+     * @param tenantId
+     * @param projectId
+     * @return
+     */
+    List<BatchPlanDTO> selectGroupPlans(List<Long> groupIds, Long tenantId, Long projectId);
 }
