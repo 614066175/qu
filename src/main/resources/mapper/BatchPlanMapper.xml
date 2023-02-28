@@ -22,5 +22,29 @@
         from xcor_project xp
         where xp.project_id = #{projectId}
     </select>
+    <select id="selectGroupPlans" resultType="com.hand.hdsp.quality.api.dto.BatchPlanDTO">
+        select xbp.* from
+        xqua_batch_plan xbp
+        <where>
+            <if test="groupIds != null">
+                and xbp.group_id in
+                <foreach item="groupId" collection="groupIds" separator="," open="(" close=")">
+                    #{groupId}
+                </foreach>
+            </if>
+            <if test="projectId !=null">
+                <!--项目共享-->
+                AND (xbp.project_id= #{projectId} or xbp.project_id in (select share_from_project_id
+                from xqua_plan_share xps
+                where
+                xps.share_object_id=xbp.plan_id and xps.share_object_type='PLAN' and
+                xps.share_to_project_id =#{projectId}))
+            </if>
+            <if test="tenantId != null">
+                and xbp.tenant_id = #{tenantId}
+            </if>
+        </where>
+
+    </select>
 
 </mapper>

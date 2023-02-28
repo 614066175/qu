@@ -4,14 +4,13 @@ import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.api.dto.BaseFormValueDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO;
 import com.hand.hdsp.quality.api.dto.BatchPlanDTO;
-import com.hand.hdsp.quality.domain.entity.BatchPlan;
 import com.hand.hdsp.quality.domain.entity.BatchPlanBase;
 import com.hand.hdsp.quality.domain.entity.PlanGroup;
 import com.hand.hdsp.quality.domain.repository.BatchPlanBaseRepository;
-import com.hand.hdsp.quality.domain.repository.BatchPlanRepository;
 import com.hand.hdsp.quality.domain.repository.PlanGroupRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.mapper.BatchPlanBaseMapper;
+import com.hand.hdsp.quality.infra.mapper.BatchPlanMapper;
 import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -19,8 +18,6 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.driver.infra.util.PageUtil;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.hzero.starter.driver.core.infra.util.PageParseUtil;
 import org.springframework.stereotype.Component;
@@ -40,16 +37,18 @@ import java.util.stream.Collectors;
 public class BatchPlanBaseRepositoryImpl extends BaseRepositoryImpl<BatchPlanBase, BatchPlanBaseDTO> implements BatchPlanBaseRepository {
 
     private final BatchPlanBaseMapper batchPlanBaseMapper;
+    private final BatchPlanMapper batchPlanMapper;
 
-    public BatchPlanBaseRepositoryImpl(BatchPlanBaseMapper batchPlanBaseMapper) {
+    public BatchPlanBaseRepositoryImpl(BatchPlanBaseMapper batchPlanBaseMapper, BatchPlanMapper batchPlanMapper) {
         this.batchPlanBaseMapper = batchPlanBaseMapper;
 
+        this.batchPlanMapper = batchPlanMapper;
     }
 
     @Override
     public Page<BatchPlanBaseDTO> list(PageRequest pageRequest, BatchPlanBaseDTO batchPlanBaseDTO) {
         //如果没有点击具体的评估方案，则查询分组下所有评估方案的质检项
-        if (batchPlanBaseDTO.getPlanId() == null && batchPlanBaseDTO.getGroupId() != null) {
+        if (batchPlanBaseDTO.getPlanId() == null && batchPlanBaseDTO.getGroupId() != null && batchPlanBaseDTO.getGroupId() != 0) {
 
             PlanGroupRepository planGroupRepository = ApplicationContextHelper.getContext().getBean(PlanGroupRepository.class);
             //并加上自己
@@ -74,13 +73,15 @@ public class BatchPlanBaseRepositoryImpl extends BaseRepositoryImpl<BatchPlanBas
             }
             //查询所有分组下的评估方案
             List<Long> groupIds = subGroupList.stream().map(PlanGroup::getGroupId).collect(Collectors.toList());
-            BatchPlanRepository batchPlanRepository = ApplicationContextHelper.getContext().getBean(BatchPlanRepository.class);
-            List<BatchPlanDTO> batchPlanDTOS = batchPlanRepository.selectDTOByCondition(Condition.builder(BatchPlan.class)
-                    .andWhere(Sqls.custom()
-                            .andIn(BatchPlan.FIELD_GROUP_ID, groupIds, true)
-                            .andEqualTo(BatchPlan.FIELD_TENANT_ID, batchPlanBaseDTO.getTenantId())
-                            .andEqualTo(BatchPlan.FIELD_PROJECT_ID, batchPlanBaseDTO.getProjectId()))
-                    .build());
+//            BatchPlanRepository batchPlanRepository = ApplicationContextHelper.getContext().getBean(BatchPlanRepository.class);
+//            List<BatchPlanDTO> batchPlanDTOS = batchPlanRepository.selectDTOByCondition(Condition.builder(BatchPlan.class)
+//                    .andWhere(Sqls.custom()
+//                            .andIn(BatchPlan.FIELD_GROUP_ID, groupIds)
+//                            .andEqualTo(BatchPlan.FIELD_TENANT_ID, batchPlanBaseDTO.getTenantId())
+//                            .andEqualTo(BatchPlan.FIELD_PROJECT_ID, batchPlanBaseDTO.getProjectId()))
+//                    .build());
+            //查询分组下评估方案
+            List<BatchPlanDTO> batchPlanDTOS = batchPlanMapper.selectGroupPlans(groupIds, batchPlanBaseDTO.getTenantId(), batchPlanBaseDTO.getProjectId());
             if (CollectionUtils.isEmpty(batchPlanDTOS)) {
                 return new Page<>();
             }
