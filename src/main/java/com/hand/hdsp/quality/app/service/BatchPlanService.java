@@ -2,6 +2,8 @@ package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.BatchPlanDTO;
 
+import java.util.List;
+
 /**
  * <p>批数据评估方案表应用服务</p>
  *
@@ -54,4 +56,12 @@ public interface BatchPlanService {
      *
      */
     void fixProjectShare();
+
+    /**
+     * 批量生成
+     * @param tenantId
+     * @param projectId
+     * @param planIds
+     */
+    void batchGenerate(Long tenantId, Long projectId, List<Long> planIds);
 }
