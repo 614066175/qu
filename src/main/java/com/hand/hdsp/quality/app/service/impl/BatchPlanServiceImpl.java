@@ -1,7 +1,6 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 import com.alibaba.druid.DbType;
-import com.hand.hdsp.quality.message.adapter.BatchPlanMessageAdapter;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanService;
 import com.hand.hdsp.quality.domain.entity.*;
@@ -27,8 +26,11 @@ import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.util.ParamsUtil;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
+import com.hand.hdsp.quality.message.adapter.BatchPlanMessageAdapter;
 import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.CustomUserDetails;
+import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -58,10 +60,11 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
-
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.SqlType.TABLE;
 
 /**
  * <p>
@@ -794,41 +797,45 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         List<BatchPlanBase> baseList = batchPlanBaseMapper.execBaseList(BatchPlanBaseDTO.builder().planId(planId).build());
 
         //评估每一个方案下的base
+        CompletionService executor = new ExecutorCompletionService<>(CustomThreadPool.getExecutor());
+        List<Future> futures = new ArrayList<>();
+        CustomUserDetails userDetails = DetailsHelper.getUserDetails();
         for (BatchPlanBase batchPlanBase : baseList) {
-            String objectName = batchPlanBase.getObjectName();
+            Future future = executor.submit(() ->
+            {
+                DetailsHelper.setCustomUserDetails(userDetails);
+                String objectName = batchPlanBase.getObjectName();
 
+                PluginDatasourceDTO pluginDatasourceDTO = PluginDatasourceDTO.builder()
+                        .datasourceId(batchPlanBase.getDatasourceId()).tenantId(tenantId)
+                        .datasourceCode(batchPlanBase.getDatasourceCode()).build();
 
-            PluginDatasourceDTO pluginDatasourceDTO = PluginDatasourceDTO.builder()
-                    .datasourceId(batchPlanBase.getDatasourceId()).tenantId(tenantId)
-                    .datasourceCode(batchPlanBase.getDatasourceCode()).build();
+                String packageObjectName = objectName;
+                if (PlanConstant.SqlType.SQL.equals(batchPlanBase.getSqlType())) {
+                    packageObjectName = String.format(SQL_PACK, objectName);
+                }
 
+                // 插入批数据方案结果表-表信息
+                BatchResultBase batchResultBase = BatchResultBase.builder().resultId(batchResult.getResultId())
+                        .planBaseId(batchPlanBase.getPlanBaseId()).objectName(objectName)
+                        .packageObjectName(packageObjectName).datasourceType(batchPlanBase.getDatasourceType())
+                        .ruleCount(0L).exceptionRuleCount(0L).checkItemCount(0L).exceptionCheckItemCount(0L)
+                        .tenantId(tenantId)
+                        .sqlType(batchPlanBase.getSqlType())
+                        //从result中取projectId
+                        .projectId(batchResult.getProjectId())
+                        .build();
 
-            String packageObjectName = objectName;
-            if (PlanConstant.SqlType.SQL.equals(batchPlanBase.getSqlType())) {
-                packageObjectName = String.format(SQL_PACK, objectName);
-            }
-
-            // 插入批数据方案结果表-表信息
-            BatchResultBase batchResultBase = BatchResultBase.builder().resultId(batchResult.getResultId())
-                    .planBaseId(batchPlanBase.getPlanBaseId()).objectName(objectName)
-                    .packageObjectName(packageObjectName).datasourceType(batchPlanBase.getDatasourceType())
-                    .ruleCount(0L).exceptionRuleCount(0L).checkItemCount(0L).exceptionCheckItemCount(0L)
-                    .tenantId(tenantId)
-                    .sqlType(batchPlanBase.getSqlType())
-                    //从result中取projectId
-                    .projectId(batchResult.getProjectId())
-                    .build();
-            if (TABLE.equals(batchPlanBase.getSqlType())) {
                 //保存表的数据量
                 DriverSession driverSession = driverSessionService.getDriverSession(tenantId, batchPlanBase.getDatasourceCode());
                 //避免hive进行优化配置hive.compute.query.using.stats=true，使用状态信息进行查询，返回的结果不正确
                 List<Map<String, Object>> maps = null;
                 if (DbType.hive.equals(driverSession.getDbType())) {
                     maps = driverSession.executeOneQuery(batchPlanBase.getDatasourceSchema(),
-                            String.format("select count(*) as COUNT from %s limit 1", batchPlanBase.getObjectName()));
+                            String.format("select count(*) as COUNT from (%s) tmp limit 1", batchPlanBase.getObjectName()));
                 } else {
                     maps = driverSession.executeOneQuery(batchPlanBase.getDatasourceSchema(),
-                            String.format("select count(*) as COUNT from %s ", batchPlanBase.getObjectName()));
+                            String.format("select count(*) as COUNT from (%s) tmp ", batchPlanBase.getObjectName()));
                 }
                 if (CollectionUtils.isNotEmpty(maps)) {
                     log.info("查询结果：" + maps);
@@ -837,17 +844,39 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                     Long count = Long.parseLong(String.valueOf(maps.get(0).get(key)));
                     batchResultBase.setDataCount(count);
                 }
+
+                // 获取增量参数，并更新 where 条件
+                updateWhereCondition(tenantId, planId, batchPlanBase, batchResultBase, timestampList);
+
+                batchResultBaseRepository.insertSelective(batchResultBase);
+
+                handleTableRule(tenantId, batchResultBase, batchPlanBase.getDatasourceSchema(), pluginDatasourceDTO);
+                handleFieldRule(tenantId, batchResultBase, batchPlanBase.getDatasourceSchema(), pluginDatasourceDTO);
+                handleRelTableRule(tenantId, batchResultBase, batchPlanBase.getDatasourceSchema(), pluginDatasourceDTO);
+
+                batchResultBaseRepository.updateByPrimaryKeySelective(batchResultBase);
+                return batchResultBase;
+            });
+
+            futures.add(future);
+        }
+        log.info("执行结束");
+        //CompletableFuture cancel任务没有效果，采用CompletionService获取先执行完的结果
+        for (int i = 0; i < futures.size(); i++) {
+            try {
+                Future future = executor.take();
+                future.get();
+            } catch (Exception e) {
+                //如果执行失败的话，取消其他任务
+                futures.forEach(f1 -> {
+                    if (!f1.isDone()) {
+                        log.info("取消正常运行的任务，避免资源浪费");
+                        boolean cancel = f1.cancel(true);
+                        System.out.println("是否取消" + cancel);
+                    }
+                });
+                throw new CommonException("质量评估异常", e);
             }
-            // 获取增量参数，并更新 where 条件
-            updateWhereCondition(tenantId, planId, batchPlanBase, batchResultBase, timestampList);
-
-            batchResultBaseRepository.insertSelective(batchResultBase);
-
-            handleTableRule(tenantId, batchResultBase, batchPlanBase.getDatasourceSchema(), pluginDatasourceDTO);
-            handleFieldRule(tenantId, batchResultBase, batchPlanBase.getDatasourceSchema(), pluginDatasourceDTO);
-            handleRelTableRule(tenantId, batchResultBase, batchPlanBase.getDatasourceSchema(), pluginDatasourceDTO);
-
-            batchResultBaseRepository.updateByPrimaryKeySelective(batchResultBase);
         }
     }
 
