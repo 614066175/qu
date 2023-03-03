@@ -107,6 +107,17 @@ public class RuleServiceImpl implements RuleService {
         ruleRepository.updateDTOAllColumnWhereTenant(ruleDTO, tenantId);
         if (ruleDTO.getRuleLineDTOList() != null) {
             for (RuleLineDTO ruleLineDTO : ruleDTO.getRuleLineDTOList()) {
+                if(CheckConstants.NOT_EMPTY.equals(ruleLineDTO.getCheckItem())){
+                    ruleLineDTO.setCheckWay(CheckConstants.COMMON);
+                    ruleLineDTO.setCountType(CheckConstants.FIXED_VALUE);
+                    ruleLineDTO.setCompareWay(CheckConstants.VALUE);
+                    List<WarningLevelDTO> warningLevelDTOS = ruleLineDTO.getWarningLevelList();
+                    warningLevelDTOS.forEach(tmp->{
+                        tmp.setCompareSymbol("NOT_EQUAL");
+                        tmp.setExpectedValue("0");
+                    });
+                    ruleLineDTO.setWarningLevel(JsonUtils.object2Json(warningLevelDTOS));
+                }
                 if (AuditDomain.RecordStatus.update.equals(ruleLineDTO.get_status())) {
                     //todo 范围重叠判断
                     ruleLineDTO.setWarningLevel(JsonUtils.object2Json(ruleLineDTO.getWarningLevelList()));
