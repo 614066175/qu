@@ -36,7 +36,7 @@ public class CommonSqlMeasure implements Measure {
 
     private final List<String> checkItemList = Arrays.asList("FIELD_UNIQUE_LINE", "FIELD_EMPTY_LINE");
 
-    private final List<String> emptyItemList=Arrays.asList("FIELD_EMPTY","FIELD_EMPTY_LINE");
+    private final List<String> emptyItemList=Arrays.asList("FIELD_EMPTY","FIELD_EMPTY_LINE","FIELD_NOT_EMPTY");
 
     public CommonSqlMeasure(ItemTemplateSqlRepository templateSqlRepository,
                             CountCollector countCollector, DriverSessionService driverSessionService) {
