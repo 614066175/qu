@@ -70,6 +70,6 @@ public class StandardDocValidator extends BatchValidatorHandler {
             log.info(e.getMessage());
             return false;
         }
-        return false;
+        return true;
     }
 }
