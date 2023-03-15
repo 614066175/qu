@@ -894,8 +894,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 futures.forEach(f1 -> {
                     if (!f1.isDone()) {
                         log.info("取消正常运行的任务，避免资源浪费");
-                        boolean cancel = f1.cancel(true);
-                        System.out.println("是否取消" + cancel);
+                        f1.cancel(true);
                     }
                 });
                 throw new CommonException("质量评估异常", e);
