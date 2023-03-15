@@ -40,6 +40,9 @@ public class AimStatisticsDTO extends AuditDomain {
     @ApiModelProperty(value = "合规行数")
     private Long compliantRow;
 
+    @ApiModelProperty(value = "非空合规行数")
+    private Long notNullCompliantRow;
+
     @ApiModelProperty(value = "合规函数比例")
     private BigDecimal compliantRate;
 

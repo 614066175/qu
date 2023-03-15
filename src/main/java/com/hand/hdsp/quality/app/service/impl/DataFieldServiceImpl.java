@@ -24,8 +24,6 @@ import com.hand.hdsp.quality.infra.util.StandardHandler;
 import com.hand.hdsp.quality.workflow.adapter.DataFieldOfflineWorkflowAdapter;
 import com.hand.hdsp.quality.workflow.adapter.DataFieldOnlineWorkflowAdapter;
 import io.choerodon.core.convertor.ApplicationContextHelper;
-import com.hand.hdsp.quality.workflow.adapter.DataFieldOfflineWorkflowAdapter;
-import com.hand.hdsp.quality.workflow.adapter.DataFieldOnlineWorkflowAdapter;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -59,8 +57,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
@@ -387,7 +387,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                 //指定字段标准修改状态
                 dataFieldDTO.setStandardStatus(ONLINE_APPROVING);
                 dataFieldOnlineWorkflowAdapter.startWorkflow(dataFieldDTO);
-            }else{
+            } else {
                 DataFieldDTO dto = dataFieldRepository.selectDTOByPrimaryKey(dataFieldDTO.getFieldId());
                 if (Objects.isNull(dto)) {
                     throw new CommonException(ErrorCode.DATA_FIELD_STANDARD_NOT_EXIST);
@@ -407,7 +407,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                 //指定字段标准修改状态
                 dataFieldDTO.setStandardStatus(OFFLINE_APPROVING);
                 dataFieldOfflineWorkflowAdapter.startWorkflow(dataFieldDTO);
-            }else{
+            } else {
                 DataFieldDTO dto = dataFieldRepository.selectDTOByPrimaryKey(dataFieldDTO.getFieldId());
                 if (Objects.isNull(dto)) {
                     throw new CommonException(ErrorCode.DATA_FIELD_STANDARD_NOT_EXIST);
@@ -552,6 +552,7 @@ public class DataFieldServiceImpl implements DataFieldService {
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public DataFieldDTO fieldAimStatistic(DataFieldDTO dataFieldDTO) {
         //根据字段标准，查找对应落标记录
         List<StandardAimDTO> standardAimDTOS = standardAimRepository.selectDTOByCondition(Condition.builder(StandardAim.class)
@@ -565,13 +566,16 @@ public class DataFieldServiceImpl implements DataFieldService {
             log.info("字段标准没有落标，无需统计");
             throw new CommonException(ErrorCode.STANDARD_NO_AIM);
         }
+        //获取所有的落标记录
+        List<Long> aimIds = standardAimDTOS.stream().map(StandardAimDTO::getAimId).collect(Collectors.toList());
 
-        List<AimStatisticsDTO> insertAimStatisticsDTOS = new CopyOnWriteArrayList<>();
-        List<AimStatistics> updateAimStatistics = new CopyOnWriteArrayList<>();
+        //新的落标统计记录
+        List<AimStatisticsDTO> aimStatisticsDTOS = new CopyOnWriteArrayList<>();
 
-        CountDownLatch countDownLatch = new CountDownLatch(standardAimDTOS.size());
+        CompletionService executor = new ExecutorCompletionService<>(CustomThreadPool.getExecutor());
+        List<Future> futures = new ArrayList<>();
         for (StandardAimDTO aimDTO : standardAimDTOS) {
-            CustomThreadPool.getExecutor().submit(() -> {
+            Future future = executor.submit(() -> {
                 try {
                     AimStatisticsDTO aimStatisticsDTO = new AimStatisticsDTO();
                     aimStatisticsDTO.setAimId(aimDTO.getAimId());
@@ -617,42 +621,40 @@ public class DataFieldServiceImpl implements DataFieldService {
                     // 统计非空行合规比列
                     BigDecimal acompliantPercent = getPercent(aimStatisticsDTO.getCompliantRow(), aimStatisticsDTO.getNonNullRow());
                     aimStatisticsDTO.setAcompliantRate(acompliantPercent);
-                    int count = aimStatisticsRepository.selectCount(AimStatistics.builder().aimId(aimStatisticsDTO.getAimId()).build());
-                    if (count > 0) {
-                        //已经统计过，更新统计
-                        List<AimStatistics> aimStatisticList = aimStatisticsRepository.select(AimStatistics.builder().aimId(aimStatisticsDTO.getAimId()).build());
-                        if (CollectionUtils.isNotEmpty(aimStatisticList)) {
-                            AimStatistics oldAimStatistic = aimStatisticList.get(0);
-                            AimStatistics newAimStatistic = aimStatisticsConverter.dtoToEntity(aimStatisticsDTO);
-                            BeanUtils.copyProperties(oldAimStatistic, newAimStatistic, AimStatistics.FIELD_ROW_NUM,
-                                    AimStatistics.FIELD_NON_NULL_ROW, AimStatistics.FIELD_COMPLIANT_ROW,
-                                    AimStatistics.FIELD_COMPLIANT_RATE, AimStatistics.FIELD_ACOMPLIANT_RATE);
-                            updateAimStatistics.add(newAimStatistic);
-                        }
-                    } else {
-                        insertAimStatisticsDTOS.add(aimStatisticsDTO);
-                    }
+                    aimStatisticsDTOS.add(aimStatisticsDTO);
                 } catch (Exception e) {
-                    log.info("统计失败");
-                    e.printStackTrace();
-                } finally {
-                    // 闭锁-1
-                    countDownLatch.countDown();
+                    throw new CommonException("落标统计失败", e);
                 }
+                return null;
             });
+            futures.add(future);
         }
-        try {
-            //等待结果
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            log.error("error", e);
+
+        //如果存在失败的情况，则直接取消落标统计
+        for (Future future : futures) {
+            try {
+                future = executor.take();
+                future.get();
+            } catch (Exception e) {
+                //如果执行失败的话，取消其他任务
+                futures.forEach(f1 -> {
+                    if (!f1.isDone()) {
+                        log.info("取消正常运行的任务，避免资源浪费");
+                        f1.cancel(true);
+                    }
+                });
+                throw new CommonException("落标统计失败", e);
+            }
         }
+
         // 落标总数统计
-        if (CollectionUtils.isNotEmpty(insertAimStatisticsDTOS)) {
-            aimStatisticsRepository.batchInsertDTOSelective(insertAimStatisticsDTOS);
-        }
-        if (CollectionUtils.isNotEmpty(updateAimStatistics)) {
-            aimStatisticsRepository.batchUpdateByPrimaryKey(updateAimStatistics);
+        if (CollectionUtils.isNotEmpty(aimStatisticsDTOS)) {
+            List<AimStatistics> oldAimStatistics = aimStatisticsRepository.selectByCondition(Condition.builder(AimStatistics.class)
+                    .andWhere(Sqls.custom().andIn(AimStatistics.FIELD_AIM_ID, aimIds))
+                    .build());
+
+            aimStatisticsRepository.batchDeleteByPrimaryKey(oldAimStatistics);
+            aimStatisticsRepository.batchInsertDTOSelective(aimStatisticsDTOS);
         }
         return dataFieldDTO;
     }
@@ -694,7 +696,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                                 .andEqualTo(StandardApproval.FIELD_STANDARD_ID, fieldId)
                                 .andEqualTo(StandardApproval.FIELD_STANDARD_TYPE, FIELD)
                                 .andEqualTo(StandardApproval.FIELD_APPLY_TYPE, ONLINE))
-                                .orderByDesc(StandardApproval.FIELD_APPROVAL_ID)
+                        .orderByDesc(StandardApproval.FIELD_APPROVAL_ID)
                         .build());
                 if (CollectionUtils.isNotEmpty(standardApprovalDTOS)) {
                     StandardApprovalDTO standardApprovalDTO = standardApprovalDTOS.get(0);
