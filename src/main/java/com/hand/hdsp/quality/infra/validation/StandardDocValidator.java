@@ -52,7 +52,6 @@ public class StandardDocValidator extends BatchValidatorHandler {
                     //标准编码不符合规范
                     if (!standardDocDTO.getStandardCode().matches("^[a-zA-Z][a-zA-Z0-9_]*$")) {
                         addErrorMsg(i, "标准编码不符合:1-64个字符，可包含字母、数字或下划线”_”，英文字母开头");
-                        return false;
                     }
                     //如果有责任人，则进行验证
                     //校验的责任人名称为员工姓名
@@ -64,13 +63,13 @@ public class StandardDocValidator extends BatchValidatorHandler {
                     Long chargeId = standardDocMapper.checkCharger(standardDocDTO.getChargeName(), tenantId);
                     if (ObjectUtils.isEmpty(chargeId)) {
                         addErrorMsg(i, "未找到此责任人，请检查数据");
-                        return false;
                     }
                 }
             }
         } catch (IOException e) {
+            log.info(e.getMessage());
             return false;
         }
-        return false;
+        return true;
     }
 }

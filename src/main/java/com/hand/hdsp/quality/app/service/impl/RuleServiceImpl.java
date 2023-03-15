@@ -6,12 +6,14 @@ import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.quality.api.dto.RuleDTO;
 import com.hand.hdsp.quality.api.dto.RuleGroupDTO;
 import com.hand.hdsp.quality.api.dto.RuleLineDTO;
+import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.app.service.RuleService;
 import com.hand.hdsp.quality.domain.entity.Rule;
 import com.hand.hdsp.quality.domain.entity.RuleGroup;
 import com.hand.hdsp.quality.domain.repository.RuleGroupRepository;
 import com.hand.hdsp.quality.domain.repository.RuleLineRepository;
 import com.hand.hdsp.quality.domain.repository.RuleRepository;
+import com.hand.hdsp.quality.infra.constant.CheckConstants;
 import com.hand.hdsp.quality.infra.converter.RuleConverter;
 import com.hand.hdsp.quality.infra.converter.RuleLineConverter;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
@@ -27,6 +29,7 @@ import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -79,6 +82,18 @@ public class RuleServiceImpl implements RuleService {
                 ruleLineDTO.setTenantId(tenantId);
                 //todo 范围重叠判断
                 ruleLineDTO.setWarningLevel(JsonUtils.object2Json(ruleLineDTO.getWarningLevelList()));
+
+                if(CheckConstants.NOT_EMPTY.equals(ruleLineDTO.getCheckItem())){
+                    ruleLineDTO.setCheckWay(CheckConstants.COMMON);
+                    ruleLineDTO.setCountType(CheckConstants.FIXED_VALUE);
+                    ruleLineDTO.setCompareWay(CheckConstants.VALUE);
+                    List<WarningLevelDTO> warningLevelDTOS = ruleLineDTO.getWarningLevelList();
+                    warningLevelDTOS.forEach(tmp->{
+                        tmp.setCompareSymbol("NOT_EQUAL");
+                        tmp.setExpectedValue("0");
+                    });
+                    ruleLineDTO.setWarningLevel(JsonUtils.object2Json(warningLevelDTOS));
+                }
                 ruleLineRepository.insertDTOSelective(ruleLineDTO);
             }
         }
@@ -92,6 +107,17 @@ public class RuleServiceImpl implements RuleService {
         ruleRepository.updateDTOAllColumnWhereTenant(ruleDTO, tenantId);
         if (ruleDTO.getRuleLineDTOList() != null) {
             for (RuleLineDTO ruleLineDTO : ruleDTO.getRuleLineDTOList()) {
+                if(CheckConstants.NOT_EMPTY.equals(ruleLineDTO.getCheckItem())){
+                    ruleLineDTO.setCheckWay(CheckConstants.COMMON);
+                    ruleLineDTO.setCountType(CheckConstants.FIXED_VALUE);
+                    ruleLineDTO.setCompareWay(CheckConstants.VALUE);
+                    List<WarningLevelDTO> warningLevelDTOS = ruleLineDTO.getWarningLevelList();
+                    warningLevelDTOS.forEach(tmp->{
+                        tmp.setCompareSymbol("NOT_EQUAL");
+                        tmp.setExpectedValue("0");
+                    });
+                    ruleLineDTO.setWarningLevel(JsonUtils.object2Json(warningLevelDTOS));
+                }
                 if (AuditDomain.RecordStatus.update.equals(ruleLineDTO.get_status())) {
                     //todo 范围重叠判断
                     ruleLineDTO.setWarningLevel(JsonUtils.object2Json(ruleLineDTO.getWarningLevelList()));
