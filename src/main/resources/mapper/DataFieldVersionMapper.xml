@@ -84,7 +84,6 @@
         hu.unit_name chargeDeptName,
 --         xsg.group_name,
 --         xsg.group_code,
-        xcg.group_id,
         xcg.group_name,
         xcg.group_path,
         <include refid="baseColumn">
