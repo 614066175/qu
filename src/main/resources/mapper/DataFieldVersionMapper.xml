@@ -59,7 +59,7 @@
     <select id="detail" resultType="com.hand.hdsp.quality.api.dto.DataFieldVersionDTO">
         SELECT
         iu.login_name lastUpdateName,
-        iu2.login_name chargeName,
+        he.name chargeName,
         hu.unit_name chargeDeptName,
         xsg.group_name,
         xsg.group_code,
@@ -70,7 +70,7 @@
         xsta_field_standard_version  fsv
         left join xsta_standard_group xsg on xsg.group_id=fsv.group_id
         left join iam_user iu on fsv.last_updated_by=iu.id
-        left join iam_user iu2 on fsv.charge_id=iu2.id
+        left join hpfm_employee he on fsv.charge_id=he.employee_id
         left join hpfm_unit hu on hu.unit_id=fsv.charge_dept_id
         WHERE
         fsv.version_id = #{versionId}
@@ -84,7 +84,6 @@
         hu.unit_name chargeDeptName,
 --         xsg.group_name,
 --         xsg.group_code,
-        xcg.group_id,
         xcg.group_name,
         xcg.group_path,
         <include refid="baseColumn">

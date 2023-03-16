@@ -17,7 +17,10 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 /**
@@ -40,6 +43,14 @@ public class DataStandardVersionServiceImpl implements DataStandardVersionServic
     @Override
     public DataStandardVersionDTO detail(Long versionId) {
         DataStandardVersionDTO dataStandardVersionDTO = dataStandardVersionMapper.detail(versionId);
+        if(DataSecurityHelper.isTenantOpen()){
+            if(StringUtils.isNotEmpty(dataStandardVersionDTO.getChargeName())) {
+                dataStandardVersionDTO.setChargeName(DataSecurityHelper.decrypt(dataStandardVersionDTO.getChargeName()));
+            }
+            if(StringUtils.isNotEmpty(dataStandardVersionDTO.getChargeName())) {
+                dataStandardVersionDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataStandardVersionDTO.getChargeDeptName()));
+            }
+        }
         if (Objects.isNull(dataStandardVersionDTO)) {
             throw new CommonException(ErrorCode.DATA_STANDARD_VERSION_NOT_EXIST);
         }
