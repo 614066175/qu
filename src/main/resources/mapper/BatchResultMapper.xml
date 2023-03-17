@@ -476,7 +476,7 @@
             group by date_format(xbr.start_date, '%Y-%m-%d'),xbrr.rule_type
             order by date_format(xbr.start_date, '%Y-%m-%d')
         </when>
-        <when test='datasourceType == "ORACLE"'>
+        <when test='datasourceType == "ORACLE" or datasourceType == "DM"'>
             select TO_DATE(TO_CHAR(xbr.start_date, 'yyyy-MM-dd'), 'yyyy-MM-dd') "date",
             xbrr.rule_type ruleType,
             (case when SUM(xbrb.exception_rule_count) is null then 0 else SUM(xbrb.exception_rule_count) end ) exceptionRuleCount
@@ -517,7 +517,7 @@
     <select id="listWarningLevel" resultType="com.hand.hdsp.quality.infra.vo.WarningLevelVO">
         <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         <choose>
-            <when test='datasourceType == "ORACLE"'>
+            <when test='datasourceType == "ORACLE" or datasourceType == "DM"'>
                 select TO_DATE(TO_CHAR(xbr.start_date, 'yyyy-MM-dd'), 'yyyy-MM-dd') "date",
                 xbri.warning_level warningLevel,
                 count(xbri.warning_level) levelCount
@@ -630,7 +630,7 @@
     <select id="errorTableList" resultType="com.hand.hdsp.quality.infra.vo.ErrorTableListVO">
         <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         <choose>
-            <when test='datasourceType == "ORACLE"'>
+            <when test='datasourceType == "ORACLE" or datasourceType == "DM"'>
                 SELECT
                 xbpb.object_name,
                 xbpb.datasource_id,

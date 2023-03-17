@@ -68,7 +68,7 @@
                     and date_format(xbri.creation_date, '%Y%m%d') &lt;= date_format(date_sub(curdate(),interval 1 day), '%Y%m%d')
                 </if>
             </when>
-            <when test='datasourceType == "ORACLE"'>
+            <when test='datasourceType == "ORACLE" or datasourceType == "DM"'>
                 <if test="measureDate != null">
                     and to_char(xbri.creation_date, 'yyyyMMdd') = to_char(#{measureDate}, 'yyyyMMdd')
                 </if>
@@ -218,7 +218,7 @@
             JOIN xqua_batch_result xbr ON xbrb.result_id = xbr.result_id
             JOIN xqua_batch_plan_base xbpb ON xbpb.plan_base_id = xbrb.plan_base_id
             JOIN xqua_batch_plan xbp ON xbpb.plan_id = xbp.plan_id
-        <if test='datasourceType == "ORACLE"'>
+        <if test='datasourceType == "ORACLE" or datasourceType == "DM"'>
             <if test="fieldName != null ">
                 join (
                     select DISTINCT result_item_id,REGEXP_SUBSTR(REGEXP_REPLACE(xbri2.field_name, '\(([^)]+)\)', ''), '[^,]+', 1, LEVEL) as name

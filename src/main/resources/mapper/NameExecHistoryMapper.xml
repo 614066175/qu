@@ -48,7 +48,7 @@
         FROM xsta_name_exec_history xneh
         LEFT JOIN xsta_name_exec_his_detail xnehd ON (xneh.history_id=xnehd.history_id)
         WHERE xneh.standard_id=#{standardId}
-        <if test='datasourceType == "ORACLE"'>
+        <if test='datasourceType == "ORACLE" or datasourceType == "DM"'>
             and rownum=1
         </if>
         ORDER BY xneh.history_id DESC
@@ -83,7 +83,7 @@
                     AND ( datediff ( xneh.exec_start_time , #{startDay} ) = 0 )
                 </if>
             </when>
-            <when test='datasourceType == "ORACLE"'>
+            <when test='datasourceType == "ORACLE" or datasourceType == "DM"'>
                 <if test="startDay != null">
                     and ROUND(TO_NUMBER(xneh.exec_start_time - #{startDay}))=0
                 </if>

@@ -99,7 +99,7 @@
                 and xs.last_update_date &lt;= DATE_FORMAT(#{suggestDTO.endDate},'%Y-%m-%d %H:%i:%s')
             </if>
         </if>
-        <if test='datasourceType == "ORACLE"'>
+        <if test='datasourceType == "ORACLE" or datasourceType == "DM"'>
             <if test="suggestDTO.startDate!=null">
                 and xs.last_update_date >= to_date(#{suggestDTO.startDate},'yyyy-MM-dd hh24:mi:ss')
             </if>

@@ -64,7 +64,7 @@
         left join xsta_root_line xrl on xr.id = xrl.root_id
         left join xcor_common_group xcg on xr.group_id = xcg.group_id
         <choose>
-            <when test='datasourceType == "ORACLE"'>
+            <when test='datasourceType == "ORACLE" or datasourceType == "DM"'>
                 LEFT JOIN (
                 SELECT
                 xsa.standard_id,
@@ -178,7 +178,7 @@
             name=#{chargeName}
           and tenant_id  = #{tenantId}
         <choose>
-        <when test='datasourceType == "ORACLE"'>
+        <when test='datasourceType == "ORACLE" or datasourceType == "DM"'>
             and rownum = 1
         </when>
         <when test="datasourceType == 'MYSQL' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
