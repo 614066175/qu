@@ -143,7 +143,10 @@ hzero:
       name: ${HZERO_SERVICE_ADMIN_NAME:hzero-admin}
     report:
       name: ${HZERO_SERVICE_REPORT_NAME:hzero-report}
-
+  data:
+    permission:
+      # 是否启用数据权限屏蔽
+      enabled: ${HZERO_ENABLE_DATA_PERMISSION:true}
 hdsp:
   quality:
     message-key: hdsp:quality:exception-message
