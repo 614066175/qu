@@ -78,4 +78,10 @@ public class DataFieldVersion extends AuditDomain {
     private Long releaseBy;
 
     private Date releaseDate;
+
+    private Integer nullFlag;
+
+    private String defaultValue;
+
+    private Long dataStandardId;
 }

@@ -48,6 +48,7 @@ public class DataStandardVersion extends AuditDomain {
     public static final String FIELD_TENANT_ID = "tenantId";
     public static final String FIELD_RELEASE_BY = "releaseBy";
     public static final String FIELD_RELEASE_DATE = "releaseDate";
+    public static final String FIELD_NULL_FLAG = "nullFlag";
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -104,4 +105,6 @@ public class DataStandardVersion extends AuditDomain {
     private Long releaseBy;
 
     private Date releaseDate;
+
+    private Integer nullFlag;
 }
