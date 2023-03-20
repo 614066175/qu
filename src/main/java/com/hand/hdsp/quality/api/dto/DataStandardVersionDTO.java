@@ -99,6 +99,9 @@ public class DataStandardVersionDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
+    @ApiModelProperty(value = "是否可为空，1可空 0 不可空")
+    private Integer nullFlag;
+
 
     @Transient
     private List<ExtraVersionDTO> extraVersionDTOList;

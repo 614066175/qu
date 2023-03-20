@@ -90,6 +90,15 @@ public class DataFieldVersionDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
+    @ApiModelProperty(value = "是否可为空，1可空 0 不可空")
+    private Integer nullFlag;
+
+    @ApiModelProperty(value = "默认值")
+    private String defaultValue;
+
+    @ApiModelProperty("数据标准ID，主键，供其他表做外键")
+    private Long dataStandardId;
+
     @Transient
     private List<ExtraVersionDTO> extraVersionDTOList;
 
@@ -118,4 +127,8 @@ public class DataFieldVersionDTO extends AuditDomain {
 
     @ApiModelProperty("发布时间")
     private Date releaseDate;
+
+    //标准组
+    @Transient
+    private List<StandardTeamDTO> standardTeamDTOList;
 }

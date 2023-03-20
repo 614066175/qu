@@ -2,9 +2,13 @@ package com.hand.hdsp.quality.app.service.impl;
 
 import com.hand.hdsp.quality.api.dto.DataFieldVersionDTO;
 import com.hand.hdsp.quality.api.dto.ExtraVersionDTO;
+import com.hand.hdsp.quality.api.dto.StandardTeamDTO;
 import com.hand.hdsp.quality.app.service.DataFieldVersionService;
 import com.hand.hdsp.quality.domain.entity.ExtraVersion;
+import com.hand.hdsp.quality.domain.entity.StandardRelation;
 import com.hand.hdsp.quality.domain.repository.ExtraVersionRepository;
+import com.hand.hdsp.quality.domain.repository.StandardRelationRepository;
+import com.hand.hdsp.quality.domain.repository.StandardTeamRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.mapper.DataFieldVersionMapper;
 import io.choerodon.core.domain.Page;
@@ -15,11 +19,13 @@ import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 
 /**
@@ -34,9 +40,15 @@ public class DataFieldVersionServiceImpl implements DataFieldVersionService {
 
     private final ExtraVersionRepository extraVersionRepository;
 
-    public DataFieldVersionServiceImpl(DataFieldVersionMapper dataFieldVersionMapper, ExtraVersionRepository extraVersionRepository) {
+    private final StandardRelationRepository standardRelationRepository;
+
+    private final StandardTeamRepository standardTeamRepository;
+
+    public DataFieldVersionServiceImpl(DataFieldVersionMapper dataFieldVersionMapper, ExtraVersionRepository extraVersionRepository, StandardRelationRepository standardRelationRepository, StandardTeamRepository standardTeamRepository) {
         this.dataFieldVersionMapper = dataFieldVersionMapper;
         this.extraVersionRepository = extraVersionRepository;
+        this.standardRelationRepository = standardRelationRepository;
+        this.standardTeamRepository = standardTeamRepository;
     }
 
     @Override
@@ -67,6 +79,16 @@ public class DataFieldVersionServiceImpl implements DataFieldVersionService {
                         .andEqualTo(ExtraVersion.FIELD_TENANT_ID, dataFieldVersionDTO.getTenantId()))
                 .build());
         dataFieldVersionDTO.setExtraVersionDTOList(extraVersionDTOS);
+
+        //查询标准组
+        List<StandardRelation> standardRelations = standardRelationRepository.select(StandardRelation.builder().fieldStandardId(dataFieldVersionDTO.getFieldId()).build());
+        List<Long> standardTeamIds = standardRelations.stream()
+                .map(StandardRelation::getStandardTeamId)
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(standardTeamIds)) {
+            List<StandardTeamDTO> standardTeamDTOS = standardTeamRepository.selectDTOByIds(standardTeamIds);
+            dataFieldVersionDTO.setStandardTeamDTOList(standardTeamDTOS);
+        }
         return dataFieldVersionDTO;
     }
 }
