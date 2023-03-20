@@ -131,4 +131,10 @@ public class DataFieldVersionDTO extends AuditDomain {
     //标准组
     @Transient
     private List<StandardTeamDTO> standardTeamDTOList;
+
+    @Transient
+    private String dataStandardName;
+
+    @Transient
+    private String dataStandardCode;
 }
