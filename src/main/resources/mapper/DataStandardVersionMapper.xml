@@ -62,7 +62,7 @@
     <select id="detail" resultType="com.hand.hdsp.quality.api.dto.DataStandardVersionDTO">
         SELECT
         iu.login_name lastUpdateName,
-        iu2.login_name chargeName,
+        he.name chargeName,
         hu.unit_name chargeDeptName,
 --         xsg.group_name,
         xcg.group_id,
@@ -76,7 +76,7 @@
         left join xcor_common_group xcg on dsv.group_id=xcg.group_id
 --         left join xsta_standard_group xsg on xsg.group_id=dsv.group_id
         left join iam_user iu on dsv.last_updated_by=iu.id
-        left join iam_user iu2 on dsv.charge_id=iu2.id
+        left join hpfm_employee he on dsv.charge_id=he.employee_id
         left join hpfm_unit hu on hu.unit_id=dsv.charge_dept_id
         WHERE
         dsv.version_id = #{versionId}

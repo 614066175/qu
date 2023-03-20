@@ -12,7 +12,10 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,6 +47,14 @@ public class DataFieldVersionServiceImpl implements DataFieldVersionService {
     @Override
     public DataFieldVersionDTO detail(Long versionId) {
         DataFieldVersionDTO dataFieldVersionDTO = dataFieldVersionMapper.detail(versionId);
+        if(DataSecurityHelper.isTenantOpen()){
+            if(StringUtils.isNotEmpty(dataFieldVersionDTO.getChargeName())) {
+                dataFieldVersionDTO.setChargeName(DataSecurityHelper.decrypt(dataFieldVersionDTO.getChargeName()));
+            }
+            if(StringUtils.isNotEmpty(dataFieldVersionDTO.getChargeName())) {
+                dataFieldVersionDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldVersionDTO.getChargeDeptName()));
+            }
+        }
         if (Objects.isNull(dataFieldVersionDTO)) {
             throw new CommonException(ErrorCode.DATA_FIELD_VERSION_NOT_EXIST);
         }
