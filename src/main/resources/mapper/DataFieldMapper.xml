@@ -75,7 +75,6 @@
         he.name chargeName,
         iu_re.real_name releaseByName,
         hu.unit_name chargeDeptName,
-        xcg.group_id,
         xcg.group_name,
         xcg.group_path,
 --         xsg.group_name,
