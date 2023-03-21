@@ -143,6 +143,15 @@
             <if test="lastUpdatedBy != null">
                 and iu.id = #{lastUpdatedBy}
             </if>
+            <if test="releaseBy != null">
+                and xr.release_by = #{releaseBy}
+            </if>
+            <if test="releaseDateFrom != null">
+                and xr.release_date &gt;= #{releaseDateFrom}
+            </if>
+            <if test="releaseDateTo != null">
+                and xr.release_date &lt;= #{releaseDateTo}
+            </if>
             <if test="startCreateDate != null">
                 and xr.creation_date &gt;= #{startCreateDate}
             </if>

@@ -163,6 +163,14 @@ public class Root extends AuditDomain {
     @DateTimeFormat(pattern = BaseConstants.Pattern.DATETIME)
     private Date endCreateDate;
 
+    @Transient
+    @DateTimeFormat(pattern = BaseConstants.Pattern.DATETIME)
+    private Date releaseDateFrom;
+
+    @Transient
+    @DateTimeFormat(pattern = BaseConstants.Pattern.DATETIME)
+    private Date releaseDateTo;
+
     /**
      * 分组集合
      */
