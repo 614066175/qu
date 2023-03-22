@@ -181,6 +181,15 @@
                 </foreach>
 
             </if>
+            <if test="dataFieldDTO.releaseBy != null">
+                and fs.release_by = #{dataFieldDTO.releaseBy}
+            </if>
+            <if test="dataFieldDTO.releaseDateFrom != null">
+                and fs.release_date &gt;= #{dataFieldDTO.releaseDateFrom}
+            </if>
+            <if test="dataFieldDTO.releaseDateTo != null">
+                and fs.release_date &lt;= #{dataFieldDTO.releaseDateTo}
+            </if>
         </where>
         order by fs.creation_date desc
     </select>
