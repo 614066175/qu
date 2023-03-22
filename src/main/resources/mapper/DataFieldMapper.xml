@@ -99,7 +99,7 @@
         left join hpfm_employee he on he.employee_id=fs.charge_id
         left join iam_user iu_re on fs.release_by=iu_re.id
         <choose>
-        <when test='datasourceType == "ORACLE" or datasourceType == "DM"'>
+        <when test='datasourceType == "ORACLE"'>
             LEFT JOIN (
                 SELECT
                     xsa1.standard_id,
@@ -181,13 +181,13 @@
                 </foreach>
 
             </if>
-            <if test="dataFieldDTO.releaseByName !=null">
-                and iu_re.real_name=#{dataFieldDTO.releaseByName}
+            <if test="dataFieldDTO.releaseBy != null">
+                and fs.release_by = #{dataFieldDTO.releaseBy}
             </if>
-            <if test="dataFieldDTO.releaseDateFrom !=null">
+            <if test="dataFieldDTO.releaseDateFrom != null">
                 and fs.release_date &gt;= #{dataFieldDTO.releaseDateFrom}
             </if>
-            <if test="dataFieldDTO.releaseDateTo !=null">
+            <if test="dataFieldDTO.releaseDateTo != null">
                 and fs.release_date &lt;= #{dataFieldDTO.releaseDateTo}
             </if>
         </where>

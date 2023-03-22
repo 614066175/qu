@@ -90,7 +90,7 @@
         left join hpfm_unit hu on hu.unit_id=ds.charge_dept_id
         left join hpfm_employee he on ds.charge_id=he.employee_id
         <choose>
-            <when test='datasourceType == "ORACLE" or datasourceType == "DM"'>
+            <when test='datasourceType == "ORACLE"'>
                 LEFT JOIN (
                     SELECT
                         xsa1.standard_id,
@@ -174,13 +174,13 @@
                     </otherwise>
                 </choose>
             </if>
-            <if test="dataStandardDTO.releaseByName !=null">
-                and iu_re.real_name=#{dataStandardDTO.releaseByName}
+            <if test="dataStandardDTO.releaseBy != null">
+                and ds.release_by = #{dataStandardDTO.releaseBy}
             </if>
-            <if test="dataStandardDTO.releaseDateFrom !=null">
+            <if test="dataStandardDTO.releaseDateFrom != null">
                 and ds.release_date &gt;= #{dataStandardDTO.releaseDateFrom}
             </if>
-            <if test="dataStandardDTO.releaseDateTo !=null">
+            <if test="dataStandardDTO.releaseDateTo != null">
                 and ds.release_date &lt;= #{dataStandardDTO.releaseDateTo}
             </if>
         </where>

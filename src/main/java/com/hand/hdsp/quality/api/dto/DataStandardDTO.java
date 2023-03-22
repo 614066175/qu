@@ -5,7 +5,10 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import org.hzero.boot.platform.lov.annotation.LovValue;
+import org.hzero.core.base.BaseConstants;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
 
@@ -220,10 +223,13 @@ public class DataStandardDTO extends AuditDomain{
     private List<Long> standardIds;
 
     @Transient
-    @ApiModelProperty("发布时间从...")
+    @DateTimeFormat(pattern = BaseConstants.Pattern.DATETIME)
     private Date releaseDateFrom;
 
     @Transient
-    @ApiModelProperty("发布时间到...")
+    @DateTimeFormat(pattern = BaseConstants.Pattern.DATETIME)
     private Date releaseDateTo;
+
+
+
 }
