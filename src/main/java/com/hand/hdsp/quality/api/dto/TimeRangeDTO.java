@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import java.util.Date;
+import javax.persistence.Transient;
 
 /**
  * description
@@ -74,5 +75,11 @@ public class TimeRangeDTO extends AuditDomain {
     private String warningLevel;
 
     private Long projectId;
+
+    @Transient
+    private String ruleCode;
+
+    @Transient
+    private String ruleName;
 
 }
