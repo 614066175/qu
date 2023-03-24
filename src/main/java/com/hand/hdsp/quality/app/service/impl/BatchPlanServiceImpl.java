@@ -897,7 +897,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                         f1.cancel(true);
                     }
                 });
-                throw new CommonException("质量评估异常", e);
+                throw new CommonException(e);
             }
         }
     }
