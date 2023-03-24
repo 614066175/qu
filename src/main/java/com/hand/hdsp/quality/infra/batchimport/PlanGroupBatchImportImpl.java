@@ -34,6 +34,8 @@ public class PlanGroupBatchImportImpl extends BatchImportHandler implements IBat
 
     private final PlanGroupRepository planGroupRepository;
 
+    private final Long ALLGROUP = 0L;
+
     public PlanGroupBatchImportImpl(ObjectMapper objectMapper, PlanGroupRepository planGroupRepository) {
         this.objectMapper = objectMapper;
         this.planGroupRepository = planGroupRepository;
@@ -80,6 +82,8 @@ public class PlanGroupBatchImportImpl extends BatchImportHandler implements IBat
                     return false;
                 }
                 planGroup.setParentGroupId(parentGroup.getGroupId());
+            }else{
+                planGroup.setParentGroupId(ALLGROUP);
             }
             if (group != null) {
                 //修改分组名称分组描述父分组编码
