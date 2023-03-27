@@ -374,6 +374,8 @@
         </choose>
         FROM
         xqua_batch_result_rule xbrr
+        left join xqua_batch_result_base xbrb on xbrr.result_base_id=xbrb.result_base_id
+        left join xqua_batch_plan_base xbpb on xbrb.plan_base_id=xbpb.plan_base_id
         WHERE
         result_flag = 1
         <include refid="custom_where">
@@ -397,6 +399,8 @@
         </choose>
         FROM
         xqua_batch_result_rule xbrr
+        left join xqua_batch_result_base xbrb on xbrr.result_base_id=xbrb.result_base_id
+        left join xqua_batch_plan_base xbpb on xbrb.plan_base_id=xbpb.plan_base_id
         <where>
             <include refid="custom_where">
                 <property name="mt" value="xbrr"/>
@@ -779,6 +783,14 @@
             <include refid="custom_where">
                 <property name="mt" value="xbpt"/>
             </include>
+            <if test="ruleCode != null and ruleCode != ''">
+                <bind name="ruleCodeLike" value="'%' + ruleCode + '%'"/>
+                and xbpt.rule_code like #{ruleCodeLike}
+            </if>
+            <if test="ruleName != null and ruleName != ''">
+                <bind name="ruleNameLike" value="'%' + ruleName + '%'"/>
+                and xbpt.rule_name like #{ruleNameLike}
+            </if>
         </where>
         union all
         SELECT
@@ -811,6 +823,14 @@
             <include refid="custom_where">
                 <property name="mt" value="xbpt"/>
             </include>
+            <if test="ruleCode != null and ruleCode != ''">
+                <bind name="ruleCodeLike" value="'%' + ruleCode + '%'"/>
+                and xbpt.rule_code like #{ruleCodeLike}
+            </if>
+            <if test="ruleName != null and ruleName != ''">
+                <bind name="ruleNameLike" value="'%' + ruleName + '%'"/>
+                and xbpt.rule_name like #{ruleNameLike}
+            </if>
         </where>
         union all
         SELECT
@@ -843,6 +863,14 @@
             <include refid="custom_where">
                 <property name="mt" value="xbpt"/>
             </include>
+            <if test="ruleCode != null and ruleCode != ''">
+                <bind name="ruleCodeLike" value="'%' + ruleCode + '%'"/>
+                and xbpt.rule_code like #{ruleCodeLike}
+            </if>
+            <if test="ruleName != null and ruleName != ''">
+                <bind name="ruleNameLike" value="'%' + ruleName + '%'"/>
+                and xbpt.rule_name like #{ruleNameLike}
+            </if>
         </where>
     </select>
 
@@ -882,6 +910,14 @@
             <include refid="custom_where">
                 <property name="mt" value="xbptc"/>
             </include>
+            <if test="ruleCode != null and ruleCode != ''">
+                <bind name="ruleCodeLike" value="'%' + ruleCode + '%'"/>
+                and xbpt.rule_code like #{ruleCodeLike}
+            </if>
+            <if test="ruleName != null and ruleName != ''">
+                <bind name="ruleNameLike" value="'%' + ruleName + '%'"/>
+                and xbpt.rule_name like #{ruleNameLike}
+            </if>
         </where>
         union all
         SELECT
@@ -919,6 +955,14 @@
             <include refid="custom_where">
                 <property name="mt" value="xbpfc"/>
             </include>
+            <if test="ruleCode != null and ruleCode != ''">
+                <bind name="ruleCodeLike" value="'%' + ruleCode + '%'"/>
+                and xbpf.rule_code like #{ruleCodeLike}
+            </if>
+            <if test="ruleName != null and ruleName != ''">
+                <bind name="ruleNameLike" value="'%' + ruleName + '%'"/>
+                and xbpf.rule_name like #{ruleNameLike}
+            </if>
         </where>
         union all
         SELECT
@@ -955,6 +999,14 @@
             <include refid="custom_where">
                 <property name="mt" value="xbpt"/>
             </include>
+            <if test="ruleCode != null and ruleCode != ''">
+                <bind name="ruleCodeLike" value="'%' + ruleCode + '%'"/>
+                and xbpt.rule_code like #{ruleCodeLike}
+            </if>
+            <if test="ruleName != null and ruleName != ''">
+                <bind name="ruleNameLike" value="'%' + ruleName + '%'"/>
+                and xbpt.rule_name like #{ruleNameLike}
+            </if>
         </where>
     </select>
 
