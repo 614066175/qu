@@ -374,6 +374,8 @@
         </choose>
         FROM
         xqua_batch_result_rule xbrr
+        left join xqua_batch_result_base xbrb on xbrr.result_base_id=xbrb.result_base_id
+        left join xqua_batch_plan_base xbpb on xbrb.plan_base_id=xbpb.plan_base_id
         WHERE
         result_flag = 1
         <include refid="custom_where">
@@ -397,6 +399,8 @@
         </choose>
         FROM
         xqua_batch_result_rule xbrr
+        left join xqua_batch_result_base xbrb on xbrr.result_base_id=xbrb.result_base_id
+        left join xqua_batch_plan_base xbpb on xbrb.plan_base_id=xbpb.plan_base_id
         <where>
             <include refid="custom_where">
                 <property name="mt" value="xbrr"/>
