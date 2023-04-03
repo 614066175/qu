@@ -320,6 +320,8 @@
         select count(*) ruleCount
         from xqua_batch_plan_table xbpt
         join xqua_batch_plan_base xbpb on xbpt.plan_base_id = xbpb.plan_base_id
+        JOIN xqua_batch_plan xbp ON xbpb.plan_id = xbp.plan_id
+        JOIN hpfm_datasource xd ON xd.datasource_id = xbpb.datasource_id
         <where>
             <include refid="custom_where">
                 <property name="mt" value="xbpt"/>
@@ -329,6 +331,8 @@
         select count(*) ruleCount
         from xqua_batch_plan_field xbpf
         join xqua_batch_plan_base xbpb on xbpf.plan_base_id = xbpb.plan_base_id
+        JOIN xqua_batch_plan xbp ON xbpb.plan_id = xbp.plan_id
+        JOIN hpfm_datasource xd ON xd.datasource_id = xbpb.datasource_id
         <where>
             <include refid="custom_where">
                 <property name="mt" value="xbpf"/>
@@ -338,6 +342,8 @@
         select count(*) ruleCount
         from xqua_batch_plan_rel_table xbprt
         join xqua_batch_plan_base xbpb on xbprt.plan_base_id = xbpb.plan_base_id
+        JOIN xqua_batch_plan xbp ON xbpb.plan_id = xbp.plan_id
+        JOIN hpfm_datasource xd ON xd.datasource_id = xbpb.datasource_id
         <where>
             <include refid="custom_where">
                 <property name="mt" value="xbprt"/>
