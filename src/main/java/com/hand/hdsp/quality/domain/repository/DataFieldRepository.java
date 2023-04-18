@@ -4,6 +4,7 @@ import com.hand.hdsp.core.base.ProxySelf;
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.domain.entity.DataField;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -20,4 +21,12 @@ public interface DataFieldRepository extends BaseRepository<DataField, DataField
      * @param dataFieldDTOList DataFieldDTO
      */
     boolean batchImport(List<DataFieldDTO> dataFieldDTOList);
+
+    /**
+     * 查询数据标准列表
+     *
+     * @param dataFieldDTO DataFieldDTO
+     * @return Long
+     */
+    List<DataFieldDTO> list(DataFieldDTO dataFieldDTO);
 }

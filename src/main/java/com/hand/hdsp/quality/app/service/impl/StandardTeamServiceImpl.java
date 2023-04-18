@@ -372,7 +372,7 @@ public class StandardTeamServiceImpl implements StandardTeamService {
         }
         if (dataFieldDTO.getStandardTeamId() == null) {
             //如果没有传递标准组参数，则就是字段标准的列表查询
-            return PageHelper.doPage(pageRequest, () -> dataFieldMapper.list(dataFieldDTO));
+            return PageHelper.doPage(pageRequest, () -> dataFieldRepository.list(dataFieldDTO));
         }
         //查询此标准组下的字段标准
         StandardTeamDTO standardTeamDTO = detail(dataFieldDTO.getStandardTeamId());

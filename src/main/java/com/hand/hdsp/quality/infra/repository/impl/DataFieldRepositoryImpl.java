@@ -14,6 +14,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.starter.driver.core.security.SecurityHelper;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -84,5 +86,18 @@ public class DataFieldRepositoryImpl extends BaseRepositoryImpl<DataField, DataF
         }
         batchInsertDTOSelective(importDataFieldDTOList);
         return true;
+    }
+
+    @Override
+    public List<DataFieldDTO> list(DataFieldDTO dataFieldDTO) {
+        List<DataFieldDTO> dataFieldDTOList = dataFieldMapper.list(dataFieldDTO);
+        if(DataSecurityHelper.isTenantOpen()){
+            for(DataFieldDTO tmp : dataFieldDTOList){
+                tmp.setChargeName(DataSecurityHelper.decrypt(tmp.getChargeName()));
+                tmp.setChargeEmail(DataSecurityHelper.decrypt(tmp.getChargeEmail()));
+                tmp.setChargeTel(DataSecurityHelper.decrypt(tmp.getChargeTel()));
+            }
+        }
+        return dataFieldDTOList;
     }
 }
