@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.ReferenceDataMapper">
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.ReferenceData">
+        <result column="data_id" property="dataId" jdbcType="DECIMAL"/>
+        <result column="data_code" property="dataCode" jdbcType="VARCHAR"/>
+        <result column="data_name" property="dataName" jdbcType="VARCHAR"/>
+        <result column="data_desc" property="dataDesc" jdbcType="VARCHAR"/>
+        <result column="parent_data_id" property="parentDataId" jdbcType="DECIMAL"/>
+        <result column="data_group_id" property="dataGroupId" jdbcType="DECIMAL"/>
+        <result column="data_status" property="dataStatus" jdbcType="VARCHAR"/>
+        <result column="release_by" property="releaseBy" jdbcType="DECIMAL"/>
+        <result column="release_date" property="releaseDate" jdbcType="TIMESTAMP"/>
+        <result column="responsible_dept_id" property="responsibleDeptId" jdbcType="DECIMAL"/>
+        <result column="responsible_person_id" property="responsiblePersonId" jdbcType="DECIMAL"/>
+        <result column="responsible_person_tel" property="responsiblePersonTel" jdbcType="VARCHAR"/>
+        <result column="responsible_person_email" property="responsiblePersonEmail" jdbcType="VARCHAR"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
+        <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
+        <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
+        <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        ${prefix}.data_id,
+        ${prefix}.data_code,
+        ${prefix}.data_name,
+        ${prefix}.data_desc,
+        ${prefix}.parent_data_id,
+        ${prefix}.data_group_id,
+        ${prefix}.data_status,
+        ${prefix}.release_by,
+        ${prefix}.release_date,
+        ${prefix}.responsible_dept_id,
+        ${prefix}.responsible_person_id,
+        --${prefix}.responsible_person_tel,
+        --${prefix}.responsible_person_email,
+        ${prefix}.project_id,
+        ${prefix}.tenant_id,
+        ${prefix}.created_by,
+        ${prefix}.last_updated_by,
+        ${prefix}.creation_date,
+        ${prefix}.last_update_date,
+        ${prefix}.object_version_number
+    </sql>
+    <select id="list" resultType="com.hand.hdsp.quality.api.dto.ReferenceDataDTO">
+        SELECT
+        <include refid="Base_Column_List">
+            <property name="prefix" value="xrd"/>
+        </include>,
+        xcg.group_name data_group_name,
+        iu.login_name publisher,
+        hu.unit_name responsible_dept_name,
+        he.email responsible_person_email,
+        he.mobile responsible_person_tel,
+        he.name responsible_person_name,
+        he.employee_num responsible_person_code,
+        xrdr.instance_id
+        FROM xqua_reference_data xrd
+        <!-- 关联通用分组 -->
+        LEFT JOIN xcor_common_group xcg ON xrd.data_group_id = xcg.group_id
+        <!-- 关联发布人 -->
+        LEFT JOIN iam_user iu ON xrd.release_by = iu.id
+        <!-- 关联发责任部门 -->
+        LEFT JOIN hpfm_unit hu ON xrd.responsible_dept_id = hu.unit_id
+        <!-- 关联发责任人 -->
+        LEFT JOIN hpfm_employee he ON xrd.responsible_person_id = he.employee_id
+        <!-- 关联查询instanceId -->
+        LEFT JOIN xqua_reference_data_record xrdr xrd.data_id = xrdr.data_id
+        <where>
+            <if test="dataId != null">
+                AND xrd.data_id = #{dataId}
+            </if>
+            <if test="dataCode != null and dataCode != ''">
+                <bind name="dataCodeLike" value="dataCode+'%'"/>
+                AND xrd.data_code LIKE #{dataCodeLike}
+            </if>
+            <if test="dataName != null and dataName != ''">
+                <bind name="dataNameLike" value="dataName+'%'"/>
+                AND xrd.data_name LIKE #{dataNameLike}
+            </if>
+            <if test="dataDesc != null and dataDesc != ''">
+                <bind name="dataDescLike" value="'%'+dataDesc+'%'"/>
+                AND xrd.data_desc LIKE = #{dataDescLike}
+            </if>
+            <if test="parentDataId != null">
+                AND xrd.parent_data_id = #{parentDataId}
+            </if>
+            <if test="dataGroupId != null">
+                AND xrd.data_group_id = #{dataGroupId}
+            </if>
+            <if test="dataStatus != null and dataStatus != ''">
+                AND xrd.data_status = #{dataStatus}
+            </if>
+            <if test="releaseBy != null">
+                AND xrd.release_by = #{releaseBy}
+            </if>
+            <if test="responsiblePersonId != null">
+                AND xrd.responsible_person_id = #{responsiblePersonId}
+            </if>
+        </where>
+    </select>
+    <select id="detail" resultType="com.hand.hdsp.quality.api.dto.ReferenceDataDTO">
+        SELECT
+        <include refid="Base_Column_List">
+            <property name="prefix" value="xrd"/>
+        </include>,
+        xcg.group_name data_group_name,
+        iu.login_name publisher,
+        hu.unit_name responsible_dept_name,
+        he.email responsible_person_email,
+        he.mobile responsible_person_tel,
+        he.name responsible_person_name,
+        he.employee_num responsible_person_code
+        FROM xqua_reference_data xrd
+        <!-- 关联通用分组 -->
+        LEFT JOIN xcor_common_group xcg ON xrd.data_group_id = xcg.group_id
+        <!-- 关联发布人 -->
+        LEFT JOIN iam_user iu ON xrd.release_by = iu.id
+        <!-- 关联发责任部门 -->
+        LEFT JOIN hpfm_unit hu ON xrd.responsible_dept_id = hu.unit_id
+        <!-- 关联发责任人 -->
+        LEFT JOIN hpfm_employee he ON xrd.responsible_person_id = he.employee_id
+        WHERE xrd.data_id = #{dataId}
+    </select>
+</mapper>
