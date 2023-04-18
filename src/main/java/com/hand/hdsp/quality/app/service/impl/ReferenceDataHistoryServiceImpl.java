@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 import com.hand.hdsp.core.util.JSON;
+import com.hand.hdsp.quality.api.dto.ReferenceDataDTO;
 import com.hand.hdsp.quality.api.dto.ReferenceDataHistoryDTO;
 import com.hand.hdsp.quality.api.dto.SimpleReferenceDataValueDTO;
 import com.hand.hdsp.quality.app.service.ReferenceDataHistoryService;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import org.hzero.mybatis.helper.DataSecurityHelper;
 
 /**
  * <p>参考数据头表应用服务默认实现</p>
@@ -53,12 +56,32 @@ public class ReferenceDataHistoryServiceImpl implements ReferenceDataHistoryServ
     @Override
     public ReferenceDataHistoryDTO detail(Long historyId) {
         ReferenceDataHistoryDTO detail = referenceDataHistoryRepository.detail(historyId);
+        decryptReferenceDataHistory(detail);
         String dataValueJson = detail.getDataValueJson();
         if (StringUtils.isNotBlank(dataValueJson)) {
             List<SimpleReferenceDataValueDTO> referenceDataValueDTOList = JSON.toArray(dataValueJson, SimpleReferenceDataValueDTO.class);
             detail.setReferenceDataValueDTOList(referenceDataValueDTOList);
         }
         return detail;
+    }
+
+    private void decryptReferenceDataHistory(ReferenceDataHistoryDTO referenceDataHistoryDTO) {
+        referenceDataHistoryDTO.setResponsibleDeptName(decrypt(referenceDataHistoryDTO.getResponsibleDeptName()));
+        referenceDataHistoryDTO.setResponsiblePersonName(decrypt(referenceDataHistoryDTO.getResponsiblePersonName()));
+        referenceDataHistoryDTO.setResponsiblePersonCode(decrypt(referenceDataHistoryDTO.getResponsiblePersonCode()));
+        referenceDataHistoryDTO.setResponsiblePersonTel(decrypt(referenceDataHistoryDTO.getResponsiblePersonTel()));
+        referenceDataHistoryDTO.setResponsiblePersonEmail(decrypt(referenceDataHistoryDTO.getResponsiblePersonEmail()));
+    }
+
+    private String decrypt(String encrypted) {
+        try {
+            if (DataSecurityHelper.isTenantOpen() && StringUtils.isNotBlank(encrypted)) {
+                return DataSecurityHelper.decrypt(encrypted);
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        return encrypted;
     }
 
     @Override

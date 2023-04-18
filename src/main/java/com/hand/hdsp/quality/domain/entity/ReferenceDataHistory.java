@@ -39,7 +39,7 @@ public class ReferenceDataHistory extends AuditDomain {
     public static final String FIELD_DATA_VALUE_JSON = "dataValueJson";
     public static final String FIELD_VERSION_NUMBER = "versionNumber";
     public static final String FIELD_RELEASE_BY = "releaseBy";
-    public static final String FIELD_RELEASE_DATA = "releaseData";
+    public static final String FIELD_RELEASE_DATE = "releaseDate";
     public static final String FIELD_RESPONSIBLE_DEPT_ID = "responsibleDeptId";
     public static final String FIELD_RESPONSIBLE_PERSON_ID = "responsiblePersonId";
     public static final String FIELD_RESPONSIBLE_PERSON_TEL = "responsiblePersonTel";
@@ -77,7 +77,7 @@ public class ReferenceDataHistory extends AuditDomain {
 
     private Long releaseBy;
 
-    private Date releaseData;
+    private Date releaseDate;
 
     private Long responsibleDeptId;
 

@@ -62,15 +62,9 @@ public class ReferenceDataServiceImpl implements ReferenceDataService, ProxySelf
         referenceDataDTO.setTenantId(tenantId);
         Page<ReferenceDataDTO> page = referenceDataRepository.list(referenceDataDTO, pageRequest);
         for (ReferenceDataDTO dataDTO : page) {
-            queryInstanceId(referenceDataDTO);
             decryptReferenceData(dataDTO);
         }
         return page;
-    }
-
-    private void queryInstanceId(ReferenceDataDTO referenceDataDTO) {
-
-
     }
 
     private void decryptReferenceData(ReferenceDataDTO referenceDataDTO) {

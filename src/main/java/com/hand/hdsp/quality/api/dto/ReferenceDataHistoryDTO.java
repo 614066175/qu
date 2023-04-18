@@ -73,7 +73,7 @@ public class ReferenceDataHistoryDTO extends AuditDomain {
 
     @ApiModelProperty(value = "发布时间")
     @NotNull
-    private Date releaseData;
+    private Date releaseDate;
 
     @ApiModelProperty(value = "责任人部门id")
     private Long responsibleDeptId;
