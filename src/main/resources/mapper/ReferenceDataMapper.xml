@@ -69,7 +69,7 @@
         <!-- 关联发责任人 -->
         LEFT JOIN hpfm_employee he ON xrd.responsible_person_id = he.employee_id
         <!-- 关联查询instanceId -->
-        LEFT JOIN xqua_reference_data_record xrdr xrd.data_id = xrdr.data_id
+        LEFT JOIN xqua_reference_data_record ON xrdr xrd.data_id = xrdr.data_id
         <where>
             <if test="dataId != null">
                 AND xrd.data_id = #{dataId}
