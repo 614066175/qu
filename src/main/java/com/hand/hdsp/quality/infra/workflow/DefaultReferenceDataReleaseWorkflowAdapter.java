@@ -136,7 +136,7 @@ public class DefaultReferenceDataReleaseWorkflowAdapter implements ReferenceData
                     .dataValueJson(JSON.toJson(simpleReferenceDataValueDTOList))
                     .versionNumber(maxVersion + 1)
                     .releaseBy(referenceDataRecord.getApplyUserId())
-                    .releaseData(date)
+                    .releaseDate(date)
                     .responsibleDeptId(referenceDataDTO.getResponsibleDeptId())
                     .responsiblePersonId(referenceDataDTO.getResponsiblePersonId())
                     .responsiblePersonTel(referenceDataDTO.getResponsiblePersonTel())

@@ -13,7 +13,7 @@
         <result column="data_value_json" property="dataValueJson" jdbcType="VARCHAR"/>
         <result column="version_number" property="versionNumber" jdbcType="DECIMAL"/>
         <result column="release_by" property="releaseBy" jdbcType="DECIMAL"/>
-        <result column="release_data" property="releaseData" jdbcType="TIMESTAMP"/>
+        <result column="release_date" property="releaseDate" jdbcType="TIMESTAMP"/>
         <result column="responsible_dept_id" property="responsibleDeptId" jdbcType="DECIMAL"/>
         <result column="responsible_person_id" property="responsiblePersonId" jdbcType="DECIMAL"/>
         <result column="responsible_person_tel" property="responsiblePersonTel" jdbcType="VARCHAR"/>
@@ -62,7 +62,7 @@
             iu.login_name publisher,
             xrdh.release_data
         FROM xqua_reference_data_history xrdh
-        LEFT JOIN iam_user xrdh.release_by = iu.id
+        LEFT JOIN iam_user iu ON xrdh.release_by = iu.id
         WHERE xrdh.data_id = #{dataId}
     </select>
     <select id="detail" resultType="com.hand.hdsp.quality.api.dto.ReferenceDataHistoryDTO">
@@ -76,7 +76,7 @@
         he.email responsible_person_email,
         he.mobile responsible_person_tel,
         he.name responsible_person_name,
-        he.employee_num responsible_person_code,
+        he.employee_num responsible_person_code
         FROM xqua_reference_data_history xrdh
         <!-- 关联通用分组 -->
         LEFT JOIN xcor_common_group xcg ON xrdh.data_group_id = xcg.group_id
