@@ -6,6 +6,7 @@ import com.hand.hdsp.quality.app.service.BatchPlanService;
 import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.AlertTemplate;
+import com.hand.hdsp.quality.infra.constant.CheckConstants;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.constant.PlanConstant.CompareSymbol;
@@ -1261,6 +1262,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 resultList.add(result);
             }
             batchResultItem.setActualValue(Strings.join(resultList, ','));
+            if(CheckConstants.ACCURACY_RATE.equals(param.getCheckItem())){
+                batchResultItem.setActualValue(batchResultItem.getCurrentValue());
+            }
             batchResultItemRepository.insertSelective(batchResultItem);
 
             if (StringUtils.isNotBlank(batchResultItem.getWarningLevel())) {
