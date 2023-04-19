@@ -25,4 +25,14 @@ public interface CheckConstants {
      * 值比较
      */
     String VALUE = "VALUE";
+
+    /**
+     * 表间校验项 计算值
+     */
+    String CALCULATED_VALUE = "CALCULATED_VALUE";
+
+    /**
+     *表间校验项 准确值
+     */
+    String ACCURACY_RATE = "ACCURACY_RATE";
 }
