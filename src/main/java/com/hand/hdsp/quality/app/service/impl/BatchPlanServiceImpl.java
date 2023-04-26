@@ -1263,7 +1263,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             }
             batchResultItem.setActualValue(Strings.join(resultList, ','));
             if(CheckConstants.ACCURACY_RATE.equals(param.getCheckItem())){
-                batchResultItem.setActualValue(batchResultItem.getCurrentValue());
+                batchResultItem.setActualValue(batchResultItem.getCurrentValue()+"%");
             }
             batchResultItemRepository.insertSelective(batchResultItem);
 
