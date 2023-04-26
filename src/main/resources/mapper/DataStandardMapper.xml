@@ -184,7 +184,7 @@
                 and ds.release_date &lt;= #{dataStandardDTO.releaseDateTo}
             </if>
         </where>
-        order by ds.creation_date desc
+        order by ds.standard_id desc
     </select>
     <select id="selectIdByChargeDeptName" resultType="java.lang.Long">
         SELECT
