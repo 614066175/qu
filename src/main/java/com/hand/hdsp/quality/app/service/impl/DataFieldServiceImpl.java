@@ -382,16 +382,21 @@ public class DataFieldServiceImpl implements DataFieldService {
         String onlineOpen = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.FIELD_STANDARD_ONLINE);
         String offlineOpen = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.FIELD_STANDARD_OFFLINE);
 
+        DataFieldDTO dto = dataFieldRepository.selectDTOByPrimaryKey(dataFieldDTO.getFieldId());
+        if (Objects.isNull(dto)) {
+            throw new CommonException(ErrorCode.DATA_FIELD_STANDARD_NOT_EXIST);
+        }
+        if (ONLINE_APPROVING.equals(dto.getStandardStatus())
+                || OFFLINE_APPROVING.equals(dto.getStandardStatus())) {
+            //前端数据传递有问题，状态检验
+            throw new CommonException("状态正在审批中，无法操作");
+        }
         if (ONLINE.equals(dataFieldDTO.getStandardStatus())) {
             if ((onlineOpen == null || Boolean.parseBoolean(onlineOpen))) {
                 //指定字段标准修改状态
                 dataFieldDTO.setStandardStatus(ONLINE_APPROVING);
                 dataFieldOnlineWorkflowAdapter.startWorkflow(dataFieldDTO);
             } else {
-                DataFieldDTO dto = dataFieldRepository.selectDTOByPrimaryKey(dataFieldDTO.getFieldId());
-                if (Objects.isNull(dto)) {
-                    throw new CommonException(ErrorCode.DATA_FIELD_STANDARD_NOT_EXIST);
-                }
                 dataFieldDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
                 //存版本表
                 doVersion(dataFieldDTO);
@@ -408,10 +413,6 @@ public class DataFieldServiceImpl implements DataFieldService {
                 dataFieldDTO.setStandardStatus(OFFLINE_APPROVING);
                 dataFieldOfflineWorkflowAdapter.startWorkflow(dataFieldDTO);
             } else {
-                DataFieldDTO dto = dataFieldRepository.selectDTOByPrimaryKey(dataFieldDTO.getFieldId());
-                if (Objects.isNull(dto)) {
-                    throw new CommonException(ErrorCode.DATA_FIELD_STANDARD_NOT_EXIST);
-                }
                 dataFieldDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
             }
         }

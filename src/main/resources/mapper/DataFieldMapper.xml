@@ -191,7 +191,7 @@
                 and fs.release_date &lt;= #{dataFieldDTO.releaseDateTo}
             </if>
         </where>
-        order by fs.creation_date desc
+        order by fs.field_id desc
     </select>
 
     <select id="selectIdByChargeDeptName" resultType="java.lang.Long">
