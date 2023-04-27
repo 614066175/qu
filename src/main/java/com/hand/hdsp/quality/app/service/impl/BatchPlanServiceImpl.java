@@ -1,6 +1,9 @@
 package com.hand.hdsp.quality.app.service.impl;
 
 import com.alibaba.druid.DbType;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.metadata.Sheet;
+import com.alibaba.excel.support.ExcelTypeEnum;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanService;
 import com.hand.hdsp.quality.domain.entity.*;
@@ -42,6 +45,8 @@ import org.hzero.boot.alert.service.AlertMessageHandler;
 import org.hzero.boot.alert.vo.InboundMessage;
 import org.hzero.boot.driver.api.dto.PluginDatasourceDTO;
 import org.hzero.boot.driver.app.service.DriverSessionService;
+import org.hzero.boot.imported.infra.util.FileUtils;
+import org.hzero.boot.message.entity.Attachment;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.boot.platform.lov.dto.LovValueDTO;
 import org.hzero.core.base.BaseConstants;
@@ -52,12 +57,18 @@ import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationOptions;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -66,6 +77,11 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
+
+import static com.hand.hdsp.quality.app.service.impl.BatchResultServiceImpl.DOWN_EXCEPTION_BATCH_SIZE;
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.ExceptionParam.*;
+import static com.hand.hdsp.quality.infra.util.PlanExceptionUtil.WARNING_LEVEL_LOV;
+import static com.hand.hdsp.quality.infra.util.PlanExceptionUtil.profileClient;
 
 /**
  * <p>
@@ -392,12 +408,19 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                             .andEqualTo(BatchResultBase.FIELD_TENANT_ID, batchResultDTO.getTenantId()))
                     .build());
             // 根据每个base去查询具体的校验情况
+            List<Attachment> attachments = new ArrayList<>();
+
             if (CollectionUtils.isNotEmpty(batchResultBaseDTOList)) {
                 batchResultBaseDTOList.forEach(batchResultBaseDTO -> {
                     //获取base下所有校验项的告警等级Json
                     getResultWarningVOList(batchResultBaseDTO);
                     //获取base的规则
                     getRule(batchResultBaseDTO);
+                    //获取异常数据文件
+                    Attachment attachment = getExceptionDataFile(batchResultBaseDTO);
+                    if (attachment != null) {
+                        attachments.add(attachment);
+                    }
                 });
                 batchResultDTO.setBatchResultBaseDTOList(batchResultBaseDTOList);
                 Map<String, Object> map = new HashMap<>();
@@ -408,11 +431,143 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             inboundMessage.setDataSet(dataSet);
             //同步告警走的是alert服务的handler，异步告警走的是event服务,生成事件消息处理
 //            inboundMessage.setAsyncFlag(1);
+
+            //发送异常数据附件
+            inboundMessage.setAttachmentList(attachments);
+
             alertMessageHandler.sendMessage(inboundMessage);
             //消息适配器
             batchPlanMessageAdapter.sendMessage(inboundMessage);
         }
     }
+
+    private Attachment getExceptionDataFile(BatchResultBaseDTO batchResultBaseDTO) {
+        // 查找异常数据
+        Long resultBaseId = batchResultBaseRepository.selectMaxResultBaseId(batchResultBaseDTO.getPlanBaseId(), batchResultBaseDTO.getProjectId());
+        if (Objects.isNull(resultBaseId)) {
+            throw new CommonException(ErrorCode.BATCH_RESULT_NOT_EXIST);
+        }
+        String collectionName = String.format("%d_%d", batchResultBaseDTO.getPlanBaseId(), resultBaseId);
+        boolean exists = mongoTemplate.collectionExists(collectionName);
+        if (!exists) {
+            //不存在直接返回
+            return null;
+        }
+
+        //获取总数，分批下载
+        Aggregation agg = Aggregation.newAggregation(Aggregation.count().as("count"),
+                Aggregation.project("count")).withOptions(AggregationOptions.builder().allowDiskUse(true).build());
+        AggregationResults<Map> aggregate = mongoTemplate.aggregate(agg, collectionName, Map.class);
+        Long total;
+        if (CollectionUtils.isEmpty(aggregate.getMappedResults())) {
+            total = 0L;
+        } else {
+            List<Map> mappedResults = aggregate.getMappedResults();
+            total = Long.parseLong(mappedResults.get(0).get("count").toString());
+        }
+
+        BatchPlanBase batchPlanBase = batchPlanBaseRepository.selectByPrimaryKey(batchResultBaseDTO.getPlanBaseId());
+        BatchPlan batchPlan = batchPlanRepository.selectByPrimaryKey(batchPlanBase.getPlanId());
+
+        File file = new File(String.format("%s-%s.xlsx", batchPlan.getPlanName(), batchPlanBase.getPlanBaseName()));
+        // 写入到excel
+        try (BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file))) {
+            ExcelWriter writer = new ExcelWriter(outputStream, ExcelTypeEnum.XLSX, true);
+            int batchSize = Integer.parseInt(Optional.ofNullable(profileClient.getProfileValueByOptions(batchResultBaseDTO.getTenantId(), null, null, DOWN_EXCEPTION_BATCH_SIZE)).orElse("10000"));
+            //多少页，也就是分多少批
+            long pageNumber = total % batchSize == 0 ? total / batchSize : total / batchSize + 1;
+            int totalAmount = 0;
+            int sheetNo = 1;
+            Sheet sheet = new Sheet(sheetNo, 0);
+            List<List<String>> headList = null;
+            //值集转换map
+            Map<String, String> warningLevelMap = new HashMap<>();
+            for (int i = 0; i < pageNumber; i++) {
+                //一百万分sheet页
+                if (totalAmount >= 1000000) {
+                    sheet = new Sheet(++sheetNo, 0);
+                    sheet.setSheetName("Exception-Data" + "_" + sheetNo);
+                    if (headList != null) {
+                        sheet.setHead(headList);
+                    }
+                }
+
+                //通过mongo来进行查询
+                Query query = new Query();
+
+                // 通过 _id 来排序
+                query.with(Sort.by(Sort.Direction.ASC, "_id"));
+                //去掉_id和#PK等返回
+                query.fields().exclude("_id", "#pk", "#planBaseId", "#resultBaseId");
+                //分页查询
+                query.with(org.springframework.data.domain.PageRequest.of(i, batchSize));
+
+                List<Map> maps = mongoTemplate.find(query, Map.class, collectionName);
+                List<List<Object>> dataList = maps.stream().map(map -> {
+                    List<Object> list = new ArrayList();
+                    Set<String> set = map.keySet();
+                    set.forEach(s -> {
+                        Object value = map.get(s);
+                        if (WARNING_LEVEL.equals(s)) {
+                            String warningLevelMeaning = warningLevelMap.get(value);
+                            if (warningLevelMeaning == null) {
+                                warningLevelMeaning = lovAdapter.queryLovMeaning(WARNING_LEVEL_LOV, BaseConstants.DEFAULT_TENANT_ID, String.valueOf(value));
+                                warningLevelMap.put(String.valueOf(value), warningLevelMeaning);
+                            }
+                            list.add(warningLevelMeaning);
+                        } else {
+                            list.add(value);
+                        }
+                    });
+                    return list;
+                }).collect(Collectors.toList());
+
+                Set<String> set = maps.get(0).keySet();
+                if (headList == null) {
+                    headList = set.stream().map(key -> {
+                        List<String> list = new ArrayList<>();
+                        switch (key) {
+                            case RULE_NAME:
+                                list.add("规则名称");
+                                break;
+                            case EXCEPTION_INFO:
+                                list.add("错误信息");
+                                break;
+                            case WARNING_LEVEL:
+                                list.add("告警等级");
+                                break;
+                            default:
+                                list.add(key);
+                        }
+                        return list;
+                    }).collect(Collectors.toList());
+                    sheet.setHead(headList);
+                }
+                writer.write1(dataList, sheet);
+                outputStream.flush();
+                totalAmount += maps.size();
+            }
+            writer.finish();
+            Attachment attachment = new Attachment();
+            try (FileInputStream fileInputStream = new FileInputStream(file)) {
+                attachment.setFile(FileUtils.inputStreamToByteArray(fileInputStream));
+            }
+            attachment.setFileName(file.getName());
+            return attachment;
+        } catch (IOException e) {
+            throw new CommonException(ErrorCode.EXCEL_WRITE_ERROR, e);
+        } finally {
+            if (file != null) {
+                try {
+                    file.delete();
+                } catch (Exception e) {
+                    //ignore
+                    log.error("文件删除失败");
+                }
+            }
+        }
+    }
+
 
     private void getRule(BatchResultBaseDTO batchResultBaseDTO) {
         List<BatchResultRuleDTO> batchResultRuleDTOList = batchResultRuleRepository.selectDTOByCondition(Condition.builder(BatchResultRule.class)
