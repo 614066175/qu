@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.infra.repository.impl;
 
+import java.util.List;
+
 import com.hand.hdsp.core.base.repository.impl.BaseRepositoryImpl;
 import com.hand.hdsp.quality.domain.entity.ReferenceData;
 import com.hand.hdsp.quality.api.dto.ReferenceDataDTO;
@@ -28,6 +30,11 @@ public class ReferenceDataRepositoryImpl extends BaseRepositoryImpl<ReferenceDat
     @Override
     public Page<ReferenceDataDTO> list(ReferenceDataDTO referenceDataDTO, PageRequest pageRequest) {
         return PageHelper.doPageAndSort(pageRequest, () -> referenceDataMapper.list(referenceDataDTO));
+    }
+
+    @Override
+    public List<ReferenceDataDTO> list(ReferenceDataDTO referenceDataDTO) {
+        return referenceDataMapper.list(referenceDataDTO);
     }
 
 

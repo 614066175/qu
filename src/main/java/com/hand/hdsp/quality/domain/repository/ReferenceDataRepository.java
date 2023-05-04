@@ -1,5 +1,7 @@
 package com.hand.hdsp.quality.domain.repository;
 
+import java.util.List;
+
 import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.domain.entity.ReferenceData;
 import com.hand.hdsp.quality.api.dto.ReferenceDataDTO;
@@ -22,6 +24,13 @@ public interface ReferenceDataRepository extends BaseRepository<ReferenceData, R
      * @return                  数据
      */
     Page<ReferenceDataDTO> list(ReferenceDataDTO referenceDataDTO, PageRequest pageRequest);
+
+    /**
+     * 列表查询 不分页
+     * @param referenceDataDTO  查询条件
+     * @return                  数据
+     */
+    List<ReferenceDataDTO> list(ReferenceDataDTO referenceDataDTO);
 
     /**
      * 根据主键查询详情

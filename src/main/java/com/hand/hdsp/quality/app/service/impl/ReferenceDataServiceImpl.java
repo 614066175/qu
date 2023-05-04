@@ -14,6 +14,8 @@ import com.hand.hdsp.quality.domain.repository.ReferenceDataRecordRepository;
 import com.hand.hdsp.quality.domain.repository.ReferenceDataRepository;
 import com.hand.hdsp.quality.domain.repository.ReferenceDataValueRepository;
 import com.hand.hdsp.quality.infra.constant.ReferenceDataConstant;
+import com.hand.hdsp.quality.infra.export.ReferenceDataExporter;
+import com.hand.hdsp.quality.infra.export.dto.ReferenceDataExportDTO;
 import com.hand.hdsp.quality.workflow.adapter.ReferenceDataOfflineWorkflowAdapter;
 import com.hand.hdsp.quality.workflow.adapter.ReferenceDataReleaseWorkflowAdapter;
 import org.apache.commons.collections4.CollectionUtils;
@@ -24,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
+import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 
 /**
@@ -41,18 +44,22 @@ public class ReferenceDataServiceImpl implements ReferenceDataService, ProxySelf
     private final ReferenceDataReleaseWorkflowAdapter<ReferenceDataDTO, ReferenceDataDTO, Long, String> referenceDataReleaseWorkflowAdapter;
     private final ReferenceDataOfflineWorkflowAdapter<ReferenceDataDTO, ReferenceDataDTO, Long, String> referenceDataOfflineWorkflowAdapter;
 
+    private final ReferenceDataExporter referenceDataExporter;
+
     public ReferenceDataServiceImpl(ReferenceDataRepository referenceDataRepository,
                                     ReferenceDataRecordRepository referenceDataRecordRepository,
                                     ReferenceDataHistoryRepository referenceDataHistoryRepository,
                                     ReferenceDataValueRepository referenceDataValueRepository,
                                     ReferenceDataReleaseWorkflowAdapter<ReferenceDataDTO, ReferenceDataDTO, Long, String> referenceDataReleaseWorkflowAdapter,
-                                    ReferenceDataOfflineWorkflowAdapter<ReferenceDataDTO, ReferenceDataDTO, Long, String> referenceDataOfflineWorkflowAdapter) {
+                                    ReferenceDataOfflineWorkflowAdapter<ReferenceDataDTO, ReferenceDataDTO, Long, String> referenceDataOfflineWorkflowAdapter,
+                                    ReferenceDataExporter referenceDataExporter) {
         this.referenceDataRepository = referenceDataRepository;
         this.referenceDataRecordRepository = referenceDataRecordRepository;
         this.referenceDataHistoryRepository = referenceDataHistoryRepository;
         this.referenceDataValueRepository = referenceDataValueRepository;
         this.referenceDataReleaseWorkflowAdapter = referenceDataReleaseWorkflowAdapter;
         this.referenceDataOfflineWorkflowAdapter = referenceDataOfflineWorkflowAdapter;
+        this.referenceDataExporter = referenceDataExporter;
     }
 
 
@@ -207,5 +214,12 @@ public class ReferenceDataServiceImpl implements ReferenceDataService, ProxySelf
             }
         }
         referenceDataRepository.updateDTOOptional(referenceDataDTO, ReferenceData.FIELD_DATA_STATUS);
+    }
+
+    @Override
+    public List<ReferenceDataExportDTO> export(Long projectId, Long tenantId, ReferenceDataDTO referenceDataDTO, ExportParam exportParam) {
+        referenceDataDTO.setProjectId(projectId);
+        referenceDataDTO.setTenantId(tenantId);
+        return referenceDataExporter.export(referenceDataDTO);
     }
 }

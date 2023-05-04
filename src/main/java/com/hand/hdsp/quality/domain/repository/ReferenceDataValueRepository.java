@@ -27,6 +27,13 @@ public interface ReferenceDataValueRepository extends BaseRepository<ReferenceDa
     Page<ReferenceDataValueDTO> list(ReferenceDataValueDTO referenceDataValueDTO, PageRequest pageRequest);
 
     /**
+     * 列表查询 不分页
+     * @param referenceDataValueDTO 查询条件
+     * @return                      结果
+     */
+    List<ReferenceDataValueDTO> list(ReferenceDataValueDTO referenceDataValueDTO);
+
+    /**
      * 列表查询
      * @param dataId 参考数据ID
      * @return       结果
