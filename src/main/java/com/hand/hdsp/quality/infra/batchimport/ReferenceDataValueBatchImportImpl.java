@@ -86,7 +86,7 @@ public class ReferenceDataValueBatchImportImpl extends BatchImportHandler implem
                 }
                 // 父参考值id
                 String parentValue = referenceDataValueDTO.getParentValue();
-                if (Objects.nonNull(referenceData.getParentDataId()) && StringUtils.isNotBlank(parentValue)) {
+                if (Objects.isNull(referenceData.getParentDataId()) && StringUtils.isNotBlank(parentValue)) {
                     log.error("参考数据(编码[{}])没有父参考数据，不能维护父参考值", referenceData.getDataCode());
                     addErrorMsg(i, "参考数据没有父参考数据，不能维护父参考值");
                     getContextList().get(i).setDataStatus(DataStatus.IMPORT_FAILED);
