@@ -2,13 +2,19 @@ package com.hand.hdsp.quality.api.controller.v1;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.hzero.core.util.Results;
 import org.hzero.core.base.BaseController;
+import org.hzero.export.annotation.ExcelExport;
+import org.hzero.export.vo.ExportParam;
 
 import com.hand.hdsp.core.constant.HdspConstant;
+import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.app.service.ReferenceDataService;
 import com.hand.hdsp.quality.domain.entity.ReferenceData;
 import com.hand.hdsp.quality.api.dto.ReferenceDataDTO;
+import com.hand.hdsp.quality.infra.export.dto.ReferenceDataExportDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -255,6 +261,19 @@ public class ReferenceDataController extends BaseController {
                                              @RequestParam Long recordId) {
         referenceDataService.withdrawEvent(tenantId, recordId);
         return Results.success();
+    }
+
+    @ApiOperation(value = "导出参考数据")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/export")
+    @ExcelExport(value = ReferenceDataExportDTO.class)
+    public ResponseEntity<List<ReferenceDataExportDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
+                                                               @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                               ReferenceDataDTO referenceDataDTO,
+                                                               ExportParam exportParam,
+                                                               HttpServletResponse response) {
+        List<ReferenceDataExportDTO> referenceDataExportDTOList = referenceDataService.export(projectId, tenantId, referenceDataDTO, exportParam);
+        return Results.success(referenceDataExportDTOList);
     }
 
 

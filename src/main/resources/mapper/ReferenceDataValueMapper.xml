@@ -41,8 +41,12 @@
         SELECT
         <include refid="Base_Column_List">
             <property name="prefix" value="xrdv"/>
-        </include>
+        </include>,
+        xrdv1.value parent_value,
+        xrd.data_code
         FROM xqua_reference_data_value xrdv
+        LEFT JOIN xqua_reference_data_value xrdv1 ON xrdv.parent_value_id = xrdv1.value_id
+        LEFT JOIN xqua_reference_data xrd ON xrdv.data_id = xrd.data_id
         <where>
             <if test="valueId != null">
                 AND xrdv.value_id = #{valueId}

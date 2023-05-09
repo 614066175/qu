@@ -34,6 +34,11 @@ public class ReferenceDataValueRepositoryImpl extends BaseRepositoryImpl<Referen
     }
 
     @Override
+    public List<ReferenceDataValueDTO> list(ReferenceDataValueDTO referenceDataValueDTO) {
+        return referenceDataValueMapper.list(referenceDataValueDTO);
+    }
+
+    @Override
     public List<SimpleReferenceDataValueDTO> simpleQueryByDataId(Long dataId) {
         return referenceDataValueMapper.simpleQueryByDataId(dataId);
     }

@@ -3,9 +3,12 @@ package com.hand.hdsp.quality.app.service;
 import java.util.List;
 
 import com.hand.hdsp.quality.api.dto.ReferenceDataDTO;
+import com.hand.hdsp.quality.infra.export.dto.ReferenceDataExportDTO;
 
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import org.hzero.export.vo.ExportParam;
 
 /**
  * <p>参考数据头表应用服务</p>
@@ -117,4 +120,14 @@ public interface ReferenceDataService {
      * @param recordId          工作流记录表
      */
     void withdrawEvent(Long tenantId, Long recordId);
+
+    /**
+     * 导出参考数据
+     * @param projectId         项目id
+     * @param tenantId          租户id
+     * @param referenceDataDTO  查询条件
+     * @param exportParam       导出参数
+     * @return                  要导出的数据
+     */
+    List<ReferenceDataExportDTO> export(Long projectId, Long tenantId, ReferenceDataDTO referenceDataDTO, ExportParam exportParam);
 }

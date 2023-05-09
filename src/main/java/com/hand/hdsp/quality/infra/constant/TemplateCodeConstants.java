@@ -37,4 +37,9 @@ public interface TemplateCodeConstants {
      * 词根-导入模板
      */
     String TEMPLATE_CODE_ROOT="HDSP.XQUA.ROOT";
+
+    /**
+     * 参考数据-导入模板
+     */
+    String TEMPLATE_CODE_REFERENCE_DATA = "XQUA.REFERENCE_DATA";
 }

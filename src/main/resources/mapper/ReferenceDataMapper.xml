@@ -52,13 +52,16 @@
             <property name="prefix" value="xrd"/>
         </include>,
         xcg.group_name data_group_name,
+        xcg.group_path,
         iu.login_name publisher,
         hu.unit_name responsible_dept_name,
         he.email responsible_person_email,
         he.mobile responsible_person_tel,
         he.name responsible_person_name,
         he.employee_num responsible_person_code,
-        xrdr.instance_id
+        xrdr.instance_id,
+        xrd1.data_code parent_data_code,
+        xrd1.data_name parent_data_name
         FROM xqua_reference_data xrd
         <!-- 关联通用分组 -->
         LEFT JOIN xcor_common_group xcg ON xrd.data_group_id = xcg.group_id
@@ -70,6 +73,8 @@
         LEFT JOIN hpfm_employee he ON xrd.responsible_person_id = he.employee_id
         <!-- 关联查询instanceId -->
         LEFT JOIN xqua_reference_data_record xrdr ON xrd.data_id = xrdr.data_id
+        <!-- 关联父参考数据-->
+        LEFT JOIN xqua_reference_data xrd1 ON xrd.parent_data_id = xrd1.data_id
         <where>
             <if test="dataId != null">
                 AND xrd.data_id = #{dataId}
@@ -101,6 +106,12 @@
             <if test="responsiblePersonId != null">
                 AND xrd.responsible_person_id = #{responsiblePersonId}
             </if>
+            <if test="exportIds != null and exportIds.size() > 0">
+                AND xrd.data_id IN
+                <foreach collection="exportIds" item="exportId" open="(" separator="," close=")">
+                    #{exportId}
+                </foreach>
+            </if>
         </where>
     </select>
     <select id="detail" resultType="com.hand.hdsp.quality.api.dto.ReferenceDataDTO">
@@ -109,12 +120,15 @@
             <property name="prefix" value="xrd"/>
         </include>,
         xcg.group_name data_group_name,
+        xcg.group_path,
         iu.login_name publisher,
         hu.unit_name responsible_dept_name,
         he.email responsible_person_email,
         he.mobile responsible_person_tel,
         he.name responsible_person_name,
-        he.employee_num responsible_person_code
+        he.employee_num responsible_person_code,
+        xrd1.data_code parent_data_code,
+        xrd1.data_name parent_data_name
         FROM xqua_reference_data xrd
         <!-- 关联通用分组 -->
         LEFT JOIN xcor_common_group xcg ON xrd.data_group_id = xcg.group_id
@@ -124,6 +138,22 @@
         LEFT JOIN hpfm_unit hu ON xrd.responsible_dept_id = hu.unit_id
         <!-- 关联发责任人 -->
         LEFT JOIN hpfm_employee he ON xrd.responsible_person_id = he.employee_id
+        <!-- 关联父参考数据-->
+        LEFT JOIN xqua_reference_data xrd1 ON xrd.parent_data_id = xrd1.data_id
         WHERE xrd.data_id = #{dataId}
+    </select>
+    <select id="queryEmployeeIdsByName" resultType="java.lang.Long">
+        SELECT
+            he.employee_id
+        FROM
+            hpfm_employee he
+        WHERE he.name = #{employeeName}
+          AND he.tenant_id  = #{tenantId}
+    </select>
+    <select id="queryDeptIdsByName" resultType="java.lang.Long">
+        SELECT hu.unit_id
+        FROM hpfm_unit hu
+        WHERE hu.unit_name = #{deptName}
+          AND hu.tenant_id = #{tenantId}
     </select>
 </mapper>
