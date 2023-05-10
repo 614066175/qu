@@ -2,11 +2,11 @@ package com.hand.hdsp.quality.infra.measure.measure;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.hand.hdsp.core.util.DiscoveryHelper;
+import com.hand.hdsp.core.util.JSON;
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
-import com.hand.hdsp.quality.domain.entity.BatchResultBase;
-import com.hand.hdsp.quality.domain.entity.BatchResultItem;
-import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
+import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
+import com.hand.hdsp.quality.domain.repository.ReferenceDataHistoryRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
@@ -20,6 +20,7 @@ import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
@@ -59,6 +60,7 @@ public class FieldValueMeasure implements Measure {
     private static final String START_SQL = " and ${field} >= %s";
     private static final String END_SQL = " and ${field} <= %s";
     private final ItemTemplateSqlRepository templateSqlRepository;
+    private final ReferenceDataHistoryRepository referenceDataHistoryRepository;
     private final LovAdapter lovAdapter;
     private final DriverSessionService driverSessionService;
 
@@ -70,8 +72,11 @@ public class FieldValueMeasure implements Measure {
 
 
     public FieldValueMeasure(ItemTemplateSqlRepository templateSqlRepository,
-                             LovAdapter lovAdapter, DriverSessionService driverSessionService) {
+                             ReferenceDataHistoryRepository referenceDataHistoryRepository,
+                             LovAdapter lovAdapter,
+                             DriverSessionService driverSessionService) {
         this.templateSqlRepository = templateSqlRepository;
+        this.referenceDataHistoryRepository = referenceDataHistoryRepository;
         this.lovAdapter = lovAdapter;
         this.driverSessionService = driverSessionService;
     }
@@ -318,7 +323,53 @@ public class FieldValueMeasure implements Measure {
                 batchResultItem.setExceptionInfo(String.format("存在%d条数据满足告警要求", count.get()));
                 batchResultItem.setWarningLevel(JsonUtil.toJson(warningLevelVOList));
             }
-        } else {
+        }
+        // 参考数据
+        else if (PlanConstant.CountType.REFERENCE_DATA.equals(countType)) {
+            WarningLevelDTO warningLevelDTO = warningLevelList.get(0);
+            Long referenceDataId = warningLevelDTO.getReferenceDataId();
+            String referenceDataValue = null;
+            if (Objects.nonNull(referenceDataId)) {
+                List<ReferenceDataHistory> referenceDataHistoryList = referenceDataHistoryRepository.select(ReferenceDataHistory.FIELD_DATA_ID, referenceDataValue);
+                Optional<ReferenceDataHistory> currentVersion = referenceDataHistoryList.stream().max(Comparator.comparingLong(ReferenceDataHistory::getVersionNumber));
+                if (currentVersion.isPresent()) {
+                    ReferenceDataHistory referenceDataHistory = currentVersion.get();
+                    String dataValueJson = referenceDataHistory.getDataValueJson();
+                    List<ReferenceDataValue> referenceDataValues = JSON.toArray(dataValueJson, ReferenceDataValue.class);
+                    referenceDataValue = referenceDataValues
+                            .stream()
+                            .filter(value -> value.getEnabledFlag() == 1)
+                            .map(value -> String.format("'%s'", value.getValue()))
+                            .collect(Collectors.joining(BaseConstants.Symbol.COMMA));
+                }
+            }
+            if (StringUtils.isBlank(referenceDataValue)) {
+                throw new CommonException(ErrorCode.NOT_FIND_REFERENCE_DATA_VALUE);
+            }
+            // 查询要执行的SQL
+            ItemTemplateSql itemTemplateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                    .checkItem(countType + "_" + warningLevelDTO.getCompareSymbol())
+                    .datasourceType(batchResultBase.getDatasourceType())
+                    .build());
+            Map<String, String> variables = new HashMap<>(3);
+            variables.put("listValue", referenceDataValue);
+            variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
+            variables.put("table", batchResultBase.getPackageObjectName());
+            String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, param.getWhereCondition());
+            List<Map<String, Object>> response = driverSession.executeOneQuery(param.getSchema(), sql);
+            String values = response.get(0).values().toArray()[0].toString();
+            if (CollectionUtils.isNotEmpty(response) && Integer.parseInt(values) != 0) {
+                long levelCount = Long.parseLong(values);
+                batchResultItem.setWarningLevel(JsonUtils.object2Json(Collections.singletonList(WarningLevelVO.builder()
+                        .warningLevel(warningLevelDTO.getWarningLevel())
+                        .levelCount(levelCount)
+                        .build())));
+                PlanExceptionUtil.getPlanException(param, batchResultBase, sql, driverSession, warningLevelDTO);
+                batchResultItem.setExceptionInfo(String.format("存在%d条数据字段值满足参考数据校验配置", levelCount));
+            }
+
+        }
+        else {
             throw new CommonException(ErrorCode.FIELD_NO_SUPPORT_CHECK_TYPE);
         }
         return batchResultItem;

@@ -172,6 +172,18 @@ public class ValueRangeHandler implements StandardHandler {
                     warningLevelDTOList = Collections.singletonList(warningLevelDTO);
                     warningLevel = JsonUtil.toJson(warningLevelDTOList);
                     break;
+                case PlanConstant.StandardValueType.REFERENCE_DATA:
+                    // 参考数据生成标准逻辑
+                    batchPlanFieldLineDTO.setCountType(PlanConstant.CountType.REFERENCE_DATA);
+                    warningLevelDTO = WarningLevelDTO.builder()
+                            .warningLevel(WarningLevel.ORANGE)
+                            .compareSymbol(PlanConstant.CompareSymbol.INCLUDED)
+                            // TODO 这里待定是查询出当前版本的参考数据 还是要动态更新
+                            .enumValue(dataFieldDTO.getValueRange())
+                            .build();
+                    warningLevelDTOList = Collections.singletonList(warningLevelDTO);
+                    warningLevel = JsonUtil.toJson(warningLevelDTOList);
+                    break;
                 default:
                     break;
             }

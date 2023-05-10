@@ -314,6 +314,8 @@ public interface PlanConstant {
 
         String LENGTH_RANGE = "LENGTH_RANGE";
 
+        String REFERENCE_DATA = "REFERENCE_DATA";
+
     }
 
     /**
@@ -345,7 +347,7 @@ public interface PlanConstant {
         String ENUM = "ENUM";
         String VALUE_SET = "VALUE_SET";
         String LOV_VIEW = "LOV_VIEW";
-
+        String REFERENCE_DATA = "REFERENCE_DATA";
     }
 
     interface StandardStatus {

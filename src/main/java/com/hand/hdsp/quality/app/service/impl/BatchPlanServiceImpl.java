@@ -976,11 +976,11 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         List<BatchPlanBase> baseList = batchPlanBaseMapper.execBaseList(BatchPlanBaseDTO.builder().planId(planId).build());
 
         //评估每一个方案下的base
-        CompletionService executor = new ExecutorCompletionService<>(CustomThreadPool.getExecutor());
-        List<Future> futures = new ArrayList<>();
+        CompletionService<BatchResultBase> executor = new ExecutorCompletionService<>(CustomThreadPool.getExecutor());
+        List<Future<BatchResultBase>> futures = new ArrayList<>();
         CustomUserDetails userDetails = DetailsHelper.getUserDetails();
         for (BatchPlanBase batchPlanBase : baseList) {
-            Future future = executor.submit(() ->
+            Future<BatchResultBase> future = executor.submit(() ->
             {
                 DetailsHelper.setCustomUserDetails(userDetails);
                 String objectName = batchPlanBase.getObjectName();
@@ -1043,7 +1043,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         //CompletableFuture cancel任务没有效果，采用CompletionService获取先执行完的结果
         for (int i = 0; i < futures.size(); i++) {
             try {
-                Future future = executor.take();
+                Future<BatchResultBase> future = executor.take();
                 future.get();
             } catch (Exception e) {
                 //如果执行失败的话，取消其他任务

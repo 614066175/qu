@@ -187,9 +187,9 @@ public class BatchPlanBaseServiceImpl implements BatchPlanBaseService {
         batchPlanBaseRepository.insertDTOSelective(batchPlanBaseDTO);
         //如果有动态表单的值
         if (CollectionUtils.isNotEmpty(batchPlanBaseDTO.getBaseFormValueDTOS())) {
-            List<BaseFormValueDTO> baseFormValueDTOS = batchPlanBaseDTO.getBaseFormValueDTOS();
-            baseFormValueDTOS.forEach(baseFormValueDTO -> baseFormValueDTO.setPlanBaseId(batchPlanBaseDTO.getPlanBaseId()));
-            baseFormValueRepository.batchInsertDTOSelective(baseFormValueDTOS);
+            List<BaseFormValueDTO> baseFormValueDTOList = batchPlanBaseDTO.getBaseFormValueDTOS();
+            baseFormValueDTOList.forEach(baseFormValueDTO -> baseFormValueDTO.setPlanBaseId(batchPlanBaseDTO.getPlanBaseId()));
+            baseFormValueRepository.batchInsertDTOSelective(baseFormValueDTOList);
         }
         // 如果类型为数据源且开启自动生成标准
         if ("TABLE".equals(batchPlanBaseDTO.getSqlType()) && batchPlanBaseDTO.getBuildRuleFlag() != null && batchPlanBaseDTO.getBuildRuleFlag() == 1) {
