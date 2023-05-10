@@ -58,6 +58,7 @@ public interface ErrorCode {
     String DQ_RULE_LINE_LIST_ALL = "hdsp.xqua.err.feign.ops.dq_rule_line.list_all";
 
     String NOT_FIND_VALUE = "hdsp.xqua.err.not_find_value";
+    String NOT_FIND_REFERENCE_DATA_VALUE = "hdsp.xqua.err.not_find_reference_data_value";
 
     //DATA_STANDARD_ERROR
     String DATA_STANDARD_CODE_EXIST = "hdsp.xqua.err.data_standard_code_exist";

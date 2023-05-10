@@ -81,6 +81,8 @@ public class FieldValueValidator implements StatisticValidator {
                         break;
                     case LOV_VIEW:
                         break;
+                    case REFERENCE_DATA:
+                        break;
                     default:
                         throw new CommonException("not support value type");
                 }
