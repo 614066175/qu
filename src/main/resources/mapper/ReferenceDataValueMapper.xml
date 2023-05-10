@@ -55,10 +55,10 @@
                 AND xrdv.data_id = #{dataId}
             </if>
             <if test="tenantId != null">
-                AND xrd.tenant_id = #{tenantId}
+                AND xrdv.tenant_id = #{tenantId}
             </if>
             <if test="projectId != null">
-                AND xrd.project_id = #{projectId}
+                AND xrdv.project_id = #{projectId}
             </if>
             <if test="value != null and value != ''">
                 <bind name="valueLike" value="value+'%'"/>
