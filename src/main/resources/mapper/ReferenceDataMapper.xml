@@ -79,6 +79,12 @@
             <if test="dataId != null">
                 AND xrd.data_id = #{dataId}
             </if>
+            <if test="tenantId != null">
+                AND xrd.tenant_id = #{tenantId}
+            </if>
+            <if test="projectId != null">
+                AND xrd.project_id = #{projectId}
+            </if>
             <if test="dataCode != null and dataCode != ''">
                 <bind name="dataCodeLike" value="dataCode+'%'"/>
                 AND xrd.data_code LIKE #{dataCodeLike}
