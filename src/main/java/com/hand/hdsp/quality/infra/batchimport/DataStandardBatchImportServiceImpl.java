@@ -7,7 +7,10 @@ import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.core.util.ProjectHelper;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
 import com.hand.hdsp.quality.domain.entity.DataStandard;
+import com.hand.hdsp.quality.domain.entity.ReferenceData;
 import com.hand.hdsp.quality.domain.repository.DataStandardRepository;
+import com.hand.hdsp.quality.domain.repository.ReferenceDataRepository;
+import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.converter.DataStandardConverter;
@@ -46,6 +49,7 @@ public class DataStandardBatchImportServiceImpl extends BatchImportHandler imple
 
     private final DataStandardRepository dataStandardRepository;
     private final CommonGroupRepository commonGroupRepository;
+    private final ReferenceDataRepository referenceDataRepository;
     private final DataStandardMapper dataStandardMapper;
     private final DataStandardConverter dataStandardConverter;
     private final ProfileClient profileClient;
@@ -54,10 +58,15 @@ public class DataStandardBatchImportServiceImpl extends BatchImportHandler imple
 
     public DataStandardBatchImportServiceImpl(ObjectMapper objectMapper, DataStandardRepository dataStandardRepository,
                                               CommonGroupRepository commonGroupRepository,
-                                              DataStandardMapper dataStandardMapper, DataStandardConverter dataStandardConverter, ProfileClient profileClient, CommonGroupClient commonGroupClient) {
+                                              ReferenceDataRepository referenceDataRepository,
+                                              DataStandardMapper dataStandardMapper,
+                                              DataStandardConverter dataStandardConverter,
+                                              ProfileClient profileClient,
+                                              CommonGroupClient commonGroupClient) {
         this.objectMapper = objectMapper;
         this.dataStandardRepository = dataStandardRepository;
         this.commonGroupRepository = commonGroupRepository;
+        this.referenceDataRepository = referenceDataRepository;
         this.dataStandardMapper = dataStandardMapper;
         this.dataStandardConverter = dataStandardConverter;
         this.profileClient = profileClient;
@@ -115,6 +124,19 @@ public class DataStandardBatchImportServiceImpl extends BatchImportHandler imple
                         .tenantId(dataStandardDTO.getTenantId())
                         .projectId(dataStandardDTO.getProjectId())
                         .build());
+                // 参考数据
+                if (PlanConstant.StandardValueType.REFERENCE_DATA.equals(dataStandardDTO.getValueType()) && StringUtils.isNotBlank(dataStandardDTO.getValueRange())) {
+                    String referenceDataCode = dataStandardDTO.getValueRange();
+                    List<ReferenceData> referenceDataList = referenceDataRepository.select(ReferenceData
+                            .builder()
+                            .dataCode(referenceDataCode)
+                            .projectId(projectId)
+                            .tenantId(tenantId)
+                            .build());
+                    if (CollectionUtils.isNotEmpty(referenceDataList)) {
+                        dataStandardDTO.setValueRange(String.valueOf(referenceDataList.get(0).getDataId()));
+                    }
+                }
                 if (exist != null) {
                     dataStandardDTO.setStandardId(exist.getStandardId());
                     dataStandardDTO.setObjectVersionNumber(exist.getObjectVersionNumber());
