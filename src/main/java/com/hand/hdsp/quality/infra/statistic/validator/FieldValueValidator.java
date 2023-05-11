@@ -1,9 +1,13 @@
 package com.hand.hdsp.quality.infra.statistic.validator;
 
+import com.hand.hdsp.core.util.JSON;
 import com.hand.hdsp.core.value.handler.ValueHandler;
 import com.hand.hdsp.quality.api.dto.AimStatisticsDTO;
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
 import com.hand.hdsp.quality.api.dto.StandardAimDTO;
+import com.hand.hdsp.quality.domain.entity.ReferenceDataHistory;
+import com.hand.hdsp.quality.domain.entity.ReferenceDataValue;
+import com.hand.hdsp.quality.domain.repository.ReferenceDataHistoryRepository;
 import com.hand.hdsp.quality.infra.measure.MeasureUtil;
 import com.hand.hdsp.quality.infra.statistic.regular.RegularValidUtil;
 import com.hand.hdsp.quality.infra.util.ApplicationContextUtil;
@@ -15,6 +19,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.boot.platform.lov.dto.LovValueDTO;
+import org.hzero.core.base.BaseConstants;
 import org.hzero.starter.driver.core.infra.meta.Column;
 import org.hzero.starter.driver.core.infra.util.UUIDUtils;
 import org.hzero.starter.driver.core.session.DriverSession;
@@ -52,10 +57,13 @@ public class FieldValueValidator implements StatisticValidator {
 
 
     private final DriverSessionService driverSessionService;
+    private final ReferenceDataHistoryRepository referenceDataHistoryRepository;
 
-    public FieldValueValidator(LovAdapter lovAdapter, DriverSessionService driverSessionService) {
+    public FieldValueValidator(LovAdapter lovAdapter, DriverSessionService driverSessionService,
+                               ReferenceDataHistoryRepository referenceDataHistoryRepository) {
         this.lovAdapter = lovAdapter;
         this.driverSessionService = driverSessionService;
+        this.referenceDataHistoryRepository = referenceDataHistoryRepository;
     }
 
 
@@ -175,6 +183,36 @@ public class FieldValueValidator implements StatisticValidator {
                     break;
                 case LOV_VIEW:
                     //查询值集视图值字段结果 todo
+                    break;
+                case REFERENCE_DATA:
+                    String valueRange = dataFieldDTO.getValueRange();
+                    if (StringUtils.isNotBlank(valueRange)) {
+                        long referenceDataId = Long.parseLong(valueRange);
+                        List<ReferenceDataHistory> referenceDataHistoryList = referenceDataHistoryRepository.select(ReferenceDataHistory.FIELD_DATA_ID, referenceDataId);
+                        Optional<ReferenceDataHistory> currentVersion = referenceDataHistoryList.stream().max(Comparator.comparingLong(ReferenceDataHistory::getVersionNumber));
+                        if (currentVersion.isPresent()) {
+                            ReferenceDataHistory referenceDataHistory = currentVersion.get();
+                            String dataValueJson = referenceDataHistory.getDataValueJson();
+                            List<ReferenceDataValue> referenceDataValues = JSON.toArray(dataValueJson, ReferenceDataValue.class);
+                            List<String> valueList = referenceDataValues
+                                    .stream()
+                                    .filter(value -> value.getEnabledFlag() == 1)
+                                    .map(ReferenceDataValue::getValue)
+                                    .collect(Collectors.toList());
+                            for (String value : valueList) {
+                                //占位符
+                                String paramName = formatFieldName + "_" + UUIDUtils.generateShortUUID();
+                                String paramHolder = String.format(PARAM_HOLDER_PATTERN, paramName);
+                                paramHolder = String.format(paramFormat, paramHolder);
+                                paramHolderList.add(paramHolder);
+                                paramMap.put(paramName, finalValueHandler.convertValueType(column.getTypeName(), value));
+                            }
+                            condition = String.format("%s in (%s)",
+                                    formatFieldName,
+                                    Strings.join(paramHolderList, ','));
+                            conditions.add(condition);
+                        }
+                    }
                     break;
                 default:
                     throw new CommonException("not support value type");

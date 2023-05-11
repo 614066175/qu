@@ -330,7 +330,7 @@ public class FieldValueMeasure implements Measure {
             Long referenceDataId = warningLevelDTO.getReferenceDataId();
             String referenceDataValue = null;
             if (Objects.nonNull(referenceDataId)) {
-                List<ReferenceDataHistory> referenceDataHistoryList = referenceDataHistoryRepository.select(ReferenceDataHistory.FIELD_DATA_ID, referenceDataValue);
+                List<ReferenceDataHistory> referenceDataHistoryList = referenceDataHistoryRepository.select(ReferenceDataHistory.FIELD_DATA_ID, referenceDataId);
                 Optional<ReferenceDataHistory> currentVersion = referenceDataHistoryList.stream().max(Comparator.comparingLong(ReferenceDataHistory::getVersionNumber));
                 if (currentVersion.isPresent()) {
                     ReferenceDataHistory referenceDataHistory = currentVersion.get();
