@@ -10,6 +10,7 @@ import com.hand.hdsp.quality.app.service.StandardApprovalService;
 import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.constant.StandardConstant.AimType;
 import com.hand.hdsp.quality.infra.constant.WarningLevel;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
@@ -25,8 +26,7 @@ import com.hand.hdsp.quality.infra.util.StandardHandler;
 import com.hand.hdsp.quality.infra.util.ValueRangeHandler;
 import com.hand.hdsp.quality.workflow.adapter.DataStandardOfflineWorkflowAdapter;
 import com.hand.hdsp.quality.workflow.adapter.DataStandardOnlineWorkflowAdapter;
-import com.hand.hdsp.quality.workflow.adapter.DataStandardOfflineWorkflowAdapter;
-import com.hand.hdsp.quality.workflow.adapter.DataStandardOnlineWorkflowAdapter;
+
 import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -129,6 +129,8 @@ public class DataStandardServiceImpl implements DataStandardService {
 
     private final StandardApprovalRepository standardApprovalRepository;
 
+    private final ReferenceDataRepository referenceDataRepository;
+
     private final StandardApprovalMapper standardApprovalMapper;
 
     private final DataStandardOnlineWorkflowAdapter dataStandardOnlineWorkflowAdapter;
@@ -173,7 +175,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                                    StandardGroupRepository standardGroupRepository,
                                    StandardApprovalService standardApprovalService,
                                    StandardApprovalRepository standardApprovalRepository,
-                                   StandardApprovalMapper standardApprovalMapper,
+                                   ReferenceDataRepository referenceDataRepository, StandardApprovalMapper standardApprovalMapper,
                                    DataStandardOnlineWorkflowAdapter dataStandardOnlineWorkflowAdapter,
                                    DataStandardOfflineWorkflowAdapter dataStandardOfflineWorkflowAdapter) {
         this.dataStandardRepository = dataStandardRepository;
@@ -195,6 +197,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         this.standardGroupRepository = standardGroupRepository;
         this.standardApprovalService = standardApprovalService;
         this.standardApprovalRepository = standardApprovalRepository;
+        this.referenceDataRepository = referenceDataRepository;
         this.standardApprovalMapper = standardApprovalMapper;
         this.dataStandardOnlineWorkflowAdapter = dataStandardOnlineWorkflowAdapter;
         this.dataStandardOfflineWorkflowAdapter = dataStandardOfflineWorkflowAdapter;
@@ -269,7 +272,15 @@ public class DataStandardServiceImpl implements DataStandardService {
                 dataStandardDTO.setChargeName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeName()));
             }
         }
+        if (PlanConstant.StandardValueType.REFERENCE_DATA.equals(dataStandardDTO.getValueType()) && StringUtils.isNotBlank(dataStandardDTO.getValueRange())) {
+            long referenceDataId = Long.parseLong(dataStandardDTO.getValueRange());
+            ReferenceDataDTO referenceDataDTO = referenceDataRepository.selectDTOByPrimaryKey(referenceDataId);
+            if (Objects.nonNull(referenceDataDTO)) {
+                dataStandardDTO.setReferenceDataCode(referenceDataDTO.getDataCode());
+                dataStandardDTO.setReferenceDataName(referenceDataDTO.getDataName());
+            }
 
+        }
         convertToDataLengthList(dataStandardDTO);
         List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
                 .andWhere(Sqls.custom()

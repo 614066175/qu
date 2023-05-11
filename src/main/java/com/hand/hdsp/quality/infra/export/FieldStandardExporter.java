@@ -3,6 +3,9 @@ package com.hand.hdsp.quality.infra.export;
 import com.hand.hdsp.core.domain.entity.CommonGroup;
 import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.quality.api.dto.DataFieldDTO;
+import com.hand.hdsp.quality.api.dto.ReferenceDataDTO;
+import com.hand.hdsp.quality.domain.repository.ReferenceDataRepository;
+import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.export.dto.FieldStandardExportDTO;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
 import org.apache.commons.collections4.CollectionUtils;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.FIELD_STANDARD;
@@ -30,10 +34,13 @@ import static org.hzero.core.util.StringPool.COMMA;
 public class FieldStandardExporter implements Exporter<DataFieldDTO, List<FieldStandardExportDTO>> {
     private final CommonGroupRepository commonGroupRepository;
     private final DataFieldMapper dataFieldMapper;
+    private final ReferenceDataRepository referenceDataRepository;
 
-    public FieldStandardExporter(CommonGroupRepository commonGroupRepository, DataFieldMapper dataFieldMapper) {
+    public FieldStandardExporter(CommonGroupRepository commonGroupRepository, DataFieldMapper dataFieldMapper,
+                                 ReferenceDataRepository referenceDataRepository) {
         this.commonGroupRepository = commonGroupRepository;
         this.dataFieldMapper = dataFieldMapper;
+        this.referenceDataRepository = referenceDataRepository;
     }
 
     @Override
@@ -92,6 +99,18 @@ public class FieldStandardExporter implements Exporter<DataFieldDTO, List<FieldS
     }
 
     public  List<FieldStandardExportDTO> exportFieldStandard(List<CommonGroup> commonGroups, List<DataFieldDTO> dataFieldDTOList) {
+        if (CollectionUtils.isNotEmpty(dataFieldDTOList)) {
+            for (DataFieldDTO dataFieldDTO : dataFieldDTOList) {
+                if (PlanConstant.StandardValueType.REFERENCE_DATA.equals(dataFieldDTO.getValueType()) && StringUtils.isNotBlank(dataFieldDTO.getValueRange())) {
+                    long referenceDataId = Long.parseLong(dataFieldDTO.getValueRange());
+                    ReferenceDataDTO referenceDataDTO = referenceDataRepository.selectDTOByPrimaryKey(referenceDataId);
+                    if (Objects.nonNull(referenceDataDTO)) {
+                        dataFieldDTO.setValueRange(referenceDataDTO.getDataCode());
+                    }
+
+                }
+            }
+        }
         List<FieldStandardExportDTO> fieldStandardExportDTOList = new ArrayList<>();
         commonGroups.forEach(commonGroup -> {
             FieldStandardExportDTO fieldStandardExportDTO = new FieldStandardExportDTO();

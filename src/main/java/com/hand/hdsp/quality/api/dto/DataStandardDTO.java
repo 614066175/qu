@@ -230,6 +230,10 @@ public class DataStandardDTO extends AuditDomain{
     @DateTimeFormat(pattern = BaseConstants.Pattern.DATETIME)
     private Date releaseDateTo;
 
+    @Transient
+    private String referenceDataCode;
 
+    @Transient
+    private String referenceDataName;
 
 }

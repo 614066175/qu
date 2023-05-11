@@ -11,8 +11,10 @@ import com.hand.hdsp.quality.api.dto.StandardRelationDTO;
 import com.hand.hdsp.quality.api.dto.StandardTeamDTO;
 import com.hand.hdsp.quality.domain.entity.DataField;
 import com.hand.hdsp.quality.domain.entity.DataStandard;
+import com.hand.hdsp.quality.domain.entity.ReferenceData;
 import com.hand.hdsp.quality.domain.entity.StandardTeam;
 import com.hand.hdsp.quality.domain.repository.*;
+import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.mapper.DataFieldMapper;
@@ -48,6 +50,7 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
     private final ObjectMapper objectMapper;
     private final DataFieldRepository dataFieldRepository;
     private final StandardGroupRepository standardGroupRepository;
+    private final ReferenceDataRepository referenceDataRepository;
     private final DataFieldMapper dataFieldMapper;
     private final DataStandardRepository dataStandardRepository;
     private final StandardRelationRepository standardRelationRepository;
@@ -64,13 +67,14 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
     public DataFieldStandardBatchImportServiceImpl(ObjectMapper objectMapper,
                                                    DataFieldRepository dataFieldRepository,
                                                    StandardGroupRepository standardGroupRepository,
-                                                   DataFieldMapper dataFieldMapper,
+                                                   ReferenceDataRepository referenceDataRepository, DataFieldMapper dataFieldMapper,
                                                    DataStandardRepository dataStandardRepository,
                                                    StandardRelationRepository standardRelationRepository,
                                                    StandardTeamRepository standardTeamRepository) {
         this.objectMapper = objectMapper;
         this.dataFieldRepository = dataFieldRepository;
         this.standardGroupRepository = standardGroupRepository;
+        this.referenceDataRepository = referenceDataRepository;
         this.dataFieldMapper = dataFieldMapper;
         this.dataStandardRepository = dataStandardRepository;
         this.standardRelationRepository = standardRelationRepository;
@@ -155,6 +159,19 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
                         .tenantId(dataFieldDTO.getTenantId())
                         .projectId(dataFieldDTO.getProjectId())
                         .build());
+                // 参考数据
+                if (PlanConstant.StandardValueType.REFERENCE_DATA.equals(dataFieldDTO.getValueType()) && StringUtils.isNotBlank(dataFieldDTO.getValueRange())) {
+                    String referenceDataCode = dataFieldDTO.getValueRange();
+                    List<ReferenceData> referenceDataList = referenceDataRepository.select(ReferenceData
+                            .builder()
+                            .dataCode(referenceDataCode)
+                            .projectId(projectId)
+                            .tenantId(tenantId)
+                            .build());
+                    if (CollectionUtils.isNotEmpty(referenceDataList)) {
+                        dataFieldDTO.setValueRange(String.valueOf(referenceDataList.get(0).getDataId()));
+                    }
+                }
                 if (exist != null) {
                     dataFieldDTO.setFieldId(exist.getFieldId());
                     dataFieldDTO.setReleaseBy(exist.getReleaseBy());
