@@ -55,6 +55,12 @@ public class WarningLevelDTO extends AuditDomain {
 
     private String compareSymbolMeaning;
 
+    @ApiModelProperty(value = "参考数据名称")
+    private String referenceDataName;
+
+    @ApiModelProperty(value = "参考数据编码")
+    private String referenceDataCode;
+
     /**
      * 标记是否触发改告警
      */

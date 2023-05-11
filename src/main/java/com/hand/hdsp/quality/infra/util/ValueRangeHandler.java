@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.infra.util;
 
 import com.hand.hdsp.quality.api.dto.*;
+import com.hand.hdsp.quality.domain.repository.ReferenceDataRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.constant.WarningLevel;
@@ -28,6 +29,13 @@ import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.RANGE
  */
 @Component
 public class ValueRangeHandler implements StandardHandler {
+
+    private final ReferenceDataRepository referenceDataRepository;
+
+    public ValueRangeHandler(ReferenceDataRepository referenceDataRepository) {
+        this.referenceDataRepository = referenceDataRepository;
+    }
+
 
     @Override
     public BatchPlanFieldLineDTO handle(DataStandardDTO dataStandardDTO) {
@@ -86,10 +94,30 @@ public class ValueRangeHandler implements StandardHandler {
                 warningLevelDTO = WarningLevelDTO.builder()
                         .warningLevel(WarningLevel.ORANGE)
                         .compareSymbol(PlanConstant.CompareSymbol.INCLUDED)
-                        .enumValue(dataStandardDTO.getValueRange())
+                        .lovCode(dataStandardDTO.getValueRange())
                         .build();
                 warningLevelDTOList = Collections.singletonList(warningLevelDTO);
                 warningLevel = JsonUtil.toJson(warningLevelDTOList);
+                break;
+            case PlanConstant.StandardValueType.REFERENCE_DATA:
+                String valueRange = dataStandardDTO.getValueRange();
+                if (StringUtils.isNotBlank(valueRange)) {
+                    long referenceDataId = Long.parseLong(valueRange);
+                    ReferenceDataDTO referenceDataDTO = referenceDataRepository.selectDTOByPrimaryKey(referenceDataId);
+                    if (Objects.isNull(referenceDataDTO)) {
+                        throw new CommonException("Reference data does not exist!");
+                    }
+                    batchPlanFieldLineDTO.setCountType(PlanConstant.CountType.REFERENCE_DATA);
+                    warningLevelDTO = WarningLevelDTO.builder()
+                            .warningLevel(WarningLevel.ORANGE)
+                            .compareSymbol(PlanConstant.CompareSymbol.INCLUDED)
+                            .referenceDataId(referenceDataId)
+                            .referenceDataCode(referenceDataDTO.getDataCode())
+                            .referenceDataName(referenceDataDTO.getDataName())
+                            .build();
+                    warningLevelDTOList = Collections.singletonList(warningLevelDTO);
+                    warningLevel = JsonUtil.toJson(warningLevelDTOList);
+                }
                 break;
             default:
                 break;
@@ -167,22 +195,31 @@ public class ValueRangeHandler implements StandardHandler {
                     warningLevelDTO = WarningLevelDTO.builder()
                             .warningLevel(WarningLevel.ORANGE)
                             .compareSymbol(PlanConstant.CompareSymbol.INCLUDED)
-                            .enumValue(dataFieldDTO.getValueRange())
+                            .lovCode(dataFieldDTO.getValueRange())
                             .build();
                     warningLevelDTOList = Collections.singletonList(warningLevelDTO);
                     warningLevel = JsonUtil.toJson(warningLevelDTOList);
                     break;
                 case PlanConstant.StandardValueType.REFERENCE_DATA:
                     // 参考数据生成标准逻辑
-                    batchPlanFieldLineDTO.setCountType(PlanConstant.CountType.REFERENCE_DATA);
-                    warningLevelDTO = WarningLevelDTO.builder()
-                            .warningLevel(WarningLevel.ORANGE)
-                            .compareSymbol(PlanConstant.CompareSymbol.INCLUDED)
-                            // TODO 这里待定是查询出当前版本的参考数据 还是要动态更新
-                            .enumValue(dataFieldDTO.getValueRange())
-                            .build();
-                    warningLevelDTOList = Collections.singletonList(warningLevelDTO);
-                    warningLevel = JsonUtil.toJson(warningLevelDTOList);
+                    String valueRange = dataFieldDTO.getValueRange();
+                    if (StringUtils.isNotBlank(valueRange)) {
+                        long referenceDataId = Long.parseLong(valueRange);
+                        ReferenceDataDTO referenceDataDTO = referenceDataRepository.selectDTOByPrimaryKey(referenceDataId);
+                        if (Objects.isNull(referenceDataDTO)) {
+                            throw new CommonException("Reference data does not exist!");
+                        }
+                        batchPlanFieldLineDTO.setCountType(PlanConstant.CountType.REFERENCE_DATA);
+                        warningLevelDTO = WarningLevelDTO.builder()
+                                .warningLevel(WarningLevel.ORANGE)
+                                .compareSymbol(PlanConstant.CompareSymbol.INCLUDED)
+                                .referenceDataId(referenceDataId)
+                                .referenceDataCode(referenceDataDTO.getDataCode())
+                                .referenceDataName(referenceDataDTO.getDataName())
+                                .build();
+                        warningLevelDTOList = Collections.singletonList(warningLevelDTO);
+                        warningLevel = JsonUtil.toJson(warningLevelDTOList);
+                    }
                     break;
                 default:
                     break;
