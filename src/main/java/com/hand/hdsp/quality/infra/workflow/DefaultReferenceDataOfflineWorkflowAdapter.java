@@ -82,8 +82,10 @@ public class DefaultReferenceDataOfflineWorkflowAdapter implements ReferenceData
         String businessKey = String.valueOf(System.currentTimeMillis());
         RunInstance runInstance = workflowClient.startInstanceByFlowKey(referenceDataDTO.getTenantId(), ReferenceDataConstant.OFFLINE_WORKFLOW, businessKey, "EMPLOYEE", employeeNum, workflowParams);
         dataRecord.setInstanceId(runInstance.getInstanceId());
+        referenceDataDTO.setDataStatus(ReferenceDataConstant.OFFLINE_ING);
         // 回写
         referenceDataRecordRepository.updateOptional(dataRecord, ReferenceDataRecord.FIELD_INSTANCE_ID);
+        referenceDataRepository.updateDTOOptional(referenceDataDTO, ReferenceData.FIELD_DATA_STATUS);
         return referenceDataDTO;
     }
 
@@ -102,14 +104,16 @@ public class DefaultReferenceDataOfflineWorkflowAdapter implements ReferenceData
             referenceDataDTO.setDataStatus(ReferenceDataConstant.OFFLINE_);
             referenceDataDTO.setReleaseBy(null);
             referenceDataDTO.setReleaseDate(null);
-            referenceDataRepository.updateDTOOptional(referenceDataDTO,
-                    ReferenceData.FIELD_DATA_STATUS,
-                    ReferenceData.FIELD_RELEASE_BY,
-                    ReferenceData.FIELD_RELEASE_DATE);
             referenceDataRecord.setRecordStatus(ReferenceDataConstant.PASS);
+        } else {
+            referenceDataRecord.setRecordStatus(ReferenceDataConstant.REJECT);
+            referenceDataDTO.setDataStatus(ReferenceDataConstant.RELEASED);
         }
-        referenceDataRecord.setRecordStatus(ReferenceDataConstant.REJECT);
         referenceDataRecordRepository.updateOptional(referenceDataRecord, ReferenceDataRecord.FIELD_RECORD_STATUS);
+        referenceDataRepository.updateDTOOptional(referenceDataDTO,
+                ReferenceData.FIELD_DATA_STATUS,
+                ReferenceData.FIELD_RELEASE_BY,
+                ReferenceData.FIELD_RELEASE_DATE);
         return approveResult;
     }
 }

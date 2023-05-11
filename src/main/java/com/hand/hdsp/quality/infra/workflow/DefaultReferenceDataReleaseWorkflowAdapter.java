@@ -111,19 +111,15 @@ public class DefaultReferenceDataReleaseWorkflowAdapter implements ReferenceData
         if (Objects.isNull(referenceDataDTO)) {
             return approveResult;
         }
+        Long maxVersion = referenceDataHistoryRepository.queryMaxVersion(dataId);
         if(WorkflowConstant.ApproveAction.APPROVED.equals(approveResult)){
             // 同意
             Date date = new Date();
             referenceDataDTO.setDataStatus(ReferenceDataConstant.RELEASED);
             referenceDataDTO.setReleaseBy(referenceDataRecord.getApplyUserId());
             referenceDataDTO.setReleaseDate(date);
-            referenceDataRepository.updateDTOOptional(referenceDataDTO,
-                    ReferenceData.FIELD_DATA_STATUS,
-                    ReferenceData.FIELD_RELEASE_BY,
-                    ReferenceData.FIELD_RELEASE_DATE);
             referenceDataRecord.setRecordStatus(ReferenceDataConstant.PASS);
             // 存储版本
-            Long maxVersion = referenceDataHistoryRepository.queryMaxVersion(dataId);
             List<SimpleReferenceDataValueDTO> simpleReferenceDataValueDTOList = referenceDataValueRepository.simpleQueryByDataId(dataId);
             ReferenceDataHistory history = ReferenceDataHistory
                     .builder()
@@ -145,9 +141,22 @@ public class DefaultReferenceDataReleaseWorkflowAdapter implements ReferenceData
                     .tenantId(referenceDataDTO.getTenantId())
                     .build();
             referenceDataHistoryRepository.insertSelective(history);
+        } else {
+            referenceDataRecord.setRecordStatus(ReferenceDataConstant.REJECT);
+            // 判断之前是什么状态
+            if (maxVersion == 0) {
+                // 没有发布过 为新建
+                referenceDataDTO.setDataStatus(ReferenceDataConstant.NEW);
+            } else {
+                // 有发布过 就是下线
+                referenceDataDTO.setDataStatus(ReferenceDataConstant.OFFLINE_);
+            }
         }
-        referenceDataRecord.setRecordStatus(ReferenceDataConstant.REJECT);
         referenceDataRecordRepository.updateOptional(referenceDataRecord, ReferenceDataRecord.FIELD_RECORD_STATUS);
+        referenceDataRepository.updateDTOOptional(referenceDataDTO,
+                ReferenceData.FIELD_DATA_STATUS,
+                ReferenceData.FIELD_RELEASE_BY,
+                ReferenceData.FIELD_RELEASE_DATE);
         return approveResult;
     }
 }
