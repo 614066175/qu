@@ -3,6 +3,9 @@ package com.hand.hdsp.quality.infra.export;
 import com.hand.hdsp.core.domain.entity.CommonGroup;
 import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.quality.api.dto.DataStandardDTO;
+import com.hand.hdsp.quality.api.dto.ReferenceDataDTO;
+import com.hand.hdsp.quality.domain.repository.ReferenceDataRepository;
+import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.export.dto.DataStandardExportDTO;
 import com.hand.hdsp.quality.infra.mapper.DataStandardMapper;
 import org.apache.commons.collections4.CollectionUtils;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.hand.hdsp.core.infra.constant.CommonGroupConstants.GroupType.DATA_STANDARD;
@@ -30,10 +34,13 @@ import static org.hzero.core.util.StringPool.COMMA;
 public class DataStandardExporter implements Exporter<DataStandardDTO, List<DataStandardExportDTO>> {
     private final CommonGroupRepository commonGroupRepository;
     private final DataStandardMapper dataStandardMapper;
+    private final ReferenceDataRepository referenceDataRepository;
 
-    public DataStandardExporter(CommonGroupRepository commonGroupRepository, DataStandardMapper dataStandardMapper) {
+    public DataStandardExporter(CommonGroupRepository commonGroupRepository, DataStandardMapper dataStandardMapper,
+                                ReferenceDataRepository referenceDataRepository) {
         this.commonGroupRepository = commonGroupRepository;
         this.dataStandardMapper = dataStandardMapper;
+        this.referenceDataRepository = referenceDataRepository;
     }
 
     @Override
@@ -92,6 +99,18 @@ public class DataStandardExporter implements Exporter<DataStandardDTO, List<Data
     }
 
     public  List<DataStandardExportDTO> exportDataStandard(List<CommonGroup> commonGroups, List<DataStandardDTO> dataStandardDTOList) {
+        if (CollectionUtils.isNotEmpty(dataStandardDTOList)) {
+            for (DataStandardDTO dataStandardDTO : dataStandardDTOList) {
+                if (PlanConstant.StandardValueType.REFERENCE_DATA.equals(dataStandardDTO.getValueType()) && StringUtils.isNotBlank(dataStandardDTO.getValueRange())) {
+                    long referenceDataId = Long.parseLong(dataStandardDTO.getValueRange());
+                    ReferenceDataDTO referenceDataDTO = referenceDataRepository.selectDTOByPrimaryKey(referenceDataId);
+                    if (Objects.nonNull(referenceDataDTO)) {
+                        dataStandardDTO.setValueRange(referenceDataDTO.getDataCode());
+                    }
+
+                }
+            }
+        }
         List<DataStandardExportDTO> dataStandardExportDTOS = new ArrayList<>();
         commonGroups.forEach(commonGroup -> {
             DataStandardExportDTO dataStandardExportDTO = new DataStandardExportDTO();

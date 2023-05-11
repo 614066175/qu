@@ -11,6 +11,7 @@ import com.hand.hdsp.quality.app.service.StandardApprovalService;
 import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.constant.WorkFlowConstant;
 import com.hand.hdsp.quality.infra.converter.AimStatisticsConverter;
 import com.hand.hdsp.quality.infra.export.ExportUtils;
@@ -53,6 +54,7 @@ import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,6 +96,8 @@ public class DataFieldServiceImpl implements DataFieldService {
     private final ExtraVersionRepository extraVersionRepository;
 
     private final DataStandardMapper dataStandardMapper;
+
+    private final ReferenceDataRepository referenceDataRepository;
 
     private final DataFieldOnlineWorkflowAdapter dataFieldOnlineWorkflowAdapter;
 
@@ -141,7 +145,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                                 DataFieldVersionRepository dataFieldVersionRepository, DataFieldMapper dataFieldMapper,
                                 DataStandardService dataStandardService, ExtraVersionRepository extraVersionRepository,
                                 DataStandardMapper dataStandardMapper, StandardAimRepository standardAimRepository,
-                                DataFieldOnlineWorkflowAdapter dataFieldOnlineWorkflowAdapter,
+                                ReferenceDataRepository referenceDataRepository, DataFieldOnlineWorkflowAdapter dataFieldOnlineWorkflowAdapter,
                                 DataFieldOfflineWorkflowAdapter dataFieldOfflineWorkflowAdapter,
                                 StandardTeamRepository standardTeamRepository, StandardRelationRepository standardRelationRepository,
                                 AimStatisticsRepository aimStatisticsRepository, StandardApprovalRepository standardApprovalRepository,
@@ -155,6 +159,7 @@ public class DataFieldServiceImpl implements DataFieldService {
         this.standardAimRepository = standardAimRepository;
         this.extraVersionRepository = extraVersionRepository;
         this.dataStandardMapper = dataStandardMapper;
+        this.referenceDataRepository = referenceDataRepository;
         this.dataFieldOnlineWorkflowAdapter = dataFieldOnlineWorkflowAdapter;
         this.dataFieldOfflineWorkflowAdapter = dataFieldOfflineWorkflowAdapter;
 
@@ -240,6 +245,15 @@ public class DataFieldServiceImpl implements DataFieldService {
             }
             if (StringUtils.isNotEmpty(dataFieldDTO.getChargeName())) {
                 dataFieldDTO.setChargeName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeName()));
+            }
+
+        }
+        if (PlanConstant.StandardValueType.REFERENCE_DATA.equals(dataFieldDTO.getValueType()) && StringUtils.isNotBlank(dataFieldDTO.getValueRange())) {
+            long referenceDataId = Long.parseLong(dataFieldDTO.getValueRange());
+            ReferenceDataDTO referenceDataDTO = referenceDataRepository.selectDTOByPrimaryKey(referenceDataId);
+            if (Objects.nonNull(referenceDataDTO)) {
+                dataFieldDTO.setReferenceDataCode(referenceDataDTO.getDataCode());
+                dataFieldDTO.setReferenceDataName(referenceDataDTO.getDataName());
             }
 
         }
