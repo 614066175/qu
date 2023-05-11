@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.ReferenceDataHistoryMapper">
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.ReferenceDataHistory">
+        <result column="history_id" property="historyId" jdbcType="DECIMAL"/>
+        <result column="data_id" property="dataId" jdbcType="DECIMAL"/>
+        <result column="data_code" property="dataCode" jdbcType="VARCHAR"/>
+        <result column="data_name" property="dataName" jdbcType="VARCHAR"/>
+        <result column="data_desc" property="dataDesc" jdbcType="VARCHAR"/>
+        <result column="parent_data_id" property="parentDataId" jdbcType="DECIMAL"/>
+        <result column="data_group_id" property="dataGroupId" jdbcType="DECIMAL"/>
+        <result column="data_value_json" property="dataValueJson" jdbcType="VARCHAR"/>
+        <result column="version_number" property="versionNumber" jdbcType="DECIMAL"/>
+        <result column="release_by" property="releaseBy" jdbcType="DECIMAL"/>
+        <result column="release_date" property="releaseDate" jdbcType="TIMESTAMP"/>
+        <result column="responsible_dept_id" property="responsibleDeptId" jdbcType="DECIMAL"/>
+        <result column="responsible_person_id" property="responsiblePersonId" jdbcType="DECIMAL"/>
+        <result column="responsible_person_tel" property="responsiblePersonTel" jdbcType="VARCHAR"/>
+        <result column="responsible_person_email" property="responsiblePersonEmail" jdbcType="VARCHAR"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
+        <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
+        <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
+        <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        ${prefix}.history_id,
+        ${prefix}.data_id,
+        ${prefix}.data_code,
+        ${prefix}.data_name,
+        ${prefix}.data_desc,
+        ${prefix}.parent_data_id,
+        ${prefix}.data_group_id,
+        ${prefix}.data_value_json,
+        ${prefix}.version_number,
+        ${prefix}.release_by,
+        ${prefix}.release_date,
+        ${prefix}.responsible_dept_id,
+        ${prefix}.responsible_person_id,
+        --${prefix}.responsible_person_tel,
+        --${prefix}.responsible_person_email,
+        ${prefix}.project_id,
+        ${prefix}.tenant_id,
+        ${prefix}.created_by,
+        ${prefix}.last_updated_by,
+        ${prefix}.creation_date,
+        ${prefix}.last_update_date,
+        ${prefix}.object_version_number
+    </sql>
+    <select id="queryMaxVersion" resultType="java.lang.Long">
+        SELECT max(xrdh.version_number)  max_vsersion
+        FROM xqua_reference_data_history xrdh
+        WHERE xrdh.data_id = #{dataId}
+    </select>
+    <select id="queryByDataId" resultType="com.hand.hdsp.quality.api.dto.ReferenceDataHistoryDTO">
+        SELECT
+            xrdh.history_id,
+            xrdh.version_number,
+            iu.login_name publisher,
+            xrdh.release_data
+        FROM xqua_reference_data_history xrdh
+        LEFT JOIN iam_user iu ON xrdh.release_by = iu.id
+        WHERE xrdh.data_id = #{dataId}
+    </select>
+    <select id="detail" resultType="com.hand.hdsp.quality.api.dto.ReferenceDataHistoryDTO">
+        SELECT
+        <include refid="Base_Column_List">
+            <property name="prefix" value="xrdh"/>
+        </include>,
+        xcg.group_name data_group_name,
+        iu.login_name publisher,
+        hu.unit_name responsible_dept_name,
+        he.email responsible_person_email,
+        he.mobile responsible_person_tel,
+        he.name responsible_person_name,
+        he.employee_num responsible_person_code
+        FROM xqua_reference_data_history xrdh
+        <!-- 关联通用分组 -->
+        LEFT JOIN xcor_common_group xcg ON xrdh.data_group_id = xcg.group_id
+        <!-- 关联发布人 -->
+        LEFT JOIN iam_user iu ON xrdh.release_by = iu.id
+        <!-- 关联发责任部门 -->
+        LEFT JOIN hpfm_unit hu ON xrdh.responsible_dept_id = hu.unit_id
+        <!-- 关联发责任人 -->
+        LEFT JOIN hpfm_employee he ON xrdh.responsible_person_id = he.employee_id
+        WHERE xrdh.history_id = #{historyId}
+    </select>
+</mapper>

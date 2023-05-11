@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hdsp.quality.infra.mapper.ReferenceDataValueMapper">
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.ReferenceDataValue">
+        <result column="value_id" property="valueId" jdbcType="DECIMAL"/>
+        <result column="data_id" property="dataId" jdbcType="DECIMAL"/>
+        <result column="value" property="value" jdbcType="VARCHAR"/>
+        <result column="value_meaning" property="valueMeaning" jdbcType="VARCHAR"/>
+        <result column="value_seq" property="valueSeq" jdbcType="DECIMAL"/>
+        <result column="value_desc" property="valueDesc" jdbcType="VARCHAR"/>
+        <result column="parent_value_id" property="parentValueId" jdbcType="DECIMAL"/>
+        <result column="enabled_flag" property="enabledFlag" jdbcType="DECIMAL"/>
+        <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
+        <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
+        <result column="created_by" property="createdBy" jdbcType="DECIMAL"/>
+        <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
+        <result column="creation_date" property="creationDate" jdbcType="TIMESTAMP"/>
+        <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
+        <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ${prefix}.value_id,
+        ${prefix}.data_id,
+        ${prefix}.value,
+        ${prefix}.value_meaning,
+        ${prefix}.value_seq,
+        ${prefix}.value_desc,
+        ${prefix}.parent_value_id,
+        ${prefix}.enabled_flag,
+        ${prefix}.project_id,
+        ${prefix}.tenant_id,
+        ${prefix}.created_by,
+        ${prefix}.last_updated_by,
+        ${prefix}.creation_date,
+        ${prefix}.last_update_date,
+        ${prefix}.object_version_number
+    </sql>
+    <select id="list" resultType="com.hand.hdsp.quality.api.dto.ReferenceDataValueDTO">
+        SELECT
+        <include refid="Base_Column_List">
+            <property name="prefix" value="xrdv"/>
+        </include>,
+        xrdv1.value parent_value,
+        xrd.data_code
+        FROM xqua_reference_data_value xrdv
+        LEFT JOIN xqua_reference_data_value xrdv1 ON xrdv.parent_value_id = xrdv1.value_id
+        LEFT JOIN xqua_reference_data xrd ON xrdv.data_id = xrd.data_id
+        <where>
+            <if test="valueId != null">
+                AND xrdv.value_id = #{valueId}
+            </if>
+            <if test="dataId != null">
+                AND xrdv.data_id = #{dataId}
+            </if>
+            <if test="tenantId != null">
+                AND xrdv.tenant_id = #{tenantId}
+            </if>
+            <if test="projectId != null">
+                AND xrdv.project_id = #{projectId}
+            </if>
+            <if test="value != null and value != ''">
+                <bind name="valueLike" value="value+'%'"/>
+                AND xrdv.value LIKE #{valueLike}
+            </if>
+            <if test="valueMeaning != null and valueMeaning != ''">
+                <bind name="valueMeaningLike" value="valueMeaning+'%'"/>
+                AND xrdv.value_meaning LIKE #{valueMeaningLike}
+            </if>
+            <if test="searchKey != null and searchKey != ''">
+                <bind name="searchKeyLike" value="'%'+searchKey+'%'"/>
+                AND (xrdv.value LIKE #{searchKeyLike} OR xrdv.value_meaning LIKE #{searchKeyLike})
+            </if>
+        </where>
+    </select>
+    <select id="simpleQueryByDataId" resultType="com.hand.hdsp.quality.api.dto.SimpleReferenceDataValueDTO">
+        SELECT
+            xrdv.value,
+            xrdv.value_meaning,
+            xrdv.value_seq,
+            xrdv.value_desc,
+            xrdv.parent_value_id,
+            xrdv.enabled_flag
+        FROM xqua_reference_data_value xrdv
+        WHERE xrdv.data_id = #{dataId}
+    </select>
+</mapper>
