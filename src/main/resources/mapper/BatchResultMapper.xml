@@ -569,7 +569,7 @@
             </when>
             <when test="datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
                 select
-                    to_char(xbr.start_date, 'yyyy-mm-dd') date,
+                    to_char(xbr.start_date, 'yyyy-mm-dd') "date",
                     xbri.warning_level warningLevel,
                     count(xbri.warning_level) levelCount
                 from xqua_batch_result xbr
