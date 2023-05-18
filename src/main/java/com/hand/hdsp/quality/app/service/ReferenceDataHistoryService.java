@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.app.service;
 
 import com.hand.hdsp.quality.api.dto.ReferenceDataHistoryDTO;
+import com.hand.hdsp.quality.api.dto.SimpleReferenceDataValueDTO;
 
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -37,4 +38,10 @@ public interface ReferenceDataHistoryService {
      */
     void remove(Long projectId, Long tenantId, ReferenceDataHistoryDTO referenceDataHistoryDTO);
 
+    /**
+     * 参考数据 参考值历史数据
+     * @param historyId 主键
+     * @return      参考值分页数据
+     */
+    Page<SimpleReferenceDataValueDTO> values(Long historyId, PageRequest pageRequest);
 }
