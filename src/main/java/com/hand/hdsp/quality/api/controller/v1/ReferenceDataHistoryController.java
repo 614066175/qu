@@ -4,9 +4,11 @@ import org.hzero.core.util.Results;
 import org.hzero.core.base.BaseController;
 
 import com.hand.hdsp.core.constant.HdspConstant;
+import com.hand.hdsp.quality.api.dto.SimpleReferenceDataValueDTO;
 import com.hand.hdsp.quality.app.service.ReferenceDataHistoryService;
 import com.hand.hdsp.quality.domain.entity.ReferenceDataHistory;
 import com.hand.hdsp.quality.api.dto.ReferenceDataHistoryDTO;
+import com.hand.hdsp.quality.domain.entity.ReferenceDataValue;
 import com.hand.hdsp.quality.domain.repository.ReferenceDataHistoryRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,7 +43,7 @@ public class ReferenceDataHistoryController extends BaseController {
         this.referenceDataHistoryService = referenceDataHistoryService;
     }
 
-    @ApiOperation(value = "参考数据头表列表")
+    @ApiOperation(value = "历史参考数据列表")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -58,7 +60,7 @@ public class ReferenceDataHistoryController extends BaseController {
         return Results.success(list);
     }
 
-    @ApiOperation(value = "参考数据头表明细")
+    @ApiOperation(value = "历史参考数据明细")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
@@ -77,8 +79,27 @@ public class ReferenceDataHistoryController extends BaseController {
         return Results.success(referenceDataHistoryDTO);
     }
 
+    @ApiOperation(value = "历史参考数据参考值")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    ), @ApiImplicitParam(
+            name = "historyId",
+            value = "参考数据头表主键",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/values/{historyId}")
+    public ResponseEntity<?> values(@PathVariable Long historyId, @ApiIgnore @SortDefault(value = ReferenceDataValue.FIELD_VALUE_SEQ, direction = Sort.Direction.ASC) PageRequest pageRequest) {
+        Page<SimpleReferenceDataValueDTO> list = referenceDataHistoryService.values(historyId, pageRequest);
+        return Results.success(list);
+    }
 
-    @ApiOperation(value = "删除参考数据头表")
+
+    @ApiOperation(value = "删除历史参考数据")
     @ApiImplicitParams({@ApiImplicitParam(
             name = "organizationId",
             value = "租户",
