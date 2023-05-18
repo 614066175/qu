@@ -60,7 +60,7 @@
             xrdh.history_id,
             xrdh.version_number,
             iu.login_name publisher,
-            xrdh.release_data
+            xrdh.release_date
         FROM xqua_reference_data_history xrdh
         LEFT JOIN iam_user iu ON xrdh.release_by = iu.id
         WHERE xrdh.data_id = #{dataId}
