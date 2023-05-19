@@ -2,6 +2,8 @@ package com.hand.hdsp.quality.infra.workflow;
 
 import java.util.*;
 
+import com.hand.hdsp.core.domain.entity.CommonGroup;
+import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.core.util.JSON;
 import com.hand.hdsp.quality.api.dto.ReferenceDataDTO;
 import com.hand.hdsp.quality.api.dto.SimpleReferenceDataValueDTO;
@@ -39,17 +41,20 @@ public class DefaultReferenceDataReleaseWorkflowAdapter implements ReferenceData
     private final ReferenceDataRepository referenceDataRepository;
     private final ReferenceDataHistoryRepository referenceDataHistoryRepository;
     private final ReferenceDataValueRepository referenceDataValueRepository;
+    private final CommonGroupRepository commonGroupRepository;
 
     public DefaultReferenceDataReleaseWorkflowAdapter(WorkflowClient workflowClient,
                                                       ReferenceDataRecordRepository referenceDataRecordRepository,
                                                       ReferenceDataRepository referenceDataRepository,
                                                       ReferenceDataHistoryRepository referenceDataHistoryRepository,
-                                                      ReferenceDataValueRepository referenceDataValueRepository) {
+                                                      ReferenceDataValueRepository referenceDataValueRepository,
+                                                      CommonGroupRepository commonGroupRepository) {
         this.workflowClient = workflowClient;
         this.referenceDataRecordRepository = referenceDataRecordRepository;
         this.referenceDataRepository = referenceDataRepository;
         this.referenceDataHistoryRepository = referenceDataHistoryRepository;
         this.referenceDataValueRepository = referenceDataValueRepository;
+        this.commonGroupRepository = commonGroupRepository;
     }
 
 
@@ -140,6 +145,19 @@ public class DefaultReferenceDataReleaseWorkflowAdapter implements ReferenceData
                     .projectId(referenceDataDTO.getProjectId())
                     .tenantId(referenceDataDTO.getTenantId())
                     .build();
+            if (Objects.nonNull(referenceDataDTO.getDataGroupId())) {
+                CommonGroup commonGroup = commonGroupRepository.selectByPrimaryKey(referenceDataDTO.getDataGroupId());
+                if (Objects.nonNull(commonGroup)) {
+                    history.setGroupPath(commonGroup.getGroupPath());
+                }
+            }
+            if (Objects.nonNull(referenceDataDTO.getParentDataId())) {
+                ReferenceDataDTO parent = referenceDataRepository.selectDTOByPrimaryKey(referenceDataDTO.getParentDataId());
+                if (Objects.nonNull(parent)) {
+                    history.setParentDataCode(parent.getDataCode());
+                    history.setParentDataName(parent.getDataName());
+                }
+            }
             referenceDataHistoryRepository.insertSelective(history);
         } else {
             referenceDataRecord.setRecordStatus(ReferenceDataConstant.REJECT);

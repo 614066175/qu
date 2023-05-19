@@ -46,6 +46,9 @@ public class SimpleReferenceDataValueDTO {
     @ApiModelProperty(value = "父参考值")
     private Long parentValueId;
 
+    @ApiModelProperty(value = "父参考值")
+    private String parentValue;
+
     @ApiModelProperty(value = "启用标志 1-启用 0-禁用")
     @NotNull
     private Integer enabledFlag;
