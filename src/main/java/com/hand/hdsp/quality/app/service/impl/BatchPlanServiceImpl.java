@@ -1011,10 +1011,10 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 List<Map<String, Object>> maps = null;
                 if (DbType.hive.equals(driverSession.getDbType())) {
                     maps = driverSession.executeOneQuery(batchPlanBase.getDatasourceSchema(),
-                            String.format("select count(*) as COUNT from (%s) tmp limit 1", batchPlanBase.getObjectName()));
+                            String.format("select count(*) as COUNT from (%s) limit 1", batchPlanBase.getObjectName()));
                 } else {
                     maps = driverSession.executeOneQuery(batchPlanBase.getDatasourceSchema(),
-                            String.format("select count(*) as COUNT from (%s) tmp ", batchPlanBase.getObjectName()));
+                            String.format("select count(*) as COUNT from (%s) ", batchPlanBase.getObjectName()));
                 }
                 if (CollectionUtils.isNotEmpty(maps)) {
                     log.info("查询结果：" + maps);

@@ -1,10 +1,12 @@
 package com.hand.hdsp.quality.infra.measure.measure;
 
 import com.alibaba.druid.DbType;
+import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
 import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
 import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
+import com.hand.hdsp.quality.infra.constant.CheckConstants;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.dataobject.MeasureParamDO;
@@ -112,6 +114,17 @@ public class CommonSqlMeasure implements Measure {
                         && batchResultItem.getTableLineNum() == 0) {
                     value = "1";
                 }
+            }
+
+            //如果是  不为空校验项
+            if("FIELD_NOT_EMPTY".equals(itemTemplateSql.getCheckItem())){
+                param.setCountType(CheckConstants.FIXED_VALUE);
+                param.setCompareWay(CheckConstants.VALUE);
+                List<WarningLevelDTO> warningLevelDTOS = param.getWarningLevelList();
+                warningLevelDTOS.forEach(tmp->{
+                    tmp.setCompareSymbol("NOT_EQUAL");
+                    tmp.setExpectedValue("0");
+                });
             }
             param.setCountValue(value);
             batchResultItem.setActualValue(value);
