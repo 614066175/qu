@@ -3,6 +3,8 @@ package com.hand.hdsp.quality.infra.workflow;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.hand.hdsp.quality.api.dto.ReferenceDataDTO;
 import com.hand.hdsp.quality.domain.entity.ReferenceData;
@@ -34,6 +36,7 @@ public class DefaultReferenceDataOfflineWorkflowAdapter implements ReferenceData
     private final WorkflowClient workflowClient;
     private final ReferenceDataRecordRepository referenceDataRecordRepository;
     private final ReferenceDataRepository referenceDataRepository;
+    private final Lock lock = new ReentrantLock();
 
     public DefaultReferenceDataOfflineWorkflowAdapter(WorkflowClient workflowClient,
                                                       ReferenceDataRecordRepository referenceDataRecordRepository,
@@ -45,48 +48,53 @@ public class DefaultReferenceDataOfflineWorkflowAdapter implements ReferenceData
 
     @Override
     public ReferenceDataDTO startWorkflow(ReferenceDataDTO referenceDataDTO) {
-        Long userId = DetailsHelper.getUserDetails().getUserId();
-        String employeeNum = EmployeeHelper.getEmployeeNum(userId, referenceDataDTO.getTenantId());
-        if (StringUtils.isBlank(employeeNum)) {
-            // TODO 异常
-            throw new CommonException("The current user does not maintain employee information");
+        lock.lock();
+        try {
+            Long userId = DetailsHelper.getUserDetails().getUserId();
+            String employeeNum = EmployeeHelper.getEmployeeNum(userId, referenceDataDTO.getTenantId());
+            if (StringUtils.isBlank(employeeNum)) {
+                // TODO 异常
+                throw new CommonException("The current user does not maintain employee information");
+            }
+            Long dataId = referenceDataDTO.getDataId();
+            // 先校验当前参考数据是否在流程中
+            int count = referenceDataRecordRepository.selectCountByCondition(Condition.builder(ReferenceDataRecord.class)
+                    .andWhere(Sqls.custom()
+                            .andEqualTo(ReferenceDataRecord.FIELD_DATA_ID, dataId, true)
+                            .andEqualTo(ReferenceDataRecord.FIELD_RECORD_STATUS, ReferenceDataConstant.RUNNING))
+                    .build());
+            if (count > 0) {
+                // TODO 异常
+                throw new CommonException("The current data is already in the process");
+            }
+            // 先删除原来的记录
+            referenceDataRecordRepository.delete(ReferenceDataRecord.builder().dataId(dataId)
+                    //.recordType(ReferenceDataConstant.OFFLINE)
+                    .build());
+            // 新增记录
+            ReferenceDataRecord dataRecord = ReferenceDataRecord
+                    .builder()
+                    .dataId(dataId)
+                    .recordType(ReferenceDataConstant.OFFLINE)
+                    .recordStatus(ReferenceDataConstant.RUNNING)
+                    .applyUserId(userId)
+                    .build();
+            referenceDataRecordRepository.insertSelective(dataRecord);
+            Map<String, Object> workflowParams = new HashMap<>(4);
+            workflowParams.put(ReferenceDataConstant.RESPONSIBLE_PERSON, referenceDataDTO.getResponsiblePersonCode());
+            workflowParams.put(ReferenceDataConstant.RECORD_ID, dataRecord.getRecordId());
+            workflowParams.put(ReferenceDataConstant.DATA_ID, referenceDataDTO.getDataId());
+            String businessKey = String.valueOf(System.currentTimeMillis());
+            RunInstance runInstance = workflowClient.startInstanceByFlowKey(referenceDataDTO.getTenantId(), ReferenceDataConstant.OFFLINE_WORKFLOW, businessKey, "EMPLOYEE", employeeNum, workflowParams);
+            dataRecord.setInstanceId(runInstance.getInstanceId());
+            referenceDataDTO.setDataStatus(ReferenceDataConstant.OFFLINE_ING);
+            // 回写
+            referenceDataRecordRepository.updateOptional(dataRecord, ReferenceDataRecord.FIELD_INSTANCE_ID);
+            referenceDataRepository.updateDTOOptional(referenceDataDTO, ReferenceData.FIELD_DATA_STATUS);
+            return referenceDataDTO;
+        } finally {
+            lock.unlock();
         }
-        Long dataId = referenceDataDTO.getDataId();
-        // 先校验当前参考数据是否在流程中
-        int count = referenceDataRecordRepository.selectCountByCondition(Condition.builder(ReferenceDataRecord.class)
-                .andWhere(Sqls.custom()
-                        .andEqualTo(ReferenceDataRecord.FIELD_DATA_ID, dataId, true)
-                        .andEqualTo(ReferenceDataRecord.FIELD_RECORD_STATUS, ReferenceDataConstant.RUNNING))
-                .build());
-        if (count > 0) {
-            // TODO 异常
-            throw new CommonException("The current data is already in the process");
-        }
-        // 先删除原来的记录
-        referenceDataRecordRepository.delete(ReferenceDataRecord.builder().dataId(dataId)
-                //.recordType(ReferenceDataConstant.OFFLINE)
-                .build());
-        // 新增记录
-        ReferenceDataRecord dataRecord = ReferenceDataRecord
-                .builder()
-                .dataId(dataId)
-                .recordType(ReferenceDataConstant.OFFLINE)
-                .recordStatus(ReferenceDataConstant.RUNNING)
-                .applyUserId(userId)
-                .build();
-        referenceDataRecordRepository.insertSelective(dataRecord);
-        Map<String, Object> workflowParams = new HashMap<>(4);
-        workflowParams.put(ReferenceDataConstant.RESPONSIBLE_PERSON, referenceDataDTO.getResponsiblePersonCode());
-        workflowParams.put(ReferenceDataConstant.RECORD_ID, dataRecord.getRecordId());
-        workflowParams.put(ReferenceDataConstant.DATA_ID, referenceDataDTO.getDataId());
-        String businessKey = String.valueOf(System.currentTimeMillis());
-        RunInstance runInstance = workflowClient.startInstanceByFlowKey(referenceDataDTO.getTenantId(), ReferenceDataConstant.OFFLINE_WORKFLOW, businessKey, "EMPLOYEE", employeeNum, workflowParams);
-        dataRecord.setInstanceId(runInstance.getInstanceId());
-        referenceDataDTO.setDataStatus(ReferenceDataConstant.OFFLINE_ING);
-        // 回写
-        referenceDataRecordRepository.updateOptional(dataRecord, ReferenceDataRecord.FIELD_INSTANCE_ID);
-        referenceDataRepository.updateDTOOptional(referenceDataDTO, ReferenceData.FIELD_DATA_STATUS);
-        return referenceDataDTO;
     }
 
     @Override
