@@ -9,7 +9,10 @@
         <result column="data_name" property="dataName" jdbcType="VARCHAR"/>
         <result column="data_desc" property="dataDesc" jdbcType="VARCHAR"/>
         <result column="parent_data_id" property="parentDataId" jdbcType="DECIMAL"/>
+        <result column="parent_data_code" property="parentDataCode" jdbcType="VARCHAR"/>
+        <result column="parent_data_name" property="parentDataName" jdbcType="VARCHAR"/>
         <result column="data_group_id" property="dataGroupId" jdbcType="DECIMAL"/>
+        <result column="group_path" property="groupPath" jdbcType="VARCHAR"/>
         <result column="data_value_json" property="dataValueJson" jdbcType="VARCHAR"/>
         <result column="version_number" property="versionNumber" jdbcType="DECIMAL"/>
         <result column="release_by" property="releaseBy" jdbcType="DECIMAL"/>
@@ -33,7 +36,10 @@
         ${prefix}.data_name,
         ${prefix}.data_desc,
         ${prefix}.parent_data_id,
+        ${prefix}.parent_data_code,
+        ${prefix}.parent_data_name,
         ${prefix}.data_group_id,
+        ${prefix}.group_path,
         ${prefix}.data_value_json,
         ${prefix}.version_number,
         ${prefix}.release_by,

@@ -8,6 +8,8 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import java.util.Date;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
+
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -35,7 +37,10 @@ public class ReferenceDataHistory extends AuditDomain {
     public static final String FIELD_DATA_NAME = "dataName";
     public static final String FIELD_DATA_DESC = "dataDesc";
     public static final String FIELD_PARENT_DATA_ID = "parentDataId";
+    public static final String FIELD_PARENT_DATA_CODE = "parentDataCode";
+    public static final String FIELD_PARENT_DATA_NAME = "parentDataName";
     public static final String FIELD_DATA_GROUP_ID = "dataGroupId";
+    public static final String FIELD_GROUP_PATH = "groupPath";
     public static final String FIELD_DATA_VALUE_JSON = "dataValueJson";
     public static final String FIELD_VERSION_NUMBER = "versionNumber";
     public static final String FIELD_RELEASE_BY = "releaseBy";
@@ -69,7 +74,13 @@ public class ReferenceDataHistory extends AuditDomain {
 
     private Long parentDataId;
 
+    private String parentDataCode;
+
+    private String parentDataName;
+
     private Long dataGroupId;
+
+    private String groupPath;
 
     private String dataValueJson;
 
