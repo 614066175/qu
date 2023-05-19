@@ -154,8 +154,8 @@ public class DefaultReferenceDataReleaseWorkflowAdapter implements ReferenceData
             if (Objects.nonNull(referenceDataDTO.getParentDataId())) {
                 ReferenceDataDTO parent = referenceDataRepository.selectDTOByPrimaryKey(referenceDataDTO.getParentDataId());
                 if (Objects.nonNull(parent)) {
-                    history.setParentDataCode(parent.getParentDataCode());
-                    history.setParentDataName(parent.getParentDataName());
+                    history.setParentDataCode(parent.getDataCode());
+                    history.setParentDataName(parent.getDataName());
                 }
             }
             referenceDataHistoryRepository.insertSelective(history);

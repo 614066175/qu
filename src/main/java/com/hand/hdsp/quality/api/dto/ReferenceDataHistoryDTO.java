@@ -68,7 +68,7 @@ public class ReferenceDataHistoryDTO extends AuditDomain {
     private Long dataGroupId;
 
     @ApiModelProperty(value = "参考数据分组路径")
-    private Long groupPath;
+    private String groupPath;
 
     @ApiModelProperty(value = "参考数据值数据json")
     private String dataValueJson;
