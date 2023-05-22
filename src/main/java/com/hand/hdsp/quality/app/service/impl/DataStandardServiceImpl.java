@@ -992,6 +992,9 @@ public class DataStandardServiceImpl implements DataStandardService {
         if (CollectionUtils.isEmpty(batchPlanBaseDTOS)) {
             //没有的话在该评估方案下生成base
             batchPlanBaseDTO = BatchPlanBaseDTO.builder()
+                    //todo 请确认编码规则
+                    .planBaseCode("1")
+                    .planBaseName("1")
                     .datasourceType(standardAimDTO.getDatasourceType())
                     .datasourceCode(standardAimDTO.getDatasourceCode())
                     .datasourceId(standardAimDTO.getDatasourceId())
