@@ -26,7 +26,6 @@ import com.hand.hdsp.quality.infra.util.StandardHandler;
 import com.hand.hdsp.quality.infra.util.ValueRangeHandler;
 import com.hand.hdsp.quality.workflow.adapter.DataStandardOfflineWorkflowAdapter;
 import com.hand.hdsp.quality.workflow.adapter.DataStandardOnlineWorkflowAdapter;
-
 import io.choerodon.core.convertor.ApplicationContextHelper;
 import com.hand.hdsp.quality.workflow.adapter.DataStandardOfflineWorkflowAdapter;
 import com.hand.hdsp.quality.workflow.adapter.DataStandardOnlineWorkflowAdapter;
@@ -1127,7 +1126,7 @@ public class DataStandardServiceImpl implements DataStandardService {
             }
         }
         //值域
-        if (Strings.isNotEmpty(dataStandardDTO.getValueRange())) {
+        if (StringUtils.isNotEmpty(dataStandardDTO.getValueType()) && StringUtils.isNotEmpty(dataStandardDTO.getValueRange())) {
             BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()
                     .checkWay(CheckWay.COMMON)
                     .checkItem(CheckItem.FIELD_VALUE)
@@ -1172,6 +1171,26 @@ public class DataStandardServiceImpl implements DataStandardService {
                     break;
                 case StandardValueType.VALUE_SET:
                     batchPlanFieldLineDTO.setCountType(CountType.LOV_VALUE);
+                    warningLevelDTO = WarningLevelDTO.builder()
+                            .warningLevel(WarningLevel.ORANGE)
+                            .compareSymbol(CompareSymbol.INCLUDED)
+                            .enumValue(dataStandardDTO.getValueRange())
+                            .build();
+                    warningLevelDTOList = Collections.singletonList(warningLevelDTO);
+                    warningLevel = JsonUtil.toJson(warningLevelDTOList);
+                    break;
+                case StandardValueType.REFERENCE_DATA:
+                    batchPlanFieldLineDTO.setCountType(CountType.REFERENCE_DATA);
+                    warningLevelDTO = WarningLevelDTO.builder()
+                            .warningLevel(WarningLevel.ORANGE)
+                            .compareSymbol(CompareSymbol.INCLUDED)
+                            .enumValue(dataStandardDTO.getValueRange())
+                            .build();
+                    warningLevelDTOList = Collections.singletonList(warningLevelDTO);
+                    warningLevel = JsonUtil.toJson(warningLevelDTOList);
+                    break;
+                case StandardValueType.LOV_VIEW:
+                    batchPlanFieldLineDTO.setCountType(CountType.LOGIC_VALUE);
                     warningLevelDTO = WarningLevelDTO.builder()
                             .warningLevel(WarningLevel.ORANGE)
                             .compareSymbol(CompareSymbol.INCLUDED)
