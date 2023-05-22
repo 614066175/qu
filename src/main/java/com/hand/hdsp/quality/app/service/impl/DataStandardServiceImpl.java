@@ -52,6 +52,7 @@ import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.infra.meta.Table;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.hzero.starter.driver.core.infra.util.PageParseUtil;
+import org.hzero.starter.driver.core.infra.util.UUIDUtils;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -991,10 +992,10 @@ public class DataStandardServiceImpl implements DataStandardService {
         BatchPlanBaseDTO batchPlanBaseDTO;
         if (CollectionUtils.isEmpty(batchPlanBaseDTOS)) {
             //没有的话在该评估方案下生成base
+            String code = UUIDUtils.generateShortUUID();
             batchPlanBaseDTO = BatchPlanBaseDTO.builder()
-                    //todo 请确认编码规则
-                    .planBaseCode("1")
-                    .planBaseName("1")
+                    .planBaseCode(code)
+                    .planBaseName(code)
                     .datasourceType(standardAimDTO.getDatasourceType())
                     .datasourceCode(standardAimDTO.getDatasourceCode())
                     .datasourceId(standardAimDTO.getDatasourceId())
