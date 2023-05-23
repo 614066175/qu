@@ -3,6 +3,8 @@ package com.hand.hdsp.quality.infra.mapper;
 import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
 import io.choerodon.mybatis.common.BaseMapper;
 
+import java.util.List;
+
 /**
  * <p>校验项模板SQL表Mapper</p>
  *
@@ -16,5 +18,5 @@ public interface ItemTemplateSqlMapper extends BaseMapper<ItemTemplateSql> {
      * @param itemTemplateSql
      * @return
      */
-    ItemTemplateSql selectSql(ItemTemplateSql itemTemplateSql);
+    List<ItemTemplateSql> selectSql(ItemTemplateSql itemTemplateSql);
 }
