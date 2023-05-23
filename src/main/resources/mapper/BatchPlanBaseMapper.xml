@@ -154,6 +154,10 @@
             <bind name="planNameLike" value="'%'+planName+'%'"/>
             and xbp.plan_name like #{planNameLike}
         </if>
+        <if test="currentPlanName != null">
+            <bind name="currentPlanNameLike" value="'%'+currentPlanName+'%'"/>
+            and xbp.plan_name like #{currentPlanNameLike}
+        </if>
     </sql>
 
     <!--查询被分配的质检项 -->
@@ -269,6 +273,10 @@
         <if test="planName != null">
             <bind name="planNameLike" value="'%'+planName+'%'"/>
             and xbp.plan_name like #{planNameLike}
+        </if>
+        <if test="currentPlanName != null">
+            <bind name="currentPlanNameLike" value="'%'+currentPlanName+'%'"/>
+            and xbp.plan_name like #{currentPlanNameLike}
         </if>
     </sql>
     <delete id="deleteTableCon">

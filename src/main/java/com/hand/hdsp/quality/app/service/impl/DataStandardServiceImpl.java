@@ -26,7 +26,6 @@ import com.hand.hdsp.quality.infra.util.StandardHandler;
 import com.hand.hdsp.quality.infra.util.ValueRangeHandler;
 import com.hand.hdsp.quality.workflow.adapter.DataStandardOfflineWorkflowAdapter;
 import com.hand.hdsp.quality.workflow.adapter.DataStandardOnlineWorkflowAdapter;
-
 import io.choerodon.core.convertor.ApplicationContextHelper;
 import com.hand.hdsp.quality.workflow.adapter.DataStandardOfflineWorkflowAdapter;
 import com.hand.hdsp.quality.workflow.adapter.DataStandardOnlineWorkflowAdapter;
@@ -55,6 +54,7 @@ import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.infra.meta.Table;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.hzero.starter.driver.core.infra.util.PageParseUtil;
+import org.hzero.starter.driver.core.infra.util.UUIDUtils;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -996,7 +996,10 @@ public class DataStandardServiceImpl implements DataStandardService {
         BatchPlanBaseDTO batchPlanBaseDTO;
         if (CollectionUtils.isEmpty(batchPlanBaseDTOS)) {
             //没有的话在该评估方案下生成base
+            String code = UUIDUtils.generateShortUUID();
             batchPlanBaseDTO = BatchPlanBaseDTO.builder()
+                    .planBaseCode(code)
+                    .planBaseName(code)
                     .datasourceType(standardAimDTO.getDatasourceType())
                     .datasourceCode(standardAimDTO.getDatasourceCode())
                     .datasourceId(standardAimDTO.getDatasourceId())
@@ -1127,7 +1130,7 @@ public class DataStandardServiceImpl implements DataStandardService {
             }
         }
         //值域
-        if (Strings.isNotEmpty(dataStandardDTO.getValueRange())) {
+        if (StringUtils.isNotEmpty(dataStandardDTO.getValueType()) && StringUtils.isNotEmpty(dataStandardDTO.getValueRange())) {
             BatchPlanFieldLineDTO batchPlanFieldLineDTO = BatchPlanFieldLineDTO.builder()
                     .checkWay(CheckWay.COMMON)
                     .checkItem(CheckItem.FIELD_VALUE)
@@ -1172,6 +1175,26 @@ public class DataStandardServiceImpl implements DataStandardService {
                     break;
                 case StandardValueType.VALUE_SET:
                     batchPlanFieldLineDTO.setCountType(CountType.LOV_VALUE);
+                    warningLevelDTO = WarningLevelDTO.builder()
+                            .warningLevel(WarningLevel.ORANGE)
+                            .compareSymbol(CompareSymbol.INCLUDED)
+                            .enumValue(dataStandardDTO.getValueRange())
+                            .build();
+                    warningLevelDTOList = Collections.singletonList(warningLevelDTO);
+                    warningLevel = JsonUtil.toJson(warningLevelDTOList);
+                    break;
+                case StandardValueType.REFERENCE_DATA:
+                    batchPlanFieldLineDTO.setCountType(CountType.REFERENCE_DATA);
+                    warningLevelDTO = WarningLevelDTO.builder()
+                            .warningLevel(WarningLevel.ORANGE)
+                            .compareSymbol(CompareSymbol.INCLUDED)
+                            .enumValue(dataStandardDTO.getValueRange())
+                            .build();
+                    warningLevelDTOList = Collections.singletonList(warningLevelDTO);
+                    warningLevel = JsonUtil.toJson(warningLevelDTOList);
+                    break;
+                case StandardValueType.LOV_VIEW:
+                    batchPlanFieldLineDTO.setCountType(CountType.LOGIC_VALUE);
                     warningLevelDTO = WarningLevelDTO.builder()
                             .warningLevel(WarningLevel.ORANGE)
                             .compareSymbol(CompareSymbol.INCLUDED)
