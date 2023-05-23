@@ -7,6 +7,9 @@ import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
 import com.hand.hdsp.quality.infra.mapper.ItemTemplateSqlMapper;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * <p>校验项模板SQL表资源库实现</p>
  *
@@ -23,6 +26,16 @@ public class ItemTemplateSqlRepositoryImpl extends BaseRepositoryImpl<ItemTempla
 
     @Override
     public ItemTemplateSql selectSql(ItemTemplateSql itemTemplateSql) {
-        return itemTemplateSqlMapper.selectSql(itemTemplateSql);
+        //先根据数据源类型查询，没有则再查询_ALL的
+        List<ItemTemplateSql> itemTemplateSqls =
+                itemTemplateSqlMapper.selectSql(itemTemplateSql);
+        if (itemTemplateSqls.size() > 1) {
+            //有自己的逻辑
+            List<ItemTemplateSql> collect = itemTemplateSqls.stream()
+                    .filter(sql -> sql.getDatasourceType().equals(itemTemplateSql.getDatasourceType()))
+                    .collect(Collectors.toList());
+            return collect.get(0);
+        }
+        return itemTemplateSqls.get(0);
     }
 }

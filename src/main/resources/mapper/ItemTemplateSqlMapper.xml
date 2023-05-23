@@ -36,7 +36,6 @@
                     and tag = #{tag}
                 </if>
                 ORDER BY datasource_type
-                LIMIT 1
             </when>
             <otherwise>
                 select * from (
@@ -54,7 +53,6 @@
                     </if>
                     ORDER BY datasource_type
                 ) a
-                where ROWNUM = 1
             </otherwise>
         </choose>
 
