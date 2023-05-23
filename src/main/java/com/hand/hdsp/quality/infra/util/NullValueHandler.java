@@ -25,7 +25,6 @@ public class NullValueHandler implements StandardHandler {
                 .checkWay(PlanConstant.CheckWay.COMMON)
                 .checkItem(PlanConstant.CheckItem.FIELD_EMPTY)
                 .countType(PlanConstant.CountType.FIXED_VALUE)
-                .fieldName(dataStandardDTO.getStandardCode() + '(' + dataStandardDTO.getDataType() + ')')
                 .build();
         WarningLevelDTO warningLevelDTO = WarningLevelDTO.builder()
                 .warningLevel(WarningLevel.ORANGE)
