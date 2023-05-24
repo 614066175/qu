@@ -86,11 +86,11 @@
                 AND xrd.project_id = #{projectId}
             </if>
             <if test="dataCode != null and dataCode != ''">
-                <bind name="dataCodeLike" value="dataCode+'%'"/>
+                <bind name="dataCodeLike" value="'%'+dataCode+'%'"/>
                 AND xrd.data_code LIKE #{dataCodeLike}
             </if>
             <if test="dataName != null and dataName != ''">
-                <bind name="dataNameLike" value="dataName+'%'"/>
+                <bind name="dataNameLike" value="'%'+dataName+'%'"/>
                 AND xrd.data_name LIKE #{dataNameLike}
             </if>
             <if test="dataDesc != null and dataDesc != ''">
@@ -111,6 +111,18 @@
             </if>
             <if test="responsiblePersonId != null">
                 AND xrd.responsible_person_id = #{responsiblePersonId}
+            </if>
+            <if test="releaseDateFrom != null">
+                AND xrd.release_date &gt;= #{releaseDateFrom}
+            </if>
+            <if test="releaseDateTo != null">
+                AND xrd.release_date &lt;= #{releaseDateTo}
+            </if>
+            <if test="creationDateFrom != null">
+                AND xrd.creation_date &gt;= #{creationDateFrom}
+            </if>
+            <if test="creationDateTo != null">
+                AND xrd.creation_date &lt;= #{creationDateTo}
             </if>
             <if test="exportIds != null and exportIds.size() > 0">
                 AND xrd.data_id IN
