@@ -19,7 +19,9 @@ import lombok.NoArgsConstructor;
 import lombok.*;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import org.hzero.core.base.BaseConstants;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
 
@@ -145,5 +147,21 @@ public class ReferenceDataDTO extends AuditDomain {
     @ExcelColumn(zh = "参考值列表", en = "referenceDataValueDTOList", child = true)
     @Transient
     private List<ReferenceDataValueDTO> referenceDataValueDTOList;
+
+    @Transient
+    @DateTimeFormat(pattern = BaseConstants.Pattern.DATETIME)
+    private Date releaseDateFrom;
+
+    @Transient
+    @DateTimeFormat(pattern = BaseConstants.Pattern.DATETIME)
+    private Date releaseDateTo;
+
+    @Transient
+    @DateTimeFormat(pattern = BaseConstants.Pattern.DATETIME)
+    private Date creationDateFrom;
+
+    @Transient
+    @DateTimeFormat(pattern = BaseConstants.Pattern.DATETIME)
+    private Date creationDateTo;
 
 }
