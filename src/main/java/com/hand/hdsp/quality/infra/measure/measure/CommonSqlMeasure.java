@@ -64,7 +64,7 @@ public class CommonSqlMeasure implements Measure {
         //如果是有空值的校验项，需特殊处理
         if(emptyItemList.contains(itemTemplateSql.getCheckItem())){
             //多字段空值，需要做sql拼接
-            variables.put("field", MeasureUtil.handleEmpty(param.getFieldName()));
+            variables.put("field", MeasureUtil.handleEmpty(param.getFieldName(),batchResultBase.getDatasourceType()));
         }else{
             variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
         }

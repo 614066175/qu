@@ -2,10 +2,13 @@ package com.hand.hdsp.quality.infra.measure;
 
 import com.hand.hdsp.quality.api.dto.WarningLevelDTO;
 import com.hand.hdsp.quality.domain.entity.BatchResultItem;
+import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
+import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
+import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -187,10 +190,12 @@ public class MeasureUtil {
     /**
      * 处理空值校验
      *
+     *
      * @param fieldName
+     * @param datasourceType
      * @return
      */
-    public static String handleEmpty(String fieldName) {
+    public static String handleEmpty(String fieldName, String datasourceType) {
         if (StringUtils.isBlank(fieldName)) {
             return null;
         }
@@ -204,7 +209,15 @@ public class MeasureUtil {
             }
         }
         // ( a is null or a = '') and (b is null or b ='')
-        List<String> emptySqlList = list.stream().map(column -> String.format(EMPTY_SQL, column, column)).collect(Collectors.toList());
+        ItemTemplateSqlRepository templateSqlRepository = ApplicationContextHelper.getContext().getBean(ItemTemplateSqlRepository.class);
+        ItemTemplateSql itemTemplateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                .checkItem("FIELD_EMPTY_CONDITION")
+                .datasourceType(datasourceType)
+                .build());
+        String sqlContent = itemTemplateSql.getSqlContent();
+        List<String> emptySqlList = list.stream()
+                .map(column -> String.format(sqlContent, column, column))
+                .collect(Collectors.toList());
         return StringUtils.join(emptySqlList, "and");
     }
 
