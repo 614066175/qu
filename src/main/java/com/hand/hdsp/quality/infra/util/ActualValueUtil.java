@@ -42,7 +42,7 @@ public class ActualValueUtil {
         Page<Map<String, Object>> maps = driverSession.executeOneQuery(param.getSchema(), sql, PageRequest.of(0, 3));
         if (maps != null && CollectionUtils.isNotEmpty(maps.getContent())) {
             List<Map<String, Object>> content = maps.getContent();
-            List<String> values = content.stream().map(field -> field.values().toArray()[0].toString()).collect(Collectors.toList());
+            List<String> values = content.stream().map(field -> String.valueOf(field.values().toArray()[0])).collect(Collectors.toList());
             return Strings.join(values, ',') + "...";
         } else {
             return null;
