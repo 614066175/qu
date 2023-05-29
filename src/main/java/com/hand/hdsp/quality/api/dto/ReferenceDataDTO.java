@@ -164,4 +164,7 @@ public class ReferenceDataDTO extends AuditDomain {
     @DateTimeFormat(pattern = BaseConstants.Pattern.DATETIME)
     private Date creationDateTo;
 
+    @Transient
+    private List<Long> dataGroupIds;
+
 }
