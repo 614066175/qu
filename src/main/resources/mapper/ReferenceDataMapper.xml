@@ -100,8 +100,14 @@
             <if test="parentDataId != null">
                 AND xrd.parent_data_id = #{parentDataId}
             </if>
-            <if test="dataGroupId != null">
-                AND xrd.data_group_id = #{dataGroupId}
+<!--            <if test="dataGroupId != null">-->
+<!--                AND xrd.data_group_id = #{dataGroupId}-->
+<!--            </if>-->
+            <if test="dataGroupIds != null and dataGroupIds.size > 0">
+                AND xrd.data_group_id IN
+                <foreach collection="dataGroupIds" item="groupId" open="(" separator="," close=")">
+                    #{groupId}
+                </foreach>
             </if>
             <if test="dataStatus != null and dataStatus != ''">
                 AND xrd.data_status = #{dataStatus}

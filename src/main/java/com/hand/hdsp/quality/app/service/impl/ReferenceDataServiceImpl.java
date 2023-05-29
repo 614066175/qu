@@ -2,8 +2,12 @@ package com.hand.hdsp.quality.app.service.impl;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
+import com.hand.hdsp.core.CommonGroupClient;
 import com.hand.hdsp.core.base.ProxySelf;
+import com.hand.hdsp.core.domain.entity.CommonGroup;
+import com.hand.hdsp.core.domain.repository.CommonGroupRepository;
 import com.hand.hdsp.quality.api.dto.ReferenceDataDTO;
 import com.hand.hdsp.quality.app.service.ReferenceDataService;
 import com.hand.hdsp.quality.domain.entity.ReferenceData;
@@ -41,6 +45,8 @@ public class ReferenceDataServiceImpl implements ReferenceDataService, ProxySelf
     private final ReferenceDataRecordRepository referenceDataRecordRepository;
     private final ReferenceDataHistoryRepository referenceDataHistoryRepository;
     private final ReferenceDataValueRepository referenceDataValueRepository;
+    private final CommonGroupRepository commonGroupRepository;
+    private final CommonGroupClient commonGroupClient;
     private final ReferenceDataReleaseWorkflowAdapter<ReferenceDataDTO, ReferenceDataDTO, Long, String> referenceDataReleaseWorkflowAdapter;
     private final ReferenceDataOfflineWorkflowAdapter<ReferenceDataDTO, ReferenceDataDTO, Long, String> referenceDataOfflineWorkflowAdapter;
 
@@ -50,6 +56,8 @@ public class ReferenceDataServiceImpl implements ReferenceDataService, ProxySelf
                                     ReferenceDataRecordRepository referenceDataRecordRepository,
                                     ReferenceDataHistoryRepository referenceDataHistoryRepository,
                                     ReferenceDataValueRepository referenceDataValueRepository,
+                                    CommonGroupRepository commonGroupRepository,
+                                    CommonGroupClient commonGroupClient,
                                     ReferenceDataReleaseWorkflowAdapter<ReferenceDataDTO, ReferenceDataDTO, Long, String> referenceDataReleaseWorkflowAdapter,
                                     ReferenceDataOfflineWorkflowAdapter<ReferenceDataDTO, ReferenceDataDTO, Long, String> referenceDataOfflineWorkflowAdapter,
                                     ReferenceDataExporter referenceDataExporter) {
@@ -57,6 +65,8 @@ public class ReferenceDataServiceImpl implements ReferenceDataService, ProxySelf
         this.referenceDataRecordRepository = referenceDataRecordRepository;
         this.referenceDataHistoryRepository = referenceDataHistoryRepository;
         this.referenceDataValueRepository = referenceDataValueRepository;
+        this.commonGroupRepository = commonGroupRepository;
+        this.commonGroupClient = commonGroupClient;
         this.referenceDataReleaseWorkflowAdapter = referenceDataReleaseWorkflowAdapter;
         this.referenceDataOfflineWorkflowAdapter = referenceDataOfflineWorkflowAdapter;
         this.referenceDataExporter = referenceDataExporter;
@@ -67,6 +77,15 @@ public class ReferenceDataServiceImpl implements ReferenceDataService, ProxySelf
     public Page<ReferenceDataDTO> list(Long projectId, Long tenantId, ReferenceDataDTO referenceDataDTO, PageRequest pageRequest) {
         referenceDataDTO.setProjectId(projectId);
         referenceDataDTO.setTenantId(tenantId);
+        if (Objects.nonNull(referenceDataDTO.getDataGroupId())) {
+            CommonGroup commonGroup = commonGroupRepository.selectByPrimaryKey(referenceDataDTO.getDataGroupId());
+            if (Objects.nonNull(commonGroup)) {
+                List<CommonGroup> subGroup = commonGroupClient.getSubGroup(commonGroup);
+                List<Long> groupIds = subGroup.stream().map(CommonGroup::getGroupId).collect(Collectors.toList());
+                groupIds.add(referenceDataDTO.getDataGroupId());
+                referenceDataDTO.setDataGroupIds(groupIds);
+            }
+        }
         Page<ReferenceDataDTO> page = referenceDataRepository.list(referenceDataDTO, pageRequest);
         for (ReferenceDataDTO dataDTO : page) {
             decryptReferenceData(dataDTO);

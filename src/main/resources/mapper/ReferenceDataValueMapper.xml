@@ -68,6 +68,9 @@
                 <bind name="valueMeaningLike" value="valueMeaning+'%'"/>
                 AND xrdv.value_meaning LIKE #{valueMeaningLike}
             </if>
+            <if test="enabledFlag != null">
+                AND xrdv.enabled_flag = #{enabledFlag}
+            </if>
             <if test="searchKey != null and searchKey != ''">
                 <bind name="searchKeyLike" value="'%'+searchKey+'%'"/>
                 AND (xrdv.value LIKE #{searchKeyLike} OR xrdv.value_meaning LIKE #{searchKeyLike})
