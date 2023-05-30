@@ -10,6 +10,7 @@ import com.hand.hdsp.quality.domain.repository.BatchPlanTableConRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanTableLineRepository;
 import com.hand.hdsp.quality.domain.repository.BatchPlanTableRepository;
 import com.hand.hdsp.quality.infra.dataobject.BatchPlanTableDO;
+import com.hand.hdsp.quality.infra.mapper.BatchPlanTableMapper;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -29,13 +30,16 @@ import java.util.List;
 @Service
 public class BatchPlanTableServiceImpl implements BatchPlanTableService {
 
+    private final BatchPlanTableMapper batchPlanTableMapper;
     private final BatchPlanTableRepository batchPlanTableRepository;
     private final BatchPlanTableLineRepository batchPlanTableLineRepository;
     private final BatchPlanTableConRepository batchPlanTableConRepository;
 
-    public BatchPlanTableServiceImpl(BatchPlanTableRepository batchPlanTableRepository,
+
+    public BatchPlanTableServiceImpl(BatchPlanTableMapper batchPlanTableMapper, BatchPlanTableRepository batchPlanTableRepository,
                                      BatchPlanTableLineRepository batchPlanTableLineRepository,
                                      BatchPlanTableConRepository batchPlanTableConRepository) {
+        this.batchPlanTableMapper = batchPlanTableMapper;
         this.batchPlanTableRepository = batchPlanTableRepository;
         this.batchPlanTableLineRepository = batchPlanTableLineRepository;
         this.batchPlanTableConRepository = batchPlanTableConRepository;
@@ -150,4 +154,12 @@ public class BatchPlanTableServiceImpl implements BatchPlanTableService {
         }
         return pages;
     }
+
+    @Override
+    public Page<BatchPlanTableDTO> selectTableList(PageRequest pageRequest, BatchPlanTableDTO batchPlanTableDTO) {
+        Page<BatchPlanTableDTO> pages = PageHelper.doPage(pageRequest, () -> batchPlanTableRepository.selectTableList(batchPlanTableDTO));
+        return pages;
+    }
+
+
 }

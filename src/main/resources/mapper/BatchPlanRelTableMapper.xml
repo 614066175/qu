@@ -41,5 +41,9 @@
         FROM xqua_batch_plan_rel_table xbprt
                  join hpfm_datasource hd on xbprt.rel_datasource_id = hd.datasource_id
         WHERE xbprt.plan_base_id = #{planBaseId}
+        <if test=" relTableName != null and relTableName != ''">
+            <bind name="relTableNameLike" value="'%' + relTableName + '%'"/>
+            and xbprt.rel_table_name like #{relTableNameLike}
+        </if>
     </select>
 </mapper>

@@ -38,4 +38,7 @@ public interface BatchPlanTableRepository extends BaseRepository<BatchPlanTable,
      * @return
      */
     List<BatchPlanTableDTO> selectDetailList(BatchPlanTableDTO batchPlanTableDTO);
+
+    List<BatchPlanTableDTO> selectTableList(BatchPlanTableDTO batchPlanTableDTO);
+
 }

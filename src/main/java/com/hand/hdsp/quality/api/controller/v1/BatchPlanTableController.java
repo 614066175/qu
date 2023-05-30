@@ -51,11 +51,11 @@ public class BatchPlanTableController extends BaseController {
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                  BatchPlanTable batchPlanTable, @ApiIgnore @SortDefault(value = BatchPlanTable.FIELD_PLAN_RULE_ID,
+                                  BatchPlanTableDTO batchPlanTableDTO, @ApiIgnore @SortDefault(value = BatchPlanTable.FIELD_PLAN_RULE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
-        batchPlanTable.setTenantId(tenantId);
-        batchPlanTable.setProjectId(projectId);
-        return Results.success(batchPlanTableRepository.pageAndSort(pageRequest, batchPlanTable));
+        batchPlanTableDTO.setTenantId(tenantId);
+        batchPlanTableDTO.setProjectId(projectId);
+        return Results.success(batchPlanTableService.selectTableList(pageRequest, batchPlanTableDTO));
     }
 
     @ApiOperation(value = "批数据方案-表级规则表列表（含校验项）")

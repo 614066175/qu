@@ -5,6 +5,8 @@ import com.hand.hdsp.core.base.repository.BaseRepository;
 import com.hand.hdsp.quality.api.dto.BatchPlanRelTableDTO;
 import com.hand.hdsp.quality.domain.entity.BatchPlanRelTable;
 
+import java.util.List;
+
 /**
  * <p>批数据方案-表间规则表资源库</p>
  *
@@ -19,4 +21,6 @@ public interface BatchPlanRelTableRepository extends BaseRepository<BatchPlanRel
      * @return
      */
     int deleteByPlanBaseId(Long planBaseId);
+
+    List<BatchPlanRelTableDTO> selectRelTable( BatchPlanRelTableDTO batchPlanRelTableDTO);
 }

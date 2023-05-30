@@ -38,4 +38,10 @@ public class BatchPlanTableRepositoryImpl extends BaseRepositoryImpl<BatchPlanTa
     public List<BatchPlanTableDTO> selectDetailList(BatchPlanTableDTO batchPlanTableDTO) {
         return batchPlanTableMapper.selectDetailList(batchPlanTableDTO);
     }
+    @Override
+    public List<BatchPlanTableDTO> selectTableList(BatchPlanTableDTO batchPlanTableDTO) {
+        return batchPlanTableMapper.getPlanTable(batchPlanTableDTO);
+    }
+
+
 }

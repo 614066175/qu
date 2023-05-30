@@ -79,5 +79,9 @@
                  LEFT JOIN xqua_batch_plan_table_line xbptl ON xbpt.plan_rule_id = xbptl.plan_rule_id
                  LEFT JOIN xqua_batch_plan_table_con xbptc ON xbptl.plan_line_id = xbptc.plan_line_id
         WHERE xbpt.plan_base_id = #{planBaseId}
+        <if test="ruleCode != null and ruleCode != ''">
+            <bind name="ruleCode" value="'%' + ruleCode + '%'"/>
+            and xbpt.rule_code like #{ruleCode}
+        </if>
     </select>
 </mapper>

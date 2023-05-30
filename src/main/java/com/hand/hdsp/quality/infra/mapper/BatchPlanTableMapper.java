@@ -48,4 +48,7 @@ public interface BatchPlanTableMapper extends BaseMapper<BatchPlanTable> {
      * @return
      */
     List<BatchPlanTableDTO> getPlanTable(Long planBaseId);
+
+    List<BatchPlanTableDTO> getPlanTable(BatchPlanTableDTO batchPlanTableDTO);
+
 }
