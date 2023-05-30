@@ -60,4 +60,6 @@ public interface BatchPlanTableService {
      * @return
      */
     Page<BatchPlanTableDTO> selectDetailList(PageRequest pageRequest, BatchPlanTableDTO batchPlanTableDTO);
+
+    Page<BatchPlanTableDTO> selectTableList(PageRequest pageRequest, BatchPlanTableDTO batchPlanTableDTO);
 }

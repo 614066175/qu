@@ -8,6 +8,7 @@ import com.hand.hdsp.quality.domain.repository.BatchPlanRelTableRepository;
 import com.hand.hdsp.quality.infra.constant.RuleType;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -77,7 +78,8 @@ public class BatchPlanRelTableServiceImpl implements BatchPlanRelTableService {
 
     @Override
     public Page<BatchPlanRelTableDTO> list(PageRequest pageRequest, BatchPlanRelTableDTO batchPlanRelTableDTO) {
-        return batchPlanRelTableRepository.pageAndSortDTO(pageRequest, batchPlanRelTableDTO);
+        Page<BatchPlanRelTableDTO> pages = PageHelper.doPage(pageRequest, () -> batchPlanRelTableRepository.selectRelTable(batchPlanRelTableDTO));
+        return  pages;
     }
 
     @Override

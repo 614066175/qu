@@ -7,6 +7,8 @@ import com.hand.hdsp.quality.domain.repository.BatchPlanRelTableRepository;
 import com.hand.hdsp.quality.infra.mapper.BatchPlanRelTableMapper;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * <p>批数据方案-表间规则表资源库实现</p>
  *
@@ -24,5 +26,11 @@ public class BatchPlanRelTableRepositoryImpl extends BaseRepositoryImpl<BatchPla
     @Override
     public int deleteByPlanBaseId(Long planBaseId) {
         return batchPlanRelTableMapper.deleteByPlanBaseId(planBaseId);
+    }
+
+    @Override
+    public List<BatchPlanRelTableDTO> selectRelTable(BatchPlanRelTableDTO batchPlanRelTableDTO) {
+        return batchPlanRelTableMapper.getRelTable(batchPlanRelTableDTO);
+
     }
 }
