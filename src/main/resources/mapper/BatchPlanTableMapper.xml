@@ -79,6 +79,14 @@
                  LEFT JOIN xqua_batch_plan_table_line xbptl ON xbpt.plan_rule_id = xbptl.plan_rule_id
                  LEFT JOIN xqua_batch_plan_table_con xbptc ON xbptl.plan_line_id = xbptc.plan_line_id
         WHERE xbpt.plan_base_id = #{planBaseId}
+    </select>
+    <select id="selectPlanTable" resultType="com.hand.hdsp.quality.api.dto.BatchPlanTableDTO">
+        SELECT *
+        FROM xqua_batch_plan_table xbpt
+                 JOIN xqua_batch_plan_base xbpb ON xbpt.plan_base_id = xbpb.plan_base_id
+                 LEFT JOIN xqua_batch_plan_table_line xbptl ON xbpt.plan_rule_id = xbptl.plan_rule_id
+                 LEFT JOIN xqua_batch_plan_table_con xbptc ON xbptl.plan_line_id = xbptc.plan_line_id
+        WHERE xbpt.plan_base_id = #{planBaseId}
         <if test="ruleCode != null and ruleCode != ''">
             <bind name="ruleCode" value="'%' + ruleCode + '%'"/>
             and xbpt.rule_code like #{ruleCode}

@@ -30,7 +30,7 @@ public class BatchPlanRelTableRepositoryImpl extends BaseRepositoryImpl<BatchPla
 
     @Override
     public List<BatchPlanRelTableDTO> selectRelTable(BatchPlanRelTableDTO batchPlanRelTableDTO) {
-        return batchPlanRelTableMapper.getRelTable(batchPlanRelTableDTO);
+        return batchPlanRelTableMapper.selectRelTable(batchPlanRelTableDTO);
 
     }
 }
