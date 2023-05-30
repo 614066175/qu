@@ -41,6 +41,13 @@
         FROM xqua_batch_plan_rel_table xbprt
                  join hpfm_datasource hd on xbprt.rel_datasource_id = hd.datasource_id
         WHERE xbprt.plan_base_id = #{planBaseId}
+    </select>
+    <select id="selectRelTable" resultType="com.hand.hdsp.quality.api.dto.BatchPlanRelTableDTO">
+        SELECT xbprt.*,
+               hd.datasource_code relDatasourceCode
+        FROM xqua_batch_plan_rel_table xbprt
+                 join hpfm_datasource hd on xbprt.rel_datasource_id = hd.datasource_id
+        WHERE xbprt.plan_base_id = #{planBaseId}
         <if test=" relTableName != null and relTableName != ''">
             <bind name="relTableNameLike" value="'%' + relTableName + '%'"/>
             and xbprt.rel_table_name like #{relTableNameLike}

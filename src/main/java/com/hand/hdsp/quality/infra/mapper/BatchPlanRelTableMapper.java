@@ -33,5 +33,5 @@ public interface BatchPlanRelTableMapper extends BaseMapper<BatchPlanRelTable> {
      * @return
      */
     List<BatchPlanRelTableDTO> getRelTable(Long planBaseId);
-    List<BatchPlanRelTableDTO> getRelTable(BatchPlanRelTableDTO batchPlanRelTableDTO);
+    List<BatchPlanRelTableDTO> selectRelTable(BatchPlanRelTableDTO batchPlanRelTableDTO);
 }
