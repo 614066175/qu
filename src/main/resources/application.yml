@@ -20,7 +20,7 @@ spring:
     host: ${SPRING_REDIS_HOST:redis.hdsp.hand.com}
     port: ${SPRING_REDIS_PORT:26379}
     database: ${SPRING_REDIS_DATABASE:1}
-    password: ${SPRING_REDIS_PASSWORD:redis!qaz}
+    password: ${SPRING_REDIS_PASSWORD:}
     jedis:
       pool:
         # 资源池中最大连接数
