@@ -1,6 +1,7 @@
 package com.hand.hdsp.quality.infra.mapper;
 
 import com.hand.hdsp.quality.api.dto.SuggestDTO;
+import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.entity.Suggest;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
@@ -33,5 +34,5 @@ public interface SuggestMapper extends BaseMapper<Suggest> {
      * @param resultBaseId 查询参数
      * @return 返回值
      */
-    String getDatasourceType(@Param("resultBaseId")Long resultBaseId);
+    BatchResultBase getDatasource(@Param("resultBaseId")Long resultBaseId);
 }

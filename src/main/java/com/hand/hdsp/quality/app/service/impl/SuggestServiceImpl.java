@@ -2,21 +2,22 @@ package com.hand.hdsp.quality.app.service.impl;
 
 import com.hand.hdsp.quality.api.dto.SuggestDTO;
 import com.hand.hdsp.quality.app.service.SuggestService;
-import com.hand.hdsp.quality.domain.repository.BatchResultRepository;
+import com.hand.hdsp.quality.domain.entity.BatchResultBase;
 import com.hand.hdsp.quality.domain.repository.SuggestRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
-import com.hand.hdsp.quality.infra.converttype.ConvertTypeBase;
 import com.hand.hdsp.quality.infra.mapper.SuggestMapper;
-import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hzero.boot.driver.app.service.DriverSessionService;
+import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -29,14 +30,16 @@ public class SuggestServiceImpl implements SuggestService {
 
     private final SuggestMapper suggestMapper;
     private final SuggestRepository suggestRepository;
-    private final BatchResultRepository batchResultRepository;
     private final String LEFT_BRACKETS = "(";
 
-    public SuggestServiceImpl(SuggestMapper suggestMapper, SuggestRepository suggestRepository, BatchResultRepository batchResultRepository) {
+    private final DriverSessionService driverSessionService;
+
+    public SuggestServiceImpl(SuggestMapper suggestMapper, SuggestRepository suggestRepository, DriverSessionService driverSessionService) {
         this.suggestMapper = suggestMapper;
         this.suggestRepository = suggestRepository;
-        this.batchResultRepository = batchResultRepository;
+        this.driverSessionService = driverSessionService;
     }
+
 
     @Override
     public SuggestDTO createSuggest(SuggestDTO suggestDTO) {
@@ -51,21 +54,25 @@ public class SuggestServiceImpl implements SuggestService {
 
     @Override
     public Page<SuggestDTO> list(PageRequest pageRequest, SuggestDTO suggestDTO) {
-        if(suggestDTO.getProblemId() == null){
+        if (suggestDTO.getProblemId() == null) {
             //前端取消选中需要
             return new Page<>();
         }
         //问题建议使用该接口时，传递problemId为-1
-        if(suggestDTO.getProblemId() == -1){
+        if (suggestDTO.getProblemId() == -1) {
             suggestDTO.setProblemId(null);
         }
         //如果前端传递的字段类型字符串包含 "("  则做类型转换
-        if(StringUtils.isNotBlank(suggestDTO.getColumnType())){
-            if(suggestDTO.getColumnType().contains(LEFT_BRACKETS)){
-                String datasourceType = suggestMapper.getDatasourceType(suggestDTO.getResultBaseId());
-                if(datasourceType != null){
-                    suggestDTO.setTypes(ApplicationContextHelper.getContext().getBean(datasourceType, ConvertTypeBase.class)
-                            .typeConvert(suggestDTO.getColumnType(), new ArrayList<>()));
+        if (StringUtils.isNotBlank(suggestDTO.getColumnType())) {
+            if (suggestDTO.getColumnType().contains(LEFT_BRACKETS)) {
+
+                BatchResultBase batchResultBase = suggestMapper.getDatasource(suggestDTO.getResultBaseId());
+                if (batchResultBase != null) {
+                    String columnType = suggestDTO.getColumnType();
+                    columnType = columnType.substring(columnType.indexOf(LEFT_BRACKETS) + 1, columnType.length() - 1);
+                    DriverSession driverSession = driverSessionService.getDriverSession(batchResultBase.getTenantId(), batchResultBase.getDatasourceCode());
+                    String type = driverSession.formatColumnType(columnType);
+                    suggestDTO.setTypes(Arrays.asList(type));
                 }
             } else {
                 List<String> list = new ArrayList<>();
@@ -73,7 +80,7 @@ public class SuggestServiceImpl implements SuggestService {
                 suggestDTO.setTypes(list);
             }
         }
-        return PageHelper.doPageAndSort(pageRequest, () ->suggestMapper.list(suggestDTO));
+        return PageHelper.doPageAndSort(pageRequest, () -> suggestMapper.list(suggestDTO));
     }
 
 }

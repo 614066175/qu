@@ -39,7 +39,7 @@ public class ProblemServiceImpl implements ProblemService {
     @Override
     public List<ProblemVO> listForTree(ProblemVO problemVO) {
         List<ProblemVO> problems = problemRepository.listForTree(problemVO);
-        return TreeBuilder.buildTree(problems, null,
+        return TreeBuilder.buildTree(problems, 0L,
                 ProblemVO::getProblemId, ProblemVO::getProblemParentId);
 
     }

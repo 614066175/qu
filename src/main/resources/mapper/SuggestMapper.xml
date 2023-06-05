@@ -108,9 +108,11 @@
             </if>
         </if>
     </select>
-    <select id="getDatasourceType" resultType="java.lang.String">
+    <select id="getDatasource" resultType="com.hand.hdsp.quality.domain.entity.BatchResultBase">
         select
-        xbpb.datasource_type
+        xbpb.datasource_type,
+        xbpb.datasource_code,
+        xbpb.tenant_id
         from xqua_batch_result_base xbrb
         left join xqua_batch_plan_base xbpb on xbrb.plan_base_id = xbpb.plan_base_id
         where xbrb.result_base_id = #{resultBaseId}
