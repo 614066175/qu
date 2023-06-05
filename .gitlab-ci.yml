@@ -4,14 +4,14 @@ stages:
   - mvn-package
   - docker-build
 
-maven-test-branches:
-  stage: mvn-package
-  script:
-    - git_merge master
-  only:
-    - /^*test$/
-    - /^bugfix-.*$/
-    - /^feature-.*$/
+#maven-test-branches:
+#  stage: mvn-package
+#  script:
+#    - git_merge master
+#  only:
+#    - /^*test$/
+#    - /^bugfix-.*$/
+#    - /^feature-.*$/
 
 maven-build:
   stage: mvn-package
