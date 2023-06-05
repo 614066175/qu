@@ -52,7 +52,7 @@ public class DataFieldVersionDTO extends AuditDomain {
     @ApiModelProperty(value = "标准描述")
     private String standardDesc;
 
-    @ApiModelProperty(value = "字段类型 (HDSP.XMOD.FIELD_TYPE)")
+    @ApiModelProperty(value = "字段类型 (XMOD.FIELD_TYPE)")
     @NotBlank
     @Size(max = 50)
     private String fieldType;
@@ -63,7 +63,7 @@ public class DataFieldVersionDTO extends AuditDomain {
     @ApiModelProperty(value = "数据格式")
     private String dataPattern;
 
-    @ApiModelProperty(value = "值域类型（快码HDSP.XSTA.VALUE_TYPE）")
+    @ApiModelProperty(value = "值域类型（快码XSTA.VALUE_TYPE）")
     private String valueType;
 
     @ApiModelProperty(value = "值域")

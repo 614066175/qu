@@ -35,17 +35,17 @@ public class MeasureParamDO {
     private String checkFieldName;
 
     /**
-     * 校验项 HDSP.XQUA.CHECK_ITEM
+     * 校验项 XQUA.CHECK_ITEM
      */
     private String checkItem;
 
     /**
-     * 校验类型 HDSP.XQUA.COUNT_TYPE
+     * 校验类型 XQUA.COUNT_TYPE
      */
     private String countType;
 
     /**
-     * 比较方式 HDSP.XQUA.COMPARE_WAY
+     * 比较方式 XQUA.COMPARE_WAY
      */
     private String compareWay;
 

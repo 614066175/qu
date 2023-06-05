@@ -27,7 +27,7 @@ import java.util.Optional;
 @Component
 @Order(1)
 public class FieldStructValidator implements StatisticValidator {
-    private static final String FIELD_TYPE = "HDSP.XMOD.FIELD_TYPE";
+    private static final String FIELD_TYPE = "XMOD.FIELD_TYPE";
     private final DriverSessionService driverSessionService;
 
     public FieldStructValidator(DriverSessionService driverSessionService) {

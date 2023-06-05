@@ -50,10 +50,10 @@ public class DatasourceDTO extends AuditDomain {
     @ApiModelProperty(value = "数据源分类")
     private String datasourceClass;
 
-    @ApiModelProperty(value = "数据源类型(快码：HDSP.DATASOURCE_TYPE)")
+    @ApiModelProperty(value = "数据源类型(快码：DATASOURCE_TYPE)")
     private String datasourceType;
 
-    @ApiModelProperty(value = "驱动类型(快码：HDSP.DRIVER_TYPE)")
+    @ApiModelProperty(value = "驱动类型(快码：XDSP.DRIVER_TYPE)")
     private String driverType;
 
     @ApiModelProperty(value = "驱动ID")

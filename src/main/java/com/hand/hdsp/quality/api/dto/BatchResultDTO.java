@@ -1,12 +1,5 @@
 package com.hand.hdsp.quality.api.dto;
 
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hand.hdsp.quality.infra.vo.ResultWaringVO;
 import io.choerodon.mybatis.annotation.ModifyAudit;
@@ -15,6 +8,13 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+
+import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>批数据方案结果表 数据传输对象</p>
@@ -48,7 +48,7 @@ public class BatchResultDTO extends AuditDomain {
     @ApiModelProperty(value = "结束时间")
     private Date endDate;
 
-    @ApiModelProperty(value = "方案状态 HDSP.XQUA.PLAN_STATUS (未评估、运行中、执行成功、执行失败)")
+    @ApiModelProperty(value = "方案状态 XQUA.PLAN_STATUS (未评估、运行中、执行成功、执行失败)")
     private String planStatus;
 
     @ApiModelProperty(value = "下次评估时间")

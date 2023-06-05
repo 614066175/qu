@@ -1,15 +1,15 @@
 package com.hand.hdsp.quality.api.dto;
 
-import javax.persistence.Transient;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  * <p>标准落标表 数据传输对象</p>
@@ -32,7 +32,7 @@ public class StandardAimDTO extends AuditDomain {
     @NotNull
     private Long standardId;
 
-    @ApiModelProperty(value = "标准类型（快码：HDSP.XSTA.STANDARD_TYPE）")
+    @ApiModelProperty(value = "标准类型（快码：XSTA.STANDARD_TYPE）")
     @NotBlank
     @Size(max = 30)
     private String standardType;

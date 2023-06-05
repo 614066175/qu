@@ -1,25 +1,17 @@
 package com.hand.hdsp.quality.api.dto;
 
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
-
-import java.math.BigDecimal;
-import java.util.Date;
-
-import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiModel;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * <p> 数据传输对象</p>
@@ -55,7 +47,7 @@ public class WorkOrderDTO extends AuditDomain {
     @NotNull
     private Long processorsId;
 
-    @ApiModelProperty(value = "紧急程度(值集 HDSP.XQUA.IMMEDIATE_LEVEL)")
+    @ApiModelProperty(value = "紧急程度(值集 XQUA.IMMEDIATE_LEVEL)")
     @NotBlank
     @Size(max = 30)
     private String immediateLevel;
@@ -63,7 +55,7 @@ public class WorkOrderDTO extends AuditDomain {
     @ApiModelProperty(value = "工单备注")
     private String orderDesc;
 
-    @ApiModelProperty(value = "工单状态(值集 HDSP.XQUA.ORDER_STATUS)")
+    @ApiModelProperty(value = "工单状态(值集 XQUA.ORDER_STATUS)")
     @NotBlank
     @Size(max = 30)
     private String workOrderStatus;

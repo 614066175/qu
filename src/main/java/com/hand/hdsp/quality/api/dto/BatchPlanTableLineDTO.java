@@ -34,10 +34,10 @@ public class BatchPlanTableLineDTO extends AuditDomain {
     @NotNull
     private Long planRuleId;
 
-    @ApiModelProperty(value = "校验项 HDSP.XQUA.CHECK_ITEM")
+    @ApiModelProperty(value = "校验项 XQUA.CHECK_ITEM")
     private String checkItem;
 
-    @ApiModelProperty(value = "校验类型 HDSP.XQUA.COUNT_TYPE")
+    @ApiModelProperty(value = "校验类型 XQUA.COUNT_TYPE")
     private String countType;
 
     @ApiModelProperty(value = "自定义SQL")

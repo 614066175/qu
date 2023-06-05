@@ -1,11 +1,5 @@
 package com.hand.hdsp.quality.api.dto;
 
-import java.util.List;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hand.hdsp.quality.infra.vo.WarningLevelVO;
 import io.choerodon.mybatis.annotation.ModifyAudit;
@@ -14,6 +8,12 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.List;
 
 /**
  * <p>批数据方案结果表-校验项信息 数据传输对象</p>
@@ -44,13 +44,13 @@ public class BatchResultItemDTO extends AuditDomain {
     @ApiModelProperty(value = "XQUA_BATCH_PLAN_TABLE_CON.CONDITION_ID/XQUA_BATCH_PLAN_FIELD_CON.CONDITION_ID")
     private Long conditionId;
 
-    @ApiModelProperty(value = "校验方式 HDSP.XQUA.CHECK_WAY")
+    @ApiModelProperty(value = "校验方式 XQUA.CHECK_WAY")
     private String checkWay;
 
-    @ApiModelProperty(value = "校验项 HDSP.XQUA.CHECK_ITEM")
+    @ApiModelProperty(value = "校验项 XQUA.CHECK_ITEM")
     private String checkItem;
 
-    @ApiModelProperty(value = "校验类型 HDSP.XQUA.COUNT_TYPE")
+    @ApiModelProperty(value = "校验类型 XQUA.COUNT_TYPE")
     private String countType;
 
     @ApiModelProperty(value = "规则字段，多个列逗号拼接")
@@ -66,7 +66,7 @@ public class BatchResultItemDTO extends AuditDomain {
     @ApiModelProperty(value = "条件where")
     private String whereCondition;
 
-    @ApiModelProperty(value = "比较方式 HDSP.XQUA.COMPARE_WAY")
+    @ApiModelProperty(value = "比较方式 XQUA.COMPARE_WAY")
     private String compareWay;
 
     @ApiModelProperty(value = "正则表达式")
@@ -75,7 +75,7 @@ public class BatchResultItemDTO extends AuditDomain {
     @ApiModelProperty(value = "自定义SQL")
     private String customSql;
 
-    @ApiModelProperty(value = "关联数据源类型(快码：HDSP.DATASOURCE_TYPE)")
+    @ApiModelProperty(value = "关联数据源类型(快码：DATASOURCE_TYPE)")
     private String relDatasourceType;
 
     @ApiModelProperty(value = "关联数据源ID")
@@ -105,7 +105,7 @@ public class BatchResultItemDTO extends AuditDomain {
     @ApiModelProperty(value = "错误信息")
     private String exceptionInfo;
 
-    @ApiModelProperty(value = "告警等级 HDSP.XQUA.WARNING_LEVEL")
+    @ApiModelProperty(value = "告警等级 XQUA.WARNING_LEVEL")
     private String warningLevel;
 
     @ApiModelProperty(value = "租户ID")
@@ -127,7 +127,7 @@ public class BatchResultItemDTO extends AuditDomain {
     @ApiModelProperty(value = "规则描述")
     private String ruleDesc;
 
-    @ApiModelProperty(value = "校验类别 HDSP.XQUA.CHECK_TYPE")
+    @ApiModelProperty(value = "校验类别 XQUA.CHECK_TYPE")
     private String checkType;
 
     @ApiModelProperty(value = "批数据方案结果表XQUA_BATCH_RESULT.RESULT_ID")

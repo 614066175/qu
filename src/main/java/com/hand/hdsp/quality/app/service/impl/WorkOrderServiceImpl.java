@@ -13,14 +13,13 @@ import com.hand.hdsp.quality.infra.converter.WorkOrderConverter;
 import com.hand.hdsp.quality.infra.mapper.WorkOrderMapper;
 import com.hand.hdsp.quality.infra.util.CustomThreadPool;
 import com.hand.hdsp.quality.infra.util.DataSecurityUtil;
+import com.hand.hdsp.quality.message.adapter.WorkOrderMessageAdapter;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-
-import com.hand.hdsp.quality.message.adapter.WorkOrderMessageAdapter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.message.MessageClient;
@@ -35,7 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static com.hand.hdsp.quality.infra.constant.WorkOrderConstants.*;
+import static com.hand.hdsp.quality.infra.constant.WorkOrderConstants.OrderOperateType;
+import static com.hand.hdsp.quality.infra.constant.WorkOrderConstants.WorkOrderStatus;
 import static org.apache.poi.util.LocaleID.ZH_CN;
 
 /**
@@ -58,23 +58,23 @@ public class WorkOrderServiceImpl implements WorkOrderService {
     /**
      * 质量工单代办消息发送消息配置
      */
-    public static final String ORDER_LAUNCH = "HDSP.XQUA.ORDER_LAUNCH";
+    public static final String ORDER_LAUNCH = "XQUA.ORDER_LAUNCH";
     /**
      * 质量工单提交消息发送消息配置
      */
-    public static final String ORDER_SUBMIT = "HDSP.XQUA.ORDER_SUBMIT";
+    public static final String ORDER_SUBMIT = "XQUA.ORDER_SUBMIT";
     /**
      *质量工单拒绝消息发送消息配置
      */
-    public static final String ORDER_REFUSE = "HDSP.XQUA.ORDER_REFUSE";
+    public static final String ORDER_REFUSE = "XQUA.ORDER_REFUSE";
     /**
      * 质量工单催办消息发送消息配置
      */
-    public static final String ORDER_TODO = "HDSP.XQUA.ORDER_TODO";
+    public static final String ORDER_TODO = "XQUA.ORDER_TODO";
     /**
      * 质量工单转交消息发送配置
      */
-    public static final String ORDER_FORWARD = "HDSP.XQUA.ORDER_FORWARD";
+    public static final String ORDER_FORWARD = "XQUA.ORDER_FORWARD";
 
     public WorkOrderServiceImpl(WorkOrderRepository workOrderRepository, WorkOrderOperationRepository workOrderOperationRepository, CodeRuleBuilder codeRuleBuilder, WorkOrderMapper workOrderMapper, WorkOrderConverter workOrderConverter, MessageClient messageClient, WorkOrderMessageAdapter workOrderMessageAdapter) {
         this.workOrderRepository = workOrderRepository;

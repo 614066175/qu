@@ -56,11 +56,11 @@ public class PlanExceptionUtil {
     public static DriverSessionService driverSessionService;
     public static LovAdapter lovAdapter;
 
-    public static final String WARNING_LEVEL_LOV = "HDSP.XQUA.WARNING_LEVEL";
+    public static final String WARNING_LEVEL_LOV = "XQUA.WARNING_LEVEL";
 
-    public static final String CHECK_ITEM_LOV = "HDSP.XQUA.CHECK_ITEM";
+    public static final String CHECK_ITEM_LOV = "XQUA.CHECK_ITEM";
 
-    public static final String COUNT_TYPE_LOV = "HDSP.XQUA.COUNT_TYPE";
+    public static final String COUNT_TYPE_LOV = "XQUA.COUNT_TYPE";
 
     public static final String EXCEPTION_NUMBER = "XQUA.EXCEPTION_NUMBER";
     public static final String PROBLEM_BATCH_NUMBER = "XQUA.PROBLEM_BATCH_NUMBER";

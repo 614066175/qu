@@ -55,7 +55,7 @@ public class PlanGroupDTO extends AuditDomain {
 
     @ApiModelProperty(value = "分组类型BATCH/STREAMING")
 //    @ExcelColumn(zh = "分组类型", en = "group type")
-    @LovValue(lovCode = "HDSP.XQUA.GROUP_TYPE",meaningField = "groupTypeMeaning")
+    @LovValue(lovCode = "XQUA.GROUP_TYPE",meaningField = "groupTypeMeaning")
     private String groupType;
 
     @ExcelColumn(zh = "分组类型", en = "group type")

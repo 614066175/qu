@@ -36,7 +36,7 @@ public class RuleLine extends AuditDomain {
 
     private Long ruleId;
 
-    @LovValue(lovCode = "HDSP.XQUA.CHECK_WAY", meaningField = "checkWayMeaning")
+    @LovValue(lovCode = "XQUA.CHECK_WAY", meaningField = "checkWayMeaning")
     private String checkWay;
 
     @LovValue(lovCode = PlanConstant.LOV_CHECK_ITEM, meaningField = "checkItemMeaning")
@@ -45,7 +45,7 @@ public class RuleLine extends AuditDomain {
     @LovValue(lovCode = PlanConstant.LOV_COUNT_TYPE, meaningField = "countTypeMeaning")
     private String countType;
 
-    @LovValue(lovCode = "HDSP.XQUA.COMPARE_WAY", meaningField = "compareWayMeaning")
+    @LovValue(lovCode = "XQUA.COMPARE_WAY", meaningField = "compareWayMeaning")
     private String compareWay;
 
     private String regularExpression;

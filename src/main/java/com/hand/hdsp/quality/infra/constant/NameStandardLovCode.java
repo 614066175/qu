@@ -10,7 +10,7 @@ package com.hand.hdsp.quality.infra.constant;
  */
 public interface NameStandardLovCode {
 
-    String EXE_STATUS = "HDSP.XSTA.EXEC_STATUS";
-    String NAME_STANDARD_TYPE = "HDSP.XSTA.NAME_STANDARD_TYPE";
-    String DATASOURCE_CODE_TYPE = "HDSP.XCOR.DATASOURCE_TYPE";
+    String EXE_STATUS = "XSTA.EXEC_STATUS";
+    String NAME_STANDARD_TYPE = "XSTA.NAME_STANDARD_TYPE";
+    String DATASOURCE_CODE_TYPE = "XCOR.DATASOURCE_TYPE";
 }

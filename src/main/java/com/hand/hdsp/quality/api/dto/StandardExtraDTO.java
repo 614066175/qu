@@ -1,14 +1,14 @@
 package com.hand.hdsp.quality.api.dto;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  * <p>标准附加信息表 数据传输对象</p>
@@ -31,7 +31,7 @@ public class StandardExtraDTO extends AuditDomain {
     @NotNull
     private Long standardId;
 
-    @ApiModelProperty(value = "标准类型(快码：HDSP.XSTA.STANDARD_TYPE：DATA/数据标准，FIELD/字段标准，NAME/命名标准)")
+    @ApiModelProperty(value = "标准类型(快码：XSTA.STANDARD_TYPE：DATA/数据标准，FIELD/字段标准，NAME/命名标准)")
     @NotBlank
     @Size(max = 30)
     private String standardType;

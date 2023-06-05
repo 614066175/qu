@@ -5,12 +5,11 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
-
 import org.hzero.boot.platform.lov.annotation.LovValue;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
@@ -78,10 +77,10 @@ public class DataStandardDTO extends AuditDomain{
     @ExcelColumn(zh = "标准描述",en = "standardDesc")
     private String standardDesc;
 
-    @ApiModelProperty(value = "数据类型 (HDSP.XMOD.FIELD_TYPE)")
+    @ApiModelProperty(value = "数据类型 (XMOD.FIELD_TYPE)")
     @NotBlank
     @Size(max = 30)
-    @LovValue(lovCode = "HDSP.XMOD.FIELD_TYPE",meaningField = "dataTypeMeaning")
+    @LovValue(lovCode = "XMOD.FIELD_TYPE",meaningField = "dataTypeMeaning")
 //    @ExcelColumn(zh = "数据类型",en="dataType")
     private String dataType;
 
@@ -93,7 +92,7 @@ public class DataStandardDTO extends AuditDomain{
     private String dataPattern;
 
     @ApiModelProperty(value = "长度类型（快码HSDP.XSTA.LENGTH_TYPE）")
-    @LovValue(lovCode = "HDSP.XSTA.LENGTH_TYPE",meaningField = "lengthTypeMeaning")
+    @LovValue(lovCode = "XSTA.LENGTH_TYPE",meaningField = "lengthTypeMeaning")
 //    @ExcelColumn(zh = "数据长度-类型",en ="lengthType")
     private String lengthType;
 
@@ -104,8 +103,8 @@ public class DataStandardDTO extends AuditDomain{
     @ExcelColumn(zh = "数据长度",en = "dataLength")
     private String dataLength;
 
-    @ApiModelProperty(value = "值域类型（快码HDSP.XSTA.VALUE_TYPE）")
-    @LovValue(lovCode = "HDSP.XSTA.VALUE_TYPE",meaningField = "valueTypeMeaning")
+    @ApiModelProperty(value = "值域类型（快码XSTA.VALUE_TYPE）")
+    @LovValue(lovCode = "XSTA.VALUE_TYPE",meaningField = "valueTypeMeaning")
 //    @ExcelColumn(zh = "值域类型",en="valueType")
     private String valueType;
 
@@ -116,8 +115,8 @@ public class DataStandardDTO extends AuditDomain{
     @ExcelColumn(zh = "值域范围",en = "valueRange")
     private String valueRange;
 
-    @ApiModelProperty(value = "标准依据（快码HDSP.XSTA.STANDARD_ACCORD）")
-    @LovValue(lovCode = "HDSP.XSTA.STANDARD_ACCORD",meaningField = "standardAccordMeaning")
+    @ApiModelProperty(value = "标准依据（快码XSTA.STANDARD_ACCORD）")
+    @LovValue(lovCode = "XSTA.STANDARD_ACCORD",meaningField = "standardAccordMeaning")
 //    @ExcelColumn(zh = "标准依据" ,en="standardAccord")
     private String standardAccord;
 

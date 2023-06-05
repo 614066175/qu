@@ -1,25 +1,18 @@
 package com.hand.hdsp.quality.api.dto;
 
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.*;
+import org.hzero.boot.platform.lov.annotation.LovValue;
+
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
-
-import io.swagger.annotations.ApiModelProperty;
-import io.swagger.annotations.ApiModel;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.*;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import org.hzero.boot.platform.lov.annotation.LovValue;
 
 /**
  * <p>命名标准执行历史表 数据传输对象</p>
@@ -62,8 +55,8 @@ public class NameExecHistoryDTO extends AuditDomain {
     @NotBlank
     private String execRule;
 
-    @LovValue(lovCode = "HDSP.XSTA.EXEC_STATUS",meaningField = "execStatusMeaning")
-    @ApiModelProperty(value = "稽核状态 (快码：HDSP.XSTA.EXEC_STATUS) <READY:就绪 RUNNING：执行中 SUCCESS：成功 FAILED：失败>")
+    @LovValue(lovCode = "XSTA.EXEC_STATUS",meaningField = "execStatusMeaning")
+    @ApiModelProperty(value = "稽核状态 (快码：XSTA.EXEC_STATUS) <READY:就绪 RUNNING：执行中 SUCCESS：成功 FAILED：失败>")
     @NotBlank
     @Size(max = 30)
     private String execStatus;

@@ -49,7 +49,7 @@ public class StreamingPlanRuleDTO extends AuditDomain {
     @ApiModelProperty(value = "规则描述")
     private String ruleDesc;
 
-    @ApiModelProperty(value = "规则类型 HDSP.XQUA.STREAMING.RULE_TYPE")
+    @ApiModelProperty(value = "规则类型 XQUA.STREAMING.RULE_TYPE")
     private String ruleType;
 
     @ApiModelProperty(value = "权重")

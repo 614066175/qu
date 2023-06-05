@@ -59,8 +59,8 @@ public class NameStandardDTO extends AuditDomain {
     private String standardDesc;
 
     //    @ExcelColumn(zh = "命名标准类型",en="standardType",order = 6)
-    @LovValue(lovCode = "HDSP.XSTA.NAME_STANDARD_TYPE", meaningField = "standardTypeMeaning")
-    @ApiModelProperty(value = "命名标准类型，快码：HDSP.XSTA.NAME_STANDARD_TYPE <TABLE:表名称>")
+    @LovValue(lovCode = "XSTA.NAME_STANDARD_TYPE", meaningField = "standardTypeMeaning")
+    @ApiModelProperty(value = "命名标准类型，快码：XSTA.NAME_STANDARD_TYPE <TABLE:表名称>")
     @NotBlank
     @Size(max = 30)
     private String standardType;
@@ -91,8 +91,8 @@ public class NameStandardDTO extends AuditDomain {
     @ApiModelProperty(value = "责任部门ID")
     private Long chargeDeptId;
 
-    @LovValue(lovCode = "HDSP.XSTA.EXEC_STATUS", meaningField = "latestCheckedStatusMeaning")
-    @ApiModelProperty(value = "最新稽核状态，值集：HDSP.XSTA.EXEC_STATUS")
+    @LovValue(lovCode = "XSTA.EXEC_STATUS", meaningField = "latestCheckedStatusMeaning")
+    @ApiModelProperty(value = "最新稽核状态，值集：XSTA.EXEC_STATUS")
     private String latestCheckedStatus;
 
     @ApiModelProperty("最新稽核异常数量")

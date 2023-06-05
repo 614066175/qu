@@ -40,7 +40,7 @@ public class StreamingResultRuleDTO extends AuditDomain {
     @ApiModelProperty(value = "topic信息")
     private String topicInfo;
 
-    @ApiModelProperty(value = "规则类型 HDSP.XQUA.RULE_TYPE")
+    @ApiModelProperty(value = "规则类型 XQUA.RULE_TYPE")
     private String ruleType;
 
     @ApiModelProperty(value = "延迟/断流时间")
@@ -49,7 +49,7 @@ public class StreamingResultRuleDTO extends AuditDomain {
     @ApiModelProperty(value = "错误信息")
     private String exceptionInfo;
 
-    @ApiModelProperty(value = "告警等级 HDSP.XQUA.WARNING_LEVEL")
+    @ApiModelProperty(value = "告警等级 XQUA.WARNING_LEVEL")
     private String warningLevel;
 
     @ApiModelProperty(value = "租户ID")

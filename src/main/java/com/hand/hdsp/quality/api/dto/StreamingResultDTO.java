@@ -44,7 +44,7 @@ public class StreamingResultDTO extends AuditDomain {
     @ApiModelProperty(value = "结束时间")
     private Date endDate;
 
-    @ApiModelProperty(value = "方案状态 HDSP.XQUA.PLAN_STATUS (未评估、运行中、执行成功、执行失败)")
+    @ApiModelProperty(value = "方案状态 XQUA.PLAN_STATUS (未评估、运行中、执行成功、执行失败)")
     private String planStatus;
 
     @ApiModelProperty(value = "下次评估时间")

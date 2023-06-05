@@ -1,25 +1,17 @@
 package com.hand.hdsp.quality.api.dto;
 
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-
-import io.choerodon.mybatis.domain.AuditDomain;
-import java.util.Date;
-import java.util.List;
-
-import io.swagger.annotations.ApiModelProperty;
-import io.swagger.annotations.ApiModel;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.*;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.choerodon.mybatis.domain.AuditDomain;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.*;
 import org.hzero.boot.platform.lov.annotation.LovValue;
+
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.List;
 
 /**
  * <p>命名落标表 数据传输对象</p>
@@ -47,8 +39,8 @@ public class NameAimDTO extends AuditDomain {
     @Size(max = 50)
     private String datasourceCode;
 
-    @LovValue(lovCode = "HDSP.XCOR.DATASOURCE_TYPE",meaningField = "datasourceTypeMeaning")
-    @ApiModelProperty(value = "数据源类型，快码：HDSP.XCOR.DATASOURCE_TYPE")
+    @LovValue(lovCode = "XCOR.DATASOURCE_TYPE",meaningField = "datasourceTypeMeaning")
+    @ApiModelProperty(value = "数据源类型，快码：XCOR.DATASOURCE_TYPE")
     @NotBlank
     @Size(max = 30)
     private String datasourceType;

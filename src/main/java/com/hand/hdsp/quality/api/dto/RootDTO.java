@@ -1,25 +1,16 @@
 package com.hand.hdsp.quality.api.dto;
 
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-
-import io.choerodon.mybatis.domain.AuditDomain;
-import java.util.Date;
-import io.swagger.annotations.ApiModelProperty;
-import io.swagger.annotations.ApiModel;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.*;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
-
+import io.choerodon.mybatis.domain.AuditDomain;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.*;
 import org.hzero.export.annotation.ExcelColumn;
-import org.hzero.export.annotation.ExcelSheet;
+
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.util.Date;
 
 /**
  * <p>词根 数据传输对象</p>
@@ -60,7 +51,7 @@ public class RootDTO extends AuditDomain {
     @ApiModelProperty(value = "责任人ID",required = true)
     @NotNull
     private Long chargeId;
-    @ApiModelProperty(value = "状态(	HDSP.XSTA.STANDARD_STATUS)")
+    @ApiModelProperty(value = "状态(	XSTA.STANDARD_STATUS)")
     private String releaseStatus;
     @ApiModelProperty(value = "分组ID")
     private Long groupId;

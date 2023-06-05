@@ -46,32 +46,32 @@ public interface PlanConstant {
     /**
      * 告警等级LOV
      */
-    String LOV_WARNING_LEVEL = "HDSP.XQUA.WARNING_LEVEL";
+    String LOV_WARNING_LEVEL = "XQUA.WARNING_LEVEL";
 
     /**
      * 方案状态LOV
      */
-    String LOV_PLAN_STATUS = "HDSP.XQUA.PLAN_STATUS";
+    String LOV_PLAN_STATUS = "XQUA.PLAN_STATUS";
 
     /**
      * 校验项(总体)LOV
      */
-    String LOV_CHECK_ITEM = "HDSP.XQUA.CHECK_ITEM";
+    String LOV_CHECK_ITEM = "XQUA.CHECK_ITEM";
 
     /**
      * 校验类型 LOV
      */
-    String LOV_COUNT_TYPE = "HDSP.XQUA.COUNT_TYPE";
+    String LOV_COUNT_TYPE = "XQUA.COUNT_TYPE";
 
     /**
      * 比较方式 LOV
      */
-    String LOV_COMPARE_WAY = "HDSP.XQUA.COMPARE_WAY";
+    String LOV_COMPARE_WAY = "XQUA.COMPARE_WAY";
 
     /**
      * 比较符
      */
-    String LOV_COMPARE_SYMBOL = "HDSP.XQUA.COMPARE_SYMBOL";
+    String LOV_COMPARE_SYMBOL = "XQUA.COMPARE_SYMBOL";
 
     /**
      * 告警等级-正常
@@ -183,7 +183,7 @@ public interface PlanConstant {
 
 
     /**
-     * 规则校验方式 HDSP.XQUA.CHECK_WAY
+     * 规则校验方式 XQUA.CHECK_WAY
      */
     interface CheckWay {
         /**

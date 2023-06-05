@@ -66,7 +66,7 @@ public class RuleDTO extends AuditDomain {
     private String ruleDesc;
 
     @ApiModelProperty("校验类别")
-    @LovValue(value = "HDSP.XQUA.CHECK_TYPE", meaningField = "checkTypeMeaning")
+    @LovValue(value = "XQUA.CHECK_TYPE", meaningField = "checkTypeMeaning")
     private String checkType;
 
     @ExcelColumn(zh = "评估指标", en = "check type", order = 3)
@@ -104,7 +104,7 @@ public class RuleDTO extends AuditDomain {
 
     @ApiModelProperty("校验方式")
 //    @ExcelColumn(zh = "校验方式", en = "check way")
-    @LovValue(value = "HDSP.XQUA.CHECK_WAY", meaningField = "checkWayMeaning")
+    @LovValue(value = "XQUA.CHECK_WAY", meaningField = "checkWayMeaning")
     private String checkWay;
 
     @ExcelColumn(zh = "校验方式", en = "check way", order = 7)
@@ -112,15 +112,15 @@ public class RuleDTO extends AuditDomain {
 
     @ApiModelProperty("校验项")
 //    @ExcelColumn(zh = "校验项", en = "check item")
-    @LovValue(value = "HDSP.XQUA.CHECK_ITEM", meaningField = "checkItemMeaning")
+    @LovValue(value = "XQUA.CHECK_ITEM", meaningField = "checkItemMeaning")
     private String checkItem;
 
     @ExcelColumn(zh = "校验项", en = "check item", order = 8)
     private String checkItemMeaning;
 
-    @ApiModelProperty("校验类型 HDSP.XQUA.COUNT_TYPE")
+    @ApiModelProperty("校验类型 XQUA.COUNT_TYPE")
 //    @ExcelColumn(zh = "校验类型", en = "count type")
-    @LovValue(lovCode = "HDSP.XQUA.COUNT_TYPE", meaningField = "countTypeMeaning")
+    @LovValue(lovCode = "XQUA.COUNT_TYPE", meaningField = "countTypeMeaning")
     private String countType;
 
     @ExcelColumn(zh = "校验类型", en = "count type", order = 9)
@@ -128,7 +128,7 @@ public class RuleDTO extends AuditDomain {
 
     @ApiModelProperty("比较方式")
 //    @ExcelColumn(zh = "比较方式", en = "compare way")
-    @LovValue(lovCode = "HDSP.XQUA.COMPARE_WAY", meaningField = "compareWayMeaning")
+    @LovValue(lovCode = "XQUA.COMPARE_WAY", meaningField = "compareWayMeaning")
     private String compareWay;
 
     @ExcelColumn(zh = "比较方式", en = "compare way", order = 10)

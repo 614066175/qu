@@ -25,10 +25,10 @@ public class ItemTemplateSqlDTO extends AuditDomain {
     @ApiModelProperty("表ID，主键，供其他表做外键")
     private Long sqlId;
 
-    @ApiModelProperty(value = "校验项 HDSP.XQUA.CHECK_ITEM")
+    @ApiModelProperty(value = "校验项 XQUA.CHECK_ITEM")
     private String checkItem;
 
-    @ApiModelProperty(value = "数据源类型(快码：HDSP.DATASOURCE_TYPE)")
+    @ApiModelProperty(value = "数据源类型(快码：DATASOURCE_TYPE)")
     private String datasourceType;
 
     @ApiModelProperty(value = "SQL")

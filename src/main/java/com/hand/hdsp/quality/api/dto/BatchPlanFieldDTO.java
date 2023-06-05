@@ -53,9 +53,9 @@ public class BatchPlanFieldDTO extends AuditDomain {
     @ExcelColumn(zh = "规则名称", en = "rule name")
     private String ruleName;
 
-    @ApiModelProperty(value = "评估指标 HDSP.XQUA.CHECK_TYPE")
+    @ApiModelProperty(value = "评估指标 XQUA.CHECK_TYPE")
 //    @ExcelColumn(zh = "评估指标", en = "check type")
-    @LovValue(lovCode = "HDSP.XQUA.CHECK_TYPE", meaningField = "checkTypeMeaning")
+    @LovValue(lovCode = "XQUA.CHECK_TYPE", meaningField = "checkTypeMeaning")
     private String checkType;
 
     @ExcelColumn(zh = "评估指标", en = "check type")
@@ -91,25 +91,25 @@ public class BatchPlanFieldDTO extends AuditDomain {
     @NotNull
     private Long tenantId;
 
-    @ApiModelProperty(value = "校验方式 HDSP.XQUA.CHECK_WAY")
+    @ApiModelProperty(value = "校验方式 XQUA.CHECK_WAY")
 //    @ExcelColumn(zh = "校验方式", en = "check way")
-    @LovValue(lovCode = "HDSP.XQUA.CHECK_WAY", meaningField = "checkWayMeaning")
+    @LovValue(lovCode = "XQUA.CHECK_WAY", meaningField = "checkWayMeaning")
     private String checkWay;
 
     @ExcelColumn(zh = "校验方式", en = "check way")
     private String checkWayMeaning;
 
-    @ApiModelProperty(value = "校验项 HDSP.XQUA.CHECK_ITEM")
+    @ApiModelProperty(value = "校验项 XQUA.CHECK_ITEM")
 //    @ExcelColumn(zh = "校验项", en = "check item")
-    @LovValue(lovCode = "HDSP.XQUA.CHECK_ITEM", meaningField = "checkItemMeaning")
+    @LovValue(lovCode = "XQUA.CHECK_ITEM", meaningField = "checkItemMeaning")
     private String checkItem;
 
     @ExcelColumn(zh = "校验项", en = "check item")
     private String checkItemMeaning;
 
-    @ApiModelProperty(value = "校验类型 HDSP.XQUA.COUNT_TYPE")
+    @ApiModelProperty(value = "校验类型 XQUA.COUNT_TYPE")
 //    @ExcelColumn(zh = "校验类型", en = "count type")
-    @LovValue(lovCode = "HDSP.XQUA.COUNT_TYPE", meaningField = "countTypeMeaning")
+    @LovValue(lovCode = "XQUA.COUNT_TYPE", meaningField = "countTypeMeaning")
     private String countType;
 
     @ExcelColumn(zh = "校验类型", en = "count type")
@@ -136,9 +136,9 @@ public class BatchPlanFieldDTO extends AuditDomain {
     @ExcelColumn(zh = "启用条件", en = "whereCondition")
     private String whereCondition;
 
-    @ApiModelProperty(value = "比较方式 HDSP.XQUA.COMPARE_WAY")
+    @ApiModelProperty(value = "比较方式 XQUA.COMPARE_WAY")
 //    @ExcelColumn(zh = "比较方式", en = "compareWay")
-    @LovValue(lovCode = "HDSP.XQUA.COMPARE_WAY", meaningField = "compareWayMeaning")
+    @LovValue(lovCode = "XQUA.COMPARE_WAY", meaningField = "compareWayMeaning")
     private String compareWay;
 
     @ExcelColumn(zh = "比较方式", en = "compareWay")

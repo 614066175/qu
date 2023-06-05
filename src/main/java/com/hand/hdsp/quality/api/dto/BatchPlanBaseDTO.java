@@ -44,7 +44,7 @@ public class BatchPlanBaseDTO extends AuditDomain {
     @ExcelColumn(zh = "质检项名称", en = "planBaseName")
     private String planBaseName;
 
-    @ApiModelProperty(value = "数据源类型(快码：HDSP.DATASOURCE_TYPE)")
+    @ApiModelProperty(value = "数据源类型(快码：XDSP.DATASOURCE_TYPE)")
     @ExcelColumn(zh = "数据源类型", en = "datasourceType")
     private String datasourceType;
 
@@ -56,9 +56,9 @@ public class BatchPlanBaseDTO extends AuditDomain {
     @ExcelColumn(zh = "数据库", en = "datasourceSchema")
     private String datasourceSchema;
 
-    @ApiModelProperty(value = "类型 HDSP.XQUA.SQL_TYPE (TABLE/VIEW/SQL)")
+    @ApiModelProperty(value = "类型 XQUA.SQL_TYPE (TABLE/VIEW/SQL)")
 //    @ExcelColumn(zh = "类型", en = "sqlType")
-    @LovValue(lovCode = "HDSP.XQUA.SQL_TYPE",meaningField = "sqlTypeMeaning")
+    @LovValue(lovCode = "XQUA.SQL_TYPE",meaningField = "sqlTypeMeaning")
     private String sqlType;
 
     @ExcelColumn(zh = "类型", en = "sqlType")
@@ -74,7 +74,7 @@ public class BatchPlanBaseDTO extends AuditDomain {
 
     @ApiModelProperty(value = "增量校验策略")
 //    @ExcelColumn(zh = "增量同步策略", en = "incrementStrategy")
-    @LovValue(lovCode = "HDSP.XFAC.INCREMENT_STRATEGY",meaningField = "incrementStrategyMeaning")
+    @LovValue(lovCode = "XFAC.INCREMENT_STRATEGY",meaningField = "incrementStrategyMeaning")
     private String incrementStrategy;
 
     @ExcelColumn(zh = "增量同步策略", en = "incrementStrategy")

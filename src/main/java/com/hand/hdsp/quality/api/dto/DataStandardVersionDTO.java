@@ -51,7 +51,7 @@ public class DataStandardVersionDTO extends AuditDomain {
     @ApiModelProperty(value = "数据标准描述")
     private String standardDesc;
 
-    @ApiModelProperty(value = "数据类型(快码：HDSP.XMOD.FIELD_TYPE)")
+    @ApiModelProperty(value = "数据类型(快码：XMOD.FIELD_TYPE)")
     @NotBlank
     @Size(max = 30)
     private String dataType;
@@ -65,13 +65,13 @@ public class DataStandardVersionDTO extends AuditDomain {
     @ApiModelProperty(value = "数据长度")
     private String dataLength;
 
-    @ApiModelProperty(value = "值域类型（快码：HDSP.XSTA.VALUE_TYPE）")
+    @ApiModelProperty(value = "值域类型（快码：XSTA.VALUE_TYPE）")
     private String valueType;
 
     @ApiModelProperty(value = "值域")
     private String valueRange;
 
-    @ApiModelProperty(value = "标准依据（快码：HDSP.XSTA.STANDARD_ACCORD）")
+    @ApiModelProperty(value = "标准依据（快码：XSTA.STANDARD_ACCORD）")
     private String standardAccord;
 
     @ApiModelProperty(value = "依据内容")

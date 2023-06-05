@@ -50,7 +50,7 @@ public class NameStandardGroupDTO extends AuditDomain {
     @Transient
     private String parentGroupCode;
 
-    @ApiModelProperty(value = "标准类型(快码：HDSP.XSTA.STANDARD_TYPE：DATA/数据标准，FIELD/字段标准，NAME/命名标准)")
+    @ApiModelProperty(value = "标准类型(快码：XSTA.STANDARD_TYPE：DATA/数据标准，FIELD/字段标准，NAME/命名标准)")
     @NotBlank
     @Size(max = 30)
     private String standardType;

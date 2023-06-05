@@ -86,7 +86,7 @@ public class BatchResultServiceImpl implements BatchResultService {
     public static final String DOWN_EXCEPTION_NUM = "XQUA.DOWN_EXCEPTION_NUM";
     public static final String DOWN_EXCEPTION_BATCH_SIZE = "XQUA.DOWN_EXCEPTION_BATCH_SIZE";
 
-    public static final String WARNING_LEVEL_LOV = "HDSP.XQUA.WARNING_LEVEL";
+    public static final String WARNING_LEVEL_LOV = "XQUA.WARNING_LEVEL";
 
     public BatchResultServiceImpl(ExecutionFlowFeign executionFlowFeign,
                                   BatchResultMapper batchResultMapper,

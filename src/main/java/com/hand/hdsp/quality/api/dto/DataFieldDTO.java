@@ -5,12 +5,11 @@ import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
-
 import org.hzero.boot.platform.lov.annotation.LovValue;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.export.annotation.ExcelColumn;
 import org.hzero.export.annotation.ExcelSheet;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
@@ -86,9 +85,9 @@ public class DataFieldDTO extends AuditDomain {
     @ExcelColumn(zh = "引用数据标准",en = "dataStandardCode",groups = {Group1.class})
     private String dataStandardCode;
 
-    @ApiModelProperty(value = "字段类型 (HDSP.XMOD.FIELD_TYPE)")
+    @ApiModelProperty(value = "字段类型 (XMOD.FIELD_TYPE)")
     @NotBlank
-    @LovValue(lovCode = "HDSP.XMOD.FIELD_TYPE",meaningField = "fieldTypeMeaning")
+    @LovValue(lovCode = "XMOD.FIELD_TYPE",meaningField = "fieldTypeMeaning")
 //    @ExcelColumn(zh = "字段类型", en = "fieldType", groups = {Group1.class})
     private String fieldType;
 
@@ -108,8 +107,8 @@ public class DataFieldDTO extends AuditDomain {
     @ExcelColumn(zh = "数据格式", en = "dataPattern", groups = {Group1.class})
     private String dataPattern;
 
-    @ApiModelProperty(value = "值域类型（快码HDSP.XSTA.VALUE_TYPE）")
-    @LovValue(lovCode = "HDSP.XSTA.VALUE_TYPE",meaningField = "valueTypeMeaning")
+    @ApiModelProperty(value = "值域类型（快码XSTA.VALUE_TYPE）")
+    @LovValue(lovCode = "XSTA.VALUE_TYPE",meaningField = "valueTypeMeaning")
 //    @ExcelColumn(zh = "值域类型", en = "valueType", groups = {Group1.class})
     private String valueType;
 

@@ -1,12 +1,11 @@
 package com.hand.hdsp.quality.app.service.impl;
 
+import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.EasyExcelFactory;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.support.ExcelTypeEnum;
-import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.alibaba.fastjson.JSON;
-import com.hand.hdsp.core.util.excel.ExcelUtil;
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.RootMatchService;
 import com.hand.hdsp.quality.app.service.RootService;
@@ -35,7 +34,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hzero.boot.file.FileClient;
 import org.hzero.boot.imported.app.service.TemplateClientService;
@@ -48,7 +46,6 @@ import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.infra.util.UUIDUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,10 +53,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -228,7 +225,7 @@ public class RootMatchServiceImpl implements RootMatchService {
         }
         //下载模板
         TemplateClientService templateClientService = applicationContext.getBean(TemplateClientService.class);
-        Template template = templateClientService.getTemplate(BaseConstants.DEFAULT_TENANT_ID, "HDSP.XQUA.ROOT_MATCHING");
+        Template template = templateClientService.getTemplate(BaseConstants.DEFAULT_TENANT_ID, "XQUA.ROOT_MATCHING");
         try (InputStream inputStream = fileClient.downloadFile(template.getTenantId(), HZeroService.Import.BUCKET_NAME, template.getTemplateUrl())){
             fileToResponse(response);
             ServletOutputStream outputStream = response.getOutputStream();
@@ -329,7 +326,7 @@ public class RootMatchServiceImpl implements RootMatchService {
             args.put("partMatchNum", String.valueOf(partMatchNum));
             args.put("failNum", String.valueOf(failNum));
             //发送站内信
-            messageClient.sendWebMessage(rootMatchDTO.getTenantId(), "HDSP.XQUA.ROOT_MATCH", null, Collections.singletonList(receiver), args);
+            messageClient.sendWebMessage(rootMatchDTO.getTenantId(), "XQUA.ROOT_MATCH", null, Collections.singletonList(receiver), args);
         }
         return rootMatches;
     }

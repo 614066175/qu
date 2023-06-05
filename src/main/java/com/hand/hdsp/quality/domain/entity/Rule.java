@@ -43,10 +43,10 @@ public class Rule extends AuditDomain {
 
     private String ruleDesc;
 
-    @LovValue(lovCode = "HDSP.XQUA.CHECK_TYPE", meaningField = "checkTypeMeaning")
+    @LovValue(lovCode = "XQUA.CHECK_TYPE", meaningField = "checkTypeMeaning")
     private String checkType;
 
-    @LovValue(lovCode = "HDSP.XQUA.RULE_TYPE", meaningField = "ruleTypeMeaning")
+    @LovValue(lovCode = "XQUA.RULE_TYPE", meaningField = "ruleTypeMeaning")
     private String ruleType;
 
     private Integer exceptionBlock;

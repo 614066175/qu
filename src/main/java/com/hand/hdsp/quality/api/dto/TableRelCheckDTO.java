@@ -1,11 +1,11 @@
 package com.hand.hdsp.quality.api.dto;
 
-import javax.validation.constraints.NotBlank;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+
+import javax.validation.constraints.NotBlank;
 
 /**
  * <p>
@@ -29,7 +29,7 @@ public class TableRelCheckDTO {
 
     private String relFieldName;
 
-    @ApiModelProperty(value = "关联关系 HDSP.XQUA.REL_CODE")
+    @ApiModelProperty(value = "关联关系 XQUA.REL_CODE")
     @NotBlank
     private String relCode;
 

@@ -54,9 +54,9 @@ public class BatchPlanRelTableDTO extends AuditDomain {
     private String ruleName;
 
 
-    @ApiModelProperty(value = "评估指标 HDSP.XQUA.CHECK_TYPE")
+    @ApiModelProperty(value = "评估指标 XQUA.CHECK_TYPE")
 //    @ExcelColumn(zh = "评估指标", en = "check type")
-    @LovValue(lovCode = "HDSP.XQUA.CHECK_TYPE", meaningField = "checkTypeMeaning")
+    @LovValue(lovCode = "XQUA.CHECK_TYPE", meaningField = "checkTypeMeaning")
     private String checkType;
 
     @ExcelColumn(zh = "评估指标", en = "check type")
@@ -77,7 +77,7 @@ public class BatchPlanRelTableDTO extends AuditDomain {
 
     @ApiModelProperty(value = "校验项")
 //    @ExcelColumn(zh = "检验项", en = "checkItem")
-    @LovValue(lovCode = "HDSP.XQUA.CHECK_ITEM", meaningField = "checkItemMeaning")
+    @LovValue(lovCode = "XQUA.CHECK_ITEM", meaningField = "checkItemMeaning")
     private String checkItem;
 
     @ExcelColumn(zh = "检验项", en = "checkItem")
@@ -90,7 +90,7 @@ public class BatchPlanRelTableDTO extends AuditDomain {
     @NotNull
     private Long planBaseId;
 
-    @ApiModelProperty(value = "关联数据源类型(快码：HDSP.DATASOURCE_TYPE)")
+    @ApiModelProperty(value = "关联数据源类型(快码：DATASOURCE_TYPE)")
     private String relDatasourceType;
 
     @ApiModelProperty(value = "关联数据源ID")

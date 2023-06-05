@@ -3,20 +3,8 @@ package com.hand.hdsp.quality.api.dto;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.metadata.BaseRowModel;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.choerodon.mybatis.domain.AuditDomain;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
-import org.hzero.boot.platform.lov.annotation.LovValue;
-import org.hzero.export.annotation.ExcelColumn;
-import org.hzero.export.annotation.ExcelSheet;
-
-import javax.persistence.Transient;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.Date;
-import java.util.List;
 
 @Data
 @Builder
@@ -52,7 +40,7 @@ public class DataFieldModel extends BaseRowModel {
     @ExcelProperty(value = "字段精度",index = 6)
     private Integer fieldAccuracy;
 
-    @ApiModelProperty(value = "字段类型 (HDSP.XMOD.FIELD_TYPE)")
+    @ApiModelProperty(value = "字段类型 (XMOD.FIELD_TYPE)")
     @ExcelProperty(value = "字段类型",index = 7)
     private String fieldType;
 
@@ -64,7 +52,7 @@ public class DataFieldModel extends BaseRowModel {
     @ExcelProperty(value = "数据格式",index = 9)
     private String dataPattern;
 
-    @ApiModelProperty(value = "值域类型（快码HDSP.XSTA.VALUE_TYPE）")
+    @ApiModelProperty(value = "值域类型（快码XSTA.VALUE_TYPE）")
     @ExcelProperty(value = "值域类型",index = 10)
     private String valueType;
 

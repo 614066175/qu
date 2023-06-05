@@ -1,24 +1,16 @@
 package com.hand.hdsp.quality.api.dto;
 
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
-import java.util.Date;
-import java.util.List;
-
-import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiModel;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.util.Date;
+import java.util.List;
 
 /**
  * <p>问题知识库表 数据传输对象</p>
@@ -56,19 +48,19 @@ public class SuggestDTO extends AuditDomain {
     @NotBlank
     private String suggestContent;
 
-    @ApiModelProperty(value = "规则类型 HDSP.XQUA.CHECK_RULE")
+    @ApiModelProperty(value = "规则类型 XQUA.CHECK_RULE")
     @Transient
     private String ruleType;
 
-    @ApiModelProperty(value = "校验方式 HDSP.XQUA.CHECK_WAY")
+    @ApiModelProperty(value = "校验方式 XQUA.CHECK_WAY")
     @Transient
     private String checkWay;
 
-    @ApiModelProperty(value = "校验项 HDSP.XQUA.CHECK_ITEM")
+    @ApiModelProperty(value = "校验项 XQUA.CHECK_ITEM")
     @Transient
     private String checkItem;
 
-    @ApiModelProperty(value = "规则字段数据类型 HDSP.XMOD.FIELD_TYPE")
+    @ApiModelProperty(value = "规则字段数据类型 XMOD.FIELD_TYPE")
     @Transient
     private String columnType;
 
