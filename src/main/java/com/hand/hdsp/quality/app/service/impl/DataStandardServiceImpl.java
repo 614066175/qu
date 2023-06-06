@@ -27,8 +27,6 @@ import com.hand.hdsp.quality.infra.util.ValueRangeHandler;
 import com.hand.hdsp.quality.workflow.adapter.DataStandardOfflineWorkflowAdapter;
 import com.hand.hdsp.quality.workflow.adapter.DataStandardOnlineWorkflowAdapter;
 import io.choerodon.core.convertor.ApplicationContextHelper;
-import com.hand.hdsp.quality.workflow.adapter.DataStandardOfflineWorkflowAdapter;
-import com.hand.hdsp.quality.workflow.adapter.DataStandardOnlineWorkflowAdapter;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -72,7 +70,6 @@ import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.RANGE
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.LengthType.FIXED;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
 import static com.hand.hdsp.quality.infra.constant.StandardConstant.Status.*;
-import static org.hzero.core.base.BaseConstants.Symbol.COMMA;
 
 /**
  * <p>
@@ -1009,6 +1006,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                     .objectName(standardAimDTO.getTableName())
                     .incrementStrategy(IncrementStrategy.NONE)
                     .tenantId(standardAimDTO.getTenantId())
+                    .projectId(standardAimDTO.getProjectId())
                     .build();
             batchPlanBaseRepository.insertDTOSelective(batchPlanBaseDTO);
         } else {
@@ -1035,6 +1033,8 @@ public class DataStandardServiceImpl implements DataStandardService {
                     .ruleDesc(dataStandardDTO.getStandardDesc())
                     .checkType(STANDARD)
                     .weight(DEFAULT_WEIGHT)
+                    .tenantId(standardAimDTO.getTenantId())
+                    .projectId(standardAimDTO.getProjectId())
                     .build();
             batchPlanFieldRepository.insertDTOSelective(batchPlanFieldDTO);
         } else {
@@ -1052,6 +1052,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                     .fieldName(standardAimDTO.getFieldName())
                     .regularExpression(dataStandardDTO.getDataPattern())
                     .tenantId(standardAimDTO.getTenantId())
+                    .projectId(standardAimDTO.getProjectId())
                     .build();
             batchPlanFieldLineRepository.insertDTOSelective(batchPlanFieldLineDTO);
             //生成每个校验项的配置项
@@ -1064,6 +1065,8 @@ public class DataStandardServiceImpl implements DataStandardService {
             BatchPlanFieldConDTO batchPlanFieldConDTO = BatchPlanFieldConDTO.builder()
                     .planLineId(batchPlanFieldLineDTO.getPlanLineId())
                     .warningLevel(warningLevel)
+                    .tenantId(standardAimDTO.getTenantId())
+                    .projectId(standardAimDTO.getProjectId())
                     .build();
             batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
         }
@@ -1075,6 +1078,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                     .planRuleId(batchPlanFieldDTO.getPlanRuleId())
                     .fieldName(standardAimDTO.getFieldName())
                     .tenantId(standardAimDTO.getTenantId())
+                    .projectId(standardAimDTO.getProjectId())
                     .build();
             //固定值
             if (FIXED.equals(dataStandardDTO.getLengthType())) {
@@ -1092,6 +1096,8 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .planLineId(batchPlanFieldLineDTO.getPlanLineId())
                         .warningLevel(warningLevel)
                         .compareWay(CompareWay.VALUE)
+                        .tenantId(standardAimDTO.getTenantId())
+                        .projectId(standardAimDTO.getProjectId())
                         .build();
                 batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
             }
@@ -1125,6 +1131,8 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .planLineId(batchPlanFieldLineDTO.getPlanLineId())
                         .warningLevel(warningLevel)
                         .compareWay(RANGE)
+                        .tenantId(standardAimDTO.getTenantId())
+                        .projectId(standardAimDTO.getProjectId())
                         .build();
                 batchPlanFieldConRepository.insertDTOSelective(batchPlanFieldConDTO);
             }
@@ -1137,6 +1145,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                     .planRuleId(batchPlanFieldDTO.getPlanRuleId())
                     .fieldName(standardAimDTO.getFieldName())
                     .tenantId(standardAimDTO.getTenantId())
+                    .projectId(standardAimDTO.getProjectId())
                     .build();
             //判断类型，并生成不同的配置项告警规则
             String warningLevel = "";
@@ -1227,6 +1236,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                 .planBaseId(batchPlanBaseDTO.getPlanBaseId())
                 .planRuleId(batchPlanFieldDTO.getPlanRuleId())
                 .tenantId(standardAimDTO.getTenantId())
+                .projectId(standardAimDTO.getProjectId())
                 .build();
         standardAimRelationRepository.insertDTOSelective(standardAimRelationDTO);
     }
