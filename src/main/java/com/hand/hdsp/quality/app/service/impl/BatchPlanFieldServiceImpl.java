@@ -1,12 +1,5 @@
 package com.hand.hdsp.quality.app.service.impl;
 
-import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.AimType.REFERENCE;
-import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.hand.hdsp.quality.api.dto.*;
 import com.hand.hdsp.quality.app.service.BatchPlanFieldService;
 import com.hand.hdsp.quality.domain.entity.*;
@@ -29,6 +22,13 @@ import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.hand.hdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.AimType.REFERENCE;
+import static com.hand.hdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
 
 /**
  * <p>批数据方案-字段规则表应用服务默认实现</p>
@@ -225,12 +225,12 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
     public void update(BatchPlanFieldDTO batchPlanFieldDTO) {
         Long tenantId = batchPlanFieldDTO.getTenantId();
         Long projectId = batchPlanFieldDTO.getProjectId();
-        batchPlanFieldRepository.updateDTOAllColumnWhereTenant(batchPlanFieldDTO, tenantId);
+        batchPlanFieldRepository.updateByDTOPrimaryKey(batchPlanFieldDTO);
         if (batchPlanFieldDTO.getBatchPlanFieldLineDTOList() != null) {
             for (BatchPlanFieldLineDTO batchPlanFieldLineDTO : batchPlanFieldDTO.getBatchPlanFieldLineDTOList()) {
                 if (AuditDomain.RecordStatus.update.equals(batchPlanFieldLineDTO.get_status())) {
                     batchPlanFieldLineDTO.setProjectId(projectId);
-                    batchPlanFieldLineRepository.updateDTOAllColumnWhereTenant(batchPlanFieldLineDTO, tenantId);
+                    batchPlanFieldLineRepository.updateByDTOPrimaryKey(batchPlanFieldLineDTO);
                 } else if (AuditDomain.RecordStatus.create.equals(batchPlanFieldLineDTO.get_status())) {
                     batchPlanFieldLineDTO.setPlanRuleId(batchPlanFieldDTO.getPlanRuleId());
                     batchPlanFieldLineDTO.setTenantId(tenantId);
@@ -244,7 +244,7 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
                         if (AuditDomain.RecordStatus.update.equals(con.get_status())) {
                             con.setWarningLevel(JsonUtils.object2Json(con.getWarningLevelList()));
                             con.setProjectId(projectId);
-                            batchPlanFieldConRepository.updateDTOAllColumnWhereTenant(con, tenantId);
+                            batchPlanFieldConRepository.updateByDTOPrimaryKey(con);
                         } else if (AuditDomain.RecordStatus.create.equals(con.get_status())) {
                             con.setWarningLevel(JsonUtils.object2Json(con.getWarningLevelList()));
                             con.setPlanLineId(batchPlanFieldLineDTO.getPlanLineId());
