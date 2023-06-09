@@ -95,7 +95,7 @@
             </if>
             <if test="dataDesc != null and dataDesc != ''">
                 <bind name="dataDescLike" value="'%'+dataDesc+'%'"/>
-                AND xrd.data_desc LIKE = #{dataDescLike}
+                AND xrd.data_desc LIKE #{dataDescLike}
             </if>
             <if test="parentDataId != null">
                 AND xrd.parent_data_id = #{parentDataId}

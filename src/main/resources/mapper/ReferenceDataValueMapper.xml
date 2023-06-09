@@ -61,11 +61,11 @@
                 AND xrdv.project_id = #{projectId}
             </if>
             <if test="value != null and value != ''">
-                <bind name="valueLike" value="value+'%'"/>
+                <bind name="valueLike" value="'%'+value+'%'"/>
                 AND xrdv.value LIKE #{valueLike}
             </if>
             <if test="valueMeaning != null and valueMeaning != ''">
-                <bind name="valueMeaningLike" value="valueMeaning+'%'"/>
+                <bind name="valueMeaningLike" value="'%'+valueMeaning+'%'"/>
                 AND xrdv.value_meaning LIKE #{valueMeaningLike}
             </if>
             <if test="enabledFlag != null">
