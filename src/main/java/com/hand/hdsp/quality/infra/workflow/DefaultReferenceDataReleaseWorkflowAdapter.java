@@ -16,8 +16,10 @@ import com.hand.hdsp.quality.domain.repository.ReferenceDataHistoryRepository;
 import com.hand.hdsp.quality.domain.repository.ReferenceDataRecordRepository;
 import com.hand.hdsp.quality.domain.repository.ReferenceDataRepository;
 import com.hand.hdsp.quality.domain.repository.ReferenceDataValueRepository;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.ReferenceDataConstant;
 import com.hand.hdsp.quality.workflow.adapter.ReferenceDataReleaseWorkflowAdapter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -68,8 +70,7 @@ public class DefaultReferenceDataReleaseWorkflowAdapter implements ReferenceData
             Long userId = DetailsHelper.getUserDetails().getUserId();
             String employeeNum = EmployeeHelper.getEmployeeNum(userId, referenceDataDTO.getTenantId());
             if (StringUtils.isBlank(employeeNum)) {
-                // TODO 异常
-                throw new CommonException("The current user does not maintain employee information");
+                throw new CommonException(ErrorCode.USER_NO_EMPLOYEE);
             }
             Long dataId = referenceDataDTO.getDataId();
             // 先校验当前参考数据是否在流程中
@@ -79,8 +80,11 @@ public class DefaultReferenceDataReleaseWorkflowAdapter implements ReferenceData
                             .andEqualTo(ReferenceDataRecord.FIELD_RECORD_STATUS, ReferenceDataConstant.RUNNING))
                     .build());
             if (count > 0) {
-                // TODO 异常
-                throw new CommonException("The current data is already in the process");
+                throw new CommonException(ErrorCode.DATA_IN_PROCESS);
+            }
+            List<SimpleReferenceDataValueDTO> simpleReferenceDataValueDTOList = referenceDataValueRepository.simpleQueryByDataId(dataId);
+            if (CollectionUtils.isEmpty(simpleReferenceDataValueDTOList)) {
+                throw new CommonException(ErrorCode.DATA_NO_VALUE);
             }
             // 先删除原来的记录
             referenceDataRecordRepository.delete(ReferenceDataRecord.builder()

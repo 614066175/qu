@@ -11,6 +11,7 @@ import com.hand.hdsp.quality.domain.entity.ReferenceData;
 import com.hand.hdsp.quality.domain.entity.ReferenceDataRecord;
 import com.hand.hdsp.quality.domain.repository.ReferenceDataRecordRepository;
 import com.hand.hdsp.quality.domain.repository.ReferenceDataRepository;
+import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.ReferenceDataConstant;
 import com.hand.hdsp.quality.workflow.adapter.ReferenceDataOfflineWorkflowAdapter;
 import org.apache.commons.lang3.StringUtils;
@@ -53,8 +54,7 @@ public class DefaultReferenceDataOfflineWorkflowAdapter implements ReferenceData
             Long userId = DetailsHelper.getUserDetails().getUserId();
             String employeeNum = EmployeeHelper.getEmployeeNum(userId, referenceDataDTO.getTenantId());
             if (StringUtils.isBlank(employeeNum)) {
-                // TODO 异常
-                throw new CommonException("The current user does not maintain employee information");
+                throw new CommonException(ErrorCode.USER_NO_EMPLOYEE);
             }
             Long dataId = referenceDataDTO.getDataId();
             // 先校验当前参考数据是否在流程中
@@ -64,8 +64,7 @@ public class DefaultReferenceDataOfflineWorkflowAdapter implements ReferenceData
                             .andEqualTo(ReferenceDataRecord.FIELD_RECORD_STATUS, ReferenceDataConstant.RUNNING))
                     .build());
             if (count > 0) {
-                // TODO 异常
-                throw new CommonException("The current data is already in the process");
+                throw new CommonException(ErrorCode.DATA_IN_PROCESS);
             }
             // 先删除原来的记录
             referenceDataRecordRepository.delete(ReferenceDataRecord.builder().dataId(dataId)
