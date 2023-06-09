@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.BaseFormValueMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.BaseFormValueMapper">
     <!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.BaseFormValue">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.BaseFormValue">
         <result column="relation_id" property="relationId" jdbcType="DECIMAL"/>
         <result column="plan_base_id" property="planBaseId" jdbcType="DECIMAL"/>
         <result column="form_line_id" property="formLineId" jdbcType="DECIMAL"/>
@@ -25,7 +25,7 @@
             #{planBaseId}
         </foreach>
     </delete>
-    <select id="selectByPlanBaseId" resultType="com.hand.hdsp.quality.api.dto.BaseFormValueDTO">
+    <select id="selectByPlanBaseId" resultType="org.xdsp.quality.api.dto.BaseFormValueDTO">
         select hfl.item_code, xbfv.form_value,xbpb.plan_base_code
         from xqua_base_form_value xbfv
                  join hpfm_form_line hfl on xbfv.form_line_id = hfl.form_line_id
@@ -33,7 +33,7 @@
         where xbfv.plan_base_id = #{planBaseId}
           and hfl.enabled_flag = 1
     </select>
-    <select id="selectFormItem" resultType="com.hand.hdsp.quality.api.dto.BaseFormValueDTO">
+    <select id="selectFormItem" resultType="org.xdsp.quality.api.dto.BaseFormValueDTO">
         select hfl.form_line_id, hfl.item_code
         from hpfm_form_line hfl
                  join hpfm_form_header hfh on hfh.form_header_id = hfl.form_header_id

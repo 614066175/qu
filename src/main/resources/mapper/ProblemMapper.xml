@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.ProblemMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.ProblemMapper">
 	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.Problem">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.Problem">
         <result column="problem_id" property="problemId" jdbcType="DECIMAL"/>
         <result column="problem_parent_id" property="problemParentId" jdbcType="DECIMAL"/>
         <result column="problem_code" property="problemCode" jdbcType="VARCHAR"/>
@@ -17,7 +17,7 @@
         <result column="object_version_number" property="objectVersionNumber" jdbcType="DECIMAL"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
-    <select id="list" resultType="com.hand.hdsp.quality.infra.vo.ProblemVO">
+    <select id="list" resultType="org.xdsp.quality.infra.vo.ProblemVO">
         SELECT
             xp.problem_id,
             xp.problem_parent_id,
@@ -34,7 +34,7 @@
         </where>
 	    order by xp.creation_date
     </select>
-    <select id="listForChild" resultType="com.hand.hdsp.quality.api.dto.ProblemDTO">
+    <select id="listForChild" resultType="org.xdsp.quality.api.dto.ProblemDTO">
         SELECT
             xp.problem_id
         FROM

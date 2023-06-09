@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.ReferenceDataHistoryMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.ReferenceDataHistoryMapper">
 	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.ReferenceDataHistory">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.ReferenceDataHistory">
         <result column="history_id" property="historyId" jdbcType="DECIMAL"/>
         <result column="data_id" property="dataId" jdbcType="DECIMAL"/>
         <result column="data_code" property="dataCode" jdbcType="VARCHAR"/>
@@ -61,7 +61,7 @@
         FROM xqua_reference_data_history xrdh
         WHERE xrdh.data_id = #{dataId}
     </select>
-    <select id="queryByDataId" resultType="com.hand.hdsp.quality.api.dto.ReferenceDataHistoryDTO">
+    <select id="queryByDataId" resultType="org.xdsp.quality.api.dto.ReferenceDataHistoryDTO">
         SELECT
             xrdh.history_id,
             xrdh.version_number,
@@ -71,7 +71,7 @@
         LEFT JOIN iam_user iu ON xrdh.release_by = iu.id
         WHERE xrdh.data_id = #{dataId}
     </select>
-    <select id="detail" resultType="com.hand.hdsp.quality.api.dto.ReferenceDataHistoryDTO">
+    <select id="detail" resultType="org.xdsp.quality.api.dto.ReferenceDataHistoryDTO">
         SELECT
         <include refid="Base_Column_List">
             <property name="prefix" value="xrdh"/>
