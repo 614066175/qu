@@ -16,7 +16,7 @@ import org.hzero.export.annotation.ExcelExport;
 import org.hzero.export.vo.ExportParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.AssigneeUserDTO;
 import org.xdsp.quality.api.dto.StandardApprovalDTO;
 import org.xdsp.quality.app.service.RootService;
@@ -49,7 +49,7 @@ public class RootController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<Page<Root>> list(@PathVariable(name = "organizationId") Long tenantId,
-                                           @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                           @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                            @ApiIgnore @SortDefault(value = Root.FIELD_ID, direction = Sort.Direction.DESC) PageRequest pageRequest,
                                            Root root) {
         root.setTenantId(tenantId);
@@ -69,7 +69,7 @@ public class RootController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<Root> create(@PathVariable(name = "organizationId") Long tenantId,
-                                       @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                       @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                        @RequestBody Root root) {
         root.setTenantId(tenantId);
         root.setProjectId(projectId);
@@ -107,7 +107,7 @@ public class RootController extends BaseController {
     @GetMapping("/export")
     @ExcelExport(value = RootExportDTO.class)
     public ResponseEntity<List<RootExportDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                     @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                      Root root,
                                                      ExportParam exportParam,
                                                      HttpServletResponse response) {
@@ -127,7 +127,7 @@ public class RootController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/publish-off")
     public ResponseEntity<List<Root>> publishOrOff(@PathVariable(name = "organizationId") Long tenantId,
-                                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                   @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                    @RequestBody List<Root> rootList) {
         rootList.forEach(root -> {
             root.setTenantId(tenantId);
@@ -218,7 +218,7 @@ public class RootController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/analyzer-word")
     public ResponseEntity<String> analyzerWord(@PathVariable(name = "organizationId") Long tenantId,
-                                               @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                               @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                String word) {
         return Results.success(rootService.analyzerWord(tenantId, projectId, word));
     }
@@ -233,7 +233,7 @@ public class RootController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/root-translate")
     public ResponseEntity<List<String>> rootTranslate(@PathVariable(name = "organizationId") Long tenantId,
-                                             @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                             @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                              String word) {
         return Results.success(rootService.rootTranslate(tenantId, projectId, word));
     }

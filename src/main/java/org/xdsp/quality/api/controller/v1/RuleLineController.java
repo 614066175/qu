@@ -11,7 +11,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.RuleLineDTO;
 import org.xdsp.quality.config.SwaggerTags;
 import org.xdsp.quality.domain.entity.RuleLine;
@@ -44,7 +44,7 @@ public class RuleLineController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   RuleLineDTO ruleLineDTO, @ApiIgnore @SortDefault(value = RuleLine.FIELD_RULE_LINE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         ruleLineDTO.setTenantId(tenantId);
@@ -63,7 +63,7 @@ public class RuleLineController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> listTenant(@PathVariable(name = "organizationId") Long tenantId,
-                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                        @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         RuleLineDTO ruleLineDTO, @ApiIgnore @SortDefault(value = RuleLine.FIELD_RULE_LINE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         ruleLineDTO.setTenantId(tenantId);
@@ -101,7 +101,7 @@ public class RuleLineController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody RuleLineDTO ruleLineDTO) {
         ruleLineDTO.setTenantId(tenantId);
         ruleLineDTO.setProjectId(projectId);
@@ -120,7 +120,7 @@ public class RuleLineController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody RuleLineDTO ruleLineDTO) {
         ruleLineDTO.setProjectId(projectId);
         ruleLineRepository.updateDTOAllColumnWhereTenant(ruleLineDTO, tenantId);

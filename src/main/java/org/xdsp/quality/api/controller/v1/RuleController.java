@@ -11,7 +11,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.RuleDTO;
 import org.xdsp.quality.app.service.RuleService;
 import org.xdsp.quality.config.SwaggerTags;
@@ -47,7 +47,7 @@ public class RuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   RuleDTO ruleDTO,
                                   @ApiIgnore @SortDefault(value = Rule.FIELD_RULE_ID, direction = Sort.Direction.DESC) PageRequest pageRequest) {
         ruleDTO.setTenantId(tenantId);
@@ -69,7 +69,7 @@ public class RuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> listTenant(@PathVariable(name = "organizationId") Long tenantId,
-                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                        @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         RuleDTO ruleDTO,
                                         @ApiIgnore @SortDefault(value = Rule.FIELD_RULE_ID, direction = Sort.Direction.DESC) PageRequest pageRequest) {
         ruleDTO.setTenantId(tenantId);
@@ -93,7 +93,7 @@ public class RuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/detail/{ruleId}")
     public ResponseEntity<?> detail(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @PathVariable Long ruleId) {
         RuleDTO ruleDTO = ruleService.detail(ruleId, tenantId,projectId);
         return Results.success(ruleDTO);
@@ -109,7 +109,7 @@ public class RuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody RuleDTO ruleDTO) {
         ruleDTO.setTenantId(tenantId);
         ruleDTO.setProjectId(projectId);
@@ -128,7 +128,7 @@ public class RuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody RuleDTO ruleDTO) {
         ruleDTO.setTenantId(tenantId);
         ruleDTO.setProjectId(projectId);

@@ -14,7 +14,7 @@ import org.hzero.export.vo.ExportParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.StandardDocDTO;
 import org.xdsp.quality.app.service.StandardDocService;
 import org.xdsp.quality.config.SwaggerTags;
@@ -57,11 +57,11 @@ public class StandardDocController extends BaseController {
     @GetMapping
     public ResponseEntity<Page<StandardDocDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
                                                      StandardDocDTO standardDocDTO,
-                                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                     @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                      @ApiIgnore @SortDefault(value = StandardDoc.FIELD_DOC_ID,
                                                              direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardDocDTO.setTenantId(tenantId);
-        standardDocDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        standardDocDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         Page<StandardDocDTO> list = standardDocService.list(pageRequest, standardDocDTO);
         return Results.success(list);
     }
@@ -95,11 +95,11 @@ public class StandardDocController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<StandardDocDTO> create(@ApiParam(value = "租户id", required = true) @PathVariable("organizationId") Long tenantId,
-                                                 @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                 @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                  @RequestPart StandardDocDTO standardDocDTO,
                                                  @RequestPart(value = "file", required = false) MultipartFile multipartFile) {
         standardDocDTO.setTenantId(tenantId);
-        standardDocDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        standardDocDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(standardDocDTO);
         return Results.success(standardDocService.create(standardDocDTO, multipartFile));
     }
@@ -114,7 +114,7 @@ public class StandardDocController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/update")
     public ResponseEntity<StandardDocDTO> update(@PathVariable("organizationId") Long tenantId,
-                                                 @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                 @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                  @RequestPart StandardDocDTO standardDocDTO,
                                                  @RequestPart(value = "file", required = false) MultipartFile multipartFile) {
         standardDocDTO.setTenantId(tenantId);
@@ -158,13 +158,13 @@ public class StandardDocController extends BaseController {
     @GetMapping("/export")
     @ExcelExport(value = DocStandardExportDTO.class)
     public ResponseEntity<List<DocStandardExportDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                                       @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                       @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                        StandardDocDTO dto,
                                                        ExportParam exportParam,
                                                        HttpServletResponse response) {
         response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
         dto.setTenantId(tenantId);
-        dto.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        dto.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         List<DocStandardExportDTO> dtoList =
                 standardDocService.export(dto, exportParam);
         return Results.success(dtoList);

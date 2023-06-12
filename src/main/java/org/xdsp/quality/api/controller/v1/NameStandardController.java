@@ -13,7 +13,7 @@ import org.hzero.export.annotation.ExcelExport;
 import org.hzero.export.vo.ExportParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.NameStandardDTO;
 import org.xdsp.quality.app.service.NameStandardService;
 import org.xdsp.quality.config.SwaggerTags;
@@ -59,11 +59,11 @@ public class NameStandardController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<Page<NameStandardDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
-                                                      @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                      @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                       NameStandardDTO nameStandardDTO, @ApiIgnore @SortDefault(value = NameStandard.FIELD_STANDARD_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         nameStandardDTO.setTenantId(tenantId);
-        nameStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        nameStandardDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         Page<NameStandardDTO> list = nameStandardService.pageNameStandards(nameStandardDTO,pageRequest);
         return Results.success(list);
     }
@@ -97,10 +97,10 @@ public class NameStandardController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<NameStandardDTO> create(@PathVariable("organizationId") Long tenantId,
-                                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                   @RequestBody NameStandardDTO nameStandardDTO) {
         nameStandardDTO.setTenantId(tenantId);
-        nameStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        nameStandardDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(nameStandardDTO);
         return Results.success(nameStandardService.create(nameStandardDTO));
     }
@@ -115,10 +115,10 @@ public class NameStandardController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<NameStandardDTO> update(@PathVariable("organizationId") Long tenantId,
-                                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                   @RequestBody NameStandardDTO nameStandardDTO) {
         nameStandardDTO.setTenantId(tenantId);
-        nameStandardDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        nameStandardDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         return Results.success(nameStandardService.update(nameStandardDTO));
     }
 
@@ -132,11 +132,11 @@ public class NameStandardController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<Void> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                       @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                       @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                        @RequestBody List<NameStandardDTO> nameStandardDtoList) {
         nameStandardDtoList.forEach(x -> {
             x.setTenantId(tenantId);
-            x.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+            x.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         });
         nameStandardService.bitchRemove(nameStandardDtoList);
         return Results.success();
@@ -162,12 +162,12 @@ public class NameStandardController extends BaseController {
     @GetMapping("/export")
     @ExcelExport(value = NameStandardExportDTO.class)
     public ResponseEntity<List<NameStandardExportDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                        @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                         NameStandardDTO dto,
                                                         ExportParam exportParam,
                                                         HttpServletResponse response) {
 
-        dto.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        dto.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         dto.setTenantId(tenantId);
         List<NameStandardExportDTO> dtoList = nameStandardService.export(dto, exportParam);
         return Results.success(dtoList);

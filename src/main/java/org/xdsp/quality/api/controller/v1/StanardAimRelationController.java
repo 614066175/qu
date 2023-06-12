@@ -14,7 +14,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.StandardAimRelationDTO;
 import org.xdsp.quality.domain.entity.StandardAimRelation;
 import org.xdsp.quality.domain.repository.StandardAimRelationRepository;
@@ -45,11 +45,11 @@ public class StanardAimRelationController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   StandardAimRelationDTO standardAimRelationDTO, @ApiIgnore @SortDefault(value = StandardAimRelation.FIELD_RELATION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardAimRelationDTO.setTenantId(tenantId);
-        standardAimRelationDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        standardAimRelationDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         Page<StandardAimRelationDTO> list = stanardAimRelationRepository.pageAndSortDTO(pageRequest, standardAimRelationDTO);
         return Results.success(list);
     }
@@ -83,10 +83,10 @@ public class StanardAimRelationController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardAimRelationDTO standardAimRelationDTO) {
         standardAimRelationDTO.setTenantId(tenantId);
-        standardAimRelationDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        standardAimRelationDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(standardAimRelationDTO);
         stanardAimRelationRepository.insertDTOSelective(standardAimRelationDTO);
         return Results.success(standardAimRelationDTO);
@@ -102,9 +102,9 @@ public class StanardAimRelationController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardAimRelationDTO standardAimRelationDTO) {
-        standardAimRelationDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        standardAimRelationDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         stanardAimRelationRepository.updateDTOWhereTenant(standardAimRelationDTO, tenantId);
         return Results.success(standardAimRelationDTO);
     }

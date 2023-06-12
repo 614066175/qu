@@ -10,7 +10,7 @@ import org.hzero.export.annotation.ExcelExport;
 import org.hzero.export.vo.ExportParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.StandardGroupDTO;
 import org.xdsp.quality.app.service.StandardGroupService;
 import org.xdsp.quality.config.SwaggerTags;
@@ -52,7 +52,7 @@ public class StandardGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   StandardGroupVO standardGroupVO , PageRequest pageRequest) {
         standardGroupVO.setTenantId(tenantId);
         return Results.success(standardGroupService.list(pageRequest,standardGroupVO));
@@ -68,10 +68,10 @@ public class StandardGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/group")
     public ResponseEntity<?> group(@PathVariable(name = "organizationId") Long tenantId,
-                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                   @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                    StandardGroupVO standardGroupVO) {
         standardGroupVO.setTenantId(tenantId);
-        standardGroupVO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        standardGroupVO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         return Results.success(standardGroupService.listByGroup(standardGroupVO));
     }
 
@@ -85,10 +85,10 @@ public class StandardGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardGroupDTO standardGroupDTO) {
         standardGroupDTO.setTenantId(tenantId);
-        standardGroupDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        standardGroupDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         return Results.success(standardGroupService.create(standardGroupDTO));
     }
 
@@ -102,10 +102,10 @@ public class StandardGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> updateGroup(@PathVariable(name = "organizationId") Long tenantId,
-                                         @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                         @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                          @RequestBody StandardGroupDTO standardGroupDTO) {
         standardGroupDTO.setTenantId(tenantId);
-        standardGroupDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        standardGroupDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         return Results.success(standardGroupService.update(standardGroupDTO));
     }
 
@@ -119,10 +119,10 @@ public class StandardGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<?> delete(@PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardGroupDTO standardGroupDTO) {
         standardGroupDTO.setTenantId(tenantId);
-        standardGroupDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        standardGroupDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         standardGroupService.delete(standardGroupDTO);
         return Results.success(standardGroupDTO);
     }

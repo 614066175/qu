@@ -14,7 +14,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.StandardExtraDTO;
 import org.xdsp.quality.app.service.StandardExtraService;
 import org.xdsp.quality.domain.entity.StandardExtra;
@@ -50,11 +50,11 @@ public class StandardExtraController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   StandardExtraDTO standardExtraDTO, @ApiIgnore @SortDefault(value = StandardExtra.FIELD_EXTRA_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardExtraDTO.setTenantId(tenantId);
-        standardExtraDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        standardExtraDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         Page<StandardExtraDTO> list = standardExtraRepository.pageAndSortDTO(pageRequest, standardExtraDTO);
         return Results.success(list);
     }
@@ -88,10 +88,10 @@ public class StandardExtraController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardExtraDTO standardExtraDTO) {
         standardExtraDTO.setTenantId(tenantId);
-        standardExtraDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        standardExtraDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(standardExtraDTO);
         standardExtraRepository.insertDTOSelective(standardExtraDTO);
         return Results.success(standardExtraDTO);
@@ -107,9 +107,9 @@ public class StandardExtraController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardExtraDTO standardExtraDTO) {
-        standardExtraDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        standardExtraDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         standardExtraRepository.updateDTOWhereTenant(standardExtraDTO, tenantId);
         return Results.success(standardExtraDTO);
     }
@@ -141,11 +141,11 @@ public class StandardExtraController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/batch-create")
     public ResponseEntity<?> batchCreate(@PathVariable("organizationId") Long tenantId,
-                                         @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                         @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                          @RequestBody List<StandardExtraDTO> standardExtraDTOList) {
         standardExtraDTOList.forEach(standardExtraDTO -> {
             standardExtraDTO.setTenantId(tenantId);
-            standardExtraDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+            standardExtraDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         });
         standardExtraRepository.batchInsertDTOSelective(standardExtraDTOList);
         return Results.success(standardExtraDTOList);
@@ -161,11 +161,11 @@ public class StandardExtraController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/batch-update")
     public ResponseEntity<?> batchUpdate(@PathVariable("organizationId") Long tenantId,
-                                         @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                         @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                          @RequestBody List<StandardExtraDTO> standardExtraDTOList) {
         standardExtraDTOList.forEach(standardExtraDTO ->{
             standardExtraDTO.setTenantId(tenantId);
-            standardExtraDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+            standardExtraDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         });
         standardExtraService.batchUpdate(standardExtraDTOList);
         return Results.success(standardExtraDTOList);

@@ -14,7 +14,7 @@ import org.hzero.export.annotation.ExcelExport;
 import org.hzero.export.vo.ExportParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.RuleDTO;
 import org.xdsp.quality.api.dto.RuleGroupDTO;
 import org.xdsp.quality.app.service.RuleGroupService;
@@ -59,7 +59,7 @@ public class RuleGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   RuleGroupDTO ruleGroupDTO, @ApiIgnore @SortDefault(value = RuleGroup.FIELD_GROUP_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         ruleGroupDTO.setTenantId(tenantId);
@@ -78,7 +78,7 @@ public class RuleGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> listNoPage(@PathVariable(name = "organizationId") Long tenantId,
-                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                        @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         RuleGroup ruleGroup) {
         ruleGroup.setTenantId(tenantId);
         ruleGroup.setProjectId(projectId);
@@ -114,7 +114,7 @@ public class RuleGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody RuleGroupDTO ruleGroupDTO) {
         ruleGroupDTO.setTenantId(tenantId);
         ruleGroupDTO.setProjectId(projectId);
@@ -133,7 +133,7 @@ public class RuleGroupController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody RuleGroupDTO ruleGroupDTO) {
         ruleGroupDTO.setProjectId(projectId);
         ruleGroupRepository.updateDTOAllColumnWhereTenant(ruleGroupDTO, tenantId);
@@ -161,7 +161,7 @@ public class RuleGroupController extends BaseController {
     @GetMapping("/export")
     @ExcelExport(value = StandardRuleExportDTO.class)
     public ResponseEntity<?> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     RuleDTO dto,
                                     ExportParam exportParam,
                                     HttpServletResponse response) {

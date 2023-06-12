@@ -15,7 +15,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.RuleDTO;
 import org.xdsp.quality.app.service.RuleService;
 import org.xdsp.quality.config.SwaggerTags;
@@ -63,7 +63,7 @@ public class RuleSiteController extends BaseController {
     @Permission(level = ResourceLevel.SITE)
     @GetMapping("/{ruleId}")
     public ResponseEntity<?> detail(@PathVariable Long ruleId) {
-        RuleDTO ruleDTO = ruleService.detail(ruleId, BaseConstants.DEFAULT_TENANT_ID, HdspConstant.DEFAULT_PROJECT_ID);
+        RuleDTO ruleDTO = ruleService.detail(ruleId, BaseConstants.DEFAULT_TENANT_ID, XdspConstant.DEFAULT_PROJECT_ID);
         return Results.success(ruleDTO);
     }
 

@@ -4,7 +4,7 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.JobDTO;
 import org.xdsp.quality.infra.feign.fallback.DispatchJobFeignFallBack;
 
@@ -33,6 +33,6 @@ public interface DispatchJobFeign {
     @GetMapping("/v1/{organizationId}/dispatch-jobs/find-by-name")
     ResponseEntity<String> findByName(@ApiParam(value = "租户id", required = true)
                                         @PathVariable(name = "organizationId") Long tenantId,
-                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                        @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         @RequestParam String jobName);
 }

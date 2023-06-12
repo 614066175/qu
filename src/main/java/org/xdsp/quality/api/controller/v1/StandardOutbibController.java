@@ -14,7 +14,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.StandardOutbibDTO;
 import org.xdsp.quality.domain.entity.StandardOutbib;
 import org.xdsp.quality.domain.repository.StandardOutbibRepository;
@@ -45,11 +45,11 @@ public class StandardOutbibController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   StandardOutbibDTO standardOutbibDTO, @ApiIgnore @SortDefault(value = StandardOutbib.FIELD_OUTBIB_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardOutbibDTO.setTenantId(tenantId);
-        standardOutbibDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        standardOutbibDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         Page<StandardOutbibDTO> list = standardOutbibRepository.pageAndSortDTO(pageRequest, standardOutbibDTO);
         return Results.success(list);
     }
@@ -83,10 +83,10 @@ public class StandardOutbibController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardOutbibDTO standardOutbibDTO) {
         standardOutbibDTO.setTenantId(tenantId);
-        standardOutbibDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        standardOutbibDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(standardOutbibDTO);
         standardOutbibRepository.insertDTOSelective(standardOutbibDTO);
         return Results.success(standardOutbibDTO);
@@ -102,9 +102,9 @@ public class StandardOutbibController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardOutbibDTO standardOutbibDTO) {
-        standardOutbibDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        standardOutbibDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         standardOutbibRepository.updateDTOWhereTenant(standardOutbibDTO, tenantId);
         return Results.success(standardOutbibDTO);
     }

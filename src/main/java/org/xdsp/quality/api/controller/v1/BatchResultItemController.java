@@ -15,7 +15,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.BatchResultItemDTO;
 import org.xdsp.quality.app.service.BatchResultItemService;
 import org.xdsp.quality.domain.entity.BatchResultItem;
@@ -52,7 +52,7 @@ public class BatchResultItemController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   BatchResultItemDTO batchResultItemDTO, @ApiIgnore @SortDefault(value = BatchResultItem.FIELD_RESULT_ITEM_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchResultItemDTO.setProjectId(projectId);
@@ -72,7 +72,7 @@ public class BatchResultItemController extends BaseController {
     @PostMapping("/asset-table")
     @ProcessLovValue(targetField = {"body", "body.warningLevelList"})
     public ResponseEntity<?> assetTable(@PathVariable(name = "organizationId") Long tenantId,
-                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                        @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         @RequestBody BatchResultItemDTO batchResultItemDTO, @ApiIgnore @SortDefault(value = BatchResultItem.FIELD_RESULT_ITEM_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchResultItemDTO.setTenantId(tenantId);
@@ -91,7 +91,7 @@ public class BatchResultItemController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/analysis-quality")
     public ResponseEntity<Map<String, Map<String, Long>>> analysisQuality(@PathVariable(name = "organizationId") Long tenantId,
-                                                                          @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                                          @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                                           @RequestBody BatchResultItemDTO batchResultItemDTO) {
         batchResultItemDTO.setTenantId(tenantId);
         batchResultItemDTO.setProjectId(projectId);
@@ -111,7 +111,7 @@ public class BatchResultItemController extends BaseController {
     @GetMapping("/result-rule")
     @ProcessLovValue(targetField = {"body", "body.warningLevelList"})
     public ResponseEntity<?> resultRule(@PathVariable(name = "organizationId") Long tenantId,
-                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                        @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         BatchResultItemDTO batchResultItemDTO, @ApiIgnore @SortDefault(value = BatchResultItem.FIELD_RESULT_ITEM_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchResultItemDTO.setTenantId(tenantId);
@@ -148,7 +148,7 @@ public class BatchResultItemController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody BatchResultItemDTO batchResultItemDTO) {
         batchResultItemDTO.setTenantId(tenantId);
         batchResultItemDTO.setProjectId(projectId);
@@ -167,7 +167,7 @@ public class BatchResultItemController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody BatchResultItemDTO batchResultItemDTO) {
         batchResultItemDTO.setProjectId(projectId);
         batchResultItemRepository.updateDTOAllColumnWhereTenant(batchResultItemDTO, tenantId);

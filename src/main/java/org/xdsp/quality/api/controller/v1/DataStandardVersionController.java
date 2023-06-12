@@ -14,7 +14,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.DataStandardVersionDTO;
 import org.xdsp.quality.app.service.DataStandardVersionService;
 import org.xdsp.quality.domain.entity.DataStandardVersion;
@@ -49,11 +49,11 @@ public class DataStandardVersionController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   DataStandardVersionDTO dataStandardVersionDTO, @ApiIgnore @SortDefault(value = DataStandardVersion.FIELD_VERSION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         dataStandardVersionDTO.setTenantId(tenantId);
-        dataStandardVersionDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        dataStandardVersionDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         Page<DataStandardVersionDTO> list = dataStandardVersionService.list(pageRequest, dataStandardVersionDTO);
         return Results.success(list);
     }
@@ -86,10 +86,10 @@ public class DataStandardVersionController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody DataStandardVersionDTO dataStandardVersionDTO) {
         dataStandardVersionDTO.setTenantId(tenantId);
-        dataStandardVersionDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        dataStandardVersionDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(dataStandardVersionDTO);
         dataStandardVersionRepository.insertDTOSelective(dataStandardVersionDTO);
         return Results.success(dataStandardVersionDTO);
@@ -105,9 +105,9 @@ public class DataStandardVersionController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody DataStandardVersionDTO dataStandardVersionDTO) {
-        dataStandardVersionDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        dataStandardVersionDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         dataStandardVersionRepository.updateDTOWhereTenant(dataStandardVersionDTO, tenantId);
         return Results.success(dataStandardVersionDTO);
     }

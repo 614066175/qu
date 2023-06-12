@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.infra.feign.fallback.ModelFeignFallBack;
 
 /**
@@ -28,7 +28,7 @@ public interface ModelFeign {
      */
     @GetMapping("/v1/{organizationId}/table-columns")
     ResponseEntity<String> list(@PathVariable(name = "organizationId") Long tenantId,
-                                @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                 @RequestParam Long customTableId);
 
 
@@ -44,7 +44,7 @@ public interface ModelFeign {
      */
     @GetMapping("/v1/{organizationId}/custom-tables/detail")
     ResponseEntity<String> detailForFeign(@PathVariable(name = "organizationId") Long tenantId,
-                                          @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                          @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                           @RequestParam String customDatasourceType,
                                           @RequestParam String customDatasourceCode,
                                           @RequestParam String customSchemaName,

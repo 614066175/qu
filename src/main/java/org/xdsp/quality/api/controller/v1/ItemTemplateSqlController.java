@@ -14,7 +14,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.ItemTemplateSqlDTO;
 import org.xdsp.quality.domain.entity.ItemTemplateSql;
 import org.xdsp.quality.domain.repository.ItemTemplateSqlRepository;
@@ -45,7 +45,7 @@ public class ItemTemplateSqlController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   ItemTemplateSqlDTO itemTemplateSqlDTO, @ApiIgnore @SortDefault(value = ItemTemplateSql.FIELD_SQL_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         itemTemplateSqlDTO.setTenantId(tenantId);
@@ -83,7 +83,7 @@ public class ItemTemplateSqlController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody ItemTemplateSqlDTO itemTemplateSqlDTO) {
         itemTemplateSqlDTO.setTenantId(tenantId);
         itemTemplateSqlDTO.setProjectId(projectId);
@@ -102,7 +102,7 @@ public class ItemTemplateSqlController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody ItemTemplateSqlDTO itemTemplateSqlDTO) {
         itemTemplateSqlDTO.setProjectId(projectId);
         itemTemplateSqlRepository.updateDTOAllColumnWhereTenant(itemTemplateSqlDTO, tenantId);

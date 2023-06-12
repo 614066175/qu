@@ -14,7 +14,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.ReferenceDataValueDTO;
 import org.xdsp.quality.app.service.ReferenceDataValueService;
 import org.xdsp.quality.domain.entity.ReferenceDataValue;
@@ -47,7 +47,7 @@ public class ReferenceDataValueController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                 ReferenceDataValueDTO referenceDataValueDTO, @ApiIgnore @SortDefault(value = ReferenceDataValue.FIELD_VALUE_SEQ,
             direction = Sort.Direction.ASC) PageRequest pageRequest) {
         Page<ReferenceDataValueDTO> list = referenceDataValueService.list(projectId, tenantId, referenceDataValueDTO, pageRequest);
@@ -64,7 +64,7 @@ public class ReferenceDataValueController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody ReferenceDataValueDTO referenceDataValueDTO) {
         referenceDataValueDTO.setTenantId(tenantId);
         referenceDataValueDTO.setProjectId(projectId);
@@ -83,7 +83,7 @@ public class ReferenceDataValueController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/batch")
     public ResponseEntity<?> batchCreate(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody List<ReferenceDataValueDTO> referenceDataValueDTOList) {
         referenceDataValueService.batchCreate(projectId, tenantId, referenceDataValueDTOList);
         return Results.success(referenceDataValueDTOList);
@@ -99,7 +99,7 @@ public class ReferenceDataValueController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody ReferenceDataValueDTO referenceDataValueDTO) {
         referenceDataValueService.update(projectId, tenantId, referenceDataValueDTO);
         return Results.success(referenceDataValueDTO);
@@ -115,7 +115,7 @@ public class ReferenceDataValueController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/batch")
     public ResponseEntity<?> batchUpdate(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody List<ReferenceDataValueDTO> referenceDataValueDTOList) {
         referenceDataValueService.batchUpdate(projectId, tenantId, referenceDataValueDTOList);
         return Results.success(referenceDataValueDTOList);
@@ -131,7 +131,7 @@ public class ReferenceDataValueController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody ReferenceDataValueDTO referenceDataValueDTO) {
         referenceDataValueService.remove(projectId, tenantId, referenceDataValueDTO);
         return Results.success();
@@ -147,7 +147,7 @@ public class ReferenceDataValueController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping("/batch")
     public ResponseEntity<?> batchRemove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody List<ReferenceDataValueDTO> referenceDataValueDTOList) {
         referenceDataValueService.batchRemove(projectId, tenantId, referenceDataValueDTOList);
         return Results.success();

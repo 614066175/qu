@@ -14,7 +14,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.StandardAimDTO;
 import org.xdsp.quality.app.service.StandardAimService;
 import org.xdsp.quality.domain.entity.StandardAim;
@@ -51,11 +51,11 @@ public class StandardAimController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   StandardAimDTO standardAimDTO, @ApiIgnore @SortDefault(value = StandardAim.FIELD_AIM_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         standardAimDTO.setTenantId(tenantId);
-        standardAimDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        standardAimDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         Page<StandardAimDTO> list = standardAimService.list(pageRequest, standardAimDTO);
         return Results.success(list);
     }
@@ -89,10 +89,10 @@ public class StandardAimController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody List<StandardAimDTO> standardAimDTOList) {
         standardAimDTOList.forEach(standardAimDTO -> {standardAimDTO.setTenantId(tenantId);
-            standardAimDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+            standardAimDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
             this.validObject(standardAimDTO);
         });
         return Results.success(standardAimRepository.batchInsertDTOSelective(standardAimDTOList));
@@ -108,9 +108,9 @@ public class StandardAimController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StandardAimDTO standardAimDTO) {
-        standardAimDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        standardAimDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         standardAimRepository.updateDTOWhereTenant(standardAimDTO, tenantId);
         return Results.success(standardAimDTO);
     }
@@ -125,7 +125,7 @@ public class StandardAimController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody List<StandardAimDTO> standardAimDTOList) {
         standardAimService.batchDelete(standardAimDTOList, tenantId, projectId);
         return Results.success();
@@ -141,10 +141,10 @@ public class StandardAimController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/un-aimed-field")
     public ResponseEntity<?> unAimedField(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                          @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                          @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                           StandardAimDTO standardAimDTO) {
         standardAimDTO.setTenantId(tenantId);
-        standardAimDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        standardAimDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         return Results.success(standardAimService.unAimField(standardAimDTO));
     }
 
@@ -158,7 +158,7 @@ public class StandardAimController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/reverse-aim")
     public ResponseEntity<?> reverseAim(@PathVariable(name = "organizationId") Long tenantId,
-                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                        @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         @RequestBody List<StandardAimDTO> standardAimDTOList) {
         standardAimDTOList.forEach(standardAimDTO -> standardAimDTO.setProjectId(projectId));
         return Results.success(standardAimService.reverseAim(tenantId, standardAimDTOList));

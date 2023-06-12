@@ -7,7 +7,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.NameAimDTO;
 import org.xdsp.quality.app.service.NameAimService;
 import org.xdsp.quality.config.SwaggerTags;
@@ -83,7 +83,7 @@ public class NameAimController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<List<NameAimDTO>> create(@PathVariable("organizationId") Long tenantId,
-                                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                   @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                    @RequestBody List<NameAimDTO> nameAimDTOList) {
         this.validObject(nameAimDTOList);
         return Results.success(nameAimService.batchCreate(nameAimDTOList, tenantId, projectId));
@@ -99,7 +99,7 @@ public class NameAimController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<List<NameAimDTO>> update(@PathVariable("organizationId") Long tenantId,
-                                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                   @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                    @RequestBody List<NameAimDTO> nameAimDTOList) {
         return Results.success(nameAimService.bitchUpdate(nameAimDTOList, tenantId, projectId));
     }

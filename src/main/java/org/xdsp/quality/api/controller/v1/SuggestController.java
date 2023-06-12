@@ -14,7 +14,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.SuggestDTO;
 import org.xdsp.quality.app.service.SuggestService;
 import org.xdsp.quality.domain.entity.Suggest;
@@ -51,7 +51,7 @@ public class SuggestController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   SuggestDTO suggestDTO, @ApiIgnore @SortDefault(value = Suggest.FIELD_SUGGEST_ORDER,
             direction = Sort.Direction.ASC) PageRequest pageRequest) {
         suggestDTO.setTenantId(tenantId);
@@ -90,7 +90,7 @@ public class SuggestController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody SuggestDTO suggestDTO) {
         suggestDTO.setTenantId(tenantId);
         suggestDTO.setProjectId(projectId);
@@ -108,7 +108,7 @@ public class SuggestController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody SuggestDTO suggestDTO) {
         suggestDTO.setProjectId(projectId);
         suggestRepository.updateDTOWhereTenant(suggestDTO, tenantId);

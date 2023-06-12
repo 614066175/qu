@@ -11,7 +11,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.BatchResultBaseDTO;
 import org.xdsp.quality.config.SwaggerTags;
 import org.xdsp.quality.domain.entity.BatchResultBase;
@@ -44,7 +44,7 @@ public class BatchResultBaseController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   BatchResultBaseDTO batchResultBaseDTO, @ApiIgnore @SortDefault(value = BatchResultBase.FIELD_RESULT_BASE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchResultBaseDTO.setTenantId(tenantId);
@@ -63,7 +63,7 @@ public class BatchResultBaseController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/result-base")
     public ResponseEntity<?> resultBase(@PathVariable(name = "organizationId") Long tenantId,
-                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                        @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         BatchResultBaseDTO batchResultBaseDTO, @ApiIgnore @SortDefault(value = BatchResultBase.FIELD_RESULT_BASE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchResultBaseDTO.setTenantId(tenantId);
@@ -81,7 +81,7 @@ public class BatchResultBaseController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/result-base-list")
     public ResponseEntity<?> resultBaseAll(@PathVariable(name = "organizationId") Long tenantId,
-                                           @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                           @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                            BatchResultBaseDTO batchResultBaseDTO) {
         batchResultBaseDTO.setTenantId(tenantId);
         batchResultBaseDTO.setProjectId(projectId);
@@ -117,7 +117,7 @@ public class BatchResultBaseController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody BatchResultBaseDTO batchResultBaseDTO) {
         batchResultBaseDTO.setTenantId(tenantId);
         batchResultBaseDTO.setProjectId(projectId);
@@ -136,7 +136,7 @@ public class BatchResultBaseController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody BatchResultBaseDTO batchResultBaseDTO) {
         batchResultBaseRepository.updateDTOAllColumnWhereTenant(batchResultBaseDTO, tenantId);
         return Results.success(batchResultBaseDTO);

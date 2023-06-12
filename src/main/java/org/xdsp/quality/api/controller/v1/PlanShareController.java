@@ -14,7 +14,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.PlanShareDTO;
 import org.xdsp.quality.app.service.PlanShareService;
 import org.xdsp.quality.domain.entity.PlanShare;
@@ -117,7 +117,7 @@ public class PlanShareController extends BaseController {
     @PostMapping("/batch-share/{planId}")
     public ResponseEntity<?> batchShare(@PathVariable("organizationId") Long tenantId,
                                         @PathVariable("planId") Long planId,
-                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                        @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         @RequestBody List<PlanShareDTO> planShareDTOList) {
         List<PlanShareDTO> planShareDTOS = planShareService.batchShare(tenantId, projectId, planId, planShareDTOList);
         return Results.success(planShareDTOS);

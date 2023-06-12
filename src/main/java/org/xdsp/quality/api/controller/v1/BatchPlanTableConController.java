@@ -11,7 +11,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.BatchPlanTableConDTO;
 import org.xdsp.quality.config.SwaggerTags;
 import org.xdsp.quality.domain.entity.BatchPlanTableCon;
@@ -44,7 +44,7 @@ public class BatchPlanTableConController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   BatchPlanTableConDTO batchPlanTableConDTO, @ApiIgnore @SortDefault(value = BatchPlanTableCon.FIELD_CONDITION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchPlanTableConDTO.setTenantId(tenantId);
@@ -82,7 +82,7 @@ public class BatchPlanTableConController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody BatchPlanTableConDTO batchPlanTableConDTO) {
         batchPlanTableConDTO.setTenantId(tenantId);
         batchPlanTableConDTO.setProjectId(projectId);
@@ -101,7 +101,7 @@ public class BatchPlanTableConController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody BatchPlanTableConDTO batchPlanTableConDTO) {
         batchPlanTableConDTO.setProjectId(projectId);
         batchPlanTableConRepository.updateDTOAllColumnWhereTenant(batchPlanTableConDTO, tenantId);

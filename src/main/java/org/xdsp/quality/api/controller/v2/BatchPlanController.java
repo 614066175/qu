@@ -10,7 +10,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.app.service.BatchPlanService;
 import org.xdsp.quality.config.SwaggerTags;
 
@@ -57,7 +57,7 @@ public class BatchPlanController extends BaseController {
     @GetMapping("/exec/{planId}")
     @Deprecated
     public ResponseEntity<?> exec(@PathVariable("organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   @PathVariable Long planId) {
         Long resultId = batchPlanService.exec(tenantId, planId, projectId);
         batchPlanService.sendMessage(planId, resultId);

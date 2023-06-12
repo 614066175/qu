@@ -12,7 +12,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.NameExecHistoryDTO;
 import org.xdsp.quality.domain.repository.NameExecHistoryRepository;
 import org.xdsp.quality.infra.vo.NameStandardHisReportVO;
@@ -44,9 +44,9 @@ public class NameExecHistoryController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<Page<NameExecHistoryDTO>> list(NameExecHistoryDTO nameExecHistoryDTO,
-                                                         @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                         @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                          PageRequest pageRequest) {
-        nameExecHistoryDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        nameExecHistoryDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         Page<NameExecHistoryDTO> list = PageHelper.doPage(pageRequest,
                 ()->nameExecHistoryRepository.getHistoryList(nameExecHistoryDTO));
         return Results.success(list);

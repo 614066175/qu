@@ -14,7 +14,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.NameAimIncludeDTO;
 import org.xdsp.quality.domain.entity.NameAimInclude;
 import org.xdsp.quality.domain.repository.NameAimIncludeRepository;
@@ -45,11 +45,11 @@ public class NameAimIncludeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<Page<NameAimIncludeDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
-                                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                        @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                         NameAimIncludeDTO nameAimIncludeDTO, @ApiIgnore @SortDefault(value = NameAimInclude.FIELD_INCLUDE_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         nameAimIncludeDTO.setTenantId(tenantId);
-        nameAimIncludeDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        nameAimIncludeDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         Page<NameAimIncludeDTO> list = nameAimIncludeRepository.pageAndSortDTO(pageRequest, nameAimIncludeDTO);
         return Results.success(list);
     }
@@ -83,10 +83,10 @@ public class NameAimIncludeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<NameAimIncludeDTO> create(@PathVariable("organizationId") Long tenantId,
-                                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                     @RequestBody NameAimIncludeDTO nameAimIncludeDTO) {
         nameAimIncludeDTO.setTenantId(tenantId);
-        nameAimIncludeDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        nameAimIncludeDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(nameAimIncludeDTO);
         nameAimIncludeRepository.insertDTOSelective(nameAimIncludeDTO);
         return Results.success(nameAimIncludeDTO);
@@ -102,9 +102,9 @@ public class NameAimIncludeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<NameAimIncludeDTO> update(@PathVariable("organizationId") Long tenantId,
-                                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                     @RequestBody NameAimIncludeDTO nameAimIncludeDTO) {
-        nameAimIncludeDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        nameAimIncludeDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         nameAimIncludeRepository.updateDTOWhereTenant(nameAimIncludeDTO, tenantId);
         return Results.success(nameAimIncludeDTO);
     }

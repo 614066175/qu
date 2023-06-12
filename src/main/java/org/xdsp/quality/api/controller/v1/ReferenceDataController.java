@@ -16,7 +16,7 @@ import org.hzero.export.annotation.ExcelExport;
 import org.hzero.export.vo.ExportParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.ReferenceDataDTO;
 import org.xdsp.quality.app.service.ReferenceDataService;
 import org.xdsp.quality.domain.entity.ReferenceData;
@@ -51,7 +51,7 @@ public class ReferenceDataController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   ReferenceDataDTO referenceDataDTO,
                                   @ApiIgnore @SortDefault(value = ReferenceData.FIELD_DATA_ID, direction = Sort.Direction.DESC) PageRequest pageRequest) {
         Page<ReferenceDataDTO> list = referenceDataService.list(projectId, tenantId, referenceDataDTO, pageRequest);
@@ -87,7 +87,7 @@ public class ReferenceDataController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody ReferenceDataDTO referenceDataDTO) {
         referenceDataDTO.setTenantId(tenantId);
         referenceDataDTO.setProjectId(projectId);
@@ -106,7 +106,7 @@ public class ReferenceDataController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody ReferenceDataDTO referenceDataDTO) {
         referenceDataService.update(projectId, tenantId, referenceDataDTO);
         return Results.success(referenceDataDTO);
@@ -123,7 +123,7 @@ public class ReferenceDataController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody ReferenceDataDTO referenceDataDTO) {
         referenceDataService.remove(projectId, tenantId, referenceDataDTO);
         return Results.success();
@@ -139,7 +139,7 @@ public class ReferenceDataController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping("/batch")
     public ResponseEntity<?> batchRemove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody List<ReferenceDataDTO> referenceDataDTOList) {
         referenceDataService.batchRemove(projectId, tenantId, referenceDataDTOList);
         return Results.success();
@@ -155,7 +155,7 @@ public class ReferenceDataController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/release")
     public ResponseEntity<?> release(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                         @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                         @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                          @RequestBody ReferenceDataDTO referenceDataDTO) {
         referenceDataService.release(projectId, tenantId, referenceDataDTO);
         return Results.success();
@@ -172,7 +172,7 @@ public class ReferenceDataController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/batch/release")
     public ResponseEntity<?> batchRelease(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                     @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                      @RequestBody List<ReferenceDataDTO> referenceDataDTOList) {
         referenceDataService.batchRelease(projectId, tenantId, referenceDataDTOList);
         return Results.success();
@@ -189,7 +189,7 @@ public class ReferenceDataController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/offline")
     public ResponseEntity<?> offline(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                     @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                      @RequestBody ReferenceDataDTO referenceDataDTO) {
         referenceDataService.offline(projectId, tenantId, referenceDataDTO);
         return Results.success();
@@ -206,7 +206,7 @@ public class ReferenceDataController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/batch/offline")
     public ResponseEntity<?> batchOffline(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                          @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                          @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                           @RequestBody List<ReferenceDataDTO> referenceDataDTOList) {
         referenceDataService.batchOffline(projectId, tenantId, referenceDataDTOList);
         return Results.success();
@@ -264,7 +264,7 @@ public class ReferenceDataController extends BaseController {
     @GetMapping("/export")
     @ExcelExport(value = ReferenceDataExportDTO.class)
     public ResponseEntity<List<ReferenceDataExportDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                                               @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                               @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                                ReferenceDataDTO referenceDataDTO,
                                                                ExportParam exportParam,
                                                                HttpServletResponse response) {

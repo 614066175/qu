@@ -14,7 +14,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.ReferenceDataHistoryDTO;
 import org.xdsp.quality.api.dto.SimpleReferenceDataValueDTO;
 import org.xdsp.quality.app.service.ReferenceDataHistoryService;
@@ -51,7 +51,7 @@ public class ReferenceDataHistoryController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                 ReferenceDataHistoryDTO referenceDataHistoryDTO, @ApiIgnore @SortDefault(value = ReferenceDataHistory.FIELD_VERSION_NUMBER,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         Page<ReferenceDataHistoryDTO> list = referenceDataHistoryService.list(projectId, tenantId, referenceDataHistoryDTO, pageRequest);
@@ -107,7 +107,7 @@ public class ReferenceDataHistoryController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody ReferenceDataHistoryDTO referenceDataHistoryDTO) {
         referenceDataHistoryService.remove(projectId, tenantId, referenceDataHistoryDTO);
         return Results.success();

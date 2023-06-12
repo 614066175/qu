@@ -14,7 +14,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.WorkOrderDTO;
 import org.xdsp.quality.app.service.WorkOrderService;
 import org.xdsp.quality.domain.entity.WorkOrder;
@@ -86,7 +86,7 @@ public class WorkOrderController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> launchUpdate(@PathVariable("organizationId") Long tenantId,
-                                          @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                          @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                           @RequestBody List<WorkOrderDTO> workOrderDTOList) {
         workOrderDTOList.forEach(workOrderDTO -> {
             workOrderDTO.setTenantId(tenantId);
@@ -151,7 +151,7 @@ public class WorkOrderController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/order-todo")
     public ResponseEntity<?> orderTodo(@PathVariable(name = "organizationId") Long tenantId,
-                                       @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                       @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                        WorkOrderDTO workOrderDTO, @ApiIgnore @SortDefault(value = WorkOrder.FIELD_WORK_ORDER_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         workOrderDTO.setTenantId(tenantId);
@@ -169,7 +169,7 @@ public class WorkOrderController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/order-apply")
     public ResponseEntity<?> orderApply(@PathVariable(name = "organizationId") Long tenantId,
-                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                        @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         WorkOrderDTO workOrderDTO, @ApiIgnore @SortDefault(value = WorkOrder.FIELD_WORK_ORDER_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         workOrderDTO.setTenantId(tenantId);
@@ -187,7 +187,7 @@ public class WorkOrderController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/batch-receive")
     public ResponseEntity<?> batchReceive(@PathVariable(name = "organizationId") Long tenantId,
-                                          @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                          @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                           @RequestBody List<WorkOrderDTO> workOrderDTOList) {
         workOrderDTOList.forEach(workOrderDTO -> {
             workOrderDTO.setTenantId(tenantId);
@@ -206,7 +206,7 @@ public class WorkOrderController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/batch-refuse")
     public ResponseEntity<?> batchRefuse(@PathVariable(name = "organizationId") Long tenantId,
-                                         @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                         @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                          @RequestBody List<WorkOrderDTO> workOrderDTOList) {
         workOrderDTOList.forEach(workOrderDTO -> {
             workOrderDTO.setTenantId(tenantId);

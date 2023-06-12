@@ -13,7 +13,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.NameExecHisDetailDTO;
 import org.xdsp.quality.domain.entity.NameExecHisDetail;
 import org.xdsp.quality.domain.repository.NameExecHisDetailRepository;
@@ -44,11 +44,11 @@ public class NameExecHisDetailController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<Page<NameExecHisDetailDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
-                                                           @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                           @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                            NameExecHisDetailDTO nameExecHisDetailDTO, @ApiIgnore @SortDefault(value = NameExecHisDetail.FIELD_DETAIL_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         nameExecHisDetailDTO.setTenantId(tenantId);
-        nameExecHisDetailDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        nameExecHisDetailDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         Page<NameExecHisDetailDTO> list = nameExecHisDetailRepository.pageAndSortDTO(pageRequest, nameExecHisDetailDTO);
         return Results.success(list);
     }

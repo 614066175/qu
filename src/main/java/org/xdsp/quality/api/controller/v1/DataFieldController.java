@@ -13,7 +13,7 @@ import org.hzero.export.annotation.ExcelExport;
 import org.hzero.export.vo.ExportParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.*;
 import org.xdsp.quality.app.service.DataFieldService;
 import org.xdsp.quality.config.SwaggerTags;
@@ -63,10 +63,10 @@ public class DataFieldController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<Page<DataFieldDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
-                                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                   @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                    DataFieldDTO dataFieldDTO, PageRequest pageRequest) {
         dataFieldDTO.setTenantId(tenantId);
-        dataFieldDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        dataFieldDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         Page<DataFieldDTO> list = dataFieldService.list(pageRequest, dataFieldDTO);
         return Results.success(list);
     }
@@ -81,10 +81,10 @@ public class DataFieldController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<DataFieldDTO> create(@PathVariable(name = "organizationId") Long tenantId,
-                                               @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                               @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                @RequestBody DataFieldDTO dataFieldDTO) {
         dataFieldDTO.setTenantId(tenantId);
-        dataFieldDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        dataFieldDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         dataFieldService.create(dataFieldDTO);
         return Results.success(dataFieldDTO);
     }
@@ -113,11 +113,11 @@ public class DataFieldController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<Void> batchDelete(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                            @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                            @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                             @RequestBody List<DataFieldDTO> dataFieldDTOList) {
         if (CollectionUtils.isNotEmpty(dataFieldDTOList)) {
             dataFieldDTOList.forEach(dataFieldDTO -> {
-                dataFieldDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+                dataFieldDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
                 dataFieldDTO.setTenantId(tenantId);
                 dataFieldService.delete(dataFieldDTO);
             });
@@ -135,10 +135,10 @@ public class DataFieldController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<DataFieldDTO> update(@PathVariable(name = "organizationId") Long tenantId,
-                                               @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                               @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                @RequestBody DataFieldDTO dataFieldDTO) {
         dataFieldDTO.setTenantId(tenantId);
-        dataFieldDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        dataFieldDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         return Results.success(dataFieldService.update(dataFieldDTO));
     }
 
@@ -152,10 +152,10 @@ public class DataFieldController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/update-status")
     public ResponseEntity<DataFieldDTO> updateStatus(@PathVariable(name = "organizationId") Long tenantId,
-                                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                     @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                      @RequestBody DataFieldDTO dataFieldDTO) {
         dataFieldDTO.setTenantId(tenantId);
-        dataFieldDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        dataFieldDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         dataFieldService.updateStatus(dataFieldDTO);
         return Results.success(dataFieldDTO);
     }
@@ -170,7 +170,7 @@ public class DataFieldController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/field-standard-aim")
     public ResponseEntity<Void> standardAim(@PathVariable(name = "organizationId") Long tenantId,
-                                            @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                            @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                             @RequestBody List<StandardAimDTO> standardAimDTOList) {
         dataFieldService.aim(tenantId, standardAimDTOList, projectId);
         return Results.success();
@@ -186,11 +186,11 @@ public class DataFieldController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/publish-off")
     public ResponseEntity<List<DataFieldDTO>> publishOrOff(@PathVariable(name = "organizationId") Long tenantId,
-                                                           @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                           @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                            @RequestBody List<DataFieldDTO> dataFieldDTOList) {
         dataFieldDTOList.forEach(dataFieldDTO -> {
             dataFieldDTO.setTenantId(tenantId);
-            dataFieldDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+            dataFieldDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
             dataFieldService.publishOrOff(dataFieldDTO);
         });
         return Results.success(dataFieldDTOList);
@@ -201,14 +201,14 @@ public class DataFieldController extends BaseController {
     @GetMapping("/export")
     @ExcelExport(value = FieldStandardExportDTO.class)
     public ResponseEntity<List<FieldStandardExportDTO>> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                                     @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                     @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                      DataFieldDTO dto,
                                                      ExportParam exportParam,
                                                      HttpServletResponse response) {
 
         response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
         dto.setTenantId(tenantId);
-        dto.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        dto.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         List<FieldStandardExportDTO> dtoList =
                 dataFieldService.export(dto, exportParam);
         return Results.success(dtoList);
@@ -290,7 +290,7 @@ public class DataFieldController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/field-aim-standard")
     public ResponseEntity<Void> fieldAimStandard(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                                 @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                 @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                  @RequestBody AssetFieldDTO assetFieldDTO) {
         assetFieldDTO.setTenantId(tenantId);
         dataFieldService.fieldAimStandard(assetFieldDTO, projectId);
@@ -301,7 +301,7 @@ public class DataFieldController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/standard-by-field")
     public ResponseEntity<List<DataFieldDTO>> standardByField(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                                                 @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                                 @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                                  @RequestBody AssetFieldDTO assetFieldDTO) {
         assetFieldDTO.setTenantId(tenantId);
         List<DataFieldDTO> dataFieldDTOList = dataFieldService.standardByField(assetFieldDTO, projectId);
@@ -346,7 +346,7 @@ public class DataFieldController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/online-workflow-success/{fieldId}")
     public ResponseEntity<DataStandardDTO> onlineWorkflowSuccess(@PathVariable(name = "organizationId") Long tenantId,
-                                                                 @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                                 @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                                  @PathVariable Long fieldId) {
         //兼容旧版工作流
         dataFieldService.onlineWorkflowCallback(fieldId, WorkflowConstant.ApproveAction.APPROVED);

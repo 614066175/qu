@@ -15,7 +15,7 @@ import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.RootMatchDTO;
 import org.xdsp.quality.app.service.RootMatchService;
 import org.xdsp.quality.domain.entity.RootMatch;
@@ -53,7 +53,7 @@ public class RootMatchController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   RootMatchDTO rootMatchDTO,
                                   @ApiIgnore @SortDefault(value = RootMatch.FIELD_ID, direction = Sort.Direction.DESC) PageRequest pageRequest) {
         rootMatchDTO.setTenantId(tenantId);
@@ -91,7 +91,7 @@ public class RootMatchController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody RootMatchDTO rootMatchDTO) {
         rootMatchDTO.setTenantId(tenantId);
         rootMatchDTO.setProjectId(projectId);
@@ -110,7 +110,7 @@ public class RootMatchController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody RootMatchDTO rootMatchDTO) {
         rootMatchDTO.setTenantId(tenantId);
         rootMatchDTO.setProjectId(projectId);
@@ -127,7 +127,7 @@ public class RootMatchController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody RootMatchDTO rootMatchDTO) {
         rootMatchDTO.setTenantId(tenantId);
         rootMatchDTO.setProjectId(projectId);
@@ -146,7 +146,7 @@ public class RootMatchController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/smart-match")
     public ResponseEntity<?> smartMatch(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                        @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         @RequestBody RootMatchDTO rootMatchDTO) {
         rootMatchDTO.setProjectId(projectId);
         rootMatchDTO.setTenantId(tenantId);
@@ -163,7 +163,7 @@ public class RootMatchController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/upload")
     public ResponseEntity<?> upload(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     RootMatchDTO rootMatchDTO,
                                     @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
         rootMatchDTO.setTenantId(tenantId);
@@ -182,7 +182,7 @@ public class RootMatchController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/export")
     public ResponseEntity<?> export(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     RootMatchDTO rootMatchDTO,
                                     HttpServletResponse response) {
         rootMatchDTO.setProjectId(projectId);

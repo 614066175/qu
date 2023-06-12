@@ -14,7 +14,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.RootMatchHisDTO;
 import org.xdsp.quality.app.service.RootMatchHisService;
 import org.xdsp.quality.domain.entity.RootMatchHis;
@@ -49,7 +49,7 @@ public class RootMatchHisController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   RootMatchHisDTO rootMatchHisDTO,
                                   @ApiIgnore @SortDefault(value = RootMatchHis.FIELD_ID, direction = Sort.Direction.DESC) PageRequest pageRequest) {
         rootMatchHisDTO.setTenantId(tenantId);
@@ -87,7 +87,7 @@ public class RootMatchHisController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody RootMatchHisDTO rootMatchHisDTO) {
         rootMatchHisDTO.setTenantId(tenantId);
         rootMatchHisDTO.setProjectId(projectId);
@@ -121,7 +121,7 @@ public class RootMatchHisController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody RootMatchHisDTO rootMatchHisDTO) {
         rootMatchHisDTO.setTenantId(tenantId);
         rootMatchHisDTO.setProjectId(projectId);

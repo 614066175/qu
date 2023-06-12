@@ -12,7 +12,7 @@ import org.hzero.core.util.Results;
 import org.hzero.mybatis.helper.SecurityTokenHelper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.BatchPlanFieldConDTO;
 import org.xdsp.quality.config.SwaggerTags;
 import org.xdsp.quality.domain.entity.BatchPlanFieldCon;
@@ -45,7 +45,7 @@ public class BatchPlanFieldConController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   BatchPlanFieldConDTO batchPlanFieldConDTO, @ApiIgnore @SortDefault(value = BatchPlanFieldCon.FIELD_CONDITION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         batchPlanFieldConDTO.setTenantId(tenantId);
@@ -83,7 +83,7 @@ public class BatchPlanFieldConController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody BatchPlanFieldConDTO batchPlanFieldConDTO) {
         batchPlanFieldConDTO.setTenantId(tenantId);
         batchPlanFieldConDTO.setProjectId(projectId);
@@ -102,7 +102,7 @@ public class BatchPlanFieldConController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody BatchPlanFieldConDTO batchPlanFieldConDTO) {
         SecurityTokenHelper.validToken(batchPlanFieldConDTO, false);
         batchPlanFieldConDTO.setProjectId(projectId);

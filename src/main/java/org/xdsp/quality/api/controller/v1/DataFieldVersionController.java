@@ -14,7 +14,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.DataFieldVersionDTO;
 import org.xdsp.quality.app.service.DataFieldVersionService;
 import org.xdsp.quality.domain.entity.DataFieldVersion;
@@ -49,11 +49,11 @@ public class DataFieldVersionController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<Page<DataFieldVersionDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
-                                                          @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                          @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                           DataFieldVersionDTO dataFieldVersionDTO, @ApiIgnore @SortDefault(value = DataFieldVersion.FIELD_VERSION_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         dataFieldVersionDTO.setTenantId(tenantId);
-        dataFieldVersionDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        dataFieldVersionDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         Page<DataFieldVersionDTO> list = dataFieldVersionService.list(pageRequest, dataFieldVersionDTO);
         return Results.success(list);
     }
@@ -87,10 +87,10 @@ public class DataFieldVersionController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<DataFieldVersionDTO> create(@PathVariable("organizationId") Long tenantId,
-                                                      @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                      @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                       @RequestBody DataFieldVersionDTO dataFieldVersionDTO) {
         dataFieldVersionDTO.setTenantId(tenantId);
-        dataFieldVersionDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        dataFieldVersionDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         this.validObject(dataFieldVersionDTO);
         dataFieldVersionRepository.insertDTOSelective(dataFieldVersionDTO);
         return Results.success(dataFieldVersionDTO);
@@ -106,9 +106,9 @@ public class DataFieldVersionController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<DataFieldVersionDTO> update(@PathVariable("organizationId") Long tenantId,
-                                                      @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                      @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                       @RequestBody DataFieldVersionDTO dataFieldVersionDTO) {
-        dataFieldVersionDTO.setProjectId(HdspConstant.DEFAULT_PROJECT_ID);
+        dataFieldVersionDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         dataFieldVersionRepository.updateDTOWhereTenant(dataFieldVersionDTO, tenantId);
         return Results.success(dataFieldVersionDTO);
     }

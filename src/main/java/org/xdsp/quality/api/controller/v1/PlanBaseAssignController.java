@@ -14,7 +14,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.PlanBaseAssignDTO;
 import org.xdsp.quality.app.service.PlanBaseAssignService;
 import org.xdsp.quality.domain.entity.PlanBaseAssign;
@@ -86,7 +86,7 @@ public class PlanBaseAssignController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody List<PlanBaseAssignDTO> planBaseAssignDTOList) {
         planBaseAssignDTOList.forEach(planBaseAssignDTO -> {
             planBaseAssignDTO.setTenantId(tenantId);
@@ -136,7 +136,7 @@ public class PlanBaseAssignController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/base-assign/{planBaseId}")
     public ResponseEntity<?> baseAssign(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                        @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                        @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                         @PathVariable(name = "planBaseId") Long planBaseId,
                                         @RequestBody List<PlanBaseAssignDTO> planBaseAssignDTOList) {
         planBaseAssignDTOList.forEach(planBaseAssignDTO -> {

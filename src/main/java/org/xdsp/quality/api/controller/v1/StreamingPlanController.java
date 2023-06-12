@@ -11,7 +11,7 @@ import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.xdsp.core.constant.HdspConstant;
+import org.xdsp.core.constant.XdspConstant;
 import org.xdsp.quality.api.dto.StreamingPlanDTO;
 import org.xdsp.quality.app.service.StreamingPlanService;
 import org.xdsp.quality.config.SwaggerTags;
@@ -48,7 +48,7 @@ public class StreamingPlanController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<?> list(@PathVariable(name = "organizationId") Long tenantId,
-                                  @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                   StreamingPlanDTO streamingPlanDTO, @ApiIgnore @SortDefault(value = StreamingPlan.FIELD_PLAN_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest) {
         streamingPlanDTO.setTenantId(tenantId);
@@ -67,7 +67,7 @@ public class StreamingPlanController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list")
     public ResponseEntity<?> listWithOutPage(@PathVariable(name = "organizationId") Long tenantId,
-                                             @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                             @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                              StreamingPlan streamingPlan) {
         streamingPlan.setTenantId(tenantId);
         streamingPlan.setProjectId(projectId);
@@ -84,7 +84,7 @@ public class StreamingPlanController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/group")
     public ResponseEntity<?> group(@PathVariable(name = "organizationId") Long tenantId,
-                                   @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                   @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                    StreamingPlanDTO streamingPlanDTO) {
         streamingPlanDTO.setTenantId(tenantId);
         streamingPlanDTO.setProjectId(projectId);
@@ -121,7 +121,7 @@ public class StreamingPlanController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<?> create(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StreamingPlanDTO streamingPlanDTO) {
         streamingPlanDTO.setTenantId(tenantId);
         streamingPlanDTO.setProjectId(projectId);
@@ -140,7 +140,7 @@ public class StreamingPlanController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping
     public ResponseEntity<?> update(@PathVariable("organizationId") Long tenantId,
-                                    @RequestParam(name = "projectId", defaultValue = HdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                     @RequestBody StreamingPlanDTO streamingPlanDTO) {
         streamingPlanDTO.setProjectId(projectId);
         streamingPlanRepository.updateDTOAllColumnWhereTenant(streamingPlanDTO, tenantId);
