@@ -51,10 +51,9 @@ public class ReferenceDataValueBatchImportImpl extends BatchImportHandler implem
     public Boolean doImport(List<String> data) {
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         Long projectId = ProjectHelper.getProjectId();
-        List<ReferenceDataValue> insertList = new ArrayList<>();
-        List<ReferenceDataValue> updateList = new ArrayList<>();
-        try {
-            for (int i = 0; i < data.size(); i++) {
+        boolean error = false;
+        for (int i = 0; i < data.size(); i++) {
+            try {
                 ReferenceDataValueDTO referenceDataValueDTO = objectMapper.readValue(data.get(i), ReferenceDataValueDTO.class);
                 referenceDataValueDTO.setEnabledFlag(1);
                 referenceDataValueDTO.setProjectId(projectId);
@@ -117,19 +116,18 @@ public class ReferenceDataValueBatchImportImpl extends BatchImportHandler implem
                     referenceDataValueDTO.setValueId(exist.getValueId());
                     referenceDataValueDTO.setEnabledFlag(exist.getEnabledFlag());
                     referenceDataValueDTO.setObjectVersionNumber(exist.getObjectVersionNumber());
-                    updateList.add(referenceDataValueConverter.dtoToEntity(referenceDataValueDTO));
+                    referenceDataValueRepository.updateByDTOPrimaryKey(referenceDataValueDTO);
                 } else {
-                    insertList.add(referenceDataValueConverter.dtoToEntity(referenceDataValueDTO));
+                    referenceDataValueRepository.insertDTOSelective(referenceDataValueDTO);
                 }
+                getContextList().get(i).setDataStatus(DataStatus.IMPORT_SUCCESS);
+            } catch (Exception e) {
+                error = true;
+                log.error("参考值导入出错", e);
+                addErrorMsg(i, "参考值导入出错:" + e.getMessage());
+                getContextList().get(i).setDataStatus(DataStatus.IMPORT_FAILED);
             }
-            referenceDataValueRepository.batchInsertSelective(insertList);
-            referenceDataValueRepository.batchUpdateByPrimaryKeySelective(updateList);
-        } catch (Exception e) {
-            // 失败
-            log.error("Permission Object data:{}", data);
-            log.error("Permission Object Read Json Error", e);
-            return false;
         }
-        return true;
+        return !error;
     }
 }

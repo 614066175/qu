@@ -58,10 +58,9 @@ public class ReferenceDataBatchImportImpl extends BatchImportHandler implements 
     public Boolean doImport(List<String> data) {
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         Long projectId = ProjectHelper.getProjectId();
-        List<ReferenceData> insertList = new ArrayList<>();
-        List<ReferenceData> updateList = new ArrayList<>();
-        try {
-            for (int i = 0; i < data.size(); i++) {
+        boolean error = false;
+        for (int i = 0; i < data.size(); i++) {
+            try {
                 ReferenceDataDTO referenceDataDTO = objectMapper.readValue(data.get(i), ReferenceDataDTO.class);
                 referenceDataDTO.setProjectId(projectId);
                 referenceDataDTO.setTenantId(tenantId);
@@ -93,6 +92,10 @@ public class ReferenceDataBatchImportImpl extends BatchImportHandler implements 
                         .build());
                 if (Objects.nonNull(commonGroup) && Objects.nonNull(commonGroup.getGroupId())) {
                     referenceDataDTO.setDataGroupId(commonGroup.getGroupId());
+                } else {
+                    addErrorMsg(i, String.format("分组[%s]不存在", referenceDataDTO.getGroupPath()));
+                    getContextList().get(i).setDataStatus(DataStatus.IMPORT_FAILED);
+                    continue;
                 }
 
                 // 父参考数据id
@@ -136,19 +139,18 @@ public class ReferenceDataBatchImportImpl extends BatchImportHandler implements 
                     referenceDataDTO.setObjectVersionNumber(exist.getObjectVersionNumber());
                     referenceDataDTO.setReleaseBy(exist.getReleaseBy());
                     referenceDataDTO.setReleaseDate(exist.getReleaseDate());
-                    updateList.add(referenceDataConverter.dtoToEntity(referenceDataDTO));
+                    referenceDataRepository.updateByDTOPrimaryKey(referenceDataDTO);
                 } else {
-                    insertList.add(referenceDataConverter.dtoToEntity(referenceDataDTO));
+                    referenceDataRepository.insertDTOSelective(referenceDataDTO);
                 }
+                getContextList().get(i).setDataStatus(DataStatus.IMPORT_SUCCESS);
+            } catch (Exception e) {
+                error = true;
+                log.error("参考数据导入出错", e);
+                addErrorMsg(i, "参考数据导入出错:" + e.getMessage());
+                getContextList().get(i).setDataStatus(DataStatus.IMPORT_FAILED);
             }
-            referenceDataRepository.batchUpdateByPrimaryKey(updateList);
-            referenceDataRepository.batchInsertSelective(insertList);
-        } catch (Exception e) {
-            // 失败
-            log.error("Permission Object data:{}", data);
-            log.error("Permission Object Read Json Error", e);
-            return false;
         }
-        return true;
+        return !error;
     }
 }
