@@ -68,6 +68,10 @@
                 <bind name="valueMeaningLike" value="'%'+valueMeaning+'%'"/>
                 AND xrdv.value_meaning LIKE #{valueMeaningLike}
             </if>
+            <if test="valueDesc != null and valueDesc != ''">
+                <bind name="valueDescLike" value="'%'+valueDesc+'%'"/>
+                AND xrdv.value_desc LIKE #{valueDescLike}
+            </if>
             <if test="enabledFlag != null">
                 AND xrdv.enabled_flag = #{enabledFlag}
             </if>
