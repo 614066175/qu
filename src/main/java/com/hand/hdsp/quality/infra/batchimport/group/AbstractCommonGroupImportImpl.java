@@ -9,7 +9,10 @@ import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import org.hzero.boot.imported.app.service.BatchImportHandler;
 import org.hzero.boot.imported.app.service.IBatchImportService;
+import org.hzero.boot.imported.infra.enums.DataStatus;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +29,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
-public class AbstractCommonGroupImportImpl implements IBatchImportService {
+public class AbstractCommonGroupImportImpl extends BatchImportHandler implements IBatchImportService {
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -41,8 +44,10 @@ public class AbstractCommonGroupImportImpl implements IBatchImportService {
     public Boolean doImport(List<String> data) {
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         Long projectId = ProjectHelper.getProjectId();
+        boolean error = false;
         //循环导入
-        for (String json : data) {
+        for (int i = 0; i < data.size(); i++) {
+            String json = data.get(i);
             try {
                 CommonGroup commonGroup = objectMapper.readValue(json, CommonGroup.class);
                 //判断在目标环境是否存在，若存在则跳过，不存在则新建
@@ -63,11 +68,14 @@ public class AbstractCommonGroupImportImpl implements IBatchImportService {
                     //从头建到尾，调用封装客户端
                     commonGroupClient.createGroup(tenantId, projectId, commonGroup.getGroupType(), groupPath);
                 }
-            } catch (IOException e) {
-                log.error("导入分组失败");
-                return false;
+                getContextList().get(i).setDataStatus(DataStatus.IMPORT_SUCCESS);
+            } catch (Exception e) {
+                error = true;
+                log.error("导入分组失败", e);
+                addErrorMsg(i, "导入分组失败:" + e.getMessage());
+                getContextList().get(i).setDataStatus(DataStatus.IMPORT_FAILED);
             }
         }
-        return true;
+        return !error;
     }
 }
