@@ -272,15 +272,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                 dataStandardDTO.setChargeName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeName()));
             }
         }
-        if (PlanConstant.StandardValueType.REFERENCE_DATA.equals(dataStandardDTO.getValueType()) && StringUtils.isNotBlank(dataStandardDTO.getValueRange())) {
-            long referenceDataId = Long.parseLong(dataStandardDTO.getValueRange());
-            ReferenceDataDTO referenceDataDTO = referenceDataRepository.selectDTOByPrimaryKey(referenceDataId);
-            if (Objects.nonNull(referenceDataDTO)) {
-                dataStandardDTO.setReferenceDataCode(referenceDataDTO.getDataCode());
-                dataStandardDTO.setReferenceDataName(referenceDataDTO.getDataName());
-            }
-
-        }
+        selectReferenceData(dataStandardDTO);
         convertToDataLengthList(dataStandardDTO);
         List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
                 .andWhere(Sqls.custom()
@@ -290,6 +282,17 @@ public class DataStandardServiceImpl implements DataStandardService {
                 .build());
         dataStandardDTO.setStandardExtraDTOList(standardExtraDTOS);
         return dataStandardDTO;
+    }
+
+    private void selectReferenceData(DataStandardDTO dataStandardDTO) {
+        if (PlanConstant.StandardValueType.REFERENCE_DATA.equals(dataStandardDTO.getValueType()) && StringUtils.isNotBlank(dataStandardDTO.getValueRange())) {
+            long referenceDataId = Long.parseLong(dataStandardDTO.getValueRange());
+            ReferenceDataDTO referenceDataDTO = referenceDataRepository.selectDTOByPrimaryKey(referenceDataId);
+            if (Objects.nonNull(referenceDataDTO)) {
+                dataStandardDTO.setReferenceDataCode(referenceDataDTO.getDataCode());
+                dataStandardDTO.setReferenceDataName(referenceDataDTO.getDataName());
+            }
+        }
     }
 
     private void convertToDataLengthList(DataStandardDTO dataStandardDTO) {
@@ -418,7 +421,11 @@ public class DataStandardServiceImpl implements DataStandardService {
             dataStandardDTO.setGroupArrays(subGroup.stream().map(CommonGroup::getGroupId).toArray(Long[]::new));
         }
         List<DataStandardDTO> list = findDataStandards(dataStandardDTO);
-        return PageParseUtil.springPage2C7nPage(PageUtil.doPage(list, org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize())));
+        Page<DataStandardDTO> page = PageParseUtil.springPage2C7nPage(PageUtil.doPage(list, org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize())));
+        for (DataStandardDTO standardDTO : page) {
+            selectReferenceData(standardDTO);
+        }
+        return page;
     }
 
 
