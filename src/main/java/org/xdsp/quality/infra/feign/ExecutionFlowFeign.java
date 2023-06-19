@@ -14,7 +14,7 @@ import org.xdsp.quality.infra.feign.fallback.ExecutionFlowFallback;
  * @author rui.jia01@hand-china.com 2020/03/27 15:39
  */
 @FeignClient(
-        value = "${hdsp.service.dispatch:hdsp-dispatch}",
+        value = "${xdsp.service.dispatch:xdsp-dispatch}",
         fallback = ExecutionFlowFallback.class
 )
 public interface ExecutionFlowFeign {

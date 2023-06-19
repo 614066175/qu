@@ -14,7 +14,7 @@ import org.xdsp.quality.infra.feign.fallback.DispatchJobFeignFallBack;
  * @author lei.xie03@hand-china.com 2019/05/31 14:52
  */
 @FeignClient(
-        value = "${hdsp.service.dispatch:hdsp-dispatch}",
+        value = "${xdsp.service.dispatch:xdsp-dispatch}",
         fallback = DispatchJobFeignFallBack.class
 )
 public interface DispatchJobFeign {

@@ -243,7 +243,7 @@ public class RootMatchServiceImpl implements RootMatchService {
             outputStream.close();
         } catch (Exception e) {
             log.error("导出excel失败", e);
-            throw new CommonException("hdsp.xqua.err.export_excel_failed", e);
+            throw new CommonException("xqua.err.export_excel_failed", e);
         }
     }
 

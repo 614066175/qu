@@ -79,7 +79,7 @@ public class RootServiceImpl implements RootService {
 
     private static final String NO_MATCH = "{未匹配}";
 
-    @Value("${hdsp.root_dic_parent:library}")
+    @Value("${xdsp.root_dic_parent:library}")
     public String dicParent;
 
     public static final String DIC_NAME_FORMAT = "rootLibrary_%d_%d.dic";

@@ -14,7 +14,7 @@ import org.xdsp.quality.infra.feign.fallback.DqRuleLineFeignFallback;
  * @author feng.liu01@hand-china.com 2020-04-20 20:03:59
  */
 @FeignClient(
-        value = "${hdsp.service.ops:hdsp-ops}",
+        value = "${xdsp.service.ops:xdsp-ops}",
         fallback = DqRuleLineFeignFallback.class
 )
 public interface DqRuleLineFeign {

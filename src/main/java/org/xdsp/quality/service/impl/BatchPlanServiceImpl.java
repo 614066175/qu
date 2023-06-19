@@ -101,9 +101,9 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             "{\"authSettingInfo\":{\"auth\":\"OAUTH2\",\"grantType\":\"PASSWORD\"},\"apiSettingInfo\":{\"retryEnabled\":false},\"callbackApiSettingInfo\":{\"enabled\":false}}";
     private static final String SQL_PACK = " (%s) sql_pack";
     private static final String ALERT_CODE = "%s-%s";
-    @Value("${hdsp.route-data.service-short}")
+    @Value("${xdsp.route-data.service-short}")
     private String serviceShort;
-    @Value("${hdsp.route-data.service-id}")
+    @Value("${xdsp.route-data.service-id}")
     private String serviceId;
 
 

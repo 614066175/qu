@@ -144,7 +144,7 @@ public class DataStandardServiceImpl implements DataStandardService {
     @Autowired
     private List<StandardHandler> handlers;
 
-    @Value("${hdsp.workflow.enabled:false}")
+    @Value("${xdsp.workflow.enabled:false}")
     private boolean enableWorkFlow;
 
     @Resource
@@ -380,7 +380,7 @@ public class DataStandardServiceImpl implements DataStandardService {
 //        assetFeign.create(oldDataStandardDTO.getTenantId(),headerDTO);
 //        ApprovalHeaderDTO approvalHeaderDTO = assetFeign.getByUnique(oldDataStandardDTO.getTenantId(), headerDTO).getBody();
 //        if(Objects.isNull(approvalHeaderDTO)){
-//            throw new CommonException("hdsp.xsta.err.approval_header_not_exist");
+//            throw new CommonException("xdsp.xsta.err.approval_header_not_exist");
 //        }
 //        //创建申请行
 //        ApprovalLineDTO approvalLineDTO = ApprovalLineDTO.builder()

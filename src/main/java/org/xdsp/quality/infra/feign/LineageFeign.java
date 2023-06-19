@@ -19,7 +19,7 @@ import java.util.List;
  * @since 1.0
  */
 @FeignClient(
-        value = "${hdsp.service.lineage:hdsp-lineage}",
+        value = "${xdsp.service.lineage:xdsp-lineage}",
         fallback = LineageFeignFallBack.class
 )
 public interface LineageFeign {

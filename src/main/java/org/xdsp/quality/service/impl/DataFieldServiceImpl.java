@@ -102,7 +102,7 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     private final DataFieldOfflineWorkflowAdapter dataFieldOfflineWorkflowAdapter;
 
-    @Value("${hdsp.workflow.enabled:false}")
+    @Value("${xdsp.workflow.enabled:false}")
     private boolean enableWorkflow;
 
     @Autowired

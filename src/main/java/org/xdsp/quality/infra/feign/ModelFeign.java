@@ -13,7 +13,7 @@ import org.xdsp.quality.infra.feign.fallback.ModelFeignFallBack;
  * @Date: 2022/06/22
  */
 @FeignClient(
-        value = "${hdsp.service.model:hdsp-model}",
+        value = "${xdsp.service.model:xdsp-model}",
         fallback = ModelFeignFallBack.class
 )
 public interface ModelFeign {

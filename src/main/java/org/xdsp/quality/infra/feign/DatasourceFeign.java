@@ -13,7 +13,7 @@ import org.xdsp.quality.infra.feign.fallback.DatasourceFeignFallback;
  * @author feng.liu01@hand-china.com 2020-02-03 14:40:55
  */
 @FeignClient(
-        value = "${hdsp.service.core:hdsp-core}",
+        value = "${xdsp.service.core:xdsp-core}",
         fallback = DatasourceFeignFallback.class
 )
 public interface DatasourceFeign {

@@ -17,7 +17,7 @@ import org.xdsp.quality.infra.feign.fallback.AssetFeignFallBack;
  * @since 1.0
  */
 @FeignClient(
-        value = "${hdsp.service.asset:hdsp-asset}",
+        value = "${xdsp.service.asset:xdsp-asset}",
         fallback = AssetFeignFallBack.class
 )
 public interface AssetFeign {

@@ -25,13 +25,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class ExceptionDataConsumer implements CommandLineRunner {
 
-    @Value("${hdsp.quality.message-key}")
+    @Value("${xdsp.quality.message-key}")
     private String messageKey;
 
     @Autowired
     private RedisHelper redisHelper;
 
-    @Value("${hdsp.quality.exception-thread-num:8}")
+    @Value("${xdsp.quality.exception-thread-num:8}")
     //定义异常数据的固定线程数,做成服务参数，根据各个服务器性能进行配置，默认8个
     private int exceptionThreadNum;
 

@@ -14,7 +14,7 @@ import org.xdsp.quality.infra.feign.fallback.TimestampFallback;
  * @date 2020/2/4 10:11
  */
 @FeignClient(
-        value = "${hdsp.service.dispatch:hdsp-dispatch}",
+        value = "${xdsp.service.dispatch:xdsp-dispatch}",
         fallback = TimestampFallback.class
 )
 public interface TimestampFeign {

@@ -10,7 +10,7 @@ public interface PlanConstant {
     /**
      * redis key
      */
-    String CACHE_BUCKET_EXCEPTION = "hdsp:quality:exception";
+    String CACHE_BUCKET_EXCEPTION = "xqua:exception";
 
     /**
      * 数据质量任务类型

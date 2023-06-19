@@ -72,7 +72,7 @@ public class NameStandardRepositoryImpl extends BaseRepositoryImpl<NameStandard,
     @Transactional(rollbackFor = Exception.class)
     public void batchImportStandard(List<NameStandardDTO> nameStandardDTOList) {
         if (CollectionUtils.isEmpty(nameStandardDTOList)) {
-            throw new CommonException("hdsp.xsta.err.is_empty");
+            throw new CommonException("xsta.err.is_empty");
         }
         nameStandardDTOList.forEach(nameStandardDTO -> {
             //根据责任人姓名 获取目标环境的责任人id

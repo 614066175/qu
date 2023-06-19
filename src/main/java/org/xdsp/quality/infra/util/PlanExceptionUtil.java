@@ -73,9 +73,9 @@ public class PlanExceptionUtil {
         redisHelper = context.getBean(RedisHelper.class);
         driverSessionService = context.getBean(DriverSessionService.class);
         lovAdapter = context.getBean(LovAdapter.class);
-        String messagekeyConfig = context.getEnvironment().resolvePlaceholders("${hdsp.quality.message-key}");
+        String messagekeyConfig = context.getEnvironment().resolvePlaceholders("${xdsp.quality.message-key}");
         if (StringUtils.isEmpty(messagekeyConfig)) {
-            messageKey = "hdsp:quality:exception-message";
+            messageKey = "xdsp:quality:exception-message";
         } else {
             messageKey = messagekeyConfig;
         }
