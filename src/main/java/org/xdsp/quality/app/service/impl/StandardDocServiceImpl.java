@@ -64,8 +64,10 @@ public class StandardDocServiceImpl implements StandardDocService {
     private final DiscoveryHelper discoveryHelper;
     private final StandardGroupRepository standardGroupRepository;
     private final FileClient fileClient;
-    @Value("${XDSP_PREVIEW_FILE_SERVICE:xdsp-file-preview}")
+    @Value("${XDSP_PREVIEW_FILE_SERVICE_URL:}")
     private String url;
+    @Value("${XDSP_PREVIEW_FILE_SERVICE:xdsp-file-preview}")
+    private String serverName;
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public StandardDocServiceImpl(StandardDocMapper standardDocMapper,
@@ -256,7 +258,11 @@ public class StandardDocServiceImpl implements StandardDocService {
     @Override
     public String previewUrl() {
         try {
-            return discoveryHelper.getAppUrlByName(url);
+            if (StringUtils.isNotBlank(url)) {
+                return url;
+            } else {
+                return discoveryHelper.getAppUrlByName(serverName);
+            }
         } catch (Exception e) {
             throw new CommonException("xsta.err.file_preview_not_exist");
         }
