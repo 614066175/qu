@@ -22,6 +22,7 @@ import org.hzero.boot.imported.infra.util.FileUtils;
 import org.hzero.boot.message.entity.Attachment;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.boot.platform.lov.dto.LovValueDTO;
+import org.hzero.common.HZeroService;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.core.message.MessageAccessor;
 import org.hzero.core.util.ResponseUtils;
@@ -292,17 +293,17 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 .append("rest.grantType=").append("IMPLICIT").append("\n")
                 .append("rest.responseType=").append("IMPLICIT").append("\n")
                 .append("rest.clientId=").append("client").append("\n")
-                .append("rest.tokenUri=").append("/xoau/public/custom-token/oauth").append("\n")
+                .append("rest.tokenUri=").append(HZeroService.Oauth.CONTEXT).append("/public/custom-token/oauth").append("\n")
                 .append("rest.username=").append("admin").append("\n")
                 .append("rest.external=false\n")
-                .append("rest.app=" + serviceId + "\n")
+                .append("rest.app=").append(serviceId).append("\n")
                 .append("rest.useGateway=true\n")
-                .append("rest.uri=/" + serviceShort + "/v1/")
+                .append("rest.uri=/").append(serviceShort).append("/v1/")
                 .append(batchPlanDTO.getTenantId())
                 //调整为按编码执行，解决环境迁移id不一致的问题
                 .append("/batch-plans/exec-by-code/")
                 //不写死projectId，项目共享支持跨项目支持
-                .append(batchPlanDTO.getPlanCode() + String.format("?projectId=${projectId}&sourceProjectId=${hProjectId}") + "\n")
+                .append(batchPlanDTO.getPlanCode()).append("?projectId=${projectId}&sourceProjectId=${hProjectId}" + "\n")
                 .append("rest.method=GET\n")
                 .append("rest.contentType=application/json\n")
                 .append("rest.body={}\n")
