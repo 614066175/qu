@@ -72,7 +72,7 @@ public class DataStandardVersionServiceImpl implements DataStandardVersionServic
 
     private void convertToDataLengthList(DataStandardVersionDTO dataStandardVersionDTO) {
         //对数据长度进行处理
-        if (Objects.nonNull(dataStandardVersionDTO.getDataLength()) ) {
+        if (StringUtils.isNotEmpty(dataStandardVersionDTO.getDataLength()) ) {
             List<String> dataLength = Arrays.asList(dataStandardVersionDTO.getDataLength().split(","));
             List<Long> dataLengthList = dataLength.stream().map(Long::parseLong).collect(Collectors.toList());
             dataStandardVersionDTO.setDataLengthList(dataLengthList);
