@@ -405,7 +405,7 @@ public class NameStandardServiceImpl implements NameStandardService {
             if (CollectionUtils.isEmpty(tables)) {
                 throw new CommonException("invalid schema:{0}/{1}", nameAimDTO.getDatasourceCode(), x.getSchemaName());
             }
-            if (!Objects.isNull(nameAimDTO.getExcludeRule())) {
+            if (StringUtils.isNotEmpty(nameAimDTO.getExcludeRule())) {
                 List<String> excludeRuleTable = tables.stream().filter(o -> Pattern.compile(nameAimDTO.getExcludeRule()).matcher(o).find())
                         .collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(excludeRuleTable)) {
