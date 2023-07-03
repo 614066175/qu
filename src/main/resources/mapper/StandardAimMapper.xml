@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.StandardAimMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.StandardAimMapper">
     <!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.StandardAim">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.StandardAim">
         <result column="aim_id" property="aimId" jdbcType="DECIMAL"/>
         <result column="standard_id" property="standardId" jdbcType="DECIMAL"/>
         <result column="standard_type" property="standardType" jdbcType="VARCHAR"/>
@@ -23,7 +23,7 @@
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
-    <select id="selectByConditionLike" resultType="com.hand.hdsp.quality.api.dto.StandardAimDTO">
+    <select id="selectByConditionLike" resultType="org.xdsp.quality.api.dto.StandardAimDTO">
         select
         xsa.aim_id,
         xsa.standard_id,

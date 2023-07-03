@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.PlanGroupMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.PlanGroupMapper">
     <!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.PlanGroup">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.PlanGroup">
         <result column="group_id" property="groupId" jdbcType="DECIMAL"/>
         <result column="parent_group_id" property="parentGroupId" jdbcType="DECIMAL"/>
         <result column="group_code" property="groupCode" jdbcType="VARCHAR"/>
@@ -19,7 +19,7 @@
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
 
-    <select id="treeBatch" resultType="com.hand.hdsp.quality.infra.vo.PlanGroupTreeVO">
+    <select id="treeBatch" resultType="org.xdsp.quality.infra.vo.PlanGroupTreeVO">
     select
     group_id id,
     concat('group',group_id) group_id,
@@ -67,7 +67,7 @@
     </where>
     </select>
 
-    <select id="treeStream" resultType="com.hand.hdsp.quality.infra.vo.PlanGroupTreeVO">
+    <select id="treeStream" resultType="org.xdsp.quality.infra.vo.PlanGroupTreeVO">
     select
     group_id id,
     concat('group',group_id) group_id,
@@ -103,7 +103,7 @@
         </if>
     </where>
     </select>
-    <select id="ownAndShareGroup" resultType="com.hand.hdsp.quality.domain.entity.PlanGroup">
+    <select id="ownAndShareGroup" resultType="org.xdsp.quality.domain.entity.PlanGroup">
         SELECT
             xpg.*
         FROM
@@ -116,7 +116,7 @@
                                        AND xps.share_object_type = 'GROUP'
                                        AND xps.share_to_project_id = #{projectId} ))
     </select>
-    <select id="selectWithParentCode" resultType="com.hand.hdsp.quality.api.dto.PlanGroupDTO">
+    <select id="selectWithParentCode" resultType="org.xdsp.quality.api.dto.PlanGroupDTO">
         SELECT
             xpg1.*,
             xpg2.group_code  parentGroupCode

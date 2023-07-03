@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.StreamingResultBaseMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.StreamingResultBaseMapper">
     <!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.StreamingResultBase">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.StreamingResultBase">
         <result column="result_base_id" property="resultBaseId" jdbcType="DECIMAL"/>
         <result column="result_id" property="resultId" jdbcType="DECIMAL"/>
         <result column="connector_info" property="connectorInfo" jdbcType="VARCHAR"/>
