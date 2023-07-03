@@ -3,7 +3,7 @@ spring:
     mongodb:
       uri: ${SPRING_DATA_MONGODB_URI:mongodb://dba:dba@172.23.16.63:27017,172.23.16.63:27018,172.23.16.63:27019/hdsp_quality?slaveOk=true&replicaSet=test&write=1&readPreference=secondaryPreferred&connectTimeoutMS=300000}
   application:
-    name: ${SPRING_APPLICATION_NAME:hdsp-quality}
+    name: ${SPRING_APPLICATION_NAME:xdsp-quality}
   datasource:
     driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:com.mysql.jdbc.Driver}
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://db.hdsp.hand.com:23306/hdsp_quality?useUnicode=true&characterEncoding=utf-8&useSSL=false}
@@ -147,28 +147,28 @@ hzero:
     permission:
       # 是否启用数据权限屏蔽
       enabled: ${HZERO_ENABLE_DATA_PERMISSION:true}
-hdsp:
+xdsp:
   quality:
-    message-key: hdsp:quality:exception-message
+    message-key: xqua:exception-message
     batch-number: 10000
   workflow:
     enabled: true
   # 提取信息
   route-data:
-    service-short: ${HDSP_ROUTE_DATA_SERVICE_SHORT:xqua}
-    service-id: ${HDSP_ROUTE_DATA_SERVICE_ID:hdsp-quality}
+    service-short: ${XDSP_ROUTE_DATA_SERVICE_SHORT:xqua}
+    service-id: ${XDSP_ROUTE_DATA_SERVICE_ID:xdsp-quality}
   # 请求签名
   access:
     sign:
-      urlSuffix: ${HDSP_ACCESS_SIGN_URL_SUFFIX:/v1/.*}
-      excludeUrlSuffix: ${HDSP_ACCESS_SIGN_EXCLUDE_URL_SUFFIX:/v2/.*}
-      initTokenNum: ${HDSP_ACCESS_SIGN_INIT_TOKEN_NUM:10}
-      enabled: ${HDSP_ACCESS_SIGN_ENABLED:false}
+      urlSuffix: ${XDSP_ACCESS_SIGN_URL_SUFFIX:/v1/.*}
+      excludeUrlSuffix: ${XDSP_ACCESS_SIGN_EXCLUDE_URL_SUFFIX:/v2/.*}
+      initTokenNum: ${XDSP_ACCESS_SIGN_INIT_TOKEN_NUM:10}
+      enabled: ${XDSP_ACCESS_SIGN_ENABLED:false}
   service:
-    core: ${HDSP_CORE_SERVICE:hdsp-core}
-    dispatch: ${HDSP_DISPATCH_SERVICE:hdsp-dispatch}
-    ops: ${HDSP_OPS_SERVICE:hdsp-ops}
-    preview: ${HDSP_PREVIEW_FILE_SERVICE:hdsp-file-preview}
+    core: ${XDSP_CORE_SERVICE:xdsp-core}
+    dispatch: ${XDSP_DISPATCH_SERVICE:xdsp-dispatch}
+    ops: ${XDSP_OPS_SERVICE:xdsp-ops}
+    preview: ${XDSP_PREVIEW_FILE_SERVICE:xdsp-file-preview}
 
 jasypt:
   encryptor:
@@ -180,8 +180,8 @@ logging:
     org.apache.ibatis: ${LOGGING_LEVEL:debug}
     io.choerodon: ${LOGGING_LEVEL:debug}
     org.hzero: ${LOGGING_LEVEL:debug}
-    com.hand.hdsp: ${LOGGING_LEVEL:debug}
-  config: classpath:logback-hdsp.xml
+    org.xdsp: ${LOGGING_LEVEL:debug}
+  config: classpath:logback-xdsp.xml
 
 plugin:
   run-mode: prod

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.StreamingResultMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.StreamingResultMapper">
     <!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.StreamingResult">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.StreamingResult">
         <result column="result_id" property="resultId" jdbcType="DECIMAL"/>
         <result column="plan_id" property="planId" jdbcType="DECIMAL"/>
         <result column="mark" property="mark" jdbcType="DECIMAL"/>
@@ -30,7 +30,7 @@
         ${xsr}.next_count_date
     </sql>
 
-    <select id="listByGroup" resultType="com.hand.hdsp.quality.api.dto.StreamingResultDTO">
+    <select id="listByGroup" resultType="org.xdsp.quality.api.dto.StreamingResultDTO">
         select * from
         (
         select
@@ -70,7 +70,7 @@
         xsp.plan_id,
         xsp.plan_name,
         null result_id,
-        '${@com.hand.hdsp.quality.infra.constant.PlanStatus@NOTACCESS}' plan_status,
+        '${@org.xdsp.quality.infra.constant.PlanStatus@NOTACCESS}' plan_status,
         null mark,
         xsp.creation_date start_date,
         null end_date,
@@ -132,7 +132,7 @@
         xsp.plan_id,
         xsp.plan_name,
         null result_id,
-        '${@com.hand.hdsp.quality.infra.constant.PlanStatus@NOTACCESS}' plan_status,
+        '${@org.xdsp.quality.infra.constant.PlanStatus@NOTACCESS}' plan_status,
         null mark,
         xsp.creation_date start_date,
         null end_date,
@@ -158,7 +158,7 @@
         ) b where a.start_date &lt; b.start_date and a.plan_id=b.plan_id)
     </select>
 
-    <select id="showResultHead" resultType="com.hand.hdsp.quality.api.dto.StreamingResultDTO">
+    <select id="showResultHead" resultType="org.xdsp.quality.api.dto.StreamingResultDTO">
         select
         <include refid="StreamingPlan_And_Result">
             <property name="xsp" value="xsp"/>
@@ -183,7 +183,7 @@
         </where>
     </select>
 
-    <select id="listHistory" resultType="com.hand.hdsp.quality.api.dto.StreamingResultDTO">
+    <select id="listHistory" resultType="org.xdsp.quality.api.dto.StreamingResultDTO">
         select
         <include refid="StreamingPlan_And_Result">
             <property name="xsp" value="xsp"/>
@@ -199,7 +199,7 @@
         left join xqua_streaming_result_base xsrb
         on xsr.result_id=xsrb.result_id
         <where>
-            xsr.plan_status != '${@com.hand.hdsp.quality.infra.constant.PlanStatus@NOTACCESS}'
+            xsr.plan_status != '${@org.xdsp.quality.infra.constant.PlanStatus@NOTACCESS}'
             <if test="groupId != null">
                 and xpg.group_id = #{groupId}
             </if>
@@ -242,8 +242,8 @@
         </where>
     </select>
 
-    <select id="listMarkTrend" resultType="com.hand.hdsp.quality.infra.vo.MarkTrendVO">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+    <select id="listMarkTrend" resultType="org.xdsp.quality.infra.vo.MarkTrendVO">
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         <choose>
             <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
                 select
@@ -290,8 +290,8 @@
         </choose>
     </select>
 
-    <select id="listWarningLevel" resultType="com.hand.hdsp.quality.infra.vo.WarningLevelVO">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+    <select id="listWarningLevel" resultType="org.xdsp.quality.infra.vo.WarningLevelVO">
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         <choose>
             <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
                 select
@@ -376,8 +376,8 @@
         GROUP BY xsrr.topic_info
     </select>
 
-    <select id="listRuleError" resultType="com.hand.hdsp.quality.infra.vo.RuleExceptionVO">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+    <select id="listRuleError" resultType="org.xdsp.quality.infra.vo.RuleExceptionVO">
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         <choose>
             <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
                 select

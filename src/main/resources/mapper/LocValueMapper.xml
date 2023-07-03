@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.LocValueMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.LocValueMapper">
     <!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.LocValue">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.LocValue">
         <result column="loc_value_id" property="locValueId" jdbcType="DECIMAL"/>
         <result column="loc_id" property="locId" jdbcType="DECIMAL"/>
         <result column="loc_code" property="locCode" jdbcType="VARCHAR"/>
@@ -24,7 +24,7 @@
     </resultMap>
 
 
-    <select id="queryList" resultType="com.hand.hdsp.quality.api.dto.LocValueDTO">
+    <select id="queryList" resultType="org.xdsp.quality.api.dto.LocValueDTO">
         select xlc.* from xqua_loc_value xlc
         <where>
             xlc.loc_id=#{locId}

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.RootMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.RootMapper">
 	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.Root">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.Root">
         <result column="id" property="id" jdbcType="DECIMAL"/>
         <result column="tenant_id" property="tenantId" jdbcType="DECIMAL"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
@@ -40,8 +40,8 @@
         ${prefix}.release_date
     </sql>
 
-    <select id="list" resultType="com.hand.hdsp.quality.domain.entity.Root">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+    <select id="list" resultType="org.xdsp.quality.domain.entity.Root">
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         select DISTINCT
         <include refid="baseColum">
             <property name="prefix" value="xr"/>
@@ -178,7 +178,7 @@
     </select>
 
     <select id="checkCharger" resultType="java.lang.Long">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         SELECT
             employee_id
         FROM
@@ -196,7 +196,7 @@
         </choose>
     </select>
 
-    <select id="getUnitByEmployeeId" resultType="com.hand.hdsp.quality.domain.entity.Root">
+    <select id="getUnitByEmployeeId" resultType="org.xdsp.quality.domain.entity.Root">
         select
             hu.unit_id chargeDeptId,
             hu.unit_name chargeDept
@@ -209,7 +209,7 @@
         order by hea.primary_position_flag desc
     </select>
 
-    <select id="getAssigneeUser" resultType="com.hand.hdsp.quality.api.dto.AssigneeUserDTO">
+    <select id="getAssigneeUser" resultType="org.xdsp.quality.api.dto.AssigneeUserDTO">
         SELECT
             name as employeeName,
             employee_num as employeeNum
