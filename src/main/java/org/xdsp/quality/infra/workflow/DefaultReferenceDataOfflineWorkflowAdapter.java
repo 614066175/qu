@@ -15,6 +15,7 @@ import org.xdsp.quality.domain.entity.ReferenceData;
 import org.xdsp.quality.domain.entity.ReferenceDataRecord;
 import org.xdsp.quality.domain.repository.ReferenceDataRecordRepository;
 import org.xdsp.quality.domain.repository.ReferenceDataRepository;
+import org.xdsp.quality.infra.constant.ErrorCode;
 import org.xdsp.quality.infra.constant.ReferenceDataConstant;
 import org.xdsp.quality.workflow.adapter.ReferenceDataOfflineWorkflowAdapter;
 
@@ -26,6 +27,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 默认参考数据工作流下线
+ *
  * @author fuqiang.luo@hand-china.com
  */
 @Component
@@ -103,7 +105,7 @@ public class DefaultReferenceDataOfflineWorkflowAdapter implements ReferenceData
         if (Objects.isNull(referenceDataDTO)) {
             return approveResult;
         }
-        if(WorkflowConstant.ApproveAction.APPROVED.equals(approveResult)){
+        if (WorkflowConstant.ApproveAction.APPROVED.equals(approveResult)) {
             // 同意
             referenceDataDTO.setDataStatus(ReferenceDataConstant.OFFLINE_);
             referenceDataDTO.setReleaseBy(null);
