@@ -1,9 +1,12 @@
 package org.xdsp.quality.infra.validation;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.imported.app.service.BatchValidatorHandler;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidator;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidators;
+import org.xdsp.core.domain.entity.CommonGroup;
 import org.xdsp.quality.infra.constant.TemplateCodeConstants;
 
 import java.util.List;
