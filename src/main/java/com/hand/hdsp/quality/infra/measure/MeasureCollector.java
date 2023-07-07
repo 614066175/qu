@@ -1,17 +1,20 @@
 package com.hand.hdsp.quality.infra.measure;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
 import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
 import com.hand.hdsp.quality.infra.constant.PlanConstant;
+import com.hand.hdsp.quality.infra.mapper.ItemTemplateSqlMapper;
 import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.core.base.BaseConstants;
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>校验项处理程序收集器</p>
@@ -23,12 +26,14 @@ import org.springframework.stereotype.Component;
 public class MeasureCollector {
     private final LovAdapter lovAdapter;
     private final ItemTemplateSqlRepository itemTemplateSqlRepository;
+    private final ItemTemplateSqlMapper itemTemplateSqlMapper;
 
     private static final Map<String, Measure> MEASURE_MAP = new HashMap<>();
 
-    public MeasureCollector(LovAdapter lovAdapter, ItemTemplateSqlRepository itemTemplateSqlRepository) {
+    public MeasureCollector(LovAdapter lovAdapter, ItemTemplateSqlRepository itemTemplateSqlRepository, ItemTemplateSqlMapper itemTemplateSqlMapper) {
         this.lovAdapter = lovAdapter;
         this.itemTemplateSqlRepository = itemTemplateSqlRepository;
+        this.itemTemplateSqlMapper = itemTemplateSqlMapper;
     }
 
     public void register(String checkItem, Measure measure) {
@@ -44,8 +49,10 @@ public class MeasureCollector {
         Measure measure = MEASURE_MAP.get(checkItem.toUpperCase());
 
         if (measure == null) {
-            ItemTemplateSql itemTemplateSql = itemTemplateSqlRepository.selectSql(ItemTemplateSql.builder().checkItem(checkItem).build());
-            if (itemTemplateSql != null) {
+            //判断有没有检验sql，有的话走通用sql检验器逻辑
+            List<ItemTemplateSql> itemTemplateSqls =
+                    itemTemplateSqlMapper.selectSql(ItemTemplateSql.builder().checkItem(checkItem).build());
+            if (CollectionUtils.isNotEmpty(itemTemplateSqls)) {
                 measure = MEASURE_MAP.get(PlanConstant.COMMON_SQL);
             }
         }
