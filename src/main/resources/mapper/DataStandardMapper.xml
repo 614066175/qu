@@ -64,7 +64,7 @@
         <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         select
         iu.login_name lastUpdateName,
-        iu.login_name lastUpdatedByName,
+        iu.real_name lastUpdatedByName,
         iu_re.real_name releaseByName,
         iu3.login_name createdByName,
         he.email chargeEmail,
