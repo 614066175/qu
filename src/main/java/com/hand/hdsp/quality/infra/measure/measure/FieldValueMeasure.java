@@ -58,7 +58,9 @@ public class FieldValueMeasure implements Measure {
     private static final String EQUAL_SQL = " and ${field} = (%s)";
     private static final String NOT_EQUAL_SQL = " and (${field} != (%s) or ${field} is null)";
     private static final String START_SQL = " and ${field} >= %s";
+    private static final String CLICKHOUSE_START_SQL = " and cast(${field} as char) >= %s";
     private static final String END_SQL = " and ${field} <= %s";
+    private static final String CLICKHOUSE_END_SQL = " and cast(${field} as char) <= %s";
     private final ItemTemplateSqlRepository templateSqlRepository;
     private final ReferenceDataHistoryRepository referenceDataHistoryRepository;
     private final LovAdapter lovAdapter;
@@ -191,10 +193,18 @@ public class FieldValueMeasure implements Measure {
                 StringBuilder condition = new StringBuilder();
                 if (RANGE.equals(param.getCompareWay())) {
                     if (Strings.isNotEmpty(warn.getStartValue())) {
-                        condition.append(String.format(START_SQL, String.format("'%s'", warn.getStartValue())));
+                        if ("clickhouse".equals(String.valueOf(driverSession.getDbType()))) {
+                            condition.append(String.format(CLICKHOUSE_START_SQL, String.format("'%s'", warn.getStartValue())));
+                        } else {
+                            condition.append(String.format(START_SQL, String.format("'%s'", warn.getStartValue())));
+                        }
                     }
                     if (Strings.isNotEmpty(warn.getEndValue())) {
-                        condition.append(String.format(END_SQL, String.format("'%s'", warn.getEndValue())));
+                        if ("clickhouse".equals(String.valueOf(driverSession.getDbType()))) {
+                            condition.append(String.format(CLICKHOUSE_END_SQL, String.format("'%s'", warn.getEndValue())));
+                        } else {
+                            condition.append(String.format(END_SQL, String.format("'%s'", warn.getEndValue())));
+                        }
                     }
                 }
                 //固定值比较
@@ -395,4 +405,26 @@ public class FieldValueMeasure implements Measure {
 
         return stringBuilder.toString();
     }
+
+
+    public String getFieldType(String input) {
+        if (!input.contains("(")) {
+            return input;
+        }
+        // 查找第一个左括号的索引
+        int startIndex = input.indexOf("(");
+        // 查找最后一个右括号的索引
+        int endIndex = input.lastIndexOf(")");
+        if (startIndex != -1 && endIndex != -1 && startIndex < endIndex) {
+            String tmpType = input.substring(startIndex + 1, endIndex);
+            if (tmpType.contains("(")) {
+                startIndex = tmpType.indexOf("(");
+                return tmpType.substring(0, startIndex);
+            }
+            return input.substring(startIndex + 1, endIndex);
+        } else {
+            return null;
+        }
+    }
+
 }
