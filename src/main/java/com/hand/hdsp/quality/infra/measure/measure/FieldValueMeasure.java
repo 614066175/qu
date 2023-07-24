@@ -56,7 +56,9 @@ public class FieldValueMeasure implements Measure {
 
     private static final String COUNT = "COUNT";
     private static final String EQUAL_SQL = " and ${field} = (%s)";
+    private static final String EQUAL_CLICKHOUSE_SQL = " and cast(${field} as char) = (%s)";
     private static final String NOT_EQUAL_SQL = " and (${field} != (%s) or ${field} is null)";
+    private static final String NOT_EQUAL_CLICKHOUSE_SQL = " and (cast(${field} as char) != (%s) or cast(${field} as char) is null)";
     private static final String START_SQL = " and ${field} >= %s";
     private static final String CLICKHOUSE_START_SQL = " and cast(${field} as char) >= %s";
     private static final String END_SQL = " and ${field} <= %s";
@@ -210,9 +212,17 @@ public class FieldValueMeasure implements Measure {
                 //固定值比较
                 if (VALUE.equals(param.getCompareWay())) {
                     if (EQUAL.equals(warn.getCompareSymbol())) {
-                        condition.append(String.format(EQUAL_SQL, String.format("'%s'", warn.getExpectedValue())));
+                        if ("clickhouse".equals(String.valueOf(driverSession.getDbType()))) {
+                            condition.append(String.format(EQUAL_CLICKHOUSE_SQL, String.format("'%s'", warn.getExpectedValue())));
+                        } else {
+                            condition.append(String.format(EQUAL_SQL, String.format("'%s'", warn.getExpectedValue())));
+                        }
                     } else {
-                        condition.append(String.format(NOT_EQUAL_SQL, String.format("'%s'", warn.getExpectedValue())));
+                        if ("clickhouse".equals(String.valueOf(driverSession.getDbType()))) {
+                            condition.append(String.format(NOT_EQUAL_CLICKHOUSE_SQL, String.format("'%s'", warn.getExpectedValue())));
+                        } else {
+                            condition.append(String.format(NOT_EQUAL_SQL, String.format("'%s'", warn.getExpectedValue())));
+                        }
                     }
                 }
                 String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, String.format("%s%s", Optional.ofNullable(param.getWhereCondition()).orElse("1=1"), condition));
