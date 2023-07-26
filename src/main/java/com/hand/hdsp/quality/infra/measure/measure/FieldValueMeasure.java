@@ -56,9 +56,7 @@ public class FieldValueMeasure implements Measure {
 
     private static final String COUNT = "COUNT";
     private static final String EQUAL_SQL = " and ${field} = (%s)";
-    private static final String EQUAL_CLICKHOUSE_SQL = " and cast(${field} as char) = (%s)";
     private static final String NOT_EQUAL_SQL = " and (${field} != (%s) or ${field} is null)";
-    private static final String NOT_EQUAL_CLICKHOUSE_SQL = " and (cast(${field} as char) != (%s) or cast(${field} as char) is null)";
     private static final String START_SQL = " and ${field} >= %s";
     private static final String CLICKHOUSE_START_SQL = " and cast(${field} as char) >= %s";
     private static final String END_SQL = " and ${field} <= %s";
@@ -195,34 +193,18 @@ public class FieldValueMeasure implements Measure {
                 StringBuilder condition = new StringBuilder();
                 if (RANGE.equals(param.getCompareWay())) {
                     if (Strings.isNotEmpty(warn.getStartValue())) {
-                        if ("clickhouse".equals(String.valueOf(driverSession.getDbType()))) {
-                            condition.append(String.format(CLICKHOUSE_START_SQL, String.format("'%s'", warn.getStartValue())));
-                        } else {
-                            condition.append(String.format(START_SQL, String.format("'%s'", warn.getStartValue())));
-                        }
+                        condition.append(String.format(START_SQL, String.format("'%s'", warn.getStartValue())));
                     }
                     if (Strings.isNotEmpty(warn.getEndValue())) {
-                        if ("clickhouse".equals(String.valueOf(driverSession.getDbType()))) {
-                            condition.append(String.format(CLICKHOUSE_END_SQL, String.format("'%s'", warn.getEndValue())));
-                        } else {
-                            condition.append(String.format(END_SQL, String.format("'%s'", warn.getEndValue())));
-                        }
+                        condition.append(String.format(END_SQL, String.format("'%s'", warn.getEndValue())));
                     }
                 }
                 //固定值比较
                 if (VALUE.equals(param.getCompareWay())) {
                     if (EQUAL.equals(warn.getCompareSymbol())) {
-                        if ("clickhouse".equals(String.valueOf(driverSession.getDbType()))) {
-                            condition.append(String.format(EQUAL_CLICKHOUSE_SQL, String.format("'%s'", warn.getExpectedValue())));
-                        } else {
-                            condition.append(String.format(EQUAL_SQL, String.format("'%s'", warn.getExpectedValue())));
-                        }
+                        condition.append(String.format(EQUAL_SQL, String.format("'%s'", warn.getExpectedValue())));
                     } else {
-                        if ("clickhouse".equals(String.valueOf(driverSession.getDbType()))) {
-                            condition.append(String.format(NOT_EQUAL_CLICKHOUSE_SQL, String.format("'%s'", warn.getExpectedValue())));
-                        } else {
-                            condition.append(String.format(NOT_EQUAL_SQL, String.format("'%s'", warn.getExpectedValue())));
-                        }
+                        condition.append(String.format(NOT_EQUAL_SQL, String.format("'%s'", warn.getExpectedValue())));
                     }
                 }
                 String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, String.format("%s%s", Optional.ofNullable(param.getWhereCondition()).orElse("1=1"), condition));
