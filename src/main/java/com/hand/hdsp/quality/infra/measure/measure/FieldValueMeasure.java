@@ -58,9 +58,7 @@ public class FieldValueMeasure implements Measure {
     private static final String EQUAL_SQL = " and ${field} = (%s)";
     private static final String NOT_EQUAL_SQL = " and (${field} != (%s) or ${field} is null)";
     private static final String START_SQL = " and ${field} >= %s";
-    private static final String CLICKHOUSE_START_SQL = " and cast(${field} as char) >= %s";
     private static final String END_SQL = " and ${field} <= %s";
-    private static final String CLICKHOUSE_END_SQL = " and cast(${field} as char) <= %s";
     private final ItemTemplateSqlRepository templateSqlRepository;
     private final ReferenceDataHistoryRepository referenceDataHistoryRepository;
     private final LovAdapter lovAdapter;
