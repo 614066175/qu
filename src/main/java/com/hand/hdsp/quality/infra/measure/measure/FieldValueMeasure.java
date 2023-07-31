@@ -57,8 +57,8 @@ public class FieldValueMeasure implements Measure {
     private static final String COUNT = "COUNT";
     private static final String EQUAL_SQL = " and ${field} = (%s)";
     private static final String NOT_EQUAL_SQL = " and (${field} != (%s) or ${field} is null)";
-    private static final String START_SQL = " and ${field} >= %s";
-    private static final String END_SQL = " and ${field} <= %s";
+//    private static final String START_SQL = " and ${field} >= %s";
+//    private static final String END_SQL = " and ${field} <= %s";
     private final ItemTemplateSqlRepository templateSqlRepository;
     private final ReferenceDataHistoryRepository referenceDataHistoryRepository;
     private final LovAdapter lovAdapter;
@@ -191,10 +191,18 @@ public class FieldValueMeasure implements Measure {
                 StringBuilder condition = new StringBuilder();
                 if (RANGE.equals(param.getCompareWay())) {
                     if (Strings.isNotEmpty(warn.getStartValue())) {
-                        condition.append(String.format(START_SQL, String.format("'%s'", warn.getStartValue())));
+                        ItemTemplateSql startSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                                .checkItem("START_SQL")
+                                .datasourceType(batchResultBase.getDatasourceType())
+                                .build());
+                        condition.append(String.format(startSql.getSqlContent(), String.format("'%s'", warn.getStartValue())));
                     }
                     if (Strings.isNotEmpty(warn.getEndValue())) {
-                        condition.append(String.format(END_SQL, String.format("'%s'", warn.getEndValue())));
+                        ItemTemplateSql endSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                                .checkItem("END_SQL")
+                                .datasourceType(batchResultBase.getDatasourceType())
+                                .build());
+                        condition.append(String.format(endSql.getSqlContent(), String.format("'%s'", warn.getEndValue())));
                     }
                 }
                 //固定值比较
@@ -287,10 +295,18 @@ public class FieldValueMeasure implements Measure {
                 //逻辑值范围比较
                 if (RANGE.equals(param.getCompareWay())) {
                     if (Strings.isNotEmpty(warningLevelDTO.getStartValue())) {
-                        condition.append(String.format(START_SQL, warningLevelDTO.getStartValue()));
+                        ItemTemplateSql startSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                                .checkItem("START_SQL")
+                                .datasourceType(batchResultBase.getDatasourceType())
+                                .build());
+                        condition.append(String.format(startSql.getSqlContent(), warningLevelDTO.getStartValue()));
                     }
                     if (Strings.isNotEmpty(warningLevelDTO.getEndValue())) {
-                        condition.append(String.format(END_SQL, warningLevelDTO.getEndValue()));
+                        ItemTemplateSql endSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                                .checkItem("END_SQL")
+                                .datasourceType(batchResultBase.getDatasourceType())
+                                .build());
+                        condition.append(String.format(endSql.getSqlContent(), warningLevelDTO.getEndValue()));
                     }
                 }
                 //逻辑值值比较
