@@ -38,7 +38,7 @@ public class MeasureUtil {
 
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(".*\\$\\{(.*)}.*");
     private static Pattern FIELD_NAME_PATTERN = Pattern.compile("(?<fieldName>[^(),]+)[(](?<fieldType>[^)]+)[)]");
-    private static Pattern FIELD_PATTERN = Pattern.compile("(\\w+)\\(([^)]+)\\)");
+    private static Pattern FIELD_PATTERN = Pattern.compile("(?:\\([^)]*\\)|[^,])+");
     private static final String FILTER_PLACEHOLDER = "${filter}";
     private static final String FIXED_VALUE_WARNING_INFO = "固定值满足告警条件";
     private static final String FIXED_RANGE_WARNING_INFO = "固定值在告警范围内";
@@ -190,17 +190,11 @@ public class MeasureUtil {
         if (StringUtils.isBlank(fieldName)) {
             return null;
         }
-        //获取的类型为：fieldName(fieldType)，如果 fieldName为 code(decimal(20, 2))则转为 code(decimal)
         List<String> list = new ArrayList<>();
         //正则有缺陷，如果是 code(decimal(20, 2))这种类型，拿到的是 code(decimal(20, 2)，少个右括号
         Matcher matcher = FIELD_PATTERN.matcher(fieldName);
         while (matcher.find()) {
-            String field = matcher.group();
-            int lastLeft = field.lastIndexOf("(");
-            String subfield = field.substring(0, lastLeft);
-            if (subfield.indexOf("(") > 0) {
-                field = subfield + ")";
-            }
+            String field = matcher.group().trim();
             list.add(field);
         }
         return list;
