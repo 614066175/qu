@@ -190,6 +190,7 @@ public class MeasureUtil {
         if (StringUtils.isBlank(fieldName)) {
             return null;
         }
+        //获取的类型为：fieldName(fieldType)，特别：code(decimal)
         List<String> list = new ArrayList<>();
         Matcher matcher = FIELD_PATTERN.matcher(fieldName);
         while (matcher.find()) {
