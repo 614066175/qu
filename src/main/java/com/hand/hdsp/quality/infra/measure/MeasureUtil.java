@@ -191,7 +191,6 @@ public class MeasureUtil {
             return null;
         }
         List<String> list = new ArrayList<>();
-        //正则有缺陷，如果是 code(decimal(20, 2))这种类型，拿到的是 code(decimal(20, 2)，少个右括号
         Matcher matcher = FIELD_PATTERN.matcher(fieldName);
         while (matcher.find()) {
             String field = matcher.group().trim();
