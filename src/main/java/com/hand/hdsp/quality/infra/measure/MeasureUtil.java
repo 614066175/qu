@@ -194,6 +194,11 @@ public class MeasureUtil {
         Matcher matcher = FIELD_PATTERN.matcher(fieldName);
         while (matcher.find()) {
             String field = matcher.group();
+            int lastLeft = field.lastIndexOf("(");
+            String subfield = field.substring(0, lastLeft);
+            if (subfield.indexOf("(") > 0) {
+                field = subfield + ")";
+            }
             list.add(field);
         }
         return list;
