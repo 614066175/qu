@@ -190,10 +190,17 @@ public class MeasureUtil {
         if (StringUtils.isBlank(fieldName)) {
             return null;
         }
+        //获取的类型为：fieldName(fieldType)，如果 fieldName为 code(decimal(20, 2))则转为 code(decimal)
         List<String> list = new ArrayList<>();
+        //正则有缺陷，如果是 code(decimal(20, 2))这种类型，拿到的是 code(decimal(20, 2)，少个右括号
         Matcher matcher = FIELD_PATTERN.matcher(fieldName);
         while (matcher.find()) {
             String field = matcher.group();
+            int lastLeft = field.lastIndexOf("(");
+            String subfield = field.substring(0, lastLeft);
+            if (subfield.indexOf("(") > 0) {
+                field = subfield + ")";
+            }
             list.add(field);
         }
         return list;
