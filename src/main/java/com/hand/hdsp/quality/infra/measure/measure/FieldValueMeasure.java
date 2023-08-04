@@ -190,19 +190,15 @@ public class FieldValueMeasure implements Measure {
                 //固定值范围比较
                 StringBuilder condition = new StringBuilder();
                 if (RANGE.equals(param.getCompareWay())) {
+                    ItemTemplateSql warningSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                            .checkItem("WARNING_SQL")
+                            .datasourceType(batchResultBase.getDatasourceType())
+                            .build());
                     if (Strings.isNotEmpty(warn.getStartValue())) {
-                        ItemTemplateSql startSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
-                                .checkItem("WARNING_START_SQL")
-                                .datasourceType(batchResultBase.getDatasourceType())
-                                .build());
-                        condition.append(String.format(startSql.getSqlContent(), warn.getStartValue()));
+                        condition.append(String.format(warningSql.getSqlContent(), ">=", warn.getStartValue()));
                     }
                     if (Strings.isNotEmpty(warn.getEndValue())) {
-                        ItemTemplateSql endSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
-                                .checkItem("WARNING_END_SQL")
-                                .datasourceType(batchResultBase.getDatasourceType())
-                                .build());
-                        condition.append(String.format(endSql.getSqlContent(), warn.getEndValue()));
+                        condition.append(String.format(warningSql.getSqlContent(), "<=", warn.getEndValue()));
                     }
                 }
                 //固定值比较
@@ -293,20 +289,16 @@ public class FieldValueMeasure implements Measure {
                         .build());
                 StringBuilder condition = new StringBuilder();
                 //逻辑值范围比较
+                ItemTemplateSql warningSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                        .checkItem("WARNING_SQL")
+                        .datasourceType(batchResultBase.getDatasourceType())
+                        .build());
                 if (RANGE.equals(param.getCompareWay())) {
                     if (Strings.isNotEmpty(warningLevelDTO.getStartValue())) {
-                        ItemTemplateSql startSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
-                                .checkItem("START_SQL")
-                                .datasourceType(batchResultBase.getDatasourceType())
-                                .build());
-                        condition.append(String.format(startSql.getSqlContent(), warningLevelDTO.getStartValue()));
+                        condition.append(String.format(warningSql.getSqlContent(), ">=", warningLevelDTO.getStartValue()));
                     }
                     if (Strings.isNotEmpty(warningLevelDTO.getEndValue())) {
-                        ItemTemplateSql endSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
-                                .checkItem("END_SQL")
-                                .datasourceType(batchResultBase.getDatasourceType())
-                                .build());
-                        condition.append(String.format(endSql.getSqlContent(), warningLevelDTO.getEndValue()));
+                        condition.append(String.format(warningSql.getSqlContent(), "<=", warningLevelDTO.getEndValue()));
                     }
                 }
                 //逻辑值值比较

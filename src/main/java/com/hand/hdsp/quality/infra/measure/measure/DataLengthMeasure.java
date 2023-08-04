@@ -99,20 +99,16 @@ public class DataLengthMeasure implements Measure {
                         .checkItem(String.format("%s_%s", param.getCheckItem(), param.getCompareWay()))
                         .datasourceType(batchResultBase.getDatasourceType())
                         .build());
+                ItemTemplateSql dataLengthValue = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                        .checkItem("DATA_LENGTH_VALUE")
+                        .datasourceType(batchResultBase.getDatasourceType())
+                        .build());
                 StringBuilder condition = new StringBuilder();
                 if (Strings.isNotEmpty(warningLevelDTO.getStartValue())) {
-                    ItemTemplateSql startValue = templateSqlRepository.selectSql(ItemTemplateSql.builder()
-                            .checkItem("DATA_LENGTH_START_VALUE")
-                            .datasourceType(batchResultBase.getDatasourceType())
-                            .build());
-                    condition.append(String.format(startValue.getSqlContent(), warningLevelDTO.getStartValue()));
+                    condition.append(String.format(dataLengthValue.getSqlContent(), ">=", warningLevelDTO.getStartValue()));
                 }
                 if (Strings.isNotEmpty(warningLevelDTO.getEndValue())) {
-                    ItemTemplateSql endValue = templateSqlRepository.selectSql(ItemTemplateSql.builder()
-                            .checkItem("DATA_LENGTH_END_VALUE")
-                            .datasourceType(batchResultBase.getDatasourceType())
-                            .build());
-                    condition.append(String.format(endValue.getSqlContent(), warningLevelDTO.getEndValue()));
+                    condition.append(String.format(dataLengthValue.getSqlContent(), "<=", warningLevelDTO.getEndValue()));
                 }
                 itemTemplateSql.setSqlContent(itemTemplateSql.getSqlContent() + condition);
                 Map<String, String> variables = new HashMap<>(8);
