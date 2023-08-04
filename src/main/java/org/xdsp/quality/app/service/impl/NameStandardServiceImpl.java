@@ -402,7 +402,7 @@ public class NameStandardServiceImpl implements NameStandardService {
         nameAimDTO.getNameAimIncludeDTOList().forEach(x -> {
             List<String> tables = driverSession.tableList(x.getSchemaName());
             if (CollectionUtils.isEmpty(tables)) {
-                throw new CommonException("invalid schema:{0}/{1}", nameAimDTO.getDatasourceCode(), x.getSchemaName());
+                return;
             }
             if (StringUtils.isNotEmpty(nameAimDTO.getExcludeRule())) {
                 List<String> excludeRuleTable = tables.stream().filter(o -> Pattern.compile(nameAimDTO.getExcludeRule()).matcher(o).find())
