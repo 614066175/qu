@@ -192,17 +192,17 @@ public class FieldValueMeasure implements Measure {
                 if (RANGE.equals(param.getCompareWay())) {
                     if (Strings.isNotEmpty(warn.getStartValue())) {
                         ItemTemplateSql startSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
-                                .checkItem("START_SQL")
+                                .checkItem("WARNING_START_SQL")
                                 .datasourceType(batchResultBase.getDatasourceType())
                                 .build());
-                        condition.append(String.format(startSql.getSqlContent(), String.format("'%s'", warn.getStartValue())));
+                        condition.append(String.format(startSql.getSqlContent(), warn.getStartValue()));
                     }
                     if (Strings.isNotEmpty(warn.getEndValue())) {
                         ItemTemplateSql endSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
-                                .checkItem("END_SQL")
+                                .checkItem("WARNING_END_SQL")
                                 .datasourceType(batchResultBase.getDatasourceType())
                                 .build());
-                        condition.append(String.format(endSql.getSqlContent(), String.format("'%s'", warn.getEndValue())));
+                        condition.append(String.format(endSql.getSqlContent(), warn.getEndValue()));
                     }
                 }
                 //固定值比较
