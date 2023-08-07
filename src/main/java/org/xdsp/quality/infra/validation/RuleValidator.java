@@ -1,11 +1,8 @@
 package org.xdsp.quality.infra.validation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hand.hdsp.quality.api.dto.RuleDTO;
-import com.hand.hdsp.quality.domain.repository.RuleRepository;
 import io.choerodon.core.oauth.DetailsHelper;
 
-import com.hand.hdsp.quality.infra.constant.TemplateCodeConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -16,6 +13,8 @@ import org.xdsp.core.util.ProjectHelper;
 import org.xdsp.quality.api.dto.RuleDTO;
 import org.xdsp.quality.domain.entity.Rule;
 import org.xdsp.quality.domain.repository.RuleRepository;
+import org.xdsp.quality.infra.constant.TemplateCodeConstants;
+
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidator;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidators;
 

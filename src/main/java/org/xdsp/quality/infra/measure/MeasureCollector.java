@@ -1,10 +1,5 @@
 package org.xdsp.quality.infra.measure;
 
-import com.hand.hdsp.quality.domain.entity.ItemTemplateSql;
-import com.hand.hdsp.quality.domain.repository.ItemTemplateSqlRepository;
-import com.hand.hdsp.quality.infra.constant.ErrorCode;
-import com.hand.hdsp.quality.infra.constant.PlanConstant;
-import com.hand.hdsp.quality.infra.mapper.ItemTemplateSqlMapper;
 import io.choerodon.core.exception.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -15,8 +10,10 @@ import org.xdsp.quality.domain.entity.ItemTemplateSql;
 import org.xdsp.quality.domain.repository.ItemTemplateSqlRepository;
 import org.xdsp.quality.infra.constant.ErrorCode;
 import org.xdsp.quality.infra.constant.PlanConstant;
+import org.xdsp.quality.infra.mapper.ItemTemplateSqlMapper;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
