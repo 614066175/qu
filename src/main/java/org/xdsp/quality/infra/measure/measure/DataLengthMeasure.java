@@ -40,8 +40,8 @@ public class DataLengthMeasure implements Measure {
     private final DriverSessionService driverSessionService;
     private final LovAdapter lovAdapter;
     public static final String COUNT = "COUNT";
-    public static final String START_VALUE = " and length(${field}) >= %s";
-    public static final String END_VALUE = " and length(${field}) <= %s";
+//    public static final String START_VALUE = " and length(${field}) >= %s";
+//    public static final String END_VALUE = " and length(${field}) <= %s";
 
     public DataLengthMeasure(ItemTemplateSqlRepository templateSqlRepository, DriverSessionService driverSessionService, LovAdapter lovAdapter) {
         this.templateSqlRepository = templateSqlRepository;
@@ -99,12 +99,16 @@ public class DataLengthMeasure implements Measure {
                         .checkItem(String.format("%s_%s", param.getCheckItem(), param.getCompareWay()))
                         .datasourceType(batchResultBase.getDatasourceType())
                         .build());
+                ItemTemplateSql dataLengthValue = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                        .checkItem("DATA_LENGTH_VALUE")
+                        .datasourceType(batchResultBase.getDatasourceType())
+                        .build());
                 StringBuilder condition = new StringBuilder();
                 if (Strings.isNotEmpty(warningLevelDTO.getStartValue())) {
-                    condition.append(String.format(START_VALUE, warningLevelDTO.getStartValue()));
+                    condition.append(String.format(dataLengthValue.getSqlContent(), ">=", warningLevelDTO.getStartValue()));
                 }
                 if (Strings.isNotEmpty(warningLevelDTO.getEndValue())) {
-                    condition.append(String.format(END_VALUE, warningLevelDTO.getEndValue()));
+                    condition.append(String.format(dataLengthValue.getSqlContent(), "<=", warningLevelDTO.getEndValue()));
                 }
                 itemTemplateSql.setSqlContent(itemTemplateSql.getSqlContent() + condition);
                 Map<String, String> variables = new HashMap<>(8);

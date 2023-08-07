@@ -57,8 +57,8 @@ public class FieldValueMeasure implements Measure {
     private static final String COUNT = "COUNT";
     private static final String EQUAL_SQL = " and ${field} = (%s)";
     private static final String NOT_EQUAL_SQL = " and (${field} != (%s) or ${field} is null)";
-    private static final String START_SQL = " and ${field} >= %s";
-    private static final String END_SQL = " and ${field} <= %s";
+//    private static final String START_SQL = " and ${field} >= %s";
+//    private static final String END_SQL = " and ${field} <= %s";
     private final ItemTemplateSqlRepository templateSqlRepository;
     private final ReferenceDataHistoryRepository referenceDataHistoryRepository;
     private final LovAdapter lovAdapter;
@@ -190,11 +190,15 @@ public class FieldValueMeasure implements Measure {
                 //固定值范围比较
                 StringBuilder condition = new StringBuilder();
                 if (RANGE.equals(param.getCompareWay())) {
+                    ItemTemplateSql warningSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                            .checkItem("WARNING_SQL")
+                            .datasourceType(batchResultBase.getDatasourceType())
+                            .build());
                     if (Strings.isNotEmpty(warn.getStartValue())) {
-                        condition.append(String.format(START_SQL, String.format("'%s'", warn.getStartValue())));
+                        condition.append(String.format(warningSql.getSqlContent(), ">=", warn.getStartValue()));
                     }
                     if (Strings.isNotEmpty(warn.getEndValue())) {
-                        condition.append(String.format(END_SQL, String.format("'%s'", warn.getEndValue())));
+                        condition.append(String.format(warningSql.getSqlContent(), "<=", warn.getEndValue()));
                     }
                 }
                 //固定值比较
@@ -285,12 +289,16 @@ public class FieldValueMeasure implements Measure {
                         .build());
                 StringBuilder condition = new StringBuilder();
                 //逻辑值范围比较
+                ItemTemplateSql warningSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                        .checkItem("WARNING_SQL")
+                        .datasourceType(batchResultBase.getDatasourceType())
+                        .build());
                 if (RANGE.equals(param.getCompareWay())) {
                     if (Strings.isNotEmpty(warningLevelDTO.getStartValue())) {
-                        condition.append(String.format(START_SQL, warningLevelDTO.getStartValue()));
+                        condition.append(String.format(warningSql.getSqlContent(), ">=", warningLevelDTO.getStartValue()));
                     }
                     if (Strings.isNotEmpty(warningLevelDTO.getEndValue())) {
-                        condition.append(String.format(END_SQL, warningLevelDTO.getEndValue()));
+                        condition.append(String.format(warningSql.getSqlContent(), "<=", warningLevelDTO.getEndValue()));
                     }
                 }
                 //逻辑值值比较
@@ -395,4 +403,26 @@ public class FieldValueMeasure implements Measure {
 
         return stringBuilder.toString();
     }
+
+
+    public String getFieldType(String input) {
+        if (!input.contains("(")) {
+            return input;
+        }
+        // 查找第一个左括号的索引
+        int startIndex = input.indexOf("(");
+        // 查找最后一个右括号的索引
+        int endIndex = input.lastIndexOf(")");
+        if (startIndex != -1 && endIndex != -1 && startIndex < endIndex) {
+            String tmpType = input.substring(startIndex + 1, endIndex);
+            if (tmpType.contains("(")) {
+                startIndex = tmpType.indexOf("(");
+                return tmpType.substring(0, startIndex);
+            }
+            return input.substring(startIndex + 1, endIndex);
+        } else {
+            return null;
+        }
+    }
+
 }

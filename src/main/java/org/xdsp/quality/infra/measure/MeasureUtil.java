@@ -37,6 +37,8 @@ public class MeasureUtil {
     }
 
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(".*\\$\\{(.*)}.*");
+    private static Pattern FIELD_NAME_PATTERN = Pattern.compile("(?<fieldName>[^(),]+)[(](?<fieldType>[^)]+)[)]");
+    private static Pattern FIELD_PATTERN = Pattern.compile("(?:\\([^)]*\\)|[^,])+");
     private static final String FILTER_PLACEHOLDER = "${filter}";
     private static final String FIXED_VALUE_WARNING_INFO = "固定值满足告警条件";
     private static final String FIXED_RANGE_WARNING_INFO = "固定值在告警范围内";
@@ -175,17 +177,28 @@ public class MeasureUtil {
         if (StringUtils.isBlank(fieldName)) {
             return null;
         }
-        String[] strings = fieldName.split(BaseConstants.Symbol.COMMA);
         List<String> list = new ArrayList<>();
-        for (String column : strings) {
-            if (StringUtils.isNotEmpty(column) && column.contains("(")) {
-                list.add(column.substring(0, column.indexOf('(')));
-            } else {
-                list.add(column);
-            }
+        Matcher matcher = FIELD_NAME_PATTERN.matcher(fieldName);
+        while (matcher.find()) {
+            String field = matcher.group("fieldName");
+            list.add(field);
         }
         return StringUtils.join(list, BaseConstants.Symbol.COMMA);
     }
+
+    public static List<String> getField(String fieldName) {
+        if (StringUtils.isBlank(fieldName)) {
+            return null;
+        }
+        List<String> list = new ArrayList<>();
+        Matcher matcher = FIELD_PATTERN.matcher(fieldName);
+        while (matcher.find()) {
+            String field = matcher.group().trim();
+            list.add(field);
+        }
+        return list;
+    }
+
 
     /**
      * 处理空值校验
@@ -199,14 +212,11 @@ public class MeasureUtil {
         if (StringUtils.isBlank(fieldName)) {
             return null;
         }
-        String[] strings = fieldName.split(BaseConstants.Symbol.COMMA);
         List<String> list = new ArrayList<>();
-        for (String column : strings) {
-            if (StringUtils.isNotEmpty(column) && column.contains("(")) {
-                list.add(column.substring(0, column.indexOf('(')));
-            } else {
-                list.add(column);
-            }
+        Matcher matcher = FIELD_NAME_PATTERN.matcher(fieldName);
+        while (matcher.find()) {
+            String field = matcher.group(1);
+            list.add(field);
         }
         // ( a is null or a = '') and (b is null or b ='')
         ItemTemplateSqlRepository templateSqlRepository = ApplicationContextHelper.getContext().getBean(ItemTemplateSqlRepository.class);
