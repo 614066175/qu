@@ -35,7 +35,6 @@ import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
-import org.hzero.starter.driver.core.infra.constant.BaseConstant;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -403,7 +402,7 @@ public class NameStandardServiceImpl implements NameStandardService {
         nameAimDTO.getNameAimIncludeDTOList().forEach(x -> {
             List<String> tables = driverSession.tableList(x.getSchemaName());
             if (CollectionUtils.isEmpty(tables)) {
-                throw new CommonException("invalid schema:{0}/{1}", nameAimDTO.getDatasourceCode(), x.getSchemaName());
+                return;
             }
             if (StringUtils.isNotEmpty(nameAimDTO.getExcludeRule())) {
                 List<String> excludeRuleTable = tables.stream().filter(o -> Pattern.compile(nameAimDTO.getExcludeRule()).matcher(o).find())
