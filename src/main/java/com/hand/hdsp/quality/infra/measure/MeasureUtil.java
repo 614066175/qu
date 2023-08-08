@@ -42,7 +42,7 @@ public class MeasureUtil {
     private static final String FIXED_VALUE_WARNING_INFO = "固定值满足告警条件";
     private static final String FIXED_RANGE_WARNING_INFO = "固定值在告警范围内";
     private static final String VOLATILITY_WARNING_INFO = "波动率在告警范围内";
-    private static final String EMPTY_SQL = " (%s is null or %s ='') ";
+    private static final List<String> needHandleValueTypes = Arrays.asList("CLICKHOUSE");
 
 
     /**
@@ -183,6 +183,23 @@ public class MeasureUtil {
             list.add(field);
         }
         return StringUtils.join(list, BaseConstants.Symbol.COMMA);
+    }
+
+    /**
+     * 处理字段类型
+     *
+     * @param fieldName
+     * @return
+     */
+    public static String handleFieldType(String fieldName) {
+        if (StringUtils.isBlank(fieldName)) {
+            return null;
+        }
+        Matcher matcher = FIELD_NAME_PATTERN.matcher(fieldName);
+        if (matcher.find()) {
+            return matcher.group("fieldType");
+        }
+        return null;
     }
 
     public static List<String> getField(String fieldName) {
@@ -491,5 +508,25 @@ public class MeasureUtil {
         } else {
             batchResultItem.setActualValue("0%");
         }
+    }
+
+    public static boolean isNumber(String datasourceType, String fieldName) {
+        //CK不支持隐式转换，导致数值型比较出现问题 数值型去除‘’
+        if (needHandleValueTypes.contains(datasourceType)) {
+            String type = handleFieldType(fieldName);
+            type=type.toUpperCase();
+            //获取字段类型，判断字段类型是否为整型
+            if (type.startsWith("INT") || type.startsWith("DECIMAL") || type.startsWith("FLOAT")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static String handleVale(boolean isNumber, String value) {
+        if (isNumber) {
+            return value;
+        }
+        return String.format("'%s'", value);
     }
 }
