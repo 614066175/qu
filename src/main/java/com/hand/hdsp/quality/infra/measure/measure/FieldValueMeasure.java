@@ -186,6 +186,8 @@ public class FieldValueMeasure implements Measure {
             Map<String, String> variables = new HashMap<>(8);
             variables.put("table", batchResultBase.getPackageObjectName());
             variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
+            //判断是否是数值型
+            boolean isNumber = MeasureUtil.isNumber(batchResultBase.getDatasourceType(), param.getFieldName());
 
             //用于统计告警规则，为后续聚合做准备
             List<WarningLevelVO> warningLevels = new ArrayList<>();
@@ -200,16 +202,16 @@ public class FieldValueMeasure implements Measure {
                         .build());
                 if (RANGE.equals(param.getCompareWay())) {
                     if (Strings.isNotEmpty(warn.getStartValue())) {
-                        condition.append(String.format(compareSql.getSqlContent(), ">=", warn.getStartValue()));
+                        condition.append(String.format(compareSql.getSqlContent(), ">=", MeasureUtil.handleVale(isNumber, warn.getStartValue())));
                     }
                     if (Strings.isNotEmpty(warn.getEndValue())) {
-                        condition.append(String.format(compareSql.getSqlContent(), "<=", warn.getEndValue()));
+                        condition.append(String.format(compareSql.getSqlContent(), "<=", MeasureUtil.handleVale(isNumber, warn.getEndValue())));
                     }
                 }
                 //固定值比较
                 if (VALUE.equals(param.getCompareWay())) {
                     if (EQUAL.equals(warn.getCompareSymbol())) {
-                        condition.append(String.format(compareSql.getSqlContent(), "=", warn.getExpectedValue()));
+                        condition.append(String.format(compareSql.getSqlContent(), "=", MeasureUtil.handleVale(isNumber, warn.getExpectedValue())));
                     } else {
                         ItemTemplateSql notEqualSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
                                 .checkItem(FIELD_NOT_EQUAL)
