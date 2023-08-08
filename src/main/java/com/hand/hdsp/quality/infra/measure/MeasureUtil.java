@@ -42,7 +42,7 @@ public class MeasureUtil {
     private static final String FIXED_VALUE_WARNING_INFO = "固定值满足告警条件";
     private static final String FIXED_RANGE_WARNING_INFO = "固定值在告警范围内";
     private static final String VOLATILITY_WARNING_INFO = "波动率在告警范围内";
-    private static final String EMPTY_SQL=" (%s is null or %s ='') ";
+    private static final String EMPTY_SQL = " (%s is null or %s ='') ";
 
 
     /**
@@ -185,9 +185,25 @@ public class MeasureUtil {
         return StringUtils.join(list, BaseConstants.Symbol.COMMA);
     }
 
+    public static List<String> getField(String fieldName) {
+        if (StringUtils.isBlank(fieldName)) {
+            return null;
+        }
+        List<String> list = new ArrayList<>();
+        Matcher matcher = FIELD_NAME_PATTERN.matcher(fieldName);
+        while (matcher.find()) {
+            String field = matcher.group().trim();
+            //如果字段格式包含, 例如tmall_quota(Decimal(10, 0))，补全右括号
+            if (field.contains(",")) {
+                field = field + ")";
+            }
+            list.add(field);
+        }
+        return list;
+    }
+
     /**
      * 处理空值校验
-     *
      *
      * @param fieldName
      * @param datasourceType

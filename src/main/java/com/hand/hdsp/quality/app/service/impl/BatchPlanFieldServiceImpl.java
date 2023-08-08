@@ -5,6 +5,7 @@ import com.hand.hdsp.quality.app.service.BatchPlanFieldService;
 import com.hand.hdsp.quality.domain.entity.*;
 import com.hand.hdsp.quality.domain.repository.*;
 import com.hand.hdsp.quality.infra.constant.ErrorCode;
+import com.hand.hdsp.quality.infra.measure.MeasureUtil;
 import com.hand.hdsp.quality.infra.util.JsonUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -280,7 +281,8 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
         return list.stream().map(rule -> {
                     //如果包含逗号，则按逗号分隔
                     if (rule.getFieldName().contains(BaseConstants.Symbol.COMMA)) {
-                        return Arrays.stream(rule.getFieldName().split(BaseConstants.Symbol.COMMA)).map(s -> {
+                        return Arrays.stream(Objects.requireNonNull(MeasureUtil.getField(rule.getFieldName()))
+                                .toArray(new String[0])).map(s -> {
                             BatchPlanFieldDTO dto = BatchPlanFieldDTO.builder().build();
                             BeanUtils.copyProperties(rule, dto);
                             dto.setFieldName(s);
