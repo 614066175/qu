@@ -55,10 +55,15 @@ import static com.hand.hdsp.quality.infra.constant.PlanConstant.CompareWay.VALUE
 public class FieldValueMeasure implements Measure {
 
     private static final String COUNT = "COUNT";
+    //供逻辑值使用
     private static final String EQUAL_SQL = " and ${field} = (%s)";
     private static final String NOT_EQUAL_SQL = " and (${field} != (%s) or ${field} is null)";
-//    private static final String START_SQL = " and ${field} >= %s";
-//    private static final String END_SQL = " and ${field} <= %s";
+
+    //字段值比较模板sql
+    private static final String FIELD_VALUE_COMPARE = "FIELD_VALUE_COMPARE";
+    //字段值不等于
+    private static final String FIELD_NOT_EQUAL = "FIELD_NOT_EQUAL";
+
     private final ItemTemplateSqlRepository templateSqlRepository;
     private final ReferenceDataHistoryRepository referenceDataHistoryRepository;
     private final LovAdapter lovAdapter;
@@ -189,28 +194,28 @@ public class FieldValueMeasure implements Measure {
             warningLevelList.forEach(warn -> {
                 //固定值范围比较
                 StringBuilder condition = new StringBuilder();
+                ItemTemplateSql compareSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                        .checkItem(FIELD_VALUE_COMPARE)
+                        .datasourceType(batchResultBase.getDatasourceType())
+                        .build());
                 if (RANGE.equals(param.getCompareWay())) {
                     if (Strings.isNotEmpty(warn.getStartValue())) {
-                        ItemTemplateSql startSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
-                                .checkItem("START_SQL")
-                                .datasourceType(batchResultBase.getDatasourceType())
-                                .build());
-                        condition.append(String.format(startSql.getSqlContent(), String.format("'%s'", warn.getStartValue())));
+                        condition.append(String.format(compareSql.getSqlContent(), ">=", warn.getStartValue()));
                     }
                     if (Strings.isNotEmpty(warn.getEndValue())) {
-                        ItemTemplateSql endSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
-                                .checkItem("END_SQL")
-                                .datasourceType(batchResultBase.getDatasourceType())
-                                .build());
-                        condition.append(String.format(endSql.getSqlContent(), String.format("'%s'", warn.getEndValue())));
+                        condition.append(String.format(compareSql.getSqlContent(), "<=", warn.getEndValue()));
                     }
                 }
                 //固定值比较
                 if (VALUE.equals(param.getCompareWay())) {
                     if (EQUAL.equals(warn.getCompareSymbol())) {
-                        condition.append(String.format(EQUAL_SQL, String.format("'%s'", warn.getExpectedValue())));
+                        condition.append(String.format(compareSql.getSqlContent(), "=", warn.getExpectedValue()));
                     } else {
-                        condition.append(String.format(NOT_EQUAL_SQL, String.format("'%s'", warn.getExpectedValue())));
+                        ItemTemplateSql notEqualSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                                .checkItem(FIELD_NOT_EQUAL)
+                                .datasourceType(batchResultBase.getDatasourceType())
+                                .build());
+                        condition.append(String.format(notEqualSql.getSqlContent(), warn.getExpectedValue()));
                     }
                 }
                 String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, String.format("%s%s", Optional.ofNullable(param.getWhereCondition()).orElse("1=1"), condition));
@@ -293,20 +298,16 @@ public class FieldValueMeasure implements Measure {
                         .build());
                 StringBuilder condition = new StringBuilder();
                 //逻辑值范围比较
+                ItemTemplateSql compareSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                        .checkItem(FIELD_VALUE_COMPARE)
+                        .datasourceType(batchResultBase.getDatasourceType())
+                        .build());
                 if (RANGE.equals(param.getCompareWay())) {
                     if (Strings.isNotEmpty(warningLevelDTO.getStartValue())) {
-                        ItemTemplateSql startSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
-                                .checkItem("START_SQL")
-                                .datasourceType(batchResultBase.getDatasourceType())
-                                .build());
-                        condition.append(String.format(startSql.getSqlContent(), warningLevelDTO.getStartValue()));
+                        condition.append(String.format(compareSql.getSqlContent(), ">=", warningLevelDTO.getStartValue()));
                     }
                     if (Strings.isNotEmpty(warningLevelDTO.getEndValue())) {
-                        ItemTemplateSql endSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
-                                .checkItem("END_SQL")
-                                .datasourceType(batchResultBase.getDatasourceType())
-                                .build());
-                        condition.append(String.format(endSql.getSqlContent(), warningLevelDTO.getEndValue()));
+                        condition.append(String.format(compareSql.getSqlContent(), "<=", warningLevelDTO.getEndValue()));
                     }
                 }
                 //逻辑值值比较
@@ -384,8 +385,7 @@ public class FieldValueMeasure implements Measure {
                 batchResultItem.setExceptionInfo(String.format("存在%d条数据字段值满足参考数据校验配置", levelCount));
             }
 
-        }
-        else {
+        } else {
             throw new CommonException(ErrorCode.FIELD_NO_SUPPORT_CHECK_TYPE);
         }
         return batchResultItem;
