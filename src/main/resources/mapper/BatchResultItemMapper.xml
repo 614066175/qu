@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.BatchResultItemMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.BatchResultItemMapper">
     <!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.BatchResultItem">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.BatchResultItem">
         <result column="result_item_id" property="resultItemId" jdbcType="DECIMAL"/>
         <result column="result_rule_id" property="resultRuleId" jdbcType="DECIMAL"/>
         <result column="plan_line_id" property="planLineId" jdbcType="DECIMAL"/>
@@ -36,10 +36,10 @@
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
 
-    <select id="selectByResultId" resultType="com.hand.hdsp.quality.api.dto.BatchResultItemDTO">
+    <select id="selectByResultId" resultType="org.xdsp.quality.api.dto.BatchResultItemDTO">
         select CASE
                    WHEN xbri.warning_level IS NOT NULL THEN xbri.warning_level
-                   ELSE '${@com.hand.hdsp.quality.infra.constant.PlanConstant@WARNING_LEVEL_NORMAL}'
+                   ELSE '${@org.xdsp.quality.infra.constant.PlanConstant@WARNING_LEVEL_NORMAL}'
                    END warning_level,
                xbrr.weight
         from xqua_batch_result_item xbri
@@ -49,8 +49,8 @@
         where xbr.result_id = #{resultId}
     </select>
 
-    <select id="queryList" resultType="com.hand.hdsp.quality.infra.dataobject.BatchResultItemDO">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+    <select id="queryList" resultType="org.xdsp.quality.infra.dataobject.BatchResultItemDO">
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
 
         select xbri.current_value
         from xqua_batch_result_item xbri
@@ -100,7 +100,7 @@
           and xbr.result_id = #{resultId}
     </select>
 
-    <select id="listRuleError" resultType="com.hand.hdsp.quality.api.dto.BatchResultItemDTO">
+    <select id="listRuleError" resultType="org.xdsp.quality.api.dto.BatchResultItemDTO">
         select xbri.result_item_id,
                xbri.result_rule_id,
                xbri.plan_line_id,
@@ -161,7 +161,7 @@
         </where>
     </select>
 
-    <select id="selectWaringLevel" resultType="com.hand.hdsp.quality.infra.vo.ResultWaringVO">
+    <select id="selectWaringLevel" resultType="org.xdsp.quality.infra.vo.ResultWaringVO">
         select
         xbri.warning_level warningLevel,
         count(xbri.warning_level) countSum
@@ -178,8 +178,8 @@
         </where>
         GROUP BY xbri.warning_level
     </select>
-    <select id="assetTable" resultType="com.hand.hdsp.quality.api.dto.BatchResultItemDTO">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+    <select id="assetTable" resultType="org.xdsp.quality.api.dto.BatchResultItemDTO">
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         SELECT
             xbri.result_rule_id,
             xbri.plan_line_id,
@@ -238,7 +238,7 @@
                 and (xbri.field_name LIKE #{fieldNameLike1} or xbri.field_name like  #{fieldNameLike2})
             </if>
     </select>
-    <select id="selectWarningLevelByResultId" resultType="com.hand.hdsp.quality.infra.vo.ResultWaringVO">
+    <select id="selectWarningLevelByResultId" resultType="org.xdsp.quality.infra.vo.ResultWaringVO">
             SELECT
 	            warning_level,
 	            exception_info

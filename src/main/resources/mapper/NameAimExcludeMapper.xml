@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.NameAimExcludeMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.NameAimExcludeMapper">
 	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.NameAimExclude">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.NameAimExclude">
         <result column="exclude_id" property="excludeId" jdbcType="DECIMAL"/>
         <result column="aim_id" property="aimId" jdbcType="DECIMAL"/>
         <result column="schema_name" property="schemaName" jdbcType="VARCHAR"/>
@@ -24,7 +24,7 @@
         ${prefix}.tenant_id,
         ${prefix}.object_version_number
     </sql>
-    <resultMap id="DtoResultMap" type="com.hand.hdsp.quality.api.dto.NameAimExcludeDTO" extends="BaseResultMap">
+    <resultMap id="DtoResultMap" type="org.xdsp.quality.api.dto.NameAimExcludeDTO" extends="BaseResultMap">
 
     </resultMap>
 
