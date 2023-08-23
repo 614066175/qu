@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.BatchResultMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.BatchResultMapper">
     <!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.BatchResult">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.BatchResult">
         <result column="result_id" property="resultId" jdbcType="DECIMAL"/>
         <result column="plan_id" property="planId" jdbcType="DECIMAL"/>
         <result column="mark" property="mark" jdbcType="DECIMAL"/>
@@ -36,7 +36,7 @@
     </sql>
 
     <sql id="custom_where">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         <if test="projectId !=null">
             and ${mt}.project_id=#{projectId}
         </if>
@@ -163,14 +163,14 @@
             )
     </delete>
 
-    <select id="listByGroup" resultType="com.hand.hdsp.quality.api.dto.BatchResultDTO">
+    <select id="listByGroup" resultType="org.xdsp.quality.api.dto.BatchResultDTO">
         SELECT xbp.plan_id,
         xbp.plan_name,
         xbp.plan_job_name,
         xbr.result_id,
         CASE
         WHEN xbr.plan_status IS NULL THEN
-        '${@com.hand.hdsp.quality.infra.constant.PlanStatus@NOTACCESS}'
+        '${@org.xdsp.quality.infra.constant.PlanStatus@NOTACCESS}'
         ELSE xbr.plan_status
         END plan_status,
         xbr.mark,
@@ -234,7 +234,7 @@
         </where>
     </select>
 
-    <select id="listResultHead" resultType="com.hand.hdsp.quality.api.dto.BatchResultDTO">
+    <select id="listResultHead" resultType="org.xdsp.quality.api.dto.BatchResultDTO">
         select
         <include refid="Plan_And_Result">
             <property name="xbp" value="xbp"/>
@@ -259,7 +259,7 @@
         </where>
     </select>
 
-    <select id="listHistory" resultType="com.hand.hdsp.quality.api.dto.BatchResultDTO">
+    <select id="listHistory" resultType="org.xdsp.quality.api.dto.BatchResultDTO">
         SELECT
         xbr.result_id,
         xbr.plan_status,
@@ -366,8 +366,8 @@
         </where>
     </select>
 
-    <select id="listSuccessTypeCount" resultType="com.hand.hdsp.quality.infra.vo.CheckTypePercentageVO">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+    <select id="listSuccessTypeCount" resultType="org.xdsp.quality.infra.vo.CheckTypePercentageVO">
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         SELECT
         xbrr.check_type,
         <choose>
@@ -391,8 +391,8 @@
         xbrr.check_type
     </select>
 
-    <select id="listAllTypeCount" resultType="com.hand.hdsp.quality.infra.vo.CheckTypePercentageVO">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+    <select id="listAllTypeCount" resultType="org.xdsp.quality.infra.vo.CheckTypePercentageVO">
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         SELECT
         xbrr.check_type,
         <choose>
@@ -416,8 +416,8 @@
         xbrr.check_type
     </select>
 
-    <select id="listMarkTrend" resultType="com.hand.hdsp.quality.infra.vo.MarkTrendVO">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+    <select id="listMarkTrend" resultType="org.xdsp.quality.infra.vo.MarkTrendVO">
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         <choose>
             <when test='datasourceType == "MYSQL"'>
                 select date_format(xbr.end_date, '%Y-%m-%d') date,IFNULL(avg(xbr.mark),0) mark
@@ -465,8 +465,8 @@
         </choose>
     </select>
 
-    <select id="listRuleException" resultType="com.hand.hdsp.quality.infra.vo.RuleExceptionVO">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+    <select id="listRuleException" resultType="org.xdsp.quality.infra.vo.RuleExceptionVO">
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         <choose>
         <when test='datasourceType == "MYSQL"'>
             select date_format(xbr.start_date, '%Y-%m-%d') date,
@@ -524,8 +524,8 @@
         </choose>
     </select>
 
-    <select id="listWarningLevel" resultType="com.hand.hdsp.quality.infra.vo.WarningLevelVO">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+    <select id="listWarningLevel" resultType="org.xdsp.quality.infra.vo.WarningLevelVO">
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         <choose>
             <when test='datasourceType == "ORACLE" or datasourceType == "DM"'>
                 select TO_DATE(TO_CHAR(xbr.start_date, 'yyyy-MM-dd'), 'yyyy-MM-dd') "date",
@@ -589,7 +589,7 @@
         </choose>
     </select>
 
-    <select id="errorTablePercentage" resultType="com.hand.hdsp.quality.infra.vo.ErrorTablePercentageVO">
+    <select id="errorTablePercentage" resultType="org.xdsp.quality.infra.vo.ErrorTablePercentageVO">
         SELECT
         xbpb.object_name,
         COUNT(*) count_sum
@@ -606,7 +606,7 @@
         xbpb.object_name
     </select>
 
-    <select id="errorTableItemPercentage" resultType="com.hand.hdsp.quality.infra.vo.ErrorTablePercentageVO">
+    <select id="errorTableItemPercentage" resultType="org.xdsp.quality.infra.vo.ErrorTablePercentageVO">
         SELECT
         a.check_item,
         a.count_type,
@@ -637,8 +637,8 @@
 
     </select>
 
-    <select id="errorTableList" resultType="com.hand.hdsp.quality.infra.vo.ErrorTableListVO">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+    <select id="errorTableList" resultType="org.xdsp.quality.infra.vo.ErrorTableListVO">
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         <choose>
             <when test='datasourceType == "ORACLE" or datasourceType == "DM"'>
                 SELECT
@@ -726,7 +726,7 @@
 
     </select>
 
-    <select id="errorTableItemList" resultType="com.hand.hdsp.quality.infra.vo.ErrorTableItemListVO">
+    <select id="errorTableItemList" resultType="org.xdsp.quality.infra.vo.ErrorTableItemListVO">
         SELECT
         DISTINCT
         xbri.plan_line_id,
@@ -758,7 +758,7 @@
 
     </select>
 
-    <select id="ruleList" resultType="com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO">
+    <select id="ruleList" resultType="org.xdsp.quality.api.dto.BatchPlanFieldDTO">
         SELECT
         '表级' rule_type,
         xbpt.rule_code,
@@ -880,7 +880,7 @@
         </where>
     </select>
 
-    <select id="itemList" resultType="com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO">
+    <select id="itemList" resultType="org.xdsp.quality.api.dto.BatchPlanFieldDTO">
         SELECT
         '表级' rule_type,
         xbpt.plan_rule_id,
@@ -1017,7 +1017,7 @@
     </select>
 
 
-    <select id="errorRuleList" resultType="com.hand.hdsp.quality.api.dto.BatchResultItemDTO">
+    <select id="errorRuleList" resultType="org.xdsp.quality.api.dto.BatchResultItemDTO">
         select xbri.result_item_id,
         xbri.result_rule_id,
         xbri.plan_line_id,
@@ -1063,7 +1063,7 @@
             </include>
         </where>
     </select>
-    <select id="selectByPlanId" resultType="com.hand.hdsp.quality.api.dto.BatchResultDTO">
+    <select id="selectByPlanId" resultType="org.xdsp.quality.api.dto.BatchResultDTO">
         SELECT
 	    xbr.result_id,
 	    xbr.plan_id,
@@ -1083,8 +1083,8 @@
 	            SELECT max( result_id ) FROM xqua_batch_result WHERE plan_id = #{planId}
 	        )
     </select>
-    <select id="listResultDetail" resultType="com.hand.hdsp.quality.api.dto.BatchResultMarkDTO">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+    <select id="listResultDetail" resultType="org.xdsp.quality.api.dto.BatchResultMarkDTO">
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         <choose>
             <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
                 SELECT
@@ -1118,8 +1118,8 @@
         </choose>
     </select>
 
-    <select id="problemTrigger" resultType="com.hand.hdsp.quality.infra.vo.ProblemTriggerVO">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+    <select id="problemTrigger" resultType="org.xdsp.quality.infra.vo.ProblemTriggerVO">
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         SELECT
         xp.problem_id,
         xp.problem_name,
@@ -1172,8 +1172,8 @@
             </if>
         </where>
     </select>
-    <select id="selectProblemTrend" resultType="com.hand.hdsp.quality.api.dto.TimeRangeDTO">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+    <select id="selectProblemTrend" resultType="org.xdsp.quality.api.dto.TimeRangeDTO">
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         select
             A.groupName dateGroup,
             xbri.warning_level
@@ -1223,8 +1223,8 @@
         LEFT JOIN xqua_batch_result_item xbri ON xbri.result_rule_id = xbrr.result_rule_id
         where xbri.warning_level is not null
     </select>
-    <select id="selectProblemWithIncre" resultType="com.hand.hdsp.quality.api.dto.TimeRangeDTO">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+    <select id="selectProblemWithIncre" resultType="org.xdsp.quality.api.dto.TimeRangeDTO">
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         SELECT
             <choose>
                 <when test='datasourceType == "MYSQL"'>

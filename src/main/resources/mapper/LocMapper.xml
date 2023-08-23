@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.LocMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.LocMapper">
 	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.Loc">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.Loc">
         <result column="loc_id" property="locId" jdbcType="DECIMAL"/>
         <result column="loc_code" property="locCode" jdbcType="VARCHAR"/>
 
@@ -23,14 +23,14 @@
         <result column="last_updated_by" property="lastUpdatedBy" jdbcType="DECIMAL"/>
 
     </resultMap>
-    <select id="detail" resultType="com.hand.hdsp.quality.api.dto.LocDTO">
+    <select id="detail" resultType="org.xdsp.quality.api.dto.LocDTO">
         select
         xl.*
         from xqua_loc xl
         left join (select * from xqua_loc_version  xlv where xlv.loc_version_id in (select max(loc_version) from xqua_loc_version group by loc_id  ) )
     </select>
 
-    <select id="list" resultType="com.hand.hdsp.quality.api.dto.LocDTO">
+    <select id="list" resultType="org.xdsp.quality.api.dto.LocDTO">
         select xl.* from xqua_loc xl
         <where>
             xl.tenant_id=#{tenantId}

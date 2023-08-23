@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.BatchPlanBaseMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.BatchPlanBaseMapper">
     <!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.api.dto.BatchPlanBaseDTO">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.api.dto.BatchPlanBaseDTO">
         <result column="plan_base_id" property="planBaseId" jdbcType="DECIMAL"/>
         <result column="plan_base_code" property="planBaseCode" jdbcType="VARCHAR"/>
         <result column="plan_base_name" property="planBaseName" jdbcType="VARCHAR"/>
@@ -36,7 +36,7 @@
         <result column="group_name" property="groupName" jdbcType="VARCHAR"/>
         <result column="parent_group_id" property="parentGroupId" jdbcType="DECIMAL"/>
         <result column="project_name" property="projectName" jdbcType="VARCHAR"/>
-        <collection property="baseFormValueDTOS" ofType="com.hand.hdsp.quality.api.dto.BaseFormValueDTO">
+        <collection property="baseFormValueDTOS" ofType="org.xdsp.quality.api.dto.BaseFormValueDTO">
             <result column="item_code" property="itemCode"/>
             <result column="form_value" property="formValue"/>
         </collection>
@@ -494,7 +494,7 @@
     </select>
 
 
-    <select id="execBaseList" resultType="com.hand.hdsp.quality.domain.entity.BatchPlanBase">
+    <select id="execBaseList" resultType="org.xdsp.quality.domain.entity.BatchPlanBase">
         select xbpb.*
         from xqua_batch_plan_base xbpb
         join xqua_batch_plan xbp on xbpb.plan_id=xbp.plan_id
