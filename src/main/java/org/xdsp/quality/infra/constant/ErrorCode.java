@@ -216,4 +216,10 @@ public interface ErrorCode {
     String ROOT_NOT_EXIST = "xqua.err.root_not_exists";
 
     String GROUP_HAS_ROOT = "xqua.err.group_has_root";
+
+    String USER_NO_EMPLOYEE = "xqua.err.user_no_employee";
+
+    String DATA_IN_PROCESS = "xqua.err.data_in_process";
+
+    String DATA_NO_VALUE = "xqua.err.data_no_value";
 }
