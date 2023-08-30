@@ -39,6 +39,9 @@
             <if test="tenantId !=null">
                 and xwo.tenant_id =#{tenantId}
             </if>
+            <if test="projectId !=null">
+                and xwo.project_id =#{projectId}
+            </if>
             <if test="workOrderCode !=null">
                 <bind name="workOrderCodeLike" value="'%'+workOrderCode+'%'"/>
                 and xwo.work_order_code like #{workOrderCodeLike}
