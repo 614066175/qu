@@ -43,7 +43,7 @@ public class RelTableMeasure implements Measure {
     private static final String COUNT = "COUNT";
     private final ItemTemplateSqlRepository templateSqlRepository;
     private final DriverSessionService driverSessionService;
-    private static final String ACCURACY_RATE_SQL = "SELECT count(*) count FROM %s base WHERE EXISTS (SELECT 1 FROM %s.%s rel WHERE %s) and %s";
+    //private static final String ACCURACY_RATE_SQL = "SELECT count(*) count FROM %s base WHERE EXISTS (SELECT 1 FROM %s.%s rel WHERE %s) and %s";
     private static final String CALCULATED_VALUE_SQL = "select count(*) COUNT from (select %s from %s.%s where %s) rel  inner join (select %s from %s) base on %s";
     private final LovAdapter lovAdapter;
 
@@ -62,6 +62,11 @@ public class RelTableMeasure implements Measure {
         List<WarningLevelDTO> warningLevelList = JsonUtils.json2WarningLevel(batchPlanRelTable.getWarningLevel());
         BatchResultItem batchResultItem = param.getBatchResultItem();
         if (PlanConstant.CheckItem.ACCURACY_RATE.equals(param.getCheckItem())) {
+            //获取sql模板
+            ItemTemplateSql accuracyItemTemplateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                    .checkItem(PlanConstant.CheckItem.ACCURACY_RATE)
+                    .datasourceType(batchResultBase.getDatasourceType())
+                    .build());
             StringBuilder where = new StringBuilder();
             where.append(" 1 = 1 ");
             if (CollectionUtils.isNotEmpty(relationshipDTOList)) {
@@ -76,7 +81,7 @@ public class RelTableMeasure implements Measure {
             }
             DriverSession driverSession = driverSessionService.getDriverSession(tenantId, param.getPluginDatasourceDTO().getDatasourceCode());
             List<Map<String, Object>> result = driverSession.executeOneQuery(param.getSchema(),
-                    String.format(ACCURACY_RATE_SQL, batchResultBase.getPackageObjectName(), batchPlanRelTable.getRelSchema(),
+                    String.format(accuracyItemTemplateSql.getSqlContent(), batchResultBase.getPackageObjectName(), batchPlanRelTable.getRelSchema(),
                             batchPlanRelTable.getRelTableName(), where.toString(), Objects.isNull(batchResultBase.getWhereCondition()) ? "1=1" : batchPlanRelTable.getWhereCondition()));
             //获取表行数
             ItemTemplateSql itemTemplateSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()

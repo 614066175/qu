@@ -1,5 +1,11 @@
 package org.xdsp.quality.app.service.impl;
 
+import org.xdsp.quality.api.dto.*;
+import org.xdsp.quality.app.service.BatchPlanFieldService;
+import org.xdsp.quality.domain.entity.*;
+import org.xdsp.quality.domain.repository.*;
+import org.xdsp.quality.infra.constant.ErrorCode;
+import org.xdsp.quality.infra.util.JsonUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -16,16 +22,20 @@ import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.xdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
+import static org.xdsp.quality.infra.constant.StandardConstant.AimType.REFERENCE;
+import static org.xdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
 import org.xdsp.quality.api.dto.*;
 import org.xdsp.quality.app.service.BatchPlanFieldService;
 import org.xdsp.quality.domain.entity.*;
 import org.xdsp.quality.domain.repository.*;
 import org.xdsp.quality.infra.constant.ErrorCode;
+import org.xdsp.quality.infra.measure.MeasureUtil;
 import org.xdsp.quality.infra.util.JsonUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
 import static org.xdsp.quality.infra.constant.PlanConstant.CheckType.STANDARD;
 import static org.xdsp.quality.infra.constant.StandardConstant.AimType.REFERENCE;
 import static org.xdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
@@ -280,7 +290,8 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
         return list.stream().map(rule -> {
                     //如果包含逗号，则按逗号分隔
                     if (rule.getFieldName().contains(BaseConstants.Symbol.COMMA)) {
-                        return Arrays.stream(rule.getFieldName().split(BaseConstants.Symbol.COMMA)).map(s -> {
+                        return Arrays.stream(Objects.requireNonNull(MeasureUtil.getField(rule.getFieldName()))
+                                .toArray(new String[0])).map(s -> {
                             BatchPlanFieldDTO dto = BatchPlanFieldDTO.builder().build();
                             BeanUtils.copyProperties(rule, dto);
                             dto.setFieldName(s);

@@ -55,10 +55,15 @@ import static org.xdsp.quality.infra.constant.PlanConstant.CompareWay.VALUE;
 public class FieldValueMeasure implements Measure {
 
     private static final String COUNT = "COUNT";
+    //供逻辑值使用
     private static final String EQUAL_SQL = " and ${field} = (%s)";
     private static final String NOT_EQUAL_SQL = " and (${field} != (%s) or ${field} is null)";
-    private static final String START_SQL = " and ${field} >= %s";
-    private static final String END_SQL = " and ${field} <= %s";
+
+    //字段值比较模板sql
+    private static final String FIELD_VALUE_COMPARE = "FIELD_VALUE_COMPARE";
+    //字段值不等于
+    private static final String FIELD_NOT_EQUAL = "FIELD_NOT_EQUAL";
+
     private final ItemTemplateSqlRepository templateSqlRepository;
     private final ReferenceDataHistoryRepository referenceDataHistoryRepository;
     private final LovAdapter lovAdapter;
@@ -181,6 +186,8 @@ public class FieldValueMeasure implements Measure {
             Map<String, String> variables = new HashMap<>(8);
             variables.put("table", batchResultBase.getPackageObjectName());
             variables.put("field", MeasureUtil.handleFieldName(param.getFieldName()));
+            //判断是否是数值型
+            boolean isNumber = MeasureUtil.isNumber(batchResultBase.getDatasourceType(), param.getFieldName());
 
             //用于统计告警规则，为后续聚合做准备
             List<WarningLevelVO> warningLevels = new ArrayList<>();
@@ -189,20 +196,28 @@ public class FieldValueMeasure implements Measure {
             warningLevelList.forEach(warn -> {
                 //固定值范围比较
                 StringBuilder condition = new StringBuilder();
+                ItemTemplateSql compareSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                        .checkItem(FIELD_VALUE_COMPARE)
+                        .datasourceType(batchResultBase.getDatasourceType())
+                        .build());
                 if (RANGE.equals(param.getCompareWay())) {
                     if (Strings.isNotEmpty(warn.getStartValue())) {
-                        condition.append(String.format(START_SQL, String.format("'%s'", warn.getStartValue())));
+                        condition.append(String.format(compareSql.getSqlContent(), ">=", MeasureUtil.handleVale(isNumber, warn.getStartValue())));
                     }
                     if (Strings.isNotEmpty(warn.getEndValue())) {
-                        condition.append(String.format(END_SQL, String.format("'%s'", warn.getEndValue())));
+                        condition.append(String.format(compareSql.getSqlContent(), "<=", MeasureUtil.handleVale(isNumber, warn.getEndValue())));
                     }
                 }
                 //固定值比较
                 if (VALUE.equals(param.getCompareWay())) {
                     if (EQUAL.equals(warn.getCompareSymbol())) {
-                        condition.append(String.format(EQUAL_SQL, String.format("'%s'", warn.getExpectedValue())));
+                        condition.append(String.format(compareSql.getSqlContent(), "=", MeasureUtil.handleVale(isNumber, warn.getExpectedValue())));
                     } else {
-                        condition.append(String.format(NOT_EQUAL_SQL, String.format("'%s'", warn.getExpectedValue())));
+                        ItemTemplateSql notEqualSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                                .checkItem(FIELD_NOT_EQUAL)
+                                .datasourceType(batchResultBase.getDatasourceType())
+                                .build());
+                        condition.append(String.format(notEqualSql.getSqlContent(), warn.getExpectedValue()));
                     }
                 }
                 String sql = MeasureUtil.replaceVariable(itemTemplateSql.getSqlContent(), variables, String.format("%s%s", Optional.ofNullable(param.getWhereCondition()).orElse("1=1"), condition));
@@ -285,12 +300,16 @@ public class FieldValueMeasure implements Measure {
                         .build());
                 StringBuilder condition = new StringBuilder();
                 //逻辑值范围比较
+                ItemTemplateSql compareSql = templateSqlRepository.selectSql(ItemTemplateSql.builder()
+                        .checkItem(FIELD_VALUE_COMPARE)
+                        .datasourceType(batchResultBase.getDatasourceType())
+                        .build());
                 if (RANGE.equals(param.getCompareWay())) {
                     if (Strings.isNotEmpty(warningLevelDTO.getStartValue())) {
-                        condition.append(String.format(START_SQL, warningLevelDTO.getStartValue()));
+                        condition.append(String.format(compareSql.getSqlContent(), ">=", warningLevelDTO.getStartValue()));
                     }
                     if (Strings.isNotEmpty(warningLevelDTO.getEndValue())) {
-                        condition.append(String.format(END_SQL, warningLevelDTO.getEndValue()));
+                        condition.append(String.format(compareSql.getSqlContent(), "<=", warningLevelDTO.getEndValue()));
                     }
                 }
                 //逻辑值值比较
@@ -368,8 +387,7 @@ public class FieldValueMeasure implements Measure {
                 batchResultItem.setExceptionInfo(String.format("存在%d条数据字段值满足参考数据校验配置", levelCount));
             }
 
-        }
-        else {
+        } else {
             throw new CommonException(ErrorCode.FIELD_NO_SUPPORT_CHECK_TYPE);
         }
         return batchResultItem;
@@ -395,4 +413,26 @@ public class FieldValueMeasure implements Measure {
 
         return stringBuilder.toString();
     }
+
+
+    public String getFieldType(String input) {
+        if (!input.contains("(")) {
+            return input;
+        }
+        // 查找第一个左括号的索引
+        int startIndex = input.indexOf("(");
+        // 查找最后一个右括号的索引
+        int endIndex = input.lastIndexOf(")");
+        if (startIndex != -1 && endIndex != -1 && startIndex < endIndex) {
+            String tmpType = input.substring(startIndex + 1, endIndex);
+            if (tmpType.contains("(")) {
+                startIndex = tmpType.indexOf("(");
+                return tmpType.substring(0, startIndex);
+            }
+            return input.substring(startIndex + 1, endIndex);
+        } else {
+            return null;
+        }
+    }
+
 }
