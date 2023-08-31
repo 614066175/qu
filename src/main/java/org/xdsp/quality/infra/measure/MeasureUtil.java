@@ -186,19 +186,6 @@ public class MeasureUtil {
         return StringUtils.join(list, BaseConstants.Symbol.COMMA);
     }
 
-    public static List<String> getField(String fieldName) {
-        if (StringUtils.isBlank(fieldName)) {
-            return null;
-        }
-        List<String> list = new ArrayList<>();
-        Matcher matcher = FIELD_PATTERN.matcher(fieldName);
-        while (matcher.find()) {
-            String field = matcher.group().trim();
-            list.add(field);
-        }
-        return list;
-    }
-
 
     /**
      * 处理字段类型
