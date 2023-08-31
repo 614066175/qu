@@ -40,6 +40,7 @@ public class DataLengthMeasure implements Measure {
     private final DriverSessionService driverSessionService;
     private final LovAdapter lovAdapter;
     public static final String COUNT = "COUNT";
+    public static final String DATA_LENGTH_VALUE_RANGE = "DATA_LENGTH_VALUE_RANGE";
 //    public static final String START_VALUE = " and length(${field}) >= %s";
 //    public static final String END_VALUE = " and length(${field}) <= %s";
 
@@ -100,7 +101,7 @@ public class DataLengthMeasure implements Measure {
                         .datasourceType(batchResultBase.getDatasourceType())
                         .build());
                 ItemTemplateSql dataLengthValue = templateSqlRepository.selectSql(ItemTemplateSql.builder()
-                        .checkItem("DATA_LENGTH_VALUE")
+                        .checkItem(DATA_LENGTH_VALUE_RANGE)
                         .datasourceType(batchResultBase.getDatasourceType())
                         .build());
                 StringBuilder condition = new StringBuilder();

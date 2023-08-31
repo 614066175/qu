@@ -281,7 +281,8 @@ public class BatchPlanFieldServiceImpl implements BatchPlanFieldService {
         return list.stream().map(rule -> {
                     //如果包含逗号，则按逗号分隔
                     if (rule.getFieldName().contains(BaseConstants.Symbol.COMMA)) {
-                        return Arrays.stream(MeasureUtil.getField(rule.getFieldName()).toArray(new String[0])).map(s -> {
+                        return Arrays.stream(Objects.requireNonNull(MeasureUtil.getField(rule.getFieldName()))
+                                .toArray(new String[0])).map(s -> {
                             BatchPlanFieldDTO dto = BatchPlanFieldDTO.builder().build();
                             BeanUtils.copyProperties(rule, dto);
                             dto.setFieldName(s);
