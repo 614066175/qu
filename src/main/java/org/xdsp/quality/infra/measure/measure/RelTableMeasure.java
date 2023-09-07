@@ -162,18 +162,17 @@ public class RelTableMeasure implements Measure {
                     baseGroupBy.append("group by ").append(Strings.join(baseList, ','));
                 }
                 for (int i = 0; i < tableRelCheckDTOList.size(); i++) {
-                    relList.add(String.format("%s(%s) as %s",
-                            tableRelCheckDTOList.get(i).getRelFunction(),
-                            tableRelCheckDTOList.get(i).getRelFieldName(),
-                            String.format("function%d", i)));
-                    baseList.add(String.format("%s(%s) as %s",
-                            tableRelCheckDTOList.get(i).getBaseFunction(),
-                            tableRelCheckDTOList.get(i).getBaseFieldName(),
-                            String.format("function%d", i)));
+                    String relFunction = tableRelCheckDTOList.get(i).getRelFunction();
+                    String baseFunction = tableRelCheckDTOList.get(i).getBaseFunction();
+                    String datasourceType = batchResultBase.getDatasourceType();
+                    String relFieldName = tableRelCheckDTOList.get(i).getRelFieldName();
+                    String baseFieldName = tableRelCheckDTOList.get(i).getBaseFieldName();
+                    relList.add(MeasureUtil.handleFunc(relFunction, relFieldName, datasourceType, i));
+                    baseList.add(MeasureUtil.handleFunc(baseFunction, baseFieldName, datasourceType, i));
                     onCondition.append(String.format(" and rel.%s %s base.%s",
-                            String.format("function%d", i),
-                            tableRelCheckDTOList.get(i).getRelCode(),
-                            String.format("function%d", i)));
+                        String.format("function%d", i),
+                        tableRelCheckDTOList.get(i).getRelCode(),
+                        String.format("function%d", i)));
                 }
                 DriverSession driverSession = driverSessionService.getDriverSession(tenantId, param.getPluginDatasourceDTO().getDatasourceCode());
                 String sql = String.format(CALCULATED_VALUE_SQL,

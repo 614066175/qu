@@ -529,4 +529,23 @@ public class MeasureUtil {
         }
         return String.format("'%s'", value);
     }
+
+    /**
+     * 处理表间规则的 聚合函数 拼接
+     * @param funcType
+     * @param fieldName
+     * @param datasourceType
+     * @param i
+     * @return
+     */
+    public static String handleFunc(String funcType, String fieldName, String datasourceType, int i){
+        switch (funcType) {
+            case "COUNT_DISTINCT":
+                return String.format("COUNT(DISTINCT %s) as function%d", fieldName, i);
+            case "ORIGIN":
+                return String.format("%s as function%d", fieldName, i);
+            default:
+                return String.format("%s(%s) as function%d", funcType, fieldName, i);
+        }
+    }
 }

@@ -79,11 +79,11 @@
             </when>
             <when test="datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
                 <if test="measureDate != null">
-                    and to_char(xbri.creation_date, 'yyyymmdd') = to_char(#{measureDate}, 'yyyymmdd')
+                    and to_char(xbri.creation_date, 'yyyymmdd') = to_char(#{measureDate}::timestamp, 'yyyymmdd')
                 </if>
                 <if test="measureDateFrom != null">
-                    and to_char(xbri.creation_date, 'yyyymmdd') &gt;= to_char(#{measureDateFrom}, 'yyyymmdd')
-                    and to_char(xbri.creation_date, 'yyyymmdd') &lt;= to_char(current_date - interval '1' day), 'yyyymmdd')
+                    and to_char(xbri.creation_date, 'yyyymmdd') &gt;= to_char(#{measureDateFrom}::timestamp, 'yyyymmdd')
+                    and to_char(xbri.creation_date, 'yyyymmdd') &lt;= to_char(current_date - interval '1' day, 'yyyymmdd')
                 </if>
             </when>
         </choose>
