@@ -86,6 +86,15 @@
                     and to_char(xbri.creation_date, 'yyyymmdd') &lt;= to_char(current_date - interval '1' day, 'yyyymmdd')
                 </if>
             </when>
+            <otherwise>
+                <if test="measureDate != null">
+                    and date_format(xbri.creation_date, '%Y%m%d') = date_format(#{measureDate}, '%Y%m%d')
+                </if>
+                <if test="measureDateFrom != null">
+                    and date_format(xbri.creation_date, '%Y%m%d') &gt;= date_format(#{measureDateFrom}, '%Y%m%d')
+                    and date_format(xbri.creation_date, '%Y%m%d') &lt;= date_format(date_sub(curdate(),interval 1 day), '%Y%m%d')
+                </if>
+            </otherwise>
         </choose>
         order by xbri.creation_date desc
     </select>
