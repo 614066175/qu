@@ -26,13 +26,13 @@ public interface DispatchJobFeign {
      * @param jobDTO   job
      * @return job
      */
-    @PostMapping("/v1/{organizationId}/dispatch-jobs/create-update")
+    @PostMapping("/v2/{organizationId}/dispatch-jobs")
     ResponseEntity<String> createOrUpdate(@PathVariable(name = "organizationId") Long tenantId, @RequestParam Long projectId, @RequestBody JobDTO jobDTO);
 
 
-    @GetMapping("/v1/{organizationId}/dispatch-jobs/find-by-name")
-    ResponseEntity<String> findByName(@ApiParam(value = "租户id", required = true)
+    @GetMapping("/v1/{organizationId}/dispatch-jobs/find-by-code")
+    ResponseEntity<String> findByCode(@ApiParam(value = "租户id", required = true)
                                         @PathVariable(name = "organizationId") Long tenantId,
                                         @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
-                                        @RequestParam String jobName);
+                                        @RequestParam String jobCode);
 }
