@@ -67,7 +67,7 @@ public class BatchPlanDTO extends AuditDomain {
 
     @ApiModelProperty(value = "方案任务名称")
     @Size(max = 255)
-    private String planJobName;
+    private String planJobCode;
 
     @ApiModelProperty(value = "告警发送代码")
     private String warningCode;
@@ -88,6 +88,9 @@ public class BatchPlanDTO extends AuditDomain {
 
     @Transient
     private String groupCode;
+
+    @Transient
+    private String planJobName;
 
     private Long projectId;
 

@@ -166,7 +166,7 @@
     <select id="listByGroup" resultType="org.xdsp.quality.api.dto.BatchResultDTO">
         SELECT xbp.plan_id,
         xbp.plan_name,
-        xbp.plan_job_name,
+        xdj.job_name planJobName,
         xbr.result_id,
         CASE
         WHEN xbr.plan_status IS NULL THEN
@@ -186,6 +186,7 @@
         xwo.work_order_id,
         xwo.work_order_status
         FROM xqua_batch_plan xbp
+        left join xdis_dispatch_job xdj on xdj.job_code=xbp.plan_job_code
         LEFT JOIN (
         SELECT *
         FROM xqua_batch_result
