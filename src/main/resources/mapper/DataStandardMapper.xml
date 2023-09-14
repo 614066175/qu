@@ -63,8 +63,8 @@
     <select id="list" resultType="org.xdsp.quality.api.dto.DataStandardDTO">
         <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         select
-        iu.login_name lastUpdateName,
-        iu.login_name lastUpdatedByName,
+        iu.real_name lastUpdateName,
+        iu.real_name lastUpdatedByName,
         iu_re.real_name releaseByName,
         iu3.login_name createdByName,
         he.email chargeEmail,
@@ -146,7 +146,7 @@
             </if>
             <if test="dataStandardDTO.lastUpdateName!=null">
                 <bind name="lastUpdateName" value="'%'+ dataStandardDTO.lastUpdateName +'%'"/>
-                and iu.login_name like #{lastUpdateName}
+                and iu.real_name like #{lastUpdateName}
             </if>
             <if test="dataStandardDTO.tenantId!=null">
                 and ds.tenant_id=#{dataStandardDTO.tenantId}

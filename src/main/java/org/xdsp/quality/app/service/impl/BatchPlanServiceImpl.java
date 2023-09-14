@@ -28,6 +28,7 @@ import org.hzero.core.message.MessageAccessor;
 import org.hzero.core.util.ResponseUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.starter.driver.core.infra.util.UUIDUtils;
 import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -230,54 +231,52 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         tenantId = batchPlanDTO.getTenantId();
         projectId = batchPlanDTO.getProjectId();
         // 创建或更新job
-        String oldJobName = String.format(PlanConstant.OLD_JOB_NAME, tenantId, projectId, batchPlanDTO.getPlanCode());
-
-        JobDTO jobDTO = ResponseUtils.getResponse(dispatchJobFeign.findByName(tenantId, projectId, oldJobName), JobDTO.class);
-        String jobName = String.format(PlanConstant.JOB_NAME, batchPlanDTO.getPlanCode());
-        if (jobDTO != null) {
-            jobName = jobDTO.getJobName();
+//        String oldJobName = String.format(PlanConstant.OLD_JOB_NAME, tenantId, projectId, batchPlanDTO.getPlanCode());
+        String jobName = batchPlanDTO.getPlanName();
+        Long jobId = null;
+        if (StringUtils.isNotEmpty(batchPlanDTO.getPlanJobCode())) {
+            JobDTO jobDTO = ResponseUtils.getResponse(dispatchJobFeign.findByCode(tenantId, projectId, batchPlanDTO.getPlanJobCode()), JobDTO.class);
+            if (jobDTO != null) {
+                dispatchJobFeign.createOrUpdate(tenantId, projectId, jobDTO);
+                return;
+            }
         }
-
 
         //生成数据质量command
         String jobCommand = generateCommand(batchPlanDTO);
 
-        ResponseEntity<String> jobResult = dispatchJobFeign.createOrUpdate(tenantId, projectId,
-                JobDTO.builder().themeId(PlanConstant.DEFAULT_THEME_ID).layerId(PlanConstant.DEFAULT_LAYER_ID)
-                        .jobName(jobName).jobCommand(jobCommand).jobDescription(batchPlanDTO.getPlanName())
-                        .jobClass(PlanConstant.JOB_CLASS).jobType(PlanConstant.JOB_TYPE)
-                        .jobLevel(PlanConstant.JOB_LEVEL).enabledFlag(1).tenantId(tenantId)
-                        .projectId(projectId).build());
-        ResponseUtils.getResponse(jobResult, JobDTO.class);
+        JobDTO jobDTO = JobDTO.builder().themeId(PlanConstant.DEFAULT_THEME_ID).layerId(PlanConstant.DEFAULT_LAYER_ID)
+                .jobId(jobId)
+                .jobName(jobName)
+                .jobCommand(jobCommand)
+                .jobDescription(batchPlanDTO.getPlanName())
+                .jobClass(PlanConstant.JOB_CLASS).jobType(PlanConstant.JOB_TYPE)
+                .jobLevel(PlanConstant.JOB_LEVEL).enabledFlag(1).tenantId(tenantId)
+                .projectId(projectId)
+                .groupId(-107L)
+                .workerGroup("default")
+                .submitStatus("COMPLETE")
+                .relateGenerateCode(batchPlanDTO.getPlanCode())
+                .build();
 
-
-        // 保存jobName到BatchPlan中
-        batchPlanDTO.setPlanJobName(jobName);
-        batchPlanRepository.updateByDTOPrimaryKeySelective(batchPlanDTO);
-
-        // 创建更新时间戳表
-        List<BatchPlanBase> list = batchPlanBaseRepository.select(BatchPlanBase.builder().planId(planId).build());
-        for (BatchPlanBase base : list) {
-            if (!PlanConstant.IncrementStrategy.NONE.equals(base.getIncrementStrategy())) {
-
-                ResponseEntity<String> timestampResult = timestampFeign.createOrUpdateTimestamp(tenantId,
-                        TimestampControlDTO.builder().tenantId(tenantId)
-                                .timestampType(String.format(PlanConstant.TIMESTAMP_TYPE, tenantId,
-                                        batchPlanDTO.getPlanCode(), base.getPlanBaseId()))
-                                .datasourceId(base.getDatasourceId())
-                                .datasourceCode(base.getDatasourceCode())
-                                .sourceTableName(base.getObjectName())
-                                .sourceSchema(base.getDatasourceSchema())
-                                .incrementStrategy(base.getIncrementStrategy())
-                                .incrementColumn(base.getIncrementColumn())
-                                .whereCondition(base.getWhereCondition())
-                                .syncType(PlanConstant.JOB_CLASS)
-                                .projectId(projectId)
-                                .build());
-                ResponseUtils.getResponse(timestampResult, TimestampControlDTO.class);
+        JobDTO response;
+        while (true) {
+            try {
+                response = ResponseUtils.getResponse(dispatchJobFeign.createOrUpdate(tenantId, projectId, jobDTO), JobDTO.class);
+                break;
+            } catch (CommonException e) {
+                //捕获名称重复
+                if (!"xdsp.xdis.err.job_exist".equals(e.getCode())) {
+                    throw new CommonException(e);
+                }
+                //名称+uuid
+                jobDTO.setJobName(jobName + "_" + (UUIDUtils.generateShortUUID()));
             }
-
         }
+
+        // 保存jobCode到BatchPlan中
+        batchPlanDTO.setPlanJobCode(response.getJobCode());
+        batchPlanRepository.updateByDTOPrimaryKeySelective(batchPlanDTO);
 
     }
 
@@ -363,7 +362,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
     public void fixProjectShare() {
         //查询已经生成任务的质检方案
         List<BatchPlan> batchPlans = batchPlanRepository.selectByCondition(Condition.builder(BatchPlan.class)
-                .andWhere(Sqls.custom().andIsNotNull(BatchPlan.FIELD_PLAN_JOB_NAME))
+                .andWhere(Sqls.custom().andIsNotNull(BatchPlan.FIELD_PLAN_JOB_CODE))
                 .build());
         if (CollectionUtils.isNotEmpty(batchPlans)) {
             batchPlans.forEach(batchPlan -> this.generate(batchPlan.getTenantId(), batchPlan.getProjectId(), batchPlan.getPlanId()));
@@ -1418,8 +1417,8 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 resultList.add(result);
             }
             batchResultItem.setActualValue(Strings.join(resultList, ','));
-            if(CheckConstants.ACCURACY_RATE.equals(param.getCheckItem())){
-                batchResultItem.setActualValue(batchResultItem.getCurrentValue()+"%");
+            if (CheckConstants.ACCURACY_RATE.equals(param.getCheckItem())) {
+                batchResultItem.setActualValue(batchResultItem.getCurrentValue() + "%");
             }
             batchResultItemRepository.insertSelective(batchResultItem);
 

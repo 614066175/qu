@@ -1,9 +1,16 @@
 package org.xdsp.quality.infra.workflow;
 
-import java.util.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
+import org.hzero.boot.workflow.WorkflowClient;
+import org.hzero.boot.workflow.constant.WorkflowConstant;
+import org.hzero.boot.workflow.dto.RunInstance;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
+import org.springframework.stereotype.Component;
 import org.xdsp.core.domain.entity.CommonGroup;
 import org.xdsp.core.domain.repository.CommonGroupRepository;
 import org.xdsp.core.util.JSON;
@@ -23,15 +30,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.DetailsHelper;
-import org.apache.commons.lang3.StringUtils;
-import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
-import org.hzero.boot.workflow.WorkflowClient;
-import org.hzero.boot.workflow.constant.WorkflowConstant;
-import org.hzero.boot.workflow.dto.RunInstance;
-import org.hzero.mybatis.domian.Condition;
-import org.hzero.mybatis.util.Sqls;
+import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 默认参考数据发布工作流

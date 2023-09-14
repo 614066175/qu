@@ -1,22 +1,5 @@
 package org.xdsp.quality.infra.workflow;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import org.xdsp.quality.api.dto.ReferenceDataDTO;
-import org.xdsp.quality.domain.entity.ReferenceData;
-import org.xdsp.quality.domain.entity.ReferenceDataRecord;
-import org.xdsp.quality.domain.repository.ReferenceDataRecordRepository;
-import org.xdsp.quality.domain.repository.ReferenceDataRepository;
-import org.xdsp.quality.infra.constant.ErrorCode;
-import org.xdsp.quality.infra.constant.ReferenceDataConstant;
-import org.xdsp.quality.workflow.adapter.ReferenceDataOfflineWorkflowAdapter;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
-
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.lang3.StringUtils;
@@ -26,9 +9,25 @@ import org.hzero.boot.workflow.constant.WorkflowConstant;
 import org.hzero.boot.workflow.dto.RunInstance;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
+import org.springframework.stereotype.Component;
+import org.xdsp.quality.api.dto.ReferenceDataDTO;
+import org.xdsp.quality.domain.entity.ReferenceData;
+import org.xdsp.quality.domain.entity.ReferenceDataRecord;
+import org.xdsp.quality.domain.repository.ReferenceDataRecordRepository;
+import org.xdsp.quality.domain.repository.ReferenceDataRepository;
+import org.xdsp.quality.infra.constant.ErrorCode;
+import org.xdsp.quality.infra.constant.ReferenceDataConstant;
+import org.xdsp.quality.workflow.adapter.ReferenceDataOfflineWorkflowAdapter;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 默认参考数据工作流下线
+ *
  * @author fuqiang.luo@hand-china.com
  */
 @Component
@@ -106,7 +105,7 @@ public class DefaultReferenceDataOfflineWorkflowAdapter implements ReferenceData
         if (Objects.isNull(referenceDataDTO)) {
             return approveResult;
         }
-        if(WorkflowConstant.ApproveAction.APPROVED.equals(approveResult)){
+        if (WorkflowConstant.ApproveAction.APPROVED.equals(approveResult)) {
             // 同意
             referenceDataDTO.setDataStatus(ReferenceDataConstant.OFFLINE_);
             referenceDataDTO.setReleaseBy(null);
