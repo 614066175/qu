@@ -156,6 +156,9 @@
             </if>
         </where>
         ) b where a.start_date &lt; b.start_date and a.plan_id=b.plan_id)
+        <if test="planStatus != null">
+            and a.plan_status = #{planStatus}
+        </if>
     </select>
 
     <select id="showResultHead" resultType="org.xdsp.quality.api.dto.StreamingResultDTO">

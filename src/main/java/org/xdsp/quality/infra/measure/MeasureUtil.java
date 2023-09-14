@@ -38,6 +38,7 @@ public class MeasureUtil {
 
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(".*\\$\\{(.*)}.*");
     private static Pattern FIELD_NAME_PATTERN = Pattern.compile("(?<fieldName>[^(),]+)[(](?<fieldType>[^)]+)[)]");
+    private static Pattern FIELD_PATTERN = Pattern.compile("(?:\\([^)]*\\)|[^,])+");
     private static final String FILTER_PLACEHOLDER = "${filter}";
     private static final String FIXED_VALUE_WARNING_INFO = "固定值满足告警条件";
     private static final String FIXED_RANGE_WARNING_INFO = "固定值在告警范围内";
@@ -184,6 +185,20 @@ public class MeasureUtil {
         }
         return StringUtils.join(list, BaseConstants.Symbol.COMMA);
     }
+
+    public static List<String> getField(String fieldName) {
+        if (StringUtils.isBlank(fieldName)) {
+            return null;
+        }
+        List<String> list = new ArrayList<>();
+        Matcher matcher = FIELD_PATTERN.matcher(fieldName);
+        while (matcher.find()) {
+            String field = matcher.group().trim();
+            list.add(field);
+        }
+        return list;
+    }
+
 
     /**
      * 处理字段类型
