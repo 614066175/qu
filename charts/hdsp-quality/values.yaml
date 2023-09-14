@@ -81,7 +81,7 @@ persistence:
   # subPath:
 
 service:
-  name: hdsp-quality
+  name: xdsp-quality
   enabled: false
   type: ClusterIP
   port: 8547
