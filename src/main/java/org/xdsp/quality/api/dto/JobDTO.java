@@ -38,6 +38,9 @@ public class JobDTO extends AuditDomain {
     @Id
     @GeneratedValue
     private Long jobId;
+
+    private String jobCode;
+
     @ApiModelProperty(value = "任务名称")
     @NotBlank
     private String jobName;
@@ -88,5 +91,19 @@ public class JobDTO extends AuditDomain {
     private String type;
 
     private Long projectId;
+
+    @ApiModelProperty(value = "分组ID")
+    private Long groupId;
+
+    @ApiModelProperty(value = "worker分组")
+    private String workerGroup;
+
+    @ApiModelProperty(value = "提交状态 XDSP.XDIS.SUBMIT_STATUS")
+    private String submitStatus;
+
+    @ApiModelProperty(value = "生成任务相关来源编码")
+    //不同类型对应不同的编码
+    private String  relateGenerateCode;
+
 
 }

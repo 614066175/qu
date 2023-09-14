@@ -44,7 +44,7 @@ public class BatchPlan extends AuditDomain {
 
     private String planName;
 
-    private String planJobName;
+    private String planJobCode;
 
     private String planDesc;
 

@@ -84,14 +84,14 @@ public class BatchPlanRepositoryImpl extends BaseRepositoryImpl<BatchPlan, Batch
     @Override
     public void clearJobName(String jobName, Long tenantId, Long projectId) {
         List<BatchPlanDTO> batchPlanDTOS = this.selectDTOByCondition(Condition.builder(BatchPlan.class)
-                .andWhere(Sqls.custom().andEqualTo(BatchPlan.FIELD_PLAN_JOB_NAME, jobName)
+                .andWhere(Sqls.custom().andEqualTo(BatchPlan.FIELD_PLAN_JOB_CODE, jobName)
                         .andEqualTo(BatchPlan.FIELD_TENANT_ID, tenantId)
                         .andEqualTo(BatchPlan.FIELD_PROJECT_ID, projectId))
                 .build());
         if (CollectionUtils.isNotEmpty(batchPlanDTOS)) {
             batchPlanDTOS.forEach(batchPlanDTO -> {
                 //清空任务名
-                batchPlanDTO.setPlanJobName(null);
+                batchPlanDTO.setPlanJobCode(null);
                 this.updateDTOAllColumnWhereTenant(batchPlanDTO, tenantId);
             });
         }

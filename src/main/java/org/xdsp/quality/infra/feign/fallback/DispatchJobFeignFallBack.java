@@ -31,7 +31,7 @@ public class DispatchJobFeignFallBack implements DispatchJobFeign {
     }
 
     @Override
-    public ResponseEntity<String> findByName(Long tenantId, Long projectId, String jobName) {
+    public ResponseEntity<String> findByCode(Long tenantId, Long projectId, String jobCode) {
         throw new CommonException("查找质量任务失败！");
     }
 
