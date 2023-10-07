@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.ReferenceDataMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.ReferenceDataMapper">
 	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.ReferenceData">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.ReferenceData">
         <result column="data_id" property="dataId" jdbcType="DECIMAL"/>
         <result column="data_code" property="dataCode" jdbcType="VARCHAR"/>
         <result column="data_name" property="dataName" jdbcType="VARCHAR"/>
@@ -46,7 +46,7 @@
         ${prefix}.last_update_date,
         ${prefix}.object_version_number
     </sql>
-    <select id="list" resultType="com.hand.hdsp.quality.api.dto.ReferenceDataDTO">
+    <select id="list" resultType="org.xdsp.quality.api.dto.ReferenceDataDTO">
         SELECT
         <include refid="Base_Column_List">
             <property name="prefix" value="xrd"/>
@@ -138,7 +138,7 @@
             </if>
         </where>
     </select>
-    <select id="detail" resultType="com.hand.hdsp.quality.api.dto.ReferenceDataDTO">
+    <select id="detail" resultType="org.xdsp.quality.api.dto.ReferenceDataDTO">
         SELECT
         <include refid="Base_Column_List">
             <property name="prefix" value="xrd"/>

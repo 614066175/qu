@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.NameAimMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.NameAimMapper">
 	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.NameAim">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.NameAim">
         <result column="aim_id" property="aimId" jdbcType="DECIMAL"/>
         <result column="standard_id" property="standardId" jdbcType="DECIMAL"/>
         <result column="datasource_code" property="datasourceCode" jdbcType="VARCHAR"/>
@@ -18,13 +18,13 @@
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
-    <resultMap id="DtoResultMap" type="com.hand.hdsp.quality.api.dto.NameAimDTO" extends="BaseResultMap">
+    <resultMap id="DtoResultMap" type="org.xdsp.quality.api.dto.NameAimDTO" extends="BaseResultMap">
         <collection property="nameAimIncludeDTOList"
-                    column="{aimId=aim_id}" ofType="com.hand.hdsp.quality.api.dto.NameAimIncludeDTO"
-                    select="com.hand.hdsp.quality.infra.mapper.NameAimIncludeMapper.getListByAimId"/>
+                    column="{aimId=aim_id}" ofType="org.xdsp.quality.api.dto.NameAimIncludeDTO"
+                    select="org.xdsp.quality.infra.mapper.NameAimIncludeMapper.getListByAimId"/>
         <collection property="nameAimExcludeDTOList" column="{aimId=aim_id}"
-                    ofType="com.hand.hdsp.quality.api.dto.NameAimExcludeDTO"
-                    select="com.hand.hdsp.quality.infra.mapper.NameAimExcludeMapper.getListByAimId"/>
+                    ofType="org.xdsp.quality.api.dto.NameAimExcludeDTO"
+                    select="org.xdsp.quality.infra.mapper.NameAimExcludeMapper.getListByAimId"/>
     </resultMap>
     <sql id="BaseProperties">
         ${prefix}.aim_id,

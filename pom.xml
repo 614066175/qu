@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.hand.hdsp</groupId>
-        <artifactId>hdsp-parent</artifactId>
-        <version>1.9.0-SNAPSHOT</version>
+        <groupId>org.xdsp</groupId>
+        <artifactId>xdsp-parent</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>hdsp-quality</artifactId>
+    <artifactId>xdsp-quality</artifactId>
     <packaging>jar</packaging>
 
     <properties>
@@ -38,7 +38,7 @@
         <dependency>
             <groupId>com.dameng</groupId>
             <artifactId>dm-jdbc</artifactId>
-            <version>1.8.1-SNAPSHOT</version>
+            <version>18</version>
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
@@ -49,18 +49,18 @@
             <artifactId>hzero-boot-workflow</artifactId>
         </dependency>
         <dependency>
-            <artifactId>hdsp-quality-workflow-adapter</artifactId>
-            <groupId>com.hand.hdsp.adapter</groupId>
+            <artifactId>xdsp-quality-workflow-adapter</artifactId>
+            <groupId>org.xdsp.adapter</groupId>
         </dependency>
         <dependency>
-            <groupId>com.hand.hdsp.adapter</groupId>
-            <artifactId>hdsp-quality-message-adapter</artifactId>
+            <groupId>org.xdsp.adapter</groupId>
+            <artifactId>xdsp-quality-message-adapter</artifactId>
         </dependency>
 
         <!-- hdsp starter -->
         <dependency>
-            <groupId>com.hand.hdsp.starter</groupId>
-            <artifactId>hdsp-core-starter</artifactId>
+            <groupId>org.xdsp.starter</groupId>
+            <artifactId>xdsp-core-starter</artifactId>
             <exclusions>
                 <exclusion>
                     <artifactId>lettuce-core</artifactId>
@@ -69,8 +69,8 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.hand.hdsp.starter</groupId>
-            <artifactId>hdsp-group-starter</artifactId>
+            <groupId>org.xdsp.starter</groupId>
+            <artifactId>xdsp-group-starter</artifactId>
         </dependency>
         <!-- ansj_seg -->
         <dependency>
@@ -94,8 +94,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.hand.hdsp.starter</groupId>
-            <artifactId>hdsp-sign-starter</artifactId>
+            <groupId>org.xdsp.starter</groupId>
+            <artifactId>xdsp-sign-starter</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>org.projectlombok</groupId>

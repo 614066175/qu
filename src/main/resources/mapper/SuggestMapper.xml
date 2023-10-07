@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.SuggestMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.SuggestMapper">
 	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.Suggest">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.Suggest">
         <result column="suggest_id" property="suggestId" jdbcType="DECIMAL"/>
         <result column="rule_id" property="ruleId" jdbcType="DECIMAL"/>
         <result column="problem_id" property="problemId" jdbcType="DECIMAL"/>
@@ -16,7 +16,7 @@
         <result column="suggest_content" property="suggestContent" jdbcType="VARCHAR"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
-    <select id="selectRuleId" resultType="com.hand.hdsp.quality.api.dto.SuggestDTO">
+    <select id="selectRuleId" resultType="org.xdsp.quality.api.dto.SuggestDTO">
         SELECT
 	        xcr.rule_id
         FROM
@@ -35,8 +35,8 @@
             and xcr.column_type=#{suggestDTO.columnType}
         </if>
     </select>
-    <select id="list" resultType="com.hand.hdsp.quality.api.dto.SuggestDTO">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+    <select id="list" resultType="org.xdsp.quality.api.dto.SuggestDTO">
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         select
             xs.suggest_id,
             xs.rule_id,
@@ -108,7 +108,7 @@
             </if>
         </if>
     </select>
-    <select id="getDatasource" resultType="com.hand.hdsp.quality.domain.entity.BatchResultBase">
+    <select id="getDatasource" resultType="org.xdsp.quality.domain.entity.BatchResultBase">
         select
         xbpb.datasource_type,
         xbpb.datasource_code,

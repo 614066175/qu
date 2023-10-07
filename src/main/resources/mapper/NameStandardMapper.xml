@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.NameStandardMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.NameStandardMapper">
 	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.NameStandard">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.NameStandard">
         <result column="standard_id" property="standardId" jdbcType="DECIMAL"/>
         <result column="group_id" property="groupId" jdbcType="DECIMAL"/>
         <result column="standard_code" property="standardCode" jdbcType="VARCHAR"/>
@@ -27,7 +27,7 @@
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
 
-    <resultMap id="DtoResultMap" type="com.hand.hdsp.quality.api.dto.NameStandardDTO" extends="BaseResultMap">
+    <resultMap id="DtoResultMap" type="org.xdsp.quality.api.dto.NameStandardDTO" extends="BaseResultMap">
         <result column="lastUpdateName" property="lastUpdateName"/>
         <result property="chargeName" column="chargeName"/>
         <result property="chargeDeptName" column="chargeDeptName"/>

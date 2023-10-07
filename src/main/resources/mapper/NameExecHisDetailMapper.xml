@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.NameExecHisDetailMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.NameExecHisDetailMapper">
 	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.NameExecHisDetail">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.NameExecHisDetail">
         <result column="detail_id" property="detailId" jdbcType="DECIMAL"/>
         <result column="history_id" property="historyId" jdbcType="DECIMAL"/>
         <result column="schema_name" property="schemaName" jdbcType="VARCHAR"/>
@@ -17,7 +17,7 @@
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
-    <resultMap id="DtoResultMap" type="com.hand.hdsp.quality.api.dto.NameExecHisDetailDTO" extends="BaseResultMap">
+    <resultMap id="DtoResultMap" type="org.xdsp.quality.api.dto.NameExecHisDetailDTO" extends="BaseResultMap">
 
     </resultMap>
     <sql id="BaseProperties">
@@ -29,7 +29,7 @@
         ${prefix}.tenant_id,
         ${prefix}.object_version_number
     </sql>
-    <select id="list" resultType="com.hand.hdsp.quality.api.dto.NameExecHisDetailDTO">
+    <select id="list" resultType="org.xdsp.quality.api.dto.NameExecHisDetailDTO">
         SELECT
         <include refid="BaseProperties">
             <property name="prefix" value="xnehd"/>

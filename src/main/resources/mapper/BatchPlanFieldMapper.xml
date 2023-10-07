@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.BatchPlanFieldMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.BatchPlanFieldMapper">
     <!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.BatchPlanField">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.BatchPlanField">
         <result column="plan_rule_id" property="planRuleId" jdbcType="DECIMAL"/>
         <result column="plan_base_id" property="planBaseId" jdbcType="DECIMAL"/>
         <result column="rule_code" property="ruleCode" jdbcType="VARCHAR"/>
@@ -33,7 +33,7 @@
         ${std}.auto_build_flag
     </sql>
 
-    <select id="selectList" resultType="com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO">
+    <select id="selectList" resultType="org.xdsp.quality.api.dto.BatchPlanFieldDTO">
         select
         <include refid="baseColumn">
             <property name="std" value="xbpf"/>
@@ -63,7 +63,7 @@
         </where>
 
     </select>
-    <select id="list" resultType="com.hand.hdsp.quality.domain.entity.BatchPlanField">
+    <select id="list" resultType="org.xdsp.quality.domain.entity.BatchPlanField">
         select
         *
         from
@@ -86,7 +86,7 @@
         </where>
     </select>
 
-    <select id="selectDetailList" resultType="com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO">
+    <select id="selectDetailList" resultType="org.xdsp.quality.api.dto.BatchPlanFieldDTO">
         select xbpf.plan_rule_id,
                xbpf.rule_code,
                xbpf.rule_name,
@@ -112,7 +112,7 @@
             and xbpfc.project_id=#{projectId}
         </if>
     </select>
-    <select id="getPlanField" resultType="com.hand.hdsp.quality.api.dto.BatchPlanFieldDTO">
+    <select id="getPlanField" resultType="org.xdsp.quality.api.dto.BatchPlanFieldDTO">
         SELECT *
         FROM xqua_batch_plan_field xbpf
                  join xqua_batch_plan_base xbpb on xbpf.plan_base_id = xbpb.plan_base_id

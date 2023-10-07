@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.DataStandardMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.DataStandardMapper">
     <!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.DataStandard">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.DataStandard">
         <result column="standard_id" property="standardId" jdbcType="DECIMAL"/>
         <result column="group_Id" property="groupId" jdbcType="DECIMAL"/>
         <result column="standard_code" property="standardCode" jdbcType="VARCHAR"/>
@@ -60,11 +60,11 @@
           ${ds}.release_date
     </sql>
 
-    <select id="list" resultType="com.hand.hdsp.quality.api.dto.DataStandardDTO">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+    <select id="list" resultType="org.xdsp.quality.api.dto.DataStandardDTO">
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         select
-        iu.login_name lastUpdateName,
-        iu.login_name lastUpdatedByName,
+        iu.real_name lastUpdateName,
+        iu.real_name lastUpdatedByName,
         iu_re.real_name releaseByName,
         iu3.login_name createdByName,
         he.email chargeEmail,
@@ -146,7 +146,7 @@
             </if>
             <if test="dataStandardDTO.lastUpdateName!=null">
                 <bind name="lastUpdateName" value="'%'+ dataStandardDTO.lastUpdateName +'%'"/>
-                and iu.login_name like #{lastUpdateName}
+                and iu.real_name like #{lastUpdateName}
             </if>
             <if test="dataStandardDTO.tenantId!=null">
                 and ds.tenant_id=#{dataStandardDTO.tenantId}
@@ -221,7 +221,7 @@
         WHERE
             unit_id=#{chargeDeptId}
     </select>
-    <select id="selectAssigneeUser" resultType="com.hand.hdsp.quality.api.dto.AssigneeUserDTO">
+    <select id="selectAssigneeUser" resultType="org.xdsp.quality.api.dto.AssigneeUserDTO">
         SELECT
             name as employeeName,
             employee_num as employeeNum

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.WorkOrderMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.WorkOrderMapper">
     <!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.WorkOrder">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.WorkOrder">
         <result column="work_order_id" property="workOrderId" jdbcType="DECIMAL"/>
         <result column="work_order_code" property="workOrderCode" jdbcType="VARCHAR"/>
         <result column="plan_id" property="planId" jdbcType="DECIMAL"/>
@@ -22,7 +22,7 @@
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
     </resultMap>
-    <select id="orderTodo" resultType="com.hand.hdsp.quality.api.dto.WorkOrderDTO">
+    <select id="orderTodo" resultType="org.xdsp.quality.api.dto.WorkOrderDTO">
         <bind name="userDetails" value="@io.choerodon.core.oauth.DetailsHelper@getUserDetails()"/>
         SELECT
         xwo.* ,
@@ -39,6 +39,9 @@
             <if test="tenantId !=null">
                 and xwo.tenant_id =#{tenantId}
             </if>
+            <if test="projectId !=null">
+                and xwo.project_id =#{projectId}
+            </if>
             <if test="workOrderCode !=null">
                 <bind name="workOrderCodeLike" value="'%'+workOrderCode+'%'"/>
                 and xwo.work_order_code like #{workOrderCodeLike}
@@ -56,7 +59,7 @@
             </if>
         </where>
     </select>
-    <select id="orderApply" resultType="com.hand.hdsp.quality.api.dto.WorkOrderDTO">
+    <select id="orderApply" resultType="org.xdsp.quality.api.dto.WorkOrderDTO">
         <bind name="userDetails" value="@io.choerodon.core.oauth.DetailsHelper@getUserDetails()"/>
         SELECT
         xwo.* ,
@@ -73,6 +76,9 @@
             <if test="tenantId !=null">
                 and xwo.tenant_id =#{tenantId}
             </if>
+            <if test="projectId !=null">
+                and xwo.project_id =#{projectId}
+            </if>
             <if test="workOrderCode !=null">
                 <bind name="workOrderCodeLike" value="'%'+workOrderCode+'%'"/>
                 and xwo.work_order_code like #{workOrderCodeLike}
@@ -90,7 +96,7 @@
             </if>
         </where>
     </select>
-    <select id="oderOperateInfo" resultType="com.hand.hdsp.quality.api.dto.WorkOrderOperationDTO">
+    <select id="oderOperateInfo" resultType="org.xdsp.quality.api.dto.WorkOrderOperationDTO">
         SELECT
             xwoo.*,
             iu.login_name operatorName
@@ -100,7 +106,7 @@
         where xwoo.work_order_id=#{workOrderId}
         order by xwoo.order_operate_id asc
     </select>
-    <select id="detail" resultType="com.hand.hdsp.quality.api.dto.WorkOrderDTO">
+    <select id="detail" resultType="org.xdsp.quality.api.dto.WorkOrderDTO">
         SELECT
             woo.*,
             xbp.plan_name,

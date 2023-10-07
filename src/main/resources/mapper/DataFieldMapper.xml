@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.DataFieldMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.DataFieldMapper">
     <!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.DataField">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.DataField">
         <result column="field_id" property="fieldId" jdbcType="DECIMAL"/>
         <result column="data_standard_id" property="dataStandardId" jdbcType="DECIMAL"/>
         <result column="group_id" property="groupId" jdbcType="DECIMAL"/>
@@ -63,8 +63,8 @@
         ${fs}.release_date
     </sql>
 
-    <select id="list" resultType="com.hand.hdsp.quality.api.dto.DataFieldDTO">
-        <bind name="datasourceType" value="@com.hand.hdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
+    <select id="list" resultType="org.xdsp.quality.api.dto.DataFieldDTO">
+        <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         select
         iu.login_name lastUpdateName,
 --         iu2.login_name chargeName,
@@ -217,7 +217,7 @@
         FROM hpfm_unit
         WHERE unit_id = #{chargeDeptId}
     </select>
-    <select id="selectStandardColumn" resultType="com.hand.hdsp.quality.api.dto.TableColumnDTO">
+    <select id="selectStandardColumn" resultType="org.xdsp.quality.api.dto.TableColumnDTO">
         select xtc.*,
         xfs.field_name quoteFieldName
         from xidx_table_column xtc

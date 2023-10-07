@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.StandardOutbibMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.StandardOutbibMapper">
 	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.StandardOutbib">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.StandardOutbib">
         <result column="outbib_id" property="outbibId" jdbcType="DECIMAL"/>
         <result column="standard_id" property="standardId" jdbcType="DECIMAL"/>
         <result column="standard_type" property="standardType" jdbcType="VARCHAR"/>

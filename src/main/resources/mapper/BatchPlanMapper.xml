@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.hand.hdsp.quality.infra.mapper.BatchPlanMapper">
+<mapper namespace="org.xdsp.quality.infra.mapper.BatchPlanMapper">
     <!-- 可根据自己的需求，是否要使用 -->
-    <resultMap id="BaseResultMap" type="com.hand.hdsp.quality.domain.entity.BatchPlan">
+    <resultMap id="BaseResultMap" type="org.xdsp.quality.domain.entity.BatchPlan">
         <result column="plan_id" property="planId" jdbcType="DECIMAL"/>
         <result column="group_id" property="groupId" jdbcType="DECIMAL"/>
         <result column="plan_code" property="planCode" jdbcType="VARCHAR"/>
@@ -22,7 +22,7 @@
         from xcor_project xp
         where xp.project_id = #{projectId}
     </select>
-    <select id="selectGroupPlans" resultType="com.hand.hdsp.quality.api.dto.BatchPlanDTO">
+    <select id="selectGroupPlans" resultType="org.xdsp.quality.api.dto.BatchPlanDTO">
         select xbp.* from
         xqua_batch_plan xbp
         <where>
