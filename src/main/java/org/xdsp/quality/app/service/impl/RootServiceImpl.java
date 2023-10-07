@@ -276,6 +276,11 @@ public class RootServiceImpl implements RootService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void publishOrOff(Root root) {
+        Root rootTmp = rootRepository.selectByPrimaryKey(root.getId());
+        if (Objects.isNull(rootTmp)) {
+            throw new CommonException(ErrorCode.ROOT_NOT_EXIST);
+        }
+        root.setObjectVersionNumber(rootTmp.getObjectVersionNumber());
         String onlineFlag = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.ROOT_ONLINE);
         String offlineFlag = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.ROOT_OFFLINE);
         if ("true".equals(onlineFlag) && ONLINE.equals(root.getReleaseStatus())) {
@@ -289,21 +294,13 @@ public class RootServiceImpl implements RootService {
             root.setReleaseStatus(OFFLINE_APPROVING);
         }
 
-        if (("false".equals(offlineFlag) && ONLINE.equals(root.getReleaseStatus())) ||
-                ("false".equals(onlineFlag) && OFFLINE.equals(root.getReleaseStatus()))) {
-            Root rootTmp = rootRepository.selectByPrimaryKey(root.getId());
-            if (Objects.isNull(rootTmp)) {
-                throw new CommonException(ErrorCode.ROOT_NOT_EXIST);
-            }
-            root.setObjectVersionNumber(rootTmp.getObjectVersionNumber());
-            if (ONLINE.equals(root.getReleaseStatus())) {
-                //存版本表
-                doVersion(root);
-                root.setReleaseBy(DetailsHelper.getUserDetails().getUserId());
-                root.setReleaseDate(new Date());
-                rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS, Root.FIELD_RELEASE_BY, Root.FIELD_RELEASE_DATE);
-                return;
-            }
+        if (ONLINE.equals(root.getReleaseStatus())) {
+            //存版本表
+            root.setReleaseBy(DetailsHelper.getUserDetails().getUserId());
+            root.setReleaseDate(new Date());
+            doVersion(root);
+            rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS, Root.FIELD_RELEASE_BY, Root.FIELD_RELEASE_DATE);
+            return;
         }
         //修改发布状态
         rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS);
