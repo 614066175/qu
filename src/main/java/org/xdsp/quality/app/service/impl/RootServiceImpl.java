@@ -298,8 +298,8 @@ public class RootServiceImpl implements RootService {
             //存版本表
             root.setReleaseBy(DetailsHelper.getUserDetails().getUserId());
             root.setReleaseDate(new Date());
-            doVersion(root);
             rootRepository.updateOptional(root, Root.FIELD_RELEASE_STATUS, Root.FIELD_RELEASE_BY, Root.FIELD_RELEASE_DATE);
+            doVersion(root);
             return;
         }
         //修改发布状态
