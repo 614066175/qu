@@ -396,11 +396,11 @@ public class DataFieldServiceImpl implements DataFieldService {
                 dataFieldOnlineWorkflowAdapter.startWorkflow(dataFieldDTO);
             } else {
                 dataFieldDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
-                //存版本表
-                doVersion(dataFieldDTO);
                 dataFieldDTO.setReleaseBy(DetailsHelper.getUserDetails().getUserId());
                 dataFieldDTO.setReleaseDate(new Date());
                 dataFieldRepository.updateDTOOptional(dataFieldDTO, DataField.FIELD_STANDARD_STATUS, DataField.FIELD_RELEASE_BY, DataField.FIELD_RELEASE_DATE);
+                //存版本表
+                doVersion(dataFieldDTO);
                 return ;
             }
         }
