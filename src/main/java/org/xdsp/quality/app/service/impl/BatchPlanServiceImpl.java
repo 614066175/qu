@@ -237,6 +237,11 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         if (StringUtils.isNotEmpty(batchPlanDTO.getPlanJobCode())) {
             JobDTO jobDTO = ResponseUtils.getResponse(dispatchJobFeign.findByCode(tenantId, projectId, batchPlanDTO.getPlanJobCode()), JobDTO.class);
             if (jobDTO != null) {
+                String jobCommand = generateCommand(batchPlanDTO);
+                //更新命令
+                jobDTO.setJobCommand(jobCommand);
+                //历史数据修复
+                jobDTO.setRelateGenerateCode(batchPlanDTO.getPlanCode());
                 dispatchJobFeign.createOrUpdate(tenantId, projectId, jobDTO);
                 return;
             }
