@@ -133,6 +133,9 @@ public class RootVersion extends AuditDomain {
     @Transient
     private String groupName;
 
+    @Transient
+    private String groupPath;
+
     /**
      * 修改人名
      */

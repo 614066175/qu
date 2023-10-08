@@ -91,13 +91,13 @@
         he.name chargeName,
         hu.unit_name chargeDept,
         xsg.group_name,
-        xsg.group_code
+        xsg.group_path
         from
         xsta_root_version xrv
         left join hpfm_employee he on xrv.charge_id=he.employee_id
         left join hpfm_unit hu on xrv.charge_dept_id=hu.unit_id
         left join iam_user iu on xrv.last_updated_by=iu.id
-        left join xsta_standard_group xsg on xrv.group_id = xsg.group_id
+        left join xcor_common_group xsg on xrv.group_id = xsg.group_id
         <where>
             <if test="id != null">
                 and xrv.id = #{id}
