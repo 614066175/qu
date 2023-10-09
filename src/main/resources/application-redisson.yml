@@ -148,9 +148,9 @@ hzero:
     permission:
       # 是否启用数据权限屏蔽
       enabled: ${HZERO_ENABLE_DATA_PERMISSION:true}
-hdsp:
+xdsp:
   quality:
-    message-key: hdsp:quality:exception-message
+    message-key: xqua:exception-message
     batch-number: 10000
   workflow:
     enabled: true
