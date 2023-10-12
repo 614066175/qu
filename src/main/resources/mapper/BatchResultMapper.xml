@@ -24,7 +24,7 @@
     <sql id="Plan_And_Result">
         ${xbp}.plan_id,
         ${xbp}.plan_name,
-        ${xbp}.plan_job_name,
+        ${xbp}.plan_job_code,
         ${xbp}.warning_code,
         ${xbr}.result_id,
         ${xbr}.plan_status,
