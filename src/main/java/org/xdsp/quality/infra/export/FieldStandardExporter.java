@@ -10,7 +10,10 @@ import org.xdsp.core.domain.entity.CommonGroup;
 import org.xdsp.core.domain.repository.CommonGroupRepository;
 import org.xdsp.quality.api.dto.DataFieldDTO;
 import org.xdsp.quality.api.dto.ReferenceDataDTO;
+import org.xdsp.quality.api.dto.StandardExtraDTO;
+import org.xdsp.quality.domain.entity.StandardExtra;
 import org.xdsp.quality.domain.repository.ReferenceDataRepository;
+import org.xdsp.quality.domain.repository.StandardExtraRepository;
 import org.xdsp.quality.infra.constant.PlanConstant;
 import org.xdsp.quality.infra.export.dto.FieldStandardExportDTO;
 import org.xdsp.quality.infra.mapper.DataFieldMapper;
@@ -23,6 +26,7 @@ import java.util.stream.Collectors;
 
 import static org.hzero.core.util.StringPool.COMMA;
 import static org.xdsp.core.infra.constant.CommonGroupConstants.GroupType.FIELD_STANDARD;
+import static org.xdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
 
 /**
  * @Title: FieldStandardExporter
@@ -35,12 +39,14 @@ public class FieldStandardExporter implements Exporter<DataFieldDTO, List<FieldS
     private final CommonGroupRepository commonGroupRepository;
     private final DataFieldMapper dataFieldMapper;
     private final ReferenceDataRepository referenceDataRepository;
+    private final StandardExtraRepository standardExtraRepository;
 
     public FieldStandardExporter(CommonGroupRepository commonGroupRepository, DataFieldMapper dataFieldMapper,
-                                 ReferenceDataRepository referenceDataRepository) {
+                                 ReferenceDataRepository referenceDataRepository, StandardExtraRepository standardExtraRepository) {
         this.commonGroupRepository = commonGroupRepository;
         this.dataFieldMapper = dataFieldMapper;
         this.referenceDataRepository = referenceDataRepository;
+        this.standardExtraRepository = standardExtraRepository;
     }
 
     @Override
@@ -109,6 +115,22 @@ public class FieldStandardExporter implements Exporter<DataFieldDTO, List<FieldS
                     }
 
                 }
+                // 设置其附加信息
+                List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
+                        .andWhere(Sqls.custom()
+                                .andEqualTo(StandardExtra.FIELD_STANDARD_ID, dataFieldDTO.getFieldId())
+                                .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, FIELD)
+                                .andEqualTo(StandardExtra.FIELD_TENANT_ID, dataFieldDTO.getTenantId()))
+                        .build());
+                StringBuilder extraStr = new StringBuilder();
+                for (StandardExtraDTO extraDTO : standardExtraDTOS) {
+                    extraStr.append(String.format("{%s:%s};", extraDTO.getExtraKey(), extraDTO.getExtraValue()));
+                }
+                if (extraStr.length() > 0) {
+                    // 删除最后的分号
+                    extraStr.deleteCharAt(extraStr.length()  - 1);
+                }
+                dataFieldDTO.setStandardExtraStr(extraStr.toString());
             }
         }
         List<FieldStandardExportDTO> fieldStandardExportDTOList = new ArrayList<>();
