@@ -398,6 +398,8 @@ public class DataFieldServiceImpl implements DataFieldService {
                 dataFieldDTO.setObjectVersionNumber(dto.getObjectVersionNumber());
                 dataFieldDTO.setReleaseBy(DetailsHelper.getUserDetails().getUserId());
                 dataFieldDTO.setReleaseDate(new Date());
+                //存版本表
+                doVersion(dataFieldDTO);
                 dataFieldRepository.updateDTOOptional(dataFieldDTO, DataField.FIELD_STANDARD_STATUS, DataField.FIELD_RELEASE_BY, DataField.FIELD_RELEASE_DATE);
                 //存版本表
                 doVersion(dataFieldDTO);

@@ -61,6 +61,7 @@ public class CommonSqlMeasure implements Measure {
 
         Map<String, String> variables = new HashMap<>(8);
         variables.put("table", batchResultBase.getPackageObjectName());
+        variables.put("schema", param.getSchema());
         //如果是有空值的校验项，需特殊处理
         if(emptyItemList.contains(itemTemplateSql.getCheckItem())){
             //多字段空值，需要做sql拼接

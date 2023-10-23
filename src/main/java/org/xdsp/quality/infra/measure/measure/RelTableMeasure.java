@@ -44,7 +44,10 @@ public class RelTableMeasure implements Measure {
     private final ItemTemplateSqlRepository templateSqlRepository;
     private final DriverSessionService driverSessionService;
     //private static final String ACCURACY_RATE_SQL = "SELECT count(*) count FROM %s base WHERE EXISTS (SELECT 1 FROM %s.%s rel WHERE %s) and %s";
-    private static final String CALCULATED_VALUE_SQL = "select count(*) COUNT from (select %s from %s.%s where %s) rel  inner join (select %s from %s) base on %s";
+    private static final String CALCULATED_VALUE_SQL = "select count(*) COUNT from (%s) rel  inner join (%s) base on %s";
+    private static final String ORIGIN_SQL_TEMPLATE = "select %s from %s";
+    private static final String OTHER_SQL_TEMPLATE = "select %s from %s %s";
+    private static final String JOIN_TEMPLATE_SQL = "select %s from (%s) a join (%s) b on %s";
     private final LovAdapter lovAdapter;
 
     public RelTableMeasure(ItemTemplateSqlRepository templateSqlRepository, DriverSessionService driverSessionService, LovAdapter lovAdapter) {
@@ -142,7 +145,6 @@ public class RelTableMeasure implements Measure {
             String tableRelCheck = batchPlanRelTable.getTableRelCheck();
             if (Strings.isNotEmpty(tableRelCheck)) {
                 StringBuilder onCondition = new StringBuilder();
-                onCondition.append("1=1");
                 List<TableRelCheckDTO> tableRelCheckDTOList = JsonUtils.json2TableRelCheck(tableRelCheck);
                 List<String> relList = new ArrayList<>();
                 List<String> baseList = new ArrayList<>();
@@ -161,28 +163,43 @@ public class RelTableMeasure implements Measure {
                     relGroupBy.append("group by ").append(Strings.join(relList, ','));
                     baseGroupBy.append("group by ").append(Strings.join(baseList, ','));
                 }
+                // 存放源表sql：聚合函数类型为Origin的sql，及聚合函数类型为其他的sql
+                List<String> relSqlList = new ArrayList<>();
+                List<String> baseSqlList = new ArrayList<>();
+                // 存放源表聚合函数为origin的列
+                List<String> relOriginFieldNameList = new ArrayList<>(relList);
+                // 存放源表聚合函数为其他的列
+                List<String> relOtherFieldNameList = new ArrayList<>(relList);
+                List<String> baseOriginFieldNameList = new ArrayList<>(baseList);
+                List<String> baseOtherFieldNameList = new ArrayList<>(baseList);
+                //既有origin，又有其他聚合函数 需要join处理
                 for (int i = 0; i < tableRelCheckDTOList.size(); i++) {
-                    relList.add(String.format("%s(%s) as %s",
-                            tableRelCheckDTOList.get(i).getRelFunction(),
-                            tableRelCheckDTOList.get(i).getRelFieldName(),
-                            String.format("function%d", i)));
-                    baseList.add(String.format("%s(%s) as %s",
-                            tableRelCheckDTOList.get(i).getBaseFunction(),
-                            tableRelCheckDTOList.get(i).getBaseFieldName(),
-                            String.format("function%d", i)));
+                    TableRelCheckDTO tableRelCheckDTO = tableRelCheckDTOList.get(i);
+                    // 1. 根据聚合函数类型分组，把列名分组
+                    if ("ORIGIN".equals(tableRelCheckDTO.getRelFunction())) {
+                        relOriginFieldNameList.add(MeasureUtil.handleFunc(tableRelCheckDTO.getRelFunction(), tableRelCheckDTO.getRelFieldName(), batchResultBase.getDatasourceType(), i));
+                    } else {
+                        relOtherFieldNameList.add(MeasureUtil.handleFunc(tableRelCheckDTO.getRelFunction(), tableRelCheckDTO.getRelFieldName(), batchResultBase.getDatasourceType(), i));
+                    }
+                    if ("ORIGIN".equals(tableRelCheckDTO.getBaseFunction())) {
+                        baseOriginFieldNameList.add(MeasureUtil.handleFunc(tableRelCheckDTO.getBaseFunction(), tableRelCheckDTO.getBaseFieldName(), batchResultBase.getDatasourceType(), i));
+                    } else {
+                        baseOtherFieldNameList.add(MeasureUtil.handleFunc(tableRelCheckDTO.getBaseFunction(), tableRelCheckDTO.getBaseFieldName(), batchResultBase.getDatasourceType(), i));
+                    }
                     onCondition.append(String.format(" and rel.%s %s base.%s",
-                            String.format("function%d", i),
-                            tableRelCheckDTOList.get(i).getRelCode(),
-                            String.format("function%d", i)));
+                        String.format("function%d", i),
+                        tableRelCheckDTOList.get(i).getRelCode(),
+                        String.format("function%d", i)));
                 }
+                // 分别处理源表和目标表的sql连接
+                String composeRelSql = processRelSql(batchPlanRelTable, tableRelCheckDTOList, relList, whereCondition, relGroupBy, relSqlList, relOriginFieldNameList, relOtherFieldNameList);
+                String composeBaseSql = processBaseSql(batchResultBase, tableRelCheckDTOList, baseList, baseGroupBy, baseSqlList, baseOriginFieldNameList, baseOtherFieldNameList);
+                // 去除多余的 and
+                onCondition.replace(0, 4, "");
                 DriverSession driverSession = driverSessionService.getDriverSession(tenantId, param.getPluginDatasourceDTO().getDatasourceCode());
                 String sql = String.format(CALCULATED_VALUE_SQL,
-                        Strings.join(relList, ','),
-                        batchPlanRelTable.getRelSchema(),
-                        batchPlanRelTable.getRelTableName(),
-                        String.format("%s %s", whereCondition, relGroupBy),
-                        Strings.join(baseList, ','),
-                        String.format("%s %s", batchResultBase.getPackageObjectName(), baseGroupBy),
+                        composeRelSql,
+                        composeBaseSql,
                         onCondition
                 );
                 List<Map<String, Object>> result = driverSession.executeOneQuery(param.getSchema(), sql);
@@ -224,5 +241,62 @@ public class RelTableMeasure implements Measure {
             }
         }
         return batchResultItem;
+    }
+
+    private String processBaseSql(BatchResultBase batchResultBase, List<TableRelCheckDTO> tableRelCheckDTOList, List<String> baseList, StringBuilder baseGroupBy, List<String> baseSqlList, List<String> baseOriginFieldNameList, List<String> baseOtherFieldNameList) {
+        baseSqlList.add(String.format(ORIGIN_SQL_TEMPLATE,
+                Strings.join(baseOriginFieldNameList, ','),
+                batchResultBase.getPackageObjectName()
+        ));
+        baseSqlList.add(String.format(OTHER_SQL_TEMPLATE,
+                Strings.join(baseOtherFieldNameList, ','),
+                batchResultBase.getPackageObjectName(),
+                baseGroupBy
+        ));
+
+        List<String> afterJoinBaseNames = new ArrayList<>(baseList);
+        afterJoinBaseNames = afterJoinBaseNames.stream().map(name -> String.format("a.%s", name)).collect(Collectors.toList());
+        for (int i = 0; i < tableRelCheckDTOList.size(); i++) {
+            afterJoinBaseNames.add(String.format("function%d", i));
+        }
+
+        String baseJoinConditon = baseList.stream().map(name -> String.format(" a.%s = b.%s ",name, name)).collect(Collectors.joining("and"));
+
+        String composeBaseSql = String.format(JOIN_TEMPLATE_SQL,
+                Strings.join(afterJoinBaseNames, ','),
+                baseSqlList.get(0),
+                baseSqlList.get(1),
+                baseJoinConditon
+        );
+        return composeBaseSql;
+    }
+
+    private String processRelSql(BatchPlanRelTable batchPlanRelTable, List<TableRelCheckDTO> tableRelCheckDTOList, List<String> relList, String whereCondition, StringBuilder relGroupBy, List<String> relSqlList, List<String> relOriginFieldNameList, List<String> relOtherFieldNameList) {
+        // 2.根据列名 拼接sql: 聚合函数为属性值的sql不加group by
+        relSqlList.add(String.format(ORIGIN_SQL_TEMPLATE,
+                Strings.join(relOriginFieldNameList, ','),
+                String.format("%s.%s",  batchPlanRelTable.getRelSchema(), batchPlanRelTable.getRelTableName())
+                ));
+        // 2.根据列名 拼接sql: 聚合函数为其他的sql需要加group by
+        relSqlList.add(String.format(OTHER_SQL_TEMPLATE,
+                Strings.join(relOtherFieldNameList, ','),
+                String.format("%s.%s",  batchPlanRelTable.getRelSchema(), batchPlanRelTable.getRelTableName()),
+                String.format(" where %s %s", whereCondition, relGroupBy)
+                ));
+        //拼接连接后的 列名
+        List<String> afterJoinRelNames = new ArrayList<>(relList);
+        afterJoinRelNames = afterJoinRelNames.stream().map(name -> String.format("a.%s", name)).collect(Collectors.toList());
+        for (int i = 0; i < tableRelCheckDTOList.size(); i++) {
+            afterJoinRelNames.add(String.format("function%d", i));
+        }
+        String relJoinConditon = relList.stream().map(name -> String.format(" a.%s = b.%s ",name, name)).collect(Collectors.joining("and"));
+        // 3. 连接拼接好的sql
+        String composeRelSql = String.format(JOIN_TEMPLATE_SQL,
+                Strings.join(afterJoinRelNames, ','),
+                relSqlList.get(0),
+                relSqlList.get(1),
+                relJoinConditon
+        );
+        return composeRelSql;
     }
 }
