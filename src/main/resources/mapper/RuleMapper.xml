@@ -153,10 +153,15 @@
             <if test="enabledFlag != null">
                 and enabled_flag = #{enabledFlag}
             </if>
-            <if test="projectId != null">
-                and project_id=#{projectId}
-            </if>
-            and tenant_id in(0,#{tenantId})
+            and (
+                tenant_id = 0
+                or (
+                    tenant_id= #{tenantId}
+                    <if test="projectId != null">
+                        and project_id=#{projectId}
+                    </if>
+                 )
+            )
         </where>
         order by rule_id desc
     </select>
