@@ -104,7 +104,7 @@ public class FieldStandardExporter implements Exporter<DataFieldDTO, List<FieldS
         return exportFieldStandard(commonGroups, dataFieldDTOList);
     }
 
-    public  List<FieldStandardExportDTO> exportFieldStandard(List<CommonGroup> commonGroups, List<DataFieldDTO> dataFieldDTOList) {
+    public List<FieldStandardExportDTO> exportFieldStandard(List<CommonGroup> commonGroups, List<DataFieldDTO> dataFieldDTOList) {
         if (CollectionUtils.isNotEmpty(dataFieldDTOList)) {
             for (DataFieldDTO dataFieldDTO : dataFieldDTOList) {
                 if (PlanConstant.StandardValueType.REFERENCE_DATA.equals(dataFieldDTO.getValueType()) && StringUtils.isNotBlank(dataFieldDTO.getValueRange())) {
@@ -122,15 +122,13 @@ public class FieldStandardExporter implements Exporter<DataFieldDTO, List<FieldS
                                 .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, FIELD)
                                 .andEqualTo(StandardExtra.FIELD_TENANT_ID, dataFieldDTO.getTenantId()))
                         .build());
-                StringBuilder extraStr = new StringBuilder();
-                for (StandardExtraDTO extraDTO : standardExtraDTOS) {
-                    extraStr.append(String.format("{%s:%s};", extraDTO.getExtraKey(), extraDTO.getExtraValue()));
+                if (CollectionUtils.isNotEmpty(standardExtraDTOS)) {
+                    //附加信息不为空
+                    String standardExtraStr = standardExtraDTOS.stream()
+                            .map(standardExtraDTO -> String.format("{%s:%s}", standardExtraDTO.getExtraKey(), standardExtraDTO.getExtraValue()))
+                            .collect(Collectors.joining(";"));
+                    dataFieldDTO.setStandardExtraStr(standardExtraStr);
                 }
-                if (extraStr.length() > 0) {
-                    // 删除最后的分号
-                    extraStr.deleteCharAt(extraStr.length()  - 1);
-                }
-                dataFieldDTO.setStandardExtraStr(extraStr.toString());
             }
         }
         List<FieldStandardExportDTO> fieldStandardExportDTOList = new ArrayList<>();

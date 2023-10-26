@@ -34,7 +34,6 @@ import org.xdsp.quality.infra.mapper.DataFieldMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static org.xdsp.core.infra.constant.CommonGroupConstants.GroupType.FIELD_STANDARD;
 import static org.xdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
@@ -91,8 +90,6 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         Long projectId = ProjectHelper.getProjectId();
         List<StandardExtra> extraList = new ArrayList<>();
-        List<StandardExtra> extraAddList = new ArrayList<>();
-        List<StandardExtra> extraUpdateList = new ArrayList<>();
         try {
             for (int i = 0; i < data.size(); i++) {
                 String json = data.get(i);
@@ -214,34 +211,20 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
                         }
                     }
                     // 附加信息设置外键
-                    extraList.forEach(extra -> {
-                        StandardExtra standardExtra = standardExtraRepository.selectOne(StandardExtra.builder()
-                                .standardId(exist.getFieldId())
-                                .extraKey(extra.getExtraKey())
-                                .build());
-                        extra.setStandardId(exist.getFieldId());
-                        if (Objects.nonNull(standardExtra)) {
-                            extraUpdateList.add(extra);
-                        } else {
-                            extraAddList.add(extra);
-                        }
-                    });
-                    //更新
-                    dataFieldRepository.updateDTOAllColumnWhereTenant(dataFieldDTO, dataFieldDTO.getTenantId());
+                    extraList.forEach(extra -> extra.setStandardId(exist.getFieldId()));
+                    //删除旧的附加信息
+                    standardExtraRepository.delete(StandardExtra.builder().standardId(exist.getFieldId())
+                            .standardType(FIELD)
+                            .tenantId(exist.getTenantId()).build());
                 } else {
                     //不存在的话插入字段标准
                     dataFieldRepository.insertDTOSelective(dataFieldDTO);
                     // 附加信息设置外键
-                    extraList.forEach(extra -> {
-                        extra.setStandardId(dataFieldDTO.getFieldId());
-                        extraAddList.add(extra);
-                    });
+                    extraList.forEach(extra -> extra.setStandardId(dataFieldDTO.getFieldId()));
                 }
-                if (CollectionUtils.isNotEmpty(extraUpdateList)) {
-                    standardExtraRepository.batchUpdateByPrimaryKey(extraUpdateList);
-                }
-                if (CollectionUtils.isNotEmpty(extraAddList)) {
-                    standardExtraRepository.batchInsertSelective(extraAddList);
+                //批量插入
+                if (CollectionUtils.isNotEmpty(extraList)) {
+                    standardExtraRepository.batchInsertSelective(extraList);
                 }
                 //设置字段标准组
                 if (StringUtils.isNotEmpty(dataFieldDTO.getStandardTeamCode())) {

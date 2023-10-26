@@ -122,15 +122,13 @@ public class DataStandardExporter implements Exporter<DataStandardDTO, List<Data
                                 .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, DATA)
                                 .andEqualTo(StandardExtra.FIELD_TENANT_ID, dataStandardDTO.getTenantId()))
                         .build());
-                StringBuilder extraStr = new StringBuilder();
-                for (StandardExtraDTO extraDTO : standardExtraDTOS) {
-                    extraStr.append(String.format("{%s:%s};", extraDTO.getExtraKey(), extraDTO.getExtraValue()));
+                if (CollectionUtils.isNotEmpty(standardExtraDTOS)) {
+                    //附加信息不为空
+                    String standardExtraStr = standardExtraDTOS.stream()
+                            .map(standardExtraDTO -> String.format("{%s:%s}", standardExtraDTO.getExtraKey(), standardExtraDTO.getExtraValue()))
+                            .collect(Collectors.joining(";"));
+                    dataStandardDTO.setStandardExtraStr(standardExtraStr);
                 }
-                if (extraStr.length() > 0) {
-                    // 删除最后的分号
-                    extraStr.deleteCharAt(extraStr.length()  - 1);
-                }
-                dataStandardDTO.setStandardExtraStr(extraStr.toString());
             }
         }
         List<DataStandardExportDTO> dataStandardExportDTOS = new ArrayList<>();
