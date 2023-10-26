@@ -165,6 +165,10 @@ public class DataStandardDTO extends AuditDomain{
     @Transient
     private List<StandardExtraDTO> standardExtraDTOList;
 
+    @ExcelColumn(zh = "附加信息",en = "extra")
+    @Transient
+    private String standardExtraStr;
+
     @Transient
     private Long versionNumber;
 

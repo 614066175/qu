@@ -24,10 +24,7 @@ import org.xdsp.quality.api.dto.DataFieldDTO;
 import org.xdsp.quality.api.dto.DataStandardDTO;
 import org.xdsp.quality.api.dto.StandardRelationDTO;
 import org.xdsp.quality.api.dto.StandardTeamDTO;
-import org.xdsp.quality.domain.entity.DataField;
-import org.xdsp.quality.domain.entity.DataStandard;
-import org.xdsp.quality.domain.entity.ReferenceData;
-import org.xdsp.quality.domain.entity.StandardTeam;
+import org.xdsp.quality.domain.entity.*;
 import org.xdsp.quality.domain.repository.*;
 import org.xdsp.quality.infra.constant.PlanConstant;
 import org.xdsp.quality.infra.constant.TemplateCodeConstants;
@@ -35,9 +32,11 @@ import org.xdsp.quality.infra.constant.WorkFlowConstant;
 import org.xdsp.quality.infra.mapper.DataFieldMapper;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.xdsp.core.infra.constant.CommonGroupConstants.GroupType.FIELD_STANDARD;
+import static org.xdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
 import static org.xdsp.quality.infra.constant.StandardConstant.Status.*;
 
 /**
@@ -55,6 +54,7 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
     private final DataStandardRepository dataStandardRepository;
     private final StandardRelationRepository standardRelationRepository;
     private final StandardTeamRepository standardTeamRepository;
+    private final StandardExtraRepository standardExtraRepository;
 
     @Autowired
     private CommonGroupRepository commonGroupRepository;
@@ -70,7 +70,8 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
                                                    ReferenceDataRepository referenceDataRepository, DataFieldMapper dataFieldMapper,
                                                    DataStandardRepository dataStandardRepository,
                                                    StandardRelationRepository standardRelationRepository,
-                                                   StandardTeamRepository standardTeamRepository) {
+                                                   StandardTeamRepository standardTeamRepository,
+                                                   StandardExtraRepository standardExtraRepository) {
         this.objectMapper = objectMapper;
         this.dataFieldRepository = dataFieldRepository;
         this.standardGroupRepository = standardGroupRepository;
@@ -79,6 +80,7 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
         this.dataStandardRepository = dataStandardRepository;
         this.standardRelationRepository = standardRelationRepository;
         this.standardTeamRepository = standardTeamRepository;
+        this.standardExtraRepository = standardExtraRepository;
     }
 
     @Override
@@ -87,6 +89,7 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
         // 设置租户Id
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         Long projectId = ProjectHelper.getProjectId();
+        List<StandardExtra> extraList = new ArrayList<>();
         try {
             for (int i = 0; i < data.size(); i++) {
                 String json = data.get(i);
@@ -172,6 +175,21 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
                         dataFieldDTO.setValueRange(String.valueOf(referenceDataList.get(0).getDataId()));
                     }
                 }
+                //附加信息处理
+                String standardExtraStr = dataFieldDTO.getStandardExtraStr();
+                if (StringUtils.isNotEmpty(standardExtraStr)) {
+                    for (String extra : standardExtraStr.split(";")) {
+                        String key = extra.substring(1, extra.indexOf(":"));
+                        String value = extra.substring(extra.indexOf(":") + 1, extra.length() - 1);
+                        extraList.add(StandardExtra.builder()
+                                .standardType(FIELD)
+                                .extraKey(key)
+                                .extraValue(value)
+                                .tenantId(tenantId)
+                                .projectId(projectId)
+                                .build());
+                    }
+                }
                 if (exist != null) {
                     dataFieldDTO.setFieldId(exist.getFieldId());
                     dataFieldDTO.setReleaseBy(exist.getReleaseBy());
@@ -192,13 +210,22 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
                             dataFieldDTO.setStandardStatus(OFFLINE);
                         }
                     }
-                    //更新
-                    dataFieldRepository.updateDTOAllColumnWhereTenant(dataFieldDTO, dataFieldDTO.getTenantId());
+                    // 附加信息设置外键
+                    extraList.forEach(extra -> extra.setStandardId(exist.getFieldId()));
+                    //删除旧的附加信息
+                    standardExtraRepository.delete(StandardExtra.builder().standardId(exist.getFieldId())
+                            .standardType(FIELD)
+                            .tenantId(exist.getTenantId()).build());
                 } else {
                     //不存在的话插入字段标准
                     dataFieldRepository.insertDTOSelective(dataFieldDTO);
+                    // 附加信息设置外键
+                    extraList.forEach(extra -> extra.setStandardId(dataFieldDTO.getFieldId()));
                 }
-
+                //批量插入
+                if (CollectionUtils.isNotEmpty(extraList)) {
+                    standardExtraRepository.batchInsertSelective(extraList);
+                }
                 //设置字段标准组
                 if (StringUtils.isNotEmpty(dataFieldDTO.getStandardTeamCode())) {
                     String[] standardTeamCodeList = dataFieldDTO.getStandardTeamCode().split(";");
