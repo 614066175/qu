@@ -82,6 +82,7 @@ import java.util.stream.Collectors;
 
 import static org.xdsp.quality.app.service.impl.BatchResultServiceImpl.DOWN_EXCEPTION_BATCH_SIZE;
 import static org.xdsp.quality.infra.constant.PlanConstant.ExceptionParam.*;
+import static org.xdsp.quality.infra.constant.PlanConstant.SqlType.SQL;
 import static org.xdsp.quality.infra.util.PlanExceptionUtil.WARNING_LEVEL_LOV;
 import static org.xdsp.quality.infra.util.PlanExceptionUtil.profileClient;
 
@@ -990,7 +991,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                         .datasourceCode(batchPlanBase.getDatasourceCode()).build();
 
                 String packageObjectName = objectName;
-                if (PlanConstant.SqlType.SQL.equals(batchPlanBase.getSqlType())) {
+                if (SQL.equals(batchPlanBase.getSqlType())) {
                     packageObjectName = String.format(SQL_PACK, objectName);
                 }
 
@@ -1009,12 +1010,17 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 DriverSession driverSession = driverSessionService.getDriverSession(tenantId, batchPlanBase.getDatasourceCode());
                 //避免hive进行优化配置hive.compute.query.using.stats=true，使用状态信息进行查询，返回的结果不正确
                 List<Map<String, Object>> maps = null;
+                String queryExpression = batchPlanBase.getObjectName();
+                if (SQL.equals(batchPlanBase.getSqlType())) {
+                    //添加（）
+                    queryExpression = String.format("(%s)", queryExpression);
+                }
                 if (DbType.hive.equals(driverSession.getDbType())) {
                     maps = driverSession.executeOneQuery(batchPlanBase.getDatasourceSchema(),
-                            String.format("select count(*) as COUNT from (%s) limit 1", batchPlanBase.getObjectName()));
+                            String.format("select count(*) as COUNT from %s limit 1", queryExpression));
                 } else {
                     maps = driverSession.executeOneQuery(batchPlanBase.getDatasourceSchema(),
-                            String.format("select count(*) as COUNT from (%s) ", batchPlanBase.getObjectName()));
+                            String.format("select count(*) as COUNT from %s ", queryExpression));
                 }
                 if (CollectionUtils.isNotEmpty(maps)) {
                     log.info("查询结果：" + maps);
