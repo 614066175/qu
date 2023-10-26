@@ -11,6 +11,7 @@ import org.hzero.boot.imported.infra.enums.DataStatus;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.mybatis.helper.DataSecurityHelper;
+import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.xdsp.core.CommonGroupClient;
 import org.xdsp.core.domain.entity.CommonGroup;
 import org.xdsp.core.domain.repository.CommonGroupRepository;
@@ -31,6 +32,7 @@ import org.xdsp.quality.infra.mapper.DataStandardMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.xdsp.core.infra.constant.CommonGroupConstants.GroupType.DATA_STANDARD;
 import static org.xdsp.quality.infra.constant.StandardConstant.StandardType.DATA;
@@ -147,13 +149,12 @@ public class DataStandardBatchImportServiceImpl extends BatchImportHandler imple
                 //附加信息处理
                 String standardExtraStr = dataStandardDTO.getStandardExtraStr();
                 if (StringUtils.isNotEmpty(standardExtraStr)) {
-                    for (String extra : standardExtraStr.split(";")) {
-                        String key = extra.substring(1, extra.indexOf(":"));
-                        String value = extra.substring(extra.indexOf(":") + 1, extra.length() - 1);
+                    List<Map<String, String>> list = JsonUtil.toObj(standardExtraStr, List.class);
+                    for (Map<String, String> map : list) {
                         extraList.add(StandardExtra.builder()
                                 .standardType(DATA)
-                                .extraKey(key)
-                                .extraValue(value)
+                                .extraKey(map.keySet().iterator().next())
+                                .extraValue(map.values().iterator().next())
                                 .tenantId(tenantId)
                                 .projectId(projectId)
                                 .build());

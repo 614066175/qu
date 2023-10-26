@@ -13,6 +13,7 @@ import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.xdsp.core.util.ProjectHelper;
 import org.xdsp.quality.api.dto.DataFieldDTO;
 import org.xdsp.quality.api.dto.DataStandardDTO;
@@ -28,7 +29,10 @@ import org.xdsp.quality.infra.constant.WorkFlowConstant;
 import org.xdsp.quality.infra.mapper.DataFieldMapper;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import static org.xdsp.quality.infra.constant.PlanConstant.StandardStatus.OFFLINE_APPROVING;
@@ -73,9 +77,8 @@ public class DataFieldValidator extends BatchValidatorHandler {
                 DataFieldDTO dataFieldDTO = objectMapper.readValue(data.get(i), DataFieldDTO.class);
                 dataFieldDTO.setTenantId(tenantId);
                 String fieldName = dataFieldDTO.getFieldName();
-                if(StringUtils.isEmpty(fieldName)){
-                    addErrorMsg(i,"导入表格中字段名称不存在");
-                    return false;
+                if (StringUtils.isEmpty(fieldName)) {
+                    addErrorMsg(i, "导入表格中字段名称不存在");
                 }
                 List<DataFieldDTO> dataFieldDTOS = dataFieldRepository.selectDTOByCondition(Condition.builder(DataField.class).andWhere(Sqls.custom()
                                 .andEqualTo(DataField.FIELD_FIELD_NAME, fieldName)
@@ -97,50 +100,44 @@ public class DataFieldValidator extends BatchValidatorHandler {
                 }
                 //如果有责任人，则进行验证
                 //校验的责任人名称为员工姓名
-                if(DataSecurityHelper.isTenantOpen()){
+                if (DataSecurityHelper.isTenantOpen()) {
                     //加密后查询
                     String chargeName = DataSecurityHelper.encrypt(dataFieldDTO.getChargeName());
                     dataFieldDTO.setChargeName(chargeName);
 
                 }
                 List<Long> chargeIds = dataFieldMapper.checkCharger(dataFieldDTO.getChargeName(), dataFieldDTO.getTenantId());
-                if(CollectionUtils.isEmpty(chargeIds)){
+                if (CollectionUtils.isEmpty(chargeIds)) {
                     addErrorMsg(i, "未找到此责任人，请检查数据");
-                    return false;
                 }
 
 
                 //责任部门不为空进行校验
-                if(StringUtils.isNotEmpty(dataFieldDTO.getChargeDeptName())){
+                if (StringUtils.isNotEmpty(dataFieldDTO.getChargeDeptName())) {
                     String chargeDeptName = DataSecurityHelper.encrypt(dataFieldDTO.getChargeDeptName());
                     dataFieldDTO.setChargeDeptName(chargeDeptName);
                     List<Long> chargeDeptId = dataFieldMapper.selectIdByChargeDeptName(dataFieldDTO.getChargeDeptName(), dataFieldDTO.getTenantId());
-                    if(CollectionUtils.isEmpty(chargeDeptId)){
+                    if (CollectionUtils.isEmpty(chargeDeptId)) {
                         addErrorMsg(i, "未找到此部门，请检查数据");
-                        return false;
                     }
                 }
 
-                if(StringUtils.isEmpty(dataFieldDTO.getFieldType())){
+                if (StringUtils.isEmpty(dataFieldDTO.getFieldType())) {
                     addErrorMsg(i, "字段类型不能为空");
-                    return false;
-                }else {
-                    if("DECIMAL".equals(dataFieldDTO.getFieldType())){
+                } else {
+                    if ("DECIMAL".equals(dataFieldDTO.getFieldType())) {
                         //校验字段精度
-                        if(ObjectUtils.isNotEmpty(dataFieldDTO.getFieldAccuracy())){
+                        if (ObjectUtils.isNotEmpty(dataFieldDTO.getFieldAccuracy())) {
                             //字段精度为正整数
-                            if (!isNumeric(dataFieldDTO.getFieldAccuracy().toString())){
-                                addErrorMsg(i,"浮点型字段精度需要为正整数");
-                                return false;
+                            if (!isNumeric(dataFieldDTO.getFieldAccuracy().toString())) {
+                                addErrorMsg(i, "浮点型字段精度需要为正整数");
                             }
-                        }else{
-                            addErrorMsg(i,"浮点型字段需设置字段精度");
-                            return false;
+                        } else {
+                            addErrorMsg(i, "浮点型字段需设置字段精度");
                         }
-                    }else {
-                        if(ObjectUtils.isNotEmpty(dataFieldDTO.getFieldAccuracy())){
-                            addErrorMsg(i,"非浮点型字段无需设置字段精度");
-                            return false;
+                    } else {
+                        if (ObjectUtils.isNotEmpty(dataFieldDTO.getFieldAccuracy())) {
+                            addErrorMsg(i, "非浮点型字段无需设置字段精度");
                         }
                     }
                 }
@@ -153,21 +150,36 @@ public class DataFieldValidator extends BatchValidatorHandler {
                                 .build());
                         if (CollectionUtils.isEmpty(standardTeamDTOS)) {
                             addErrorMsg(i, String.format("导入环境字段标准组：%s不存在", standardTeamCode));
-                            return false;
                         }
                     }
                 }
 
                 //校验目标环境引用数据标准
-                if(StringUtils.isNotEmpty(dataFieldDTO.getDataStandardCode())){
+                if (StringUtils.isNotEmpty(dataFieldDTO.getDataStandardCode())) {
                     List<DataStandardDTO> dataStandardDTOList = dataStandardRepository.selectDTOByCondition(Condition.builder(DataStandard.class).andWhere(Sqls.custom()
-                                    .andEqualTo(DataStandard.FIELD_TENANT_ID,tenantId)
-                                    .andEqualTo(DataStandard.FIELD_PROJECT_ID,projectId)
-                                    .andEqualTo(DataStandard.FIELD_STANDARD_CODE,dataFieldDTO.getDataStandardCode()))
+                                    .andEqualTo(DataStandard.FIELD_TENANT_ID, tenantId)
+                                    .andEqualTo(DataStandard.FIELD_PROJECT_ID, projectId)
+                                    .andEqualTo(DataStandard.FIELD_STANDARD_CODE, dataFieldDTO.getDataStandardCode()))
                             .build());
-                    if(CollectionUtils.isEmpty(dataStandardDTOList)){
+                    if (CollectionUtils.isEmpty(dataStandardDTOList)) {
                         addErrorMsg(i, String.format("导入环境引用的数据标准：%s不存在", dataFieldDTO.getDataStandardCode()));
-                        return false;
+                    }
+                }
+
+                //检验附加信息key是否重复
+                String standardExtraStr = dataFieldDTO.getStandardExtraStr();
+                Set<String> keyNames = new HashSet<>();
+                if (StringUtils.isNotEmpty(standardExtraStr)) {
+                    List<Map<String, String>> list = JsonUtil.toObj(standardExtraStr, List.class);
+                    for (Map<String, String> map : list) {
+                        String keyName = map.keySet().iterator().next();
+                        if (StringUtils.isEmpty(keyName)) {
+                            addErrorMsg(i, "附加信息key不能为空");
+                        }
+                        if (keyNames.contains(keyName)) {
+                            addErrorMsg(i, String.format("附加信息key【%s】重复", keyName));
+                        }
+                        keyNames.add(keyName);
                     }
                 }
             } catch (IOException e) {
@@ -180,7 +192,7 @@ public class DataFieldValidator extends BatchValidatorHandler {
     }
 
 
-    public static boolean isNumeric(String string){
+    public static boolean isNumeric(String string) {
         Pattern pattern = Pattern.compile("[0-9]*");
         return pattern.matcher(string).matches();
     }
