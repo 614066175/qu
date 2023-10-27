@@ -1013,7 +1013,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 String queryExpression = batchPlanBase.getObjectName();
                 if (SQL.equals(batchPlanBase.getSqlType())) {
                     //添加（）
-                    queryExpression = String.format("(%s)", queryExpression);
+                    queryExpression = String.format("(%s) tmp", queryExpression);
                 }
                 if (DbType.hive.equals(driverSession.getDbType())) {
                     maps = driverSession.executeOneQuery(batchPlanBase.getDatasourceSchema(),
