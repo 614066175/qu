@@ -715,6 +715,11 @@ public class DataFieldServiceImpl implements DataFieldService {
     }
 
     @Override
+    public List<DataFieldDTO> listAll(DataFieldDTO dataFieldDTO) {
+        return dataFieldMapper.list(dataFieldDTO);
+    }
+
+    @Override
     public void fieldAimStandard(AssetFieldDTO assetFieldDTO, Long projectId) {
         // 根据字段删除 字段标准落标
         String fieldName = String.format("%s(%s)", assetFieldDTO.getFieldName(), assetFieldDTO.getFieldType().toUpperCase());
