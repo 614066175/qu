@@ -14,6 +14,7 @@ import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.xdsp.core.CommonGroupClient;
@@ -34,6 +35,7 @@ import org.xdsp.quality.infra.mapper.DataFieldMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.xdsp.core.infra.constant.CommonGroupConstants.GroupType.FIELD_STANDARD;
 import static org.xdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
@@ -89,9 +91,9 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
         // 设置租户Id
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         Long projectId = ProjectHelper.getProjectId();
-        List<StandardExtra> extraList = new ArrayList<>();
         try {
             for (int i = 0; i < data.size(); i++) {
+                List<StandardExtra> extraList = new ArrayList<>();
                 String json = data.get(i);
                 DataFieldDTO dataFieldDTO = objectMapper.readValue(json, DataFieldDTO.class);
                 //导入分组id
@@ -178,13 +180,12 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
                 //附加信息处理
                 String standardExtraStr = dataFieldDTO.getStandardExtraStr();
                 if (StringUtils.isNotEmpty(standardExtraStr)) {
-                    for (String extra : standardExtraStr.split(";")) {
-                        String key = extra.substring(1, extra.indexOf(":"));
-                        String value = extra.substring(extra.indexOf(":") + 1, extra.length() - 1);
+                    List<Map<String, String>> list = JsonUtil.toObj(standardExtraStr, List.class);
+                    for (Map<String, String> map : list) {
                         extraList.add(StandardExtra.builder()
                                 .standardType(FIELD)
-                                .extraKey(key)
-                                .extraValue(value)
+                                .extraKey(map.keySet().iterator().next())
+                                .extraValue(map.values().iterator().next())
                                 .tenantId(tenantId)
                                 .projectId(projectId)
                                 .build());

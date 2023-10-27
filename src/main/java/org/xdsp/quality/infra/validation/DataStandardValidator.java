@@ -5,6 +5,7 @@ import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.imported.app.service.BatchValidatorHandler;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidator;
@@ -13,6 +14,7 @@ import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xdsp.core.domain.repository.CommonGroupRepository;
 import org.xdsp.core.util.ProjectHelper;
@@ -24,7 +26,10 @@ import org.xdsp.quality.infra.constant.WorkFlowConstant;
 import org.xdsp.quality.infra.mapper.DataStandardMapper;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.xdsp.quality.infra.constant.PlanConstant.StandardStatus.OFFLINE_APPROVING;
 import static org.xdsp.quality.infra.constant.PlanConstant.StandardStatus.ONLINE;
@@ -114,6 +119,22 @@ public class DataStandardValidator extends BatchValidatorHandler {
                         }
                     }
 
+                }
+                //检验附加信息key是否重复
+                String standardExtraStr = dataStandardDTO.getStandardExtraStr();
+                Set<String> keyNames = new HashSet<>();
+                if (StringUtils.isNotEmpty(standardExtraStr)) {
+                    List<Map<String, String>> list = JsonUtil.toObj(standardExtraStr, List.class);
+                    for (Map<String, String> map : list) {
+                        String keyName = map.keySet().iterator().next();
+                        if (StringUtils.isEmpty(keyName)) {
+                            addErrorMsg(i, "附加信息key不能为空");
+                        }
+                        if (keyNames.contains(keyName)) {
+                            addErrorMsg(i, String.format("附加信息key【%s】重复", keyName));
+                        }
+                        keyNames.add(keyName);
+                    }
                 }
             }
         } catch (IOException e) {

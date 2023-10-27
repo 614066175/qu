@@ -428,4 +428,21 @@ public class DataFieldController extends BaseController {
         dataFieldService.workflowing(tenantId, fieldId, OFFLINE_APPROVING);
         return Results.success();
     }
+
+    @ApiOperation(value = "字段标准查询所有")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/list-all")
+    public ResponseEntity<List<DataFieldDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
+                                                   @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                   DataFieldDTO dataFieldDTO) {
+        dataFieldDTO.setTenantId(tenantId);
+        dataFieldDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
+        return Results.success(dataFieldService.listAll(dataFieldDTO));
+    }
 }

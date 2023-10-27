@@ -4,6 +4,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 import org.xdsp.core.domain.entity.CommonGroup;
@@ -18,10 +19,7 @@ import org.xdsp.quality.infra.constant.PlanConstant;
 import org.xdsp.quality.infra.export.dto.FieldStandardExportDTO;
 import org.xdsp.quality.infra.mapper.DataFieldMapper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.hzero.core.util.StringPool.COMMA;
@@ -123,10 +121,15 @@ public class FieldStandardExporter implements Exporter<DataFieldDTO, List<FieldS
                                 .andEqualTo(StandardExtra.FIELD_TENANT_ID, dataFieldDTO.getTenantId()))
                         .build());
                 if (CollectionUtils.isNotEmpty(standardExtraDTOS)) {
+                    List<Map<String,String>> maps = standardExtraDTOS.stream()
+                            .map(standardExtraDTO -> {
+                                Map<String,String> map = new HashMap<>();
+                                map.put(standardExtraDTO.getExtraKey(), standardExtraDTO.getExtraValue());
+                                return map;
+                            })
+                            .collect(Collectors.toList());
                     //附加信息不为空
-                    String standardExtraStr = standardExtraDTOS.stream()
-                            .map(standardExtraDTO -> String.format("{%s:%s}", standardExtraDTO.getExtraKey(), standardExtraDTO.getExtraValue()))
-                            .collect(Collectors.joining(";"));
+                    String standardExtraStr = JsonUtil.toJson(maps);
                     dataFieldDTO.setStandardExtraStr(standardExtraStr);
                 }
             }

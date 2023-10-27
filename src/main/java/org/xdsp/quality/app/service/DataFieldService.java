@@ -178,4 +178,11 @@ public interface DataFieldService {
      * @param status
      */
     void workflowing(Long tenantId, Long fieldId, String status);
+
+    /**
+     * 查询所有
+     * @param dataFieldDTO
+     * @return
+     */
+    List<DataFieldDTO> listAll(DataFieldDTO dataFieldDTO);
 }
