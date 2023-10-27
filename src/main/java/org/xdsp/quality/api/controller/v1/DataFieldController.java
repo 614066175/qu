@@ -438,7 +438,7 @@ public class DataFieldController extends BaseController {
     )})
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/list-all")
-    public ResponseEntity<List<DataFieldDTO>> list(@PathVariable(name = "organizationId") Long tenantId,
+    public ResponseEntity<List<DataFieldDTO>> listAll(@PathVariable(name = "organizationId") Long tenantId,
                                                    @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                    DataFieldDTO dataFieldDTO) {
         dataFieldDTO.setTenantId(tenantId);
