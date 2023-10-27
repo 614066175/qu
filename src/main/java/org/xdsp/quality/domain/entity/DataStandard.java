@@ -48,6 +48,10 @@ public class DataStandard extends AuditDomain {
     public static final String FIELD_NULL_FLAG = "nullFlag";
     public static final String FIELD_RELEASE_BY = "releaseBy";
     public static final String FIELD_RELEASE_DATE = "releaseDate";
+    public static final String BUSINESS_PURPOSE = "businessPurpose";
+    public static final String BUSINESS_RULES = "businessRules";
+    public static final String DATA_EXAMPLE = "dataExample";
+
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -104,4 +108,17 @@ public class DataStandard extends AuditDomain {
     private Long releaseBy;
 
     private Date releaseDate;
+
+    /**
+     * 业务用途
+     */
+    private String businessPurpose;
+    /**
+     * 业务规则
+     */
+    private String businessRules;
+    /**
+     * 示例数据
+     */
+    private String dataExample;
 }
