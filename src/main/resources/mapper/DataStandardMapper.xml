@@ -29,6 +29,9 @@
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
         <result column="null_flag" property="nullFlag" jdbcType="DECIMAL"/>
+        <result column="business_purpose" property="businessPurpose" jdbcType="VARCHAR"/>
+        <result column="business_rules" property="businessRules" jdbcType="VARCHAR"/>
+        <result column="data_example" property="dataExample" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="baseColumn">
@@ -55,6 +58,9 @@
           ${ds}.last_updated_by,
           ${ds}.last_update_date,
           ${ds}.null_flag,
+          ${ds}.business_purpose,
+          ${ds}.business_rules,
+          ${ds}.data_example,
           ${ds}.project_id,
           ${ds}.release_by,
           ${ds}.release_date
@@ -79,7 +85,7 @@
 --         xsg.parent_group_id,
         xsa.instance_id,
         <include refid="baseColumn">
-            <property name="ds" value="ds"/>
+            <property name="ds"  value="ds"/>
         </include>
         from xsta_data_standard ds
         left join xcor_common_group xcg on ds.group_id=xcg.group_id

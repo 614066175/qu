@@ -131,6 +131,18 @@ public class DataStandardDTO extends AuditDomain{
     @ExcelColumn(zh = "是否可为空",en = "Can be empty or not")
     private Integer nullFlag;
 
+    @ApiModelProperty(value = "业务用途")
+    @ExcelColumn(zh = "业务用途",en = "businessPurpose")
+    private String businessPurpose;
+
+    @ApiModelProperty(value = "业务规则")
+    @ExcelColumn(zh = "业务规则",en = "businessRules")
+    private String businessRules;
+
+    @ApiModelProperty(value = "数据示例")
+    @ExcelColumn(zh = "数据示例",en = "dataExample")
+    private String dataExample;
+
     @Transient
     @ExcelColumn(zh = "责任部门", en = "chargeDeptName")
     private String chargeDeptName;
