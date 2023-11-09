@@ -7,6 +7,7 @@ import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.stereotype.Component;
 import org.xdsp.core.base.repository.impl.BaseRepositoryImpl;
 import org.xdsp.quality.api.dto.BatchPlanFieldDTO;
@@ -116,8 +117,15 @@ public class BatchResultRepositoryImpl extends BaseRepositoryImpl<BatchResult, B
             //将字段类型不一致的问题筛选出去，并把剩余的问题合并到同一个list
             lastTriggers.addAll(triggers.stream()
                     .filter(u -> FIELD.equals(u.getRuleType()))
-                    .filter(u -> ApplicationContextHelper.getContext().getBean(u.getDatasourceType(), ConvertTypeBase.class)
-                            .typeConvert(u.getFieldName(), new ArrayList<>()).contains(u.getColumnType()))
+                    .filter(u -> {
+                        ConvertTypeBase convertTypeBase;
+                        try {
+                            convertTypeBase = ApplicationContextHelper.getContext().getBean(u.getDatasourceType(), ConvertTypeBase.class);
+                        } catch (NoSuchBeanDefinitionException exception) {
+                            convertTypeBase = ApplicationContextHelper.getContext().getBean("CommonConvert", ConvertTypeBase.class);
+                        }
+                        return convertTypeBase.typeConvert(u.getFieldName(), new ArrayList<>()).contains(u.getColumnType());
+                    })
                     .collect(Collectors.toList()));
             lastTriggers.addAll(triggers.stream()
                     .filter(u -> !FIELD.equals(u.getRuleType()))

@@ -1,5 +1,7 @@
 package org.xdsp.quality.infra.converttype;
 
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 
 /**
@@ -7,6 +9,7 @@ import java.util.List;
  *
  * @author 29713 2021/08/27 10:37
  */
+@Component("CommonConvert")
 public class ConvertTypeBase {
 
     public List<String> typeConvert(String type, List<String> list) {
