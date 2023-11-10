@@ -217,6 +217,7 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
                     standardExtraRepository.delete(StandardExtra.builder().standardId(exist.getFieldId())
                             .standardType(FIELD)
                             .tenantId(exist.getTenantId()).build());
+                    dataFieldRepository.updateDTOAllColumnWhereTenant(dataFieldDTO, tenantId);
                 } else {
                     //不存在的话插入字段标准
                     dataFieldRepository.insertDTOSelective(dataFieldDTO);

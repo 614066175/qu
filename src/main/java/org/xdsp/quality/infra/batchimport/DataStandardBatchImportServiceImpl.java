@@ -186,6 +186,7 @@ public class DataStandardBatchImportServiceImpl extends BatchImportHandler imple
                     standardExtraRepository.delete(StandardExtra.builder().standardId(exist.getStandardId())
                             .standardType(DATA)
                             .tenantId(exist.getTenantId()).build());
+                    updateList.add(dataStandardConverter.dtoToEntity(dataStandardDTO));
                 } else {
                     DataStandard dataStandard = dataStandardConverter.dtoToEntity(dataStandardDTO);
                     dataStandardRepository.insertSelective(dataStandard);
