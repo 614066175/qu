@@ -115,17 +115,6 @@ public class DataStandardDTO extends AuditDomain{
     @ExcelColumn(zh = "值域范围",en = "valueRange")
     private String valueRange;
 
-    @ApiModelProperty(value = "标准依据（快码XSTA.STANDARD_ACCORD）")
-    @LovValue(lovCode = "XSTA.STANDARD_ACCORD",meaningField = "standardAccordMeaning")
-//    @ExcelColumn(zh = "标准依据" ,en="standardAccord")
-    private String standardAccord;
-
-    @ExcelColumn(zh = "标准依据" ,en="standardAccord")
-    private String standardAccordMeaning;
-
-    @ApiModelProperty(value = "依据内容")
-    @ExcelColumn(zh = "依据内容",en = "accordContent")
-    private String accordContent;
 
     @ApiModelProperty(value = "是否可为空，1可空 0 不可空")
     @ExcelColumn(zh = "是否可为空",en = "Can be empty or not")
@@ -142,6 +131,18 @@ public class DataStandardDTO extends AuditDomain{
     @ApiModelProperty(value = "数据示例")
     @ExcelColumn(zh = "数据示例",en = "dataExample")
     private String dataExample;
+
+    @ApiModelProperty(value = "标准依据（快码XSTA.STANDARD_ACCORD）")
+    @LovValue(lovCode = "XSTA.STANDARD_ACCORD",meaningField = "standardAccordMeaning")
+//    @ExcelColumn(zh = "标准依据" ,en="standardAccord")
+    private String standardAccord;
+
+    @ExcelColumn(zh = "标准依据" ,en="standardAccord")
+    private String standardAccordMeaning;
+
+    @ApiModelProperty(value = "依据内容")
+    @ExcelColumn(zh = "依据内容",en = "accordContent")
+    private String accordContent;
 
     @Transient
     @ExcelColumn(zh = "责任部门", en = "chargeDeptName")
