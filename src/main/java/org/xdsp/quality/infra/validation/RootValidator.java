@@ -1,7 +1,6 @@
 package org.xdsp.quality.infra.validation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -9,10 +8,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.imported.app.service.BatchValidatorHandler;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidator;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidators;
-import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+import org.xdsp.core.profile.XdspProfileClient;
 import org.xdsp.core.util.ProjectHelper;
 import org.xdsp.quality.domain.entity.Root;
 import org.xdsp.quality.domain.entity.RootLine;
@@ -28,6 +27,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import io.choerodon.core.oauth.DetailsHelper;
+
 /**
  * description
  *
@@ -41,9 +42,9 @@ public class RootValidator extends BatchValidatorHandler {
     private final RootMapper rootMapper;
     private final RootRepository rootRepository;
     private final RootLineRepository rootLineRepository;
-    private final ProfileClient profileClient;
+    private final XdspProfileClient profileClient;
 
-    public RootValidator(ObjectMapper objectMapper, RootMapper rootMapper, RootRepository rootRepository, RootLineRepository rootLineRepository, ProfileClient profileClient) {
+    public RootValidator(ObjectMapper objectMapper, RootMapper rootMapper, RootRepository rootRepository, RootLineRepository rootLineRepository, XdspProfileClient profileClient) {
         this.objectMapper = objectMapper;
         this.rootMapper = rootMapper;
         this.rootRepository = rootRepository;
@@ -142,7 +143,7 @@ public class RootValidator extends BatchValidatorHandler {
                     //判断是否在线
                     if (StandardConstant.Status.ONLINE.equals(rootExist.getReleaseStatus())
                             || StandardConstant.Status.OFFLINE_APPROVING.equals(rootExist.getReleaseStatus())) {
-                        String offlineFlag = profileClient.getProfileValueByOptions(tenantId, null, null, WorkFlowConstant.OpenConfig.ROOT_OFFLINE);
+                        String offlineFlag = profileClient.getProfileValue(tenantId, projectId, WorkFlowConstant.OpenConfig.ROOT_OFFLINE);
                         //下线是否需要审批
                         if(Boolean.parseBoolean(offlineFlag)){
                             addErrorMsg(i,"词根已存在，状态不允许做修改操作，请先下线");

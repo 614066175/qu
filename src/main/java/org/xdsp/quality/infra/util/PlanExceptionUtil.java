@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
-import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.core.redis.RedisHelper;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
@@ -19,6 +18,7 @@ import org.hzero.starter.driver.core.session.DriverSession;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.xdsp.core.profile.XdspProfileClient;
 import org.xdsp.quality.api.dto.WarningLevelDTO;
 import org.xdsp.quality.domain.entity.BatchResultBase;
 import org.xdsp.quality.infra.constant.ErrorCode;
@@ -51,7 +51,7 @@ public class PlanExceptionUtil {
 
     public static MongoTemplate mongoTemplate;
 
-    public static ProfileClient profileClient;
+    public static XdspProfileClient profileClient;
     public static RedisHelper redisHelper;
     public static DriverSessionService driverSessionService;
     public static LovAdapter lovAdapter;
@@ -69,7 +69,7 @@ public class PlanExceptionUtil {
 
     static {
         mongoTemplate = context.getBean(MongoTemplate.class);
-        profileClient = context.getBean(ProfileClient.class);
+        profileClient = context.getBean(XdspProfileClient.class);
         redisHelper = context.getBean(RedisHelper.class);
         driverSessionService = context.getBean(DriverSessionService.class);
         lovAdapter = context.getBean(LovAdapter.class);
@@ -94,7 +94,7 @@ public class PlanExceptionUtil {
     public static void getPlanException(MeasureParamDO param, BatchResultBase batchResultBase, String sql, DriverSession driverSession, WarningLevelDTO warningLevelDTO) {
         long start = System.currentTimeMillis();
         //给配置维护，控制获取异常数据的数量
-        String exceptionNumber = profileClient.getProfileValueByOptions(batchResultBase.getTenantId(), null, null, EXCEPTION_NUMBER);
+        String exceptionNumber = profileClient.getProfileValue(batchResultBase.getTenantId(), batchResultBase.getProjectId(), EXCEPTION_NUMBER);
         Long limit = null;
         log.info("exceptionNumber:" + exceptionNumber);
         try {
@@ -146,7 +146,7 @@ public class PlanExceptionUtil {
         //2.如果大于批次量，按照批次大小，拆分sql，发送给redis。服务阻塞消费redis中的key，当数据量过大，线程数过多，达到性能瓶颈时，可以水平扩容服务实例来增加并行度
         //3.通过计数器来控制线程执行结果，每个服务定义固定可用线程数，避免消息被一个服务过度消费，线程资源不能得到合理利用
 
-        String batchNumberConfig = profileClient.getProfileValueByOptions(batchResultBase.getTenantId(), null, null, PROBLEM_BATCH_NUMBER);
+        String batchNumberConfig = profileClient.getProfileValue(batchResultBase.getTenantId(), batchResultBase.getProjectId(), PROBLEM_BATCH_NUMBER);
         int batchNumber;
         //如果没有配置，默认为10000L
         if (Strings.isEmpty(batchNumberConfig)) {
