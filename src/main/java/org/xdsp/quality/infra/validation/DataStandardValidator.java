@@ -14,6 +14,7 @@ import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.starter.driver.core.infra.exception.JsonException;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xdsp.core.domain.repository.CommonGroupRepository;
@@ -71,8 +72,8 @@ public class DataStandardValidator extends BatchValidatorHandler {
         // 设置租户Id
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         Long projectId = ProjectHelper.getProjectId();
-        try {
-            for (int i = 0; i < data.size(); i++) {
+        for (int i = 0; i < data.size(); i++) {
+            try {
                 DataStandardDTO dataStandardDTO = objectMapper.readValue(data.get(i), DataStandardDTO.class);
                 dataStandardDTO.setTenantId(tenantId);
 
@@ -124,22 +125,27 @@ public class DataStandardValidator extends BatchValidatorHandler {
                 String standardExtraStr = dataStandardDTO.getStandardExtraStr();
                 Set<String> keyNames = new HashSet<>();
                 if (StringUtils.isNotEmpty(standardExtraStr)) {
-                    List<Map<String, String>> list = JsonUtil.toObj(standardExtraStr, List.class);
-                    for (Map<String, String> map : list) {
-                        String keyName = map.keySet().iterator().next();
-                        if (StringUtils.isEmpty(keyName)) {
-                            addErrorMsg(i, "附加信息key不能为空");
+                    try {
+                        List<Map<String, Object>> list = JsonUtil.toObj(standardExtraStr, List.class);
+                        for (Map<String, Object> map : list) {
+                            String keyName = String.valueOf(map.keySet().iterator().next());
+                            if (StringUtils.isEmpty(keyName)) {
+                                addErrorMsg(i, "附加信息key不能为空");
+                            }
+                            if (keyNames.contains(keyName)) {
+                                addErrorMsg(i, String.format("附加信息key【%s】重复", keyName));
+                            }
+                            keyNames.add(keyName);
                         }
-                        if (keyNames.contains(keyName)) {
-                            addErrorMsg(i, String.format("附加信息key【%s】重复", keyName));
-                        }
-                        keyNames.add(keyName);
+                    } catch (JsonException e) {
+                        log.error("Json Error", e);
+                        addErrorMsg(i, "JSON格式错误:"+e.getMessage());
                     }
                 }
+            } catch (IOException e) {
+                log.error("DataStandard Validation Failed",e);
+                addErrorMsg(i,e.getMessage());
             }
-        } catch (IOException e) {
-            log.info(e.getMessage());
-            return false;
         }
         return true;
     }

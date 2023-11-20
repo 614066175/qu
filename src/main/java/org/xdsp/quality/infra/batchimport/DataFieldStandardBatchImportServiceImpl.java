@@ -14,6 +14,7 @@ import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.starter.driver.core.infra.exception.JsonException;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -180,15 +181,20 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
                 //附加信息处理
                 String standardExtraStr = dataFieldDTO.getStandardExtraStr();
                 if (StringUtils.isNotEmpty(standardExtraStr)) {
-                    List<Map<String, String>> list = JsonUtil.toObj(standardExtraStr, List.class);
-                    for (Map<String, String> map : list) {
-                        extraList.add(StandardExtra.builder()
-                                .standardType(FIELD)
-                                .extraKey(map.keySet().iterator().next())
-                                .extraValue(map.values().iterator().next())
-                                .tenantId(tenantId)
-                                .projectId(projectId)
-                                .build());
+                    try {
+                        List<Map<String, Object>> list = JsonUtil.toObj(standardExtraStr, List.class);
+                        for (Map<String, Object> map : list) {
+                            extraList.add(StandardExtra.builder()
+                                    .standardType(FIELD)
+                                    .extraKey(map.keySet().iterator().next())
+                                    .extraValue(String.valueOf(map.values().iterator().next()))
+                                    .tenantId(tenantId)
+                                    .projectId(projectId)
+                                    .build());
+                        }
+                    } catch (JsonException e) {
+                        log.error("Json Error", e);
+                        addErrorMsg(i, "JSON格式错误:"+e.getMessage());
                     }
                 }
                 if (exist != null) {

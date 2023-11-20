@@ -13,6 +13,7 @@ import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.starter.driver.core.infra.exception.JsonException;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.xdsp.core.util.ProjectHelper;
 import org.xdsp.quality.api.dto.DataFieldDTO;
@@ -170,22 +171,26 @@ public class DataFieldValidator extends BatchValidatorHandler {
                 String standardExtraStr = dataFieldDTO.getStandardExtraStr();
                 Set<String> keyNames = new HashSet<>();
                 if (StringUtils.isNotEmpty(standardExtraStr)) {
-                    List<Map<String, String>> list = JsonUtil.toObj(standardExtraStr, List.class);
-                    for (Map<String, String> map : list) {
-                        String keyName = map.keySet().iterator().next();
-                        if (StringUtils.isEmpty(keyName)) {
-                            addErrorMsg(i, "附加信息key不能为空");
+                    try{
+                        List<Map<String, Object>> list = JsonUtil.toObj(standardExtraStr, List.class);
+                        for (Map<String, Object> map : list) {
+                            String keyName = String.valueOf(map.keySet().iterator().next());
+                            if (StringUtils.isEmpty(keyName)) {
+                                addErrorMsg(i, "附加信息key不能为空");
+                            }
+                            if (keyNames.contains(keyName)) {
+                                addErrorMsg(i, String.format("附加信息key【%s】重复", keyName));
+                            }
+                            keyNames.add(keyName);
                         }
-                        if (keyNames.contains(keyName)) {
-                            addErrorMsg(i, String.format("附加信息key【%s】重复", keyName));
-                        }
-                        keyNames.add(keyName);
+                    }catch (JsonException e){
+                        log.error("Json Error",e);
+                        addErrorMsg(i,"JSON格式错误:"+e.getMessage());
                     }
                 }
             } catch (IOException e) {
-                log.info(e.getMessage());
+                log.info("DataField Validation Failed",e);
                 addErrorMsg(i, e.getMessage());
-                return false;
             }
         }
         return true;
