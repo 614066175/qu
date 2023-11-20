@@ -11,6 +11,7 @@ import org.hzero.boot.imported.infra.enums.DataStatus;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
 import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.mybatis.helper.DataSecurityHelper;
+import org.hzero.starter.driver.core.infra.exception.JsonException;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.xdsp.core.CommonGroupClient;
 import org.xdsp.core.domain.entity.CommonGroup;
@@ -87,7 +88,6 @@ public class DataStandardBatchImportServiceImpl extends BatchImportHandler imple
         // 设置租户Id
         Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         Long projectId = ProjectHelper.getProjectId();
-        List<DataStandard> addList = new ArrayList<>();
         List<DataStandard> updateList = new ArrayList<>();
         List<StandardExtra> extraList = new ArrayList<>();
         try {
@@ -196,18 +196,16 @@ public class DataStandardBatchImportServiceImpl extends BatchImportHandler imple
                     // 附加信息设置外键
                     extraList.forEach(extra -> extra.setStandardId(dataStandard.getStandardId()));
                 }
+
+                //批量插入
+                if (CollectionUtils.isNotEmpty(extraList)) {
+                    standardExtraRepository.batchInsertSelective(extraList);
+                    extraList.clear();
+                }
             }
 
-            if (CollectionUtils.isNotEmpty(addList)) {
-                dataStandardRepository.batchInsertSelective(addList);
-
-            }
             if (CollectionUtils.isNotEmpty(updateList)) {
                 dataStandardRepository.batchUpdateByPrimaryKey(updateList);
-            }
-            //批量插入
-            if (CollectionUtils.isNotEmpty(extraList)) {
-                standardExtraRepository.batchInsertSelective(extraList);
             }
         } catch (IOException e) {
             // 失败
