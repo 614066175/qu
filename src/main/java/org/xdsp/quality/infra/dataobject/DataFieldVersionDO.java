@@ -53,4 +53,14 @@ public class DataFieldVersionDO extends AuditDomain {
 
     private Long projectId;
 
+    private String businessPurpose;
+
+    private String businessRules;
+
+    private String dataExample;
+
+    private String standardAccord;
+
+    private String accordContent;
+
 }

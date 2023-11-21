@@ -30,6 +30,9 @@
         <result column="last_update_date" property="lastUpdateDate" jdbcType="TIMESTAMP"/>
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
         <result column="null_flag" property="nullFlag" jdbcType="DECIMAL"/>
+        <result column="business_purpose" property="businessPurpose" jdbcType="VARCHAR"/>
+        <result column="business_rules" property="businessRules" jdbcType="VARCHAR"/>
+        <result column="data_example" property="dataExample" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="baseColumn">
@@ -59,7 +62,10 @@
         ${dsv}.tenant_id,
         ${dsv}.release_by,
         ${dsv}.release_date,
-        ${dsv}.null_flag
+        ${dsv}.null_flag,
+        ${dsv}.business_purpose,
+        ${dsv}.business_rules,
+        ${dsv}.data_example
     </sql>
     <select id="detail" resultType="org.xdsp.quality.api.dto.DataStandardVersionDTO">
         SELECT
