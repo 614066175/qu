@@ -268,6 +268,26 @@ public class DataFieldDTO extends AuditDomain {
     @ApiModelProperty("发布时间")
     private Date releaseDate;
 
+    @ApiModelProperty(value = "业务用途")
+    @ExcelColumn(zh = "业务用途", en = "businessPurpose", groups = {Group2.class})
+    private String businessPurpose;
+
+    @ApiModelProperty(value = "业务规则")
+    @ExcelColumn(zh = "业务规则", en = "businessRules", groups = {Group2.class})
+    private String businessRules;
+
+    @ApiModelProperty(value = "数据示例")
+    @ExcelColumn(zh = "数据示例", en = "dataExample", groups = {Group2.class})
+    private String dataExample;
+
+    @ApiModelProperty(value = "标准依据")
+    @ExcelColumn(zh = "标准依据", en = "standardAccord", groups = {Group2.class})
+    private String standardAccord;
+
+    @ApiModelProperty(value = "依据内容")
+    @ExcelColumn(zh = "依据内容", en = "accordContent", groups = {Group2.class})
+    private String accordContent;
+
 
     @Transient
     @DateTimeFormat(pattern = BaseConstants.Pattern.DATETIME)

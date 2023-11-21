@@ -55,4 +55,11 @@ public class DataStandardVersionDO extends AuditDomain {
 
     private Long projectId;
 
+    private String businessPurpose;
+
+    private String businessRules;
+
+    private String dataExample;
+
+
 }

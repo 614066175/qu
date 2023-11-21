@@ -57,5 +57,11 @@ public class DataStandardDO extends AuditDomain {
 
     private Integer notNullFlag;
 
+    private String businessPurpose;
+
+    private String businessRules;
+
+    private String dataExample;
+
 
 }

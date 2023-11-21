@@ -30,6 +30,11 @@
         <result column="project_id" property="projectId" jdbcType="DECIMAL"/>
         <result column="null_flag" property="nullFlag" jdbcType="DECIMAL"/>
         <result column="default_value" property="defaultValue" jdbcType="VARCHAR"/>
+        <result column="business_purpose" property="businessPurpose" jdbcType="VARCHAR"/>
+        <result column="business_rules" property="businessRules" jdbcType="VARCHAR"/>
+        <result column="data_example" property="dataExample" jdbcType="VARCHAR"/>
+        <result column="standard_accord" property="standardAccord" jdbcType="VARCHAR"/>
+        <result column="accord_content" property="accordContent" jdbcType="VARCHAR"/>
     </resultMap>
 
 
@@ -60,7 +65,12 @@
         ${fs}.default_value,
         ${fs}.project_id,
         ${fs}.release_by,
-        ${fs}.release_date
+        ${fs}.release_date,
+        ${fs}.business_purpose,
+        ${fs}.business_rules,
+        ${fs}.data_example,
+        ${fs}.standard_accord,
+        ${fs}.accord_content
     </sql>
 
     <select id="list" resultType="org.xdsp.quality.api.dto.DataFieldDTO">

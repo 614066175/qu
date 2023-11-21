@@ -48,6 +48,8 @@ public class DataStandardVersion extends AuditDomain {
     public static final String FIELD_RELEASE_BY = "releaseBy";
     public static final String FIELD_RELEASE_DATE = "releaseDate";
     public static final String FIELD_NULL_FLAG = "nullFlag";
+    public static final String FIELD_BUSINESS_RULES = "businessRules";
+    public static final String FIELD_DATA_EXAMPLE = "dataExample";
 
     //
     // 业务方法(按public protected private顺序排列)
@@ -106,4 +108,11 @@ public class DataStandardVersion extends AuditDomain {
     private Date releaseDate;
 
     private Integer nullFlag;
+
+    private String businessPurpose;
+
+    private String businessRules;
+
+    private String dataExample;
+
 }

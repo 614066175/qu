@@ -102,6 +102,14 @@ public class DataStandardVersionDTO extends AuditDomain {
     @ApiModelProperty(value = "是否可为空，1可空 0 不可空")
     private Integer nullFlag;
 
+    @ApiModelProperty(value = "业务用途")
+    private String businessPurpose;
+
+    @ApiModelProperty(value = "业务规则")
+    private String businessRules;
+
+    @ApiModelProperty(value = "数据示例")
+    private String dataExample;
 
     @Transient
     private List<ExtraVersionDTO> extraVersionDTOList;
