@@ -15,6 +15,7 @@ import org.hzero.starter.driver.core.infra.util.JsonUtil;
 import org.xdsp.core.CommonGroupClient;
 import org.xdsp.core.domain.entity.CommonGroup;
 import org.xdsp.core.domain.repository.CommonGroupRepository;
+import org.xdsp.core.profile.XdspProfileClient;
 import org.xdsp.core.util.ProjectHelper;
 import org.xdsp.quality.api.dto.DataStandardDTO;
 import org.xdsp.quality.domain.entity.DataStandard;
@@ -58,7 +59,7 @@ public class DataStandardBatchImportServiceImpl extends BatchImportHandler imple
     private final StandardExtraRepository standardExtraRepository;
     private final DataStandardMapper dataStandardMapper;
     private final DataStandardConverter dataStandardConverter;
-    private final ProfileClient profileClient;
+    private final XdspProfileClient profileClient;
     private final CommonGroupClient commonGroupClient;
 
 
@@ -68,7 +69,7 @@ public class DataStandardBatchImportServiceImpl extends BatchImportHandler imple
                                               StandardExtraRepository standardExtraRepository,
                                               DataStandardMapper dataStandardMapper,
                                               DataStandardConverter dataStandardConverter,
-                                              ProfileClient profileClient,
+                                              XdspProfileClient profileClient,
                                               CommonGroupClient commonGroupClient) {
         this.objectMapper = objectMapper;
         this.dataStandardRepository = dataStandardRepository;
@@ -169,7 +170,7 @@ public class DataStandardBatchImportServiceImpl extends BatchImportHandler imple
                     dataStandardDTO.setStandardStatus(exist.getStandardStatus());
                     //如果是在线或下线中状态，判断是否需要下线审核，需要则报错
                     if (ONLINE.equals(exist.getStandardStatus()) || OFFLINE_APPROVING.equals(exist.getStandardStatus())) {
-                        String offlineOpen = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.DATA_STANDARD_OFFLINE);
+                        String offlineOpen = profileClient.getProfileValue(tenantId, projectId, WorkFlowConstant.OpenConfig.DATA_STANDARD_OFFLINE);
                         //为空，或者为true
                         if (StringUtils.isEmpty(offlineOpen) || Boolean.parseBoolean(offlineOpen)) {
                             addErrorMsg(i, "标准已存在，状态不可进行数据修改，请先下线标准！");

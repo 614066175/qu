@@ -10,7 +10,6 @@ import org.hzero.boot.imported.app.service.BatchImportHandler;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.enums.DataStatus;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
-import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
@@ -19,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.xdsp.core.CommonGroupClient;
 import org.xdsp.core.domain.entity.CommonGroup;
 import org.xdsp.core.domain.repository.CommonGroupRepository;
+import org.xdsp.core.profile.XdspProfileClient;
 import org.xdsp.core.util.ProjectHelper;
 import org.xdsp.quality.domain.entity.Root;
 import org.xdsp.quality.domain.entity.RootLine;
@@ -47,12 +47,12 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
     private final RootRepository rootRepository;
     private final RootLineRepository rootLineRepository;
     private final CommonGroupRepository commonGroupRepository;
-    private final ProfileClient profileClient;
+    private final XdspProfileClient profileClient;
 
     @Autowired
     private CommonGroupClient commonGroupClient;
 
-    public RootBatchImportServiceImpl(ObjectMapper objectMapper, RootMapper rootMapper, RootRepository rootRepository, RootLineRepository rootLineRepository, CommonGroupRepository commonGroupRepository, ProfileClient profileClient) {
+    public RootBatchImportServiceImpl(ObjectMapper objectMapper, RootMapper rootMapper, RootRepository rootRepository, RootLineRepository rootLineRepository, CommonGroupRepository commonGroupRepository, XdspProfileClient profileClient) {
         this.objectMapper = objectMapper;
         this.rootMapper = rootMapper;
         this.rootRepository = rootRepository;
@@ -134,7 +134,7 @@ public class RootBatchImportServiceImpl extends BatchImportHandler implements IB
                     //在线、下线审核中,下线要审批则报错，不要则更新，改未下线状态
                     if(StandardConstant.Status.ONLINE.equals(rootExist.getReleaseStatus())
                             || StandardConstant.Status.OFFLINE_APPROVING.equals(rootExist.getReleaseStatus())){
-                        String offlineFlag = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.ROOT_OFFLINE);
+                        String offlineFlag = profileClient.getProfileValue(tenantId, projectId, WorkFlowConstant.OpenConfig.ROOT_OFFLINE);
                         if(Boolean.parseBoolean(offlineFlag)){
                             addErrorMsg(i,"词根已存在，状态不可有修改，请先下线");
                             getContextList().get(i).setDataStatus(DataStatus.IMPORT_FAILED);
