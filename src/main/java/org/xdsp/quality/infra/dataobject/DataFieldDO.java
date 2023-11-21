@@ -60,4 +60,14 @@ public class DataFieldDO extends AuditDomain {
 
     private String defaultValue;
     private Long dataStandardId;
+
+    private String businessPurpose;
+
+    private String businessRules;
+
+    private String dataExample;
+
+    private String standardAccord;
+
+    private String accordContent;
 }

@@ -128,6 +128,21 @@ public class DataFieldVersionDTO extends AuditDomain {
     @ApiModelProperty("发布时间")
     private Date releaseDate;
 
+    @ApiModelProperty(value = "业务用途")
+    private String businessPurpose;
+
+    @ApiModelProperty(value = "业务规则")
+    private String businessRules;
+
+    @ApiModelProperty(value = "数据示例")
+    private String dataExample;
+
+    @ApiModelProperty(value = "标准依据")
+    private String standardAccord;
+
+    @ApiModelProperty(value = "依据内容")
+    private String accordContent;
+
     //标准组
     @Transient
     private List<StandardTeamDTO> standardTeamDTOList;

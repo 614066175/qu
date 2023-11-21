@@ -40,17 +40,8 @@ public class DataFieldController extends BaseController {
 
     private final DataFieldService dataFieldService;
 
-    private final DataFieldRepository dataFieldRepository;
-
-    private final StandardExtraRepository standardExtraRepository;
-
-    private final StandardDocMapper standardDocMapper;
-
-    public DataFieldController(DataFieldService dataFieldService, DataFieldRepository dataFieldRepository, StandardExtraRepository standardExtraRepository, StandardDocMapper standardDocMapper) {
+    public DataFieldController(DataFieldService dataFieldService) {
         this.dataFieldService = dataFieldService;
-        this.dataFieldRepository = dataFieldRepository;
-        this.standardExtraRepository = standardExtraRepository;
-        this.standardDocMapper = standardDocMapper;
     }
 
     @ApiOperation(value = "字段标准列表")
