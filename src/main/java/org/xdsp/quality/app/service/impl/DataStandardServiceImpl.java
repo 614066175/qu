@@ -300,7 +300,12 @@ public class DataStandardServiceImpl implements DataStandardService {
         //对数据长度进行处理
         if (Strings.isNotEmpty(dataStandardDTO.getDataLength())) {
             List<String> dataLength = Arrays.asList(dataStandardDTO.getDataLength().split(","));
-            List<Long> dataLengthList = dataLength.stream().map(Long::parseLong).collect(Collectors.toList());
+            List<Long> dataLengthList = new LinkedList<>();
+            dataLength.forEach(s->{
+                if(StringUtils.isNotEmpty(s)){
+                    dataLengthList.add(Long.parseLong(s));
+                }
+            });
             dataStandardDTO.setDataLengthList(dataLengthList);
         }
     }
