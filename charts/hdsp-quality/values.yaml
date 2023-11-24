@@ -48,12 +48,7 @@ env:
     # Redis DB
     SPRING_REDIS_DATABASE: 1
     SPRING_REDIS_PORT: 6379
-    # Hystrix 熔断超时时间
-    HYSTRIX_COMMAND_TIMEOUT_IN_MILLISECONDS: 40000
-    # Ribbon 读取超时时间
-    RIBBON_READ_TIMEOUT: 30000
-    # Ribbon 连接超时时间
-    RIBBON_CONNECT_TIMEOUT: 3000
+
     # 日志级别
     LOG_LEVEL: info
 
