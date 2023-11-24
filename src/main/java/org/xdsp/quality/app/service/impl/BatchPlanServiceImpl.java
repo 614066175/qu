@@ -4,6 +4,12 @@ import com.alibaba.druid.DbType;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.metadata.Sheet;
 import com.alibaba.excel.support.ExcelTypeEnum;
+import io.choerodon.core.convertor.ApplicationContextHelper;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.CustomUserDetails;
+import io.choerodon.core.oauth.DetailsHelper;
+
+import groovyjarjarantlr4.runtime.tree.CommonErrorNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -81,11 +87,6 @@ import static org.xdsp.quality.infra.constant.PlanConstant.ExceptionParam.*;
 import static org.xdsp.quality.infra.constant.PlanConstant.SqlType.SQL;
 import static org.xdsp.quality.infra.util.PlanExceptionUtil.WARNING_LEVEL_LOV;
 import static org.xdsp.quality.infra.util.PlanExceptionUtil.profileClient;
-
-import io.choerodon.core.convertor.ApplicationContextHelper;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.CustomUserDetails;
-import io.choerodon.core.oauth.DetailsHelper;
 
 /**
  * <p>
@@ -819,12 +820,13 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             // 更新增量参数
             updateTimestamp(tenantId, timestampList, false);
             batchResult.setPlanStatus(PlanConstant.PlanStatus.FAILED);
-            batchResult.setExceptionInfo(MessageAccessor.getMessage(e.getMessage(), e.getParameters()).getDesc());
+            batchResult.setExceptionInfo(MessageAccessor.getMessage(ExceptionUtils.getRootCauseMessage(e),
+                    e.getParameters()).getDesc());
             // 错误也应该添加结束时间
             batchResult.setEndDate(new Date());
             batchResultRepository.updateByPrimaryKeySelective(batchResult);
             log.error("exec plan error!", e);
-            throw e;
+            throw new CommonException(ErrorCode.CHECK_RULE_FAILED,ExceptionUtils.getRootCauseMessage(e));
         } catch (Exception e) {
             // 更新增量参数
             updateTimestamp(tenantId, timestampList, false);
@@ -834,7 +836,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
             batchResult.setEndDate(new Date());
             batchResultRepository.updateByPrimaryKeySelective(batchResult);
             log.error("exec plan error!", e);
-            throw e;
+            throw new CommonException(ErrorCode.CHECK_RULE_IS_ERROR,e);
         }
         //质量评估完后。根据评估结果获取每个base的情况，去做血缘的质量问题的处理，此处理不阻塞且不影响评估流程
         ThreadPoolExecutor executor = CustomThreadPool.getExecutor();
