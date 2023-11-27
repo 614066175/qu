@@ -13,7 +13,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
-import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.core.util.ResponseUtils;
 import org.hzero.mybatis.domian.Condition;
@@ -29,6 +28,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.xdsp.core.profile.XdspProfileClient;
 import org.xdsp.quality.api.dto.*;
 import org.xdsp.quality.app.service.BatchResultService;
 import org.xdsp.quality.domain.entity.BatchPlan;
@@ -78,7 +78,7 @@ public class BatchResultServiceImpl implements BatchResultService {
     private final String INCREMENTSTRATEGY = "NONE";
 
     private final MongoTemplate mongoTemplate;
-    private final ProfileClient profileClient;
+    private final XdspProfileClient profileClient;
 
     @Autowired
     private LovAdapter lovAdapter;
@@ -91,7 +91,7 @@ public class BatchResultServiceImpl implements BatchResultService {
     public BatchResultServiceImpl(ExecutionFlowFeign executionFlowFeign,
                                   BatchResultMapper batchResultMapper,
                                   BatchResultItemMapper batchResultItemMapper,
-                                  BatchResultBaseRepository batchResultBaseRepository, BatchResultRepository batchResultRepository, BatchPlanBaseRepository batchPlanBaseRepository, BatchPlanRepository batchPlanRepository, MongoTemplate mongoTemplate, ProfileClient profileClient) {
+                                  BatchResultBaseRepository batchResultBaseRepository, BatchResultRepository batchResultRepository, BatchPlanBaseRepository batchPlanBaseRepository, BatchPlanRepository batchPlanRepository, MongoTemplate mongoTemplate, XdspProfileClient profileClient) {
         this.executionFlowFeign = executionFlowFeign;
         this.batchResultMapper = batchResultMapper;
         this.batchResultItemMapper = batchResultItemMapper;
@@ -375,7 +375,7 @@ public class BatchResultServiceImpl implements BatchResultService {
                             java.net.URLEncoder.encode(String.format("%s-%s",batchPlan.getPlanName(),batchPlanBase.getPlanBaseName()), "UTF-8")));
 
             ExcelWriter writer = new ExcelWriter(outputStream, ExcelTypeEnum.XLSX, true);
-            int batchSize = Integer.parseInt(Optional.ofNullable(profileClient.getProfileValueByOptions(exceptionDataDTO.getTenantId(), null, null, DOWN_EXCEPTION_BATCH_SIZE)).orElse("10000"));
+            int batchSize = Integer.parseInt(Optional.ofNullable(profileClient.getProfileValue(exceptionDataDTO.getTenantId(), exceptionDataDTO.getProjectId(), DOWN_EXCEPTION_BATCH_SIZE)).orElse("10000"));
             //多少页，也就是分多少批
             long pageNumber = total % batchSize == 0 ? total / batchSize : total / batchSize + 1;
             int totalAmount = 0;

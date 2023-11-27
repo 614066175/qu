@@ -1,7 +1,6 @@
 package org.xdsp.quality.infra.batchimport;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -10,7 +9,6 @@ import org.hzero.boot.imported.app.service.BatchImportHandler;
 import org.hzero.boot.imported.app.service.IBatchImportService;
 import org.hzero.boot.imported.infra.enums.DataStatus;
 import org.hzero.boot.imported.infra.validator.annotation.ImportService;
-import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
@@ -20,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.xdsp.core.CommonGroupClient;
 import org.xdsp.core.domain.entity.CommonGroup;
 import org.xdsp.core.domain.repository.CommonGroupRepository;
+import org.xdsp.core.profile.XdspProfileClient;
 import org.xdsp.core.util.ProjectHelper;
 import org.xdsp.quality.api.dto.DataFieldDTO;
 import org.xdsp.quality.api.dto.DataStandardDTO;
@@ -41,6 +40,8 @@ import static org.xdsp.core.infra.constant.CommonGroupConstants.GroupType.FIELD_
 import static org.xdsp.quality.infra.constant.StandardConstant.StandardType.FIELD;
 import static org.xdsp.quality.infra.constant.StandardConstant.Status.*;
 
+import io.choerodon.core.oauth.DetailsHelper;
+
 /**
  * @author wsl
  */
@@ -61,7 +62,7 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
     @Autowired
     private CommonGroupRepository commonGroupRepository;
     @Autowired
-    private ProfileClient profileClient;
+    private XdspProfileClient profileClient;
 
     @Autowired
     private CommonGroupClient commonGroupClient;
@@ -200,7 +201,7 @@ public class DataFieldStandardBatchImportServiceImpl extends BatchImportHandler 
                     dataFieldDTO.setStandardStatus(exist.getStandardStatus());
                     //如果是在线或下线中状态，判断是否需要下线审核，需要则报错
                     if (ONLINE.equals(exist.getStandardStatus()) || OFFLINE_APPROVING.equals(exist.getStandardStatus())) {
-                        String offlineOpen = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.FIELD_STANDARD_OFFLINE);
+                        String offlineOpen = profileClient.getProfileValue(tenantId, projectId, WorkFlowConstant.OpenConfig.FIELD_STANDARD_OFFLINE);
                         //为空，或者为true
                         if (StringUtils.isEmpty(offlineOpen) || Boolean.parseBoolean(offlineOpen)) {
                             addErrorMsg(i, "标准已存在，状态不可进行数据修改，请先下线标准！");

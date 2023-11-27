@@ -16,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
 import org.hzero.boot.platform.plugin.hr.entity.Employee;
-import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.boot.workflow.WorkflowClient;
 import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
 import org.hzero.export.vo.ExportParam;
@@ -32,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.xdsp.core.CommonGroupClient;
 import org.xdsp.core.domain.entity.CommonGroup;
 import org.xdsp.core.domain.repository.CommonGroupRepository;
+import org.xdsp.core.profile.XdspProfileClient;
 import org.xdsp.quality.api.dto.AssigneeUserDTO;
 import org.xdsp.quality.api.dto.StandardApprovalDTO;
 import org.xdsp.quality.app.service.RootService;
@@ -70,7 +70,7 @@ public class RootServiceImpl implements RootService {
     private final CommonGroupRepository commonGroupRepository;
     private final StandardApprovalRepository standardApprovalRepository;
     private final StandardApprovalMapper standardApprovalMapper;
-    private final ProfileClient profileClient;
+    private final XdspProfileClient profileClient;
     private final WorkflowClient workflowClient;
     private final RootOnlineWorkflowAdapter rootOnlineWorkflowAdapter;
     private final RootOfflineWorkflowAdapter rootOfflineWorkflowAdapter;
@@ -90,7 +90,7 @@ public class RootServiceImpl implements RootService {
 
     private final RootDicRepository rootDicRepository;
 
-    public RootServiceImpl(RootRepository rootRepository, RootVersionRepository rootVersionRepository, RootLineRepository rootLineRepository, CommonGroupRepository commonGroupRepository, StandardApprovalRepository standardApprovalRepository, StandardApprovalMapper standardApprovalMapper, ProfileClient profileClient, WorkflowClient workflowClient, RootOnlineWorkflowAdapter rootOnlineWorkflowAdapter, RootOfflineWorkflowAdapter rootOfflineWorkflowAdapter, AnsjUtil ansjUtil, RootDicRepository rootDicRepository) {
+    public RootServiceImpl(RootRepository rootRepository, RootVersionRepository rootVersionRepository, RootLineRepository rootLineRepository, CommonGroupRepository commonGroupRepository, StandardApprovalRepository standardApprovalRepository, StandardApprovalMapper standardApprovalMapper, XdspProfileClient profileClient, WorkflowClient workflowClient, RootOnlineWorkflowAdapter rootOnlineWorkflowAdapter, RootOfflineWorkflowAdapter rootOfflineWorkflowAdapter, AnsjUtil ansjUtil, RootDicRepository rootDicRepository) {
         this.rootRepository = rootRepository;
         this.rootVersionRepository = rootVersionRepository;
         this.rootLineRepository = rootLineRepository;
@@ -281,8 +281,8 @@ public class RootServiceImpl implements RootService {
             throw new CommonException(ErrorCode.ROOT_NOT_EXIST);
         }
         root.setObjectVersionNumber(rootTmp.getObjectVersionNumber());
-        String onlineFlag = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.ROOT_ONLINE);
-        String offlineFlag = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.ROOT_OFFLINE);
+        String onlineFlag = profileClient.getProfileValue(root.getTenantId(), root.getProjectId(), WorkFlowConstant.OpenConfig.ROOT_ONLINE);
+        String offlineFlag = profileClient.getProfileValue(root.getTenantId(), root.getProjectId(), WorkFlowConstant.OpenConfig.ROOT_OFFLINE);
         if ("true".equals(onlineFlag) && ONLINE.equals(root.getReleaseStatus())) {
             //启动工作流，启动工作流需要花费一定时间,有异常回滚
             rootOnlineWorkflowAdapter.startWorkflow(root);

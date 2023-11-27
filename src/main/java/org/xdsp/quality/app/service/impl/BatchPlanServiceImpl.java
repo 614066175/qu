@@ -4,10 +4,6 @@ import com.alibaba.druid.DbType;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.metadata.Sheet;
 import com.alibaba.excel.support.ExcelTypeEnum;
-import io.choerodon.core.convertor.ApplicationContextHelper;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.oauth.CustomUserDetails;
-import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -85,6 +81,11 @@ import static org.xdsp.quality.infra.constant.PlanConstant.ExceptionParam.*;
 import static org.xdsp.quality.infra.constant.PlanConstant.SqlType.SQL;
 import static org.xdsp.quality.infra.util.PlanExceptionUtil.WARNING_LEVEL_LOV;
 import static org.xdsp.quality.infra.util.PlanExceptionUtil.profileClient;
+
+import io.choerodon.core.convertor.ApplicationContextHelper;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.CustomUserDetails;
+import io.choerodon.core.oauth.DetailsHelper;
 
 /**
  * <p>
@@ -479,7 +480,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
         // 写入到excel
         try (BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file))) {
             ExcelWriter writer = new ExcelWriter(outputStream, ExcelTypeEnum.XLSX, true);
-            int batchSize = Integer.parseInt(Optional.ofNullable(profileClient.getProfileValueByOptions(batchResultBaseDTO.getTenantId(), null, null, DOWN_EXCEPTION_BATCH_SIZE)).orElse("10000"));
+            int batchSize = Integer.parseInt(Optional.ofNullable(profileClient.getProfileValue(batchResultBaseDTO.getTenantId(), batchResultBaseDTO.getProjectId(), DOWN_EXCEPTION_BATCH_SIZE)).orElse("10000"));
             //多少页，也就是分多少批
             long pageNumber = total % batchSize == 0 ? total / batchSize : total / batchSize + 1;
             int totalAmount = 0;

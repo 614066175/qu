@@ -6,6 +6,7 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -16,7 +17,6 @@ import org.hzero.boot.driver.infra.util.PageUtil;
 import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
 import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
 import org.hzero.boot.platform.plugin.hr.entity.Employee;
-import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.boot.workflow.WorkflowClient;
 import org.hzero.boot.workflow.constant.WorkflowConstant;
 import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
@@ -35,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.xdsp.core.CommonGroupClient;
 import org.xdsp.core.domain.entity.CommonGroup;
 import org.xdsp.core.domain.repository.CommonGroupRepository;
+import org.xdsp.core.profile.XdspProfileClient;
 import org.xdsp.quality.api.dto.*;
 import org.xdsp.quality.app.service.DataFieldService;
 import org.xdsp.quality.app.service.DataStandardService;
@@ -138,7 +139,7 @@ public class DataFieldServiceImpl implements DataFieldService {
     private final static String NOT_NULL_COUNT = "SELECT COUNT(*)  FROM %s where %s is not null";
 
     @Autowired
-    private ProfileClient profileClient;
+    private XdspProfileClient profileClient;
 
     public DataFieldServiceImpl(DataFieldRepository dataFieldRepository, StandardExtraRepository standardExtraRepository,
                                 DataFieldVersionRepository dataFieldVersionRepository, DataFieldMapper dataFieldMapper,
@@ -377,8 +378,8 @@ public class DataFieldServiceImpl implements DataFieldService {
     @Transactional(rollbackFor = Exception.class)
     public void publishOrOff(DataFieldDTO dataFieldDTO) {
         //一个工作流的总开关
-        String onlineOpen = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.FIELD_STANDARD_ONLINE);
-        String offlineOpen = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.FIELD_STANDARD_OFFLINE);
+        String onlineOpen = profileClient.getProfileValue(dataFieldDTO.getTenantId(), dataFieldDTO.getProjectId(), WorkFlowConstant.OpenConfig.FIELD_STANDARD_ONLINE);
+        String offlineOpen = profileClient.getProfileValue(dataFieldDTO.getTenantId(), dataFieldDTO.getProjectId(), WorkFlowConstant.OpenConfig.FIELD_STANDARD_OFFLINE);
 
         DataFieldDTO dto = dataFieldRepository.selectDTOByPrimaryKey(dataFieldDTO.getFieldId());
         if (Objects.isNull(dto)) {
@@ -403,7 +404,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                 dataFieldRepository.updateDTOOptional(dataFieldDTO, DataField.FIELD_STANDARD_STATUS, DataField.FIELD_RELEASE_BY, DataField.FIELD_RELEASE_DATE);
                 //存版本表
                 doVersion(dataFieldDTO);
-                return ;
+                return;
             }
         }
 
@@ -461,9 +462,9 @@ public class DataFieldServiceImpl implements DataFieldService {
     }
 
     @Override
-    public void onlineWorkflowCallback(Long fieldId,String nodeApproveResult) {
-        nodeApproveResult = (String) dataFieldOnlineWorkflowAdapter.callBack(fieldId,nodeApproveResult);
-        if(WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)){
+    public void onlineWorkflowCallback(Long fieldId, String nodeApproveResult) {
+        nodeApproveResult = (String) dataFieldOnlineWorkflowAdapter.callBack(fieldId, nodeApproveResult);
+        if (WorkflowConstant.ApproveAction.APPROVED.equals(nodeApproveResult)) {
             workflowing(DetailsHelper.getUserDetails().getTenantId(), fieldId, ONLINE);
         } else {
             workflowing(DetailsHelper.getUserDetails().getTenantId(), fieldId, OFFLINE);

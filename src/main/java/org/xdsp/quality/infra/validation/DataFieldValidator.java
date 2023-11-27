@@ -1,7 +1,6 @@
 package org.xdsp.quality.infra.validation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -9,11 +8,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.imported.app.service.BatchValidatorHandler;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidator;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidators;
-import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
 import org.hzero.mybatis.util.Sqls;
 import org.hzero.starter.driver.core.infra.util.JsonUtil;
+import org.xdsp.core.profile.XdspProfileClient;
 import org.xdsp.core.util.ProjectHelper;
 import org.xdsp.quality.api.dto.DataFieldDTO;
 import org.xdsp.quality.api.dto.DataStandardDTO;
@@ -38,6 +37,8 @@ import java.util.regex.Pattern;
 import static org.xdsp.quality.infra.constant.PlanConstant.StandardStatus.OFFLINE_APPROVING;
 import static org.xdsp.quality.infra.constant.PlanConstant.StandardStatus.ONLINE;
 
+import io.choerodon.core.oauth.DetailsHelper;
+
 /**
  * <p>
  * description
@@ -57,9 +58,9 @@ public class DataFieldValidator extends BatchValidatorHandler {
 
     private final DataStandardRepository dataStandardRepository;
     private final StandardTeamRepository standardTeamRepository;
-    private final ProfileClient profileClient;
+    private final XdspProfileClient profileClient;
 
-    public DataFieldValidator(ObjectMapper objectMapper, DataFieldRepository dataFieldRepository, DataFieldMapper dataFieldMapper, DataStandardRepository dataStandardRepository, StandardTeamRepository standardTeamRepository, ProfileClient profileClient) {
+    public DataFieldValidator(ObjectMapper objectMapper, DataFieldRepository dataFieldRepository, DataFieldMapper dataFieldMapper, DataStandardRepository dataStandardRepository, StandardTeamRepository standardTeamRepository, XdspProfileClient profileClient) {
         this.objectMapper = objectMapper;
         this.dataFieldRepository = dataFieldRepository;
         this.dataFieldMapper = dataFieldMapper;
@@ -90,7 +91,7 @@ public class DataFieldValidator extends BatchValidatorHandler {
                 if (CollectionUtils.isNotEmpty(dataFieldDTOS)) {
                     DataFieldDTO exist = dataFieldDTOS.get(0);
                     if (ONLINE.equals(exist.getStandardStatus()) || OFFLINE_APPROVING.equals(exist.getStandardStatus())) {
-                        String offlineOpen = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.FIELD_STANDARD_OFFLINE);
+                        String offlineOpen = profileClient.getProfileValue(tenantId, projectId, WorkFlowConstant.OpenConfig.FIELD_STANDARD_OFFLINE);
                         if (offlineOpen == null || Boolean.parseBoolean(offlineOpen)) {
                             //如果需要下线审批,则报错
                             addErrorMsg(i, "标准已存在，状态不可进行数据修改，请先下线标准！");

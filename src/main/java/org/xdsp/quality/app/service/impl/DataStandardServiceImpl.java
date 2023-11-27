@@ -5,6 +5,7 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +15,6 @@ import org.hzero.boot.driver.infra.util.PageUtil;
 import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
 import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
 import org.hzero.boot.platform.plugin.hr.entity.Employee;
-import org.hzero.boot.platform.profile.ProfileClient;
 import org.hzero.boot.workflow.WorkflowClient;
 import org.hzero.boot.workflow.constant.WorkflowConstant;
 import org.hzero.boot.workflow.dto.ProcessInstanceDTO;
@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.xdsp.core.CommonGroupClient;
 import org.xdsp.core.domain.entity.CommonGroup;
 import org.xdsp.core.domain.repository.CommonGroupRepository;
+import org.xdsp.core.profile.XdspProfileClient;
 import org.xdsp.quality.api.dto.*;
 import org.xdsp.quality.app.service.DataStandardService;
 import org.xdsp.quality.app.service.StandardAimService;
@@ -151,7 +152,7 @@ public class DataStandardServiceImpl implements DataStandardService {
     private AssetFeign assetFeign;
 
     @Autowired
-    private ProfileClient profileClient;
+    private XdspProfileClient profileClient;
 
     @Autowired
     private CommonGroupRepository commonGroupRepository;
@@ -464,8 +465,8 @@ public class DataStandardServiceImpl implements DataStandardService {
     @Transactional(rollbackFor = Exception.class)
     public void publishOrOff(DataStandardDTO dataStandardDTO) {
         //一个工作流的总开关
-        String onlineOpen = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.DATA_STANDARD_ONLINE);
-        String offlineOpen = profileClient.getProfileValueByOptions(DetailsHelper.getUserDetails().getTenantId(), null, null, WorkFlowConstant.OpenConfig.DATA_STANDARD_OFFLINE);
+        String onlineOpen = profileClient.getProfileValue(dataStandardDTO.getTenantId(), dataStandardDTO.getProjectId(), WorkFlowConstant.OpenConfig.DATA_STANDARD_ONLINE);
+        String offlineOpen = profileClient.getProfileValue(dataStandardDTO.getTenantId(), dataStandardDTO.getProjectId(), WorkFlowConstant.OpenConfig.DATA_STANDARD_OFFLINE);
         //为空或者为true
         if (ONLINE.equals(dataStandardDTO.getStandardStatus())) {
             if ((onlineOpen == null || Boolean.parseBoolean(onlineOpen))) {
