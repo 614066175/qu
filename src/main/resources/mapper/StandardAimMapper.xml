@@ -49,6 +49,9 @@
         where 1=1
         and xsa.tenant_id = #{standardAimDTO.tenantId}
         and xsa.standard_id = #{standardAimDTO.standardId}
+        <if test=" standardAimDTO.standardType !=null and standardAimDTO.standardType !='' ">
+            and xsa.standard_type = #{standardAimDTO.standardType}
+        </if>
         <if test="standardAimDTO.projectId !=null">
             and xsa.project_id=#{standardAimDTO.projectId}
         </if>

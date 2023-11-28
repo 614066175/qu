@@ -127,8 +127,10 @@ public class DataStandardBatchImportServiceImpl extends BatchImportHandler imple
                     String chargeName = DataSecurityHelper.encrypt(dataStandardDTO.getChargeName());
                     dataStandardDTO.setChargeName(chargeName);
                 }
-                Long chargeId = dataStandardMapper.checkCharger(dataStandardDTO.getChargeName(), dataStandardDTO.getTenantId());
-                dataStandardDTO.setChargeId(chargeId);
+                List<Long> chargeIds = dataStandardMapper.checkCharger(dataStandardDTO.getChargeName(), dataStandardDTO.getTenantId());
+                if(CollectionUtils.isNotEmpty(chargeIds)){
+                    dataStandardDTO.setChargeId(chargeIds.get(0));
+                }
                 DataStandard exist = dataStandardRepository.selectOne(DataStandard.builder()
                         .standardCode(dataStandardDTO.getStandardCode())
                         .tenantId(dataStandardDTO.getTenantId())

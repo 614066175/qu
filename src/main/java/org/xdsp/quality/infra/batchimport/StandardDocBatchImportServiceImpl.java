@@ -92,8 +92,10 @@ public class StandardDocBatchImportServiceImpl extends BatchImportHandler implem
                     String chargeName = DataSecurityHelper.encrypt(standardDocDTO.getChargeName());
                     standardDocDTO.setChargeName(chargeName);
                 }
-                Long chargeId = standardDocMapper.checkCharger(standardDocDTO.getChargeName(), standardDocDTO.getTenantId());
-                standardDocDTO.setChargeId(chargeId);
+                List<Long> chargeIds = standardDocMapper.checkCharger(standardDocDTO.getChargeName(), standardDocDTO.getTenantId());
+                if(CollectionUtils.isNotEmpty(chargeIds)){
+                    standardDocDTO.setChargeId(chargeIds.get(0));
+                }
 
                 StandardDoc exist = standardDocRepository.selectOne(StandardDoc.builder()
                         .standardCode(standardDocDTO.getStandardCode())
