@@ -3,7 +3,6 @@ package org.xdsp.quality.infra.validation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.imported.app.service.BatchValidatorHandler;
@@ -83,8 +82,8 @@ public class DataStandardValidator extends BatchValidatorHandler {
                     String chargeName = DataSecurityHelper.encrypt(dataStandardDTO.getChargeName());
                     dataStandardDTO.setChargeName(chargeName);
                 }
-                Long chargeId = dataStandardMapper.checkCharger(dataStandardDTO.getChargeName(), dataStandardDTO.getTenantId());
-                if (ObjectUtils.isEmpty(chargeId)) {
+                List<Long> chargeIds = dataStandardMapper.checkCharger(dataStandardDTO.getChargeName(), dataStandardDTO.getTenantId());
+                if (CollectionUtils.isEmpty(chargeIds)) {
                     addErrorMsg(i, "未找到此责任人，请检查数据");
                 }
                 //如果责任部门不为空时进行检验

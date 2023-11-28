@@ -3,7 +3,7 @@ package org.xdsp.quality.infra.validation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.core.oauth.DetailsHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.imported.app.service.BatchValidatorHandler;
 import org.hzero.boot.imported.infra.validator.annotation.ImportValidator;
@@ -60,8 +60,8 @@ public class StandardDocValidator extends BatchValidatorHandler {
                         String chargeName = DataSecurityHelper.encrypt(standardDocDTO.getChargeName());
                         standardDocDTO.setChargeName(chargeName);
                     }
-                    Long chargeId = standardDocMapper.checkCharger(standardDocDTO.getChargeName(), tenantId);
-                    if (ObjectUtils.isEmpty(chargeId)) {
+                    List<Long> chargeIds = standardDocMapper.checkCharger(standardDocDTO.getChargeName(), tenantId);
+                    if (CollectionUtils.isEmpty(chargeIds)) {
                         addErrorMsg(i, "未找到此责任人，请检查数据");
                     }
                 }

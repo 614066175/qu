@@ -88,8 +88,10 @@ public class NameStandardBatchImportImpl extends BatchImportHandler implements I
                     String chargeName = DataSecurityHelper.encrypt(nameStandardDTO.getChargeName());
                     nameStandardDTO.setChargeName(chargeName);
                 }
-                Long chargeId = nameStandardMapper.checkCharger(nameStandardDTO.getChargeName(), nameStandardDTO.getTenantId());
-                nameStandardDTO.setChargeId(chargeId);
+                List<Long> chargeIds = nameStandardMapper.checkCharger(nameStandardDTO.getChargeName(), nameStandardDTO.getTenantId());
+                if(CollectionUtils.isNotEmpty(chargeIds)){
+                    nameStandardDTO.setChargeId(chargeIds.get(0));
+                }
 
 
                 //判断命名标准是否存在
