@@ -38,7 +38,7 @@ public class DataFieldDTO extends AuditDomain {
     private String groupName;
 
     @Transient
-    @ExcelColumn(zh = "分组全路径", en = "groupPath", groups = {Group1.class})
+    @ExcelColumn(zh = "分组全路径", en = "groupPath", order = 0)
     private String groupPath;
 
     @Transient
@@ -62,27 +62,27 @@ public class DataFieldDTO extends AuditDomain {
     @ApiModelProperty(value = "字段名称")
     @NotBlank
     @Size(max = 255)
-    @ExcelColumn(zh = "字段名称", en = "fieldName", groups = {Group1.class})
+    @ExcelColumn(zh = "字段名称", en = "fieldName", order = 10)
     private String fieldName;
 
     @ApiModelProperty(value = "字段注释")
     @NotBlank
     @Size(max = 255)
-    @ExcelColumn(zh = "字段注释", en = "fieldComment", groups = {Group1.class})
+    @ExcelColumn(zh = "字段注释", en = "fieldComment", order = 20)
     private String fieldComment;
 
     @ApiModelProperty(value = "标准描述")
-    @ExcelColumn(zh = "标准描述", en = "standardDesc", groups = {Group1.class})
+    @ExcelColumn(zh = "标准描述", en = "standardDesc", order = 30)
     private String standardDesc;
 
     //字段标准组：支持填写多个值，可用;区分
     @Transient
-    @ExcelColumn(zh = "字段标准组", en = "standardTeamCode", groups = {Group1.class})
+    @ExcelColumn(zh = "字段标准组", en = "standardTeamCode", order = 40)
     private String standardTeamCode;
 
     //引用数据标准
     @Transient
-    @ExcelColumn(zh = "引用数据标准",en = "dataStandardCode",groups = {Group1.class})
+    @ExcelColumn(zh = "引用数据标准",en = "dataStandardCode", order = 50)
     private String dataStandardCode;
 
     @ApiModelProperty(value = "字段类型 (XMOD.FIELD_TYPE)")
@@ -93,18 +93,18 @@ public class DataFieldDTO extends AuditDomain {
 
     //字段精度
     @ApiModelProperty(value = "字段精度")
-    @ExcelColumn(zh = "字段精度", en = "fieldAccuracy", groups = {Group1.class})
+    @ExcelColumn(zh = "字段精度", en = "fieldAccuracy", order = 70)
     private Integer fieldAccuracy;
 
-    @ExcelColumn(zh = "字段类型", en = "fieldType", groups = {Group1.class})
+    @ExcelColumn(zh = "字段类型", en = "fieldType", order = 60)
     private String fieldTypeMeaning;
 
     @ApiModelProperty(value = "字段长度")
-    @ExcelColumn(zh = "字段长度", en = "fieldLength", groups = {Group1.class})
+    @ExcelColumn(zh = "字段长度", en = "fieldLength", order = 80)
     private String fieldLength;
 
     @ApiModelProperty(value = "数据格式")
-    @ExcelColumn(zh = "数据格式", en = "dataPattern", groups = {Group1.class})
+    @ExcelColumn(zh = "数据格式", en = "dataPattern", order = 90)
     private String dataPattern;
 
     @ApiModelProperty(value = "值域类型（快码XSTA.VALUE_TYPE）")
@@ -112,41 +112,41 @@ public class DataFieldDTO extends AuditDomain {
 //    @ExcelColumn(zh = "值域类型", en = "valueType", groups = {Group1.class})
     private String valueType;
 
-    @ExcelColumn(zh = "值域类型", en = "valueType", groups = {Group1.class})
+    @ExcelColumn(zh = "值域类型", en = "valueType", order = 100)
     private String valueTypeMeaning;
 
     @ApiModelProperty(value = "值域范围")
-    @ExcelColumn(zh = "值域范围", en = "valueRange", groups = {Group1.class})
+    @ExcelColumn(zh = "值域范围", en = "valueRange", order = 110)
     private String valueRange;
 
     @ApiModelProperty(value = "是否可为空，1可空 0 不可空")
-    @ExcelColumn(zh = "是否可为空" ,en = "Can be empty or not")
+    @ExcelColumn(zh = "是否可为空" ,en = "Can be empty or not", order = 120)
     private Integer nullFlag;
 
     //默认值
     @ApiModelProperty(value = "默认值")
-    @ExcelColumn(zh = "默认值" ,en = "defaultValue")
+    @ExcelColumn(zh = "默认值" ,en = "defaultValue", order = 130)
     private String defaultValue;
 
     //系统常用名
     @ApiModelProperty(value = "系统常用名")
-    @ExcelColumn(zh = "系统常用名", en = "sysCommonName", groups = {Group1.class})
+    @ExcelColumn(zh = "系统常用名", en = "sysCommonName", order = 140)
     private String sysCommonName;
 
     @Transient
-    @ExcelColumn(zh = "责任部门", en = "chargeDeptName", groups = {Group2.class})
+    @ExcelColumn(zh = "责任部门", en = "chargeDeptName", order = 200)
     private String chargeDeptName;
 
     @Transient
-    @ExcelColumn(zh = "责任人", en = "chargeName", groups = {Group2.class})
+    @ExcelColumn(zh = "责任人", en = "chargeName", order = 210)
     private String chargeName;
 
     @ApiModelProperty(value = "责任人电话")
-    @ExcelColumn(zh = "责任人电话", en = "chargeTel", groups = {Group2.class})
+    @ExcelColumn(zh = "责任人电话", en = "chargeTel", order = 220)
     private String chargeTel;
 
     @ApiModelProperty(value = "责任人邮箱")
-    @ExcelColumn(zh = "责任人邮箱", en = "chargeEmail", groups = {Group2.class})
+    @ExcelColumn(zh = "责任人邮箱", en = "chargeEmail", order = 230)
     private String chargeEmail;
 
     @ApiModelProperty(value = "责任部门ID")
@@ -169,7 +169,7 @@ public class DataFieldDTO extends AuditDomain {
     @Transient
     private List<StandardExtraDTO> standardExtraDTOList;
 
-    @ExcelColumn(zh = "附加信息",en = "extra")
+    @ExcelColumn(zh = "附加信息",en = "extra", order = 240)
     @Transient
     private String standardExtraStr;
 
@@ -269,23 +269,23 @@ public class DataFieldDTO extends AuditDomain {
     private Date releaseDate;
 
     @ApiModelProperty(value = "业务用途")
-    @ExcelColumn(zh = "业务用途", en = "businessPurpose", groups = {Group2.class})
+    @ExcelColumn(zh = "业务用途", en = "businessPurpose", order = 150)
     private String businessPurpose;
 
     @ApiModelProperty(value = "业务规则")
-    @ExcelColumn(zh = "业务规则", en = "businessRules", groups = {Group2.class})
+    @ExcelColumn(zh = "业务规则", en = "businessRules", order = 160)
     private String businessRules;
 
     @ApiModelProperty(value = "数据示例")
-    @ExcelColumn(zh = "数据示例", en = "dataExample", groups = {Group2.class})
+    @ExcelColumn(zh = "数据示例", en = "dataExample", order = 170)
     private String dataExample;
 
     @ApiModelProperty(value = "标准依据")
-    @ExcelColumn(zh = "标准依据", en = "standardAccord", groups = {Group2.class})
+    @ExcelColumn(zh = "标准依据", en = "standardAccord", order = 180)
     private String standardAccord;
 
     @ApiModelProperty(value = "依据内容")
-    @ExcelColumn(zh = "依据内容", en = "accordContent", groups = {Group2.class})
+    @ExcelColumn(zh = "依据内容", en = "accordContent", order = 190)
     private String accordContent;
 
 
