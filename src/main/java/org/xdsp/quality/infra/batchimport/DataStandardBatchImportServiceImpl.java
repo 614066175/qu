@@ -152,15 +152,20 @@ public class DataStandardBatchImportServiceImpl extends BatchImportHandler imple
                 //附加信息处理
                 String standardExtraStr = dataStandardDTO.getStandardExtraStr();
                 if (StringUtils.isNotEmpty(standardExtraStr)) {
-                    List<Map<String, String>> list = JsonUtil.toObj(standardExtraStr, List.class);
-                    for (Map<String, String> map : list) {
-                        extraList.add(StandardExtra.builder()
-                                .standardType(DATA)
-                                .extraKey(map.keySet().iterator().next())
-                                .extraValue(map.values().iterator().next())
-                                .tenantId(tenantId)
-                                .projectId(projectId)
-                                .build());
+                    try {
+                        List<Map<String, Object>> list = JsonUtil.toObj(standardExtraStr, List.class);
+                        for (Map<String, Object> map : list) {
+                            extraList.add(StandardExtra.builder()
+                                    .standardType(DATA)
+                                    .extraKey(map.keySet().iterator().next())
+                                    .extraValue(String.valueOf(map.values().iterator().next()))
+                                    .tenantId(tenantId)
+                                    .projectId(projectId)
+                                    .build());
+                        }
+                    } catch (JsonException e) {
+                        log.error("Json Error", e);
+                        addErrorMsg(i, "JSON格式错误:"+e.getMessage());
                     }
                 }
                 if (exist != null) {
