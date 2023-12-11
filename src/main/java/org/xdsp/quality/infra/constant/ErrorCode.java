@@ -222,4 +222,9 @@ public interface ErrorCode {
     String DATA_IN_PROCESS = "xqua.err.data_in_process";
 
     String DATA_NO_VALUE = "xqua.err.data_no_value";
+
+    /**
+     * 质量评估规则错误
+     */
+    String CHECK_RULE_FAILED="xqua.err.check_rule_failed";
 }
