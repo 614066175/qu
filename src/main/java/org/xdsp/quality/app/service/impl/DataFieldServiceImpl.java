@@ -49,6 +49,7 @@ import org.xdsp.quality.infra.converter.AimStatisticsConverter;
 import org.xdsp.quality.infra.export.ExportUtils;
 import org.xdsp.quality.infra.export.FieldStandardExporter;
 import org.xdsp.quality.infra.export.dto.FieldStandardExportDTO;
+import org.xdsp.quality.infra.feign.AssetFeign;
 import org.xdsp.quality.infra.mapper.DataFieldMapper;
 import org.xdsp.quality.infra.mapper.DataStandardMapper;
 import org.xdsp.quality.infra.mapper.StandardApprovalMapper;
@@ -141,6 +142,8 @@ public class DataFieldServiceImpl implements DataFieldService {
     @Autowired
     private XdspProfileClient profileClient;
 
+    private final AssetFeign assetFeign;
+
     public DataFieldServiceImpl(DataFieldRepository dataFieldRepository, StandardExtraRepository standardExtraRepository,
                                 DataFieldVersionRepository dataFieldVersionRepository, DataFieldMapper dataFieldMapper,
                                 DataStandardService dataStandardService, ExtraVersionRepository extraVersionRepository,
@@ -150,7 +153,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                                 StandardTeamRepository standardTeamRepository, StandardRelationRepository standardRelationRepository,
                                 AimStatisticsRepository aimStatisticsRepository, StandardApprovalRepository standardApprovalRepository,
                                 StandardApprovalMapper standardApprovalMapper, List<StatisticValidator> statisticValidatorList,
-                                DriverSessionService driverSessionService, StandardApprovalService standardApprovalService, AimStatisticsConverter aimStatisticsConverter, StandardGroupRepository standardGroupRepository) {
+                                DriverSessionService driverSessionService, StandardApprovalService standardApprovalService, AimStatisticsConverter aimStatisticsConverter, StandardGroupRepository standardGroupRepository, AssetFeign assetFeign) {
         this.dataFieldRepository = dataFieldRepository;
         this.standardExtraRepository = standardExtraRepository;
         this.dataFieldVersionRepository = dataFieldVersionRepository;
@@ -173,6 +176,7 @@ public class DataFieldServiceImpl implements DataFieldService {
         this.standardApprovalService = standardApprovalService;
         this.aimStatisticsConverter = aimStatisticsConverter;
         this.standardGroupRepository = standardGroupRepository;
+        this.assetFeign = assetFeign;
     }
 
 
@@ -404,11 +408,13 @@ public class DataFieldServiceImpl implements DataFieldService {
                 dataFieldRepository.updateDTOOptional(dataFieldDTO, DataField.FIELD_STANDARD_STATUS, DataField.FIELD_RELEASE_BY, DataField.FIELD_RELEASE_DATE);
                 //存版本表
                 doVersion(dataFieldDTO);
+                assetFeign.saveFieldToEs(dataFieldDTO.getTenantId(), dataFieldDTO);
                 return;
             }
         }
 
         if (OFFLINE.equals(dataFieldDTO.getStandardStatus())) {
+            assetFeign.deleteFieldToEs(dataFieldDTO.getTenantId(), dataFieldDTO);
             if ((offlineOpen == null || Boolean.parseBoolean(offlineOpen))) {
                 //指定字段标准修改状态
                 dataFieldDTO.setStandardStatus(OFFLINE_APPROVING);
