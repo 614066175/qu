@@ -436,4 +436,19 @@ public class DataFieldController extends BaseController {
         dataFieldDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
         return Results.success(dataFieldService.listAll(dataFieldDTO));
     }
+
+    @ApiOperation(value = "元数据字段标准详情")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/asset-detail/{fieldId}")
+    public ResponseEntity<DataFieldDTO> assetDetail(@PathVariable(name = "organizationId") Long tenantId,
+                                                       @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                       @PathVariable(name = "fieldId") Long fieldId) {
+        return Results.success(dataFieldService.assetDetail(tenantId, fieldId,projectId));
+    }
 }

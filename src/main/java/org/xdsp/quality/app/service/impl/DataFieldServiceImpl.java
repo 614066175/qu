@@ -80,6 +80,8 @@ import static org.xdsp.quality.infra.constant.StandardConstant.Status.*;
 @Service
 public class DataFieldServiceImpl implements DataFieldService {
 
+    private static final String FIELD_STANDARD = "FIELD_STANDARD";
+
     public static final Long DEFAULT_VERSION = 1L;
 
     private final DataFieldRepository dataFieldRepository;
@@ -848,5 +850,93 @@ public class DataFieldServiceImpl implements DataFieldService {
             throw new CommonException(ErrorCode.NO_APPROVAL_INSTANCE);
         }
         return this.detail(standardApprovalDTO.getTenantId(), standardApprovalDTO.getStandardId());
+    }
+
+    @Override
+    public DataFieldDTO assetDetail(Long tenantId, Long fieldId, Long projectId) {
+        List<DataFieldDTO> dataFieldDTOList = dataFieldMapper.list(DataFieldDTO
+                .builder()
+                .fieldId(fieldId)
+                .build());
+        if (CollectionUtils.isEmpty(dataFieldDTOList)) {
+            throw new CommonException(ErrorCode.DATA_FIELD_STANDARD_NOT_EXIST);
+        }
+        DataFieldDTO dataFieldDTO = dataFieldDTOList.get(0);
+        //判断当前租户是否启用安全加密
+        if (DataSecurityHelper.isTenantOpen()) {
+            //解密邮箱，电话
+            if (Strings.isNotEmpty(dataFieldDTO.getChargeTel())) {
+                dataFieldDTO.setChargeTel(DataSecurityHelper.decrypt(dataFieldDTO.getChargeTel()));
+            }
+            if (Strings.isNotEmpty(dataFieldDTO.getChargeEmail())) {
+                dataFieldDTO.setChargeEmail(DataSecurityHelper.decrypt(dataFieldDTO.getChargeEmail()));
+            }
+            if (Strings.isNotEmpty(dataFieldDTO.getChargeDeptName())) {
+                dataFieldDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeDeptName()));
+            }
+            if (StringUtils.isNotEmpty(dataFieldDTO.getChargeName())) {
+                dataFieldDTO.setChargeName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeName()));
+            }
+
+        }
+        //查询资源路径
+        dataFieldDTO.setNameLevelPath(dataFieldDTO.getGroupName());
+        if (Objects.nonNull(dataFieldDTO.getParentGroupId())) {
+            while (Objects.nonNull(dataFieldDTO.getParentGroupId())) {
+                List<StandardGroup> standardGroups = standardGroupRepository
+                        .selectByCondition(Condition.builder(StandardGroup.class)
+                                .andWhere(Sqls.custom()
+                                        .andEqualTo(StandardGroup.FIELD_GROUP_ID, dataFieldDTO.getParentGroupId())
+                                        .andEqualTo(StandardGroup.FIELD_TENANT_ID, tenantId)
+                                        .andEqualTo(StandardGroup.FIELD_PROJECT_ID, projectId))
+                                .build());
+                dataFieldDTO.setParentGroupId(standardGroups.get(0).getParentGroupId());
+                dataFieldDTO.setNameLevelPath(String.format("%s/%s",
+                        standardGroups.get(0).getGroupName(),
+                        dataFieldDTO.getNameLevelPath()));
+            }
+        }
+        if (PlanConstant.StandardValueType.REFERENCE_DATA.equals(dataFieldDTO.getValueType()) && StringUtils.isNotBlank(dataFieldDTO.getValueRange())) {
+            long referenceDataId = Long.parseLong(dataFieldDTO.getValueRange());
+            ReferenceDataDTO referenceDataDTO = referenceDataRepository.selectDTOByPrimaryKey(referenceDataId);
+            if (Objects.nonNull(referenceDataDTO)) {
+                dataFieldDTO.setReferenceDataCode(referenceDataDTO.getDataCode());
+                dataFieldDTO.setReferenceDataName(referenceDataDTO.getDataName());
+            }
+
+        }
+        List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
+                .andWhere(Sqls.custom()
+                        .andEqualTo(StandardExtra.FIELD_STANDARD_ID, fieldId)
+                        .andEqualTo(StandardExtra.FIELD_STANDARD_TYPE, FIELD)
+                        .andEqualTo(StandardExtra.FIELD_TENANT_ID, tenantId)
+                        .andEqualTo(StandardExtra.FIELD_PROJECT_ID, projectId))
+                .build());
+        dataFieldDTO.setStandardExtraDTOList(standardExtraDTOS);
+        dataFieldDTO.setMetadataName(dataFieldDTO.getFieldName());
+        dataFieldDTO.setMetadataType(FIELD_STANDARD);
+        //查询标准组
+        List<StandardRelation> standardRelations = standardRelationRepository.select(StandardRelation.builder().fieldStandardId(fieldId).build());
+        List<Long> standardTeamIds = standardRelations.stream()
+                .map(StandardRelation::getStandardTeamId)
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(standardTeamIds)) {
+            List<StandardTeamDTO> standardTeamDTOS = standardTeamRepository.selectDTOByIds(standardTeamIds);
+            dataFieldDTO.setStandardTeamDTOList(standardTeamDTOS);
+            StringBuilder standardTeamCode = new StringBuilder();
+            if (CollectionUtils.isNotEmpty(standardTeamDTOS)) {
+                standardTeamDTOS.forEach(e -> standardTeamCode.append(e.getStandardTeamCode() + ";"));
+            }
+            standardTeamCode.deleteCharAt(standardTeamCode.length() - 1);
+            dataFieldDTO.setStandardTeamCode(standardTeamCode.toString());
+        }
+        //解密责任部门
+//        if (DataSecurityHelper.isTenantOpen()) {
+//            if (Strings.isNotEmpty(dataFieldDTO.getChargeDeptName())) {
+//                dataFieldDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeDeptName()));
+//            }
+//        }
+
+        return dataFieldDTO;
     }
 }
