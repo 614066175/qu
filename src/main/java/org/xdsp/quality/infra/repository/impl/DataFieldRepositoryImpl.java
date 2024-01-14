@@ -13,6 +13,7 @@ import org.xdsp.quality.api.dto.StandardGroupDTO;
 import org.xdsp.quality.domain.entity.DataField;
 import org.xdsp.quality.domain.repository.DataFieldRepository;
 import org.xdsp.quality.domain.repository.StandardGroupRepository;
+import org.xdsp.quality.infra.constant.ErrorCode;
 import org.xdsp.quality.infra.mapper.DataFieldMapper;
 import org.xdsp.quality.infra.mapper.DataStandardMapper;
 import org.xdsp.quality.infra.util.ImportUtil;
@@ -61,7 +62,7 @@ public class DataFieldRepositoryImpl extends BaseRepositoryImpl<DataField, DataF
                 ).build();
                 List<DataField> dataFields = selectByCondition(condition);
                 if (CollectionUtils.isNotEmpty(dataFields)) {
-                    throw new CommonException("字段名称已存在");
+                    throw new CommonException(ErrorCode.DATA_FIELD_NAME_EXIST);
                 }
 
                 //使用工具类获取责任人Id，和责任部门Id

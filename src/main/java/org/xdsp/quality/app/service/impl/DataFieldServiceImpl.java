@@ -388,7 +388,7 @@ public class DataFieldServiceImpl implements DataFieldService {
         if (ONLINE_APPROVING.equals(dto.getStandardStatus())
                 || OFFLINE_APPROVING.equals(dto.getStandardStatus())) {
             //前端数据传递有问题，状态检验
-            throw new CommonException("状态正在审批中，无法操作");
+            throw new CommonException(ErrorCode.DATA_FIELD_APPROVING);
         }
         if (ONLINE.equals(dataFieldDTO.getStandardStatus())) {
             if ((onlineOpen == null || Boolean.parseBoolean(onlineOpen))) {
@@ -625,7 +625,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                     aimStatisticsDTO.setAcompliantRate(acompliantPercent);
                     aimStatisticsDTOS.add(aimStatisticsDTO);
                 } catch (Exception e) {
-                    throw new CommonException("落标统计失败", e);
+                    throw new CommonException(ErrorCode.AIM_STATISTIC_FAILED, e);
                 }
                 return null;
             });
@@ -645,7 +645,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                         f1.cancel(true);
                     }
                 });
-                throw new CommonException("落标统计失败", e);
+                throw new CommonException(ErrorCode.AIM_STATISTIC_FAILED, e);
             }
         }
 

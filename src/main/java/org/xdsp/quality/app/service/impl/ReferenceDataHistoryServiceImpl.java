@@ -14,6 +14,7 @@ import org.xdsp.quality.api.dto.SimpleReferenceDataValueDTO;
 import org.xdsp.quality.app.service.ReferenceDataHistoryService;
 import org.xdsp.quality.domain.entity.ReferenceDataHistory;
 import org.xdsp.quality.domain.repository.ReferenceDataHistoryRepository;
+import org.xdsp.quality.infra.constant.ErrorCode;
 
 import java.util.List;
 import java.util.Objects;
@@ -40,7 +41,7 @@ public class ReferenceDataHistoryServiceImpl implements ReferenceDataHistoryServ
         Long dataId = referenceDataHistoryDTO.getDataId();
         if (Objects.isNull(dataId)) {
             // TODO 异常信息
-            throw new CommonException("Please select a reference data");
+            throw new CommonException(ErrorCode.REFERENCE_DATA_NOT_SELECTED);
         }
         Page<ReferenceDataHistoryDTO> list = referenceDataHistoryRepository.list(dataId, pageRequest);
         Long maxVersion = referenceDataHistoryRepository.queryMaxVersion(dataId);

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.xdsp.quality.api.dto.AimStatisticsDTO;
 import org.xdsp.quality.api.dto.DataFieldDTO;
 import org.xdsp.quality.api.dto.StandardAimDTO;
+import org.xdsp.quality.infra.constant.ErrorCode;
 import org.xdsp.quality.infra.util.TypeUtil;
 
 import java.util.List;
@@ -46,7 +47,7 @@ public class FieldStructValidator implements StatisticValidator {
         if (first.isPresent()) {
             column = first.get();
         } else {
-            throw new CommonException("字段未找到");
+            throw new CommonException(ErrorCode.COLUMN_NOT_FOUND);
         }
         //检验长度，精度，类型
         //整形长度没意义
