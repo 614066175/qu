@@ -372,7 +372,7 @@
         SELECT
         xbrr.check_type,
         <choose>
-            <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
+            <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL' or datasourceType == 'DM'">
                 COUNT(distinct xbrr.rule_type||xbrr.plan_rule_id) count_sum
             </when>
             <otherwise>
@@ -397,7 +397,7 @@
         SELECT
         xbrr.check_type,
         <choose>
-            <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
+            <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL' or datasourceType == 'DM'">
                 COUNT(distinct xbrr.rule_type||xbrr.plan_rule_id) count_sum
             </when>
             <otherwise>
@@ -1087,7 +1087,7 @@
     <select id="listResultDetail" resultType="org.xdsp.quality.api.dto.BatchResultMarkDTO">
         <bind name="datasourceType" value="@org.xdsp.core.util.SpringDatasourceHelper@getDatasourceType()"/>
         <choose>
-            <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL'">
+            <when test="datasourceType == 'ORACLE' or datasourceType == 'PANWEI' or datasourceType == 'POSTGRESQL' or datasourceType == 'DM'">
                 SELECT
                     avg(mark) avgMark,
                     to_char(end_date,'yyyy-MM-dd') "day"
