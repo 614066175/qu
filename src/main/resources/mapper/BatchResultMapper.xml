@@ -434,7 +434,7 @@
                 group by date_format(xbr.end_date, '%Y-%m-%d')
                 order by date_format(xbr.end_date, '%Y-%m-%d')
             </when>
-            <when test='datasourceType =="ORACLE"'>
+            <when test="datasourceType == 'ORACLE' or datasourceType == 'DM'">
                 select TO_DATE(TO_CHAR(xbr.end_date, 'yyyy-MM-dd'), 'yyyy-MM-dd') "date",
                 (case when avg(xbr.mark) is null then 0 else avg(xbr.mark) end )mark
                 from xqua_batch_result xbr

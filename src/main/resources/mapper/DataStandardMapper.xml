@@ -96,7 +96,7 @@
         left join hpfm_unit hu on hu.unit_id=ds.charge_dept_id
         left join hpfm_employee he on ds.charge_id=he.employee_id
         <choose>
-            <when test='datasourceType == "ORACLE"'>
+            <when test="datasourceType == 'ORACLE' or datasourceType == 'DM'">
                 LEFT JOIN (
                     SELECT
                         xsa1.standard_id,

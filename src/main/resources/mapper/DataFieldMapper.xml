@@ -99,7 +99,7 @@
         left join hpfm_employee he on he.employee_id=fs.charge_id
         left join iam_user iu_re on fs.release_by=iu_re.id
         <choose>
-        <when test='datasourceType == "ORACLE"'>
+        <when test="datasourceType == 'ORACLE' or datasourceType == 'DM'">
             LEFT JOIN (
                 SELECT
                     xsa1.standard_id,
