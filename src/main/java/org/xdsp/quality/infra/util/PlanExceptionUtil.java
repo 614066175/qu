@@ -26,6 +26,8 @@ import org.xdsp.quality.infra.consumer.ExceptionDataConsumer;
 import org.xdsp.quality.infra.dataobject.MeasureParamDO;
 import org.xdsp.quality.infra.message.MessageDTO;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -295,8 +297,22 @@ public class PlanExceptionUtil {
                 map.put(EXCEPTION_INFO, String.format("%s(%s)", warningLevelMeaning, exception));
             });
         }
+        // Mongodb 值类型转换：ZonedDateTime
+        handleValueType(exceptionMapList);
+
         //collection 使用质检项Id_结果Id
         mongoTemplate.insert(exceptionMapList, String.format("%d_%d", batchResultBase.getPlanBaseId(), batchResultBase.getResultBaseId()));
+    }
+
+    private static void handleValueType(List<Map<String, Object>> exceptionMapList) {
+        exceptionMapList.forEach(map->{
+            map.forEach((k,v)->{
+                if (v instanceof ZonedDateTime) {
+                    String formattedNow = ((ZonedDateTime)v).format(DateTimeFormatter.ISO_ZONED_DATE_TIME);
+                    map.put(k,formattedNow);
+                }
+            });
+        });
     }
 
     /**

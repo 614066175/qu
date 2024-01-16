@@ -3,6 +3,7 @@ package org.xdsp.quality.infra.feign.fallback;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.xdsp.quality.api.dto.DataFieldDTO;
 import org.xdsp.quality.api.dto.DataStandardDTO;
 import org.xdsp.quality.infra.feign.AssetFeign;
 
@@ -26,6 +27,16 @@ public class AssetFeignFallBack implements AssetFeign {
 
     @Override
     public ResponseEntity<?> deleteStandardToEs(Long tenantId, DataStandardDTO dataStandardDTO) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<?> saveFieldToEs(Long tenantId, DataFieldDTO dataFieldDTO) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<?> deleteFieldToEs(Long tenantId, DataFieldDTO dataFieldDTO) {
         return null;
     }
 }
