@@ -1,6 +1,9 @@
 package org.xdsp.quality.infra.util;
 
 import io.choerodon.core.exception.CommonException;
+import org.apache.commons.lang3.StringUtils;
+import org.hzero.starter.driver.core.infra.constant.FieldType;
+import org.hzero.starter.driver.core.infra.constant.SqlTypeConstant;
 import org.xdsp.quality.infra.constant.ErrorCode;
 
 /**
@@ -17,6 +20,12 @@ public class TypeUtil {
     }
 
     public static String convertType(String type) {
+        if (StringUtils.startsWith(type.toUpperCase(), SqlTypeConstant.DECIMAL)) {
+            type = FieldType.DECIMAL.name();
+        }
+        if (StringUtils.startsWith(type.toUpperCase(), SqlTypeConstant.VARCHAR)) {
+            type = FieldType.STRING.name();
+        }
         switch (type.toUpperCase()) {
             case "INT":
             case "INT4":
