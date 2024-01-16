@@ -72,7 +72,7 @@ public class FieldStructValidator implements StatisticValidator {
         }
 
         //类型校验
-        String type = TypeUtil.convertType(column.getTypeName());
+        String type = driverSession.formatColumnType(column.getTypeName());
         if (!type.equals(dataFieldDTO.getFieldType())) {
             //无需继续检验
             aimStatisticsDTO.setValidFlag(false);
