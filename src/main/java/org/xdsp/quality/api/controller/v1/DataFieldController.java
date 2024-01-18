@@ -18,9 +18,7 @@ import org.xdsp.quality.api.dto.*;
 import org.xdsp.quality.app.service.DataFieldService;
 import org.xdsp.quality.config.SwaggerTags;
 import org.xdsp.quality.domain.repository.DataFieldRepository;
-import org.xdsp.quality.domain.repository.StandardExtraRepository;
 import org.xdsp.quality.infra.export.dto.FieldStandardExportDTO;
-import org.xdsp.quality.infra.mapper.StandardDocMapper;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -40,8 +38,11 @@ public class DataFieldController extends BaseController {
 
     private final DataFieldService dataFieldService;
 
-    public DataFieldController(DataFieldService dataFieldService) {
+    private final DataFieldRepository dataFieldRepository;
+
+    public DataFieldController(DataFieldService dataFieldService, DataFieldRepository dataFieldRepository) {
         this.dataFieldService = dataFieldService;
+        this.dataFieldRepository = dataFieldRepository;
     }
 
     @ApiOperation(value = "字段标准列表")
@@ -450,5 +451,23 @@ public class DataFieldController extends BaseController {
                                                        @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
                                                        @PathVariable(name = "fieldId") Long fieldId) {
         return Results.success(dataFieldService.assetDetail(tenantId, fieldId,projectId));
+    }
+
+    @ApiOperation(value = "修改字段标准属性")
+    @ApiImplicitParams({@ApiImplicitParam(
+            name = "organizationId",
+            value = "租户",
+            paramType = "path",
+            required = true
+    )})
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/update-field-standard-property")
+    public ResponseEntity<DataFieldDTO> updateStandardProperty(@PathVariable(name = "organizationId") Long tenantId,
+                                                                  @RequestParam(name = "projectId", defaultValue = XdspConstant.DEFAULT_PROJECT_ID_STR) Long projectId,
+                                                                  @RequestBody DataFieldDTO dataFieldDTO) {
+        dataFieldDTO.setTenantId(tenantId);
+        dataFieldDTO.setProjectId(XdspConstant.DEFAULT_PROJECT_ID);
+        dataFieldRepository.updateDTOAllColumnWhereTenant(dataFieldDTO, tenantId);
+        return Results.success(dataFieldDTO);
     }
 }
