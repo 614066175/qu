@@ -282,6 +282,7 @@ public class DataFieldDTO extends AuditDomain {
 
     @ApiModelProperty(value = "标准依据")
     @ExcelColumn(zh = "标准依据", en = "standardAccord", order = 180)
+    @LovValue(lovCode = "XSTA.STANDARD_ACCORD",meaningField = "standardAccordMeaning")
     private String standardAccord;
 
     @ApiModelProperty(value = "依据内容")

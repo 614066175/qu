@@ -68,4 +68,13 @@ public interface DataFieldMapper extends BaseMapper<DataField> {
      * @return 员工id
      */
     List<Long> checkCharger(String chargeName,Long tenantId);
+
+    /**
+     * 根据责任人和责任部门查找部门Id
+     *
+     * @param chargeName
+     * @param chargeDeptName
+     * @return
+     */
+    List<Long> selectIdByChargeAndDeptName(@Param("chargeName") String chargeName, @Param("chargeDeptName") String chargeDeptName);
 }

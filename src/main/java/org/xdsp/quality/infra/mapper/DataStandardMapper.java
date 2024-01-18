@@ -64,5 +64,14 @@ public interface DataStandardMapper extends BaseMapper<DataStandard> {
      * 根据责任人名称去查找员工id
      * @return 员工id
      */
-    List<Long> checkCharger(String chargeName,Long tenantId);
+    List<Long> checkCharger(String chargeName, Long tenantId);
+
+    /**
+     * 根据责任人和责任部门查找部门Id
+     *
+     * @param chargeName
+     * @param chargeDeptName
+     * @return
+     */
+    List<Long> selectIdByChargeAndDeptName(@Param("chargeName") String chargeName, @Param("chargeDeptName") String chargeDeptName);
 }
