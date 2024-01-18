@@ -925,17 +925,11 @@ public class DataFieldServiceImpl implements DataFieldService {
             dataFieldDTO.setStandardTeamDTOList(standardTeamDTOS);
             StringBuilder standardTeamCode = new StringBuilder();
             if (CollectionUtils.isNotEmpty(standardTeamDTOS)) {
-                standardTeamDTOS.forEach(e -> standardTeamCode.append(e.getStandardTeamCode() + ";"));
+                standardTeamDTOS.forEach(e -> standardTeamCode.append(e.getStandardTeamName() + ";"));
             }
             standardTeamCode.deleteCharAt(standardTeamCode.length() - 1);
             dataFieldDTO.setStandardTeamCode(standardTeamCode.toString());
         }
-        //解密责任部门
-//        if (DataSecurityHelper.isTenantOpen()) {
-//            if (Strings.isNotEmpty(dataFieldDTO.getChargeDeptName())) {
-//                dataFieldDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataFieldDTO.getChargeDeptName()));
-//            }
-//        }
 
         return dataFieldDTO;
     }
