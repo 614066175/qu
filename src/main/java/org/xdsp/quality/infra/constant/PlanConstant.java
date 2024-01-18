@@ -1,5 +1,9 @@
 package org.xdsp.quality.infra.constant;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
+
 /**
  * <p>方案常量类</p>
  *
@@ -343,11 +347,24 @@ public interface PlanConstant {
     }
 
     interface StandardValueType {
+        // 区间
         String AREA = "AREA";
+        // 枚举
         String ENUM = "ENUM";
+        // 独立值集
         String VALUE_SET = "VALUE_SET";
+        // 值集视图
         String LOV_VIEW = "LOV_VIEW";
+        // 参考数据
         String REFERENCE_DATA = "REFERENCE_DATA";
+
+        // 值域类型验证正则表达式
+        Map<String, Pattern> ValueTypeRegexPattern = new HashMap<String,Pattern>(){
+            {
+                // {-1.1,-2.1} {-1,2} {1,2} {,}
+                put(PlanConstant.StandardValueType.AREA,Pattern.compile("^(-?\\d+(\\.\\d+)?)?,(-?\\d+(\\.\\d+)?)?$"));
+            }
+        };
     }
 
     interface StandardStatus {

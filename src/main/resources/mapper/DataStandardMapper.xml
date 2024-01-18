@@ -96,7 +96,7 @@
         left join hpfm_unit hu on hu.unit_id=ds.charge_dept_id
         left join hpfm_employee he on ds.charge_id=he.employee_id
         <choose>
-            <when test='datasourceType == "ORACLE"'>
+            <when test="datasourceType == 'ORACLE' or datasourceType == 'DM'">
                 LEFT JOIN (
                     SELECT
                         xsa1.standard_id,
@@ -243,5 +243,25 @@
         WHERE
             name=#{chargeName}
           and tenant_id  = #{tenantId}
+    </select>
+    <select id="selectIdByChargeAndDeptName" resultType="java.lang.Long">
+        <bind name="userDetails" value="@io.choerodon.core.oauth.DetailsHelper@getUserDetails()"/>
+        SELECT
+            hu.unit_id
+        FROM
+            hpfm_employee he
+        LEFT JOIN
+            hpfm_employee_assign hea
+        ON
+            he.employee_id  = hea.employee_id
+        LEFT JOIN
+            hpfm_unit hu
+        ON
+            hea.unit_id = hu.unit_id
+        <where>
+            he.tenant_id = #{userDetails.tenantId}
+            AND he.name = #{chargeName}
+            AND hu.unit_name = #{chargeDeptName}
+        </where>
     </select>
 </mapper>
