@@ -21,6 +21,7 @@ import org.xdsp.quality.domain.repository.StandardRelationRepository;
 import org.xdsp.quality.domain.repository.StandardTeamRepository;
 import org.xdsp.quality.infra.constant.ErrorCode;
 import org.xdsp.quality.infra.mapper.DataFieldVersionMapper;
+import org.xdsp.quality.infra.util.DataTranslateUtil;
 
 import java.util.List;
 import java.util.Objects;
@@ -43,11 +44,14 @@ public class DataFieldVersionServiceImpl implements DataFieldVersionService {
 
     private final StandardTeamRepository standardTeamRepository;
 
-    public DataFieldVersionServiceImpl(DataFieldVersionMapper dataFieldVersionMapper, ExtraVersionRepository extraVersionRepository, StandardRelationRepository standardRelationRepository, StandardTeamRepository standardTeamRepository) {
+    private final DataTranslateUtil dataTranslateUtil;
+
+    public DataFieldVersionServiceImpl(DataFieldVersionMapper dataFieldVersionMapper, ExtraVersionRepository extraVersionRepository, StandardRelationRepository standardRelationRepository, StandardTeamRepository standardTeamRepository, DataTranslateUtil dataTranslateUtil) {
         this.dataFieldVersionMapper = dataFieldVersionMapper;
         this.extraVersionRepository = extraVersionRepository;
         this.standardRelationRepository = standardRelationRepository;
         this.standardTeamRepository = standardTeamRepository;
+        this.dataTranslateUtil = dataTranslateUtil;
     }
 
     @Override
@@ -88,6 +92,13 @@ public class DataFieldVersionServiceImpl implements DataFieldVersionService {
             List<StandardTeamDTO> standardTeamDTOS = standardTeamRepository.selectDTOByIds(standardTeamIds);
             dataFieldVersionDTO.setStandardTeamDTOList(standardTeamDTOS);
         }
+
+        // 翻译值域范围：翻译失败，返回原值
+        String valueType = dataFieldVersionDTO.getValueType();
+        String valueRange = dataFieldVersionDTO.getValueRange();
+        Long tenantId = dataFieldVersionDTO.getTenantId();
+        dataFieldVersionDTO.setValueRange(dataTranslateUtil.translateValueRange(valueType,valueRange,tenantId));
+
         return dataFieldVersionDTO;
     }
 }
