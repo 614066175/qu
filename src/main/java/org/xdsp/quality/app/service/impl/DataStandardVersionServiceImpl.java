@@ -4,6 +4,8 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.helper.DataSecurityHelper;
@@ -16,6 +18,7 @@ import org.xdsp.quality.domain.entity.ExtraVersion;
 import org.xdsp.quality.domain.repository.ExtraVersionRepository;
 import org.xdsp.quality.infra.constant.ErrorCode;
 import org.xdsp.quality.infra.mapper.DataStandardVersionMapper;
+import org.xdsp.quality.infra.util.DataTranslateUtil;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,25 +31,29 @@ import java.util.stream.Collectors;
  * @author guoliangli01@hand-china.com 2020-11-27 14:36:44
  */
 @Service
+@Slf4j
 public class DataStandardVersionServiceImpl implements DataStandardVersionService {
 
     private DataStandardVersionMapper dataStandardVersionMapper;
 
     private ExtraVersionRepository extraVersionRepository;
 
-    public DataStandardVersionServiceImpl(DataStandardVersionMapper dataStandardVersionMapper, ExtraVersionRepository extraVersionRepository) {
+    private final DataTranslateUtil dataTranslateUtil;
+
+    public DataStandardVersionServiceImpl(DataStandardVersionMapper dataStandardVersionMapper, ExtraVersionRepository extraVersionRepository, DataTranslateUtil dataTranslateUtil) {
         this.dataStandardVersionMapper = dataStandardVersionMapper;
         this.extraVersionRepository = extraVersionRepository;
+        this.dataTranslateUtil = dataTranslateUtil;
     }
 
     @Override
     public DataStandardVersionDTO detail(Long versionId) {
         DataStandardVersionDTO dataStandardVersionDTO = dataStandardVersionMapper.detail(versionId);
-        if(DataSecurityHelper.isTenantOpen()){
-            if(StringUtils.isNotEmpty(dataStandardVersionDTO.getChargeName())) {
+        if (DataSecurityHelper.isTenantOpen()) {
+            if (StringUtils.isNotEmpty(dataStandardVersionDTO.getChargeName())) {
                 dataStandardVersionDTO.setChargeName(DataSecurityHelper.decrypt(dataStandardVersionDTO.getChargeName()));
             }
-            if(StringUtils.isNotEmpty(dataStandardVersionDTO.getChargeName())) {
+            if (StringUtils.isNotEmpty(dataStandardVersionDTO.getChargeName())) {
                 dataStandardVersionDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataStandardVersionDTO.getChargeDeptName()));
             }
         }
@@ -54,6 +61,13 @@ public class DataStandardVersionServiceImpl implements DataStandardVersionServic
             throw new CommonException(ErrorCode.DATA_STANDARD_VERSION_NOT_EXIST);
         }
         convertToDataLengthList(dataStandardVersionDTO);
+
+        // 翻译值域范围: 翻译失败，返回原值
+        String valueType = dataStandardVersionDTO.getValueType();
+        String valueRange = dataStandardVersionDTO.getValueRange();
+        Long tenantId = dataStandardVersionDTO.getTenantId();
+        dataStandardVersionDTO.setValueRange(dataTranslateUtil.translateValueRange(valueType,valueRange,tenantId));
+
         List<ExtraVersionDTO> extraVersionDTOS = extraVersionRepository.selectDTOByCondition(Condition.builder(ExtraVersion.class)
                 .andWhere(Sqls.custom()
                         .andEqualTo(ExtraVersion.FIELD_STANDARD_ID, dataStandardVersionDTO.getStandardId())

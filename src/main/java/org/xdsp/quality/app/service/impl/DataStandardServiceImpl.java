@@ -54,10 +54,7 @@ import org.xdsp.quality.infra.export.dto.DataStandardExportDTO;
 import org.xdsp.quality.infra.feign.AssetFeign;
 import org.xdsp.quality.infra.mapper.DataStandardMapper;
 import org.xdsp.quality.infra.mapper.StandardApprovalMapper;
-import org.xdsp.quality.infra.util.DataLengthHandler;
-import org.xdsp.quality.infra.util.DataPatternHandler;
-import org.xdsp.quality.infra.util.StandardHandler;
-import org.xdsp.quality.infra.util.ValueRangeHandler;
+import org.xdsp.quality.infra.util.*;
 import org.xdsp.quality.workflow.adapter.DataStandardOfflineWorkflowAdapter;
 import org.xdsp.quality.workflow.adapter.DataStandardOnlineWorkflowAdapter;
 
@@ -157,6 +154,8 @@ public class DataStandardServiceImpl implements DataStandardService {
     @Autowired
     private CommonGroupRepository commonGroupRepository;
 
+    private final DataTranslateUtil dataTranslateUtil;
+
     public DataStandardServiceImpl(DataStandardRepository dataStandardRepository,
                                    DataStandardVersionRepository dataStandardVersionRepository,
                                    StandardExtraRepository standardExtraRepository,
@@ -178,7 +177,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                                    StandardApprovalRepository standardApprovalRepository,
                                    ReferenceDataRepository referenceDataRepository, StandardApprovalMapper standardApprovalMapper,
                                    DataStandardOnlineWorkflowAdapter dataStandardOnlineWorkflowAdapter,
-                                   DataStandardOfflineWorkflowAdapter dataStandardOfflineWorkflowAdapter) {
+                                   DataStandardOfflineWorkflowAdapter dataStandardOfflineWorkflowAdapter, DataTranslateUtil dataTranslateUtil) {
         this.dataStandardRepository = dataStandardRepository;
         this.dataStandardVersionRepository = dataStandardVersionRepository;
         this.standardExtraRepository = standardExtraRepository;
@@ -202,6 +201,7 @@ public class DataStandardServiceImpl implements DataStandardService {
         this.standardApprovalMapper = standardApprovalMapper;
         this.dataStandardOnlineWorkflowAdapter = dataStandardOnlineWorkflowAdapter;
         this.dataStandardOfflineWorkflowAdapter = dataStandardOfflineWorkflowAdapter;
+        this.dataTranslateUtil = dataTranslateUtil;
     }
 
 
@@ -282,6 +282,11 @@ public class DataStandardServiceImpl implements DataStandardService {
                         .andEqualTo(StandardExtra.FIELD_TENANT_ID, tenantId))
                 .build());
         dataStandardDTO.setStandardExtraDTOList(standardExtraDTOS);
+
+        // 翻译值域范围：翻译失败，返回原值
+        String valueRange = dataTranslateUtil.translateValueRange(dataStandardDTO.getValueType(), dataStandardDTO.getValueRange(), tenantId);
+        dataStandardDTO.setValueRange(valueRange);
+
         return dataStandardDTO;
     }
 
@@ -798,6 +803,12 @@ public class DataStandardServiceImpl implements DataStandardService {
                 dataStandardDTO.setChargeDeptName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeDeptName()));
             }
         }
+
+        // 翻译值域范围：翻译失败，返回原值
+        String valueType = dataStandardDTO.getValueType();
+        String valueRange = dataStandardDTO.getValueRange();
+        dataStandardDTO.setValueRange(dataTranslateUtil.translateValueRange(valueType,valueRange,tenantId));
+
         return dataStandardDTO;
     }
 

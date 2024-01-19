@@ -55,6 +55,7 @@ import org.xdsp.quality.infra.mapper.DataStandardMapper;
 import org.xdsp.quality.infra.mapper.StandardApprovalMapper;
 import org.xdsp.quality.infra.statistic.validator.StatisticValidator;
 import org.xdsp.quality.infra.util.CustomThreadPool;
+import org.xdsp.quality.infra.util.DataTranslateUtil;
 import org.xdsp.quality.infra.util.StandardHandler;
 import org.xdsp.quality.workflow.adapter.DataFieldOfflineWorkflowAdapter;
 import org.xdsp.quality.workflow.adapter.DataFieldOnlineWorkflowAdapter;
@@ -146,6 +147,8 @@ public class DataFieldServiceImpl implements DataFieldService {
 
     private final AssetFeign assetFeign;
 
+    private final DataTranslateUtil dataTranslateUtil;
+
     public DataFieldServiceImpl(DataFieldRepository dataFieldRepository, StandardExtraRepository standardExtraRepository,
                                 DataFieldVersionRepository dataFieldVersionRepository, DataFieldMapper dataFieldMapper,
                                 DataStandardService dataStandardService, ExtraVersionRepository extraVersionRepository,
@@ -155,7 +158,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                                 StandardTeamRepository standardTeamRepository, StandardRelationRepository standardRelationRepository,
                                 AimStatisticsRepository aimStatisticsRepository, StandardApprovalRepository standardApprovalRepository,
                                 StandardApprovalMapper standardApprovalMapper, List<StatisticValidator> statisticValidatorList,
-                                DriverSessionService driverSessionService, StandardApprovalService standardApprovalService, AimStatisticsConverter aimStatisticsConverter, StandardGroupRepository standardGroupRepository, AssetFeign assetFeign) {
+                                DriverSessionService driverSessionService, StandardApprovalService standardApprovalService, AimStatisticsConverter aimStatisticsConverter, StandardGroupRepository standardGroupRepository, AssetFeign assetFeign, DataTranslateUtil dataTranslateUtil) {
         this.dataFieldRepository = dataFieldRepository;
         this.standardExtraRepository = standardExtraRepository;
         this.dataFieldVersionRepository = dataFieldVersionRepository;
@@ -179,6 +182,7 @@ public class DataFieldServiceImpl implements DataFieldService {
         this.aimStatisticsConverter = aimStatisticsConverter;
         this.standardGroupRepository = standardGroupRepository;
         this.assetFeign = assetFeign;
+        this.dataTranslateUtil = dataTranslateUtil;
     }
 
 
@@ -279,6 +283,10 @@ public class DataFieldServiceImpl implements DataFieldService {
             List<StandardTeamDTO> standardTeamDTOS = standardTeamRepository.selectDTOByIds(standardTeamIds);
             dataFieldDTO.setStandardTeamDTOList(standardTeamDTOS);
         }
+
+        // 翻译值域范围: 翻译失败，返回原valueRange
+        String valueRange = dataTranslateUtil.translateValueRange(dataFieldDTO.getValueType(), dataFieldDTO.getValueRange(), tenantId);
+        dataFieldDTO.setValueRange(valueRange);
 
         return dataFieldDTO;
     }
@@ -930,6 +938,11 @@ public class DataFieldServiceImpl implements DataFieldService {
             standardTeamCode.deleteCharAt(standardTeamCode.length() - 1);
             dataFieldDTO.setStandardTeamCode(standardTeamCode.toString());
         }
+
+        // 翻译值域范围：翻译失败，返回原值
+        String valueRange = dataFieldDTO.getValueRange();
+        String valueType = dataFieldDTO.getValueType();
+        dataFieldDTO.setValueRange(dataTranslateUtil.translateValueRange(valueType,valueRange,tenantId));
 
         return dataFieldDTO;
     }
