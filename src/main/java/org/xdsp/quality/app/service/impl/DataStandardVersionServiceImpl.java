@@ -19,6 +19,7 @@ import org.xdsp.quality.domain.repository.ExtraVersionRepository;
 import org.xdsp.quality.infra.constant.ErrorCode;
 import org.xdsp.quality.infra.mapper.DataStandardVersionMapper;
 import org.xdsp.quality.infra.util.DataTranslateUtil;
+import org.xdsp.quality.infra.vo.ValueRangeVo;
 
 import java.util.Arrays;
 import java.util.List;
@@ -62,11 +63,13 @@ public class DataStandardVersionServiceImpl implements DataStandardVersionServic
         }
         convertToDataLengthList(dataStandardVersionDTO);
 
-        // 翻译值域范围: 翻译失败，返回原值
+        // 翻译值域范围
         String valueType = dataStandardVersionDTO.getValueType();
         String valueRange = dataStandardVersionDTO.getValueRange();
         Long tenantId = dataStandardVersionDTO.getTenantId();
-        dataStandardVersionDTO.setValueRange(dataTranslateUtil.translateValueRange(valueType,valueRange,tenantId));
+        ValueRangeVo valueRangeVo = dataTranslateUtil.translateValueRange(valueType, valueRange, tenantId);
+        dataStandardVersionDTO.setValueRangeCode(valueRangeVo.getCode());
+        dataStandardVersionDTO.setValueRangeName(valueRangeVo.getName());
 
         List<ExtraVersionDTO> extraVersionDTOS = extraVersionRepository.selectDTOByCondition(Condition.builder(ExtraVersion.class)
                 .andWhere(Sqls.custom()

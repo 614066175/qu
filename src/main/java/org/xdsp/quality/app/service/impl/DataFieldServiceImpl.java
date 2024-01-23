@@ -58,6 +58,7 @@ import org.xdsp.quality.infra.statistic.validator.StatisticValidator;
 import org.xdsp.quality.infra.util.CustomThreadPool;
 import org.xdsp.quality.infra.util.DataTranslateUtil;
 import org.xdsp.quality.infra.util.StandardHandler;
+import org.xdsp.quality.infra.vo.ValueRangeVo;
 import org.xdsp.quality.workflow.adapter.DataFieldOfflineWorkflowAdapter;
 import org.xdsp.quality.workflow.adapter.DataFieldOnlineWorkflowAdapter;
 
@@ -285,9 +286,10 @@ public class DataFieldServiceImpl implements DataFieldService {
             dataFieldDTO.setStandardTeamDTOList(standardTeamDTOS);
         }
 
-        // 翻译值域范围: 翻译失败，返回原valueRange
-        String valueRange = dataTranslateUtil.translateValueRange(dataFieldDTO.getValueType(), dataFieldDTO.getValueRange(), tenantId);
-        dataFieldDTO.setValueRange(valueRange);
+        // 翻译值域范围
+        ValueRangeVo valueRangeVo = dataTranslateUtil.translateValueRange(dataFieldDTO.getValueType(), dataFieldDTO.getValueRange(), tenantId);
+        dataFieldDTO.setValueRangeCode(valueRangeVo.getCode());
+        dataFieldDTO.setValueRangeName(valueRangeVo.getName());
 
         return dataFieldDTO;
     }
@@ -939,7 +941,9 @@ public class DataFieldServiceImpl implements DataFieldService {
         // 翻译值域范围：翻译失败，返回原值
         String valueRange = dataFieldDTO.getValueRange();
         String valueType = dataFieldDTO.getValueType();
-        dataFieldDTO.setValueRange(dataTranslateUtil.translateValueRange(valueType,valueRange,tenantId));
+        ValueRangeVo valueRangeVo = dataTranslateUtil.translateValueRange(valueType, valueRange, tenantId);
+        dataFieldDTO.setValueRangeCode(valueRangeVo.getCode());
+        dataFieldDTO.setValueRangeName(valueRangeVo.getName());
 
         return dataFieldDTO;
     }

@@ -55,6 +55,7 @@ import org.xdsp.quality.infra.feign.AssetFeign;
 import org.xdsp.quality.infra.mapper.DataStandardMapper;
 import org.xdsp.quality.infra.mapper.StandardApprovalMapper;
 import org.xdsp.quality.infra.util.*;
+import org.xdsp.quality.infra.vo.ValueRangeVo;
 import org.xdsp.quality.workflow.adapter.DataStandardOfflineWorkflowAdapter;
 import org.xdsp.quality.workflow.adapter.DataStandardOnlineWorkflowAdapter;
 
@@ -273,7 +274,7 @@ public class DataStandardServiceImpl implements DataStandardService {
                 dataStandardDTO.setChargeName(DataSecurityHelper.decrypt(dataStandardDTO.getChargeName()));
             }
         }
-        selectReferenceData(dataStandardDTO);
+//        selectReferenceData(dataStandardDTO);
         convertToDataLengthList(dataStandardDTO);
         List<StandardExtraDTO> standardExtraDTOS = standardExtraRepository.selectDTOByCondition(Condition.builder(StandardExtra.class)
                 .andWhere(Sqls.custom()
@@ -283,9 +284,10 @@ public class DataStandardServiceImpl implements DataStandardService {
                 .build());
         dataStandardDTO.setStandardExtraDTOList(standardExtraDTOS);
 
-        // 翻译值域范围：翻译失败，返回原值
-        String valueRange = dataTranslateUtil.translateValueRange(dataStandardDTO.getValueType(), dataStandardDTO.getValueRange(), tenantId);
-        dataStandardDTO.setValueRange(valueRange);
+        // 翻译值域范围
+        ValueRangeVo valueRangeVo = dataTranslateUtil.translateValueRange(dataStandardDTO.getValueType(), dataStandardDTO.getValueRange(), tenantId);
+        dataStandardDTO.setValueRangeCode(valueRangeVo.getCode());
+        dataStandardDTO.setValueRangeName(valueRangeVo.getName());
 
         return dataStandardDTO;
     }
@@ -804,10 +806,12 @@ public class DataStandardServiceImpl implements DataStandardService {
             }
         }
 
-        // 翻译值域范围：翻译失败，返回原值
+        // 翻译值域范围
         String valueType = dataStandardDTO.getValueType();
         String valueRange = dataStandardDTO.getValueRange();
-        dataStandardDTO.setValueRange(dataTranslateUtil.translateValueRange(valueType,valueRange,tenantId));
+        ValueRangeVo valueRangeVo = dataTranslateUtil.translateValueRange(valueType, valueRange, tenantId);
+        dataStandardDTO.setValueRangeCode(valueRangeVo.getCode());
+        dataStandardDTO.setValueRangeName(valueRangeVo.getName());
 
         return dataStandardDTO;
     }

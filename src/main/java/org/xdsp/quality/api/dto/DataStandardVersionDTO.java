@@ -142,4 +142,10 @@ public class DataStandardVersionDTO extends AuditDomain {
 
     @ApiModelProperty("发布时间")
     private Date releaseDate;
+
+    // 值域范围翻译
+    @Transient
+    private String valueRangeCode;
+    @Transient
+    private String valueRangeName;
 }
