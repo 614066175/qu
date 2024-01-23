@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.hzero.boot.driver.app.service.DriverSessionService;
 import org.hzero.boot.driver.infra.util.PageUtil;
@@ -586,55 +587,51 @@ public class DataFieldServiceImpl implements DataFieldService {
         List<Future> futures = new ArrayList<>();
         for (StandardAimDTO aimDTO : standardAimDTOS) {
             Future future = executor.submit(() -> {
-                try {
-                    AimStatisticsDTO aimStatisticsDTO = new AimStatisticsDTO();
-                    aimStatisticsDTO.setAimId(aimDTO.getAimId());
-                    String fieldName = aimDTO.getFieldName().split("\\(")[0];
-                    String dataSourceCode = aimDTO.getDatasourceCode();
-                    String schemaName = aimDTO.getSchemaName();
-                    String tableName = aimDTO.getTableName();
+                AimStatisticsDTO aimStatisticsDTO = new AimStatisticsDTO();
+                aimStatisticsDTO.setAimId(aimDTO.getAimId());
+                String fieldName = aimDTO.getFieldName().split("\\(")[0];
+                String dataSourceCode = aimDTO.getDatasourceCode();
+                String schemaName = aimDTO.getSchemaName();
+                String tableName = aimDTO.getTableName();
 
-                    DriverSession driverSession = driverSessionService.getDriverSession(aimDTO.getTenantId(), dataSourceCode);
-                    List<Map<String, Object>> countResult = driverSession.executeOneQuery(schemaName, String.format(COUNT_SQL, tableName));
-                    if (CollectionUtils.isNotEmpty(countResult)) {
-                        log.info("行数查询结果【{}】", countResult);
-                        String count = countResult.get(0).values().toArray()[0].toString();
-                        aimStatisticsDTO.setRowNum(Long.parseLong(count));
-                    }
-
-                    List<Map<String, Object>> notNullResult = driverSession.executeOneQuery(schemaName, String.format(NOT_NULL_COUNT, tableName, fieldName));
-                    if (CollectionUtils.isNotEmpty(notNullResult)) {
-                        log.info("非空行数查询结果【{}】", notNullResult);
-                        String notNullCount = notNullResult.get(0).values().toArray()[0].toString();
-                        aimStatisticsDTO.setNonNullRow(Long.parseLong(notNullCount));
-                    }
-
-                    // 统计合规行数 字段类型校验，字段长度、字段精度、数据格式、值域类型校验（若字段标准中维护了值）
-                    //1.查询出字段标准表，并取出对应的合规校验 字段
-                    DataFieldDTO dto = dataFieldRepository.selectDTOByPrimaryKey(aimDTO.getStandardId());
-                    if (Objects.isNull(dto)) {
-                        throw new CommonException(ErrorCode.DATA_FIELD_STANDARD_NOT_EXIST);
-                    }
-
-                    //执行验证逻辑
-                    //定义一个验证标识，是否有必要继续验证
-                    aimStatisticsDTO.setValidFlag(true);
-                    statisticValidatorList.forEach(statisticValidator -> {
-                        if (aimStatisticsDTO.isValidFlag()) {
-                            statisticValidator.valid(dto, aimDTO, aimStatisticsDTO);
-                        }
-                    });
-
-                    // 统计总行合规比例
-                    BigDecimal compliantRatePercent = getPercent(aimStatisticsDTO.getCompliantRow(), aimStatisticsDTO.getRowNum());
-                    aimStatisticsDTO.setCompliantRate(compliantRatePercent);
-                    // 统计非空行合规比列
-                    BigDecimal acompliantPercent = getPercent(aimStatisticsDTO.getCompliantRow(), aimStatisticsDTO.getNonNullRow());
-                    aimStatisticsDTO.setAcompliantRate(acompliantPercent);
-                    aimStatisticsDTOS.add(aimStatisticsDTO);
-                } catch (Exception e) {
-                    throw new CommonException(ErrorCode.AIM_STATISTIC_FAILED, e);
+                DriverSession driverSession = driverSessionService.getDriverSession(aimDTO.getTenantId(), dataSourceCode);
+                List<Map<String, Object>> countResult = driverSession.executeOneQuery(schemaName, String.format(COUNT_SQL, tableName));
+                if (CollectionUtils.isNotEmpty(countResult)) {
+                    log.info("行数查询结果【{}】", countResult);
+                    String count = countResult.get(0).values().toArray()[0].toString();
+                    aimStatisticsDTO.setRowNum(Long.parseLong(count));
                 }
+
+                List<Map<String, Object>> notNullResult = driverSession.executeOneQuery(schemaName, String.format(NOT_NULL_COUNT, tableName, fieldName));
+                if (CollectionUtils.isNotEmpty(notNullResult)) {
+                    log.info("非空行数查询结果【{}】", notNullResult);
+                    String notNullCount = notNullResult.get(0).values().toArray()[0].toString();
+                    aimStatisticsDTO.setNonNullRow(Long.parseLong(notNullCount));
+                }
+
+                // 统计合规行数 字段类型校验，字段长度、字段精度、数据格式、值域类型校验（若字段标准中维护了值）
+                //1.查询出字段标准表，并取出对应的合规校验 字段
+                DataFieldDTO dto = dataFieldRepository.selectDTOByPrimaryKey(aimDTO.getStandardId());
+                if (Objects.isNull(dto)) {
+                    throw new CommonException(ErrorCode.DATA_FIELD_STANDARD_NOT_EXIST);
+                }
+
+                //执行验证逻辑
+                //定义一个验证标识，是否有必要继续验证
+                aimStatisticsDTO.setValidFlag(true);
+                statisticValidatorList.forEach(statisticValidator -> {
+                    if (aimStatisticsDTO.isValidFlag()) {
+                        statisticValidator.valid(dto, aimDTO, aimStatisticsDTO);
+                    }
+                });
+
+                // 统计总行合规比例
+                BigDecimal compliantRatePercent = getPercent(aimStatisticsDTO.getCompliantRow(), aimStatisticsDTO.getRowNum());
+                aimStatisticsDTO.setCompliantRate(compliantRatePercent);
+                // 统计非空行合规比列
+                BigDecimal acompliantPercent = getPercent(aimStatisticsDTO.getCompliantRow(), aimStatisticsDTO.getNonNullRow());
+                aimStatisticsDTO.setAcompliantRate(acompliantPercent);
+                aimStatisticsDTOS.add(aimStatisticsDTO);
                 return null;
             });
             futures.add(future);
@@ -653,7 +650,7 @@ public class DataFieldServiceImpl implements DataFieldService {
                         f1.cancel(true);
                     }
                 });
-                throw new CommonException(ErrorCode.AIM_STATISTIC_FAILED, e);
+                throw new CommonException(ErrorCode.AIM_STATISTIC_FAILED, e, ExceptionUtils.getRootCauseMessage(e));
             }
         }
 
