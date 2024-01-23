@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.xdsp.quality.api.dto.StandardGroupDTO;
 import org.xdsp.quality.domain.entity.StandardGroup;
 import org.xdsp.quality.domain.repository.StandardGroupRepository;
+import org.xdsp.quality.infra.constant.ErrorCode;
 import org.xdsp.quality.infra.mapper.DataStandardMapper;
 
 import java.util.List;
@@ -39,7 +40,7 @@ public class ImportUtil {
     public Long getChargerId(String chargerName, Long tenantId) {
         List<Long> chargeId = dataStandardMapper.selectIdByChargeName(chargerName, tenantId);
         if (CollectionUtils.isEmpty(chargeId)) {
-            throw new CommonException("责任人不存在");
+            throw new CommonException(ErrorCode.CHARGER_NOT_EXIST);
         }
         return chargeId.get(0);
     }
@@ -54,7 +55,7 @@ public class ImportUtil {
         }
         List<Long> chargeDeptId = dataStandardMapper.selectIdByChargeDeptName(chargeDeptName, tenantId);
         if (CollectionUtils.isEmpty(chargeDeptId)) {
-            throw new CommonException("责任部门不存在");
+            throw new CommonException(ErrorCode.CHARGER_DEPT_NOT_EXIST);
         }
         return chargeDeptId.get(0);
     }

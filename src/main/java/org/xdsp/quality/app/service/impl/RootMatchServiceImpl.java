@@ -181,7 +181,7 @@ public class RootMatchServiceImpl implements RootMatchService {
                 rootMatchHisRepository.updateByPrimaryKeySelective(matchHis);
             }
         } catch (IOException e) {
-            throw new CommonException("上传失败");
+            throw new CommonException(ErrorCode.UPLOAD_FILE_READ_FAILED);
         }
         return rootMatchDTO.getBatchNumber();
     }
@@ -243,7 +243,7 @@ public class RootMatchServiceImpl implements RootMatchService {
             outputStream.close();
         } catch (Exception e) {
             log.error("导出excel失败", e);
-            throw new CommonException("xqua.err.export_excel_failed", e);
+            throw new CommonException(ErrorCode.EXPORT_EXCEL_FAILED, e);
         }
     }
 
@@ -265,7 +265,7 @@ public class RootMatchServiceImpl implements RootMatchService {
         RootMatchHis rootMatchHis = rootMatchHisRepository.selectOne(RootMatchHis.builder().batchNumber(rootMatchDTO.getBatchNumber()).build());
         if (MATCHING.equals(rootMatchHis.getStatus())) {
             //如果当前批次记录正在匹配中，无法进行操作
-            throw new CommonException("当前批次正在匹配中，无法进行操作");
+            throw new CommonException(ErrorCode.MATCHING_BATCH_RUNNING);
         }
         //获取当前批次的除手动维护状态外的所有数据
         List<RootMatch> rootMatches = rootMatchRepository.selectByCondition(Condition.builder(RootMatch.class)
@@ -277,7 +277,7 @@ public class RootMatchServiceImpl implements RootMatchService {
                 .build());
         if (CollectionUtils.isEmpty(rootMatches)) {
             //如果当前批次记录正在匹配中，无法进行操作
-            throw new CommonException("无可智能匹配数据！");
+            throw new CommonException(ErrorCode.NO_SMART_MATCH_DATA);
         }
         List<Future> futures = new ArrayList<>();
         //修改批次记录状态

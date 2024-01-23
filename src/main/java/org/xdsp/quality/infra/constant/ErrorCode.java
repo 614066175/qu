@@ -227,4 +227,68 @@ public interface ErrorCode {
      * 质量评估规则错误
      */
     String CHECK_RULE_FAILED="xqua.err.check_rule_failed";
+    /**
+     * 未找到评估方案
+     */
+    String NOT_FOUND_ASSESSMENT_PLAN = "xqua.err.not_found_assessment_plan";
+    /**
+     * 责任人不存在
+     */
+    String CHARGER_NOT_EXIST = "xqua.err.charger_not_exists";
+    String CHARGER_DEPT_NOT_EXIST = "xqua.err.charger_dept_not_exists";
+
+    String REFERENCE_DATA_NOT_SELECTED = "xqua.err.reference_data_not_selected";
+    /**
+     * 读取网络文件异常
+     */
+    String READ_NET_FILE_ERROR = "xqua.err.read_net_file_error";
+    String FILE_PREVIEW_NOT_EXISTS = "xsta.err.file_preview_not_exist";
+
+    String REFERENCE_DATA_NOT_EXISTS = "xqua.err.reference_data_not_exists";
+
+    /**
+     * DS JOB Feign
+     */
+    String DS_JOB_FIND_BY_CODE_FAILED = "xqua.err.ds_job_find_by_code_failed";
+
+    /**
+     * 字段标准：状态正在审批中，无法操作
+     */
+    String DATA_FIELD_APPROVING = "xqua.err.data_field_approving";
+    /**
+     * excel文件失败
+     */
+    String UPLOAD_FILE_READ_FAILED = "xqua.err.upload_file_read_failed";
+    String EXPORT_EXCEL_FAILED = "xqua.err.export_excel_failed";
+
+    String MATCHING_BATCH_RUNNING = "xqua.err.matching_batch_running";
+    String COLUMN_NOT_FOUND = "xqua.err.column_not_found";
+    String EXCEPTION_DATA_GET_ERROR = "xqua.err.exception_data_get_error";
+    String NO_SMART_MATCH_DATA = "xqua.err.no_smart_match_data";
+    String STANDARD_DOC_CODE_EXIST = "xqua.err.standard_doc_code_exist";
+    String STANDARD_DOC_NAME_EXIST = "xqua.err.standard_doc_name_exist";
+    /**
+     * 落标统计失败
+     */
+    String AIM_STATISTIC_FAILED = "xqua.err.aim_statistic_failed";
+    /**
+     * 参数异常
+     */
+    String PARAM_ERROR = "xqua.err.param_error";
+    String NAME_STANDARD_IS_EMPTY = "xsta.err.name_standard_is_empty";
+
+    /**
+     * 词根分析
+     */
+    String BAD_INPUT_CAN_NOT_ANALYZE = "xqua.err.bad_input_can_not_analyze";
+    String ROOT_ANALYSE_FAILED = "xqua.err.root_analyse_failed";
+    String DIY_DIC_CREATE_ERROR = "xqua.err.diy_dic_create_error";
+    String DIC_APPEND_ERROR = "xqua.err.dic_append_error";
+    String DIC_FILE_UPLOAD_FAILED = "xqua.err.dic_file_upload_failed";
+    String DIC_FILE_DOWNLOAD_FAILED = "xqua.err.dic_file_download_failed";
+    /**
+     * 值集为空
+     */
+    String LOV_VALUE_EMPTY = "xqua.lov_value_empty";
+    String VALUE_TYPE_NOT_SUPPORTED = "xqua.value_type_not_supported";
 }
