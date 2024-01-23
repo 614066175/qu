@@ -152,4 +152,10 @@ public class DataFieldVersionDTO extends AuditDomain {
 
     @Transient
     private String dataStandardCode;
+
+    // 值域范围翻译
+    @Transient
+    private String valueRangeCode;
+    @Transient
+    private String valueRangeName;
 }

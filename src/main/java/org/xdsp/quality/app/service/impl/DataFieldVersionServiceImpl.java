@@ -22,6 +22,7 @@ import org.xdsp.quality.domain.repository.StandardTeamRepository;
 import org.xdsp.quality.infra.constant.ErrorCode;
 import org.xdsp.quality.infra.mapper.DataFieldVersionMapper;
 import org.xdsp.quality.infra.util.DataTranslateUtil;
+import org.xdsp.quality.infra.vo.ValueRangeVo;
 
 import java.util.List;
 import java.util.Objects;
@@ -93,11 +94,13 @@ public class DataFieldVersionServiceImpl implements DataFieldVersionService {
             dataFieldVersionDTO.setStandardTeamDTOList(standardTeamDTOS);
         }
 
-        // 翻译值域范围：翻译失败，返回原值
+        // 翻译值域范围
         String valueType = dataFieldVersionDTO.getValueType();
         String valueRange = dataFieldVersionDTO.getValueRange();
         Long tenantId = dataFieldVersionDTO.getTenantId();
-        dataFieldVersionDTO.setValueRange(dataTranslateUtil.translateValueRange(valueType,valueRange,tenantId));
+        ValueRangeVo valueRangeVo = dataTranslateUtil.translateValueRange(valueType, valueRange, tenantId);
+        dataFieldVersionDTO.setValueRangeCode(valueRangeVo.getCode());
+        dataFieldVersionDTO.setValueRangeName(valueRangeVo.getName());
 
         return dataFieldVersionDTO;
     }

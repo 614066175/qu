@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.xdsp.quality.domain.entity.ReferenceData;
 import org.xdsp.quality.domain.repository.ReferenceDataRepository;
 import org.xdsp.quality.infra.constant.PlanConstant;
+import org.xdsp.quality.infra.vo.ValueRangeVo;
 
 import java.util.Objects;
 
@@ -38,17 +39,19 @@ public class DataTranslateUtil {
      * @param valueRange 值域范围
      * @param tenantId 租户Id
      */
-    public String translateValueRange(String valueType, String valueRange,Long tenantId) {
+    public ValueRangeVo translateValueRange(String valueType, String valueRange, Long tenantId) {
+
+        ValueRangeVo valueRangeVo = ValueRangeVo.builder().build();
 
         if (StringUtils.isNotEmpty(valueType) && StringUtils.isNotEmpty(valueRange)) {
             switch (valueType) {
                 case PlanConstant.StandardValueType.VALUE_SET:
                 case PlanConstant.StandardValueType.LOV_VIEW: {
+                    valueRangeVo.setCode(valueRange);
                     // 翻译值集名称
                     LovDTO lovDTO = lovAdapter.queryLovInfo(valueRange, tenantId);
                     if (Objects.nonNull(lovDTO)) {
-                        // 修改成值集对应的名称
-                        return lovDTO.getLovName();
+                        valueRangeVo.setName(lovDTO.getLovName());
                     }
                 }
                 break;
@@ -59,7 +62,8 @@ public class DataTranslateUtil {
                             .dataId(dataId)
                             .tenantId(tenantId).build());
                     if (Objects.nonNull(referenceData)) {
-                        return referenceData.getDataName();
+                        valueRangeVo.setCode(referenceData.getDataCode());
+                        valueRangeVo.setName(referenceData.getDataName());
                     }
                 }
                 break;
@@ -67,10 +71,8 @@ public class DataTranslateUtil {
                     // 不处理
                 }
             }
-            log.error("值域范围翻译失败");
         }
-
-        return valueRange;
+        return valueRangeVo;
     }
 
 }
