@@ -316,4 +316,10 @@ public class DataFieldDTO extends AuditDomain {
     @Transient
     private String referenceDataName;
 
+    // 值域范围翻译
+    @Transient
+    private String valueRangeCode;
+    @Transient
+    private String valueRangeName;
+
 }
