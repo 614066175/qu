@@ -13,6 +13,7 @@ import org.xdsp.quality.api.dto.StandardGroupDTO;
 import org.xdsp.quality.domain.entity.NameStandard;
 import org.xdsp.quality.domain.repository.NameStandardRepository;
 import org.xdsp.quality.domain.repository.StandardGroupRepository;
+import org.xdsp.quality.infra.constant.ErrorCode;
 import org.xdsp.quality.infra.constant.StandardConstant;
 import org.xdsp.quality.infra.mapper.DataStandardMapper;
 import org.xdsp.quality.infra.mapper.NameStandardMapper;
@@ -72,7 +73,7 @@ public class NameStandardRepositoryImpl extends BaseRepositoryImpl<NameStandard,
     @Transactional(rollbackFor = Exception.class)
     public void batchImportStandard(List<NameStandardDTO> nameStandardDTOList) {
         if (CollectionUtils.isEmpty(nameStandardDTOList)) {
-            throw new CommonException("xsta.err.is_empty");
+            throw new CommonException(ErrorCode.NAME_STANDARD_IS_EMPTY);
         }
         nameStandardDTOList.forEach(nameStandardDTO -> {
             //根据责任人姓名 获取目标环境的责任人id

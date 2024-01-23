@@ -11,6 +11,7 @@ import org.xdsp.quality.api.dto.StandardGroupDTO;
 import org.xdsp.quality.domain.entity.StandardDoc;
 import org.xdsp.quality.domain.repository.StandardDocRepository;
 import org.xdsp.quality.domain.repository.StandardGroupRepository;
+import org.xdsp.quality.infra.constant.ErrorCode;
 import org.xdsp.quality.infra.constant.StandardConstant;
 import org.xdsp.quality.infra.mapper.StandardDocMapper;
 import org.xdsp.quality.infra.util.ImportUtil;
@@ -49,7 +50,7 @@ public class StandardDocRepositoryImpl extends BaseRepositoryImpl<StandardDoc, S
                                 .andEqualTo(StandardDoc.FIELD_TENANT_ID, standardDocDTO.getTenantId())
                         ).build());
                 if (CollectionUtils.isNotEmpty(standardDocs)) {
-                    throw new CommonException("标准编码已存在");
+                    throw new CommonException(ErrorCode.STANDARD_DOC_CODE_EXIST);
                 }
                 standardDocs = selectByCondition(Condition.builder(StandardDoc.class)
                         .andWhere(Sqls.custom()
@@ -57,7 +58,7 @@ public class StandardDocRepositoryImpl extends BaseRepositoryImpl<StandardDoc, S
                                 .andEqualTo(StandardDoc.FIELD_TENANT_ID, standardDocDTO.getTenantId())
                         ).build());
                 if (CollectionUtils.isNotEmpty(standardDocs)) {
-                    throw new CommonException("标准名称已存在");
+                    throw new CommonException(ErrorCode.STANDARD_DOC_NAME_EXIST,"标准名称已存在");
                 }
 
                 //根据责任人姓名 获取目标环境的责任人id

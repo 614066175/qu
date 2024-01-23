@@ -435,10 +435,10 @@ public class RootServiceImpl implements RootService {
             Result result = DicAnalysis.parse(word, forest);
             terms = result.getTerms();
             if (CollectionUtils.isEmpty(terms)) {
-                throw new CommonException("输入内容不合法,无法分词分析");
+                throw new CommonException(ErrorCode.BAD_INPUT_CAN_NOT_ANALYZE);
             }
         } catch (Exception e) {
-            throw new CommonException("词根分析失败", e);
+            throw new CommonException(ErrorCode.ROOT_ANALYSE_FAILED, e);
         }
         List<String> roots = new ArrayList<>();
         terms.forEach(term -> {

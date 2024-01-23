@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.driver.infra.util.PageUtil;
 import org.hzero.boot.file.FileClient;
 import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
+import org.hzero.core.base.BaseConstants;
 import org.hzero.export.vo.ExportParam;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
@@ -239,7 +240,7 @@ public class StandardDocServiceImpl implements StandardDocService {
             //得到输入流
             return conn.getInputStream();
         } catch (Exception e) {
-            throw new CommonException("读取网络文件异常:" + e);
+            throw new CommonException(ErrorCode.READ_NET_FILE_ERROR,e);
         }
     }
 
@@ -264,7 +265,7 @@ public class StandardDocServiceImpl implements StandardDocService {
                 return discoveryHelper.getAppUrlByName(serverName);
             }
         } catch (Exception e) {
-            throw new CommonException("xsta.err.file_preview_not_exist");
+            throw new CommonException(ErrorCode.FILE_PREVIEW_NOT_EXISTS);
         }
     }
 

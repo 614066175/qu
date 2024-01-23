@@ -21,6 +21,7 @@ import org.xdsp.quality.app.service.BatchPlanService;
 import org.xdsp.quality.config.SwaggerTags;
 import org.xdsp.quality.domain.entity.BatchPlan;
 import org.xdsp.quality.domain.repository.BatchPlanRepository;
+import org.xdsp.quality.infra.constant.ErrorCode;
 import org.xdsp.quality.infra.mapper.BatchPlanMapper;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -268,7 +269,7 @@ public class BatchPlanController extends BaseController {
                 .tenantId(tenantId).projectId(sourceProjectId)
                 .build());
         if (batchPlan == null) {
-            throw new CommonException("未找到评估方案！");
+            throw new CommonException(ErrorCode.NOT_FOUND_ASSESSMENT_PLAN);
         }
         Long resultId = batchPlanService.exec(tenantId, batchPlan.getPlanId(), projectId);
         batchPlanService.sendMessage(batchPlan.getPlanId(), resultId);

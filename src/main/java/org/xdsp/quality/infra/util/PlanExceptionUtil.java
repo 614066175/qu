@@ -186,7 +186,7 @@ public class PlanExceptionUtil {
                     if (redisHelper.hasKey(ERROR_FLAG + batchResultBase.getResultBaseId())) {
                         //删除，并抛出异常
                         mongoTemplate.dropCollection(String.format("%d_%d", batchResultBase.getPlanBaseId(), batchResultBase.getResultBaseId()));
-                        throw new CommonException("异常数据获取失败！");
+                        throw new CommonException(ErrorCode.EXCEPTION_DATA_GET_ERROR);
                     }
                 } catch (InterruptedException e) {
                     log.error("线程中断，设置异常标识");
@@ -199,7 +199,7 @@ public class PlanExceptionUtil {
             if (redisHelper.hasKey(ERROR_FLAG + batchResultBase.getResultBaseId())) {
                 //删除，并抛出异常
                 mongoTemplate.dropCollection(String.format("%d_%d", batchResultBase.getPlanBaseId(), batchResultBase.getResultBaseId()));
-                throw new CommonException("异常数据获取失败！");
+                throw new CommonException(ErrorCode.EXCEPTION_DATA_GET_ERROR);
             }
             long end = System.currentTimeMillis();
             log.info("异常数据获取结束,耗时{}s", (end - start) / 1000);

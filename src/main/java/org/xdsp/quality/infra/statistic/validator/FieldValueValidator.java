@@ -21,6 +21,7 @@ import org.xdsp.quality.api.dto.StandardAimDTO;
 import org.xdsp.quality.domain.entity.ReferenceDataHistory;
 import org.xdsp.quality.domain.entity.ReferenceDataValue;
 import org.xdsp.quality.domain.repository.ReferenceDataHistoryRepository;
+import org.xdsp.quality.infra.constant.ErrorCode;
 import org.xdsp.quality.infra.measure.MeasureUtil;
 import org.xdsp.quality.infra.statistic.regular.RegularValidUtil;
 import org.xdsp.quality.infra.util.ApplicationContextUtil;
@@ -97,7 +98,7 @@ public class FieldValueValidator implements StatisticValidator {
                 column = optional.get();
 
             } else {
-                throw new CommonException("字段不存在");
+                throw new CommonException(ErrorCode.COLUMN_NOT_FOUND);
             }
 
             String condition;
@@ -122,7 +123,7 @@ public class FieldValueValidator implements StatisticValidator {
                     //范围
                     String[] split = dataFieldDTO.getValueRange().split(",");
                     if (split.length != 2) {
-                        throw new CommonException("参数不正确");
+                        throw new CommonException(ErrorCode.PARAM_ERROR);
                     }
                     if (StringUtils.isNotEmpty(split[0])) {
                         //占位符
@@ -164,7 +165,7 @@ public class FieldValueValidator implements StatisticValidator {
                     //查询值集结果
                     List<LovValueDTO> lovValueDTOS = lovAdapter.queryLovValue(dataFieldDTO.getValueRange(), dataFieldDTO.getTenantId());
                     if (CollectionUtils.isEmpty(lovValueDTOS)) {
-                        throw new CommonException("值集【" + dataFieldDTO.getValueRange() + "】为空");
+                        throw new CommonException(ErrorCode.LOV_VALUE_EMPTY,dataFieldDTO.getValueRange());
                     }
                     List<String> lovValues = lovValueDTOS.stream().map(LovValueDTO::getValue).collect(Collectors.toList());
                     for (String value : lovValues) {
@@ -214,7 +215,7 @@ public class FieldValueValidator implements StatisticValidator {
                     }
                     break;
                 default:
-                    throw new CommonException("not support value type");
+                    throw new CommonException(ErrorCode.VALUE_TYPE_NOT_SUPPORTED,dataFieldDTO.getValueType());
             }
         }
 

@@ -105,7 +105,7 @@ public class ValueRangeHandler implements StandardHandler {
                     long referenceDataId = Long.parseLong(valueRange);
                     ReferenceDataDTO referenceDataDTO = referenceDataRepository.selectDTOByPrimaryKey(referenceDataId);
                     if (Objects.isNull(referenceDataDTO)) {
-                        throw new CommonException("Reference data does not exist!");
+                        throw new CommonException(ErrorCode.REFERENCE_DATA_NOT_EXISTS);
                     }
                     batchPlanFieldLineDTO.setCountType(PlanConstant.CountType.REFERENCE_DATA);
                     warningLevelDTO = WarningLevelDTO.builder()
@@ -207,7 +207,7 @@ public class ValueRangeHandler implements StandardHandler {
                         long referenceDataId = Long.parseLong(valueRange);
                         ReferenceDataDTO referenceDataDTO = referenceDataRepository.selectDTOByPrimaryKey(referenceDataId);
                         if (Objects.isNull(referenceDataDTO)) {
-                            throw new CommonException("Reference data does not exist!");
+                            throw new CommonException(ErrorCode.REFERENCE_DATA_NOT_EXISTS);
                         }
                         batchPlanFieldLineDTO.setCountType(PlanConstant.CountType.REFERENCE_DATA);
                         warningLevelDTO = WarningLevelDTO.builder()

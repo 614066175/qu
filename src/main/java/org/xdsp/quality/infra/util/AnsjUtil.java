@@ -17,6 +17,7 @@ import org.xdsp.quality.domain.entity.RootLine;
 import org.xdsp.quality.domain.repository.RootDicRepository;
 import org.xdsp.quality.domain.repository.RootLineRepository;
 import org.xdsp.quality.domain.repository.RootRepository;
+import org.xdsp.quality.infra.constant.ErrorCode;
 import org.xdsp.quality.infra.publisher.DicChangeNoticePublisher;
 
 import java.io.*;
@@ -92,7 +93,7 @@ public class AnsjUtil {
                 try {
                     rootLibrary.createNewFile();
                 } catch (IOException e) {
-                    throw new CommonException("自定义词库创建失败", e);
+                    throw new CommonException(ErrorCode.DIY_DIC_CREATE_ERROR, e);
                 }
             }
             if (CollectionUtils.isEmpty(words)) {
@@ -106,7 +107,7 @@ public class AnsjUtil {
                     fileWriter.flush();
                 }
             } catch (IOException e) {
-                throw new CommonException("字典追加失败");
+                throw new CommonException(ErrorCode.DIC_APPEND_ERROR);
             }
             //上传minio
             try (FileInputStream inputStream = new FileInputStream(rootLibrary)) {
@@ -126,7 +127,7 @@ public class AnsjUtil {
                     rootDicRepository.insertSelective(newDic);
                 }
             } catch (Exception e) {
-                throw new CommonException("字典文件上传失败");
+                throw new CommonException(ErrorCode.DIC_FILE_UPLOAD_FAILED,e);
             }
         });
         //通知各服务删除此变化的词库文件,等到下次使用时去下载最新的
@@ -164,7 +165,7 @@ public class AnsjUtil {
                 try {
                     rootLibrary.createNewFile();
                 } catch (IOException e) {
-                    throw new CommonException("自定义词库创建失败", e);
+                    throw new CommonException(ErrorCode.DIY_DIC_CREATE_ERROR, e);
                 }
             }
             try (FileWriter fileWriter = new FileWriter(rootLibrary, true)) {
@@ -174,7 +175,7 @@ public class AnsjUtil {
                     fileWriter.flush();
                 }
             } catch (IOException e) {
-                throw new CommonException("字典追加失败");
+                throw new CommonException(ErrorCode.DIC_APPEND_ERROR);
             }
             //上传minio
             try (FileInputStream inputStream = new FileInputStream(rootLibrary)) {
@@ -195,7 +196,7 @@ public class AnsjUtil {
                     rootDicRepository.insertSelective(newDic);
                 }
             } catch (Exception e) {
-                throw new CommonException("字典文件上传失败");
+                throw new CommonException(ErrorCode.DIC_FILE_UPLOAD_FAILED);
             }
         });
         //通知各服务删除此变化的词库文件,等到下次使用时去下载最新的
@@ -243,7 +244,7 @@ public class AnsjUtil {
             try (InputStream inputStream = fileClient.downloadFile(tenantId, DIC_BUCKET, rootDic.getDicUrl())) {
                 org.apache.commons.io.FileUtils.copyInputStreamToFile(inputStream, dic);
             } catch (IOException e) {
-                throw new CommonException("dic文件下载失败!");
+                throw new CommonException(ErrorCode.DIC_FILE_DOWNLOAD_FAILED);
             }
         }
     }

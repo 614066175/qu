@@ -4,6 +4,7 @@ import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
+import org.hzero.starter.driver.core.domain.entity.Err;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.xdsp.core.base.repository.impl.BaseRepositoryImpl;
@@ -12,6 +13,7 @@ import org.xdsp.quality.api.dto.StandardGroupDTO;
 import org.xdsp.quality.domain.entity.DataStandard;
 import org.xdsp.quality.domain.repository.DataStandardRepository;
 import org.xdsp.quality.domain.repository.StandardGroupRepository;
+import org.xdsp.quality.infra.constant.ErrorCode;
 import org.xdsp.quality.infra.constant.StandardConstant;
 import org.xdsp.quality.infra.mapper.DataStandardMapper;
 import org.xdsp.quality.infra.util.ImportUtil;
@@ -56,7 +58,7 @@ public class DataStandardRepositoryImpl extends BaseRepositoryImpl<DataStandard,
                         )
                         .build());
                 if (CollectionUtils.isNotEmpty(dataStandards)) {
-                    throw new CommonException("标准编码已存在");
+                    throw new CommonException(ErrorCode.DATA_STANDARD_CODE_EXIST);
                 }
                 dataStandards = selectByCondition(Condition.builder(DataStandard.class)
                         .andWhere(Sqls.custom()
@@ -65,7 +67,7 @@ public class DataStandardRepositoryImpl extends BaseRepositoryImpl<DataStandard,
                         )
                         .build());
                 if (CollectionUtils.isNotEmpty(dataStandards)) {
-                    throw new CommonException("标准名称已存在");
+                    throw new CommonException(ErrorCode.DATA_STANDARD_NAME_EXIST);
                 }
                 //使用工具类获取责任人Id，和责任部门Id
                 dataStandardDTO.setChargeDeptId(importUtil.getChargeDeptId(dataStandardDTO.getChargeDeptName(), dataStandardDTO.getTenantId()));
