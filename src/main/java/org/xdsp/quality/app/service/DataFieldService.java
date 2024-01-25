@@ -185,4 +185,14 @@ public interface DataFieldService {
      * @return
      */
     List<DataFieldDTO> listAll(DataFieldDTO dataFieldDTO);
+
+    /**
+     * 元数据字段标准详情
+     *
+     * @param tenantId
+     * @param fieldId
+     * @param projectId
+     * @return
+     */
+    DataFieldDTO assetDetail(Long tenantId, Long fieldId, Long projectId);
 }

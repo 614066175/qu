@@ -34,6 +34,18 @@ import java.util.List;
 public class DataFieldDTO extends AuditDomain {
 
     @Transient
+    private Long parentGroupId;
+
+    @Transient
+    private String nameLevelPath;
+
+    @Transient
+    private String metadataName;
+
+    @Transient
+    private String metadataType;
+
+    @Transient
 //    @ExcelColumn(zh = "分组名称", en = "groupName", groups = {Group1.class})
     private String groupName;
 

@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.xdsp.quality.api.dto.DataFieldDTO;
 import org.xdsp.quality.api.dto.DataStandardDTO;
 import org.xdsp.quality.infra.feign.fallback.AssetFeignFallBack;
 
@@ -41,4 +42,22 @@ public interface AssetFeign {
      */
     @PostMapping("/v1/{organizationId}/asset-fields/delete-Standard-to-es")
     ResponseEntity<?> deleteStandardToEs(@PathVariable("organizationId") Long tenantId, @RequestBody DataStandardDTO dataStandardDTO);
+
+    /**
+     * 字段标准存es
+     * @param tenantId
+     * @param dataFieldDTO
+     * @return
+     */
+    @PostMapping("/v1/{organizationId}/asset-fields/save-field-to-es")
+    ResponseEntity<?> saveFieldToEs(@PathVariable("organizationId") Long tenantId, @RequestBody DataFieldDTO dataFieldDTO);
+
+    /**
+     * 将字段标准从es删除
+     * @param tenantId
+     * @param dataFieldDTO
+     * @return
+     */
+    @PostMapping("/v1/{organizationId}/asset-fields/delete-field-to-es")
+    ResponseEntity<?> deleteFieldToEs(@PathVariable("organizationId") Long tenantId, @RequestBody DataFieldDTO dataFieldDTO);
 }
