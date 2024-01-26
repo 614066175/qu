@@ -721,9 +721,11 @@ public class DataFieldServiceImpl implements DataFieldService {
                 }
                 dataFieldDTO.setStandardStatus(status);
                 dataFieldRepository.updateDTOOptional(dataFieldDTO, DataField.FIELD_STANDARD_STATUS, DataField.FIELD_RELEASE_BY, DataField.FIELD_RELEASE_DATE);
+                assetFeign.saveFieldToEs(dataFieldDTO.getTenantId(), dataFieldDTO);
             } else {
                 dataFieldDTO.setStandardStatus(status);
                 dataFieldRepository.updateDTOOptional(dataFieldDTO, DataField.FIELD_STANDARD_STATUS);
+                assetFeign.deleteFieldToEs(dataFieldDTO.getTenantId(), dataFieldDTO);
             }
             if (ONLINE.equals(status)) {
                 doVersion(dataFieldDTO);
