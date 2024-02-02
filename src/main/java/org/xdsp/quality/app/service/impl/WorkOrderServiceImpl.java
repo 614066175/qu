@@ -10,13 +10,16 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.message.MessageClient;
-import org.hzero.boot.message.entity.MessageSender;
-import org.hzero.boot.message.entity.Receiver;
+import org.hzero.boot.message.entity.*;
+import org.hzero.boot.message.service.FlyBookMessageSender;
 import org.hzero.boot.platform.code.builder.CodeRuleBuilder;
+import org.hzero.core.base.BaseConstants;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.xdsp.core.profile.XdspProfileClient;
+import org.xdsp.core.util.FlyBookHelper;
 import org.xdsp.quality.api.dto.WorkOrderDTO;
 import org.xdsp.quality.api.dto.WorkOrderOperationDTO;
 import org.xdsp.quality.app.service.WorkOrderService;
@@ -33,6 +36,7 @@ import org.xdsp.quality.message.adapter.WorkOrderMessageAdapter;
 
 import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 import static org.apache.poi.util.LocaleID.ZH_CN;
 import static org.xdsp.quality.infra.constant.WorkOrderConstants.OrderOperateType;
@@ -52,6 +56,8 @@ public class WorkOrderServiceImpl implements WorkOrderService {
     private final WorkOrderConverter workOrderConverter;
     private final MessageClient messageClient;
     private final WorkOrderMessageAdapter workOrderMessageAdapter;
+    private final XdspProfileClient profileClient;
+    private final FlyBookHelper flyBookHelper;
 
     public static final String WORK_ORDER_CODE = "XQUA.WORK_ORDER_CODE";
     private static final String GLOBAL = "GLOBAL";
@@ -75,8 +81,19 @@ public class WorkOrderServiceImpl implements WorkOrderService {
      * 质量工单转交消息发送配置
      */
     public static final String ORDER_FORWARD = "XQUA.ORDER_FORWARD";
+    private static final String WORK_ORDER_REMINDER_WAYS = "XQUA.WORK_ORDER_REMINDER_WAYS";
+    public static final String FLY_BOOK = "FLY_BOOK";
+    public static final String FLY_BOOK_PHONE = "FLY_BOOK_PHONE";
 
-    public WorkOrderServiceImpl(WorkOrderRepository workOrderRepository, WorkOrderOperationRepository workOrderOperationRepository, CodeRuleBuilder codeRuleBuilder, WorkOrderMapper workOrderMapper, WorkOrderConverter workOrderConverter, MessageClient messageClient, WorkOrderMessageAdapter workOrderMessageAdapter) {
+    public WorkOrderServiceImpl(WorkOrderRepository workOrderRepository,
+                                WorkOrderOperationRepository workOrderOperationRepository,
+                                CodeRuleBuilder codeRuleBuilder,
+                                WorkOrderMapper workOrderMapper,
+                                WorkOrderConverter workOrderConverter,
+                                MessageClient messageClient,
+                                WorkOrderMessageAdapter workOrderMessageAdapter,
+                                XdspProfileClient profileClient,
+                                FlyBookHelper flyBookHelper) {
         this.workOrderRepository = workOrderRepository;
         this.workOrderOperationRepository = workOrderOperationRepository;
         this.codeRuleBuilder = codeRuleBuilder;
@@ -84,6 +101,8 @@ public class WorkOrderServiceImpl implements WorkOrderService {
         this.workOrderConverter = workOrderConverter;
         this.messageClient = messageClient;
         this.workOrderMessageAdapter = workOrderMessageAdapter;
+        this.profileClient = profileClient;
+        this.flyBookHelper = flyBookHelper;
     }
 
     @Override
@@ -148,36 +167,123 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 
     private void sendMessage(List<WorkOrderDTO> workOrderDTOList, String messageTemplateCode, CustomUserDetails userDetails) {
         DetailsHelper.setCustomUserDetails(userDetails);
-        Receiver receiver;
+        Long tenantId = userDetails.getTenantId();
+        String receiverWays = profileClient.getProfileValue(WORK_ORDER_REMINDER_WAYS);
+        boolean containsFlyBook = StringUtils.contains(receiverWays, FLY_BOOK) || StringUtils.contains(receiverWays, FLY_BOOK_PHONE);
+        List<String> receiverWayList = new ArrayList<>();
+        if (StringUtils.isNotBlank(receiverWays)) {
+            receiverWayList = Arrays.stream(receiverWays.split(BaseConstants.Symbol.COMMA)).collect(Collectors.toList());
+        }
+        if (CollectionUtils.isEmpty(receiverWayList)) {
+            receiverWayList.add("WEB");
+        }
+        Map<Long, Receiver> receiverMap = new HashMap<>();
+        List<String> mobiles = new ArrayList<>();
         for (WorkOrderDTO workOrderDTO : workOrderDTOList) {
-            //接受组为发起人
-            receiver = new Receiver();
-            //如果是发起,则接受人为处理人
-            //质量工单转交的接收人为处理人
+            Receiver receiver = new Receiver();
             if (ORDER_LAUNCH.equals(messageTemplateCode) || ORDER_FORWARD.equals(messageTemplateCode)) {
                 receiver.setUserId(workOrderDTO.getProcessorsId());
-                receiver.setEmail(acquireEmail(workOrderDTO.getProcessorsId()));
             } else {
                 receiver.setUserId(workOrderDTO.getCreatedBy());
-                receiver.setEmail(acquireEmail(workOrderDTO.getCreatedBy()));
+            }
+            receiver.setEmail(acquireEmail(receiver.getUserId()));
+            if (containsFlyBook) {
+                String phone = acquirePhone(receiver.getUserId());
+                receiver.setPhone(phone);
+                mobiles.add(phone);
             }
             receiver.setTargetUserTenantId(workOrderDTO.getTenantId());
+            receiverMap.put(workOrderDTO.getWorkOrderId(), receiver);
+        }
+        mobiles = mobiles.stream().distinct().collect(Collectors.toList());
+        Map<String, String> flyBookUserIdMap;
+        if (CollectionUtils.isNotEmpty(mobiles)) {
+            flyBookUserIdMap = flyBookHelper.batchGetUserIdByMobiles(mobiles);
+        } else {
+            flyBookUserIdMap = new HashMap<>();
+        }
+        for (WorkOrderDTO workOrderDTO : workOrderDTOList) {
             //模板内容 您发起的${工单号}工单已被拒绝，可确认后重新提交。
             Map<String, String> args = new HashMap<>();
             args.put("workOrderCode", workOrderDTO.getWorkOrderCode());
-            //发送自定义消息，可设置邮件/站内消息发送开关
-            MessageSender messageSender = MessageSender.builder()
-                    .messageCode(messageTemplateCode)
-                    .serverCode(messageTemplateCode)
-                    .tenantId(userDetails.getTenantId())
-                    .receiverAddressList(Collections.singletonList(receiver))
-                    .args(args)
-                    .lang(ZH_CN.getLanguageTag())
-                    .build();
-            messageClient.sendMessage(messageSender);
-            //消息适配器
-            workOrderMessageAdapter.sendMessage(messageSender);
+            Receiver receiver = receiverMap.get(workOrderDTO.getWorkOrderId());
+            List<String> tmpReceiverWayList = new ArrayList<>(receiverWayList);
+            FlyBookSender flyBookSender = null;
+            if (containsFlyBook) {
+                String phone = receiver.getPhone();
+                String flyBookOpenUserId = null;
+                if (StringUtils.isNotBlank(phone)) {
+                    flyBookOpenUserId = flyBookUserIdMap.get(phone);
+                }
+                if (tmpReceiverWayList.contains(FLY_BOOK)) {
+                    if (StringUtils.isNotBlank(flyBookOpenUserId)) {
+                        Map<String, String> openUserId = new HashMap<>();
+                        openUserId.put("user_id", flyBookOpenUserId);
+                        flyBookSender = new FlyBookSender()
+                                .setMsg_type(FlyBookMsgType.TEXT.getValue())
+                                .setReceiverList(Collections.singletonList(openUserId))
+                                .setArgs(new HashMap<>(args))
+                                .setMessageCode(messageTemplateCode)
+                                .setServerCode(messageTemplateCode)
+                                .setTenantId(tenantId);
+                    }
+                    tmpReceiverWayList.remove(FLY_BOOK);
+                }
+                if (tmpReceiverWayList.contains(FLY_BOOK_PHONE)) {
+                    if (StringUtils.isNotBlank(flyBookOpenUserId)) {
+                        if (flyBookSender == null) {
+                            Map<String, String> openUserId = new HashMap<>();
+                            openUserId.put("user_id", flyBookOpenUserId);
+                            flyBookSender = new FlyBookSender()
+                                    .setMsg_type(FlyBookMsgType.TEXT.getValue())
+                                    .setReceiverList(Collections.singletonList(openUserId))
+                                    .setArgs(new HashMap<>(args))
+                                    .setMessageCode(messageTemplateCode)
+                                    .setServerCode(messageTemplateCode)
+                                    .setTenantId(tenantId)
+                                    .setUrgentFlag(BaseConstants.Flag.YES)
+                                    .setUrgentType(FlyBookUrgentType.PHONE.getValue());
+                        } else {
+                            flyBookSender.setUrgentFlag(BaseConstants.Flag.YES)
+                                    .setUrgentType(FlyBookUrgentType.PHONE.getValue());
+                        }
+                    }
+                    tmpReceiverWayList.remove(FLY_BOOK_PHONE);
+                }
+            }
+            MessageSender messageSender = null;
+            if (CollectionUtils.isNotEmpty(tmpReceiverWayList)) {
+                messageSender = MessageSender.builder()
+                        .typeCodeList(tmpReceiverWayList)
+                        .messageCode(messageTemplateCode)
+                        .serverCode(messageTemplateCode)
+                        .tenantId(tenantId)
+                        .receiverAddressList(Collections.singletonList(receiver))
+                        .args(args)
+                        .lang(ZH_CN.getLanguageTag())
+                        .build();
+            }
+            if (messageSender != null || flyBookSender != null) {
+                messageClient.sendMessage(messageSender, null, null, null, flyBookSender);
+            }
+            if (messageSender != null) {
+                //消息适配器
+                workOrderMessageAdapter.sendMessage(messageSender);
+            }
+            if (flyBookSender != null) {
+                //消息适配器
+                workOrderMessageAdapter.sendMessage(flyBookSender);
+            }
         }
+    }
+
+    private String acquirePhone(Long processorsId) {
+        String phone = "";
+        String encryptedPhone = workOrderMapper.findUserPhone(processorsId);
+        if(!Strings.isNullOrEmpty(encryptedPhone)){
+            phone = DataSecurityUtil.decrypt(encryptedPhone);
+        }
+        return phone;
     }
 
     private String acquireEmail(Long processorsId) {
@@ -427,36 +533,39 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 
     @Override
     public WorkOrderDTO orderRemind(Long workOrderId) {
-        Long tenantId = DetailsHelper.getUserDetails().getTenantId();
         WorkOrderDTO workOrderDTO = workOrderRepository.selectDTOByPrimaryKey(workOrderId);
-        //处理人
-        Long processorsId = workOrderDTO.getProcessorsId();
-        //接受组为发起人
-        Receiver receiver = new Receiver();
-        receiver.setUserId(processorsId).setTargetUserTenantId(tenantId);
-        //解密获取用户邮箱
-        String encryptedEmail = workOrderMapper.findUserEmail(processorsId);
-        if(!Strings.isNullOrEmpty(encryptedEmail)){
-            String email = DataSecurityUtil.decrypt(encryptedEmail);
-            receiver.setEmail(email);
-        }
-        //模板内容 您发起的${工单号}工单已被拒绝，可确认后重新提交。
-        //您有数据质量整改工单${workOrderCode}待处理，请及时处理！！！
-        Map<String, String> args = new HashMap<>();
-        args.put("workOrderCode", workOrderDTO.getWorkOrderCode());
-        //发送自定义消息，可设置邮件/站内消息发送开关
-        MessageSender messageSender = MessageSender.builder()
-                .tenantId(workOrderDTO.getTenantId())
-                .messageCode(ORDER_TODO)
-                .serverCode(ORDER_TODO)
-                .lang(ZH_CN.getLanguageTag())
-                .receiverAddressList(Collections.singletonList(receiver))
-                .args(args)
-                .build();
-        messageClient.sendMessage(messageSender);
-        //消息适配器
-        workOrderMessageAdapter.sendMessage(messageSender);
+        sendMessage(Collections.singletonList(workOrderDTO), ORDER_TODO, DetailsHelper.getUserDetails());
         return workOrderDTO;
+//        Long tenantId = DetailsHelper.getUserDetails().getTenantId();
+//        WorkOrderDTO workOrderDTO = workOrderRepository.selectDTOByPrimaryKey(workOrderId);
+//        //处理人
+//        Long processorsId = workOrderDTO.getProcessorsId();
+//        //接受组为发起人
+//        Receiver receiver = new Receiver();
+//        receiver.setUserId(processorsId).setTargetUserTenantId(tenantId);
+//        //解密获取用户邮箱
+//        String encryptedEmail = workOrderMapper.findUserEmail(processorsId);
+//        if(!Strings.isNullOrEmpty(encryptedEmail)){
+//            String email = DataSecurityUtil.decrypt(encryptedEmail);
+//            receiver.setEmail(email);
+//        }
+//        //模板内容 您发起的${工单号}工单已被拒绝，可确认后重新提交。
+//        //您有数据质量整改工单${workOrderCode}待处理，请及时处理！！！
+//        Map<String, String> args = new HashMap<>();
+//        args.put("workOrderCode", workOrderDTO.getWorkOrderCode());
+//        //发送自定义消息，可设置邮件/站内消息发送开关
+//        MessageSender messageSender = MessageSender.builder()
+//                .tenantId(workOrderDTO.getTenantId())
+//                .messageCode(ORDER_TODO)
+//                .serverCode(ORDER_TODO)
+//                .lang(ZH_CN.getLanguageTag())
+//                .receiverAddressList(Collections.singletonList(receiver))
+//                .args(args)
+//                .build();
+//        messageClient.sendMessage(messageSender);
+//        //消息适配器
+//        workOrderMessageAdapter.sendMessage(messageSender);
+//        return workOrderDTO;
     }
 
     @Override

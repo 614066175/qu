@@ -129,4 +129,14 @@
             </if>
         </where>
     </select>
+    <select id="findUserPhone" resultType="java.lang.String">
+        select
+            iu.phone
+        from iam_user iu
+        <where>
+            <if test="processorsId != null ">
+                iu.id = #{processorsId}
+            </if>
+        </where>
+    </select>
 </mapper>
