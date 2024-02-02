@@ -220,7 +220,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
                         Map<String, String> openUserId = new HashMap<>();
                         openUserId.put("user_id", flyBookOpenUserId);
                         flyBookSender = new FlyBookSender()
-                                .setMsg_type(FlyBookMsgType.TEXT.getValue())
+                                .setMsg_type(FlyBookMsgType.POST.getValue())
                                 .setReceiverList(Collections.singletonList(openUserId))
                                 .setArgs(new HashMap<>(args))
                                 .setMessageCode(messageTemplateCode)
@@ -235,7 +235,7 @@ public class WorkOrderServiceImpl implements WorkOrderService {
                             Map<String, String> openUserId = new HashMap<>();
                             openUserId.put("user_id", flyBookOpenUserId);
                             flyBookSender = new FlyBookSender()
-                                    .setMsg_type(FlyBookMsgType.TEXT.getValue())
+                                    .setMsg_type(FlyBookMsgType.POST.getValue())
                                     .setReceiverList(Collections.singletonList(openUserId))
                                     .setArgs(new HashMap<>(args))
                                     .setMessageCode(messageTemplateCode)
