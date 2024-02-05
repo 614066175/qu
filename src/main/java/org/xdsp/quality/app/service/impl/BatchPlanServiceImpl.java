@@ -310,7 +310,7 @@ public class BatchPlanServiceImpl implements BatchPlanService {
                 //调整为按编码执行，解决环境迁移id不一致的问题
                 .append("/batch-plans/exec-by-code/")
                 //不写死projectId，项目共享支持跨项目支持
-                .append(batchPlanDTO.getPlanCode()).append("?projectId=${projectId}&sourceProjectId=${hProjectId}" + "\n")
+                .append(batchPlanDTO.getPlanCode()).append("?projectId=${projectId}&sourceProjectId=${sourceProjectId}" + "\n")
                 .append("rest.method=GET\n")
                 .append("rest.contentType=application/json\n")
                 .append("rest.body={}\n")
