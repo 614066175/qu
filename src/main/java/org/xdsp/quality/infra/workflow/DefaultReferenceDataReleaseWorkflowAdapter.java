@@ -1,6 +1,7 @@
 package org.xdsp.quality.infra.workflow;
 
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -10,6 +11,7 @@ import org.hzero.boot.workflow.constant.WorkflowConstant;
 import org.hzero.boot.workflow.dto.RunInstance;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xdsp.core.domain.entity.CommonGroup;
 import org.xdsp.core.domain.repository.CommonGroupRepository;
@@ -29,6 +31,7 @@ import org.xdsp.quality.workflow.adapter.ReferenceDataReleaseWorkflowAdapter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import org.xdsp.workflow.common.external.ExternalFlowHelper;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -48,6 +51,9 @@ public class DefaultReferenceDataReleaseWorkflowAdapter implements ReferenceData
     private final ReferenceDataValueRepository referenceDataValueRepository;
     private final CommonGroupRepository commonGroupRepository;
     private final Lock lock = new ReentrantLock();
+
+    @Autowired
+    private ExternalFlowHelper externalFlowHelper;
 
     public DefaultReferenceDataReleaseWorkflowAdapter(WorkflowClient workflowClient,
                                                       ReferenceDataRecordRepository referenceDataRecordRepository,
@@ -106,12 +112,20 @@ public class DefaultReferenceDataReleaseWorkflowAdapter implements ReferenceData
             workflowParams.put(ReferenceDataConstant.RECORD_ID, dataRecord.getRecordId());
             workflowParams.put(ReferenceDataConstant.DATA_ID, referenceDataDTO.getDataId());
             String businessKey = String.valueOf(System.currentTimeMillis());
-            RunInstance runInstance = workflowClient.startInstanceByFlowKey(referenceDataDTO.getTenantId(), ReferenceDataConstant.RELEASE_WORKFLOW, businessKey, "EMPLOYEE", employeeNum, workflowParams);
-            dataRecord.setInstanceId(runInstance.getInstanceId());
-            referenceDataDTO.setDataStatus(ReferenceDataConstant.RELEASE_ING);
-            // 回写
-            referenceDataRecordRepository.updateOptional(dataRecord, ReferenceDataRecord.FIELD_INSTANCE_ID);
-            referenceDataRepository.updateDTOOptional(referenceDataDTO, ReferenceData.FIELD_DATA_STATUS);
+            CustomUserDetails self = DetailsHelper.getUserDetails();
+            externalFlowHelper.startEmployeeInstance(self.getTenantNum(),
+                    ReferenceDataConstant.EXTERNAL_RELEASE_WORKFLOW,
+                    self.getUsername(),
+                    workflowParams,
+                    () -> {
+                        RunInstance runInstance = workflowClient.startInstanceByFlowKey(referenceDataDTO.getTenantId(), ReferenceDataConstant.RELEASE_WORKFLOW, businessKey, "EMPLOYEE", employeeNum, workflowParams);
+                        dataRecord.setInstanceId(runInstance.getInstanceId());
+                        referenceDataDTO.setDataStatus(ReferenceDataConstant.RELEASE_ING);
+                        // 回写
+                        referenceDataRecordRepository.updateOptional(dataRecord, ReferenceDataRecord.FIELD_INSTANCE_ID);
+                        referenceDataRepository.updateDTOOptional(referenceDataDTO, ReferenceData.FIELD_DATA_STATUS);
+                    }
+            );
             return referenceDataDTO;
         } finally {
             lock.unlock();

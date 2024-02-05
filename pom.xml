@@ -17,6 +17,7 @@
         <maven.test.skip>true</maven.test.skip>
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <ansj.version>5.1.1</ansj.version>
+        <hzero.workflow.version>1.16.0.RELEASE</hzero.workflow.version>
     </properties>
 
     <dependencies>
@@ -48,6 +49,13 @@
             <groupId>org.hzero.boot</groupId>
             <artifactId>hzero-boot-workflow</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.xdsp.adapter</groupId>
+            <artifactId>xdsp-workflow-adapter-common</artifactId>
+            <version>2.1.0-SNAPSHOT</version>
+        </dependency>
+
         <dependency>
             <artifactId>xdsp-quality-workflow-adapter</artifactId>
             <groupId>org.xdsp.adapter</groupId>

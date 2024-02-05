@@ -1,6 +1,7 @@
 package org.xdsp.quality.infra.workflow;
 
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.platform.plugin.hr.EmployeeHelper;
@@ -9,6 +10,7 @@ import org.hzero.boot.workflow.constant.WorkflowConstant;
 import org.hzero.boot.workflow.dto.RunInstance;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xdsp.quality.api.dto.ReferenceDataDTO;
 import org.xdsp.quality.domain.entity.ReferenceData;
@@ -18,6 +20,7 @@ import org.xdsp.quality.domain.repository.ReferenceDataRepository;
 import org.xdsp.quality.infra.constant.ErrorCode;
 import org.xdsp.quality.infra.constant.ReferenceDataConstant;
 import org.xdsp.quality.workflow.adapter.ReferenceDataOfflineWorkflowAdapter;
+import org.xdsp.workflow.common.external.ExternalFlowHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,6 +40,9 @@ public class DefaultReferenceDataOfflineWorkflowAdapter implements ReferenceData
     private final ReferenceDataRecordRepository referenceDataRecordRepository;
     private final ReferenceDataRepository referenceDataRepository;
     private final Lock lock = new ReentrantLock();
+
+    @Autowired
+    private ExternalFlowHelper externalFlowHelper;
 
     public DefaultReferenceDataOfflineWorkflowAdapter(WorkflowClient workflowClient,
                                                       ReferenceDataRecordRepository referenceDataRecordRepository,
@@ -83,12 +89,20 @@ public class DefaultReferenceDataOfflineWorkflowAdapter implements ReferenceData
             workflowParams.put(ReferenceDataConstant.RECORD_ID, dataRecord.getRecordId());
             workflowParams.put(ReferenceDataConstant.DATA_ID, referenceDataDTO.getDataId());
             String businessKey = String.valueOf(System.currentTimeMillis());
-            RunInstance runInstance = workflowClient.startInstanceByFlowKey(referenceDataDTO.getTenantId(), ReferenceDataConstant.OFFLINE_WORKFLOW, businessKey, "EMPLOYEE", employeeNum, workflowParams);
-            dataRecord.setInstanceId(runInstance.getInstanceId());
-            referenceDataDTO.setDataStatus(ReferenceDataConstant.OFFLINE_ING);
-            // 回写
-            referenceDataRecordRepository.updateOptional(dataRecord, ReferenceDataRecord.FIELD_INSTANCE_ID);
-            referenceDataRepository.updateDTOOptional(referenceDataDTO, ReferenceData.FIELD_DATA_STATUS);
+            CustomUserDetails self = DetailsHelper.getUserDetails();
+            externalFlowHelper.startEmployeeInstance(self.getTenantNum(),
+                    ReferenceDataConstant.EXTERNAL_OFFLINE_WORKFLOW,
+                    self.getUsername(),
+                    workflowParams,
+                    () -> {
+                        RunInstance runInstance = workflowClient.startInstanceByFlowKey(referenceDataDTO.getTenantId(), ReferenceDataConstant.OFFLINE_WORKFLOW, businessKey, "EMPLOYEE", employeeNum, workflowParams);
+                        dataRecord.setInstanceId(runInstance.getInstanceId());
+                        referenceDataDTO.setDataStatus(ReferenceDataConstant.OFFLINE_ING);
+                        // 回写
+                        referenceDataRecordRepository.updateOptional(dataRecord, ReferenceDataRecord.FIELD_INSTANCE_ID);
+                        referenceDataRepository.updateDTOOptional(referenceDataDTO, ReferenceData.FIELD_DATA_STATUS);
+                    }
+            );
             return referenceDataDTO;
         } finally {
             lock.unlock();

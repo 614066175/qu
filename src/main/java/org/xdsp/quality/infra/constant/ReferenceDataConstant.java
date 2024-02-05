@@ -17,6 +17,10 @@ public interface ReferenceDataConstant {
 
     String OFFLINE_WORKFLOW = "FLOW1648143827911647233";
 
+    String EXTERNAL_RELEASE_WORKFLOW = "FLOW1753984754258116610";
+
+    String EXTERNAL_OFFLINE_WORKFLOW = "FLOW1753984974282915841";
+
     String RECORD_ID = "recordId";
 
     String DATA_ID = "dataId";
