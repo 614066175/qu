@@ -33,6 +33,15 @@ public interface WorkFlowConstant {
         String OFFLINE_WORKFLOW_KEY="FLOW1365186609020002306";
     }
 
+    interface ExternalDataStandard{
+        String ONLINE_WORKFLOW_KEY="FLOW1753317103999483906";
+        String OFFLINE_WORKFLOW_KEY="FLOW1753320016478044161";
+    }
+
+    interface ExternalFieldStandard{
+        String ONLINE_WORKFLOW_KEY="FLOW1753322685741498369";
+        String OFFLINE_WORKFLOW_KEY="FLOW1753320928206487554";
+    }
     interface FieldStandard{
         String ONLINE_WORKFLOW_KEY="FLOW1427814945561071617";
         String OFFLINE_WORKFLOW_KEY="FLOW1427816537739841538";
