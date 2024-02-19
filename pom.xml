@@ -112,6 +112,7 @@
         <dependency>
             <groupId>org.hzero.boot</groupId>
             <artifactId>hzero-boot-message</artifactId>
+            <version>1.10.2.BETA.2</version>
         </dependency>
 
 
