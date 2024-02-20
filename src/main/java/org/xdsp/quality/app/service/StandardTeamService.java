@@ -91,4 +91,12 @@ public interface StandardTeamService {
      * @return
      */
     Page<DataFieldDTO> standardList(DataFieldDTO dataFieldDTO, PageRequest pageRequest);
+
+    /**
+     * 待添加字段标准列表
+     * @param dataFieldDTO
+     * @param pageRequest
+     * @return
+     */
+    Page<DataFieldDTO> addStandardList(DataFieldDTO dataFieldDTO, PageRequest pageRequest);
 }

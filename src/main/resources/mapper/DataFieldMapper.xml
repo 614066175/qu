@@ -200,6 +200,15 @@
             <if test="dataFieldDTO.releaseDateTo != null">
                 and fs.release_date &lt;= #{dataFieldDTO.releaseDateTo}
             </if>
+             <!--标准组待添加数据标准列表查询 -->
+             <if test="dataFieldDTO.addFlag != null and dataFieldDTO.addFlag=1">
+                 <if test="dataFieldDTO.standardTeamId != null">
+                     and not exists (select 1 from xsta_standard_relation xsr where xsr.standard_team_id=#{dataFieldDTO.standardTeamId} and fs.field_id=xsr.field_standard_id)
+                 </if>
+                 <if test="dataFieldDTO.inheriteTeamId != null">
+                     and not exists (select 1 from xsta_standard_relation xsr2 where xsr2.standard_team_id =#{dataFieldDTO.inheriteTeamId} and fs.field_id =xsr2.field_standard_id )
+                 </if>
+            </if>
         </where>
         order by fs.field_id desc
     </select>

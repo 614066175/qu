@@ -117,9 +117,8 @@ public class StandardRelationController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping
     public ResponseEntity<?> remove(@ApiParam(value = "租户id", required = true) @PathVariable(name = "organizationId") Long tenantId,
-                                    @RequestBody StandardRelationDTO standardRelationDTO) {
-        standardRelationDTO.setTenantId(tenantId);
-        standardRelationRepository.deleteByPrimaryKey(standardRelationDTO);
+                                    @RequestBody List<StandardRelationDTO> standardRelationDTOS) {
+        standardRelationRepository.batchDTODeleteByPrimaryKey(standardRelationDTOS);
         return Results.success();
     }
 }

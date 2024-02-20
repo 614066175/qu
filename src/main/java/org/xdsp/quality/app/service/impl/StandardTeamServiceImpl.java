@@ -218,7 +218,7 @@ public class StandardTeamServiceImpl implements StandardTeamService {
             }
         }
         //若责任人信息加密则解密
-        if(DataSecurityHelper.isTenantOpen()){
+        if (DataSecurityHelper.isTenantOpen()) {
             allDataFieldDTOList.forEach(dataFieldDto -> {
                 if (StringUtils.isNotEmpty(dataFieldDto.getChargeName())) {
                     dataFieldDto.setChargeName(DataSecurityHelper.decrypt(dataFieldDto.getChargeName()));
@@ -281,6 +281,11 @@ public class StandardTeamServiceImpl implements StandardTeamService {
                         .build());
                 if (CollectionUtils.isNotEmpty(inheriteRelations)) {
                     inheriteFieldIds = inheriteRelations.stream().map(StandardRelation::getFieldStandardId).collect(Collectors.toList());
+                    standardRelations.addAll(inheriteRelations);
+                    //去重
+                    standardRelations = new ArrayList<>(standardRelations.stream()
+                            .collect(Collectors.toMap(StandardRelation::getFieldStandardId, s -> s, (s1, s2) -> s1))
+                            .values());
                 }
             }
         }
@@ -291,6 +296,8 @@ public class StandardTeamServiceImpl implements StandardTeamService {
                     .map(standardRelation -> {
                         DataFieldDTO dataFieldDTO = dataFieldRepository.selectDTOByPrimaryKey(standardRelation.getFieldStandardId());
                         dataFieldDTO.setCheckFlag(1);
+                        //记录标准关系id，用于批量移除
+                        dataFieldDTO.setStandardRelationId(standardRelation.getRelationId());
                         if (CollectionUtils.isNotEmpty(finalInheriteFieldIds)) {
                             if (finalInheriteFieldIds.contains(dataFieldDTO.getFieldId())) {
                                 dataFieldDTO.setEditFlag(0);
@@ -298,6 +305,8 @@ public class StandardTeamServiceImpl implements StandardTeamService {
                         }
                         return dataFieldDTO;
                     })
+                    .sorted(Comparator.comparing(DataFieldDTO::getEditFlag)
+                            .thenComparing(DataFieldDTO::getFieldId, Comparator.reverseOrder()))
                     .collect(Collectors.toList());
             standardTeamDTO.setDataFieldDTOList(dataFieldDTOList);
         }
@@ -365,7 +374,7 @@ public class StandardTeamServiceImpl implements StandardTeamService {
         if (dataFieldDTO.getCustomTableId() != null) {
             //从表设计查询标准组
             List<TableColumnDTO> tableColumnDTOS = dataFieldMapper.selectStandardColumn(dataFieldDTO.getCustomTableId());
-            if(CollectionUtils.isNotEmpty(tableColumnDTOS)){
+            if (CollectionUtils.isNotEmpty(tableColumnDTOS)) {
                 List<Long> checkFieldIds = tableColumnDTOS.stream().map(TableColumnDTO::getQuoteId).collect(Collectors.toList());
                 dataFieldDTO.setCheckFieldIds(checkFieldIds);
             }
@@ -403,6 +412,13 @@ public class StandardTeamServiceImpl implements StandardTeamService {
         }
         org.springframework.data.domain.Page<DataFieldDTO> page = PageUtil.doPage(dataFieldDTOList, org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize()));
         return PageParseUtil.springPage2C7nPage(page);
+    }
+
+    @Override
+    public Page<DataFieldDTO> addStandardList(DataFieldDTO dataFieldDTO, PageRequest pageRequest) {
+        dataFieldDTO.setAddFlag(1);
+        //获取当前标准组待添加字段标准,排除已有的字段标准
+        return PageHelper.doPage(pageRequest, () -> dataFieldMapper.list(dataFieldDTO));
     }
 
     private List<StandardTeam> getSubStandardTeam(Long standardTeamId) {
