@@ -217,6 +217,9 @@ public class DataFieldDTO extends AuditDomain {
     @Transient
     private Long standardTeamId;
 
+    @Transient
+    private Long standardRelationId;
+
     //继承自标准组id
     @Transient
     private Long inheriteTeamId;
@@ -229,6 +232,10 @@ public class DataFieldDTO extends AuditDomain {
     //是否编辑标识，继承的标准组下的标准不允许编辑（0否，1时）
     @Transient
     private Integer editFlag = 1;
+
+    //标准组标准查询是否是走添加标准查询，如果是需要排除已选中的和集成的字段标准
+    @Transient
+    private Integer addFlag;
 
 
     //标准组
